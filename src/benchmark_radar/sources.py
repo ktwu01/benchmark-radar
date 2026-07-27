@@ -38,9 +38,7 @@ def fetch_arxiv(config: dict[str, Any], since: datetime, limit: int) -> list[Rad
             url = (entry.findtext("atom:id", namespaces=namespace) or "").replace("http:", "https:")
             source_id = url.rsplit("/", 1)[-1].split("v", 1)[0]
             title = " ".join((entry.findtext("atom:title", namespaces=namespace) or "").split())
-            summary = " ".join(
-                (entry.findtext("atom:summary", namespaces=namespace) or "").split()
-            )
+            summary = " ".join((entry.findtext("atom:summary", namespaces=namespace) or "").split())
             authors = [
                 name.text or ""
                 for name in entry.findall("atom:author/atom:name", namespace)
@@ -91,9 +89,7 @@ def fetch_huggingface(config: dict[str, Any], since: datetime, limit: int) -> li
                         f"{'created' if _date(row.get('createdAt')) >= since else 'updated'} "
                         "on Hugging Face."
                     ),
-                    event_kind=(
-                        "released" if _date(row.get("createdAt")) >= since else "updated"
-                    ),
+                    event_kind=("released" if _date(row.get("createdAt")) >= since else "updated"),
                     metrics={
                         "downloads": float(row.get("downloads") or 0),
                         "likes": float(row.get("likes") or 0),
@@ -131,9 +127,7 @@ def fetch_github(config: dict[str, Any], since: datetime, limit: int) -> list[Ra
                 url=row["html_url"],
                 published_at=changed,
                 summary=row.get("description") or "AI benchmark or data repository.",
-                event_kind=(
-                    "released" if _date(row.get("created_at")) >= since else "updated"
-                ),
+                event_kind=("released" if _date(row.get("created_at")) >= since else "updated"),
                 metrics={
                     "stars": float(row.get("stargazers_count") or 0),
                     "forks": float(row.get("forks_count") or 0),

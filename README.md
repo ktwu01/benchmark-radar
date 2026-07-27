@@ -5,7 +5,8 @@ datasets, leaderboards, and data-quality work.
 
 Every day, GitHub Actions queries primary or structured sources, deduplicates records,
 classifies them with a transparent taxonomy, ranks them using explainable signals, and
-publishes a GitHub Issue. It is inspired by
+publishes a GitHub Issue and a
+[cumulative dashboard](https://ktwu01.github.io/benchmark-radar/). It is inspired by
 [agents-radar](https://github.com/duanyytop/agents-radar), with sources and scoring
 redesigned for benchmark and AI-data research.
 
@@ -59,6 +60,14 @@ Outputs:
 
 - `out/report.md`: the exact GitHub Issue body
 - `out/items.json`: machine-readable evidence and source-health snapshot
+- `data/snapshots/YYYY-MM-DD.json`: versioned, idempotent UTC snapshot
+- `site/data/radar.json`: deterministic browser-ready history
+
+Rebuild the dashboard data without collecting again:
+
+```bash
+benchmark-radar rebuild
+```
 
 Run checks:
 
@@ -87,9 +96,10 @@ The built-in `GITHUB_TOKEN` is used automatically in Actions.
 It:
 
 1. collects and renders with read-only repository permission;
-2. uploads the Markdown and JSON evidence for 30 days;
-3. creates or updates the issue for that UTC date;
-4. prevents duplicate daily issues by exact-title lookup.
+2. validates and persists one snapshot for that UTC date;
+3. creates or updates the date-filtered daily Issue;
+4. rebuilds and deploys the static GitHub Pages dashboard;
+5. prevents duplicate snapshots and daily Issues on reruns.
 
 The workflow needs repository Issues enabled. The labels `daily-radar` and `automated`
 must exist; they are created during initial repository setup.
@@ -98,10 +108,20 @@ must exist; they are created during initial repository setup.
 
 - Every entry links to its discovered primary or structured record.
 - Optional-source failures are visible.
+- Persisted snapshots omit raw API payloads and credentials.
+- Public attention feeds are displayed separately and never contribute to quality scores.
 - Reports can contain false positives; always inspect the source.
 - A repository update is not necessarily a new release.
 - Publication dates differ across preprints, code, datasets, and formal publications.
 - This system does not automatically create ANX-Bench events or research claims.
+
+## Public observation feeds
+
+The Explorer can load compatible public attention observations from separate, read-only
+repositories. Feed producers must follow
+[`docs/public-observation-feed.schema.json`](docs/public-observation-feed.schema.json).
+The dashboard validates the feed version and HTTP(S) links, renders all source text as
+plain text, and labels these records as attention rather than primary evidence.
 
 ## License
 

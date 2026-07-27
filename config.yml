@@ -77,6 +77,7 @@ sources:
       - AI dataset release data quality
 
 publish:
+  dashboard_url: "https://ktwu01.github.io/benchmark-radar/"
   issue_title_prefix: "📡 AI Benchmark & Data Radar"
   labels:
     - daily-radar

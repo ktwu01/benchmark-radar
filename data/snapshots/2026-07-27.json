@@ -1,0 +1,883 @@
+{
+  "date": "2026-07-27",
+  "generated_at": "2026-07-27T15:09:12.201050+00:00",
+  "health": [
+    {
+      "error": "HTTPError: HTTP Error 429: Unknown Error",
+      "item_count": 0,
+      "ok": false,
+      "source": "arxiv"
+    },
+    {
+      "error": null,
+      "item_count": 88,
+      "ok": true,
+      "source": "huggingface"
+    },
+    {
+      "error": null,
+      "item_count": 218,
+      "ok": true,
+      "source": "github"
+    },
+    {
+      "error": "RuntimeError: OPENALEX_API_KEY is not configured",
+      "item_count": 0,
+      "ok": false,
+      "source": "openalex"
+    },
+    {
+      "error": "RuntimeError: BRAVE_API_KEY is not configured",
+      "item_count": 0,
+      "ok": false,
+      "source": "brave"
+    }
+  ],
+  "items": [
+    {
+      "adoption_score": 0.24082399653118497,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "evaluation",
+        "dataset",
+        "data_quality"
+      ],
+      "event_kind": "released",
+      "evidence_score": 1.5,
+      "metrics": {
+        "forks": 3.0,
+        "stars": 1.0
+      },
+      "published_at": "2026-07-27T13:35:04+00:00",
+      "rationale": [
+        "Matched: benchmark, data quality, dataset, evaluation",
+        "Primary record: GitHub"
+      ],
+      "recency_score": 3.934627302662037,
+      "relevance_score": 4.0,
+      "source": "GitHub",
+      "source_id": "ktwu01/benchmark-radar",
+      "summary": "Daily evidence-first radar for AI benchmarks, evaluations, datasets, and data quality.",
+      "title": "ktwu01/benchmark-radar",
+      "total_score": 2.8,
+      "url": "https://github.com/ktwu01/benchmark-radar"
+    },
+    {
+      "adoption_score": 0.0,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "evaluation",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "forks": 0.0,
+        "stars": 0.0
+      },
+      "published_at": "2026-07-27T14:39:11+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset, evaluation",
+        "Primary record: GitHub"
+      ],
+      "recency_score": 3.979152765625,
+      "relevance_score": 4.0,
+      "source": "GitHub",
+      "source_id": "evaldataset2026/Neurips2026_submission",
+      "summary": "This repository contains the demo code for SA-PFL method as part of the review process for NeurIPS2026 submission under the Evaluation & Dataset Benchmark Track. Full code will be released upon acceptance. ",
+      "title": "evaldataset2026/Neurips2026_submission",
+      "total_score": 2.77,
+      "url": "https://github.com/evaldataset2026/Neurips2026_submission"
+    },
+    {
+      "adoption_score": 2.798979176598324,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "evaluation"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "forks": 433.0,
+        "stars": 3152.0
+      },
+      "published_at": "2026-07-27T14:20:11+00:00",
+      "rationale": [
+        "Matched: benchmark, evaluation",
+        "Primary record: GitHub"
+      ],
+      "recency_score": 3.9659583211805556,
+      "relevance_score": 2.9,
+      "source": "GitHub",
+      "source_id": "modelscope/evalscope",
+      "summary": "A streamlined and customizable framework for efficient large model (LLM, VLM, AIGC) evaluation and performance benchmarking.",
+      "title": "modelscope/evalscope",
+      "total_score": 2.75,
+      "url": "https://github.com/modelscope/evalscope"
+    },
+    {
+      "adoption_score": 2.3134392601635723,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 4025.0,
+        "likes": 1.0
+      },
+      "published_at": "2026-07-27T15:00:26+00:00",
+      "rationale": [
+        "Matched: dataset, leaderboard",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.9939097100694445,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "runbenchhub/leaderboards",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "runbenchhub/leaderboards",
+      "total_score": 2.68,
+      "url": "https://huggingface.co/datasets/runbenchhub/leaderboards"
+    },
+    {
+      "adoption_score": 2.2406673760133273,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 3044.0,
+        "likes": 1.0
+      },
+      "published_at": "2026-07-27T14:30:12+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.972914339699074,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "hf-benchmarks/transformers",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "hf-benchmarks/transformers",
+      "total_score": 2.67,
+      "url": "https://huggingface.co/datasets/hf-benchmarks/transformers"
+    },
+    {
+      "adoption_score": 2.4174877640604167,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 4280.0,
+        "likes": 2.0
+      },
+      "published_at": "2026-07-27T11:41:04+00:00",
+      "rationale": [
+        "Matched: dataset, leaderboard",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.8554606359953705,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "vava22684/song-jury-leaderboard",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "vava22684/song-jury-leaderboard",
+      "total_score": 2.67,
+      "url": "https://huggingface.co/datasets/vava22684/song-jury-leaderboard"
+    },
+    {
+      "adoption_score": 2.420440007158536,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 10815.0,
+        "likes": 0.0
+      },
+      "published_at": "2026-07-27T09:28:43+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.763550913773148,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "AlphaDojo/dojo_benchmark_kline",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "AlphaDojo/dojo_benchmark_kline",
+      "total_score": 2.65,
+      "url": "https://huggingface.co/datasets/AlphaDojo/dojo_benchmark_kline"
+    },
+    {
+      "adoption_score": 1.8736173400087126,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 530.0,
+        "likes": 2.0
+      },
+      "published_at": "2026-07-27T13:54:18+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.9479837841435184,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "Agnuxo/P2PCLAW-Innovative-Benchmark",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "Agnuxo/P2PCLAW-Innovative-Benchmark",
+      "total_score": 2.61,
+      "url": "https://huggingface.co/datasets/Agnuxo/P2PCLAW-Innovative-Benchmark"
+    },
+    {
+      "adoption_score": 2.241773920774727,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 1424.0,
+        "likes": 4.0
+      },
+      "published_at": "2026-07-27T03:52:33+00:00",
+      "rationale": [
+        "Matched: dataset, leaderboard",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.530101839699074,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "Weyaxi/followers-leaderboard",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "Weyaxi/followers-leaderboard",
+      "total_score": 2.58,
+      "url": "https://huggingface.co/datasets/Weyaxi/followers-leaderboard"
+    },
+    {
+      "adoption_score": 3.382961683396785,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 97680.0,
+        "likes": 5.0
+      },
+      "published_at": "2026-07-26T04:46:02+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 2.5672430434027778,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "RoboDojo-Benchmark/RoboDojo",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "RoboDojo-Benchmark/RoboDojo",
+      "total_score": 2.56,
+      "url": "https://huggingface.co/datasets/RoboDojo-Benchmark/RoboDojo"
+    },
+    {
+      "adoption_score": 1.360303037041808,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "released",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 184.0,
+        "likes": 0.0
+      },
+      "published_at": "2026-07-27T15:08:36+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.999581006365741,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "elisacarli/graph-benchmark-v1",
+      "summary": "Dataset repository created on Hugging Face.",
+      "title": "elisacarli/graph-benchmark-v1",
+      "total_score": 2.54,
+      "url": "https://huggingface.co/datasets/elisacarli/graph-benchmark-v1"
+    },
+    {
+      "adoption_score": 1.684296498292363,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "evaluation",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 359.0,
+        "likes": 1.0
+      },
+      "published_at": "2026-07-27T09:21:52+00:00",
+      "rationale": [
+        "Matched: dataset, evaluation",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.758793969328704,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "pengyue-polaron/galaxea-a1-lingbot-va-real-world-evaluations",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "pengyue-polaron/galaxea-a1-lingbot-va-real-world-evaluations",
+      "total_score": 2.54,
+      "url": "https://huggingface.co/datasets/pengyue-polaron/galaxea-a1-lingbot-va-real-world-evaluations"
+    },
+    {
+      "adoption_score": 1.2342229822223227,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 63.0,
+        "likes": 1.0
+      },
+      "published_at": "2026-07-27T14:51:42+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.9878448952546295,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "Bluntmachetti7/synthworld-benchmarks",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "Bluntmachetti7/synthworld-benchmarks",
+      "total_score": 2.52,
+      "url": "https://huggingface.co/datasets/Bluntmachetti7/synthworld-benchmarks"
+    },
+    {
+      "adoption_score": 1.4897241501652523,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 303.0,
+        "likes": 0.0
+      },
+      "published_at": "2026-07-27T11:06:41+00:00",
+      "rationale": [
+        "Matched: dataset, leaderboard",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.8315833211805557,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "villekuosmanen/armnet-demo-leaderboard",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "villekuosmanen/armnet-demo-leaderboard",
+      "total_score": 2.52,
+      "url": "https://huggingface.co/datasets/villekuosmanen/armnet-demo-leaderboard"
+    },
+    {
+      "adoption_score": 1.5708288580272554,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 414.0,
+        "likes": 0.0
+      },
+      "published_at": "2026-07-27T08:16:39+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.713504617476852,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "brettsp/stan-benchmark",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "brettsp/stan-benchmark",
+      "total_score": 2.51,
+      "url": "https://huggingface.co/datasets/brettsp/stan-benchmark"
+    },
+    {
+      "adoption_score": 1.631523396079285,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 293.0,
+        "likes": 1.0
+      },
+      "published_at": "2026-07-27T06:51:59+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.6547083211805553,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "JacobPEvans/mlx-benchmarks",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "JacobPEvans/mlx-benchmarks",
+      "total_score": 2.51,
+      "url": "https://huggingface.co/datasets/JacobPEvans/mlx-benchmarks"
+    },
+    {
+      "adoption_score": 1.7509867695659629,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 464.0,
+        "likes": 1.0
+      },
+      "published_at": "2026-07-27T03:38:35+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.520402765625,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "OpenChainBench/benchmarks",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "OpenChainBench/benchmarks",
+      "total_score": 2.5,
+      "url": "https://huggingface.co/datasets/OpenChainBench/benchmarks"
+    },
+    {
+      "adoption_score": 1.0837079843903321,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 63.0,
+        "likes": 0.0
+      },
+      "published_at": "2026-07-27T13:06:21+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.9146851730324075,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "shuaishuaicdp/gameplay-benchmark-strict",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "shuaishuaicdp/gameplay-benchmark-strict",
+      "total_score": 2.48,
+      "url": "https://huggingface.co/datasets/shuaishuaicdp/gameplay-benchmark-strict"
+    },
+    {
+      "adoption_score": 2.0315781423604182,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 2431.0,
+        "likes": 0.0
+      },
+      "published_at": "2026-07-26T19:28:39+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.1801712841435186,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "sanmay4119/geofm-agriculture-benchmark",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "sanmay4119/geofm-agriculture-benchmark",
+      "total_score": 2.48,
+      "url": "https://huggingface.co/datasets/sanmay4119/geofm-agriculture-benchmark"
+    },
+    {
+      "adoption_score": 1.0296020061808795,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 51.0,
+        "likes": 0.0
+      },
+      "published_at": "2026-07-27T12:27:41+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.8878333211805556,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "Keh0t0/scene-mem-benchmark",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "Keh0t0/scene-mem-benchmark",
+      "total_score": 2.47,
+      "url": "https://huggingface.co/datasets/Keh0t0/scene-mem-benchmark"
+    },
+    {
+      "adoption_score": 1.0141176480171081,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 48.0,
+        "likes": 0.0
+      },
+      "published_at": "2026-07-27T12:28:21+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.8882962841435185,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "Toivo0/Turkce-istatistik-benchmark",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "Toivo0/Turkce-istatistik-benchmark",
+      "total_score": 2.46,
+      "url": "https://huggingface.co/datasets/Toivo0/Turkce-istatistik-benchmark"
+    },
+    {
+      "adoption_score": 1.076955824442156,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 34.0,
+        "likes": 1.0
+      },
+      "published_at": "2026-07-27T05:46:04+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.6089328582175924,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "Kingsfield-Lawfare/legal-citation-benchmark",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "Kingsfield-Lawfare/legal-citation-benchmark",
+      "total_score": 2.42,
+      "url": "https://huggingface.co/datasets/Kingsfield-Lawfare/legal-citation-benchmark"
+    },
+    {
+      "adoption_score": 1.7855346818410756,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 945.0,
+        "likes": 0.0
+      },
+      "published_at": "2026-07-26T16:40:00+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.063053228587963,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "intellistream/vllm-hust-benchmark-results",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "intellistream/vllm-hust-benchmark-results",
+      "total_score": 2.42,
+      "url": "https://huggingface.co/datasets/intellistream/vllm-hust-benchmark-results"
+    },
+    {
+      "adoption_score": 1.1637115515711711,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 86.0,
+        "likes": 0.0
+      },
+      "published_at": "2026-07-27T00:54:49+00:00",
+      "rationale": [
+        "Matched: dataset, leaderboard",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.406675913773148,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "IntelligenceLab/LHTB-leaderboard",
+      "summary": "Dataset repository updated on Hugging Face.",
+      "title": "IntelligenceLab/LHTB-leaderboard",
+      "total_score": 2.39,
+      "url": "https://huggingface.co/datasets/IntelligenceLab/LHTB-leaderboard"
+    },
+    {
+      "adoption_score": 0.38169700377572996,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "evaluation",
+        "dataset"
+      ],
+      "event_kind": "updated",
+      "evidence_score": 1.5,
+      "metrics": {
+        "forks": 1.0,
+        "stars": 2.0
+      },
+      "published_at": "2026-07-27T12:06:48+00:00",
+      "rationale": [
+        "Matched: dataset, evaluation",
+        "Primary record: GitHub"
+      ],
+      "recency_score": 3.8733310063657407,
+      "relevance_score": 2.9,
+      "source": "GitHub",
+      "source_id": "bennettmichaeldvg2519/nist-ai-model-evaluation",
+      "summary": "Browser-based testbed for evaluating artificial intelligence models on relevant tasks across diverse datasets, modalities, and domains, with hosted and local options for running the platform.",
+      "title": "bennettmichaeldvg2519/nist-ai-model-evaluation",
+      "total_score": 2.37,
+      "url": "https://github.com/bennettmichaeldvg2519/nist-ai-model-evaluation"
+    },
+    {
+      "adoption_score": 0.1505149978319906,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "released",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 0.0,
+        "likes": 1.0
+      },
+      "published_at": "2026-07-27T14:58:15+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.9923935063657408,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "MetaboLLM/MetaboLLM-Benchmark",
+      "summary": "Dataset repository created on Hugging Face.",
+      "title": "MetaboLLM/MetaboLLM-Benchmark",
+      "total_score": 2.36,
+      "url": "https://huggingface.co/datasets/MetaboLLM/MetaboLLM-Benchmark"
+    },
+    {
+      "adoption_score": 0.7531635030619835,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "released",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 17.0,
+        "likes": 0.0
+      },
+      "published_at": "2026-07-27T03:47:57+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.5269073952546295,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "depinwang/sc-splicing-7type-benchmark-toolchain-chr21-v1",
+      "summary": "Dataset repository created on Hugging Face.",
+      "title": "depinwang/sc-splicing-7type-benchmark-toolchain-chr21-v1",
+      "total_score": 2.35,
+      "url": "https://huggingface.co/datasets/depinwang/sc-splicing-7type-benchmark-toolchain-chr21-v1"
+    },
+    {
+      "adoption_score": 0.7531635030619835,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "released",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 17.0,
+        "likes": 0.0
+      },
+      "published_at": "2026-07-27T03:47:43+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.5267453582175925,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "depinwang/sc-splicing-7type-benchmark-canary-boost-chr21-v1",
+      "summary": "Dataset repository created on Hugging Face.",
+      "title": "depinwang/sc-splicing-7type-benchmark-canary-boost-chr21-v1",
+      "total_score": 2.35,
+      "url": "https://huggingface.co/datasets/depinwang/sc-splicing-7type-benchmark-canary-boost-chr21-v1"
+    },
+    {
+      "adoption_score": 0.8281267450269635,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "evaluation",
+        "dataset"
+      ],
+      "event_kind": "released",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 23.0,
+        "likes": 0.0
+      },
+      "published_at": "2026-07-27T02:33:13+00:00",
+      "rationale": [
+        "Matched: dataset, evaluation",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.4750092471064815,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "NeurIPsMay1234/real_world_evaluation",
+      "summary": "Dataset repository created on Hugging Face.",
+      "title": "NeurIPsMay1234/real_world_evaluation",
+      "total_score": 2.35,
+      "url": "https://huggingface.co/datasets/NeurIPsMay1234/real_world_evaluation"
+    },
+    {
+      "adoption_score": 0.1505149978319906,
+      "artifact_urls": [],
+      "authors": [],
+      "categories": [
+        "benchmark",
+        "dataset"
+      ],
+      "event_kind": "released",
+      "evidence_score": 1.5,
+      "metrics": {
+        "downloads": 0.0,
+        "likes": 1.0
+      },
+      "published_at": "2026-07-27T12:37:54+00:00",
+      "rationale": [
+        "Matched: benchmark, dataset",
+        "Primary record: Hugging Face"
+      ],
+      "recency_score": 3.894928228587963,
+      "relevance_score": 2.9,
+      "source": "Hugging Face",
+      "source_id": "VladLB/paperparse-benchmark",
+      "summary": "Dataset repository created on Hugging Face.",
+      "title": "VladLB/paperparse-benchmark",
+      "total_score": 2.34,
+      "url": "https://huggingface.co/datasets/VladLB/paperparse-benchmark"
+    }
+  ],
+  "schema_version": 1,
+  "since": "2026-07-25T15:09:12.201050+00:00"
+}

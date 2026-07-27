@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="An evidence-first daily map of new AI benchmarks, evaluations, and datasets."
+    >
+    <title>Benchmark Radar</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <script src="assets/app.js" type="module"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <header class="masthead">
+      <a class="brand" href="./" aria-label="Benchmark Radar home">
+        <span class="brand-mark" aria-hidden="true">
+          <span></span>
+        </span>
+        <span>
+          <strong>Benchmark Radar</strong>
+          <small>Evidence log / UTC</small>
+        </span>
+      </a>
+      <div class="run-status" id="run-status" role="status">
+        <span class="status-light" aria-hidden="true"></span>
+        <span id="status-copy">Loading latest scan</span>
+      </div>
+    </header>
+
+    <nav class="view-nav" aria-label="Dashboard views">
+      <button type="button" data-view="today" aria-controls="today-view">Today</button>
+      <button type="button" data-view="trends" aria-controls="trends-view">Trends</button>
+      <button type="button" data-view="explorer" aria-controls="explorer-view">Explorer</button>
+      <a href="https://github.com/ktwu01/benchmark-radar">Source ↗</a>
+    </nav>
+
+    <main id="main-content" tabindex="-1">
+      <section class="view" id="today-view" aria-labelledby="today-heading">
+        <header class="view-heading">
+          <div>
+            <p class="eyebrow">Daily field note</p>
+            <h1 id="today-heading">What entered the field?</h1>
+          </div>
+          <label class="date-control">
+            Scan date
+            <select id="today-date"></select>
+          </label>
+        </header>
+
+        <div class="today-overview">
+          <div class="scan-dial" id="scan-dial" aria-label="Daily scan summary">
+            <div class="scan-sweep" aria-hidden="true"></div>
+            <div class="scan-reading">
+              <strong id="scan-count">—</strong>
+              <span>ranked signals</span>
+            </div>
+          </div>
+          <div class="briefing">
+            <p class="eyebrow">Observation window</p>
+            <h2 id="briefing-date">Awaiting data</h2>
+            <p id="briefing-copy">Loading the latest validated daily snapshot.</p>
+            <dl class="briefing-stats" id="briefing-stats"></dl>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <div>
+            <div class="section-title">
+              <h2>Ranked signals</h2>
+              <span id="today-count"></span>
+            </div>
+            <div class="signal-list" id="today-list"></div>
+          </div>
+          <aside class="health-panel" aria-labelledby="health-heading">
+            <div class="section-title">
+              <h2 id="health-heading">Source health</h2>
+              <span id="health-summary"></span>
+            </div>
+            <ul id="health-list"></ul>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" id="trends-view" aria-labelledby="trends-heading" hidden>
+        <header class="view-heading">
+          <div>
+            <p class="eyebrow">Corpus rhythm</p>
+            <h1 id="trends-heading">Signals over time</h1>
+          </div>
+          <p class="heading-note">Counts describe discovery volume, not scientific quality.</p>
+        </header>
+
+        <div class="trend-panel">
+          <div class="section-title">
+            <h2>Daily category volume</h2>
+            <div class="legend" id="trend-legend" aria-label="Category legend"></div>
+          </div>
+          <div class="trend-chart" id="trend-chart" role="img" aria-label="Daily category counts"></div>
+        </div>
+
+        <div class="trend-grid">
+          <section class="ledger" aria-labelledby="ledger-heading">
+            <div class="section-title">
+              <h2 id="ledger-heading">Daily ledger</h2>
+              <span id="snapshot-count"></span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Items</th>
+                    <th>Categories</th>
+                    <th>Coverage</th>
+                  </tr>
+                </thead>
+                <tbody id="trend-table"></tbody>
+              </table>
+            </div>
+          </section>
+          <aside class="method-note">
+            <p class="eyebrow">Read the chart</p>
+            <h2>Volume is a prompt to inspect.</h2>
+            <p>
+              Each column is one validated UTC snapshot. A taller band means more records matched
+              that category on the day; it does not imply better work or stronger evidence.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" id="explorer-view" aria-labelledby="explorer-heading" hidden>
+        <header class="view-heading">
+          <div>
+            <p class="eyebrow">Evidence index</p>
+            <h1 id="explorer-heading">Explore every observation</h1>
+          </div>
+          <p class="heading-note" id="feed-status">Checking public signal feeds…</p>
+        </header>
+
+        <form class="filter-panel" id="filters">
+          <label class="search-field">
+            Search
+            <input id="search-filter" name="q" type="search" placeholder="Title, summary, or source">
+          </label>
+          <label>
+            Date
+            <select id="date-filter" name="date"></select>
+          </label>
+          <label>
+            Category
+            <select id="category-filter" name="category"></select>
+          </label>
+          <label>
+            Source
+            <select id="source-filter" name="source"></select>
+          </label>
+          <label>
+            Event
+            <select id="event-filter" name="event"></select>
+          </label>
+          <button class="clear-button" id="clear-filters" type="button">Clear filters</button>
+        </form>
+
+        <div class="section-title explorer-title">
+          <h2>Matching observations</h2>
+          <span id="explorer-count" aria-live="polite"></span>
+        </div>
+        <div class="explorer-list" id="explorer-list"></div>
+      </section>
+
+      <section class="error-state" id="error-state" hidden>
+        <p class="eyebrow">Dashboard unavailable</p>
+        <h1>The validated data file could not be loaded.</h1>
+        <p>Try refreshing, or inspect the latest daily Issue while the dashboard rebuilds.</p>
+        <a href="https://github.com/ktwu01/benchmark-radar/issues?q=is%3Aissue+label%3Adaily-radar">
+          Open daily Issues ↗
+        </a>
+      </section>
+    </main>
+
+    <dialog id="detail-dialog" aria-labelledby="detail-title">
+      <button class="dialog-close" id="dialog-close" type="button" aria-label="Close details">×</button>
+      <div id="detail-content"></div>
+    </dialog>
+
+    <footer>
+      <p>Automated discovery and triage—not an endorsement.</p>
+      <p id="build-meta">Schema — · Build —</p>
+    </footer>
+  </body>
+</html>

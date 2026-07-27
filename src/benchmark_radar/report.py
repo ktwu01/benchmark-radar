@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from collections import Counter
+from datetime import UTC
 
+from . import __version__
 from .models import RadarItem, RadarRun
 
 
@@ -45,14 +47,14 @@ def _item_block(index: int, item: RadarItem) -> str:
     return "\n".join(lines)
 
 
-def render_markdown(run: RadarRun) -> str:
-    date = run.generated_at.date().isoformat()
+def render_markdown(run: RadarRun, dashboard_url: str | None = None) -> str:
+    date = run.generated_at.astimezone(UTC).date().isoformat()
     category_counts = Counter(category for item in run.items for category in item.categories)
     source_counts = Counter(item.source for item in run.items)
     failed = [health for health in run.health if not health.ok]
     lines = [
         f"<!-- benchmark-radar:daily:{date} -->",
-        "<!-- generator: benchmark-radar/0.1.0 -->",
+        f"<!-- generator: benchmark-radar/{__version__} -->",
         "",
         f"# 📡 AI Benchmark & Data Radar — {date}",
         "",
@@ -62,22 +64,33 @@ def render_markdown(run: RadarRun) -> str:
         "> Automated discovery and triage, not an endorsement. Open the primary source before "
         "using any claim.",
         "",
-        "## At a glance",
-        "",
-        f"- **{len(run.items)}** ranked items",
-        "- Categories: "
-        + (
-            ", ".join(
-                f"{key.replace('_', ' ')} ({value})"
-                for key, value in category_counts.items()
-            )
-            or "none"
-        ),
-        "- Sources represented: "
-        + (", ".join(f"{key} ({value})" for key, value in source_counts.items()) or "none"),
-        f"- Source health: **{len(run.health) - len(failed)}/{len(run.health)} healthy**",
-        "",
     ]
+    if dashboard_url:
+        separator = "&" if "?" in dashboard_url else "?"
+        lines.extend(
+            [
+                f"**[Explore this day on the dashboard]({dashboard_url}{separator}date={date})**",
+                "",
+            ]
+        )
+    lines.extend(
+        [
+            "## At a glance",
+            "",
+            f"- **{len(run.items)}** ranked items",
+            "- Categories: "
+            + (
+                ", ".join(
+                    f"{key.replace('_', ' ')} ({value})" for key, value in category_counts.items()
+                )
+                or "none"
+            ),
+            "- Sources represented: "
+            + (", ".join(f"{key} ({value})" for key, value in source_counts.items()) or "none"),
+            f"- Source health: **{len(run.health) - len(failed)}/{len(run.health)} healthy**",
+            "",
+        ]
+    )
     if run.items:
         lines.extend(["## Today's signals", ""])
         for index, item in enumerate(run.items, start=1):

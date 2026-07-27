@@ -45,11 +45,46 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: benchmark-radar-${{ github.run_id }}
-          path: out/
+          path: |
+            out/
+            data/snapshots/
+            site/data/radar.json
           retention-days: 30
 
-  publish-issue:
+  persist-snapshot:
     needs: build-report
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+      - name: Download validated snapshot
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: benchmark-radar-${{ github.run_id }}
+          path: generated/
+      - name: Persist UTC snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data/snapshots site/data
+          cp generated/data/snapshots/*.json data/snapshots/
+          cp generated/site/data/radar.json site/data/radar.json
+          git config user.name "benchmark-radar[bot]"
+          git config user.email "benchmark-radar[bot]@users.noreply.github.com"
+          git add data/snapshots site/data/radar.json
+          if git diff --cached --quiet; then
+            echo "UTC snapshot is already current"
+            exit 0
+          fi
+          git commit -m "Record daily radar snapshot [skip ci]"
+          git push origin HEAD:main
+
+  publish-issue:
+    needs: [build-report, persist-snapshot]
     if: >-
       github.event_name == 'schedule' ||
       (github.event_name == 'workflow_dispatch' && inputs.publish)
@@ -63,7 +98,7 @@ jobs:
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: benchmark-radar-${{ github.run_id }}
-          path: out/
+          path: generated/
       - name: Create idempotent daily issue
         env:
           GH_TOKEN: ${{ github.token }}
@@ -76,9 +111,54 @@ jobs:
           existing="$(gh issue list --state all --search "\"${title}\" in:title" \
             --json number,title --jq ".[] | select(.title == \"${title}\") | .number" | head -1)"
           if [[ -n "${existing}" ]]; then
-            gh issue edit "${existing}" --body-file out/report.md
+            gh issue edit "${existing}" --body-file generated/out/report.md
             echo "Updated issue #${existing}"
           else
-            gh issue create --title "${title}" --body-file out/report.md \
+            gh issue create --title "${title}" --body-file generated/out/report.md \
               --label daily-radar --label automated
           fi
+
+  build-pages:
+    needs: persist-snapshot
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Build validated dashboard data
+        run: |
+          python -m pip install -e '.[dev]'
+          benchmark-radar rebuild
+          pytest -q
+      - name: Configure Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+        with:
+          path: site/
+
+  deploy-pages:
+    needs: build-pages
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5

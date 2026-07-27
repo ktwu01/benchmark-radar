@@ -18,7 +18,10 @@ def item(**overrides):
 
 
 def test_url_canonicalization_removes_tracking():
-    assert canonical_url("HTTPS://Example.COM/a/?utm_source=x&keep=y") == "https://example.com/a?keep=y"
+    assert (
+        canonical_url("HTTPS://Example.COM/a/?utm_source=x&keep=y")
+        == "https://example.com/a?keep=y"
+    )
 
 
 def test_title_normalization():
@@ -43,4 +46,3 @@ def test_scoring_is_explainable_and_bounded():
     assert scored.categories == ["benchmark", "evaluation", "dataset"]
     assert 0 <= scored.total_score <= 4
     assert any("Matched:" in reason for reason in scored.rationale)
-
