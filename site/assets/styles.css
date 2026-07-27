@@ -263,6 +263,21 @@ h1 {
   text-transform: uppercase;
 }
 
+#today-view {
+  padding-top: clamp(2.5rem, 4vw, 4.25rem);
+}
+
+#today-view .view-heading {
+  margin-bottom: clamp(1.75rem, 3vw, 2.75rem);
+}
+
+#today-heading {
+  max-width: none;
+  font-size: clamp(2.75rem, 4.5vw, 4.25rem);
+  line-height: 0.95;
+  white-space: nowrap;
+}
+
 h2 {
   font-size: 1.35rem;
   line-height: 1.1;
@@ -299,9 +314,9 @@ input {
 
 .today-overview {
   display: grid;
-  grid-template-columns: minmax(260px, 0.75fr) 1.4fr;
-  min-height: 430px;
-  margin-bottom: 5rem;
+  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
+  min-height: 280px;
+  margin-bottom: 3.25rem;
   border: 1px solid var(--ink);
   background: var(--panel);
   box-shadow: var(--shadow);
@@ -311,7 +326,7 @@ input {
   --coverage: 65%;
   position: relative;
   display: grid;
-  min-height: 430px;
+  min-height: 280px;
   overflow: hidden;
   place-items: center;
   background:
@@ -323,7 +338,7 @@ input {
 
 .scan-dial::before {
   position: absolute;
-  width: 76%;
+  width: 58%;
   aspect-ratio: 1;
   border: 1px solid var(--ink);
   border-radius: 50%;
@@ -332,7 +347,7 @@ input {
 
 .scan-sweep {
   position: absolute;
-  width: 76%;
+  width: 58%;
   aspect-ratio: 1;
   border-radius: 50%;
   background: conic-gradient(from -90deg, rgb(37 94 168 / 28%), transparent var(--coverage));
@@ -361,8 +376,8 @@ input {
 .scan-reading {
   z-index: 1;
   display: grid;
-  width: 148px;
-  height: 148px;
+  width: 86px;
+  height: 86px;
   align-content: center;
   border: 1px solid var(--ink);
   border-radius: 50%;
@@ -372,11 +387,13 @@ input {
 
 .scan-reading strong {
   font-family: var(--display);
-  font-size: 4rem;
+  font-size: 2.35rem;
   line-height: 0.9;
 }
 
 .scan-reading span {
+  max-width: 62px;
+  margin-inline: auto;
   color: var(--muted);
   font-family: var(--utility);
   font-size: 0.62rem;
@@ -388,13 +405,13 @@ input {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: clamp(2rem, 6vw, 5rem);
+  padding: clamp(1.5rem, 2.5vw, 2rem);
   border-left: 1px solid var(--ink);
 }
 
 .briefing h2 {
-  margin-bottom: 1rem;
-  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  margin-bottom: 0.65rem;
+  font-size: clamp(2rem, 3.2vw, 2.75rem);
 }
 
 .briefing > p:not(.eyebrow) {
@@ -407,8 +424,8 @@ input {
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem 3rem;
-  margin: 2rem 0 0;
-  padding-top: 1.5rem;
+  margin: 1.35rem 0 0;
+  padding-top: 1rem;
   border-top: 1px solid var(--line);
 }
 
@@ -1048,12 +1065,22 @@ footer {
     font-size: clamp(2.7rem, 14vw, 4.7rem);
   }
 
+  #today-heading {
+    font-size: clamp(2.2rem, 10vw, 3.1rem);
+    white-space: normal;
+  }
+
   .today-overview {
     grid-template-columns: 1fr;
   }
 
   .scan-dial {
-    min-height: 340px;
+    min-height: 210px;
+  }
+
+  .scan-dial::before,
+  .scan-sweep {
+    width: 46%;
   }
 
   .briefing {
