@@ -880,11 +880,83 @@ dialog::backdrop {
   color: var(--muted);
 }
 
+.attention-notice {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-left: 3px solid #756aa8;
+  background: #f1edfa;
+}
+
+.attention-notice strong {
+  color: #51477f;
+  font-family: var(--utility);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.attention-notice p,
+.discovery-note {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.supporting-signals {
+  margin: 1.8rem 0;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--line);
+}
+
+.supporting-signals ul {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.supporting-signals li {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.supporting-signals a {
+  color: var(--blue-deep);
+  font-family: var(--utility);
+  font-size: 0.75rem;
+}
+
+.supporting-signals span {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.discovery-note {
+  margin: 1.5rem 0;
+}
+
+.detail-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
 .primary-link {
   display: inline-block;
   padding: 0.75rem 1rem;
   background: var(--ink);
   color: white;
+  font-family: var(--utility);
+  font-size: 0.7rem;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.secondary-link {
+  display: inline-block;
+  padding: 0.7rem 0.95rem;
+  border: 1px solid var(--ink);
+  color: var(--ink);
   font-family: var(--utility);
   font-size: 0.7rem;
   text-decoration: none;

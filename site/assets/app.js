@@ -11,6 +11,7 @@ const state = {
   data: null,
   external: [],
   view: "today",
+  todayDate: "",
   date: "",
   q: "",
   category: "",
@@ -61,7 +62,11 @@ function readUrl() {
   state.view = ["today", "trends", "explorer"].includes(requestedView)
     ? requestedView
     : "today";
-  state.date = params.get("date") || "";
+  if (state.view === "today") {
+    state.todayDate = params.get("date") || "";
+  } else {
+    state.date = params.get("date") || "";
+  }
   state.q = params.get("q") || "";
   state.category = params.get("category") || "";
   state.source = params.get("source") || "";
@@ -71,7 +76,10 @@ function readUrl() {
 function writeUrl() {
   const params = new URLSearchParams();
   if (state.view !== "today") params.set("view", state.view);
-  if (state.date && state.date !== state.data?.latest_date) params.set("date", state.date);
+  const activeDate = state.view === "today" ? state.todayDate : state.date;
+  if (activeDate && (state.view !== "today" || activeDate !== state.data?.latest_date)) {
+    params.set("date", activeDate);
+  }
   if (state.q) params.set("q", state.q);
   if (state.category) params.set("category", state.category);
   if (state.source) params.set("source", state.source);
@@ -99,7 +107,7 @@ function categoryColor(category, index = 0) {
   return CATEGORY_COLORS[category] || FALLBACK_COLORS[index % FALLBACK_COLORS.length];
 }
 
-function dailySnapshot(date = state.date) {
+function dailySnapshot(date = state.todayDate) {
   return (
     state.data.days.find((day) => day.date === date) ||
     state.data.days[state.data.days.length - 1]
@@ -159,7 +167,7 @@ function definition(label, value) {
 function renderToday() {
   const day = dailySnapshot();
   if (!day) return;
-  state.date = day.date;
+  state.todayDate = day.date;
   byId("today-date").value = day.date;
   byId("scan-count").textContent = day.item_count;
   byId("scan-dial").style.setProperty(
@@ -244,7 +252,7 @@ function renderTrends() {
         element("span", { className: "day-label", text: day.date.slice(5) }),
       ]);
       button.addEventListener("click", () => {
-        state.date = day.date;
+        state.todayDate = day.date;
         setView("today");
         renderToday();
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -260,7 +268,7 @@ function renderTrends() {
       const link = element("a", { text: day.date, attrs: { href: `?date=${day.date}` } });
       link.addEventListener("click", (event) => {
         event.preventDefault();
-        state.date = day.date;
+        state.todayDate = day.date;
         setView("today");
         renderToday();
       });
@@ -292,13 +300,12 @@ function normalizeExternal(observation, feed) {
     artifact_urls: observation.primary_artifact_url ? [observation.primary_artifact_url] : [],
     metrics: observation.metrics || {},
     categories: observation.categories || [],
-    evidence_score: 0,
-    relevance_score: 0,
-    recency_score: 0,
-    adoption_score: 0,
-    total_score: 0,
     rationale: observation.rationale || ["Public attention signal; not quality evidence"],
-    snapshot_date: (observation.discovered_at || published).slice(0, 10),
+    discovered_at: observation.discovered_at || feed.generated_at,
+    snapshot_date: published.slice(0, 10),
+    supporting_observations: (observation.supporting_observations || []).filter(
+      (supporting) => supporting && safeHttpUrl(supporting.url),
+    ),
     observation_kind: "attention",
   };
 }
@@ -310,6 +317,78 @@ function safeHttpUrl(value) {
   } catch {
     return false;
   }
+}
+
+function normalizedRecordTitle(title) {
+  return title.toLowerCase().match(/[a-z0-9]+/g)?.join(" ") || title.toLowerCase().trim();
+}
+
+function attentionTotal(item) {
+  return Number(item.metrics?.points || 0) + Number(item.metrics?.comments || 0);
+}
+
+function metricLabel(value, singular, plural = `${singular}s`) {
+  const count = Number(value || 0);
+  return `${count.toLocaleString()} ${count === 1 ? singular : plural}`;
+}
+
+function supportingRecord(item) {
+  return {
+    source_id: item.source_id,
+    url: item.url,
+    published_at: item.published_at,
+    metrics: item.metrics || {},
+    ...(item.artifact_urls?.[0] ? { primary_artifact_url: item.artifact_urls[0] } : {}),
+  };
+}
+
+function clusterAttentionRecords(items) {
+  const groups = new Map();
+  items.forEach((item) => {
+    const key = `${item.source}\u0000${normalizedRecordTitle(item.title)}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(item);
+  });
+  return [...groups.values()].map((group) => {
+    if (group.length === 1) return group[0];
+    const primary = [...group].sort(
+      (left, right) =>
+        attentionTotal(right) - attentionTotal(left) ||
+        String(right.published_at).localeCompare(String(left.published_at)),
+    )[0];
+    const supporting = [
+      ...(primary.supporting_observations || []),
+      ...group
+        .filter((item) => item.source_id !== primary.source_id)
+        .flatMap((item) => [supportingRecord(item), ...(item.supporting_observations || [])]),
+    ];
+    const uniqueSupporting = [
+      ...new Map(
+        supporting
+          .filter((item) => item.source_id !== primary.source_id && safeHttpUrl(item.url))
+          .map((item) => [item.source_id, item]),
+      ).values(),
+    ];
+    return {
+      ...primary,
+      categories: [...new Set(group.flatMap((item) => item.categories || []))].sort(),
+      metrics: {
+        points: group.reduce((sum, item) => sum + Number(item.metrics?.points || 0), 0),
+        comments: group.reduce((sum, item) => sum + Number(item.metrics?.comments || 0), 0),
+        submissions: group.reduce(
+          (sum, item) => sum + Number(item.metrics?.submissions || 1),
+          0,
+        ),
+      },
+      rationale: [
+        ...new Set([
+          ...group.flatMap((item) => item.rationale || []),
+          `Clustered ${group.length} public submissions with the same normalized title`,
+        ]),
+      ],
+      supporting_observations: uniqueSupporting,
+    };
+  });
 }
 
 async function loadExternalFeeds() {
@@ -335,9 +414,11 @@ async function loadExternalFeeds() {
           .map((observation) => normalizeExternal(observation, feed));
       }),
     );
-    state.external = settled
-      .filter((result) => result.status === "fulfilled")
-      .flatMap((result) => result.value);
+    state.external = clusterAttentionRecords(
+      settled
+        .filter((result) => result.status === "fulfilled")
+        .flatMap((result) => result.value),
+    );
     const failures = settled.filter((result) => result.status === "rejected").length;
     byId("feed-status").textContent = failures
       ? `${state.external.length} public signals · ${failures} feed unavailable`
@@ -413,17 +494,78 @@ function filteredObservations() {
 }
 
 function openDetails(item) {
-  const scoreEntries = [
-    ["Priority", Number(item.total_score || 0).toFixed(2)],
-    ["Evidence", Number(item.evidence_score || 0).toFixed(2)],
-    ["Relevance", Number(item.relevance_score || 0).toFixed(2)],
-    ["Recency", Number(item.recency_score || 0).toFixed(2)],
-  ];
+  const isAttention = item.observation_kind === "attention";
+  const scoreEntries = isAttention
+    ? [
+        ["HN points", Number(item.metrics?.points || 0).toLocaleString()],
+        ["Comments", Number(item.metrics?.comments || 0).toLocaleString()],
+        ["Submissions", Number(item.metrics?.submissions || 1).toLocaleString()],
+        ["Published", formatDate(item.published_at, { dateStyle: "medium" })],
+      ]
+    : [
+        ["Priority", Number(item.total_score || 0).toFixed(2)],
+        ["Evidence", Number(item.evidence_score || 0).toFixed(2)],
+        ["Relevance", Number(item.relevance_score || 0).toFixed(2)],
+        ["Recency", Number(item.recency_score || 0).toFixed(2)],
+      ];
   const rationale = element(
     "ul",
     { className: "rationale-list" },
     (item.rationale || []).map((reason) => element("li", { text: reason })),
   );
+  const attentionNotice = isAttention
+    ? element("div", { className: "attention-notice" }, [
+        element("strong", { text: "Not quality-scored" }),
+        element("p", {
+          text: "This is a public attention signal. Its activity is shown separately from scientific evidence and priority.",
+        }),
+      ])
+    : null;
+  const supporting =
+    isAttention && item.supporting_observations?.length
+      ? element("section", { className: "supporting-signals" }, [
+          element("h3", { text: "Supporting submissions" }),
+          element(
+            "ul",
+            {},
+            item.supporting_observations.map((record) =>
+              element("li", {}, [
+                element("a", {
+                  text: `Hacker News #${record.source_id}`,
+                  attrs: {
+                    href: record.url,
+                    target: "_blank",
+                    rel: "noopener noreferrer",
+                  },
+                }),
+                element("span", {
+                  text: `${formatDate(record.published_at, { dateStyle: "medium" })} · ${metricLabel(record.metrics?.points, "point")} · ${metricLabel(record.metrics?.comments, "comment")}`,
+                }),
+              ]),
+            ),
+          ),
+        ])
+      : null;
+  const links = element("div", { className: "detail-links" }, [
+    ...(isAttention && item.artifact_urls?.[0]
+      ? [
+          element("a", {
+            className: "primary-link",
+            text: "Open primary artifact ↗",
+            attrs: {
+              href: item.artifact_urls[0],
+              target: "_blank",
+              rel: "noopener noreferrer",
+            },
+          }),
+        ]
+      : []),
+    element("a", {
+      className: isAttention ? "secondary-link" : "primary-link",
+      text: isAttention ? "Open public discussion ↗" : "Open primary source ↗",
+      attrs: { href: item.url, target: "_blank", rel: "noopener noreferrer" },
+    }),
+  ]);
   replaceChildren(byId("detail-content"), [
     element("p", {
       className: "detail-source",
@@ -431,6 +573,7 @@ function openDetails(item) {
     }),
     element("h2", { className: "detail-title", text: item.title, attrs: { id: "detail-title" } }),
     element("p", { className: "detail-summary", text: item.summary || "No summary provided." }),
+    attentionNotice,
     element(
       "dl",
       { className: "detail-grid" },
@@ -438,23 +581,27 @@ function openDetails(item) {
     ),
     element("h3", { text: "Why surfaced" }),
     rationale,
-    element("a", {
-      className: "primary-link",
-      text: item.observation_kind === "attention" ? "Open public observation ↗" : "Open primary source ↗",
-      attrs: { href: item.url, target: "_blank", rel: "noopener noreferrer" },
-    }),
+    supporting,
+    isAttention
+      ? element("p", {
+          className: "discovery-note",
+          text: `Discovered by the radar ${formatDate(item.discovered_at, { dateStyle: "medium", timeStyle: "short" })} UTC`,
+        })
+      : null,
+    links,
   ]);
   byId("detail-dialog").showModal();
 }
 
 function explorerCard(item) {
+  const isAttention = item.observation_kind === "attention";
   const badge =
-    item.observation_kind === "attention"
+    isAttention
       ? element("span", { className: "attention-badge", text: "attention" })
       : null;
   const details = element("button", {
     className: "detail-button",
-    text: "View evidence",
+    text: isAttention ? "View signal" : "View evidence",
     attrs: { type: "button" },
   });
   details.addEventListener("click", () => openDetails(item));
@@ -469,11 +616,17 @@ function explorerCard(item) {
       element("h3", {}, [
         element("a", {
           text: item.title,
-          attrs: { href: item.url, target: "_blank", rel: "noopener noreferrer" },
+          attrs: {
+            href: isAttention && item.artifact_urls?.[0] ? item.artifact_urls[0] : item.url,
+            target: "_blank",
+            rel: "noopener noreferrer",
+          },
         }),
       ]),
       element("p", {
-        text: `${(item.categories || []).join(" · ") || "uncategorized"} · ${shorten(item.summary, 140)}`,
+        text: isAttention
+          ? `${(item.categories || []).join(" · ") || "uncategorized"} · ${metricLabel(item.metrics?.points, "point")} · ${metricLabel(item.metrics?.comments, "comment")} · ${metricLabel(item.metrics?.submissions || 1, "submission")}`
+          : `${(item.categories || []).join(" · ") || "uncategorized"} · ${shorten(item.summary, 140)}`,
       }),
     ]),
     details,
@@ -506,7 +659,7 @@ function bindEvents() {
     });
   });
   byId("today-date").addEventListener("change", (event) => {
-    state.date = event.target.value;
+    state.todayDate = event.target.value;
     renderToday();
   });
   byId("filters").addEventListener("input", () => {
@@ -545,12 +698,16 @@ async function initialize() {
     ) {
       throw new Error("No compatible snapshots");
     }
-    if (!state.data.facets.dates.includes(state.date)) state.date = state.data.latest_date;
+    if (!state.data.facets.dates.includes(state.todayDate)) {
+      state.todayDate = state.data.latest_date;
+    }
     replaceChildren(
       byId("today-date"),
       [...state.data.facets.dates]
         .reverse()
-        .map((date) => option(date, formatDate(date, { dateStyle: "medium" }), date === state.date)),
+        .map((date) =>
+          option(date, formatDate(date, { dateStyle: "medium" }), date === state.todayDate),
+        ),
     );
     await loadExternalFeeds();
     renderToday();

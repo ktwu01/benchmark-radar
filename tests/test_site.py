@@ -47,3 +47,22 @@ def test_public_feed_configuration_is_versioned_and_https():
     assert config["schema_version"] == 1
     assert config["feeds"]
     assert all(feed["url"].startswith("https://") for feed in config["feeds"])
+
+
+def test_attention_signals_use_activity_metrics_not_quality_scores():
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+
+    assert 'text: "Not quality-scored"' in script
+    assert '["Submissions", Number(item.metrics?.submissions || 1).toLocaleString()]' in script
+    assert '["Published", formatDate(item.published_at' in script
+    assert "supporting_observations" in script
+    assert 'total_score: 0' not in script
+    assert 'evidence_score: 0' not in script
+
+
+def test_explorer_clusters_attention_by_normalized_title():
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+
+    assert "function clusterAttentionRecords(items)" in script
+    assert "normalizedRecordTitle(item.title)" in script
+    assert "state.external = clusterAttentionRecords(" in script

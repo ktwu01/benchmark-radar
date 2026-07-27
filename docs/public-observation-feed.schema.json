@@ -124,6 +124,49 @@
           "items": {
             "type": "string"
           }
+        },
+        "supporting_observations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/supportingObservation"
+          }
+        }
+      }
+    },
+    "supportingObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "url",
+        "published_at",
+        "metrics"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https?://"
+        },
+        "published_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "primary_artifact_url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https?://"
         }
       }
     },
