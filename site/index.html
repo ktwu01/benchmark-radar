@@ -51,12 +51,10 @@
         </header>
 
         <div class="today-overview">
-          <div class="scan-dial" id="scan-dial" aria-label="Daily scan summary">
-            <div class="scan-sweep" aria-hidden="true"></div>
-            <div class="scan-reading">
-              <strong id="scan-count">—</strong>
-              <span>ranked signals</span>
-            </div>
+          <div class="scan-readout">
+            <p class="eyebrow">Ranked signals</p>
+            <strong id="scan-count">—</strong>
+            <div class="scan-distribution" id="scan-distribution" aria-label="Signals by category"></div>
           </div>
           <div class="briefing">
             <p class="eyebrow">Observation window</p>
@@ -114,7 +112,7 @@
                     <th>Date</th>
                     <th>Items</th>
                     <th>Categories</th>
-                    <th>Coverage</th>
+                    <th>Sources reporting</th>
                   </tr>
                 </thead>
                 <tbody id="trend-table"></tbody>

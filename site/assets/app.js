@@ -117,11 +117,8 @@ function dailySnapshot(date = state.todayDate) {
 function scoreBlock(item) {
   const score = Number(item.total_score || 0);
   const width = Math.max(0, Math.min(100, (score / 4) * 100));
-  const trackFill = element("span", {
-    attrs: { style: `--score:${width}%` },
-  });
+  const trackFill = element("span", {});
   const track = element("div", { className: "score-track" }, [trackFill]);
-  track.style.setProperty("--score", `${width}%`);
   trackFill.style.width = `${width}%`;
   return element("div", { className: "score" }, [
     element("div", { className: "score-value" }, [
@@ -133,26 +130,46 @@ function scoreBlock(item) {
   ]);
 }
 
+function pillBar(item) {
+  const pills = [
+    element("span", { className: "pill pill-source", text: item.source }),
+    element("span", { className: "pill pill-event", text: item.event_kind }),
+    ...(item.categories || []).map((category) =>
+      element("span", { className: "pill", text: category.replaceAll("_", " ") }),
+    ),
+  ];
+  if (!(item.categories || []).length) {
+    pills.push(element("span", { className: "pill", text: "uncategorized" }));
+  }
+  return element("div", { className: "pill-bar" }, pills);
+}
+
 function signalCard(item, index) {
   const title = element("a", {
     text: item.title,
     attrs: { href: item.url, target: "_blank", rel: "noopener noreferrer" },
   });
-  const categories = (item.categories || []).join(" · ") || "uncategorized";
+  const body = [
+    pillBar(item),
+    element("h3", {}, [title]),
+    element("p", { text: shorten(item.summary) }),
+  ];
+  // The pill bar already states source and categories, so drop the rationale
+  // entries that only restate them.
+  const rationale = (item.rationale || [])
+    .filter(Boolean)
+    .filter((reason) => !/^(Matched|Primary record):/.test(reason));
+  if (rationale.length) {
+    body.push(
+      element("p", {
+        className: "signal-why",
+        text: `Why surfaced: ${rationale.join("; ")}`,
+      }),
+    );
+  }
   return element("article", { className: "signal-card" }, [
     element("div", { className: "signal-rank", text: String(index + 1).padStart(2, "0") }),
-    element("div", {}, [
-      element("div", {
-        className: "signal-meta",
-        text: `${item.source} · ${item.event_kind} · ${categories}`,
-      }),
-      element("h3", {}, [title]),
-      element("p", { text: shorten(item.summary) }),
-      element("div", {
-        className: "signal-meta",
-        text: (item.rationale || []).join(" · "),
-      }),
-    ]),
+    element("div", {}, body),
     scoreBlock(item),
   ]);
 }
@@ -170,35 +187,54 @@ function renderToday() {
   state.todayDate = day.date;
   byId("today-date").value = day.date;
   byId("scan-count").textContent = day.item_count;
-  byId("scan-dial").style.setProperty(
-    "--coverage",
-    `${Math.min(92, Math.max(14, day.item_count * 2.4))}%`,
-  );
   byId("briefing-date").textContent = formatDate(day.date);
+
+  const reporting = day.health.filter((entry) => entry.ok);
   const failed = day.health.filter((entry) => !entry.ok);
+  const represented = new Set(day.items.map((item) => item.source)).size;
   byId("briefing-copy").textContent = failed.length
-    ? `${failed.length} source${failed.length === 1 ? "" : "s"} reported a coverage gap. Comparisons should be read with that limitation.`
+    ? `${reporting.length} of ${day.health.length} configured sources reported; ${failed.length} failed and contributed nothing. Comparisons should be read with that limitation.`
     : "All configured sources reported successfully for this scan.";
   replaceChildren(byId("briefing-stats"), [
     definition("Window start", formatDate(day.since, { dateStyle: "medium" })),
-    definition("Sources", new Set(day.items.map((item) => item.source)).size),
+    definition("Sources reporting", `${reporting.length}/${day.health.length}`),
+    definition("Sources in results", represented),
     definition("Categories", Object.keys(day.category_counts).length),
   ]);
+
+  const distribution = Object.entries(day.category_counts).sort((a, b) => b[1] - a[1]);
+  const distributionMax = Math.max(1, ...distribution.map(([, count]) => count));
+  replaceChildren(
+    byId("scan-distribution"),
+    distribution.map(([category, count], index) => {
+      const fill = element("span", { className: "spark-fill" });
+      fill.style.width = `${Math.max(4, (count / distributionMax) * 100)}%`;
+      fill.style.setProperty("--bar-color", categoryColor(category, index));
+      return element("div", { className: "spark-row" }, [
+        element("span", { className: "spark-label", text: category.replaceAll("_", " ") }),
+        element("span", { className: "spark-track" }, [fill]),
+        element("span", { className: "spark-count", text: String(count) }),
+      ]);
+    }),
+  );
+
   byId("today-count").textContent = `${day.item_count} records`;
   replaceChildren(
     byId("today-list"),
     day.items.map((item, index) => signalCard(item, index)),
   );
 
-  const healthy = day.health.filter((entry) => entry.ok).length;
-  byId("health-summary").textContent = `${healthy}/${day.health.length} healthy`;
+  byId("health-summary").textContent = `${reporting.length}/${day.health.length} reporting`;
   replaceChildren(
     byId("health-list"),
     day.health.map((entry) => {
       const children = [
         element("span", { className: `health-dot${entry.ok ? " ok" : ""}` }),
         element("span", { className: "health-name", text: entry.source }),
-        element("span", { className: "health-count", text: `${entry.item_count} found` }),
+        element("span", {
+          className: "health-count",
+          text: entry.ok ? `${entry.item_count} found` : "failed",
+        }),
       ];
       if (entry.error) {
         children.push(element("p", { className: "health-detail", text: entry.error }));
@@ -280,7 +316,7 @@ function renderTrends() {
             .map(([name, count]) => `${name.replaceAll("_", " ")} ${count}`)
             .join(" · "),
         }),
-        element("td", { text: `${healthy}/${day.health.length} sources` }),
+        element("td", { text: `${healthy}/${day.health.length} reporting` }),
       ]);
     }),
   );
@@ -717,7 +753,7 @@ async function initialize() {
     const latest = dailySnapshot(state.data.latest_date);
     const healthy = latest.health.filter((entry) => entry.ok).length;
     byId("status-copy").textContent =
-      `Latest ${latest.date} · ${healthy}/${latest.health.length} sources`;
+      `Latest ${latest.date} · ${healthy}/${latest.health.length} sources reporting`;
     byId("run-status").querySelector(".status-light").classList.add(
       healthy === latest.health.length ? "ok" : "warning",
     );
