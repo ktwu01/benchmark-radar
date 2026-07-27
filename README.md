@@ -63,6 +63,10 @@ Outputs:
 - `data/snapshots/YYYY-MM-DD.json`: versioned, idempotent UTC snapshot
 - `site/data/radar.json`: deterministic browser-ready history
 
+Automation keeps the growing corpus on the public `radar-data` branch so the protected
+`main` branch remains pull-request-only. Dashboard builds restore that history before
+validation and deployment.
+
 Rebuild the dashboard data without collecting again:
 
 ```bash
