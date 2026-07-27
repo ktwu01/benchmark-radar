@@ -9,3 +9,5 @@ build/
 .env
 out/
 
+.gstack/
+.DS_Store
