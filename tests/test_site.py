@@ -56,8 +56,8 @@ def test_attention_signals_use_activity_metrics_not_quality_scores():
     assert '["Submissions", Number(item.metrics?.submissions || 1).toLocaleString()]' in script
     assert '["Published", formatDate(item.published_at' in script
     assert "supporting_observations" in script
-    assert 'total_score: 0' not in script
-    assert 'evidence_score: 0' not in script
+    assert "total_score: 0" not in script
+    assert "evidence_score: 0" not in script
 
 
 def test_explorer_clusters_attention_by_normalized_title():
