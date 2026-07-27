@@ -32,6 +32,25 @@ def test_site_has_accessible_landmarks_and_views():
     assert {"today-view", "trends-view", "explorer-view", "main-content"} <= parser.ids
 
 
+def test_today_view_keeps_one_signal_summary_and_one_source_status():
+    html = Path("site/index.html").read_text(encoding="utf-8")
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+
+    assert html.count("Ranked signals") == 1
+    assert "Daily field note" not in html
+    assert "What entered the field?" not in html
+    assert "today-overview" not in html
+    assert "Sources in results" not in script
+    assert "health-summary" not in html
+
+
+def test_summaries_truncate_at_a_word_boundary():
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+
+    assert 'const lastSpace = candidate.lastIndexOf(" ");' in script
+    assert "candidate.slice(0, lastSpace)" in script
+
+
 def test_site_does_not_render_source_content_as_html():
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
 

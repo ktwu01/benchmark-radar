@@ -46,7 +46,14 @@ function formatDate(value, options = { dateStyle: "long" }) {
 
 function shorten(value, max = 190) {
   if (!value) return "";
-  return value.length > max ? `${value.slice(0, max).trim()}…` : value;
+  const normalized = value.trim();
+  if (normalized.length <= max) return normalized;
+  const candidate = normalized.slice(0, max - 1).trimEnd();
+  const lastSpace = candidate.lastIndexOf(" ");
+  const cutoff = lastSpace >= Math.floor(max * 0.6)
+    ? candidate.slice(0, lastSpace)
+    : candidate;
+  return `${cutoff.replace(/[,:;.!?-]+$/, "")}…`;
 }
 
 function option(value, label, selected = false) {
@@ -186,37 +193,6 @@ function renderToday() {
   if (!day) return;
   state.todayDate = day.date;
   byId("today-date").value = day.date;
-  byId("scan-count").textContent = day.item_count;
-  byId("briefing-date").textContent = formatDate(day.date);
-
-  const reporting = day.health.filter((entry) => entry.ok);
-  const failed = day.health.filter((entry) => !entry.ok);
-  const represented = new Set(day.items.map((item) => item.source)).size;
-  byId("briefing-copy").textContent = failed.length
-    ? `${reporting.length} of ${day.health.length} configured sources reported; ${failed.length} failed and contributed nothing. Comparisons should be read with that limitation.`
-    : "All configured sources reported successfully for this scan.";
-  replaceChildren(byId("briefing-stats"), [
-    definition("Window start", formatDate(day.since, { dateStyle: "medium" })),
-    definition("Sources reporting", `${reporting.length}/${day.health.length}`),
-    definition("Sources in results", represented),
-    definition("Categories", Object.keys(day.category_counts).length),
-  ]);
-
-  const distribution = Object.entries(day.category_counts).sort((a, b) => b[1] - a[1]);
-  const distributionMax = Math.max(1, ...distribution.map(([, count]) => count));
-  replaceChildren(
-    byId("scan-distribution"),
-    distribution.map(([category, count], index) => {
-      const fill = element("span", { className: "spark-fill" });
-      fill.style.width = `${Math.max(4, (count / distributionMax) * 100)}%`;
-      fill.style.setProperty("--bar-color", categoryColor(category, index));
-      return element("div", { className: "spark-row" }, [
-        element("span", { className: "spark-label", text: category.replaceAll("_", " ") }),
-        element("span", { className: "spark-track" }, [fill]),
-        element("span", { className: "spark-count", text: String(count) }),
-      ]);
-    }),
-  );
 
   byId("today-count").textContent = `${day.item_count} records`;
   replaceChildren(
@@ -224,7 +200,6 @@ function renderToday() {
     day.items.map((item, index) => signalCard(item, index)),
   );
 
-  byId("health-summary").textContent = `${reporting.length}/${day.health.length} reporting`;
   replaceChildren(
     byId("health-list"),
     day.health.map((entry) => {

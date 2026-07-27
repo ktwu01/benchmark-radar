@@ -38,30 +38,12 @@
     </nav>
 
     <main id="main-content" tabindex="-1">
-      <section class="view" id="today-view" aria-labelledby="today-heading">
-        <header class="view-heading">
-          <div>
-            <p class="eyebrow">Daily field note</p>
-            <h1 id="today-heading">What entered the field?</h1>
-          </div>
+      <section class="view" id="today-view" aria-label="Today">
+        <div class="today-toolbar">
           <label class="date-control">
             Scan date
             <select id="today-date"></select>
           </label>
-        </header>
-
-        <div class="today-overview">
-          <div class="scan-readout">
-            <p class="eyebrow">Ranked signals</p>
-            <strong id="scan-count">—</strong>
-            <div class="scan-distribution" id="scan-distribution" aria-label="Signals by category"></div>
-          </div>
-          <div class="briefing">
-            <p class="eyebrow">Observation window</p>
-            <h2 id="briefing-date">Awaiting data</h2>
-            <p id="briefing-copy">Loading the latest validated daily snapshot.</p>
-            <dl class="briefing-stats" id="briefing-stats"></dl>
-          </div>
         </div>
 
         <div class="content-grid">
@@ -74,8 +56,7 @@
           </div>
           <aside class="health-panel" aria-labelledby="health-heading">
             <div class="section-title">
-              <h2 id="health-heading">Source health</h2>
-              <span id="health-summary"></span>
+              <h2 id="health-heading">Sources</h2>
             </div>
             <ul id="health-list"></ul>
           </aside>
