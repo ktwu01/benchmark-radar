@@ -108,7 +108,10 @@ def test_every_required_source_must_return_records(monkeypatch):
         "sources": {"required_fixture": {"enabled": True, "required": True}},
     }
 
-    with pytest.raises(RuntimeError, match="required_fixture"):
+    with pytest.raises(
+        RuntimeError,
+        match="required_fixture returned no records",
+    ):
         run_pipeline(config, datetime(2026, 7, 27, tzinfo=UTC))
 
 

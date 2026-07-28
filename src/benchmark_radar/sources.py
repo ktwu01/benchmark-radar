@@ -5,6 +5,7 @@ import re
 import time
 import xml.etree.ElementTree as ET
 from datetime import UTC, datetime, timedelta
+from email.utils import parsedate_to_datetime
 from typing import Any
 
 from .describe import github_summary, huggingface_summary
@@ -18,6 +19,85 @@ def _date(value: str | None) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(UTC)
 
 
+def _arxiv_source_id(value: str) -> str:
+    identifier = value.rsplit("/", 1)[-1].replace("oai:arXiv.org:", "")
+    return re.sub(r"v\d+$", "", identifier)
+
+
+def _fetch_arxiv_rss(
+    config: dict[str, Any],
+    *,
+    overlap_since: datetime,
+    limit: int,
+) -> list[RadarItem]:
+    namespaces = {
+        "arxiv": "http://arxiv.org/schemas/atom",
+        "dc": "http://purl.org/dc/elements/1.1/",
+    }
+    keywords = [
+        str(keyword).casefold()
+        for keyword in config.get(
+            "rss_keywords",
+            [
+                "benchmark",
+                "evaluation",
+                "leaderboard",
+                "dataset",
+                "test set",
+                "data contamination",
+                "benchmark leakage",
+                "data quality",
+            ],
+        )
+    ]
+    found: dict[str, RadarItem] = {}
+    for category in config.get("rss_categories", ["cs.AI", "cs.CL", "cs.CV"]):
+        root = ET.fromstring(get_text(f"https://rss.arxiv.org/rss/{category}"))
+        for entry in root.findall("./channel/item"):
+            title = " ".join((entry.findtext("title") or "").split())
+            description = " ".join((entry.findtext("description") or "").split())
+            if keywords and not any(
+                keyword in f"{title} {description}".casefold() for keyword in keywords
+            ):
+                continue
+            published_text = entry.findtext("pubDate")
+            if not published_text:
+                continue
+            published = parsedate_to_datetime(published_text).astimezone(UTC)
+            if published < overlap_since:
+                continue
+            url = (entry.findtext("link") or "").replace("http:", "https:")
+            guid = entry.findtext("guid") or url
+            source_id = _arxiv_source_id(guid)
+            if not source_id or not url:
+                continue
+            announce_type = (
+                entry.findtext("arxiv:announce_type", namespaces=namespaces) or ""
+            ).casefold()
+            summary = (
+                description.split("Abstract:", 1)[-1].strip()
+                if "Abstract:" in description
+                else description
+            )
+            creators = entry.findtext("dc:creator", namespaces=namespaces) or ""
+            found[source_id] = RadarItem(
+                source="arXiv",
+                source_id=source_id,
+                title=title,
+                url=url,
+                published_at=published,
+                updated_at=published,
+                summary=summary,
+                event_kind="updated" if announce_type == "replace" else "released",
+                authors=[author.strip() for author in creators.split(",") if author.strip()],
+            )
+    return sorted(
+        found.values(),
+        key=lambda item: (item.updated_at or item.published_at, item.source_id),
+        reverse=True,
+    )[:limit]
+
+
 def fetch_arxiv(config: dict[str, Any], since: datetime, limit: int) -> list[RadarItem]:
     namespace = {"atom": "http://www.w3.org/2005/Atom"}
     found: dict[str, RadarItem] = {}
@@ -28,46 +108,72 @@ def fetch_arxiv(config: dict[str, Any], since: datetime, limit: int) -> list[Rad
     overlap_since = since - timedelta(hours=int(config.get("overlap_hours", 120)))
     queries = config.get("queries", [])
     request_delay = float(config.get("request_delay_seconds", 3))
-    for query_index, query in enumerate(queries):
-        if query_index and request_delay > 0:
-            time.sleep(request_delay)
-        xml = get_text(
-            "https://export.arxiv.org/api/query",
-            params={
-                "search_query": query,
-                "start": 0,
-                "max_results": limit,
-                "sortBy": "submittedDate",
-                "sortOrder": "descending",
-            },
+    atom_error: Exception | None = None
+    if config.get("atom_enabled", True):
+        try:
+            for query_index, query in enumerate(queries):
+                if query_index and request_delay > 0:
+                    time.sleep(request_delay)
+                xml = get_text(
+                    "https://export.arxiv.org/api/query",
+                    params={
+                        "search_query": query,
+                        "start": 0,
+                        "max_results": limit,
+                        "sortBy": "submittedDate",
+                        "sortOrder": "descending",
+                    },
+                )
+                root = ET.fromstring(xml)
+                for entry in root.findall("atom:entry", namespace):
+                    published = _date(entry.findtext("atom:published", namespaces=namespace))
+                    updated = _date(entry.findtext("atom:updated", namespaces=namespace))
+                    if max(published, updated) < overlap_since:
+                        continue
+                    url = (entry.findtext("atom:id", namespaces=namespace) or "").replace(
+                        "http:", "https:"
+                    )
+                    source_id = _arxiv_source_id(url)
+                    title = " ".join(
+                        (entry.findtext("atom:title", namespaces=namespace) or "").split()
+                    )
+                    summary = " ".join(
+                        (entry.findtext("atom:summary", namespaces=namespace) or "").split()
+                    )
+                    authors = [
+                        name.text or ""
+                        for name in entry.findall("atom:author/atom:name", namespace)
+                        if name.text
+                    ]
+                    found[source_id] = RadarItem(
+                        source="arXiv",
+                        source_id=source_id,
+                        title=title,
+                        url=url,
+                        published_at=published,
+                        updated_at=updated,
+                        summary=summary,
+                        event_kind="updated" if updated > published else "released",
+                        authors=authors,
+                    )
+        except Exception as error:
+            atom_error = error
+
+    if atom_error or not found:
+        rss_items = _fetch_arxiv_rss(
+            config,
+            overlap_since=overlap_since,
+            limit=limit,
         )
-        root = ET.fromstring(xml)
-        for entry in root.findall("atom:entry", namespace):
-            published = _date(entry.findtext("atom:published", namespaces=namespace))
-            updated = _date(entry.findtext("atom:updated", namespaces=namespace))
-            if max(published, updated) < overlap_since:
-                continue
-            url = (entry.findtext("atom:id", namespaces=namespace) or "").replace("http:", "https:")
-            source_id = url.rsplit("/", 1)[-1].split("v", 1)[0]
-            title = " ".join((entry.findtext("atom:title", namespaces=namespace) or "").split())
-            summary = " ".join((entry.findtext("atom:summary", namespaces=namespace) or "").split())
-            authors = [
-                name.text or ""
-                for name in entry.findall("atom:author/atom:name", namespace)
-                if name.text
-            ]
-            found[source_id] = RadarItem(
-                source="arXiv",
-                source_id=source_id,
-                title=title,
-                url=url,
-                published_at=published,
-                updated_at=updated,
-                summary=summary,
-                event_kind="updated" if updated > published else "released",
-                authors=authors,
-            )
-    return list(found.values())
+        if rss_items:
+            return rss_items
+        if atom_error:
+            raise atom_error
+    return sorted(
+        found.values(),
+        key=lambda item: (item.updated_at or item.published_at, item.source_id),
+        reverse=True,
+    )[:limit]
 
 
 def fetch_huggingface(config: dict[str, Any], since: datetime, limit: int) -> list[RadarItem]:

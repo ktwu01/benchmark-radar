@@ -41,6 +41,21 @@ sources:
     # timestamp is submission time, while announcements pause on weekends.
     overlap_hours: 120
     request_delay_seconds: 3
+    # GitHub-hosted runners are routinely rate-limited by the Atom API's
+    # shared-IP quota. Use official category RSS feeds and filter locally.
+    # Atom parsing remains available for deployments with a stable egress IP.
+    atom_enabled: false
+    rss_categories: [cs.AI, cs.CL, cs.CV]
+    rss_keywords:
+      - benchmark
+      - evaluation
+      - evaluator
+      - leaderboard
+      - dataset
+      - test set
+      - data contamination
+      - benchmark leakage
+      - data quality
     queries:
       - 'all:"large language model" AND (all:benchmark OR all:evaluation)'
       - '(all:benchmark OR all:dataset) AND (cat:cs.AI OR cat:cs.CL OR cat:cs.CV)'

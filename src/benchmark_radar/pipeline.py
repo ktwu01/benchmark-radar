@@ -210,13 +210,17 @@ def run_pipeline(
         if source_config.get("enabled", True) and source_config.get("required", False)
     }
     required_health = {source.source: source for source in health if source.source in required}
-    unavailable_required = sorted(
-        source
-        for source in required
-        if source not in required_health
-        or not required_health[source].ok
-        or required_health[source].item_count == 0
-    )
+    unavailable_required = []
+    for source in sorted(required):
+        source_health = required_health.get(source)
+        if source_health is None:
+            unavailable_required.append(f"{source} was not checked")
+        elif not source_health.ok:
+            unavailable_required.append(
+                f"{source} failed" + (f" ({source_health.error})" if source_health.error else "")
+            )
+        elif source_health.item_count == 0:
+            unavailable_required.append(f"{source} returned no records")
     if unavailable_required:
         raise RuntimeError(
             "Required discovery sources failed or returned no records: "
