@@ -40,6 +40,22 @@ taxonomy:
     - data provenance
     - annotation quality
     - benchmark leakage
+  # "agent"/"agentic" alone appear in most 2026 ML papers' related work, so
+  # (per issue #51's lesson on bare-word taxonomy terms) these require the
+  # phrase to name an agent benchmark/eval itself, not merely mention agents.
+  agentic:
+    - agent benchmark
+    - agentic benchmark
+    - agent evaluation
+    - agentic evaluation
+    - multi-agent benchmark
+    - tool-use benchmark
+    - tool use benchmark
+    - agentic capabilities
+    - agentic task
+    - benchmark for agent
+    - benchmark for llm agent
+    - benchmark for autonomous agent
 
 # Named artifacts worth surfacing whenever they move, regardless of where the
 # generic score places them. A watchlist hit is a routing decision, not a
@@ -103,10 +119,17 @@ sources:
       - curated dataset
       - data contamination
       - benchmark leakage
+      - agent benchmark
+      - agentic benchmark
+      - agent evaluation
+      - agentic evaluation
+      - multi-agent benchmark
+      - benchmark for agent
     queries:
       - 'ti:"benchmark" AND (all:"we introduce" OR all:"we present" OR all:"we release")'
       - 'ti:"dataset" AND (all:"we introduce" OR all:"we present" OR all:"we release")'
       - '(all:"data contamination" OR all:"benchmark leakage" OR all:"data quality")'
+      - '(all:"agent benchmark" OR all:"agentic benchmark" OR all:"agent evaluation")'
 
   huggingface:
     enabled: true
@@ -118,6 +141,7 @@ sources:
       - leaderboard
       - preference
       - synthetic-data
+      - agent benchmark
 
   github:
     enabled: true
@@ -127,6 +151,8 @@ sources:
       - '"AI evaluation" in:name,description,readme'
       - '"benchmark dataset" in:name,description,readme'
       - '"data contamination" in:name,description,readme'
+      - '"agent benchmark" in:name,description,readme'
+      - '"agentic benchmark" in:name,description,readme'
 
   openreview:
     enabled: true
@@ -146,6 +172,7 @@ sources:
       - large language model benchmark
       - artificial intelligence evaluation dataset
       - data contamination benchmark
+      - agentic benchmark evaluation
     page_size: 100
     max_requests: 3
     attempts: 3
@@ -174,6 +201,7 @@ sources:
       - large language model benchmark
       - artificial intelligence evaluation dataset
       - benchmark contamination data quality
+      - agentic benchmark evaluation
 
   brave:
     enabled: true
@@ -181,6 +209,7 @@ sources:
       - new AI benchmark evaluation dataset
       - new LLM benchmark leaderboard
       - AI dataset release data quality
+      - new agentic AI benchmark leaderboard
 
 attention:
   feeds:

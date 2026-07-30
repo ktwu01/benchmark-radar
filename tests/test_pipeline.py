@@ -65,6 +65,32 @@ def test_scoring_is_explainable_and_bounded():
     assert any("Matched:" in reason for reason in scored.rationale)
 
 
+def test_agentic_taxonomy_requires_a_scoped_phrase_not_a_bare_word():
+    """Regression for issue #52/#57: a bare 'agent' term would match almost
+    every 2026 ML paper's related work, the same failure issue #51 hit with
+    bare 'benchmark'/'evaluation'. The taxonomy phrase must name an agent
+    benchmark/eval itself."""
+    taxonomy = {"agentic": ["agent benchmark", "agentic evaluation"]}
+    matched = score_item(
+        item(
+            title="AgentBench-Pro",
+            summary="We introduce a new agent benchmark for tool-use reasoning.",
+        ),
+        taxonomy,
+        datetime(2026, 7, 27, 1, tzinfo=UTC),
+    )
+    unmatched = score_item(
+        item(
+            title="Scaling Transformers",
+            summary="Our agent uses a transformer trained on web-scale data.",
+        ),
+        taxonomy,
+        datetime(2026, 7, 27, 1, tzinfo=UTC),
+    )
+    assert matched.categories == ["agentic"]
+    assert unmatched.categories == []
+
+
 def test_templated_summaries_fail_the_run():
     """Regression: 26/30 records once shared 'Dataset repository updated on
     Hugging Face.', which told the reader nothing and inflated relevance

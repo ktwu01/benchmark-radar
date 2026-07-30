@@ -3,6 +3,7 @@ const CATEGORY_COLORS = {
   evaluation: "#dc633f",
   dataset: "#4c948b",
   data_quality: "#c99327",
+  agentic: "#756aa8",
 };
 const FALLBACK_COLORS = ["#756aa8", "#397f9a", "#a4576d", "#70833d"];
 
