@@ -645,15 +645,24 @@ def fetch_github_releases(
 
 
 def fetch_openalex(config: dict[str, Any], since: datetime, limit: int) -> list[RadarItem]:
-    api_key = os.getenv("OPENALEX_API_KEY")
-    if not api_key:
-        raise RuntimeError("OPENALEX_API_KEY is not configured")
+    # OpenAlex is a fully open API: anonymous requests succeed, and there is no
+    # free key to obtain. Requiring one disabled a working source on every run.
+    # A key is still forwarded when set, because OpenAlex sells premium keys,
+    # but an unset key is the normal case rather than a failure.
+    api_key = os.getenv("OPENALEX_API_KEY") or None
+    # `mailto` is how OpenAlex identifies a caller for its faster, more reliable
+    # "polite pool". It replaces the key as the default courtesy identifier.
+    mailto = str(config.get("mailto") or "").strip() or None
     found: dict[str, RadarItem] = {}
     for search in config.get("searches", []):
         payload = get_json(
             "https://api.openalex.org/works",
             params={
+                # get_json drops None params, so an unset key or mailto is
+                # simply absent instead of being sent as an empty string, which
+                # OpenAlex rejects with HTTP 401.
                 "api_key": api_key,
+                "mailto": mailto,
                 "search": search,
                 "filter": f"from_publication_date:{since.date().isoformat()}",
                 "sort": "publication_date:desc",

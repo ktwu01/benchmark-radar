@@ -235,6 +235,10 @@ sources:
 
   openalex:
     enabled: true
+    # OpenAlex has no free API key. It asks callers to identify themselves with
+    # a contact address, which routes requests to the faster and more reliable
+    # "polite pool". This is a public repository address, not a credential.
+    mailto: ktwu01@users.noreply.github.com
     searches:
       - large language model benchmark
       - artificial intelligence evaluation dataset

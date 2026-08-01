@@ -532,15 +532,66 @@ def test_new_connectors_never_synthesize_missing_summary(monkeypatch, fetcher, c
 def test_openalex_rejects_a_shapeless_payload(monkeypatch):
     # `payload.get("results", [])` made a `{}` reply indistinguishable from a
     # genuine zero-result day, so a broken response reported as healthy.
-    monkeypatch.setenv("OPENALEX_API_KEY", "key")
+    monkeypatch.delenv("OPENALEX_API_KEY", raising=False)
     monkeypatch.setattr("benchmark_radar.sources.get_json", lambda url, params: {})
 
     with pytest.raises(ConnectorPayloadError):
         fetch_openalex({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
 
 
+def test_openalex_collects_without_an_api_key(monkeypatch):
+    # OpenAlex is an open API with no free key. Requiring one raised
+    # "OPENALEX_API_KEY is not configured" on every scheduled run and disabled
+    # a working source, so an unset key must be a normal anonymous request.
+    monkeypatch.delenv("OPENALEX_API_KEY", raising=False)
+    seen: list[dict] = []
+
+    def fake_get_json(url, params):
+        seen.append(params)
+        return {
+            "results": [
+                {
+                    "id": "https://openalex.org/W1",
+                    "display_name": "Keyless benchmark",
+                    "publication_date": "2026-07-27",
+                    "primary_location": {"landing_page_url": "https://example.com/w1"},
+                }
+            ]
+        }
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+
+    items = fetch_openalex(
+        {"searches": ["benchmark"], "mailto": "radar@example.com"},
+        datetime(2026, 7, 26, tzinfo=UTC),
+        10,
+    )
+
+    assert [item.title for item in items] == ["Keyless benchmark"]
+    # An empty api_key must be dropped, not sent: OpenAlex answers a blank or
+    # wrong key with HTTP 401 rather than ignoring it.
+    assert seen[0]["api_key"] is None
+    assert seen[0]["mailto"] == "radar@example.com"
+
+
+def test_openalex_forwards_a_premium_api_key_when_set(monkeypatch):
+    monkeypatch.setenv("OPENALEX_API_KEY", "premium")
+    seen: list[dict] = []
+
+    def fake_get_json(url, params):
+        seen.append(params)
+        return {"results": []}
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+
+    fetch_openalex({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert seen[0]["api_key"] == "premium"
+    assert seen[0]["mailto"] is None
+
+
 def test_openalex_skips_undated_works(monkeypatch):
-    monkeypatch.setenv("OPENALEX_API_KEY", "key")
+    monkeypatch.delenv("OPENALEX_API_KEY", raising=False)
     monkeypatch.setattr(
         "benchmark_radar.sources.get_json",
         lambda url, params: {
