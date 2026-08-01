@@ -568,14 +568,35 @@ def test_openalex_collects_without_an_api_key(monkeypatch):
     )
 
     assert [item.title for item in items] == ["Keyless benchmark"]
-    # An empty api_key must be dropped, not sent: OpenAlex answers a blank or
+    # An unset api_key must be dropped, not sent: OpenAlex answers a blank or
     # wrong key with HTTP 401 rather than ignoring it.
     assert seen[0]["api_key"] is None
     assert seen[0]["mailto"] == "radar@example.com"
 
 
+@pytest.mark.parametrize("blank", ["", "   ", "\n", " \t\n"])
+def test_openalex_drops_a_blank_or_whitespace_api_key(monkeypatch, blank):
+    # An unset GitHub Actions secret expands to an empty string. Forwarding it
+    # (or a whitespace-only value) sends api_key= and OpenAlex replies 401,
+    # which would disable the source exactly as the missing-key guard did.
+    monkeypatch.setenv("OPENALEX_API_KEY", blank)
+    seen: list[dict] = []
+
+    def fake_get_json(url, params):
+        seen.append(params)
+        return {"results": []}
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+
+    fetch_openalex({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert seen[0]["api_key"] is None
+
+
 def test_openalex_forwards_a_premium_api_key_when_set(monkeypatch):
-    monkeypatch.setenv("OPENALEX_API_KEY", "premium")
+    # Secrets are routinely pasted with a trailing newline, and OpenAlex
+    # rejects "premium\n" with HTTP 401, so the key is stripped before use.
+    monkeypatch.setenv("OPENALEX_API_KEY", "  premium\n")
     seen: list[dict] = []
 
     def fake_get_json(url, params):

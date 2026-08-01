@@ -649,7 +649,10 @@ def fetch_openalex(config: dict[str, Any], since: datetime, limit: int) -> list[
     # free key to obtain. Requiring one disabled a working source on every run.
     # A key is still forwarded when set, because OpenAlex sells premium keys,
     # but an unset key is the normal case rather than a failure.
-    api_key = os.getenv("OPENALEX_API_KEY") or None
+    # Stripped, not just falsy-checked: an unset GitHub Actions secret expands
+    # to "" and a pasted one often carries a trailing newline. OpenAlex answers
+    # both with HTTP 401, so an unnormalized value silently disables the source.
+    api_key = os.getenv("OPENALEX_API_KEY", "").strip() or None
     # `mailto` is how OpenAlex identifies a caller for its faster, more reliable
     # "polite pool". It replaces the key as the default courtesy identifier.
     mailto = str(config.get("mailto") or "").strip() or None
