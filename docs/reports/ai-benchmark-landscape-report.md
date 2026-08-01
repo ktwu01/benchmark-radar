@@ -16,7 +16,7 @@ This distinction changes the meaning of every headline number.
 
 The validated snapshot corpus contains 645 distinct artifacts from 791 sightings. Its current tags are 512 benchmark, 450 dataset, 401 evaluation, 78 agentic, and 15 data quality. These tags overlap. They describe the observed corpus, not the total market, and they must not be added together.
 
-The most informative finding is not the corrected agentic count. It is the shape of the observed agentic segment. Of the 78 tagged artifacts, 53 come from arXiv, 17 from Hugging Face, and 8 from GitHub. Transparent content probes show that software engineering and computer use, tool use and planning, memory and long-horizon behavior, professional tasks, and security dominate the material. This points to a field moving from static question answering toward sustained action in technical and operational environments.
+The most informative finding is not the corrected agentic count. It is the shape of the observed agentic segment. Of the 78 tagged artifacts, 53 come from arXiv, 17 from Hugging Face, and 8 from GitHub. Transparent content probes find software engineering and computer use in 34 artifacts, tool use and planning in 32, and memory or long-horizon behavior in 30. The overlap among these signals points to evaluation moving beyond static question answering toward sustained action in technical and operational environments.
 
 The report also identifies why a market total remains unavailable. Four of nine snapshot dates are simulated. Only three source families contribute any corpus records. Nineteen of 20 canonical benchmarks tested are absent. No artifact has a populated cross-source link, so a paper, repository, and dataset for the same benchmark may remain separate. The watchlist has not fired once. These are properties of the measurement system, not minor footnotes.
 
@@ -174,25 +174,25 @@ The following probes are transparent keyword scans over the 78 tagged artifacts.
 
 | Theme signal | Artifacts matched in title or summary | Share of agentic set |
 |---|---:|---:|
-| Software engineering and computer use | 56 | 71.8% |
-| Tool use and planning | 39 | 50.0% |
-| Memory and long-horizon behavior | 27 | 34.6% |
-| Domain and professional tasks | 25 | 32.1% |
-| Security and safety | 22 | 28.2% |
+| Software engineering and computer use | 34 | 43.6% |
+| Tool use and planning | 32 | 41.0% |
+| Memory and long-horizon behavior | 30 | 38.5% |
+| Domain and professional tasks | 24 | 30.8% |
+| Security and safety | 19 | 24.4% |
 | Multi-agent coordination | 7 | 9.0% |
 
 The probe text is the lowercased title plus summary. The exact Python regular expressions are versioned here so the table can be reproduced:
 
-- Software engineering and computer use: `code|coding|software|web|browser|gui|computer|office|database|terminal|devops|repository|repo|swe`
-- Tool use and planning: `tool|planning|plan\b|workflow|function.call|action|reasoning`
-- Memory and long-horizon behavior: `memory|context|long.horizon|long.term|persistent|trajectory`
-- Domain and professional tasks: `health|patient|medical|finance|financial|legal|science|scientific|aerial|bim|education|robot`
-- Security and safety: `secur|attack|pentest|vulnerab|red.team|poison|privacy|stealth|risk|safe`
-- Multi-agent coordination: `multi.agent|orchestrat|cooperat|collaborat|team|coordination`
+- Software engineering and computer use: `\b(?:code|coding|software|web|browser|gui|computer|office|database|terminal|devops|repository|repositories|repo|swe)\b`
+- Tool use and planning: `\b(?:tool|tools|tooling|planning|plan|workflow|function[ -]?call|function[ -]?calls|action|actions|reasoning)\b`
+- Memory and long-horizon behavior: `\b(?:memory|context|long[ -]?horizon|long[ -]?term|persistent|trajectory|trajectories)\b`
+- Domain and professional tasks: `\b(?:health|patient|patients|medical|finance|financial|legal|science|scientific|aerial|bim|education|robot|robots|robotic|robotics)\b`
+- Security and safety: `\b(?:security|secure|securing|attack|attacks|pentest|pentesting|vulnerability|vulnerabilities|vulnerable|red[ -]?team|red[ -]?teaming|poison|poisoning|privacy|stealth|stealthy|risk|risks|safe|safety|unsafe)\b`
+- Multi-agent coordination: `\b(?:multi[ -]?agent|multi[ -]?agents|orchestration|orchestrating|cooperation|cooperative|collaboration|collaborative|team|teams|coordination)\b`
 
 Three interpretations follow.
 
-First, agent evaluation is centered on environments, not isolated questions. Software repositories, browsers, office tools, databases, and operational workflows appear throughout the set. The unit being evaluated is increasingly a trajectory of actions against stateful systems.
+First, environment interaction is the largest observed theme, though it appears in fewer than half of the tagged artifacts. Software repositories, browsers, office tools, databases, and operational workflows recur throughout the set. The unit being evaluated is increasingly a trajectory of actions against stateful systems.
 
 Second, memory and long-horizon behavior are becoming evaluation objects in their own right. Several artifacts test persistence, contamination, retrieval, or downstream consequences rather than treating context as a fixed input.
 
