@@ -114,6 +114,24 @@ def deduplicate(items: list[RadarItem]) -> list[RadarItem]:
     return order
 
 
+def match_phrase(text: str, term: str) -> bool:
+    """Substring match anchored at a word start, optionally at a word end too.
+
+    A bare substring test let `corpora` match inside "incorporates" and
+    "corporate", tagging unrelated artifacts as datasets: the same failure mode
+    issue #51 raised for bare taxonomy words. Anchoring the left edge fixes
+    most of it while preserving the deliberate stem behaviour the taxonomy
+    relies on, since `evaluat` must still match "evaluating" and "evaluated".
+
+    A trailing ``$`` on a term closes the right edge as well, which is what
+    separates the whole word `corpora$` from the stem `evaluat`.
+    """
+    term = term.lower()
+    if term.endswith("$"):
+        return re.search(rf"\b{re.escape(term[:-1])}\b", text) is not None
+    return re.search(rf"\b{re.escape(term)}", text) is not None
+
+
 def _proximity_tokens(text: str) -> list[str]:
     """Word tokens with hyphens treated as separators.
 
@@ -177,7 +195,7 @@ def score_item(
             hit = match_proximity_rule(haystack, terms)
             matches = [hit] if hit else []
         else:
-            matches = [term for term in terms if term.lower() in haystack]
+            matches = [term for term in terms if match_phrase(haystack, term)]
         if matches:
             categories.append(category)
             matched_terms.extend(matches[:2])

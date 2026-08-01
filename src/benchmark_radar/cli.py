@@ -113,6 +113,11 @@ def main() -> None:
             now_count = summary["after"].get(category, 0)
             marker = "" if was == now_count else f"  <- was {was}"
             print(f"  {category:14s} {now_count}{marker}")
+        if summary["schema_migrated"]:
+            print(
+                f"Note: {len(summary['schema_migrated'])} snapshot(s) were also upgraded "
+                f"from an older schema: {', '.join(summary['schema_migrated'])}"
+            )
         print(f"Rebuilt {args.dashboard_output} from {dashboard['snapshot_count']} snapshots")
         return
     if args.command == "migrate":

@@ -32,7 +32,9 @@ taxonomy:
   dataset:
     - dataset
     - corpus
-    - corpora
+    # Trailing $ closes the right edge: bare `corpora` matched inside
+    # "incorporates" and "corporate", tagging unrelated artifacts as datasets.
+    - corpora$
     - data collection
     - synthetic data
     - training data
@@ -77,9 +79,17 @@ taxonomy:
         arena,
         bench,
       ]
-    # No trailing \b: it can never match after the colon in "position:", which
-    # would silently disable that clause.
-    exclude: '\b(?:position:|survey|scoping review|unlocking agentic capabilities|needs redefinition)'
+    # Genre markers only, anchored to where a paper declares its own type.
+    # A bare `survey` would drop "A Benchmark of LLM-Simulated Human Survey
+    # Response", a real agent benchmark, because survey response is a subject
+    # area as well as a paper genre. `position:` carries no trailing \b: it
+    # could never match after the colon, which silently disabled the clause.
+    #
+    # Kept deliberately short. Per-title exclusions ("unlocking agentic
+    # capabilities") were tested and dropped: each removed exactly one
+    # artifact from the measurement corpus, which is memorizing the test set
+    # rather than stating a rule.
+    exclude: '(?:^|: )(?:position:|a survey|survey of|scoping review)|\bwe survey\b'
 
 # Named artifacts worth surfacing whenever they move, regardless of where the
 # generic score places them. A watchlist hit is a routing decision, not a

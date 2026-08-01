@@ -610,11 +610,17 @@ def rescore_snapshot_history(
     before: Counter[str] = Counter()
     after: Counter[str] = Counter()
     changed = 0
+    migrated: list[str] = []
     for path in paths:
-        snapshot = normalize_snapshot(
-            json.loads(path.read_text(encoding="utf-8")),
-            source=str(path),
-        )
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        snapshot = normalize_snapshot(raw, source=str(path))
+        # Normalizing a v1 document renames `items` to `evidence_items` and
+        # synthesizes the v2-only blocks, which is a schema migration rather
+        # than a rescore. `migrate` exists as its own command precisely so that
+        # rewrite is a deliberate act, so report it instead of performing it
+        # silently under a summary that reads "0 records changed".
+        if int(raw.get("schema_version") or 0) != int(snapshot.get("schema_version") or 0):
+            migrated.append(path.name)
         for record in snapshot.get("evidence_items") or []:
             previous = list(record.get("categories") or [])
             before.update(previous)
@@ -647,6 +653,7 @@ def rescore_snapshot_history(
     return {
         "snapshots": len(paths),
         "records_changed": changed,
+        "schema_migrated": migrated,
         "before": dict(sorted(before.items())),
         "after": dict(sorted(after.items())),
     }
