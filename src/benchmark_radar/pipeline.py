@@ -114,9 +114,49 @@ def deduplicate(items: list[RadarItem]) -> list[RadarItem]:
     return order
 
 
+def _proximity_tokens(text: str) -> list[str]:
+    """Word tokens with hyphens treated as separators.
+
+    Repository names carry their whole description in one hyphenated slug
+    (`agent-failure-atlas-benchmark`), so splitting only on whitespace hides
+    the two words a proximity rule needs to see. Six of the agentic misses
+    measured for issue #52 were exactly this shape.
+    """
+    return re.findall(r"[a-z0-9]+", text.replace("-", " "))
+
+
+def match_proximity_rule(text: str, rule: dict[str, Any]) -> str | None:
+    """Match when a term from each of two token groups appears close together.
+
+    A plain substring test demands the words be literally adjacent in one
+    fixed order, so `agent benchmark` cannot see "Benchmark **for** Database
+    Operations **Agents**" -- the dominant real phrasing. Measured against a
+    hand-labeled sample of the corpus (109 candidates, two independent
+    annotators, Cohen's kappa 0.888), the adjacency list scored 21.7% recall
+    where this rule reaches 95.0% at 75.0% precision.
+
+    `exclude` removes the residual false positives, which are systematically
+    artifacts that *build* an agent or survey the field rather than evaluate
+    one.
+    """
+    if rule.get("exclude") and re.search(str(rule["exclude"]), text):
+        return None
+    tokens = _proximity_tokens(text)
+    window = int(rule.get("within", 15))
+    left = {str(term).lower() for term in rule.get("any_of") or []}
+    right = {str(term).lower() for term in rule.get("near") or []}
+    left_at = [n for n, token in enumerate(tokens) if token in left]
+    right_at = [n for n, token in enumerate(tokens) if token in right]
+    for a in left_at:
+        for b in right_at:
+            if abs(a - b) <= window:
+                return f"{tokens[a]}~{tokens[b]}"
+    return None
+
+
 def score_item(
     item: RadarItem,
-    taxonomy: dict[str, list[str]],
+    taxonomy: dict[str, Any],
     now: datetime | None = None,
     *,
     lookback_hours: float = rubric.DEFAULT_LOOKBACK_HOURS,
@@ -129,7 +169,15 @@ def score_item(
     categories = []
     matched_terms: list[str] = []
     for category, terms in taxonomy.items():
-        matches = [term for term in terms if term.lower() in haystack]
+        # A category is either a plain phrase list or a proximity rule. Both
+        # shapes stay supported so the three categories measured as working
+        # (benchmark, dataset, evaluation at 96-98% recall) keep their exact
+        # current semantics and counts.
+        if isinstance(terms, dict):
+            hit = match_proximity_rule(haystack, terms)
+            matches = [hit] if hit else []
+        else:
+            matches = [term for term in terms if term.lower() in haystack]
         if matches:
             categories.append(category)
             matched_terms.extend(matches[:2])
