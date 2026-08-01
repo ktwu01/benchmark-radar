@@ -13,22 +13,26 @@ radar:
   minimum_score: 40
 
 taxonomy:
+  # `challenge set` and `capability eval` matched zero artifacts across all
+  # nine snapshots (issue #52 audit) and are dropped: a term that never fires
+  # creates an illusion of coverage. `evaluat` replaces `evaluation` as a
+  # strict superset under substring matching, picking up "evaluating" and
+  # "evaluated"; `corpora` is added because substring matching gets `corpus`
+  # but cannot bridge the irregular Latin plural.
   benchmark:
     - benchmark
     - leaderboard
     - test set
-    - challenge set
     - evaluation suite
   evaluation:
-    - evaluation
-    - evaluator
+    - evaluat
     - judge model
     - red teaming
-    - capability eval
     - safety eval
   dataset:
     - dataset
     - corpus
+    - corpora
     - data collection
     - synthetic data
     - training data
@@ -41,21 +45,41 @@ taxonomy:
     - annotation quality
     - benchmark leakage
   # "agent"/"agentic" alone appear in most 2026 ML papers' related work, so
-  # (per issue #51's lesson on bare-word taxonomy terms) these require the
-  # phrase to name an agent benchmark/eval itself, not merely mention agents.
+  # this still requires an evaluation noun -- but as a *proximity* rule rather
+  # than an adjacent phrase.
+  #
+  # The previous 12 adjacent phrases matched 16 of 645 artifacts (21.7% recall,
+  # issue #52). Six of them matched nothing at all, because real titles put the
+  # agent noun last and interpose qualifiers: "A Production-Fidelity Benchmark
+  # for LLM-Based Database Operations Agents" contains neither "agent
+  # benchmark" nor "benchmark for agent". Requiring the two nouns within 15
+  # tokens instead of adjacent reaches 95.0% recall at 75.0% precision,
+  # measured against 109 hand-labeled candidates (two independent annotators,
+  # Cohen's kappa 0.888). `exclude` drops the residual false positives, which
+  # are artifacts that build or survey agents rather than evaluate them.
   agentic:
-    - agent benchmark
-    - agentic benchmark
-    - agent evaluation
-    - agentic evaluation
-    - multi-agent benchmark
-    - tool-use benchmark
-    - tool use benchmark
-    - agentic capabilities
-    - agentic task
-    - benchmark for agent
-    - benchmark for llm agent
-    - benchmark for autonomous agent
+    within: 15
+    any_of: [agent, agents, agentic]
+    near:
+      [
+        benchmark,
+        benchmarks,
+        benchmarking,
+        eval,
+        evals,
+        evaluation,
+        evaluations,
+        evaluating,
+        evaluate,
+        leaderboard,
+        harness,
+        testbed,
+        arena,
+        bench,
+      ]
+    # No trailing \b: it can never match after the colon in "position:", which
+    # would silently disable that clause.
+    exclude: '\b(?:position:|survey|scoping review|unlocking agentic capabilities|needs redefinition)'
 
 # Named artifacts worth surfacing whenever they move, regardless of where the
 # generic score places them. A watchlist hit is a routing decision, not a
