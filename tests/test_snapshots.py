@@ -15,6 +15,7 @@ from benchmark_radar.snapshots import (
     load_snapshots,
     migrate_snapshot_history,
     rebuild_dashboard,
+    rescore_snapshot_history,
     snapshot_for_run,
     validate_snapshot,
     write_snapshot,
@@ -141,6 +142,65 @@ def test_rebuild_is_deterministic(tmp_path):
     assert first["days"][0]["evidence_count"] == 1
     assert first["days"][0]["attention"]["new_count"] == 1
     assert first["days"][0]["attention"]["active_count"] == 1
+
+
+def test_rescore_applies_a_new_category_to_older_snapshots(tmp_path):
+    """Regression for issue #52: snapshots are append-only, so a category
+    added on day N stayed absent from every earlier day and the dashboard
+    divided a one-day numerator by a nine-day denominator. That published
+    `agentic: 3` when the same corpus re-scored yielded far more."""
+    snapshot_dir = tmp_path / "snapshots"
+    write_snapshot(radar_run(26, title="A Benchmark for Web Agents"), snapshot_dir)
+    write_snapshot(radar_run(27, title="A Benchmark for Web Agents"), snapshot_dir)
+    stored = load_snapshots(snapshot_dir)
+    assert "agentic" not in stored[0]["evidence_items"][0]["categories"]
+
+    config = {
+        "taxonomy": {
+            "benchmark": ["benchmark"],
+            "agentic": {
+                "within": 15,
+                "any_of": ["agent", "agents", "agentic"],
+                "near": ["benchmark", "evaluation"],
+            },
+        }
+    }
+    summary = rescore_snapshot_history(config, snapshot_dir)
+
+    rescored = load_snapshots(snapshot_dir)
+    assert summary["snapshots"] == 2
+    assert summary["after"]["agentic"] == 2
+    assert all("agentic" in day["evidence_items"][0]["categories"] for day in rescored)
+
+
+def test_rescore_preserves_the_scores_the_run_actually_recorded(tmp_path):
+    """Only categories are rewritten. Scores and timestamps describe what the
+    pipeline did on the day it ran; rewriting them would turn an audit trail
+    into a fiction."""
+    snapshot_dir = tmp_path / "snapshots"
+    write_snapshot(radar_run(27), snapshot_dir)
+    before = load_snapshots(snapshot_dir)[0]["evidence_items"][0]
+
+    rescore_snapshot_history({"taxonomy": {"benchmark": ["benchmark"]}}, snapshot_dir)
+    after = load_snapshots(snapshot_dir)[0]["evidence_items"][0]
+
+    assert after["total_score"] == before["total_score"]
+    assert after["published_at"] == before["published_at"]
+    assert after["url"] == before["url"]
+
+
+def test_rescore_is_idempotent(tmp_path):
+    snapshot_dir = tmp_path / "snapshots"
+    write_snapshot(radar_run(27), snapshot_dir)
+    config = {"taxonomy": {"benchmark": ["benchmark"], "evaluation": ["evaluat"]}}
+
+    first = rescore_snapshot_history(config, snapshot_dir)
+    first_bytes = sorted(path.read_bytes() for path in snapshot_dir.glob("*.json"))
+    second = rescore_snapshot_history(config, snapshot_dir)
+
+    assert second["records_changed"] == 0
+    assert first["after"] == second["after"]
+    assert first_bytes == sorted(path.read_bytes() for path in snapshot_dir.glob("*.json"))
 
 
 def test_thirty_snapshots_replay_into_one_deterministic_cumulative_entity(tmp_path):

@@ -16,6 +16,7 @@ from .corpus import (
     organizations_for_item,
 )
 from .models import RadarRun
+from .pipeline import match_proximity_rule
 from .rubric import (
     SCORING_VERSION,
     legacy_rubric_reference,
@@ -581,6 +582,74 @@ def rebuild_dashboard(snapshot_dir: Path, output: Path) -> dict[str, Any]:
     value = dashboard_data(load_snapshots(snapshot_dir))
     _write_json(output, value)
     return value
+
+
+def rescore_snapshot_history(
+    config: dict[str, Any],
+    snapshot_dir: Path,
+) -> dict[str, Any]:
+    """Recompute stored taxonomy categories for every snapshot on disk.
+
+    Snapshots are append-only and were never rewritten when the taxonomy
+    changed, so a category added on day N stayed absent from days 1..N-1 and
+    the dashboard divided a one-day numerator by a nine-day denominator. That
+    alone published `agentic: 3` when re-scoring the same corpus yielded 16
+    (issue #52); no keyword change can fix it, because the old days simply
+    carry no such tag.
+
+    Only `categories` and the "Matched:" rationale are rewritten. Scores,
+    timestamps, selection counts and health are left exactly as recorded: they
+    describe what the pipeline did on the day it ran, and rewriting them would
+    turn an audit trail into a fiction. The consequence is that a re-scored
+    record can carry a category its stored `total_score` never reflected,
+    which is the honest trade -- the tag is a property of the artifact, the
+    score is a property of the run.
+    """
+    taxonomy = config["taxonomy"]
+    paths = sorted(snapshot_dir.glob("*.json"))
+    before: Counter[str] = Counter()
+    after: Counter[str] = Counter()
+    changed = 0
+    for path in paths:
+        snapshot = normalize_snapshot(
+            json.loads(path.read_text(encoding="utf-8")),
+            source=str(path),
+        )
+        for record in snapshot.get("evidence_items") or []:
+            previous = list(record.get("categories") or [])
+            before.update(previous)
+            haystack = f"{record.get('title', '')} {record.get('summary', '')}".lower()
+            categories: list[str] = []
+            matched: list[str] = []
+            for category, terms in taxonomy.items():
+                if isinstance(terms, dict):
+                    hit = match_proximity_rule(haystack, terms)
+                    matches = [hit] if hit else []
+                else:
+                    matches = [term for term in terms if term.lower() in haystack]
+                if matches:
+                    categories.append(category)
+                    matched.extend(str(term) for term in matches[:2])
+            after.update(categories)
+            if categories != previous:
+                changed += 1
+            record["categories"] = categories
+            rationale = [
+                reason
+                for reason in record.get("rationale") or []
+                if not str(reason).startswith("Matched:")
+            ]
+            if matched:
+                rationale.insert(0, f"Matched: {', '.join(sorted(set(matched)))}")
+            record["rationale"] = rationale
+        validate_snapshot(snapshot, source=str(path))
+        _write_json(path, snapshot)
+    return {
+        "snapshots": len(paths),
+        "records_changed": changed,
+        "before": dict(sorted(before.items())),
+        "after": dict(sorted(after.items())),
+    }
 
 
 def migrate_snapshot_history(config: dict[str, Any], snapshot_dir: Path) -> list[dict[str, Any]]:

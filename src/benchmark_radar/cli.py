@@ -13,6 +13,7 @@ from .snapshots import (
     load_snapshots,
     migrate_snapshot_history,
     rebuild_dashboard,
+    rescore_snapshot_history,
     write_snapshot,
 )
 
@@ -27,11 +28,12 @@ def main() -> None:
     parser.add_argument(
         "command",
         nargs="?",
-        choices=("run", "rebuild", "backfill", "migrate", "simulate-history"),
+        choices=("run", "rebuild", "backfill", "migrate", "rescore", "simulate-history"),
         default="run",
         help=(
             "Collect a daily run, rebuild/backfill cumulative data from saved snapshots, "
-            "migrate snapshot schemas, or simulate missing historical snapshots."
+            "migrate snapshot schemas, rescore stored taxonomy categories against the "
+            "current config, or simulate missing historical snapshots."
         ),
     )
     parser.add_argument("--config", type=Path, default=Path("config.yml"))
@@ -98,6 +100,20 @@ def main() -> None:
             "skipped rather than published empty; arXiv excluded from simulation, see issue "
             f"#35 known limitations); {dashboard['snapshot_count']} total daily snapshots"
         )
+        return
+    if args.command == "rescore":
+        summary = rescore_snapshot_history(config, args.snapshot_dir)
+        dashboard = rebuild_dashboard(args.snapshot_dir, args.dashboard_output)
+        print(
+            f"Rescored {summary['snapshots']} snapshots against the current taxonomy; "
+            f"{summary['records_changed']} records changed category"
+        )
+        for category in sorted({*summary["before"], *summary["after"]}):
+            was = summary["before"].get(category, 0)
+            now_count = summary["after"].get(category, 0)
+            marker = "" if was == now_count else f"  <- was {was}"
+            print(f"  {category:14s} {now_count}{marker}")
+        print(f"Rebuilt {args.dashboard_output} from {dashboard['snapshot_count']} snapshots")
         return
     if args.command == "migrate":
         snapshots = migrate_snapshot_history(config, args.snapshot_dir)
