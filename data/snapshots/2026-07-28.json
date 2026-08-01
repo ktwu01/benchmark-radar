@@ -1921,7 +1921,8 @@
       "categories": [
         "benchmark",
         "evaluation",
-        "dataset"
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "updated",
@@ -1932,7 +1933,7 @@
       },
       "published_at": "2026-07-28T09:59:05+00:00",
       "rationale": [
-        "Matched: benchmark, corpus, dataset, evaluation, leaderboard",
+        "Matched: agents~benchmarking, benchmark, corpus, dataset, evaluat, leaderboard",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.8097085665625,
@@ -1965,7 +1966,7 @@
       },
       "published_at": "2026-07-28T13:45:41+00:00",
       "rationale": [
-        "Matched: dataset, evaluation, leaderboard",
+        "Matched: dataset, evaluat, leaderboard",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.967069677673611,
@@ -1998,7 +1999,7 @@
       },
       "published_at": "2026-07-28T03:06:29+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.5231807887847224,
@@ -2035,7 +2036,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2071,7 +2072,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2113,7 +2114,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2160,7 +2161,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation, training data",
+        "Matched: benchmark, dataset, evaluat, training data",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2194,7 +2195,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, deduplication, evaluation",
+        "Matched: dataset, deduplication, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2228,7 +2229,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation, test set",
+        "Matched: dataset, evaluat, test set",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2267,7 +2268,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2301,7 +2302,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation, training data",
+        "Matched: benchmark, dataset, evaluat, training data",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2340,7 +2341,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2375,7 +2376,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2410,7 +2411,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpus, evaluation, test set, training data",
+        "Matched: benchmark, corpora, corpus, evaluat, test set",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2452,7 +2453,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2487,7 +2488,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation, test set",
+        "Matched: dataset, evaluat, test set",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2520,7 +2521,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2552,7 +2553,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation, evaluator",
+        "Matched: benchmark, corpora, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2577,7 +2578,8 @@
         "benchmark",
         "evaluation",
         "dataset",
-        "data_quality"
+        "data_quality",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "released",
@@ -2585,7 +2587,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpus, deduplication, evaluation",
+        "Matched: agentic~benchmarks, benchmark, corpus, deduplication, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2622,7 +2624,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2659,7 +2661,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2698,7 +2700,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2734,7 +2736,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, corpora, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2769,7 +2771,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2804,7 +2806,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, corpora, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2845,7 +2847,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -2878,7 +2880,7 @@
       },
       "published_at": "2026-07-28T06:31:03+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.6652409739699072,
@@ -2943,7 +2945,7 @@
       },
       "published_at": "2026-07-27T16:19:19+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.073759492488426,
@@ -3006,7 +3008,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation, evaluation suite, red teaming",
+        "Matched: benchmark, evaluat, evaluation suite, red teaming",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3038,7 +3040,7 @@
       },
       "published_at": "2026-07-28T13:54:18+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.9730534739699075,
@@ -3124,7 +3126,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "released",
@@ -3132,7 +3135,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation, evaluator",
+        "Matched: agent~evaluation, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3172,7 +3175,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation, test set",
+        "Matched: benchmark, evaluat, test set",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3199,6 +3202,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
@@ -3207,7 +3211,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpus, dataset",
+        "Matched: benchmark, corpus, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3239,7 +3243,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: corpus, dataset, evaluation",
+        "Matched: corpus, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3271,7 +3275,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation, evaluation suite",
+        "Matched: benchmark, evaluat, evaluation suite",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3303,7 +3307,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: corpus, evaluation, training data",
+        "Matched: corpus, evaluat, training data",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3326,6 +3330,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
@@ -3334,7 +3339,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, leaderboard, test set",
+        "Matched: dataset, evaluat, leaderboard, test set",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3359,6 +3364,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
@@ -3367,7 +3373,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpus, dataset",
+        "Matched: benchmark, corpus, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3432,7 +3438,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation, synthetic data",
+        "Matched: dataset, evaluat, synthetic data",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3485,7 +3491,8 @@
       "authors": [],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "updated",
@@ -3496,7 +3503,7 @@
       },
       "published_at": "2026-07-28T10:31:23+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agent~benchmark, benchmark, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.8321391221180554,
@@ -3601,7 +3608,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "released",
@@ -3609,7 +3617,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agentic~benchmarks, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3681,7 +3689,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3715,7 +3723,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3785,7 +3793,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3819,7 +3827,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: corpora, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3844,6 +3852,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
@@ -3852,7 +3861,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpus",
+        "Matched: benchmark, corpus, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3884,7 +3893,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3915,7 +3924,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -3941,7 +3950,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "released",
@@ -3949,7 +3959,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agent~benchmarking, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4015,7 +4025,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpus",
+        "Matched: benchmark, corpora, corpus",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4047,7 +4057,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4154,7 +4164,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4190,7 +4200,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4224,7 +4234,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4329,6 +4339,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
@@ -4337,7 +4348,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, corpora, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4426,7 +4437,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4494,7 +4505,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "released",
@@ -4502,7 +4514,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agents~benchmark, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4593,7 +4605,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4627,7 +4639,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4661,7 +4673,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4687,7 +4699,8 @@
       ],
       "categories": [
         "evaluation",
-        "dataset"
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "released",
@@ -4695,7 +4708,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: agents~evaluation, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4728,7 +4741,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4800,7 +4813,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: corpus, evaluation",
+        "Matched: corpus, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4836,7 +4849,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4868,7 +4881,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4904,7 +4917,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4938,7 +4951,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: corpora, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4973,7 +4986,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: evaluation, synthetic data",
+        "Matched: evaluat, synthetic data",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -4997,6 +5010,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
@@ -5005,7 +5019,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpus",
+        "Matched: benchmark, corpus, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5040,7 +5054,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5078,7 +5092,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5112,7 +5126,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5172,7 +5186,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "released",
@@ -5180,7 +5195,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agentic~evaluation, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5348,7 +5363,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5381,7 +5396,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5412,6 +5427,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
@@ -5420,7 +5436,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5445,6 +5461,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
@@ -5453,7 +5470,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5480,7 +5497,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "dataset"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "released",
@@ -5488,7 +5506,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, corpora, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5527,7 +5545,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5597,7 +5615,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluator",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5632,7 +5650,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5667,7 +5685,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5699,7 +5717,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5727,6 +5745,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
@@ -5735,7 +5754,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5773,7 +5792,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5815,6 +5834,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
@@ -5823,7 +5843,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5855,7 +5875,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5878,6 +5898,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
@@ -5886,7 +5907,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5954,7 +5975,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: corpora, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -5978,7 +5999,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T03:05:06.194511+00:00",
       "event_kind": "released",
@@ -5986,7 +6008,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agents~benchmarks, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6021,7 +6043,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6056,7 +6078,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6083,7 +6105,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T03:05:06.194511+00:00",
       "event_kind": "released",
@@ -6091,7 +6114,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agent~benchmarks, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6196,7 +6219,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6223,7 +6246,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T03:05:06.194511+00:00",
       "event_kind": "released",
@@ -6231,7 +6255,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agents~bench, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6256,6 +6280,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-28T03:05:06.194511+00:00",
@@ -6264,7 +6289,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, data collection",
+        "Matched: benchmark, data collection, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6320,7 +6345,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6352,7 +6377,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6388,7 +6413,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6418,7 +6443,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "released",
@@ -6426,7 +6452,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agents~evaluation, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6527,7 +6553,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6551,6 +6577,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
@@ -6559,7 +6586,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, corpora, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6584,7 +6611,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "updated",
@@ -6592,7 +6620,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agentic~evaluation, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6616,6 +6644,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
@@ -6624,7 +6653,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpus",
+        "Matched: benchmark, corpus, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6694,7 +6723,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6720,7 +6749,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "released",
@@ -6728,7 +6758,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agents~benchmarks, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6762,7 +6792,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: corpora, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -6995,7 +7025,7 @@
       },
       "published_at": "2026-07-28T13:48:44+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: GitHub"
       ],
       "recency_score": 3.9691877332291665,
@@ -7112,7 +7142,8 @@
       "authors": [],
       "categories": [
         "benchmark",
-        "dataset"
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "released",
@@ -7123,7 +7154,7 @@
       },
       "published_at": "2026-07-28T03:00:20+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: agent~benchmark, benchmark, dataset",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.518909955451389,
@@ -7155,7 +7186,7 @@
       },
       "published_at": "2026-07-27T22:53:25+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, corpora, dataset",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.3474400480439814,
@@ -7219,7 +7250,7 @@
       },
       "published_at": "2026-07-28T14:16:38+00:00",
       "rationale": [
-        "Matched: data quality, evaluator",
+        "Matched: data quality, evaluat",
         "Primary record: GitHub"
       ],
       "recency_score": 3.9885627332291667,
@@ -7240,7 +7271,8 @@
       "authors": [],
       "categories": [
         "evaluation",
-        "data_quality"
+        "data_quality",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "released",
@@ -7251,7 +7283,7 @@
       },
       "published_at": "2026-07-28T13:35:53+00:00",
       "rationale": [
-        "Matched: data contamination, evaluation",
+        "Matched: agentic~evaluation, data contamination, evaluat",
         "Primary record: GitHub"
       ],
       "recency_score": 3.9602641221180557,
@@ -7315,7 +7347,7 @@
       },
       "published_at": "2026-07-28T12:25:11+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.911166899895833,
@@ -7475,7 +7507,7 @@
       },
       "published_at": "2026-07-28T08:26:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.7450673628587965,
@@ -7528,6 +7560,7 @@
       "authors": [],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
@@ -7539,7 +7572,7 @@
       },
       "published_at": "2026-07-27T12:27:41+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 2.9129030110069447,
@@ -7634,7 +7667,7 @@
       },
       "published_at": "2026-07-28T13:38:17+00:00",
       "rationale": [
-        "Matched: evaluation",
+        "Matched: evaluat",
         "Primary record: GitHub"
       ],
       "recency_score": 3.961930788784722,
@@ -7730,7 +7763,7 @@
       },
       "published_at": "2026-07-27T07:38:08+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 2.7118266221180556,
@@ -7762,7 +7795,7 @@
       },
       "published_at": "2026-07-27T07:30:58+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 2.7068497702662038,
@@ -7825,7 +7858,7 @@
       },
       "published_at": "2026-07-26T21:21:19+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 2.283481714710648,
@@ -7845,7 +7878,9 @@
       "artifact_urls": [],
       "authors": [],
       "categories": [
-        "dataset"
+        "evaluation",
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "updated",
@@ -7856,7 +7891,7 @@
       },
       "published_at": "2026-07-28T14:30:21+00:00",
       "rationale": [
-        "Matched: dataset",
+        "Matched: agent~evaluating, dataset, evaluat",
         "Primary record: GitHub"
       ],
       "recency_score": 3.9980881961921297,
@@ -7939,6 +7974,7 @@
       "authors": [],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
@@ -7950,7 +7986,7 @@
       },
       "published_at": "2026-07-26T16:58:09+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 2.1007270850810187,
@@ -8063,7 +8099,8 @@
       "artifact_urls": [],
       "authors": [],
       "categories": [
-        "benchmark"
+        "benchmark",
+        "evaluation"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "updated",
@@ -8074,7 +8111,7 @@
       },
       "published_at": "2026-07-28T08:52:13+00:00",
       "rationale": [
-        "Matched: benchmark, leaderboard",
+        "Matched: benchmark, evaluat, leaderboard",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.763273381377315,
@@ -8141,7 +8178,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, training data",
+        "Matched: corpora, dataset",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -8271,7 +8308,8 @@
         "Moritz Zaiss"
       ],
       "categories": [
-        "benchmark"
+        "benchmark",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "released",
@@ -8279,7 +8317,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, leaderboard",
+        "Matched: agent~benchmarks, benchmark, leaderboard",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -8335,7 +8373,8 @@
         "Seshu K. Damarla"
       ],
       "categories": [
-        "benchmark"
+        "benchmark",
+        "evaluation"
       ],
       "discovered_at": "2026-07-28T03:05:06.194511+00:00",
       "event_kind": "updated",
@@ -8343,7 +8382,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, test set",
+        "Matched: benchmark, evaluat, test set",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -8376,7 +8415,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: evaluation, evaluator",
+        "Matched: evaluat",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,
@@ -8476,7 +8515,7 @@
       "metrics": {},
       "published_at": "2026-07-28T04:00:00+00:00",
       "rationale": [
-        "Matched: evaluation, judge model",
+        "Matched: evaluat, judge model",
         "Primary record: arXiv"
       ],
       "recency_score": 3.5603451406365743,

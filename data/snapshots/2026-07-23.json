@@ -125,7 +125,8 @@
       "categories": [
         "benchmark",
         "evaluation",
-        "dataset"
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-24T00:00:00+00:00",
       "event_kind": "updated",
@@ -137,7 +138,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-22T07:44:20+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: agent~benchmark, benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:a323484724935d1d637e5f8fe69c6e7a7402f54652def78cd75ef1f2d13283d8",
@@ -164,7 +165,8 @@
       "categories": [
         "benchmark",
         "evaluation",
-        "dataset"
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-24T00:00:00+00:00",
       "event_kind": "updated",
@@ -176,7 +178,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-22T16:00:58+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: agents~benchmark, benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:afc4449f88a68c400c946d154aa6aaa0204b777f5c91f88d5d90d7e59729e96e",
@@ -203,7 +205,8 @@
       "categories": [
         "benchmark",
         "evaluation",
-        "dataset"
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-24T00:00:00+00:00",
       "event_kind": "released",
@@ -215,7 +218,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-22T07:30:58+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: agentic~benchmarks, benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:11b1532fc6b2698676d6b79b068808d17265f0b6e2b27c1336a06cfe887ccf50",
@@ -292,7 +295,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-22T11:05:18+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:94209861be4a1e1aa1be92f2f761fcbefc139da77de6c8635591403953e92f16",
@@ -318,6 +321,7 @@
       "authors": [],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-24T00:00:00+00:00",
@@ -330,7 +334,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-22T18:44:56+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:385facd11a8249c924a58b58ca84ec47d90ba5d4a78386bba614e419f1d96feb",
@@ -432,6 +436,7 @@
       "authors": [],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-24T00:00:00+00:00",
@@ -444,7 +449,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-22T13:30:37+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:7f0f309ffa25a6fc05232d9abbd7105617b95e594bb57a7c816301584ffbf096",
@@ -508,6 +513,7 @@
       "authors": [],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-24T00:00:00+00:00",
@@ -520,7 +526,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-22T14:07:26+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:02567aa3f7012bf91b35aed28e681cd8c2a7b457298543fae9e907563697eed1",
@@ -634,7 +640,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-22T09:26:52+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:a38321fe70597f566675be424f925f612c897113404f9266fe3b8bf55cc4fcfd",
@@ -660,6 +666,7 @@
       "authors": [],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-24T00:00:00+00:00",
@@ -672,7 +679,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-22T07:09:38+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:87af4b5fa4debd0e325416dc3a3ed31d16b1a79657e892006fc5567fca1463ea",
@@ -820,7 +827,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-22T17:52:19+00:00",
       "rationale": [
-        "Matched: evaluation",
+        "Matched: evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:94fc70de7d670c19c718e7b8ed42fac004222c6bbe7243ad92f8612fded240f3",

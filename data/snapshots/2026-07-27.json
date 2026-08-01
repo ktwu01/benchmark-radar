@@ -636,7 +636,7 @@
       },
       "published_at": "2026-07-27T17:53:37+00:00",
       "rationale": [
-        "Matched: dataset, evaluation, leaderboard",
+        "Matched: dataset, evaluat, leaderboard",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.996720476585648,
@@ -668,7 +668,7 @@
       },
       "published_at": "2026-07-27T17:31:01+00:00",
       "rationale": [
-        "Matched: benchmark, data quality, dataset, evaluation",
+        "Matched: benchmark, data quality, dataset, evaluat",
         "Primary record: GitHub"
       ],
       "recency_score": 3.981026032141204,
@@ -699,7 +699,7 @@
       },
       "published_at": "2026-07-27T16:19:19+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.931234365474537,
@@ -729,7 +729,7 @@
       },
       "published_at": "2026-07-27T14:20:11+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: GitHub"
       ],
       "recency_score": 3.8485028839930555,
@@ -789,7 +789,7 @@
       },
       "published_at": "2026-07-27T13:54:18+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.8305283469560187,
@@ -838,7 +838,8 @@
       "authors": [],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-27T17:58:20.350823+00:00",
       "event_kind": "updated",
@@ -849,7 +850,7 @@
       },
       "published_at": "2026-07-27T17:25:38+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agent~benchmark, benchmark, evaluat",
         "Primary record: GitHub"
       ],
       "recency_score": 3.977287606215278,
@@ -898,6 +899,7 @@
       "authors": [],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-27T17:58:20.350823+00:00",
@@ -909,7 +911,7 @@
       },
       "published_at": "2026-07-27T12:27:41+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.7703778839930555,
@@ -939,7 +941,7 @@
       },
       "published_at": "2026-07-27T12:06:48+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: GitHub"
       ],
       "recency_score": 3.7558755691782406,
@@ -969,7 +971,7 @@
       },
       "published_at": "2026-07-27T17:39:07+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: GitHub"
       ],
       "recency_score": 3.9866510321412036,
@@ -1089,7 +1091,7 @@
       },
       "published_at": "2026-07-27T07:41:28+00:00",
       "rationale": [
-        "Matched: evaluation, evaluation suite",
+        "Matched: evaluat, evaluation suite",
         "Primary record: GitHub"
       ],
       "recency_score": 3.5716163099189817,
@@ -1119,7 +1121,7 @@
       },
       "published_at": "2026-07-26T21:21:19+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.1409565876967593,
@@ -1138,6 +1140,7 @@
       "authors": [],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-27T17:58:20.350823+00:00",
@@ -1149,7 +1152,7 @@
       },
       "published_at": "2026-07-26T16:58:09+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 2.9582019580671295,
@@ -1268,7 +1271,7 @@
       },
       "published_at": "2026-07-27T07:38:08+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.569301495104167,
@@ -1298,7 +1301,7 @@
       },
       "published_at": "2026-07-27T07:30:58+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 3.5643246432523146,
@@ -1358,7 +1361,7 @@
       },
       "published_at": "2026-07-26T04:14:08+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation, evaluator",
+        "Matched: benchmark, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 2.4276348284375002,
@@ -1478,7 +1481,7 @@
       },
       "published_at": "2026-07-26T00:54:21+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "recency_score": 2.2888964025115746,

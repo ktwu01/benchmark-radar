@@ -4159,7 +4159,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-30T14:03:05+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation, leaderboard",
+        "Matched: benchmark, dataset, evaluat, leaderboard",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:88cf2e776d630645710ae7eff1484fe336a5fc8dd16c7782b439b47c7d83121b",
@@ -4203,7 +4203,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, data quality, dataset, evaluation",
+        "Matched: benchmark, data quality, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:1e821280c1136be81fbd92ffddf2bb7558aeacb5b8805a7a8094d8330d18e663",
@@ -4318,7 +4318,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-30T09:37:42+00:00",
       "rationale": [
-        "Matched: dataset, evaluation, leaderboard",
+        "Matched: dataset, evaluat, leaderboard",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:2170579a2a1ae06a2a521f604ba9d9154dcee8def1f0aaf6ef13df7d67a6ac2a",
@@ -4391,7 +4391,8 @@
       "categories": [
         "benchmark",
         "evaluation",
-        "dataset"
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -4400,7 +4401,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation, evaluator",
+        "Matched: agents~evaluation, benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:906fc83564d9e293d8ca326815995d572f2da4e023fe5e6e77717e4be3e0995e",
@@ -4430,7 +4431,8 @@
       "categories": [
         "benchmark",
         "evaluation",
-        "dataset"
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -4439,7 +4441,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation, leaderboard",
+        "Matched: agents~benchmark, benchmark, dataset, evaluat, leaderboard",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:4099fbd588a679d3eaa68957efba1fb84af50ac243de136f0d2e12887262fee7",
@@ -4483,7 +4485,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpus, evaluation, test set",
+        "Matched: benchmark, corpus, evaluat, test set",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:1e0172c5c73c3ab1a09ab5390856a56b6d96736d79bf0433e54a33b8cffc67bd",
@@ -4525,7 +4527,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation, training data",
+        "Matched: benchmark, dataset, evaluat, training data",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:61ba905ba0c2af05578e7bc564b9475ec6b05cc8893f2c0ea73a9b77b3e307b3",
@@ -4602,7 +4604,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-30T09:23:56+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:fe2b83515338a0a71d2d0306521f8d67d55e5dcf04b6a09585cc60a6d2bd478e",
@@ -4629,7 +4631,8 @@
       "categories": [
         "benchmark",
         "evaluation",
-        "dataset"
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "updated",
@@ -4641,7 +4644,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-29T19:29:22+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: agent~benchmark, benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:d3ef340291bf3a0c6c9924553033cb60e88b7f901ce5fb81327bda78697ace76",
@@ -4666,7 +4669,9 @@
       "artifact_urls": [],
       "authors": [],
       "categories": [
-        "dataset"
+        "evaluation",
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "updated",
@@ -4678,7 +4683,7 @@
       "parser_version": "github-search/1",
       "published_at": "2026-07-30T14:01:58+00:00",
       "rationale": [
-        "Matched: dataset",
+        "Matched: agent~evaluating, dataset, evaluat",
         "Primary record: GitHub"
       ],
       "raw_payload_hash": "sha256:978d1bd6e569f3b16a1df928a47f8b30d3bb48c4369fd45aaab7e2b57fc98b46",
@@ -4758,7 +4763,8 @@
       "categories": [
         "benchmark",
         "evaluation",
-        "dataset"
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -4767,7 +4773,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: agents~benchmarking, benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:28e7d47dee7d48932a664979e46757420ffac4af85c1ba516b39bf59d7bc1d86",
@@ -4801,7 +4807,8 @@
       "categories": [
         "benchmark",
         "evaluation",
-        "dataset"
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -4810,7 +4817,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: agent~evaluation, benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:526e0df2cb16bd18ba3f2ed1c1d309b91f1714f8b5a4a863dfa4424cad527ae8",
@@ -4854,7 +4861,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation, test set",
+        "Matched: dataset, evaluat, test set",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:b95dd03bf2fafe18c7e472feb2377fe6f2579d41832b7877d38bcbc8f374a6e9",
@@ -4898,7 +4905,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:1ea912d49e32a14a52f977f04ef747a03e8d9b1d3430e6173ca0cd5482334e39",
@@ -4941,7 +4948,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:9e2e54d8647dc513dea3723c3a1eb71ff438575ae39a6d1f752538c2544334f3",
@@ -4981,7 +4988,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:2b56bf02717b7d4f65c9fbeabf4cd2d2615512a03412b15ba2ccf792685cdab7",
@@ -5024,7 +5031,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpus, evaluation",
+        "Matched: benchmark, corpus, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:d4115b87a6b5491dd9de19e4f82b19f5f6a43e2a1b383492609501a5451d878f",
@@ -5070,7 +5077,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:ec4e8fc347a8e93ee86034edb49452af6d9c8e0c451824a659eef24bb87e7b4a",
@@ -5110,7 +5117,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:a653ab183edd8dc8125ab8bb5697c86f7961941c2446f524efafeadda5798c16",
@@ -5156,7 +5163,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:fe88fc7ff2a6e039dd99550185a5817369224f6db72b6c9680919dacbdf2b45d",
@@ -5199,7 +5206,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:c656d25783f33efd46dc566039a32f4984be8c04b76ac1fc6a64fe89ff624b3f",
@@ -5313,7 +5320,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-30T13:22:56+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:3495608fd04a5b1c5495f44033b539b0fa9f3dfbf9d16efcff59698ae31e2829",
@@ -5427,7 +5434,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-29T04:26:21+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:72773c9f4c899f70f28bbc68558ad69b25a6660537e1e3e8c344ccade62c2942",
@@ -5466,7 +5473,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-30T04:34:35+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:f3ac306fe921bc9e0ae3bcffad9bbfbe2a9d4ed662e14f816e26d041c76dc13f",
@@ -5505,7 +5512,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-30T03:19:25+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:9cf9d1006cfcad855d0aab673ad5b4fac3cbe4a8f41d7df74d8c3be436f1c119",
@@ -5544,7 +5551,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-30T03:19:24+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:1b16c30bd50de0461f4034569f6de4cc9bcb3d99bd29c63288eddb6974e48345",
@@ -5583,7 +5590,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-30T04:33:57+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:8a10ce7826d630e4fbe300b532dd76ff59d6e7fcf0b2560ee4a7ecc2a95068aa",
@@ -5622,7 +5629,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-30T03:19:28+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:b3eb8ffad9706a47ff0f0280dce6da88efc6abb8a6d5f469a7470213cf38465f",
@@ -5661,7 +5668,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-30T03:19:26+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:3650b5fb5640845236aaff46653c46eed6e9a0e647994ac8fc49d1f4b41e1bf7",
@@ -5700,7 +5707,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-29T16:16:18+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:b9f955cd00d9bca1cf672fe3683375c2ee9d0c1367858dc8046548978df46b26",
@@ -5739,7 +5746,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-30T04:34:20+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:032ef386ff77e7d2f87597986511f1bbae9feba2a36d589a088ea608eb3f1dd0",
@@ -5778,7 +5785,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-30T07:33:14+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:8866459f73860e95c99f9c4e5f500b87d7251bb83e715ccb87b214e3755daf97",
@@ -5817,7 +5824,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-29T08:25:04+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:23f2b40be281c460dced4accd4123a30ac2f1f478628db21eb13a872f7ead738",
@@ -6044,7 +6051,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation, training data",
+        "Matched: dataset, evaluat, training data",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:c45f6b90eea5a3b2b814f77bea03e5f7883405492466601ee950e1685e84e204",
@@ -6086,7 +6093,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation, synthetic data",
+        "Matched: dataset, evaluat, synthetic data",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:6a879168eba6ad8433942f4094838d66df29961f5d6969eeaab7cde4502800c1",
@@ -6125,7 +6132,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation, synthetic data",
+        "Matched: dataset, evaluat, synthetic data",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:9eb558a7c5a03d83d107a5d5429c9ee0866bcd6982a3ed2d2d15b1d09bc0e3c3",
@@ -6203,7 +6210,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation, safety eval",
+        "Matched: benchmark, evaluat, safety eval",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:85e311b70c63d696fcee5c62074d19080d9d309b1a9cefa1c79dcf571b2f0898",
@@ -6248,7 +6255,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation, leaderboard",
+        "Matched: benchmark, evaluat, leaderboard",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:dd4620d0ef833c58dafe4cffc07a148b0afe24a0791e50e17598747d2ec41a71",
@@ -6329,7 +6336,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation, leaderboard",
+        "Matched: benchmark, evaluat, leaderboard",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:907fa50bcdd9afcf12c15d4d77aa05cac17f0e34a4d7b0b567b775480136523a",
@@ -6366,7 +6373,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation, evaluator",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:abf68df2467d9ff7019e2d08beb2d7407b32b7c5aca792e66a3f25293fe52a62",
@@ -6395,7 +6402,8 @@
       ],
       "categories": [
         "evaluation",
-        "dataset"
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -6404,7 +6412,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: corpus, dataset, evaluation",
+        "Matched: agent~harness, corpus, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:c5e629c224b16ab1d4fef95af37bdcb6cc1aa7db407a62aaa666d4fbbe25ad68",
@@ -6439,7 +6447,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-29T14:29:12.279273+00:00",
       "event_kind": "updated",
@@ -6448,7 +6457,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation, evaluator",
+        "Matched: agent~evaluation, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:21c00dea6fc4401e0b4db54e790126365452ea754ba13af28d7c914a2397535b",
@@ -6505,7 +6514,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "updated",
@@ -6514,7 +6524,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation, evaluator",
+        "Matched: agent~evaluation, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:5beb8bddc28aa60c83b1f6e9528f7f2e5ec4f03ea9f9deeeac9990fdb90f6c90",
@@ -6544,7 +6554,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "updated",
@@ -6553,7 +6564,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation, leaderboard",
+        "Matched: agent~evaluation, benchmark, evaluat, leaderboard",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:9b9d4606462de3fec9c0d6a198ca034be66ddea07c9d8924840084d84e7df676",
@@ -6596,7 +6607,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation, training data",
+        "Matched: dataset, evaluat, training data",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:e1100d1ef0c4c6ab22ddd94ea7374cb76ce10f11af6f84b823b01d05ad130216",
@@ -6624,7 +6635,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "updated",
@@ -6633,7 +6645,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation, evaluator",
+        "Matched: agentic~benchmarks, benchmark, evaluat, judge model",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:ba623c6a460c31e81296176648bc7a9228954498fc7c3e2eb78d56dc86f70583",
@@ -6668,7 +6680,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "dataset"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "updated",
@@ -6677,7 +6690,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation, test set",
+        "Matched: benchmark, corpora, evaluat, test set",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:e9327aefcc2939e194ffb15248d0e4f301c0b68ef27ff8c70a29d4434dc1d410",
@@ -6706,6 +6719,7 @@
         "Haihua Chen"
       ],
       "categories": [
+        "evaluation",
         "dataset",
         "data_quality"
       ],
@@ -6716,7 +6730,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: annotation quality, corpus, dataset",
+        "Matched: annotation quality, corpus, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:d4475a36057f7015a839acf21e4032b96ba8be3c74dcb32e41fb788f1d4af881",
@@ -6830,7 +6844,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-28T20:36:34+00:00",
       "rationale": [
-        "Matched: benchmark, corpus, dataset, evaluation",
+        "Matched: benchmark, corpus, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:023e52e1f2104daa214973baeeed0cba0b014443c077fdc67ace5d96278687c9",
@@ -6943,7 +6957,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:f17006429831c023739451bab4f09a57de4f0cd610dbd8d5ab5a55528ecdc6ff",
@@ -6997,7 +7011,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:424db99154135280d72bf0a1a285953c3bf2c9a7ccc2e40d7a5c53a37892f3e3",
@@ -7068,6 +7082,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
@@ -7077,7 +7092,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:ecfad67027dd4bfb57464921ea62e235fa31358fc9a00418297ad36976bc14aa",
@@ -7118,7 +7133,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:66ff38aab998f2dc8bcda307a64234211da17699e2abebf2d67e4df85489c2a8",
@@ -7151,7 +7166,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -7160,7 +7176,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agent~benchmarks, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:b9e309de63ddb7180bfa4e8845f3c5ef2c178623622f78b5cac22d584fdabff1",
@@ -7199,7 +7215,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -7208,7 +7225,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agents~benchmark, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:55d7e3851d740ada090bbb523c5d14cee88213e1636290db5d5647282ca8a023",
@@ -7249,7 +7266,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:a8f3db8d88841ae43b17311d813eb60395c50a536d739bec5fa74e830cee171f",
@@ -7282,6 +7299,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
@@ -7291,7 +7309,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:75b34a07bbbaa5274ed627d665dd312543fbc007c99149b5a74b8740290fca8f",
@@ -7376,7 +7394,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: evaluation, test set",
+        "Matched: evaluat, test set",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:7265740668efd427d75de2509c265fe236fe908617842b8a6fe068a75adc5533",
@@ -7417,7 +7435,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:e6d34ea56e9c490491fcf9b00a4ff076a555d133948213f482ece5cca34b94cf",
@@ -7466,7 +7484,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:c11e1365ceaa01ffc4a641f73fac73b9d2991e05c2ecfd75717ee2b538ad250c",
@@ -7503,7 +7521,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:c7fd9ff66c104758ee02021c8ae579f5a042c323652e87d0a3b7f285bc5fd11e",
@@ -7578,6 +7596,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
@@ -7587,7 +7606,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:19b16391f0ec03e81af9a13a320ba5dfa8fd8f3f4e7802e38b3b9f331684adba",
@@ -7621,7 +7640,9 @@
       ],
       "categories": [
         "benchmark",
-        "dataset"
+        "evaluation",
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -7630,7 +7651,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: agents~evaluate, benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:b343d1d1674a11b575ce7380340132a6ac1b9fd45c9ffe7db0a41c3355f6ea8a",
@@ -7664,6 +7685,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
@@ -7673,7 +7695,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpus",
+        "Matched: benchmark, corpus, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:365bc1b2ec72576b82eb882385a26830d42f4662d61699455a35426e8ff56908",
@@ -7716,7 +7738,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:db36b2e890253d58d29a6cd6e2eb92e39bc9d553c30148584675217f1723f6df",
@@ -7758,7 +7780,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:82c9d560282129e89bf24c5ca1940422f4f79308f4fa0ea84bf56aa8e365d66f",
@@ -7850,7 +7872,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:29b88a676d3a22c4d6270784a8a5c1d1dd62dc4f802d59e2070b23816cd0d71e",
@@ -7891,7 +7913,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:6973550dacc97af4c2a95ec802df9f10780d861492e1ff960dbed8116aab49e3",
@@ -7969,7 +7991,9 @@
       ],
       "categories": [
         "benchmark",
-        "dataset"
+        "evaluation",
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -7978,7 +8002,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpus",
+        "Matched: agentic~benchmarks, benchmark, corpus, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:eeba3196861a38bb2853d6bb6ba0ed9fd5128c62b66cbcc4b1de24665b1a9d57",
@@ -8019,7 +8043,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpus",
+        "Matched: benchmark, corpora, corpus",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:0f83f1def29479b7a3004e793bec5c6a90c0f7ccec1df3c6d4752ce9ee75654a",
@@ -8070,7 +8094,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:bac9be79b872c13960378c94b041288f0c850b5dd26df032b3076f0b7168e271",
@@ -8149,7 +8173,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:68105b448c0658096084ff836d77b95f6295634c38544a6b4e9f68a5d296f011",
@@ -8234,7 +8258,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:f69d87a6ac2bcb40cae0faa0d655c5a5a4773a35ebb4c7352b979b115404ecda",
@@ -8263,7 +8287,9 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -8272,7 +8298,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agent~evaluate, benchmark, corpora, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:c81478b9546ed46a57f71bc782b18d5f2c83e86b4ee60cd13b072eab36cd6845",
@@ -8311,7 +8337,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:4415df2d0ef63666144eb0691919fd8d7dfadc373856728433a9abe5f81009e2",
@@ -8364,7 +8390,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:bfc23681b73c41b88477a9f534ac053918f9475a866f9760f80cbf89173be372",
@@ -8402,7 +8428,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:c56e7e4337037334487779483787c04d1d40a2f531651ee0b5342d1e696cf13b",
@@ -8434,6 +8460,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
@@ -8443,7 +8470,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:71c8943cb47106fb9d713a23cf3d62c8907ef6c964c3e4dfd4c0d5a87ba2a761",
@@ -8481,7 +8508,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:53482bab2059ec26c97cebdc8c9375edb4dc92339bcdce4c988224e3d00a22bf",
@@ -8521,7 +8548,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:e3d92118037458349d254b98d345ed2b043709a34698e17c0608aa033a4d96b6",
@@ -8565,7 +8592,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:a92f1866941d360d51d5ee154edf2ba8628e11c6177d9c72af8428da82a8eae3",
@@ -8607,7 +8634,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:f6052910e7f2366434fba2a202dd9e9dcab46db0078bccb68744f33195533dfb",
@@ -8638,7 +8665,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -8647,7 +8675,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluator",
+        "Matched: agents~benchmarks, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:9f5cbff0280977fd752f691aed0621b5a58f1833567ac3cfa79f1e2d290a450f",
@@ -8724,7 +8752,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:6989866d93187331f8a579ee48e61f64bc2ebec2f3c691e1daa51fba81cb95f7",
@@ -8755,7 +8783,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -8764,7 +8793,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agents~evaluating, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:5894895b6e920f0b3d23d8ace8e1b9ac5e0222894be24fb9063abdf5f4f037c4",
@@ -8920,7 +8949,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:f616f19e667aa788123ba879bb5fa5fb11e1bfca2c1f85464dc0a8eb875ad740",
@@ -8960,7 +8989,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:e783d71e849fe642bb44ad18d074e7f90589a1ce60b033adf601a5976e81b6fd",
@@ -8998,7 +9027,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "released",
@@ -9007,7 +9037,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agents~benchmark, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:d68d47c142051e88c60f6d8820f525a17ca5b9a69e3dc232e400e00a65948653",
@@ -9038,7 +9068,8 @@
       ],
       "categories": [
         "evaluation",
-        "dataset"
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-28T14:33:06.179849+00:00",
       "event_kind": "released",
@@ -9047,7 +9078,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: agents~evaluation, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:96f8467164b21dc486543ee8018d20245c308ba061a199399484de0bbf51426d",
@@ -9125,7 +9156,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:27070872a428d4f50c17af1e38fb60e169b48a1a30d5cd2b46ee392611e2e230",
@@ -9199,7 +9230,8 @@
       ],
       "categories": [
         "evaluation",
-        "dataset"
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "updated",
@@ -9208,7 +9240,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluation",
+        "Matched: agent~evaluation, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:abf6e85679bac6027cd1d4ef31cd90efaf7ef9a4757097cf26a9804202e0531e",
@@ -9284,6 +9316,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
@@ -9293,7 +9326,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:a6e7a813c4b9a51e5c58b99cec41bcaae6ed7e5da79ef500c4132c684348e2d2",
@@ -9370,6 +9403,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
@@ -9379,7 +9413,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpus",
+        "Matched: benchmark, corpora, corpus, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:bf7445372af92436606d9087edd4cc1193a52c0e4adfaf6abc72a34a9507f02c",
@@ -9417,7 +9451,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:505a3ea4a42d230e10ca77f7e6ae4569d63f6b73cd1275129d1dcac06aff94b9",
@@ -9448,7 +9482,9 @@
       ],
       "categories": [
         "benchmark",
-        "dataset"
+        "evaluation",
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "updated",
@@ -9457,7 +9493,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpus",
+        "Matched: agent~evaluate, benchmark, corpus, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:f47ead2717bdc5279e40ecf48e78903ee7796fdf7ba9363a92577b518d9326e3",
@@ -9571,7 +9607,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "updated",
@@ -9580,7 +9617,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agentic~benchmarks, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:e88ac221bab2b4b3b3b08ecf182fb0082672c183fb962b9215f24b0607820a36",
@@ -9616,7 +9653,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "updated",
@@ -9625,7 +9663,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agents~evaluating, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:cc139866133b8261016af63e6db209eef6f293f310848f6fadf69dbf6a752979",
@@ -9659,7 +9697,8 @@
       ],
       "categories": [
         "evaluation",
-        "data_quality"
+        "data_quality",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -9668,7 +9707,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: deduplication, evaluation",
+        "Matched: agents~evaluation, deduplication, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:c597e0a5c3272197b769e6729c1da283e6e71a12439c509fb6527cf5415c2b7b",
@@ -9696,7 +9735,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "dataset"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -9705,7 +9745,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, corpora, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:1a01a9e2d397993e823de7426cf5bef58ce3aace03795e4e5f07e3ce397b53ec",
@@ -9734,7 +9774,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -9743,7 +9784,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agent~benchmark, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:e045592b8c66e57c5d5e5d8f1bf39016dc630c77d670bcfad84608d084130a30",
@@ -9778,6 +9819,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
@@ -9787,7 +9829,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:088ed1245ddac72fa7dc24b9403a7ebebe0197fd4f9ff65bd1fa597d739a27ca",
@@ -9832,7 +9874,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: dataset, evaluator",
+        "Matched: dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:a8bc3e5e87b833d76a9dce5c9a78e3b9ed9619dd03048164eb56cea81bd01ac7",
@@ -9905,7 +9947,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -9914,7 +9957,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: agent~benchmarks, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:4805677ebeadcf0efd239a0fa858da28005667b33238f1a59cb5cf875156aa5c",
@@ -9961,7 +10004,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: evaluation, training data",
+        "Matched: evaluat, training data",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:d33e75a1c84c3df5ccd8e9f86342e80d3a9ebdeb1881dcbc5b05857ee5608efd",
@@ -10110,6 +10153,7 @@
       ],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
@@ -10119,7 +10163,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:d990f93a6bc358fc7346c5f74d547137bfe0e977512d377ff1588ec0cd7e232b",
@@ -10156,7 +10200,8 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation"
+        "evaluation",
+        "dataset"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "updated",
@@ -10165,7 +10210,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, corpora, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:b6dbd1fc582e26734f3bdd9ed1fe022586fb2230beab2590d843941f993c0bc4",
@@ -10275,6 +10320,7 @@
       "authors": [],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
@@ -10287,7 +10333,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-30T01:21:24+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, leaderboard",
+        "Matched: benchmark, dataset, evaluat, leaderboard",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:d40e053264ce596faeacfe1b9e5c9f7c442e6723f3c6ec40b32488f404cbdcd4",
@@ -10350,7 +10396,8 @@
       "authors": [],
       "categories": [
         "evaluation",
-        "data_quality"
+        "data_quality",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "updated",
@@ -10362,7 +10409,7 @@
       "parser_version": "github-search/1",
       "published_at": "2026-07-30T13:16:28+00:00",
       "rationale": [
-        "Matched: data contamination, evaluation",
+        "Matched: agentic~evaluation, data contamination, evaluat",
         "Primary record: GitHub"
       ],
       "raw_payload_hash": "sha256:59c8f6a29bb932ac5cde17c3841408b7da4e78553fbd85da8852064329480932",
@@ -10387,7 +10434,8 @@
       "artifact_urls": [],
       "authors": [],
       "categories": [
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "updated",
@@ -10399,7 +10447,7 @@
       "parser_version": "github-search/1",
       "published_at": "2026-07-30T14:01:31+00:00",
       "rationale": [
-        "Matched: evaluator",
+        "Matched: agents~evals, evaluat",
         "Primary record: GitHub"
       ],
       "raw_payload_hash": "sha256:5d1fa7e4d7f5c898d715c0c2468ad657e7e6138e6a4e6003f6a482c0c0b4aac6",
@@ -10475,7 +10523,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-29T05:48:44+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:723f865e88a6dec25c46b52c1533d6ffea5b945051d40e0e31b6452caf375078",
@@ -10539,7 +10587,9 @@
       "authors": [],
       "categories": [
         "benchmark",
-        "dataset"
+        "evaluation",
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "updated",
@@ -10551,7 +10601,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-29T17:10:19+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: agentic~evaluating, benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:e4246eda01d45ed2e24da56bbc47968d582ba7aa5e3ff14c97055d9ed8a9d7c1",
@@ -10589,7 +10639,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-29T17:47:54+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, corpora, dataset",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:66875095772085382b98e08d411b7c5f5ffb89f6819e5822521b1b77002cdaa3",
@@ -10628,7 +10678,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-28T20:36:34+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:0a648334f1cdb11b374bbe32a7bcbd30b4db5d1ef552cb7bb0f1b6fe08b8637d",
@@ -10667,7 +10717,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-29T01:37:36+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:4e3c1e841eae8591c6d9cdd70c2c33d2820035fd34dc87e01fd6fab49a6a42b8",
@@ -10781,7 +10831,7 @@
       "parser_version": "github-search/1",
       "published_at": "2026-07-30T13:26:10+00:00",
       "rationale": [
-        "Matched: benchmark, evaluation",
+        "Matched: benchmark, evaluat",
         "Primary record: GitHub"
       ],
       "raw_payload_hash": "sha256:97d1157223705b412e4f81d69b8b1761358f18e22c6398370a8e2b7304fbe6f1",
@@ -10845,6 +10895,7 @@
       "authors": [],
       "categories": [
         "benchmark",
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
@@ -10857,7 +10908,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-30T04:34:31+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:3fa80da6edf983645fffb7e0bc2b6256efa88d28139e0d0b87c63977913868c3",
@@ -10972,7 +11023,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-28T22:52:25+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:20dbc2faaeac0d91490f7cc7263c3f6d62b2c25a5cd0f68adc132198ab2142cc",
@@ -11160,7 +11211,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-28T22:53:01+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, corpora, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:88c7e54585c61ce81deb6f474f46fd68075526a50b38bd56c78ba7e7d86ecf24",
@@ -11237,7 +11288,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-28T22:52:20+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:7c3168a622e8a094bff83e1fcb7dd7b2546630110c50772917f4ed8257212003",
@@ -11314,7 +11365,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-28T22:52:42+00:00",
       "rationale": [
-        "Matched: benchmark, dataset, evaluation",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:f1154b5b6444fd9613e5cce046b08e4fe6572c193499a4a1eeb0308cd80f3a49",
@@ -11378,7 +11429,8 @@
       "authors": [],
       "categories": [
         "benchmark",
-        "dataset"
+        "dataset",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -11390,7 +11442,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-30T08:47:33+00:00",
       "rationale": [
-        "Matched: benchmark, dataset",
+        "Matched: agent~benchmark, benchmark, dataset",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:4835933f67efb6fdfc222fadb819537fec915e2fd5320f7dd7cf7b2413a68aac",
@@ -11415,7 +11467,8 @@
       "artifact_urls": [],
       "authors": [],
       "categories": [
-        "evaluation"
+        "evaluation",
+        "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "updated",
@@ -11427,7 +11480,7 @@
       "parser_version": "github-search/1",
       "published_at": "2026-07-30T12:14:50+00:00",
       "rationale": [
-        "Matched: evaluation",
+        "Matched: agents~eval, evaluat",
         "Primary record: GitHub"
       ],
       "raw_payload_hash": "sha256:c843331d08425a5b6bf88f01e1b91c9ed2539c77d1f44d34a63f68f9918cf182",
@@ -11690,7 +11743,7 @@
       "parser_version": "github-search/1",
       "published_at": "2026-07-30T13:41:48+00:00",
       "rationale": [
-        "Matched: evaluation",
+        "Matched: evaluat",
         "Primary record: GitHub"
       ],
       "raw_payload_hash": "sha256:c2b09f3086bd1a9a433660d9e270dc4c38187cafeef4b759cdc98861dd81a69e",
@@ -11886,7 +11939,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: evaluation, evaluator",
+        "Matched: evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:b7cacd3837de558b2464e4f821ca2944839d5aa28af81b59ebde7ecb3a0bb2f4",
@@ -11957,6 +12010,7 @@
         "Yong Guo"
       ],
       "categories": [
+        "evaluation",
         "dataset"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
@@ -11966,7 +12020,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: data collection, dataset",
+        "Matched: data collection, dataset, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:91dc2846584c61a63bbe8c79a2ffb43061e9c2f63353ba8fd20a72aca3ec11ef",
@@ -12038,7 +12092,8 @@
         "Anita K. Rao"
       ],
       "categories": [
-        "evaluation"
+        "evaluation",
+        "dataset"
       ],
       "discovered_at": "2026-07-29T14:29:12.279273+00:00",
       "event_kind": "updated",
@@ -12047,7 +12102,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: evaluation, evaluator",
+        "Matched: corpora, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:e98b2e0117b2a2952f7fb71b74f2affe4854b9e125eccfcc8942ec701f6857c0",
@@ -12090,7 +12145,8 @@
         "Haina Zhu"
       ],
       "categories": [
-        "benchmark"
+        "benchmark",
+        "evaluation"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -12099,7 +12155,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, leaderboard",
+        "Matched: benchmark, evaluat, leaderboard",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:08d1bb286c2553f372b32de170c5de39f1001ca7782f570b51bc5bab7db3ba00",
