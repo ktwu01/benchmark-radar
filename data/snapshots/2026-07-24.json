@@ -947,7 +947,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-23T03:24:36+00:00",
       "rationale": [
-        "Matched: benchmark, corpora, dataset",
+        "Matched: benchmark, dataset",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:485f35579a7c8e88525ab71bc072603e6cb581362ff2726934108dd74fcb7a0a",

@@ -3,7 +3,7 @@
 > Report date: July 31, 2026 | Repository: ktwu01/benchmark-radar | Subject: corpus counts, taxonomy recall, and the flow-versus-stock distinction
 > Evidence cutoff: 2026-07-31T14:31Z (the `generated_at` of the latest rebuild). Author: Koutian Wu (https://ktwu01.github.io/).
 
-> **Update, this PR: the agentic defect is fixed, not just diagnosed.** The published count moved from **3 to 75** distinct artifacts. Two things changed. A new `benchmark-radar rescore` command recomputes stored categories across all nine snapshots, which alone moved 3 to 16 by fixing the one-day-numerator bug. The classifier then moved 16 to 75 by replacing the adjacent-phrase list with a proximity rule, measured at **95.0% recall and 76.0% precision** against a hand-labeled sample.
+> **Update, this PR: the agentic defect is fixed, not just diagnosed.** The published count moved from **3 to 78** distinct artifacts. Two things changed. A new `benchmark-radar rescore` command recomputes stored categories across all nine snapshots, which alone moved 3 to 16 by fixing the one-day-numerator bug. The classifier then moved 16 to 78 by replacing the adjacent-phrase list with a proximity rule, measured at **95.0% recall and 73.1% precision** against a hand-labeled sample.
 >
 > The report's headline open question is also resolved. The unreconciled "89 versus 64" ground-truth dispute was an artifact of two passes using *different* inclusion rules. Re-run with the rule fixed in advance, two independent annotators reached **Cohen's kappa 0.888** (94.5% raw agreement, 6 disagreements in 109), settling ground truth at **60 to 66**, not 89. Sections 4, 8 and 12 are corrected accordingly; the pre-fix findings are kept as the diagnosis that motivated the change.
 >
@@ -32,9 +32,9 @@ Issue #52 asked how many benchmarks exist on the market, how many are agentic, a
 
 **The direct answer splits in two.**
 
-**On category breakdown, the project can partly answer, with corrections.** The corpus holds 645 distinct artifacts. Before this PR they were tagged benchmark 512, dataset 450, evaluation 337, data_quality 15, agentic 3. The three large figures survive audit at 96 to 98% recall. The agentic figure did not: it was wrong twice over, first because snapshots written before the category existed were never re-scored (3 should have been 16), and second because the keyword list matched almost nothing (16 should have been ~75).
+**On category breakdown, the project can partly answer, with corrections.** The corpus holds 645 distinct artifacts. Before this PR they were tagged benchmark 512, dataset 450, evaluation 337, data_quality 15, agentic 3. The three large figures survive audit at 96 to 98% recall. The agentic figure did not: it was wrong twice over, first because snapshots written before the category existed were never re-scored (3 should have been 16), and second because the keyword list matched almost nothing (16 should have been ~78).
 
-**Both defects are now fixed in this PR.** The current published figures are **benchmark 512, dataset 458, evaluation 401, data_quality 15, agentic 75**, and the agentic classifier is measured at 95.0% recall / 76.0% precision against hand-labeled ground truth. `benchmark` is deliberately unchanged: narrowing it was measured and found actively harmful. The data_quality figure remains disputed between two audits and is **left unfixed on purpose** (section 4a) because the two passes disagree by an order of magnitude on what the category means, and shipping a keyword change on an unsettled definition would repeat the exact error this report documents. The tags are multi-label, so the five figures do not partition 645 and must never be summed.
+**Both defects are now fixed in this PR.** The current published figures are **benchmark 512, dataset 450, evaluation 401, data_quality 15, agentic 78**, and the agentic classifier is measured at 95.0% recall / 73.1% precision against hand-labeled ground truth. `benchmark` is deliberately unchanged: narrowing it was measured and found actively harmful. The data_quality figure remains disputed between two audits and is **left unfixed on purpose** (section 4a) because the two passes disagree by an order of magnitude on what the category means, and shipping a keyword change on an unsettled definition would repeat the exact error this report documents. The tags are multi-label, so the five figures do not partition 645 and must never be summed.
 
 Your instinct that the defect extends beyond agentic is partly confirmed and partly not, and the distinction is useful. The three large categories are working; narrowing them was measured and found actively harmful. But `benchmark` at 79.4% prevalence is non-discriminative in a different way: 489 of its 512 matches come from the single bare word "benchmark", which is also what the retrieval layer queries for, so the category largely restates the query.
 
@@ -46,8 +46,8 @@ Meanwhile the corpus does contain `omegaprime669/rtx-5090-benchmarks`, `NODARISH
 
 | Question asked in #52 | Can the project answer it? | Published figure after this PR | Verdict |
 |---|---|---|---|
-| Category breakdown | Partly | benchmark 512, dataset 458, evaluation 401 | These three measured at 96 to 98% recall. Multi-label, not a partition |
-| How many agentic? | **Yes, now** | **75** (was 3) | **Fixed.** Rescore moved 3 to 16; proximity rule moved 16 to 75, at 95.0% recall / 76.0% precision |
+| Category breakdown | Partly | benchmark 512, dataset 450, evaluation 401 | These three measured at 96 to 98% recall. Multi-label, not a partition |
+| How many agentic? | **Yes, now** | **78** (was 3) | **Fixed.** Rescore moved 3 to 16; proximity rule moved 16 to 78, at 95.0% recall / 73.1% precision |
 | How many data-quality? | Disputed | 15 (unchanged) | **Deliberately not fixed.** Two audits disagree on the inclusion rule by an order of magnitude. Needs a definition before a keyword |
 | How many benchmarks total on the market? | No | 512 implied | Category error: flow reported as stock. Unchanged by this PR |
 | New benchmark artifacts per day | Yes, and this is the real strength | 84.9/day recent average | Defensible as a floor, given per-source truncation |
@@ -517,7 +517,7 @@ Rejected for data_quality, each measured then rejected on reading its hits: `qua
 
 Adopting the recommended set yields benchmark 512, dataset 446, evaluation 336, data_quality 100. The 3-or-more-tag share rises from 18.4% to about 27%, which is the correct and acceptable cost of data_quality finally working: data-quality artifacts genuinely are usually also benchmarks or datasets.
 
-**Update: the agentic and working-category changes are now applied (section 8a), and the snapshots were re-scored so the numerator and denominator cover the same period.** The shipped rule is the co-occurrence shape recommended above rather than the 33-term interim list, tightened to a 15-token proximity window with exclusions to lift its precision ceiling from 60% to 76%. The `data_quality` list in this section is **not** applied, for the reason given in section 8a: its ground truth is still disputed.
+**Update: the agentic and working-category changes are now applied (section 8a), and the snapshots were re-scored so the numerator and denominator cover the same period.** The shipped rule is the co-occurrence shape recommended above rather than the 33-term interim list, tightened to a 15-token proximity window with exclusions, lifting its precision from a 60% ceiling to 73.1%. The `data_quality` list in this section is **not** applied, for the reason given in section 8a: its ground truth is still disputed.
 
 ## 8a. What this PR actually changed, and what it measures
 
@@ -550,14 +550,14 @@ Measured on the 109 hand-labeled candidates:
 | Current 12 adjacent phrases | 16 | 81.2% | 21.7% | 34.2% |
 | Bare co-occurrence, anywhere in text | 105 | 57.1% | 100.0% | 72.7% |
 | Title-only co-occurrence | 23 | 91.3% | 35.0% | 50.6% |
-| **Proximity, 15 tokens, hyphen-aware, with exclusions** | **75** | **76.0%** | **95.0%** | **84.4%** |
+| **Proximity, 15 tokens, hyphen-aware, with exclusions** | **78** | **73.1%** | **95.0%** | **82.6%** |
 
-The chosen rule is robust to the annotation dispute, which is why it is safe to ship: scored against the loose 66-item ground truth instead of the strict 60, it reads 81.3% precision and 92.4% recall (F1 86.5%). The conclusion does not depend on which denominator is correct.
+The chosen rule is robust to the annotation dispute, which is why it is safe to ship: scored against the loose 66-item ground truth instead of the strict 60, it reads 80.8% precision and 95.5% recall (F1 87.5%). The conclusion does not depend on which denominator is correct.
 
 Two failure modes visible in the earlier measurements were fixed along the way:
 
 - **Hyphen-joined repository names.** `solsticestudioai/agent-failure-atlas-benchmark` carries its whole description in one slug, so whitespace tokenization hid it. Six of the misses were this exact shape; treating hyphens as separators recovered all of them.
-- **A silently inert exclusion clause.** The first version of the exclusion pattern ended in `\b` after `position:`, which can never match, because a colon is already a non-word character. A regression test caught it. Removing the trailing boundary raised precision from 75.0% to 76.0%.
+- **A silently inert exclusion clause.** The first version of the exclusion pattern ended in `\b` after `position:`, which can never match, because a colon is already a non-word character. A regression test caught it. Removing the trailing boundary fixed it.
 
 ### The append-only bug, and why a config change alone would have done nothing
 
@@ -575,9 +575,9 @@ Verified on the real corpus, only category and rationale fields appear in the di
 
 | Category | Before | After |
 |---|---:|---:|
-| agentic | 3 | **75** |
+| agentic | 3 | **78** |
 | evaluation | 337 | 401 |
-| dataset | 450 | 458 |
+| dataset | 450 | 450 |
 | benchmark | 512 | 512 |
 | data_quality | 15 | 15 |
 
@@ -586,8 +586,20 @@ Verified on the real corpus, only category and rationale fields appear in the di
 ### The other applied edits
 
 - **`evaluation`**: `evaluation` replaced with the stem `evaluat`, a strict superset that picks up "evaluating" and "evaluated". This is what moves 337 to 401.
-- **`dataset`**: added `corpora`, which substring matching cannot reach from `corpus`. This moves 450 to 458.
+- **`dataset`**: added `corpora$`, which substring matching cannot reach from `corpus`. The trailing `$` closes the right edge; without it, `corpora` matched inside "incorporates" and "corporate" and mis-tagged 7 artifacts, which is exactly the bare-substring failure issue #51 warned about. Net effect on the count is zero, and that is the point: the term now fires only on the real plural.
 - **Deleted two dead terms**: `challenge set` and `capability eval` matched zero artifacts across all nine snapshots. The four dead agentic terms disappear with the phrase list itself.
+
+### Adversarial review of the fix, and what it changed
+
+The fix was itself reviewed by a pass whose brief was to refute it. External review was attempted first and is still unavailable: the `gemini` CLI has no credentials in this environment, and the `codex` CLI remains usage-limited until 2026-08-03. The internal pass re-derived every published number independently and confirmed the 3 to 78 movement, the arithmetic consistency of the precision/recall tables, and that `rescore` genuinely preserves scores and timestamps. It also found three defects worth fixing, all now fixed:
+
+**1. `corpora` matched inside `incorporate`.** The proximity rule is token-aware, but plain phrase lists were still raw substring tests, so adding `corpora` tagged 7 unrelated artifacts as datasets on strings like "the framework **incorporates**" and "a **corporate** network access policy". This is precisely the bare-substring failure mode issue #51 raised, reintroduced by the fix meant to honor that lesson. Phrase terms are now anchored at a word start, with an optional trailing `$` to close the right edge for whole words while stems such as `evaluat` keep matching their inflections. The earlier commit's claim of "precision 8/8 on reading every new hit" was wrong, and `dataset` returns to 450 rather than the 458 first reported.
+
+**2. A bare `survey` in the exclusion was a recall regression waiting to fire.** It would have dropped any agent benchmark about survey responses, an active evaluation area the corpus already contains. The exclusion is now anchored to where a paper declares its genre rather than searching the whole text.
+
+**3. The exclusion list was memorizing the test set.** Leave-one-out showed `unlocking agentic capabilities` and `needs redefinition` each removed exactly one artifact, both verbatim substrings of specific titles in the measurement corpus. Those are hardcoded answers, not rules, and the 1-point precision gain they bought would not transfer to any other corpus. They are deleted. **Removing them is why precision is reported here at 73.1% rather than the 76.0% first measured**, and the lower figure is the honest one.
+
+A fourth finding was accepted but handled differently: `rescore` writes back a normalized snapshot, which silently upgrades a schema-v1 file to v2 while reporting "0 records changed". Rather than change the write path, `rescore` now reports any schema upgrade explicitly. All nine snapshots on disk are already v2, so this is latent rather than active.
 
 ### What was deliberately left alone
 
@@ -644,11 +656,11 @@ The project has crossed one threshold and not the next.
 
 It has crossed from no measurement to a working flow instrument. Three live connectors, deterministic replay, exact-identifier deduplication, an append-only snapshot corpus, and an explainable rubric. The daily-arrival figures are real and are something registry enumeration cannot provide. That is a genuine contribution and it should be stated as the system's answer to what it can answer.
 
-It has not crossed from flow measurement to population estimate, and the gap was papered over rather than stated. Issue #52 asked a stock question. The pipeline answered with a flow number, in a collapsed dashboard panel, and the issue was auto-closed twice by PR keywords before a human confirmed anything. The agentic count that was supposed to answer the second half of the question was published at 3, when re-scoring the same corpus yielded 16 and the achievable figure was around 63. **That specific defect is fixed in this PR: the published figure is now 75 at 95.0% recall (section 8a).** The rest of this paragraph still stands. Six terms across the taxonomy matched nothing at all, four of which are now deleted. Five of eight connectors contribute nothing, and a sixth reports success while returning zero. Both mechanisms intended to pin famous benchmarks, the watchlist and the release feed, have fired zero times in nine days.
+It has not crossed from flow measurement to population estimate, and the gap was papered over rather than stated. Issue #52 asked a stock question. The pipeline answered with a flow number, in a collapsed dashboard panel, and the issue was auto-closed twice by PR keywords before a human confirmed anything. The agentic count that was supposed to answer the second half of the question was published at 3, when re-scoring the same corpus yielded 16 and the achievable figure was around 63. **That specific defect is fixed in this PR: the published figure is now 78 at 95.0% recall (section 8a).** The rest of this paragraph still stands. Six terms across the taxonomy matched nothing at all, four of which are now deleted. Five of eight connectors contribute nothing, and a sixth reports success while returning zero. Both mechanisms intended to pin famous benchmarks, the watchlist and the release feed, have fired zero times in nine days.
 
 The pattern underneath all of it is a single missing habit. Every keyword change in this repository was validated in one direction only. Issue #51's precision fix was measured against the live feed and reported honestly (65% of the daily pool down to 9 to 12%). Not one recall measurement existed anywhere in the project's history: searching all commits, PR comments, and issue comments for a recall figure returned nothing. Precision failures are loud, because they flood the digest and someone complains. Recall failures are silent, because a number that is too small still renders. That asymmetry in *feedback*, not in effort or care, is what produced a category reading 3 when the answer was around 63.
 
-This PR supplies the missing half. The agentic taxonomy is now the one part of the system with **both** numbers attached: 95.0% recall and 76.0% precision, against ground truth two annotators agreed on at kappa 0.888, with regression tests pinning each failure mode. The habit worth keeping is not the specific rule but the requirement that a taxonomy change state both figures before it merges.
+This PR supplies the missing half. The agentic taxonomy is now the one part of the system with **both** numbers attached: 95.0% recall and 73.1% precision, against ground truth two annotators agreed on at kappa 0.888, with regression tests pinning each failure mode. The habit worth keeping is not the specific rule but the requirement that a taxonomy change state both figures before it merges.
 
 None of this means the counting question is unanswerable. It means the answer requires a second collection mode that enumerates registries rather than crawling a window, reported separately from the flow, with the definition of "benchmark" stated alongside the number. The infrastructure needed already exists in the repository.
 
@@ -667,11 +679,11 @@ Reproducing the fix itself (this PR). `rescore` is idempotent, so re-running it 
 ```bash
 .venv/bin/benchmark-radar rescore --config config.yml
 # -> Rescored 9 snapshots against the current taxonomy; 165 records changed category
-# ->   agentic        97  <- was 3      (per-sighting; 75 distinct artifacts)
+# ->   agentic       100  <- was 3      (per-sighting; 78 distinct artifacts)
 # ->   evaluation    474  <- was 399
-# ->   dataset       575  <- was 566
+# ->   dataset       566
 
-.venv/bin/python -m pytest tests/ -q     # 160 passed
+.venv/bin/python -m pytest tests/ -q     # 163 passed
 ```
 
 Confirming the rescore touched only categories, never the recorded scores:
@@ -784,7 +796,7 @@ This report's own boundaries, stated so they are not mistaken for findings:
 - **The triple-counting inflation factor is unmeasurable** from current data, because `artifact_urls` is empty on all 645 records. The cross-namespace join rate is not merely low, it cannot be computed.
 - **Ground truth is model judgment, not expert consensus.** This is now measured rather than asserted: two independent passes under a rule fixed in advance reached Cohen's kappa 0.888 (94.5% raw agreement), settling `agentic` ground truth at 60 to 66. That is high agreement, but both annotators are models, so a systematic blind spot shared by both would not show up as disagreement. A human domain expert spot-checking the 109 labels remains the appropriate confirmation. The earlier denominator of 89 is withdrawn: it came from a looser rule, not a different judgment.
 - **`data_quality` ground truth remains genuinely unresolved**, at 83 under a "described property" rule versus 8 to 15 under a "substantive contribution" rule. This is why the category was left at 15 rather than fixed. It needs a definition chosen in advance, which is the top follow-up.
-- **The proximity rule's precision is 76%, and that is a real cost.** Roughly 18 of the 75 published agentic artifacts are expected to be false positives, most commonly artifacts that build an agent system or evaluate a model on an agent-flavored task without being an agent benchmark. The alternative was 21.7% recall, and under-counting by a factor of four was the defect issue #52 reported. The trade is deliberate and reversible: raise the exclusion pattern or narrow `within` to trade recall back for precision.
+- **The proximity rule's precision is 73.1%, and that is a real cost.** Roughly 21 of the 78 published agentic artifacts are expected to be false positives, most commonly artifacts that build an agent system or evaluate a model on an agent-flavored task without being an agent benchmark. The alternative was 21.7% recall, and under-counting by a factor of four was the defect issue #52 reported. The trade is deliberate and reversible: raise the exclusion pattern or narrow `within` to trade recall back for precision.
 - **The 15-token window was tuned on this corpus**, which risks overfitting to 645 artifacts from one 9-day period. The precision/recall curve is flat between 10 and 20 tokens (F1 79.7% to 82.6% before exclusions), so the choice is not on a knife edge, but the exact figure should be re-measured as the corpus grows.
 - **PapersWithCode export availability, OpenML, and Kaggle counts: not available.** Not verified here.
 - **Overlap between the 214 lm-eval tasks and 208 HELM scenarios: not counted.** Both figures are cited separately and must not be added.
@@ -814,6 +826,7 @@ Four parallel investigations were run, including one whose explicit brief was to
 | Retrieval binds first, so classification is secondary | Independent problems; classification has a measured 4x payoff on data already held |
 | data_quality=15 is a confirmed defect | Disputed between two audits, unresolved |
 | Ground truth is disputed at 89 versus 64, unresolvable here | Resolved: the passes used different rules. Re-run with one fixed rule, kappa 0.888, ground truth 60 to 66. The 89 is withdrawn |
-| The co-occurrence rule is the right shape but unmeasured | Built and measured: 95.0% recall, 76.0% precision, F1 84.4%. Applied in this PR |
+| The co-occurrence rule is the right shape but unmeasured | Built and measured: 95.0% recall, 73.1% precision, F1 82.6%. Applied in this PR |
+| The fix's own first measurement, 76.0% precision | 73.1% after an adversarial pass removed exclusions that memorized specific titles in the test corpus |
 
 **External review was attempted and did not run.** The `gemini` CLI has no credentials in this environment (no `~/.gemini/oauth_creds.json`, no API key), and the `codex` CLI returned a usage-limit error until 2026-08-03. This report therefore carries internal adversarial verification but no independent external review, which is a real gap given that its ground truth is model-generated. A human read is the appropriate next check.

@@ -6680,8 +6680,7 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation",
-        "dataset"
+        "evaluation"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "updated",
@@ -6690,7 +6689,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpora, evaluat, test set",
+        "Matched: benchmark, evaluat, test set",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:e9327aefcc2939e194ffb15248d0e4f301c0b68ef27ff8c70a29d4434dc1d410",
@@ -8043,7 +8042,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpora, corpus",
+        "Matched: benchmark, corpus",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:0f83f1def29479b7a3004e793bec5c6a90c0f7ccec1df3c6d4752ce9ee75654a",
@@ -8288,7 +8287,6 @@
       "categories": [
         "benchmark",
         "evaluation",
-        "dataset",
         "agentic"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
@@ -8298,7 +8296,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: agent~evaluate, benchmark, corpora, evaluat",
+        "Matched: agent~evaluate, benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:c81478b9546ed46a57f71bc782b18d5f2c83e86b4ee60cd13b072eab36cd6845",
@@ -9413,7 +9411,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpora, corpus, evaluat",
+        "Matched: benchmark, corpus, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:bf7445372af92436606d9087edd4cc1193a52c0e4adfaf6abc72a34a9507f02c",
@@ -9735,8 +9733,7 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation",
-        "dataset"
+        "evaluation"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "released",
@@ -9745,7 +9742,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpora, evaluat",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:1a01a9e2d397993e823de7426cf5bef58ce3aace03795e4e5f07e3ce397b53ec",
@@ -10200,8 +10197,7 @@
       ],
       "categories": [
         "benchmark",
-        "evaluation",
-        "dataset"
+        "evaluation"
       ],
       "discovered_at": "2026-07-30T14:28:50.917100+00:00",
       "event_kind": "updated",
@@ -10210,7 +10206,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: benchmark, corpora, evaluat",
+        "Matched: benchmark, evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:b6dbd1fc582e26734f3bdd9ed1fe022586fb2230beab2590d843941f993c0bc4",
@@ -10639,7 +10635,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-29T17:47:54+00:00",
       "rationale": [
-        "Matched: benchmark, corpora, dataset",
+        "Matched: benchmark, dataset",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:66875095772085382b98e08d411b7c5f5ffb89f6819e5822521b1b77002cdaa3",
@@ -11211,7 +11207,7 @@
       "parser_version": "huggingface-hub/1",
       "published_at": "2026-07-28T22:53:01+00:00",
       "rationale": [
-        "Matched: benchmark, corpora, dataset, evaluat",
+        "Matched: benchmark, dataset, evaluat",
         "Primary record: Hugging Face"
       ],
       "raw_payload_hash": "sha256:88c7e54585c61ce81deb6f474f46fd68075526a50b38bd56c78ba7e7d86ecf24",
@@ -12092,8 +12088,7 @@
         "Anita K. Rao"
       ],
       "categories": [
-        "evaluation",
-        "dataset"
+        "evaluation"
       ],
       "discovered_at": "2026-07-29T14:29:12.279273+00:00",
       "event_kind": "updated",
@@ -12102,7 +12097,7 @@
       "parser_version": "arxiv-rss/1",
       "published_at": "2026-07-30T04:00:00+00:00",
       "rationale": [
-        "Matched: corpora, evaluat",
+        "Matched: evaluat",
         "Primary record: arXiv"
       ],
       "raw_payload_hash": "sha256:e98b2e0117b2a2952f7fb71b74f2affe4854b9e125eccfcc8942ec701f6857c0",
