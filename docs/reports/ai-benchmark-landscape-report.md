@@ -68,8 +68,8 @@ The corpus joins nine versioned daily snapshots:
 | Simulated dates | 4 |
 | Sightings | 791 |
 | Distinct artifacts | 645 |
-| Released artifacts | 444 |
-| Updated artifacts | 201 |
+| Latest sighting marked released | 444 |
+| Latest sighting marked updated | 201 |
 
 The four simulated dates are useful for testing history and presentation. They are not observed market activity. Trend work must either exclude them or label them separately.
 
@@ -133,9 +133,9 @@ Those dimensions would let an expert compare like with like. “Benchmark” and
 
 ### 3.3 Activity and maturity signals
 
-The corpus records 444 releases and 201 updates. This split suggests that maintenance activity is a material part of the observed flow, not noise to discard. An update to a benchmark, dataset, or harness may matter more to practitioners than another first release.
+The latest sighting for each artifact marks 444 as released and 201 as updated. This split suggests that maintenance activity is a material part of the observed flow, not noise to discard. An update to a benchmark, dataset, or harness may matter more to practitioners than another first release.
 
-Adoption signals are available for only 224 of 645 artifacts. GitHub supplies stars and forks, and Hugging Face supplies downloads and likes. arXiv records in this corpus carry no comparable citation signal. A zero adoption score therefore often means “not observed for this source,” not “unused.”
+Adoption fields are available for 262 of 645 artifacts: all 207 Hugging Face artifacts and all 55 GitHub artifacts. Of those 262, 224 have at least one nonzero metric and 38 have observed zero values. GitHub supplies stars and forks, and Hugging Face supplies downloads and likes. The 383 arXiv records in this corpus carry no comparable citation signal. Missing metrics and measured zero values must remain separate.
 
 The highest observed adoption scores include an evaluation harness, leaderboard datasets, result stores, and collections. This mix is another warning against treating every artifact as one benchmark. A market report should distinguish benchmark definitions from infrastructure and result repositories before ranking adoption.
 
@@ -166,7 +166,7 @@ This is a useful classifier for discovery, but it is not an expert-validated mar
 
 Agentic evaluation is even more paper-heavy than the full corpus. This may mean that proposed tasks and methods are arriving faster than reusable implementations. It may also reflect source bias: the GitHub queries are capped, and several scholarly connectors are inactive. The report should track the paper-to-runnable-artifact conversion rate over longer windows before calling this a maturity gap.
 
-Only 23 of the 78 agentic artifacts carry a nonzero adoption score. That figure is not a usage rate because arXiv lacks a comparable metric in the current data. It does show that adoption evidence is sparse and source-dependent.
+Adoption fields are present for 25 of the 78 agentic artifacts, and 23 have at least one nonzero metric. Neither figure is a usage rate because arXiv lacks a comparable metric in the current data. They show that adoption evidence is sparse and source-dependent.
 
 ### 4.3 Research themes
 
@@ -180,6 +180,15 @@ The following probes are transparent keyword scans over the 78 tagged artifacts.
 | Domain and professional tasks | 25 | 32.1% |
 | Security and safety | 22 | 28.2% |
 | Multi-agent coordination | 7 | 9.0% |
+
+The probe text is the lowercased title plus summary. The exact Python regular expressions are versioned here so the table can be reproduced:
+
+- Software engineering and computer use: `code|coding|software|web|browser|gui|computer|office|database|terminal|devops|repository|repo|swe`
+- Tool use and planning: `tool|planning|plan\b|workflow|function.call|action|reasoning`
+- Memory and long-horizon behavior: `memory|context|long.horizon|long.term|persistent|trajectory`
+- Domain and professional tasks: `health|patient|medical|finance|financial|legal|science|scientific|aerial|bim|education|robot`
+- Security and safety: `secur|attack|pentest|vulnerab|red.team|poison|privacy|stealth|risk|safe`
+- Multi-agent coordination: `multi.agent|orchestrat|cooperat|collaborat|team|coordination`
 
 Three interpretations follow.
 
@@ -197,7 +206,7 @@ The small multi-agent coordination signal is also informative. Multi-agent langu
 
 The pipeline uses a 48-hour lookback and repeated daily collection. That measures arrivals and updates. Established benchmarks do not need to emit a new timestamp, so a short-window feed cannot reconstruct the installed stock.
 
-The coverage test is direct. The report searched all 791 sightings for 20 canonical names: MMLU, HELM, GPQA, ARC-AGI, HumanEval, BIG-bench, MMMU, GSM8K, HellaSwag, TruthfulQA, WebArena, tau-bench, OSWorld, MLE-bench, PaperBench, lm-evaluation-harness, MLCommons, EvalPlus, openai/evals, and SWE-bench. Nineteen are absent. The only match is a third-party SWE-bench-related Hugging Face artifact, not the canonical Princeton repository.
+The coverage test is direct and deliberately identity-scoped. The report searched the `title`, `source_id`, and `url` fields of all 791 sightings for 20 canonical names: MMLU, HELM, GPQA, ARC-AGI, HumanEval, BIG-bench, MMMU, GSM8K, HellaSwag, TruthfulQA, WebArena, tau-bench, OSWorld, MLE-bench, PaperBench, lm-evaluation-harness, MLCommons, EvalPlus, openai/evals, and SWE-bench. Nineteen have no artifact-level match in those identity fields. The only match is a third-party SWE-bench-related Hugging Face artifact, not the canonical Princeton repository. Ten names do appear as references inside summaries, but a paper mentioning MMLU or HELM does not place the MMLU or HELM artifact in the corpus.
 
 At the same time, the corpus includes GPU hardware benchmarks, SEO health reports, homework result repositories, and site-performance records whose names contain “benchmark.” The current count therefore misses much of the known stock while including artifacts outside a strict AI-evaluation definition.
 
@@ -241,7 +250,7 @@ The project configures eight discovery connectors, but the stored corpus contain
 
 Configured coverage is not realized coverage. The daily report should publish both, and market claims should be blocked when required source families are absent.
 
-The GitHub release connector is a special case. It is the only connector aimed directly at several established benchmark repositories, yet it returned zero records on every stored date. A release-only feed inside a 48-hour window is an event monitor, not a stock collector.
+The GitHub release connector is a special case. It is the only connector aimed directly at several established benchmark repositories, yet it returned zero records on all seven dates where its health was recorded. The July 27 and July 28 snapshots contain no health row for this connector and are unobserved, not zero. A release-only feed inside a 48-hour window is an event monitor, not a stock collector.
 
 ### 6.2 Taxonomy validity
 
