@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from benchmark_radar.models import RadarItem
+from benchmark_radar.models import RadarItem, SourceHealth
 from benchmark_radar.pipeline import (
     apply_watchlist,
     assert_no_boilerplate_summaries,
@@ -515,6 +515,48 @@ def test_optional_source_failure_streak_persists_and_resets(monkeypatch):
         previous_snapshot=previous,
     )
     assert recovered.discovery_state["source_failure_streaks"] == {}
+
+
+def test_attention_failure_participates_in_persistent_streaks(monkeypatch):
+    pipeline = __import__("benchmark_radar.pipeline", fromlist=["fetch_attention_feeds"])
+    monkeypatch.setattr(
+        pipeline,
+        "fetch_attention_feeds",
+        lambda *args, **kwargs: (
+            [],
+            [
+                SourceHealth(
+                    source="Hacker News collector",
+                    kind="attention",
+                    ok=False,
+                    error="HTTP 503",
+                )
+            ],
+            [],
+            {},
+        ),
+    )
+    config = {
+        "radar": {
+            "lookback_hours": 48,
+            "max_items_per_source": 10,
+            "report_limit": 10,
+            "minimum_score": 0,
+        },
+        "taxonomy": {"benchmark": ["benchmark"]},
+        "sources": {},
+        "attention": {"hacker_news": {"enabled": True}},
+    }
+    previous = None
+    for hour in range(3):
+        run = run_pipeline(
+            config,
+            datetime(2026, 7, 27, hour, tzinfo=UTC),
+            previous_snapshot=previous,
+        )
+        previous = {"discovery_state": run.discovery_state}
+
+    assert run.discovery_state["source_failure_streaks"] == {"Hacker News collector": 3}
 
 
 def test_funnel_counts_suppressed_arxiv_records_as_fetched(monkeypatch):

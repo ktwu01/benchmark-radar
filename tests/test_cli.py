@@ -132,17 +132,25 @@ def test_actions_warn_after_repeated_optional_source_failures(monkeypatch, capsy
         generated_at=datetime(2026, 8, 2, tzinfo=UTC),
         since=datetime(2026, 7, 31, tzinfo=UTC),
         items=[],
-        health=[SourceHealth(source="openreview", ok=False, error="ChallengeRequiredError")],
-        discovery_state={"source_failure_streaks": {"openreview": 3}},
+        health=[],
+        attention_ingest_health=[
+            SourceHealth(
+                source="Hacker News collector",
+                kind="attention",
+                ok=False,
+                error="HTTP 503",
+            )
+        ],
+        discovery_state={"source_failure_streaks": {"Hacker News collector": 3}},
     )
     config = {
         "radar": {"optional_source_failure_warning_runs": 3},
-        "sources": {"openreview": {"enabled": True}},
+        "sources": {},
     }
 
     cli._emit_persistent_source_warnings(run, config)
 
     assert capsys.readouterr().out == (
         "::warning title=Persistent optional source failure::"
-        "openreview has failed for 3 consecutive runs\n"
+        "Hacker News collector has failed for 3 consecutive runs\n"
     )
