@@ -90,6 +90,23 @@ def test_report_shows_the_selection_funnel():
     assert "**30** published" in report
 
 
+def test_report_accounts_for_future_dated_quarantine_in_the_funnel():
+    run = _run([_record(1)])
+    run.selection = {
+        "fetched": 2,
+        "suppressed_future_dated": 1,
+        "deduplicated": 1,
+        "qualified": 1,
+        "published": 1,
+        "minimum_score": 0,
+    }
+
+    report = render_markdown(run)
+
+    assert "**2** fetched → **1** future-dated records quarantined" in report
+    assert "→ **1** after dedupe" in report
+
+
 def test_funnel_excludes_watchlist_bypasses_from_the_threshold_count():
     # A lone bypass must not read as "1 qualified (at or above 99)": nothing
     # met the threshold, so the two counts are reported separately.

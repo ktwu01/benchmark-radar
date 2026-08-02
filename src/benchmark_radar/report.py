@@ -121,12 +121,18 @@ def render_markdown(
             + ")"
         )
         suppressed = int(selection.get("suppressed_as_seen") or 0)
+        suppressed_future = int(selection.get("suppressed_future_dated") or 0)
         suppressed_low_value = int(selection.get("suppressed_low_value") or 0)
         lines.extend(
             [
                 "- Selection: "
                 f"**{selection.get('fetched', 0)}** fetched → "
                 + (f"**{suppressed}** already seen → " if suppressed else "")
+                + (
+                    f"**{suppressed_future}** future-dated records quarantined → "
+                    if suppressed_future
+                    else ""
+                )
                 + f"**{selection.get('deduplicated', 0)}** after dedupe → "
                 + (
                     f"**{suppressed_low_value}** low-value artifacts suppressed → "
