@@ -610,8 +610,10 @@ def run_pipeline(
                 fetched = fetcher(fetch_config, since, limit, now=now)
             else:
                 fetched = fetcher(fetch_config, since, limit)
-            fetched_count += len(fetched)
+            connector_rejected = int(fetch_config.get("_future_rejections", 0) or 0)
+            fetched_count += len(fetched) + connector_rejected
             fetched, rejected_future = _drop_future_dated_items(fetched, now=now)
+            rejected_future += connector_rejected
             future_dated_count += rejected_future
             health.append(
                 SourceHealth(

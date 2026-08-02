@@ -480,6 +480,38 @@ def test_pipeline_quarantines_future_dated_records_before_scoring(monkeypatch):
     assert run.selection["suppressed_future_dated"] == 1
 
 
+def test_pipeline_accounts_for_future_records_rejected_inside_a_connector(monkeypatch):
+    current = item(
+        source="Hugging Face",
+        source_id="org/current",
+        published_at=datetime(2026, 7, 27, 11, tzinfo=UTC),
+    )
+
+    def fetch(config, since, limit):
+        config["_future_rejections"] = 1
+        return [current]
+
+    pipeline = __import__("benchmark_radar.pipeline", fromlist=["SOURCE_FETCHERS"])
+    monkeypatch.setitem(pipeline.SOURCE_FETCHERS, "huggingface", fetch)
+    config = {
+        "radar": {
+            "lookback_hours": 48,
+            "max_items_per_source": 10,
+            "report_limit": 10,
+            "minimum_score": 0,
+        },
+        "taxonomy": {"benchmark": ["benchmark"]},
+        "sources": {"huggingface": {"enabled": True, "required": True}},
+    }
+
+    run = run_pipeline(config, datetime(2026, 7, 27, 12, tzinfo=UTC))
+
+    assert run.health[0].item_count == 1
+    assert run.health[0].error == "Discarded 1 future-dated record(s)"
+    assert run.selection["fetched"] == 2
+    assert run.selection["suppressed_future_dated"] == 1
+
+
 def test_optional_source_failure_streak_persists_and_resets(monkeypatch):
     pipeline = __import__("benchmark_radar.pipeline", fromlist=["SOURCE_FETCHERS"])
 

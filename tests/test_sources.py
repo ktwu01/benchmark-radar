@@ -69,6 +69,7 @@ def test_arxiv_uses_overlap_and_updated_timestamp(monkeypatch):
     )
 
     assert len(calls) == 3
+    assert all("lastUpdatedDate:" in call["search_query"] for call in calls)
     assert delays == [3, 3]
     assert len(items) == 1
     assert items[0].published_at == datetime(2026, 7, 23, 18, tzinfo=UTC)
@@ -441,6 +442,37 @@ def test_github_releases_success_uses_release_notes(monkeypatch):
     assert items[0].parser_version == "github-releases/1"
 
 
+def test_github_releases_replaces_a_page_consumed_by_future_rows(monkeypatch):
+    pages = []
+
+    def fake_get_json(url, params, **kwargs):
+        pages.append(params["page"])
+        published = "2050-01-01T00:00:00Z" if params["page"] == 1 else "2026-07-27T12:00:00Z"
+        tag = "future" if params["page"] == 1 else "current"
+        return [
+            {
+                "tag_name": tag,
+                "html_url": f"https://github.com/example/benchmark/releases/tag/{tag}",
+                "published_at": published,
+            }
+        ]
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+    config = {
+        "repositories": ["example/benchmark"],
+        "page_size": 1,
+        "max_pages_per_repository": 1,
+        "max_requests": 2,
+        "_collection_now": datetime(2026, 7, 28, tzinfo=UTC),
+    }
+
+    items = fetch_github_releases(config, datetime(2026, 7, 26, tzinfo=UTC), 1)
+
+    assert pages == [1, 2]
+    assert [item.source_id for item in items] == ["example/benchmark@current"]
+    assert config["_future_rejections"] == 1
+
+
 @pytest.mark.parametrize(
     ("fetcher", "config", "empty_payload"),
     [
@@ -728,15 +760,17 @@ def test_huggingface_filters_future_rows_before_the_local_cap(monkeypatch):
 
     monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
 
+    config = {
+        "kinds": ["datasets"],
+        "searches": ["benchmark"],
+        "_collection_now": datetime(2026, 7, 28, tzinfo=UTC),
+    }
     items = fetch_huggingface(
-        {
-            "kinds": ["datasets"],
-            "searches": ["benchmark"],
-            "_collection_now": datetime(2026, 7, 28, tzinfo=UTC),
-        },
+        config,
         datetime(2026, 7, 26, tzinfo=UTC),
         1,
     )
 
     assert seen_limit == [51]
     assert [item.source_id for item in items] == ["org/current"]
+    assert config["_future_rejections"] == 1
