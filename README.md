@@ -33,6 +33,8 @@ Default sources:
 
 The report remains useful without optional secrets. Missing optional sources are shown
 as warnings in the source-health table instead of being silently ignored.
+In GitHub Actions, an optional source that fails for three consecutive runs also emits a
+workflow warning; `radar.optional_source_failure_warning_runs` controls that threshold.
 
 ## How ranking works
 

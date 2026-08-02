@@ -1,5 +1,8 @@
 radar:
   lookback_hours: 48
+  # Optional connectors remain non-fatal, but repeated failures must not hide
+  # indefinitely inside green scheduled runs.
+  optional_source_failure_warning_runs: 3
   # Sources routinely return several hundred rows a day. The previous 60/30
   # pair discarded most of them before anyone could see them, so the dashboard
   # claimed "228 found" while publishing 8 GitHub records.

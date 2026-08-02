@@ -681,6 +681,20 @@ def run_pipeline(
         previous_observations=((previous_snapshot or {}).get("attention") or {}).get("observations")
         or [],
     )
+    previous_streaks = ((previous_snapshot or {}).get("discovery_state") or {}).get(
+        "source_failure_streaks"
+    ) or {}
+    failure_streaks: dict[str, int] = {}
+    for source_health in health:
+        if source_health.ok:
+            continue
+        previous = previous_streaks.get(source_health.source, 0)
+        try:
+            previous_count = max(0, int(previous))
+        except (TypeError, ValueError):
+            previous_count = 0
+        failure_streaks[source_health.source] = previous_count + 1
+
     return RadarRun(
         generated_at=now,
         since=since,
@@ -693,5 +707,6 @@ def run_pipeline(
         discovery_state={
             **discovery_state,
             "attention": attention_state,
+            "source_failure_streaks": failure_streaks,
         },
     )

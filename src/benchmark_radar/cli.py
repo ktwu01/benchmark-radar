@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -16,6 +17,29 @@ from .snapshots import (
     rescore_snapshot_history,
     write_snapshot,
 )
+
+
+def _emit_persistent_source_warnings(run, config: dict) -> None:
+    """Raise visible Actions warnings for optional sources that keep failing."""
+    if os.getenv("GITHUB_ACTIONS") != "true":
+        return
+    threshold = max(
+        1,
+        int(config.get("radar", {}).get("optional_source_failure_warning_runs", 3)),
+    )
+    required = {
+        name
+        for name, source_config in config.get("sources", {}).items()
+        if source_config.get("enabled", True) and source_config.get("required", False)
+    }
+    streaks = run.discovery_state.get("source_failure_streaks") or {}
+    for health in run.health:
+        streak = int(streaks.get(health.source, 0) or 0)
+        if not health.ok and health.source not in required and streak >= threshold:
+            print(
+                "::warning title=Persistent optional source failure::"
+                f"{health.source} has failed for {streak} consecutive runs"
+            )
 
 
 def load_config(path: Path) -> dict:
@@ -134,6 +158,7 @@ def main() -> None:
         config,
         previous_snapshot=snapshots[-1] if snapshots else None,
     )
+    _emit_persistent_source_warnings(run, config)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.json_output.parent.mkdir(parents=True, exist_ok=True)
     dashboard_url = config.get("publish", {}).get("dashboard_url")

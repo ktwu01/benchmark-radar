@@ -480,6 +480,43 @@ def test_pipeline_quarantines_future_dated_records_before_scoring(monkeypatch):
     assert run.selection["suppressed_future_dated"] == 1
 
 
+def test_optional_source_failure_streak_persists_and_resets(monkeypatch):
+    pipeline = __import__("benchmark_radar.pipeline", fromlist=["SOURCE_FETCHERS"])
+
+    def fail(config, since, limit):
+        raise RuntimeError("upstream unavailable")
+
+    monkeypatch.setitem(pipeline.SOURCE_FETCHERS, "optional_fixture", fail)
+    config = {
+        "radar": {
+            "lookback_hours": 48,
+            "max_items_per_source": 10,
+            "report_limit": 10,
+            "minimum_score": 0,
+        },
+        "taxonomy": {"benchmark": ["benchmark"]},
+        "sources": {"optional_fixture": {"enabled": True}},
+    }
+    previous = None
+    for hour in range(3):
+        run = run_pipeline(
+            config,
+            datetime(2026, 7, 27, hour, tzinfo=UTC),
+            previous_snapshot=previous,
+        )
+        previous = {"discovery_state": run.discovery_state}
+
+    assert run.discovery_state["source_failure_streaks"] == {"optional_fixture": 3}
+
+    monkeypatch.setitem(pipeline.SOURCE_FETCHERS, "optional_fixture", lambda c, s, limit: [])
+    recovered = run_pipeline(
+        config,
+        datetime(2026, 7, 27, 4, tzinfo=UTC),
+        previous_snapshot=previous,
+    )
+    assert recovered.discovery_state["source_failure_streaks"] == {}
+
+
 def test_funnel_counts_suppressed_arxiv_records_as_fetched(monkeypatch):
     # Source health counts these as fetched, so the funnel must agree rather
     # than reporting zero for a source that plainly returned records.

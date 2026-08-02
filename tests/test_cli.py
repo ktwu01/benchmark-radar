@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 
 from benchmark_radar import cli
-from benchmark_radar.models import RadarItem, RadarRun
+from benchmark_radar.models import RadarItem, RadarRun, SourceHealth
 from benchmark_radar.pipeline import SOURCE_FETCHERS
 from benchmark_radar.snapshots import write_snapshot
 
@@ -124,3 +124,25 @@ def test_simulate_history_marks_written_snapshots_as_simulated(monkeypatch, tmp_
 
     simulated = json.loads((tmp_path / "snapshots" / "2026-07-29.json").read_text(encoding="utf-8"))
     assert simulated["selection"]["simulated"] is True
+
+
+def test_actions_warn_after_repeated_optional_source_failures(monkeypatch, capsys):
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    run = RadarRun(
+        generated_at=datetime(2026, 8, 2, tzinfo=UTC),
+        since=datetime(2026, 7, 31, tzinfo=UTC),
+        items=[],
+        health=[SourceHealth(source="openreview", ok=False, error="ChallengeRequiredError")],
+        discovery_state={"source_failure_streaks": {"openreview": 3}},
+    )
+    config = {
+        "radar": {"optional_source_failure_warning_runs": 3},
+        "sources": {"openreview": {"enabled": True}},
+    }
+
+    cli._emit_persistent_source_warnings(run, config)
+
+    assert capsys.readouterr().out == (
+        "::warning title=Persistent optional source failure::"
+        "openreview has failed for 3 consecutive runs\n"
+    )
