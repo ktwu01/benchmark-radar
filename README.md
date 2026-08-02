@@ -27,7 +27,7 @@ Default sources:
 | GitHub | No in Actions | Code and artifact discovery |
 | GitHub Releases | No in Actions | Curated first-party release discovery |
 | Semantic Scholar | Optional `SEMANTIC_SCHOLAR_API_KEY` | Structured scholarly discovery |
-| OpenAlex | `OPENALEX_API_KEY` | Scholarly metadata enrichment |
+| OpenAlex | Free `OPENALEX_API_KEY` | Scholarly metadata enrichment |
 | Brave Search | `BRAVE_API_KEY` | Web and lab-blog discovery |
 | Hacker News | No | Public attention only; never quality-scored |
 

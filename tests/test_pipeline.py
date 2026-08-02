@@ -442,6 +442,44 @@ def test_selection_counts_expose_the_published_gap(monkeypatch):
     assert len(run.items) == 2
 
 
+def test_pipeline_quarantines_future_dated_records_before_scoring(monkeypatch):
+    current = item(
+        source="GitHub",
+        source_id="org/current",
+        url="https://github.com/org/current",
+        published_at=datetime(2026, 7, 27, 11, tzinfo=UTC),
+    )
+    future = item(
+        source="GitHub",
+        source_id="org/future",
+        url="https://github.com/org/future",
+        published_at=datetime(2050, 1, 1, tzinfo=UTC),
+    )
+    monkeypatch.setitem(
+        __import__("benchmark_radar.pipeline", fromlist=["SOURCE_FETCHERS"]).SOURCE_FETCHERS,
+        "github",
+        lambda config, since, limit: [current, future],
+    )
+    config = {
+        "radar": {
+            "lookback_hours": 48,
+            "max_items_per_source": 10,
+            "report_limit": 10,
+            "minimum_score": 0,
+        },
+        "taxonomy": {"benchmark": ["benchmark"]},
+        "sources": {"github": {"enabled": True, "required": True}},
+    }
+
+    run = run_pipeline(config, datetime(2026, 7, 27, 12, tzinfo=UTC))
+
+    assert [record.source_id for record in run.items] == ["org/current"]
+    assert run.health[0].item_count == 1
+    assert run.health[0].error == "Discarded 1 future-dated record(s)"
+    assert run.selection["fetched"] == 2
+    assert run.selection["suppressed_future_dated"] == 1
+
+
 def test_funnel_counts_suppressed_arxiv_records_as_fetched(monkeypatch):
     # Source health counts these as fetched, so the funnel must agree rather
     # than reporting zero for a source that plainly returned records.

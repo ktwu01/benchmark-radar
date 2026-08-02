@@ -644,10 +644,20 @@ def fetch_github_releases(
     return sorted(found.values(), key=lambda item: item.published_at, reverse=True)[:limit]
 
 
-def fetch_openalex(config: dict[str, Any], since: datetime, limit: int) -> list[RadarItem]:
-    api_key = os.getenv("OPENALEX_API_KEY")
+def fetch_openalex(
+    config: dict[str, Any],
+    since: datetime,
+    limit: int,
+    *,
+    now: datetime | None = None,
+) -> list[RadarItem]:
+    # OpenAlex replaced its mailto-based polite pool with free API keys in
+    # February 2026. Anonymous calls still have a small compatibility budget,
+    # but they are not the documented production path.
+    api_key = os.getenv("OPENALEX_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError("OPENALEX_API_KEY is not configured")
+    now = now or datetime.now(UTC)
     found: dict[str, RadarItem] = {}
     for search in config.get("searches", []):
         payload = get_json(
@@ -655,7 +665,12 @@ def fetch_openalex(config: dict[str, Any], since: datetime, limit: int) -> list[
             params={
                 "api_key": api_key,
                 "search": search,
-                "filter": f"from_publication_date:{since.date().isoformat()}",
+                # The lower bound alone lets erroneous future records sort to
+                # the front and crowd real current work out of the first page.
+                "filter": (
+                    f"from_publication_date:{since.date().isoformat()},"
+                    f"to_publication_date:{now.date().isoformat()}"
+                ),
                 "sort": "publication_date:desc",
                 "per_page": min(limit, 100),
                 "select": "id,doi,display_name,publication_date,authorships,"
@@ -679,7 +694,14 @@ def fetch_openalex(config: dict[str, Any], since: datetime, limit: int) -> list[
             # resolution; an undated row is skipped rather than dated "now",
             # which would have handed it maximum recency.
             published = _optional_date(row.get("publication_date"))
-            if published is None or published.date() < since.date():
+            # Keep a defensive client-side bound as well as the API filter: a
+            # malformed or ignored upstream filter must not grant future work
+            # maximum recency in the shared scorer.
+            if (
+                published is None
+                or published.date() < since.date()
+                or published.date() > now.date()
+            ):
                 continue
             found[source_id] = RadarItem(
                 source="OpenAlex",

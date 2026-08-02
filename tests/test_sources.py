@@ -539,6 +539,54 @@ def test_openalex_rejects_a_shapeless_payload(monkeypatch):
         fetch_openalex({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
 
 
+@pytest.mark.parametrize("blank", ["", "   ", "\n", " \t\n"])
+def test_openalex_requires_a_nonblank_free_api_key(monkeypatch, blank):
+    monkeypatch.setenv("OPENALEX_API_KEY", blank)
+
+    with pytest.raises(RuntimeError, match="OPENALEX_API_KEY is not configured"):
+        fetch_openalex(
+            {"searches": ["benchmark"]},
+            datetime(2026, 7, 26, tzinfo=UTC),
+            10,
+        )
+
+
+def test_openalex_bounds_results_to_the_run_date(monkeypatch):
+    seen = []
+    monkeypatch.setenv("OPENALEX_API_KEY", "  free-key\n")
+
+    def fake_get_json(url, params):
+        seen.append(params)
+        return {
+            "results": [
+                {
+                    "id": "https://openalex.org/W2050",
+                    "display_name": "Erroneously future benchmark",
+                    "publication_date": "2050-01-01",
+                    "primary_location": {"landing_page_url": "https://example.com/future"},
+                },
+                {
+                    "id": "https://openalex.org/WNOW",
+                    "display_name": "Current benchmark",
+                    "publication_date": "2026-07-28",
+                    "primary_location": {"landing_page_url": "https://example.com/current"},
+                },
+            ]
+        }
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+    items = fetch_openalex(
+        {"searches": ["benchmark"]},
+        datetime(2026, 7, 26, tzinfo=UTC),
+        10,
+        now=datetime(2026, 7, 28, 12, tzinfo=UTC),
+    )
+
+    assert [item.title for item in items] == ["Current benchmark"]
+    assert seen[0]["api_key"] == "free-key"
+    assert seen[0]["filter"] == ("from_publication_date:2026-07-26,to_publication_date:2026-07-28")
+
+
 def test_openalex_skips_undated_works(monkeypatch):
     monkeypatch.setenv("OPENALEX_API_KEY", "key")
     monkeypatch.setattr(
