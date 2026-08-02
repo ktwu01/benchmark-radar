@@ -714,3 +714,29 @@ def test_huggingface_skips_undated_repositories(monkeypatch):
     )
 
     assert [item.source_id for item in items] == ["org/dated"]
+
+
+def test_huggingface_filters_future_rows_before_the_local_cap(monkeypatch):
+    seen_limit = []
+
+    def fake_get_json(url, params):
+        seen_limit.append(params["limit"])
+        return [
+            {"id": "org/future", "lastModified": "2050-01-01T00:00:00Z"},
+            {"id": "org/current", "lastModified": "2026-07-27T12:00:00Z"},
+        ]
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+
+    items = fetch_huggingface(
+        {
+            "kinds": ["datasets"],
+            "searches": ["benchmark"],
+            "_collection_now": datetime(2026, 7, 28, tzinfo=UTC),
+        },
+        datetime(2026, 7, 26, tzinfo=UTC),
+        1,
+    )
+
+    assert seen_limit == [51]
+    assert [item.source_id for item in items] == ["org/current"]

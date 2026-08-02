@@ -13,7 +13,7 @@ from . import rubric
 from .attention import fetch_attention_feeds
 from .corpus import exact_artifact_keys
 from .models import RadarItem, RadarRun, SourceHealth
-from .sources import SOURCE_FETCHERS
+from .sources import FUTURE_TIMESTAMP_TOLERANCE, SOURCE_FETCHERS
 
 TRACKING_PARAMETERS = {"ref", "source", "utm_campaign", "utm_content", "utm_medium", "utm_source"}
 
@@ -314,7 +314,6 @@ def apply_watchlist(
 
 
 BOILERPLATE_THRESHOLD = 3
-FUTURE_TIMESTAMP_TOLERANCE = timedelta(minutes=5)
 
 
 def assert_no_boilerplate_summaries(items: list[RadarItem]) -> None:
@@ -600,10 +599,11 @@ def run_pipeline(
             continue
         fetcher = SOURCE_FETCHERS[source_name]
         try:
+            fetch_config = {**source_config, "_collection_now": now}
             if source_name == "openalex":
-                fetched = fetcher(source_config, since, limit, now=now)
+                fetched = fetcher(fetch_config, since, limit, now=now)
             else:
-                fetched = fetcher(source_config, since, limit)
+                fetched = fetcher(fetch_config, since, limit)
             fetched_count += len(fetched)
             fetched, rejected_future = _drop_future_dated_items(fetched, now=now)
             future_dated_count += rejected_future

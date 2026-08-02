@@ -17,6 +17,16 @@ class ConnectorPayloadError(ValueError):
     """Raised when a source returns a successful but incompatible payload."""
 
 
+FUTURE_TIMESTAMP_TOLERANCE = timedelta(minutes=5)
+
+
+def _latest_allowed(config: dict[str, Any]) -> datetime:
+    collection_now = config.get("_collection_now")
+    if not isinstance(collection_now, datetime):
+        collection_now = datetime.now(UTC)
+    return collection_now.astimezone(UTC) + FUTURE_TIMESTAMP_TOLERANCE
+
+
 def _payload_dict(payload: Any, source: str) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ConnectorPayloadError(f"{source} returned a non-object payload")
@@ -129,7 +139,7 @@ def _fetch_arxiv_rss(
             ):
                 continue
             published = parsedate_to_datetime(published_text).astimezone(UTC)
-            if published < overlap_since:
+            if published < overlap_since or published > _latest_allowed(config):
                 continue
             announce_type = (
                 entry.findtext("arxiv:announce_type", namespaces=namespaces) or ""
@@ -179,7 +189,11 @@ def fetch_arxiv(config: dict[str, Any], since: datetime, limit: int) -> list[Rad
                 xml = get_text(
                     "https://export.arxiv.org/api/query",
                     params={
-                        "search_query": query,
+                        "search_query": (
+                            f"({query}) AND submittedDate:"
+                            f"[{overlap_since:%Y%m%d%H%M} TO "
+                            f"{_latest_allowed(config):%Y%m%d%H%M}]"
+                        ),
                         "start": 0,
                         "max_results": limit,
                         "sortBy": "submittedDate",
@@ -190,7 +204,9 @@ def fetch_arxiv(config: dict[str, Any], since: datetime, limit: int) -> list[Rad
                 for entry in root.findall("atom:entry", namespace):
                     published = _date(entry.findtext("atom:published", namespaces=namespace))
                     updated = _date(entry.findtext("atom:updated", namespaces=namespace))
-                    if max(published, updated) < overlap_since:
+                    if max(published, updated) < overlap_since or max(
+                        published, updated
+                    ) > _latest_allowed(config):
                         continue
                     url = (entry.findtext("atom:id", namespaces=namespace) or "").replace(
                         "http:", "https:"
@@ -250,7 +266,10 @@ def fetch_huggingface(config: dict[str, Any], since: datetime, limit: int) -> li
                     "search": search,
                     "sort": "lastModified",
                     "direction": -1,
-                    "limit": limit,
+                    # The Hub API has no upper-date filter. Fetch extra rows so
+                    # malformed future timestamps cannot consume the local cap
+                    # before they are rejected below.
+                    "limit": min(1000, max(limit * 2, limit + 50)),
                     "full": "true",
                 },
             )
@@ -261,7 +280,7 @@ def fetch_huggingface(config: dict[str, Any], since: datetime, limit: int) -> li
                 # substitution both invented freshness and slipped past the
                 # `since` check below, which is what it was meant to enforce.
                 changed = _optional_date(row.get("lastModified") or row.get("createdAt"))
-                if changed is None or changed < since:
+                if changed is None or changed < since or changed > _latest_allowed(config):
                     continue
                 item_id = row.get("id") or row.get("modelId")
                 if not item_id:
@@ -329,7 +348,10 @@ def fetch_github(config: dict[str, Any], since: datetime, limit: int) -> list[Ra
             payload = get_json(
                 "https://api.github.com/search/repositories",
                 params={
-                    "q": f"{query} pushed:>={date_filter}",
+                    "q": (
+                        f"{query} pushed:{date_filter}.."
+                        f"{_latest_allowed(config).date().isoformat()}"
+                    ),
                     "sort": "updated",
                     "order": "desc",
                     "per_page": min(limit, page_size),
@@ -409,7 +431,7 @@ def fetch_openreview(
                 if not note_id or not title or not created or not activity:
                     continue
                 oldest = min(oldest or activity, activity)
-                if activity < since:
+                if activity < since or activity > _latest_allowed(config):
                     continue
                 abstract = str(_openreview_value(content, "abstract", "") or "").strip()
                 authors = _openreview_value(content, "authors", []) or []
@@ -484,7 +506,9 @@ def fetch_semantic_scholar(
                 "https://api.semanticscholar.org/graph/v1/paper/search",
                 params={
                     "query": search,
-                    "publicationDateOrYear": f"{since.date().isoformat()}:",
+                    "publicationDateOrYear": (
+                        f"{since.date().isoformat()}:{_latest_allowed(config).date().isoformat()}"
+                    ),
                     "offset": offset,
                     "limit": min(page_size, limit - len(found)),
                     "fields": (
@@ -506,7 +530,7 @@ def fetch_semantic_scholar(
                 if not paper_id or not title or not published_text:
                     continue
                 published = _date(str(published_text))
-                if published < since:
+                if published < since or published > _latest_allowed(config):
                     continue
                 external = row.get("externalIds") or {}
                 if not isinstance(external, dict):
@@ -667,7 +691,7 @@ def fetch_openalex(
     api_key = os.getenv("OPENALEX_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError("OPENALEX_API_KEY is not configured")
-    now = now or datetime.now(UTC)
+    now = now or _latest_allowed(config) - FUTURE_TIMESTAMP_TOLERANCE
     found: dict[str, RadarItem] = {}
     for search in config.get("searches", []):
         payload = get_json(
@@ -739,6 +763,10 @@ def fetch_brave(config: dict[str, Any], since: datetime, limit: int) -> list[Rad
     if not api_key:
         raise RuntimeError("BRAVE_API_KEY is not configured")
     found: dict[str, RadarItem] = {}
+    freshness_end = min(
+        since + timedelta(days=_BRAVE_RANGE_DAYS),
+        _latest_allowed(config),
+    ).date()
     for query in config.get("searches", []):
         payload = get_json(
             "https://api.search.brave.com/res/v1/web/search",
@@ -748,10 +776,7 @@ def fetch_brave(config: dict[str, Any], since: datetime, limit: int) -> list[Rad
                 # run reconstructs the same query. The end is padded past the
                 # lookback so the present day stays inside the range: reading
                 # the clock here made the request depend on when it was issued.
-                "freshness": (
-                    f"{since.date().isoformat()}to"
-                    f"{(since + timedelta(days=_BRAVE_RANGE_DAYS)).date().isoformat()}"
-                ),
+                "freshness": (f"{since.date().isoformat()}to{freshness_end.isoformat()}"),
                 "count": min(limit, 20),
                 "extra_snippets": "true",
             },
@@ -772,7 +797,7 @@ def fetch_brave(config: dict[str, Any], since: datetime, limit: int) -> list[Rad
             # a freshness the response never asserted and awarded them full
             # recency, so an undated result is skipped instead.
             published = _optional_date(row.get("page_age"))
-            if published is None:
+            if published is None or published > _latest_allowed(config):
                 continue
             found[url] = RadarItem(
                 source="Brave Web",
