@@ -235,6 +235,9 @@ sources:
     page_size: 30
     max_pages_per_repository: 1
     max_requests: 8
+    # Invalid future-dated rows may consume a page slot. Replacement requests
+    # use a separate cap so they cannot steal the first request from later repos.
+    future_replacement_requests: 2
     attempts: 3
     timeout_seconds: 30
 

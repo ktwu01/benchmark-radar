@@ -473,6 +473,48 @@ def test_github_releases_replaces_a_page_consumed_by_future_rows(monkeypatch):
     assert config["_future_rejections"] == 1
 
 
+def test_release_replacement_budget_preserves_later_repository_coverage(monkeypatch):
+    calls = []
+
+    def fake_get_json(url, params, **kwargs):
+        repository = url.split("/repos/", 1)[1].split("/releases", 1)[0]
+        calls.append((repository, params["page"]))
+        if repository == "org/repo0" and params["page"] == 1:
+            return [
+                {
+                    "tag_name": "future",
+                    "html_url": "https://example.test/future",
+                    "published_at": "2050-01-01T00:00:00Z",
+                }
+            ]
+        if repository == "org/repo0" and params["page"] == 2:
+            return [
+                {
+                    "tag_name": "current",
+                    "html_url": "https://example.test/current",
+                    "published_at": "2026-07-27T00:00:00Z",
+                }
+            ]
+        return []
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+    repositories = [f"org/repo{index}" for index in range(8)]
+    config = {
+        "repositories": repositories,
+        "page_size": 1,
+        "max_pages_per_repository": 1,
+        "max_requests": 8,
+        "future_replacement_requests": 1,
+        "_collection_now": datetime(2026, 7, 28, tzinfo=UTC),
+    }
+
+    fetch_github_releases(config, datetime(2026, 7, 26, tzinfo=UTC), 300)
+
+    assert ("org/repo0", 2) in calls
+    assert ("org/repo7", 1) in calls
+    assert len(calls) == 9
+
+
 @pytest.mark.parametrize(
     ("fetcher", "config", "empty_payload"),
     [

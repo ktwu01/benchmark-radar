@@ -203,7 +203,7 @@ def fetch_arxiv(config: dict[str, Any], since: datetime, limit: int) -> list[Rad
                         ),
                         "start": 0,
                         "max_results": limit,
-                        "sortBy": "submittedDate",
+                        "sortBy": "lastUpdatedDate",
                         "sortOrder": "descending",
                     },
                 )
@@ -611,13 +611,20 @@ def fetch_github_releases(
     page_size = min(100, max(1, int(config.get("page_size", 30))))
     max_pages = max(1, int(config.get("max_pages_per_repository", 2)))
     budget = max(1, int(config.get("max_requests", len(repositories) or 1)))
-    requests_made = 0
+    replacement_budget = max(0, int(config.get("future_replacement_requests", 2)))
+    regular_requests = 0
+    replacement_requests = 0
     found: dict[str, RadarItem] = {}
     for repository in repositories:
         page = 1
         page_limit = max_pages
         while page <= page_limit:
-            if requests_made >= budget or len(found) >= limit:
+            is_replacement = page > max_pages
+            if (
+                (is_replacement and replacement_requests >= replacement_budget)
+                or (not is_replacement and regular_requests >= budget)
+                or len(found) >= limit
+            ):
                 break
             payload = get_json(
                 f"https://api.github.com/repos/{repository}/releases",
@@ -625,7 +632,10 @@ def fetch_github_releases(
                 headers=headers,
                 **_request_options(config),
             )
-            requests_made += 1
+            if is_replacement:
+                replacement_requests += 1
+            else:
+                regular_requests += 1
             if not isinstance(payload, list) or not all(isinstance(row, dict) for row in payload):
                 raise ConnectorPayloadError("GitHub Releases returned a non-array payload")
             if not payload:
@@ -689,7 +699,7 @@ def fetch_github_releases(
             if rejected_on_page:
                 page_limit += 1
             page += 1
-        if requests_made >= budget or len(found) >= limit:
+        if regular_requests >= budget or len(found) >= limit:
             break
     return sorted(found.values(), key=lambda item: item.published_at, reverse=True)[:limit]
 
