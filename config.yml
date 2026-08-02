@@ -213,6 +213,8 @@ sources:
       - agentic benchmark evaluation
     page_size: 100
     max_requests: 3
+    # A free individual API key starts at one request per second.
+    request_delay_seconds: 1.1
     attempts: 3
     timeout_seconds: 30
 

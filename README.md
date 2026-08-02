@@ -148,6 +148,11 @@ OPENALEX_API_KEY
 BRAVE_API_KEY
 ```
 
+OpenAlex replaced its old `mailto` polite pool with free API keys in February 2026.
+Create the key at <https://openalex.org/settings/api>. Semantic Scholar keys also start
+with a one-request-per-second limit, so its connector is paced by
+`sources.semantic_scholar.request_delay_seconds`.
+
 Daily snapshot persistence also requires a private GitHub App with **Contents: read and
 write** access to this repository. Add the App to the `main-protect` ruleset's bypass
 list with **Always allow**, then configure:

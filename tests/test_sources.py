@@ -386,6 +386,29 @@ def test_semantic_scholar_success_preserves_external_ids(monkeypatch):
     assert items[0].parser_version == "semantic-scholar-graph/1"
 
 
+def test_semantic_scholar_paces_an_individual_api_key(monkeypatch):
+    calls = []
+    delays = []
+    monkeypatch.setenv("SEMANTIC_SCHOLAR_API_KEY", "  key-with-newline\n")
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: calls.append(kwargs) or {"data": [], "next": None},
+    )
+    monkeypatch.setattr("benchmark_radar.sources.time.sleep", delays.append)
+
+    fetch_semantic_scholar(
+        {"searches": ["one", "two"], "max_requests": 2},
+        datetime(2026, 7, 26, tzinfo=UTC),
+        10,
+    )
+
+    assert [call["headers"] for call in calls] == [
+        {"x-api-key": "key-with-newline"},
+        {"x-api-key": "key-with-newline"},
+    ]
+    assert delays == [1.1]
+
+
 def test_github_releases_success_uses_release_notes(monkeypatch):
     payload = [
         {

@@ -460,16 +460,26 @@ def fetch_semantic_scholar(
     limit: int,
 ) -> list[RadarItem]:
     """Fetch structured scholarly records with exact external identifiers."""
-    api_key = os.getenv("SEMANTIC_SCHOLAR_API_KEY")
+    api_key = os.getenv("SEMANTIC_SCHOLAR_API_KEY", "").strip()
     headers = {"x-api-key": api_key} if api_key else {}
     found: dict[str, RadarItem] = {}
     searches = [str(value) for value in config.get("searches", []) if str(value).strip()]
     budget = max(1, int(config.get("max_requests", len(searches) or 1)))
     page_size = min(100, max(1, int(config.get("page_size", 100))))
+    # An individual Semantic Scholar key starts at one request per second.
+    # Pace proactively instead of making every request after the first rely on
+    # a 429 and retry. Anonymous callers remain on the shared pool and retain
+    # the old no-delay default unless the configuration says otherwise.
+    request_delay = max(
+        0.0,
+        float(config.get("request_delay_seconds", 1.1 if api_key else 0.0)),
+    )
     requests_made = 0
     for search in searches:
         offset = 0
         while requests_made < budget and len(found) < limit:
+            if requests_made and request_delay:
+                time.sleep(request_delay)
             payload = get_json(
                 "https://api.semanticscholar.org/graph/v1/paper/search",
                 params={
