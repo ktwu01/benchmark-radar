@@ -8,7 +8,7 @@ from pathlib import Path
 
 import yaml
 
-from .pipeline import run_pipeline, simulate_backfill
+from .pipeline import _failure_streak_key, run_pipeline, simulate_backfill
 from .report import render_markdown
 from .snapshots import (
     load_snapshots,
@@ -35,11 +35,7 @@ def _emit_persistent_source_warnings(run, config: dict) -> None:
     streaks = run.discovery_state.get("source_failure_streaks") or {}
 
     def emit(health, *, layer: str, required_source: bool = False) -> None:
-        streak_key = (
-            f"producer:{health.producer}:{health.source}"
-            if layer == "producer"
-            else f"{layer}:{health.source}"
-        )
+        streak_key = _failure_streak_key(layer, health)
         streak = int(streaks.get(streak_key, 0) or 0)
         if not health.ok and not required_source and streak >= threshold:
             source = health.source.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")

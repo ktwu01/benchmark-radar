@@ -141,7 +141,9 @@ def test_actions_warn_after_repeated_optional_source_failures(monkeypatch, capsy
                 error="HTTP 503",
             )
         ],
-        discovery_state={"source_failure_streaks": {"producer:fixture-producer:Hacker News": 3}},
+        discovery_state={
+            "source_failure_streaks": {'["producer","fixture-producer","Hacker News"]': 3}
+        },
     )
     config = {
         "radar": {"optional_source_failure_warning_runs": 3},
@@ -165,7 +167,15 @@ def test_actions_escape_remote_source_names(monkeypatch, capsys):
         items=[],
         health=[],
         producer_health=[ProducerHealth(producer="fixture-producer", source=source, ok=False)],
-        discovery_state={"source_failure_streaks": {f"producer:fixture-producer:{source}": 3}},
+        discovery_state={
+            "source_failure_streaks": {
+                json.dumps(
+                    ["producer", "fixture-producer", source],
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                ): 3
+            }
+        },
     )
 
     cli._emit_persistent_source_warnings(run, {"radar": {}, "sources": {}})
@@ -184,7 +194,7 @@ def test_required_discovery_name_does_not_exempt_attention_failure(monkeypatch, 
         items=[],
         health=[],
         producer_health=[ProducerHealth(producer="fixture-producer", source="github", ok=False)],
-        discovery_state={"source_failure_streaks": {"producer:fixture-producer:github": 3}},
+        discovery_state={"source_failure_streaks": {'["producer","fixture-producer","github"]': 3}},
     )
     config = {"radar": {}, "sources": {"github": {"required": True}}}
 

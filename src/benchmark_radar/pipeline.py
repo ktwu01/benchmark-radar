@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import math
 import re
 from collections import Counter
@@ -354,8 +355,10 @@ def _drop_future_dated_items(
 
 def _failure_streak_key(layer: str, health: Any) -> str:
     if layer == "producer":
-        return f"producer:{health.producer}:{health.source}"
-    return f"{layer}:{health.source}"
+        identity = [layer, health.producer, health.source]
+    else:
+        identity = [layer, health.source]
+    return json.dumps(identity, ensure_ascii=False, separators=(",", ":"))
 
 
 def _date(value: str | None, *, fallback: datetime) -> datetime:

@@ -538,7 +538,7 @@ def test_optional_source_failure_streak_persists_and_resets(monkeypatch):
         )
         previous = {"discovery_state": run.discovery_state}
 
-    assert run.discovery_state["source_failure_streaks"] == {"evidence:optional_fixture": 3}
+    assert run.discovery_state["source_failure_streaks"] == {'["evidence","optional_fixture"]': 3}
 
     monkeypatch.setitem(pipeline.SOURCE_FETCHERS, "optional_fixture", lambda c, s, limit: [])
     recovered = run_pipeline(
@@ -588,7 +588,9 @@ def test_attention_failure_participates_in_persistent_streaks(monkeypatch):
         )
         previous = {"discovery_state": run.discovery_state}
 
-    assert run.discovery_state["source_failure_streaks"] == {"attention:Hacker News collector": 3}
+    assert run.discovery_state["source_failure_streaks"] == {
+        '["attention","Hacker News collector"]': 3
+    }
 
 
 def test_attention_producer_failure_participates_in_persistent_streaks(monkeypatch):
@@ -621,7 +623,9 @@ def test_attention_producer_failure_participates_in_persistent_streaks(monkeypat
         "sources": {},
     }
     previous = {
-        "discovery_state": {"source_failure_streaks": {"producer:fixture-producer:Hacker News": 2}}
+        "discovery_state": {
+            "source_failure_streaks": {'["producer","fixture-producer","Hacker News"]': 2}
+        }
     }
 
     run = run_pipeline(
@@ -631,7 +635,7 @@ def test_attention_producer_failure_participates_in_persistent_streaks(monkeypat
     )
 
     assert run.discovery_state["source_failure_streaks"] == {
-        "producer:fixture-producer:Hacker News": 3
+        '["producer","fixture-producer","Hacker News"]': 3
     }
 
 
@@ -665,7 +669,9 @@ def test_attention_producer_streaks_do_not_cross_producer_boundaries(monkeypatch
         "sources": {},
     }
     previous = {
-        "discovery_state": {"source_failure_streaks": {"producer:producer-a:Hacker News": 2}}
+        "discovery_state": {
+            "source_failure_streaks": {'["producer","producer-a","Hacker News"]': 2}
+        }
     }
 
     run = run_pipeline(
@@ -674,7 +680,18 @@ def test_attention_producer_streaks_do_not_cross_producer_boundaries(monkeypatch
         previous_snapshot=previous,
     )
 
-    assert run.discovery_state["source_failure_streaks"] == {"producer:producer-b:Hacker News": 1}
+    assert run.discovery_state["source_failure_streaks"] == {
+        '["producer","producer-b","Hacker News"]': 1
+    }
+
+
+def test_attention_producer_streak_key_is_unambiguous():
+    from benchmark_radar.pipeline import _failure_streak_key
+
+    first = ProducerHealth(producer="a:b", source="c", ok=False)
+    second = ProducerHealth(producer="a", source="b:c", ok=False)
+
+    assert _failure_streak_key("producer", first) != _failure_streak_key("producer", second)
 
 
 def test_funnel_counts_suppressed_arxiv_records_as_fetched(monkeypatch):
