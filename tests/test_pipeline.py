@@ -506,7 +506,7 @@ def test_optional_source_failure_streak_persists_and_resets(monkeypatch):
         )
         previous = {"discovery_state": run.discovery_state}
 
-    assert run.discovery_state["source_failure_streaks"] == {"optional_fixture": 3}
+    assert run.discovery_state["source_failure_streaks"] == {"evidence:optional_fixture": 3}
 
     monkeypatch.setitem(pipeline.SOURCE_FETCHERS, "optional_fixture", lambda c, s, limit: [])
     recovered = run_pipeline(
@@ -556,7 +556,7 @@ def test_attention_failure_participates_in_persistent_streaks(monkeypatch):
         )
         previous = {"discovery_state": run.discovery_state}
 
-    assert run.discovery_state["source_failure_streaks"] == {"Hacker News collector": 3}
+    assert run.discovery_state["source_failure_streaks"] == {"attention:Hacker News collector": 3}
 
 
 def test_attention_producer_failure_participates_in_persistent_streaks(monkeypatch):
@@ -588,7 +588,9 @@ def test_attention_producer_failure_participates_in_persistent_streaks(monkeypat
         "taxonomy": {"benchmark": ["benchmark"]},
         "sources": {},
     }
-    previous = {"discovery_state": {"source_failure_streaks": {"Hacker News": 2}}}
+    previous = {
+        "discovery_state": {"source_failure_streaks": {"producer:fixture-producer:Hacker News": 2}}
+    }
 
     run = run_pipeline(
         config,
@@ -596,7 +598,51 @@ def test_attention_producer_failure_participates_in_persistent_streaks(monkeypat
         previous_snapshot=previous,
     )
 
-    assert run.discovery_state["source_failure_streaks"] == {"Hacker News": 3}
+    assert run.discovery_state["source_failure_streaks"] == {
+        "producer:fixture-producer:Hacker News": 3
+    }
+
+
+def test_attention_producer_streaks_do_not_cross_producer_boundaries(monkeypatch):
+    pipeline = __import__("benchmark_radar.pipeline", fromlist=["fetch_attention_feeds"])
+    monkeypatch.setattr(
+        pipeline,
+        "fetch_attention_feeds",
+        lambda *args, **kwargs: (
+            [],
+            [],
+            [
+                ProducerHealth(
+                    producer="producer-b",
+                    source="Hacker News",
+                    ok=False,
+                    error="HTTP 503",
+                )
+            ],
+            {},
+        ),
+    )
+    config = {
+        "radar": {
+            "lookback_hours": 48,
+            "max_items_per_source": 10,
+            "report_limit": 10,
+            "minimum_score": 0,
+        },
+        "taxonomy": {},
+        "sources": {},
+    }
+    previous = {
+        "discovery_state": {"source_failure_streaks": {"producer:producer-a:Hacker News": 2}}
+    }
+
+    run = run_pipeline(
+        config,
+        datetime(2026, 7, 27, tzinfo=UTC),
+        previous_snapshot=previous,
+    )
+
+    assert run.discovery_state["source_failure_streaks"] == {"producer:producer-b:Hacker News": 1}
 
 
 def test_funnel_counts_suppressed_arxiv_records_as_fetched(monkeypatch):

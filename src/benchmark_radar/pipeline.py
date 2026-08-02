@@ -352,6 +352,12 @@ def _drop_future_dated_items(
     return accepted, len(items) - len(accepted)
 
 
+def _failure_streak_key(layer: str, health: Any) -> str:
+    if layer == "producer":
+        return f"producer:{health.producer}:{health.source}"
+    return f"{layer}:{health.source}"
+
+
 def _date(value: str | None, *, fallback: datetime) -> datetime:
     if not value:
         return fallback
@@ -685,15 +691,21 @@ def run_pipeline(
         "source_failure_streaks"
     ) or {}
     failure_streaks: dict[str, int] = {}
-    for source_health in [*health, *attention_health, *producer_health]:
+    monitored_health = [
+        *(("evidence", source_health) for source_health in health),
+        *(("attention", source_health) for source_health in attention_health),
+        *(("producer", source_health) for source_health in producer_health),
+    ]
+    for layer, source_health in monitored_health:
         if source_health.ok:
             continue
-        previous = previous_streaks.get(source_health.source, 0)
+        streak_key = _failure_streak_key(layer, source_health)
+        previous = previous_streaks.get(streak_key, 0)
         try:
             previous_count = max(0, int(previous))
         except (TypeError, ValueError):
             previous_count = 0
-        failure_streaks[source_health.source] = previous_count + 1
+        failure_streaks[streak_key] = previous_count + 1
 
     return RadarRun(
         generated_at=now,

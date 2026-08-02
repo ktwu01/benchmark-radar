@@ -34,8 +34,13 @@ def _emit_persistent_source_warnings(run, config: dict) -> None:
     }
     streaks = run.discovery_state.get("source_failure_streaks") or {}
 
-    def emit(health, *, required_source: bool = False) -> None:
-        streak = int(streaks.get(health.source, 0) or 0)
+    def emit(health, *, layer: str, required_source: bool = False) -> None:
+        streak_key = (
+            f"producer:{health.producer}:{health.source}"
+            if layer == "producer"
+            else f"{layer}:{health.source}"
+        )
+        streak = int(streaks.get(streak_key, 0) or 0)
         if not health.ok and not required_source and streak >= threshold:
             source = health.source.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
             print(
@@ -44,9 +49,11 @@ def _emit_persistent_source_warnings(run, config: dict) -> None:
             )
 
     for health in run.health:
-        emit(health, required_source=health.source in required)
-    for health in [*run.attention_ingest_health, *run.producer_health]:
-        emit(health)
+        emit(health, layer="evidence", required_source=health.source in required)
+    for health in run.attention_ingest_health:
+        emit(health, layer="attention")
+    for health in run.producer_health:
+        emit(health, layer="producer")
 
 
 def load_config(path: Path) -> dict:
