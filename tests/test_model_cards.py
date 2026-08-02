@@ -558,8 +558,13 @@ def test_fable_mythos_card_records_its_full_comparison_table():
         "exploitbench",
         "healthbench_professional",
     } <= reported
-    # Named in the prose but not scored in the table.
-    assert {"frontier_bench", "cursor_bench", "vibench"} <= reported
+    # Named in the prose but not scored in the table. The prose also names
+    # Frontier-Bench, which is Terminal-Bench 3.0 under its former name and so
+    # resolves to `terminal_bench` (asserted above) rather than an id of its
+    # own. FrontierCode, in the table above, is Cognition's separate
+    # instrument and keeps its own id despite the shared prefix.
+    assert {"cursor_bench", "vibench"} <= reported
+    assert "frontier_bench" not in reported
     # Recorded by an earlier pass but absent from the release entirely.
     assert not ({"browsecomp", "swe_bench_verified"} & reported)
 

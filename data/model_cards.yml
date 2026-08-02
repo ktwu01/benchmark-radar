@@ -107,6 +107,12 @@ benchmarks:
       - "Terminal-Bench 2.1"
       - "Terminal Bench 2"
       - "TerminalBench Hard"
+      - "Terminal-Bench 3.0"
+      - "Terminal Bench 3"
+      - "Frontier-Bench"
+      - "FrontierBench"
+      - "Frontier-Bench v0.1"
+      - "FrontierSWE"
     domain: agent
     url: https://www.tbench.ai/
     released: 2025-05-19
@@ -114,7 +120,13 @@ benchmarks:
       Environment image, timeout and permitted commands change results
       independently of the model. Version and harness both matter: 2.0 and 2.1
       are different instruments, and cards report Terminus, Claude Code and
-      Codex harness numbers for the same version.
+      Codex harness numbers for the same version. Frontier-Bench is this
+      series' next version rather than a separate benchmark: frontierbench.ai
+      now bills it as "Terminal-Bench 3.0 (formerly Frontier-Bench)", built by
+      the makers of Harbor and Terminal-Bench, so its mentions are counted
+      here. Being a new version, its task set is not comparable to a 2.x
+      number. Not to be confused with Cognition's FrontierCode, a separate
+      instrument recorded separately despite the shared prefix.
 
   - id: livecodebench
     name: LiveCodeBench
@@ -474,16 +486,6 @@ benchmarks:
       Screen resolution, OS image and action space all change results. The
       Verified and 2.0 revisions are not comparable to the original.
 
-  - id: frontier_bench
-    name: Frontier-Bench
-    aliases: ["Frontier-Bench", "FrontierBench", "Frontier-Bench v0.1", "FrontierSWE"]
-    domain: coding_agent
-    url: https://cognition.ai/blog/frontier-bench
-    released: 2026-05-19
-    caveat: >-
-      Published by Cognition, a vendor of a competing coding agent, and run in
-      its own harness. Treat it as first-party to that harness.
-
   - id: cursor_bench
     name: CursorBench
     aliases: ["CursorBench", "Cursor Bench", "CursorBench 3.2"]
@@ -761,17 +763,19 @@ benchmarks:
     name: FrontierCode
     aliases: ["FrontierCode", "FrontierCode (Diamond)"]
     domain: coding_agent
-    url: https://cognition.ai/blog/frontier-bench
-    # Unset: 2026-05-19 is Frontier-Bench's release date, and assuming this
-    # shares it because both are Cognition's would be a guess about a separate
-    # instrument.
-    released: null
+    # Its own announcement post. This previously pointed at
+    # cognition.ai/blog/frontier-bench, which 404s and is not Cognition's:
+    # Frontier-Bench is Terminal-Bench's, and is recorded under terminal_bench.
+    url: https://cognition.com/blog/frontier-code
+    released: 2026-06-08
     caveat: >-
-      Cognition's production-standard coding evaluation, distinct from that
-      vendor's Frontier-Bench despite the shared prefix and blog. Reported per
+      Cognition's production-standard coding evaluation, asking whether models
+      write *good* code rather than merely correct code. Unrelated to
+      Terminal-Bench's Frontier-Bench despite the shared prefix. Reported per
       reasoning-effort setting (the Diamond subset at xhigh), so the effort
       level has to travel with the number. First-party to a competing coding
-      agent's vendor.
+      agent's vendor, and revised as 1.1 on 2026-07-07, so the methodology
+      version has to travel with the number too.
 
   - id: blueprint_bench_2
     name: Blueprint-Bench 2
@@ -1161,9 +1165,9 @@ model_cards:
   #     OSWorld, GDPval). MMLU and HumanEval still appear, but in base-model
   #     tables, not in the lead.
   #   * Several 2026 headline benchmarks are published by a commercial party
-  #     with a stake in the result (Cognition's Frontier-Bench, Cursor's
-  #     CursorBench, Zapier's AutomationBench, Artificial Analysis's -AA
-  #     variants). Their per-benchmark caveats say so; the adoption count cannot.
+  #     with a stake in the result (Cursor's CursorBench, Zapier's
+  #     AutomationBench, Artificial Analysis's -AA variants). Their
+  #     per-benchmark caveats say so; the adoption count cannot.
   # ---------------------------------------------------------------------------
 
   - id: anthropic_claude_opus_5_system_card
@@ -1174,7 +1178,6 @@ model_cards:
     url: https://www.anthropic.com/news/claude-opus-5
     retrieved_at: 2026-08-02
     benchmarks:
-      - frontier_bench
       - cursor_bench
       - arc_agi_3
       - automationbench
@@ -1211,11 +1214,11 @@ model_cards:
       - legal_agent_benchmark
       - hle
       - biomysterybench
+      # Frontier-Bench, named in the prose, is folded into this id.
       - terminal_bench
       - exploitbench
       - healthbench_professional
       # Named in prose rather than scored in the table.
-      - frontier_bench
       - cursor_bench
       - vibench
 
@@ -1406,7 +1409,6 @@ model_cards:
       - aa_lcr
       - hle
       - terminal_bench
-      - frontier_bench
       - posttrainbench
       - scicode
       - browsecomp
