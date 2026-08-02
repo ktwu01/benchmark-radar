@@ -804,7 +804,7 @@ def test_huggingface_filters_future_rows_before_the_local_cap(monkeypatch):
 
     config = {
         "kinds": ["datasets"],
-        "searches": ["benchmark"],
+        "searches": ["benchmark", "evaluation"],
         "_collection_now": datetime(2026, 7, 28, tzinfo=UTC),
     }
     items = fetch_huggingface(
@@ -813,6 +813,6 @@ def test_huggingface_filters_future_rows_before_the_local_cap(monkeypatch):
         1,
     )
 
-    assert seen_limit == [51]
+    assert seen_limit == [51, 51]
     assert [item.source_id for item in items] == ["org/current"]
     assert config["_future_rejections"] == 1

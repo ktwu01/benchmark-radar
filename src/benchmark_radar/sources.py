@@ -27,10 +27,16 @@ def _latest_allowed(config: dict[str, Any]) -> datetime:
     return collection_now.astimezone(UTC) + FUTURE_TIMESTAMP_TOLERANCE
 
 
-def _reject_future(config: dict[str, Any], *timestamps: datetime | None) -> bool:
+def _reject_future(
+    config: dict[str, Any],
+    identity: str,
+    *timestamps: datetime | None,
+) -> bool:
     if not any(value is not None and value > _latest_allowed(config) for value in timestamps):
         return False
-    config["_future_rejections"] = int(config.get("_future_rejections", 0)) + 1
+    identities = config.setdefault("_future_rejection_ids", set())
+    identities.add(identity)
+    config["_future_rejections"] = len(identities)
     return True
 
 
@@ -146,7 +152,7 @@ def _fetch_arxiv_rss(
             ):
                 continue
             published = parsedate_to_datetime(published_text).astimezone(UTC)
-            if published < overlap_since or _reject_future(config, published):
+            if published < overlap_since or _reject_future(config, source_id, published):
                 continue
             announce_type = (
                 entry.findtext("arxiv:announce_type", namespaces=namespaces) or ""
@@ -209,16 +215,16 @@ def fetch_arxiv(config: dict[str, Any], since: datetime, limit: int) -> list[Rad
                 )
                 root = ET.fromstring(xml)
                 for entry in root.findall("atom:entry", namespace):
-                    published = _date(entry.findtext("atom:published", namespaces=namespace))
-                    updated = _date(entry.findtext("atom:updated", namespaces=namespace))
-                    if max(published, updated) < overlap_since or _reject_future(
-                        config, published, updated
-                    ):
-                        continue
                     url = (entry.findtext("atom:id", namespaces=namespace) or "").replace(
                         "http:", "https:"
                     )
                     source_id = _arxiv_source_id(url)
+                    published = _date(entry.findtext("atom:published", namespaces=namespace))
+                    updated = _date(entry.findtext("atom:updated", namespaces=namespace))
+                    if max(published, updated) < overlap_since or _reject_future(
+                        config, source_id, published, updated
+                    ):
+                        continue
                     title = " ".join(
                         (entry.findtext("atom:title", namespaces=namespace) or "").split()
                     )
@@ -283,14 +289,18 @@ def fetch_huggingface(config: dict[str, Any], since: datetime, limit: int) -> li
             if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
                 raise ConnectorPayloadError("Hugging Face Hub returned a non-array payload")
             for row in rows:
+                item_id = row.get("id") or row.get("modelId")
+                if not item_id:
+                    continue
                 # An undated repo is skipped rather than dated "now": the
                 # substitution both invented freshness and slipped past the
                 # `since` check below, which is what it was meant to enforce.
                 changed = _optional_date(row.get("lastModified") or row.get("createdAt"))
-                if changed is None or changed < since or _reject_future(config, changed):
-                    continue
-                item_id = row.get("id") or row.get("modelId")
-                if not item_id:
+                if (
+                    changed is None
+                    or changed < since
+                    or _reject_future(config, str(item_id), changed)
+                ):
                     continue
                 created = _optional_date(row.get("createdAt"))
                 found[item_id] = RadarItem(
@@ -368,10 +378,10 @@ def fetch_github(config: dict[str, Any], since: datetime, limit: int) -> list[Ra
             )
             rows = _payload_rows(payload, "items", "GitHub Search")
             for row in rows:
-                changed = _date(row.get("pushed_at") or row.get("updated_at"))
-                if changed < since or _reject_future(config, changed):
-                    continue
                 full_name = row["full_name"]
+                changed = _date(row.get("pushed_at") or row.get("updated_at"))
+                if changed < since or _reject_future(config, full_name, changed):
+                    continue
                 found[full_name] = RadarItem(
                     source="GitHub",
                     source_id=full_name,
@@ -438,7 +448,7 @@ def fetch_openreview(
                 if not note_id or not title or not created or not activity:
                     continue
                 oldest = min(oldest or activity, activity)
-                if activity < since or _reject_future(config, activity):
+                if activity < since or _reject_future(config, note_id, activity):
                     continue
                 abstract = str(_openreview_value(content, "abstract", "") or "").strip()
                 authors = _openreview_value(content, "authors", []) or []
@@ -537,7 +547,7 @@ def fetch_semantic_scholar(
                 if not paper_id or not title or not published_text:
                     continue
                 published = _date(str(published_text))
-                if published < since or _reject_future(config, published):
+                if published < since or _reject_future(config, paper_id, published):
                     continue
                 external = row.get("externalIds") or {}
                 if not isinstance(external, dict):
@@ -652,12 +662,12 @@ def fetch_github_releases(
                 oldest = min(oldest or published, published)
                 if published < since:
                     continue
-                if _reject_future(config, published):
-                    rejected_on_page += 1
-                    continue
                 tag = str(row.get("tag_name") or "").strip()
                 url = str(row.get("html_url") or "").strip()
                 if not tag or not url:
+                    continue
+                if _reject_future(config, f"{repository}@{tag}", published):
+                    rejected_on_page += 1
                     continue
                 author = row.get("author") or {}
                 assets = row.get("assets") or []
@@ -761,7 +771,7 @@ def fetch_openalex(
             if (
                 published is None
                 or published.date() < since.date()
-                or _reject_future(config, published)
+                or _reject_future(config, source_id, published)
             ):
                 continue
             found[source_id] = RadarItem(
@@ -824,7 +834,7 @@ def fetch_brave(config: dict[str, Any], since: datetime, limit: int) -> list[Rad
             # a freshness the response never asserted and awarded them full
             # recency, so an undated result is skipped instead.
             published = _optional_date(row.get("page_age"))
-            if published is None or _reject_future(config, published):
+            if published is None or _reject_future(config, url, published):
                 continue
             found[url] = RadarItem(
                 source="Brave Web",
