@@ -33,13 +33,20 @@ def _emit_persistent_source_warnings(run, config: dict) -> None:
         if source_config.get("enabled", True) and source_config.get("required", False)
     }
     streaks = run.discovery_state.get("source_failure_streaks") or {}
-    for health in [*run.health, *run.attention_ingest_health, *run.producer_health]:
+
+    def emit(health, *, required_source: bool = False) -> None:
         streak = int(streaks.get(health.source, 0) or 0)
-        if not health.ok and health.source not in required and streak >= threshold:
+        if not health.ok and not required_source and streak >= threshold:
+            source = health.source.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
             print(
                 "::warning title=Persistent optional source failure::"
-                f"{health.source} has failed for {streak} consecutive runs"
+                f"{source} has failed for {streak} consecutive runs"
             )
+
+    for health in run.health:
+        emit(health, required_source=health.source in required)
+    for health in [*run.attention_ingest_health, *run.producer_health]:
+        emit(health)
 
 
 def load_config(path: Path) -> dict:
