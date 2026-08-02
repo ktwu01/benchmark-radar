@@ -33,7 +33,7 @@ def _emit_persistent_source_warnings(run, config: dict) -> None:
         if source_config.get("enabled", True) and source_config.get("required", False)
     }
     streaks = run.discovery_state.get("source_failure_streaks") or {}
-    for health in [*run.health, *run.attention_ingest_health]:
+    for health in [*run.health, *run.attention_ingest_health, *run.producer_health]:
         streak = int(streaks.get(health.source, 0) or 0)
         if not health.ok and health.source not in required and streak >= threshold:
             print(

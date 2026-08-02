@@ -685,7 +685,7 @@ def run_pipeline(
         "source_failure_streaks"
     ) or {}
     failure_streaks: dict[str, int] = {}
-    for source_health in [*health, *attention_health]:
+    for source_health in [*health, *attention_health, *producer_health]:
         if source_health.ok:
             continue
         previous = previous_streaks.get(source_health.source, 0)

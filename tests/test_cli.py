@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 
 from benchmark_radar import cli
-from benchmark_radar.models import RadarItem, RadarRun, SourceHealth
+from benchmark_radar.models import ProducerHealth, RadarItem, RadarRun
 from benchmark_radar.pipeline import SOURCE_FETCHERS
 from benchmark_radar.snapshots import write_snapshot
 
@@ -133,15 +133,15 @@ def test_actions_warn_after_repeated_optional_source_failures(monkeypatch, capsy
         since=datetime(2026, 7, 31, tzinfo=UTC),
         items=[],
         health=[],
-        attention_ingest_health=[
-            SourceHealth(
-                source="Hacker News collector",
-                kind="attention",
+        producer_health=[
+            ProducerHealth(
+                producer="fixture-producer",
+                source="Hacker News",
                 ok=False,
                 error="HTTP 503",
             )
         ],
-        discovery_state={"source_failure_streaks": {"Hacker News collector": 3}},
+        discovery_state={"source_failure_streaks": {"Hacker News": 3}},
     )
     config = {
         "radar": {"optional_source_failure_warning_runs": 3},
@@ -152,5 +152,5 @@ def test_actions_warn_after_repeated_optional_source_failures(monkeypatch, capsy
 
     assert capsys.readouterr().out == (
         "::warning title=Persistent optional source failure::"
-        "Hacker News collector has failed for 3 consecutive runs\n"
+        "Hacker News has failed for 3 consecutive runs\n"
     )
