@@ -1,0 +1,35 @@
+name: Report a data error
+description: A row in the adoption ranking or the daily radar does not match its source.
+title: "Data error: "
+labels: ["data-error"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A wrong row is a real bug, not a nitpick. This project's only claim is
+        that every entry can be checked against the record it came from, so a
+        row that does not match its source breaks the one guarantee it makes.
+
+  - type: input
+    id: source_url
+    attributes:
+      label: Source document URL
+      description: The record the entry claims to be derived from.
+    validations:
+      required: true
+
+  - type: textarea
+    id: claimed
+    attributes:
+      label: What the radar currently shows
+      description: The benchmark id, ranking row, or daily entry as published.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What the source actually says
+      description: Quote it if you can, so the correction is checkable without re-reading the whole document.
+    validations:
+      required: true

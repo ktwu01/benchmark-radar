@@ -1,0 +1,90 @@
+name: Add a model card to the adoption registry
+description: Report a model card, system card, technical report, or release post the Model Card Adoption Rank has not read yet.
+title: "Add model card: "
+labels: ["model-card", "good first issue"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The [Model Card Adoption Rank](https://github.com/ktwu01/benchmark-radar#model-card-adoption-rank)
+        is curated by hand, so its coverage is exactly the set of documents
+        someone has read. Naming one it is missing is a useful contribution on
+        its own; you do not have to open the pull request yourself.
+
+        If you would like to add it directly, see
+        [CONTRIBUTING.md](https://github.com/ktwu01/benchmark-radar/blob/main/CONTRIBUTING.md).
+
+  - type: input
+    id: url
+    attributes:
+      label: Document URL
+      description: The card, report, or post the benchmarks are read from. This is what makes the row checkable.
+      placeholder: https://example.com/frontier-1-model-card
+    validations:
+      required: true
+
+  - type: input
+    id: organization
+    attributes:
+      label: Organization
+      placeholder: Acme
+    validations:
+      required: true
+
+  - type: input
+    id: model
+    attributes:
+      label: Model
+      placeholder: Frontier-1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: document_type
+    attributes:
+      label: Document type
+      options:
+        - model_card
+        - system_card
+        - technical_report
+        - release_post
+    validations:
+      required: true
+
+  - type: input
+    id: published
+    attributes:
+      label: Publication date (YYYY-MM-DD)
+      description: The document's date, not the model's announcement date, if they differ.
+      placeholder: "2026-05-14"
+    validations:
+      required: true
+
+  - type: textarea
+    id: benchmarks
+    attributes:
+      label: Benchmarks the document reports
+      description: |
+        One per line. Names as the document writes them are fine; they will be
+        mapped to registry ids.
+
+        Record what the document reports, not what the model can do. The
+        counted unit is the document: a card reporting AIME in three
+        configurations still counts once.
+      placeholder: |
+        GPQA Diamond
+        SWE-bench Verified
+        AIME 2025
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything unusual about this document
+      description: |
+        Optional. Useful cases: the document was revised after publication and
+        gained benchmarks later, it reports a benchmark under a name nobody else
+        uses, or it describes an evaluation in prose without scoring it.
+    validations:
+      required: false
