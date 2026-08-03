@@ -42,6 +42,12 @@ jobs:
         run: |
           python -m pip install -e '.[dev]'
           benchmark-radar rebuild
+          # Standalone citable artifacts alongside the dashboard bundle (issue
+          # #88). Written into site/data/ so they deploy with the rest of the
+          # site and resolve at a stable URL: an embedded badge or a citation
+          # pointing at a release asset breaks on the next release, while one
+          # pointing here tracks the registry.
+          benchmark-radar export
           pytest -q
       - name: Configure Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6

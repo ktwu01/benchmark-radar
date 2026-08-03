@@ -8,6 +8,7 @@ from pathlib import Path
 
 import yaml
 
+from .export import DEFAULT_TABLE_LIMIT, write_exports
 from .pipeline import _failure_streak_key, run_pipeline, simulate_backfill
 from .report import render_markdown
 from .snapshots import (
@@ -62,12 +63,13 @@ def main() -> None:
     parser.add_argument(
         "command",
         nargs="?",
-        choices=("run", "rebuild", "backfill", "migrate", "rescore", "simulate-history"),
+        choices=("run", "rebuild", "backfill", "migrate", "rescore", "simulate-history", "export"),
         default="run",
         help=(
             "Collect a daily run, rebuild/backfill cumulative data from saved snapshots, "
             "migrate snapshot schemas, rescore stored taxonomy categories against the "
-            "current config, or simulate missing historical snapshots."
+            "current config, simulate missing historical snapshots, or export the "
+            "Model Card Adoption Rank as standalone citable files."
         ),
     )
     parser.add_argument("--config", type=Path, default=Path("config.yml"))
@@ -83,6 +85,26 @@ def main() -> None:
             "Curated model card registry powering the Model Card Adoption Rank "
             "(issue #83). A missing file omits the leaderboard; an invalid one "
             "fails the build rather than publishing a stale ranking."
+        ),
+    )
+    parser.add_argument(
+        "--export-dir",
+        type=Path,
+        default=Path("site/data"),
+        help=(
+            "export only: directory for the standalone leaderboard artifacts "
+            "(issue #88). Defaults inside the published site so the JSON, CSV, "
+            "Markdown table, and Shields badge endpoint are fetchable at a "
+            "stable URL rather than only reachable from a release asset."
+        ),
+    )
+    parser.add_argument(
+        "--export-table-limit",
+        type=int,
+        default=DEFAULT_TABLE_LIMIT,
+        help=(
+            "export only: rows in the paste-ready Markdown table. 0 emits every "
+            "tracked benchmark; the truncation is always stated in the output."
         ),
     )
     parser.add_argument(
@@ -107,6 +129,27 @@ def main() -> None:
         return
 
     config = load_config(args.config)
+
+    if args.command == "export":
+        dashboard_url = config.get("publish", {}).get("dashboard_url")
+        # `?view=leaderboard` rather than the dashboard root: a reader arriving
+        # from a cited CSV is looking for the ranking, and the root opens on the
+        # daily Today list instead.
+        source_url = f"{dashboard_url}?view=leaderboard" if dashboard_url else None
+        written = write_exports(
+            args.export_dir,
+            registry_path=args.model_cards,
+            # 0 means "no limit" on a command line, where passing None is not
+            # expressible. Negative values collapse to the same intent rather
+            # than silently producing an empty table through a slice.
+            table_limit=(
+                None if args.export_table_limit <= 0 else args.export_table_limit
+            ),
+            source_url=source_url,
+        )
+        for name in sorted(written):
+            print(f"Wrote {written[name]}")
+        return
 
     if args.command == "simulate-history":
         existing = load_snapshots(args.snapshot_dir)
