@@ -85,6 +85,10 @@ def render(leaderboard: dict, output: Path) -> Path:
     row_face = font(30)
     row_bold = font(30, bold=True)
     small = font(23)
+    # A step down from `small`: the URL is provenance, not a line of the
+    # finding, and the size difference is what buys it room on the caveat's
+    # line without either being truncated.
+    attribution = font(21)
 
     y = MARGIN - 12
     draw.text((MARGIN, y), "Benchmark Radar", font=title, fill=INK)
@@ -149,11 +153,27 @@ def render(leaderboard: dict, output: Path) -> Path:
     # The caveat travels on the card too. This image is the most widely seen
     # and least clicked-through representation of the ranking, so it is the
     # worst place to let a bare top-five read as a quality ordering.
+    #
+    # Phrased without a leading "Measures" so it clears the attribution to its
+    # right. The two are measured to fit on one line at these faces with ~75px
+    # between them; lengthening either, or raising `small`, will collide before
+    # it wraps, because Pillow does not wrap.
     draw.text(
         (MARGIN, y),
-        "Measures vendor reporting convention, not benchmark quality",
+        "Vendor reporting convention, not benchmark quality",
         font=small,
         fill=SLATE,
+    )
+    # The card is built to be reposted, and a screenshot of a ranking with no
+    # source is a claim nobody can check. Bottom right, sharing the caveat's
+    # baseline: an unfamiliar reader meets the attribution and the disclaimer
+    # in one glance, and the footer has no room for a third line.
+    draw.text(
+        (WIDTH - MARGIN, y + 2),
+        "github.com/ktwu01/benchmark-radar",
+        font=attribution,
+        fill=TEAL,
+        anchor="ra",
     )
 
     output.parent.mkdir(parents=True, exist_ok=True)

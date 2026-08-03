@@ -1,3 +1,4 @@
+import sys
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -553,3 +554,20 @@ def test_share_card_exists_at_the_declared_size():
         # at another size loses its bottom line, which is where the "not
         # benchmark quality" caveat sits.
         assert image.size == (1200, 630)
+
+
+def test_share_card_attributes_its_source_without_overlapping_the_caveat():
+    from PIL import Image, ImageDraw
+
+    sys.path.insert(0, "scripts")
+    from generate_og_image import MARGIN, WIDTH, font
+
+    # The card is built to be reposted, and a screenshot of a ranking with no
+    # source is a claim nobody can check. Pillow does not wrap or shrink text:
+    # if the caveat and the attribution stop fitting on one line they silently
+    # draw over each other, and the rendered PNG is the only place that shows.
+    draw = ImageDraw.Draw(Image.new("RGB", (WIDTH, 630)))
+    caveat = draw.textlength("Vendor reporting convention, not benchmark quality", font=font(23))
+    attribution = draw.textlength("github.com/ktwu01/benchmark-radar", font=font(21))
+
+    assert caveat + attribution < WIDTH - 2 * MARGIN
