@@ -48,6 +48,9 @@ jobs:
           # pointing at a release asset breaks on the next release, while one
           # pointing here tracks the registry.
           benchmark-radar export
+          # Regenerated rather than served from the commit, so a share card can
+          # never advertise counts the registry has moved past.
+          python scripts/generate_og_image.py
           pytest -q
       - name: Configure Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6

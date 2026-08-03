@@ -229,8 +229,7 @@ def leaderboard_badge(leaderboard: dict[str, Any]) -> str:
         "schemaVersion": 1,
         "label": "model cards tracked",
         "message": (
-            f"{leaderboard['model_card_count']} cards · "
-            f"{leaderboard['benchmark_count']} benchmarks"
+            f"{leaderboard['model_card_count']} cards · {leaderboard['benchmark_count']} benchmarks"
         ),
         "color": "blue",
     }

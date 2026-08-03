@@ -8,6 +8,29 @@
       content="An evidence-first daily map of new AI benchmarks, evaluations, and datasets."
     >
     <title>Benchmark Radar</title>
+
+    <!-- Without these, every share of this dashboard renders as a grey
+         placeholder with a URL under it. The card is generated from the same
+         registry as the ranking (scripts/generate_og_image.py), so a share
+         shows the current top rows rather than a static logo. -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Benchmark Radar">
+    <meta property="og:title" content="Which benchmarks do frontier labs actually report?">
+    <meta
+      property="og:description"
+      content="A live ranking of the benchmarks reported in frontier model cards, system cards, and technical reports. Measures vendor reporting convention, not benchmark quality."
+    >
+    <meta property="og:url" content="https://ktwu01.github.io/benchmark-radar/">
+    <!-- Absolute, because Open Graph consumers do not resolve relative URLs. -->
+    <meta property="og:image" content="https://ktwu01.github.io/benchmark-radar/assets/og-card.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta
+      property="og:image:alt"
+      content="Benchmark Radar: the most-reported benchmarks across frontier model cards, led by GPQA Diamond, SWE-bench Verified, and LiveCodeBench."
+    >
+    <meta name="twitter:card" content="summary_large_image">
+
     <link rel="stylesheet" href="assets/styles.css">
     <script src="assets/app.js" type="module"></script>
   </head>

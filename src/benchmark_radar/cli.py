@@ -142,9 +142,7 @@ def main() -> None:
             # 0 means "no limit" on a command line, where passing None is not
             # expressible. Negative values collapse to the same intent rather
             # than silently producing an empty table through a slice.
-            table_limit=(
-                None if args.export_table_limit <= 0 else args.export_table_limit
-            ),
+            table_limit=(None if args.export_table_limit <= 0 else args.export_table_limit),
             source_url=source_url,
         )
         for name in sorted(written):
