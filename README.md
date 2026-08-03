@@ -1,11 +1,47 @@
 # Benchmark Radar
 
-An evidence-first daily radar for newly released AI benchmarks, evaluation methods,
-datasets, leaderboards, and data-quality work.
+**Which AI benchmarks do frontier labs actually report when they ship a model?**
 
-Every day, GitHub Actions queries primary or structured sources, deduplicates records,
-classifies them with a transparent taxonomy, ranks them using explainable signals, and
-publishes a GitHub Issue and a
+Not which benchmarks exist, and not which are cited most in papers: which ones a
+vendor chooses to put in front of readers in a model card. That is a question about
+what the field currently treats as the standard set, and it is answered here by
+reading the documents rather than by asking anyone's opinion.
+
+| Rank | Benchmark | Domain | Model cards | Organizations |
+|---:|---|---|---:|---:|
+| 1 | [GPQA Diamond](https://arxiv.org/abs/2311.12022) | science | 23 | 10 |
+| 2 | [SWE-bench Verified](https://openai.com/index/introducing-swe-bench-verified/) | coding_agent | 17 | 8 |
+| 3 | [LiveCodeBench](https://livecodebench.github.io/) | coding | 15 | 7 |
+| 4 | [Humanity's Last Exam](https://lastexam.ai/) | reasoning | 14 | 8 |
+| 5 | [AIME](https://maa.org/maa-invitational-competitions/) | math | 14 | 7 |
+| 6 | [Terminal-Bench](https://www.tbench.ai/) | agent | 13 | 8 |
+| 7 | [BrowseComp](https://openai.com/index/browsecomp/) | agent | 11 | 6 |
+| 8 | [MMLU-Pro](https://github.com/TIGER-AI-Lab/MMLU-Pro) | knowledge | 11 | 6 |
+
+Across 30 curated model cards, system cards, and technical reports from 10
+organizations, tracking 79 benchmarks.
+**[See the full ranking](https://ktwu01.github.io/benchmark-radar/?view=leaderboard)**
+or read [how it is counted](#model-card-adoption-rank).
+
+This measures vendor attention, not benchmark quality. A saturated or contaminated
+benchmark can rank highly precisely because reporting it is conventional, so every row
+carries its own caveat.
+
+Take it with you: [`leaderboard.json`][json] · [`leaderboard.csv`][csv] ·
+[`leaderboard.md`][md] (paste-ready table). Every artifact restates the caveat, so the
+ranking cannot be separated from what it means.
+
+[json]: https://ktwu01.github.io/benchmark-radar/data/leaderboard.json
+[csv]: https://ktwu01.github.io/benchmark-radar/data/leaderboard.csv
+[md]: https://ktwu01.github.io/benchmark-radar/data/leaderboard.md
+
+## The daily radar
+
+The ranking above is the curated half of this project. The other half runs every day:
+GitHub Actions queries primary or structured sources for newly released benchmarks,
+evaluation methods, datasets, and data-quality work, deduplicates records, classifies
+them with a transparent taxonomy, ranks them using explainable signals, and publishes a
+GitHub Issue and a
 [cumulative dashboard](https://ktwu01.github.io/benchmark-radar/). It is inspired by
 [agents-radar](https://github.com/duanyytop/agents-radar), with sources and scoring
 redesigned for benchmark and AI-data research.
@@ -92,6 +128,40 @@ the unit this ranking can honestly publish today.
 To extend it, add a benchmark to the `benchmarks:` block and a document to
 `model_cards:`, then run `benchmark-radar rebuild`. A card referencing an unknown
 benchmark id fails the build rather than silently creating a phantom entry.
+Adding a model card is the most useful contribution this project can receive, and
+[CONTRIBUTING.md](CONTRIBUTING.md) walks through it.
+
+### Citing the ranking
+
+The ranking is published as standalone files, so quoting it does not mean parsing the
+multi-megabyte dashboard bundle:
+
+| Artifact | URL | Use |
+|---|---|---|
+| JSON | [`data/leaderboard.json`][json] | The ranking and its card-level edges, without the daily corpus |
+| CSV | [`data/leaderboard.csv`][csv] | One row per benchmark, for a spreadsheet or dataframe |
+| Markdown | [`data/leaderboard.md`][md] | A paste-ready table for a README or post |
+| Badge | [`data/leaderboard-badge.json`][badge] | A Shields endpoint that tracks registry coverage |
+
+Generate them locally with:
+
+```bash
+benchmark-radar export
+```
+
+Each artifact restates what the ranking measures and the denominator it was counted
+against. These files are built to travel, and a ranking separated from its caveat reads
+as a quality ordering, which is the misreading the registry exists to prevent.
+
+The badge reports coverage rather than a top rank, for the same reason: a badge is a
+single number seen with no context, and "GPQA Diamond is #1" shown that way is a claim
+this ranking does not make.
+
+```markdown
+![Model cards tracked](https://img.shields.io/endpoint?url=https://ktwu01.github.io/benchmark-radar/data/leaderboard-badge.json)
+```
+
+[badge]: https://ktwu01.github.io/benchmark-radar/data/leaderboard-badge.json
 
 ## Run locally
 
@@ -109,6 +179,8 @@ Outputs:
 - `data/snapshots/YYYY-MM-DD.json`: versioned, idempotent UTC snapshot
 - `site/data/radar.json`: deterministic browser-ready history, cumulative entity graph,
   observations, edges, and precomputed aggregates generated for deployment
+- `site/data/leaderboard.{json,csv,md}` and `leaderboard-badge.json`: the standalone
+  adoption-rank exports, written by `benchmark-radar export`
 
 Validated snapshots are the canonical corpus and live on `main` beside the code and
 schema that interpret them. A dedicated snapshot-writer GitHub App may append only
