@@ -8,7 +8,12 @@ from pathlib import Path
 
 import yaml
 
-from .briefing import BriefingError, generate_daily_briefing, previous_calendar_day
+from .briefing import (
+    BriefingError,
+    current_day_snapshot,
+    generate_daily_briefing,
+    previous_calendar_day,
+)
 from .export import DEFAULT_TABLE_LIMIT, write_exports
 from .http import RequestError
 from .pipeline import _failure_streak_key, run_pipeline, simulate_backfill
@@ -264,7 +269,7 @@ def main() -> None:
     if api_key := os.getenv("OPENAI_API_KEY"):
         try:
             daily_briefing = generate_daily_briefing(
-                run,
+                current_day_snapshot(snapshots, run),
                 previous_calendar_day(snapshots, run),
                 api_key,
             )

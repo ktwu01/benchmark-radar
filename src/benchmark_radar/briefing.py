@@ -8,8 +8,10 @@ from collections import Counter
 from datetime import UTC, timedelta
 from typing import Any
 
+from .corpus import artifact_alias_map, exact_artifact_key
 from .http import post_json
 from .models import RadarRun
+from .snapshots import merge_snapshots, snapshot_for_run
 
 RESPONSES_URL = "https://api.openai.com/v1/responses"
 BRIEFING_MODEL = "gpt-5.6-luna"
@@ -31,8 +33,14 @@ def previous_calendar_day(snapshots: list[dict[str, Any]], run: RadarRun) -> dic
     )
 
 
-def _identity(item: dict[str, Any]) -> str:
-    return f"{item.get('source', '')}:{item.get('source_id', '')}".lower()
+def current_day_snapshot(snapshots: list[dict[str, Any]], run: RadarRun) -> dict[str, Any]:
+    """Return this run merged with an earlier pass from the same UTC day."""
+    incoming = snapshot_for_run(run)
+    existing = next(
+        (snapshot for snapshot in reversed(snapshots) if snapshot["date"] == incoming["date"]),
+        None,
+    )
+    return merge_snapshots(existing, incoming) if existing else incoming
 
 
 def _counts(items: list[dict[str, Any]], field: str) -> Counter[str]:
@@ -51,21 +59,25 @@ def _delta(current: Counter[str], previous: Counter[str], *, limit: int = 8) -> 
     return dict(ordered)
 
 
-def briefing_input(run: RadarRun, previous: dict[str, Any] | None) -> dict[str, Any]:
+def briefing_input(current: dict[str, Any], previous: dict[str, Any] | None) -> dict[str, Any]:
     """Build a deterministic, compact comparison instead of sending raw snapshots."""
-    current_items = [item.to_dict() for item in run.items]
+    current_items = list(current.get("evidence_items") or [])
     previous_items = list((previous or {}).get("evidence_items") or [])
-    previous_ids = {_identity(item) for item in previous_items}
-    new_items = [item for item in current_items if _identity(item) not in previous_ids]
+    aliases = artifact_alias_map([*previous_items, *current_items])
+    previous_ids = {aliases[exact_artifact_key(item)] for item in previous_items}
+    new_items = [
+        item for item in current_items if aliases[exact_artifact_key(item)] not in previous_ids
+    ]
     previous_attention = ((previous or {}).get("attention") or {}).get("observations") or []
+    current_attention = (current.get("attention") or {}).get("observations") or []
 
     value: dict[str, Any] = {
-        "date": run.generated_at.astimezone(UTC).date().isoformat(),
+        "date": current["date"],
         "comparison_date": (previous or {}).get("date"),
-        "today": {"evidence": len(current_items), "attention": len(run.attention)},
+        "today": {"evidence": len(current_items), "attention": len(current_attention)},
         "change": {
             "evidence": len(current_items) - len(previous_items) if previous else None,
-            "attention": len(run.attention) - len(previous_attention) if previous else None,
+            "attention": len(current_attention) - len(previous_attention) if previous else None,
             "sources": _delta(_counts(current_items, "source"), _counts(previous_items, "source"))
             if previous
             else {},
@@ -82,7 +94,7 @@ def briefing_input(run: RadarRun, previous: dict[str, Any] | None) -> dict[str, 
         ],
     }
 
-    current_taxonomy = (run.selection or {}).get("taxonomy_version")
+    current_taxonomy = (current.get("selection") or {}).get("taxonomy_version")
     previous_taxonomy = ((previous or {}).get("selection") or {}).get("taxonomy_version")
     if previous and current_taxonomy and current_taxonomy == previous_taxonomy:
         value["change"]["categories"] = _delta(
@@ -132,11 +144,11 @@ def _safe_bullets(text: str) -> list[str]:
 
 
 def generate_daily_briefing(
-    run: RadarRun,
+    current: dict[str, Any],
     previous: dict[str, Any] | None,
     api_key: str,
 ) -> list[str]:
-    comparison = briefing_input(run, previous)
+    comparison = briefing_input(current, previous)
     payload = {
         "model": BRIEFING_MODEL,
         "instructions": (

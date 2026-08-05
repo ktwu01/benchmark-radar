@@ -5,10 +5,12 @@ from benchmark_radar.briefing import (
     MAX_HIGHLIGHTS,
     MAX_INPUT_CHARS,
     briefing_input,
+    current_day_snapshot,
     generate_daily_briefing,
     previous_calendar_day,
 )
 from benchmark_radar.models import RadarItem, RadarRun
+from benchmark_radar.snapshots import snapshot_for_run
 
 
 def _item(index: int, *, title: str | None = None) -> RadarItem:
@@ -45,7 +47,7 @@ def test_previous_calendar_day_ignores_same_day_and_older_gap():
 
 def test_briefing_input_is_bounded_and_uses_structured_highlights_only():
     items = [_item(index, title="x" * 1_000) for index in range(30)]
-    value = briefing_input(_run(items), None)
+    value = briefing_input(snapshot_for_run(_run(items)), None)
     encoded = json.dumps(value, ensure_ascii=False, separators=(",", ":"))
 
     assert len(encoded) <= MAX_INPUT_CHARS
@@ -62,9 +64,42 @@ def test_categories_compare_only_under_the_same_taxonomy():
         "selection": {"taxonomy_version": "older-taxonomy"},
     }
 
-    assert "categories" not in briefing_input(_run([_item(2)]), previous)["change"]
+    current = snapshot_for_run(_run([_item(2)]))
+    assert "categories" not in briefing_input(current, previous)["change"]
     previous["selection"]["taxonomy_version"] = "taxonomy-v2"
-    assert briefing_input(_run([_item(2)]), previous)["change"]["categories"] == {}
+    assert briefing_input(current, previous)["change"]["categories"] == {}
+
+
+def test_current_day_snapshot_merges_both_scheduled_passes():
+    morning = snapshot_for_run(_run([_item(1)]))
+    afternoon = _run([_item(2)])
+
+    merged = current_day_snapshot([morning], afternoon)
+
+    assert {item["source_id"] for item in merged["evidence_items"]} == {
+        "org/repo-1",
+        "org/repo-2",
+    }
+
+
+def test_new_items_use_cross_source_artifact_identity():
+    prior_item = _item(1).to_dict()
+    current_item = RadarItem(
+        source="Semantic Scholar",
+        source_id="paper-1",
+        title="The same benchmark",
+        url="https://www.semanticscholar.org/paper/paper-1",
+        artifact_urls=[prior_item["url"]],
+        published_at=datetime(2026, 8, 4, tzinfo=UTC),
+        categories=["benchmark"],
+    )
+    previous = snapshot_for_run(_run([_item(1)]))
+    previous["date"] = "2026-08-03"
+
+    value = briefing_input(snapshot_for_run(_run([current_item])), previous)
+
+    assert value["new_item_count"] == 0
+    assert value["highlights"] == []
 
 
 def test_generate_daily_briefing_caps_api_and_sanitizes_output(monkeypatch):
@@ -91,7 +126,7 @@ def test_generate_daily_briefing_caps_api_and_sanitizes_output(monkeypatch):
 
     monkeypatch.setattr("benchmark_radar.briefing.post_json", fake_post)
 
-    bullets = generate_daily_briefing(_run([_item(1)]), None, "secret")
+    bullets = generate_daily_briefing(snapshot_for_run(_run([_item(1)])), None, "secret")
 
     assert bullets == ["One new benchmark.", "Evidence rose."]
     assert captured["payload"]["max_output_tokens"] == 220
