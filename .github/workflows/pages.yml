@@ -14,6 +14,12 @@ on:
       - "src/benchmark_radar/snapshots.py"
       - "src/benchmark_radar/corpus.py"
       - "src/benchmark_radar/model_cards.py"
+      # Both run during the build and write files into the artifact, so a change
+      # to either one only reaches the published site if it also triggers a
+      # deploy. Without these, editing the share-card generator or the export
+      # layer succeeds, merges, and changes nothing that anyone can see.
+      - "scripts/generate_og_image.py"
+      - "src/benchmark_radar/export.py"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
