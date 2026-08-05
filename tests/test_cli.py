@@ -5,7 +5,6 @@ from pathlib import Path
 import yaml
 
 from benchmark_radar import cli
-from benchmark_radar.briefing import BriefingError
 from benchmark_radar.models import ProducerHealth, RadarItem, RadarRun
 from benchmark_radar.pipeline import SOURCE_FETCHERS
 from benchmark_radar.snapshots import write_snapshot
@@ -234,82 +233,48 @@ def _stub_sources(monkeypatch, day: datetime) -> None:
     monkeypatch.setitem(SOURCE_FETCHERS, "huggingface", lambda config, since, limit: [item])
 
 
-def test_second_pass_reuses_the_stored_briefing_without_calling_the_api(
-    monkeypatch, tmp_path, capsys
-):
+def test_every_pass_over_a_day_derives_the_same_briefing(monkeypatch, tmp_path):
     _stub_sources(monkeypatch, datetime.now(UTC))
-    monkeypatch.setenv("OPENAI_API_KEY", "secret")
-    calls = []
-
-    def fake_generate(current, previous, api_key):
-        calls.append(api_key)
-        return ["The day's only briefing."]
-
-    monkeypatch.setattr("benchmark_radar.cli.generate_daily_briefing", fake_generate)
     monkeypatch.setattr("sys.argv", _briefing_argv(tmp_path))
 
     cli.main()
+    first = json.loads(next((tmp_path / "snapshots").glob("*.json")).read_text(encoding="utf-8"))[
+        "briefing"
+    ]
     cli.main()
+    second = json.loads(next((tmp_path / "snapshots").glob("*.json")).read_text(encoding="utf-8"))[
+        "briefing"
+    ]
 
-    # One UTC day holds exactly one briefing, so the second pass over the same
-    # day must not spend another API call or overwrite the stored text.
-    assert calls == ["secret"]
-    assert "Reusing the briefing already stored" in capsys.readouterr().out
-    stored = json.loads(next((tmp_path / "snapshots").glob("*.json")).read_text(encoding="utf-8"))
-    assert stored["briefing"]["bullets"] == ["The day's only briefing."]
+    # Findings are computed from the corpus, so there is nothing to reuse or
+    # retry: every pass over the same day derives the same text. The reuse and
+    # retry machinery the LLM path needed is gone with it.
+    assert first == second
+    assert first["bullets"]
 
 
-def test_a_later_pass_retries_after_the_briefing_call_failed(monkeypatch, tmp_path):
+def test_a_briefing_is_written_without_any_api_key(monkeypatch, tmp_path):
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     _stub_sources(monkeypatch, datetime.now(UTC))
-    monkeypatch.setenv("OPENAI_API_KEY", "secret")
-    attempts = []
-
-    def flaky_generate(current, previous, api_key):
-        attempts.append(api_key)
-        if len(attempts) == 1:
-            raise BriefingError("upstream refused")
-        return ["Recovered on the retry."]
-
-    monkeypatch.setattr("benchmark_radar.cli.generate_daily_briefing", flaky_generate)
     monkeypatch.setattr("sys.argv", _briefing_argv(tmp_path))
 
     cli.main()
-    cli.main()
 
-    # The first pass stored nothing, so the day still needs a briefing and the
-    # next pass tries again rather than leaving the day permanently blank.
-    assert len(attempts) == 2
     stored = json.loads(next((tmp_path / "snapshots").glob("*.json")).read_text(encoding="utf-8"))
-    assert stored["briefing"]["bullets"] == ["Recovered on the retry."]
+    # The briefing no longer depends on a credential, so a day can never be
+    # left blank because a key was missing.
+    assert stored["briefing"]["bullets"]
 
 
-def test_a_briefing_stored_for_an_earlier_day_is_not_reused(monkeypatch, tmp_path):
-    now = datetime.now(UTC)
-    _stub_sources(monkeypatch, now)
-    monkeypatch.setenv("OPENAI_API_KEY", "secret")
-    # A snapshot from a previous day that already carries its own briefing.
-    stale = RadarRun(
-        generated_at=now - timedelta(days=1),
-        since=now - timedelta(days=1, hours=48),
-        items=[],
-        health=[],
-        daily_briefing=["Yesterday's summary."],
-    )
-    write_snapshot(stale, tmp_path / "snapshots")
-    generated = []
-
-    def fake_generate(current, previous, api_key):
-        generated.append(api_key)
-        return ["Today's summary."]
-
-    monkeypatch.setattr("benchmark_radar.cli.generate_daily_briefing", fake_generate)
+def test_a_thin_day_reports_insufficient_volume_rather_than_a_pattern(monkeypatch, tmp_path):
+    _stub_sources(monkeypatch, datetime.now(UTC))
     monkeypatch.setattr("sys.argv", _briefing_argv(tmp_path))
 
     cli.main()
 
-    # Reuse requires the stored briefing to be dated today, not merely present,
-    # so yesterday's text is never published beside today's listings.
-    assert generated == ["secret"]
-    today = now.date().isoformat()
-    stored = json.loads((tmp_path / "snapshots" / f"{today}.json").read_text(encoding="utf-8"))
-    assert stored["briefing"] == {"date": today, "bullets": ["Today's summary."]}
+    stored = json.loads(next((tmp_path / "snapshots").glob("*.json")).read_text(encoding="utf-8"))
+    bullets = " ".join(stored["briefing"]["bullets"])
+    # One stubbed item is far below the volume a composition claim needs, and a
+    # single day has no baseline. Saying so is the correct output: a quota would
+    # be an incentive to manufacture significance.
+    assert "Insufficient" in bullets or "No material pattern" in bullets
