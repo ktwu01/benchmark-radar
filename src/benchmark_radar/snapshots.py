@@ -332,6 +332,17 @@ def merge_snapshots(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[
         merged_items[exact_artifact_key(item)] = item
     evidence_items = list(merged_items.values())
 
+    # Attention collection normally carries the previous pass forward, but a
+    # successful feed can still return a narrower moving window. Persist the
+    # explicit union so the canonical day matches the report and remains the
+    # complete baseline for tomorrow's briefing. The newer observation wins
+    # on collision because its engagement metrics are fresher.
+    merged_attention: dict[str, Any] = {}
+    for observation in (existing.get("attention") or {}).get("observations") or []:
+        merged_attention[observation["observation_id"]] = observation
+    for observation in (incoming.get("attention") or {}).get("observations") or []:
+        merged_attention[observation["observation_id"]] = observation
+
     # The funnel counters (fetched, deduplicated, scored, qualified,
     # suppressed_*) each measure rows moving through one pass. They cannot be
     # reconstructed from the union, and summing them would double-count the
@@ -360,14 +371,15 @@ def merge_snapshots(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[
     merged = {
         **incoming,
         "evidence_items": evidence_items,
+        "attention": {"observations": list(merged_attention.values())},
         # The union covers everything either pass looked at, so the earlier
         # `since` is the honest lower bound on the window it describes.
         "since": min(existing["since"], incoming["since"]),
     }
     if selection or existing_selection:
         merged["selection"] = selection
-    # `discovery_state` and `attention` are already cumulative by construction:
-    # the later pass loads the earlier snapshot and carries the ledger forward.
+    # `discovery_state` is cumulative by construction: the later pass loads
+    # the earlier snapshot and carries the ledger forward.
     # `ingest_health` and `producer_health` are per-pass and are taken from the
     # incoming pass unmerged, because concatenating them would emit duplicate
     # `source` rows and corrupt the coverage_signature derived from them.

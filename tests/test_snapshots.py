@@ -124,6 +124,9 @@ def test_same_utc_day_unions_both_runs(tmp_path):
     second = radar_run(title="Second run")
     second.items[0].source_id = "2607.9999"
     second.items[0].url = "https://arxiv.org/abs/2607.9999"
+    second.attention[0].observation_id = "producer:hacker-news:9999"
+    second.attention[0].source_id = "9999"
+    second.attention[0].url = "https://news.ycombinator.com/item?id=9999"
     second.generated_at = first.generated_at + timedelta(hours=6)
     second.since = second.generated_at - timedelta(hours=12)
     first.selection = {"fetched": 10, "qualified": 1, "published": 1}
@@ -139,6 +142,9 @@ def test_same_utc_day_unions_both_runs(tmp_path):
         "First run",
         "Second run",
     ]
+    assert {
+        observation["observation_id"] for observation in merged["attention"]["observations"]
+    } == {"producer:hacker-news:27", "producer:hacker-news:9999"}
     # The union covers the wider of the two windows, so `since` is the earlier.
     assert merged["since"] == first.since.isoformat()
     # One count describes the file. Every other counter describes the last

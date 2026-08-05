@@ -52,17 +52,6 @@ def current_day_snapshot(snapshots: list[dict[str, Any]], run: RadarRun) -> dict
         ),
         reverse=True,
     )
-    attention = {
-        item["observation_id"]: item
-        for item in (existing.get("attention") or {}).get("observations") or []
-    }
-    attention.update(
-        {
-            item["observation_id"]: item
-            for item in (incoming.get("attention") or {}).get("observations") or []
-        }
-    )
-    merged["attention"] = {"observations": list(attention.values())}
     return merged
 
 
