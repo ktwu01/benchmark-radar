@@ -1,6 +1,9 @@
 import re
+import tempfile
 from pathlib import Path
+from urllib.parse import quote
 
+from benchmark_radar.export import write_exports
 from benchmark_radar.model_cards import build_adoption_rank
 
 README = Path("README.md")
@@ -56,6 +59,28 @@ def test_readme_headline_totals_match_the_registry():
         f"and technical reports from {leaderboard['organization_count']}\n"
         f"organizations, tracking {leaderboard['benchmark_count']} benchmarks."
     ) in text
+
+
+def test_readme_badge_points_at_the_published_endpoint():
+    # The badge is the one artifact whose whole purpose is to be copied by
+    # someone else, so its URL is quoted twice: once rendered, once as a
+    # copyable snippet. Both are hand-written, and a badge pointing at a path
+    # the export layer no longer writes fails as a broken image on every README
+    # that copied it -- including other people's.
+    if not README.exists():  # pragma: no cover
+        return
+    text = README.read_text(encoding="utf-8")
+
+    url = "https://koutian.is-a.dev/benchmark-radar/data/leaderboard-badge.json"
+    quoted = quote(url, safe="")
+    assert text.count(f"https://img.shields.io/endpoint?url={quoted}") == 2
+
+
+def test_readme_badge_endpoint_filename_matches_the_exporter():
+    # Ties the name above to the writer, so renaming the artifact breaks a test
+    # here rather than silently breaking every embedded badge.
+    written = write_exports(Path(tempfile.mkdtemp()), source_url=None)
+    assert written["badge"].name == "leaderboard-badge.json"
 
 
 def test_readme_headline_keeps_the_quality_caveat():

@@ -2,6 +2,8 @@
 
 **Which AI benchmarks do frontier labs actually report when they ship a model?**
 
+[![model cards tracked](https://img.shields.io/endpoint?url=https%3A%2F%2Fkoutian.is-a.dev%2Fbenchmark-radar%2Fdata%2Fleaderboard-badge.json)](https://koutian.is-a.dev/benchmark-radar/?view=leaderboard)
+
 Not which benchmarks exist, and not which are cited most in papers: which ones a
 vendor chooses to put in front of readers in a model card. That is a question about
 what the field currently treats as the standard set, and it is answered here by
@@ -30,6 +32,17 @@ carries its own caveat.
 Take it with you: [`leaderboard.json`][json] · [`leaderboard.csv`][csv] ·
 [`leaderboard.md`][md] (paste-ready table). Every artifact restates the caveat, so the
 ranking cannot be separated from what it means.
+
+The coverage badge above reads the same registry, so it reports the current denominator
+rather than whatever it was when someone copied it:
+
+```markdown
+[![model cards tracked](https://img.shields.io/endpoint?url=https%3A%2F%2Fkoutian.is-a.dev%2Fbenchmark-radar%2Fdata%2Fleaderboard-badge.json)](https://koutian.is-a.dev/benchmark-radar/?view=leaderboard)
+```
+
+It deliberately shows coverage and not a rank: a badge is a single number read without
+context, and "GPQA Diamond is #1" seen that way is the quality claim this ranking does
+not make.
 
 [json]: https://ktwu01.github.io/benchmark-radar/data/leaderboard.json
 [csv]: https://ktwu01.github.io/benchmark-radar/data/leaderboard.csv
