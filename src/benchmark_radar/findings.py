@@ -58,9 +58,16 @@ BASELINE_DAYS = 9
 # Percentage points. Below this a composition change is not worth a reader's
 # attention even when it is real and separated.
 MINIMUM_SHIFT_POINTS = 5.0
-# A change carried by fewer independent sources than this is a connector
-# artifact, not a property of the feed.
-MINIMUM_SOURCE_BREADTH = 3
+# A change has to appear in at least this many sources, and in a majority of
+# the sources comparable across both windows. The absolute floor rejects a
+# two-source feed where one connector is half the evidence; the majority rule
+# scales with the feed instead of demanding unanimity, which a fixed count
+# effectively does when only three sources span both windows.
+MINIMUM_SOURCE_BREADTH = 2
+# Percentage points a single source must move on its own before it counts as
+# having contributed. Without a floor, noise in three sources can certify a
+# change that came almost entirely from a fourth.
+MINIMUM_SOURCE_SHIFT_POINTS = 2.0
 # Categories are multi-label, so several move together and testing all of them
 # invites reporting whichever crossed the line. Only the largest separated
 # shift is published, which is the same discipline as reporting the gated cell
@@ -118,10 +125,19 @@ def coverage_for(snapshot: dict[str, Any], config: dict[str, Any] | None = None)
         source = str(entry.get("source"))
         target = failed_required if (sources.get(source) or {}).get("required") else failed_optional
         target.append(source)
+    # A required source with no health row at all never reported, which is not
+    # the same as reporting successfully. Historical days recorded before a
+    # connector became required would otherwise be admitted as fully covered,
+    # and the caption would call the feed complete while a required source was
+    # simply absent from it.
+    reported = {str(entry.get("source")) for entry in health}
+    for source, settings in sources.items():
+        if (settings or {}).get("required") and source not in reported:
+            failed_required.append(source)
     return Coverage(
         healthy=sum(1 for entry in health if entry.get("ok")),
-        total=len(health),
-        failed_required=sorted(failed_required),
+        total=len(health) + len(set(failed_required) - reported),
+        failed_required=sorted(set(failed_required)),
         failed_optional=sorted(failed_optional),
     )
 
@@ -190,7 +206,14 @@ def _contributing_sources(
         baseline_share = mean_share(baseline, source)
         if recent_share is None or baseline_share is None:
             continue
-        if (recent_share > baseline_share) if rising else (recent_share < baseline_share):
+        # Material movement, not any directional drift. Counting a source that
+        # went from 10% to 11% as a contributor would let three sources of noise
+        # certify a change that came almost entirely from a fourth, which is the
+        # single-source artifact this gate exists to reject.
+        change = recent_share - baseline_share
+        if abs(change) < MINIMUM_SOURCE_SHIFT_POINTS:
+            continue
+        if (change > 0) if rising else (change < 0):
             moved += 1
     return moved, len(comparable)
 
@@ -202,23 +225,38 @@ def _category_counts(snapshot: dict[str, Any], category: str) -> tuple[int, int]
     return matching, len(items)
 
 
-MEASUREMENT_KEYS = ("taxonomy_version", "max_items_per_source")
+def _trailing_run(days: list[dict[str, Any]], usable) -> list[dict[str, Any]]:
+    """Return the longest unbroken run of usable days ending at the last one."""
+    run: list[dict[str, Any]] = []
+    for day in reversed(days):
+        if not usable(day):
+            break
+        run.append(day)
+    return list(reversed(run))
+
+
+# Every setting that changes which items a day contains or how they are
+# classified. `report_limit` truncates the ranked selection directly
+# (`pipeline.py`), so a change to it moves category shares without anything
+# happening in the feed.
+MEASUREMENT_KEYS = ("taxonomy_version", "max_items_per_source", "report_limit")
 
 
 def measurement_conflict(window: list[dict[str, Any]]) -> bool:
     """Whether the window spans a change in how the corpus was measured.
 
     Category shares are only comparable across days classified by the same
-    taxonomy and capped the same way. A taxonomy edit reclassifies artifacts
-    wholesale, and a changed per-source cap changes which items are present at
-    all, so either can produce a fully separated share change that reflects the
-    instrument rather than the feed.
+    taxonomy, capped the same way, and truncated at the same ranked limit. Any
+    of those changing reclassifies or re-selects artifacts wholesale, which can
+    produce a fully separated share change that reflects the instrument rather
+    than the feed.
 
-    Only recorded values are compared. Early snapshots predate these fields, and
-    an absent value is unknown rather than different: treating a missing key as
-    its own signature rejected the entire real history here, where every day was
-    in fact classified by the same taxonomy. Unknown settings are a reason to
-    read a claim carefully, not evidence that the instrument changed.
+    A day recording none of these keys is incomparable, not compatible: it was
+    produced under settings nobody wrote down, and silently admitting it would
+    let a differently-measured day sit inside a window described as verified.
+    Individual absent keys are treated as unknown rather than different, which
+    is what keeps the real history usable: its early days stamp the taxonomy but
+    not the caps, and every one of them was in fact classified identically.
     """
     for key in MEASUREMENT_KEYS:
         recorded = {
@@ -250,29 +288,39 @@ def comparable_window(
 
         A thin day yields 0% or 100% in every category and manufactures
         separation out of a handful of records. A day missing a required
-        connector is measuring a different feed. Either one has to be excluded
-        from both windows, not merely from the reported day.
+        connector is measuring a different feed. A day recording none of the
+        measurement settings was produced under settings nobody wrote down, so
+        it cannot be certified as measured the same way as its neighbours. Each
+        has to be kept out of both windows, not merely out of the reported day.
         """
+        selection = day.get("selection") or {}
         return (
             len(day.get("evidence_items") or []) >= MINIMUM_DAY_ITEMS
             and coverage_for(day, config).complete
+            and any(selection.get(key) is not None for key in MEASUREMENT_KEYS)
         )
 
     # The reported day itself is never dropped: if it cannot be compared, there
     # is nothing to report and the caller renders the reason instead.
     if not usable(history[-1]):
         return None
-    # Unusable days are excluded rather than rejecting the whole window. The
-    # real history here opens with four days of arXiv outage, and discarding
-    # every window that reaches back to them would suppress findings for as
-    # long as those days stayed in range. Dropping them and requiring enough
-    # clean days to remain keeps the comparison honest without making one old
-    # outage permanently disqualifying.
-    recent = [day for day in history[-RECENT_DAYS:] if usable(day)]
-    baseline = [
-        day for day in history[-(RECENT_DAYS + BASELINE_DAYS) : -RECENT_DAYS] if usable(day)
-    ]
-    if len(recent) < MINIMUM_RECENT_DAYS or len(baseline) < MINIMUM_BASELINE_DAYS:
+    # Windows must be contiguous. Dropping an unusable day from the middle and
+    # comparing what is left would let a contradictory day be skipped while the
+    # remaining days are still described as consecutive, which is the
+    # cherry-picking the persistence rule exists to prevent. So the recent
+    # window is the longest unbroken run of usable days ending today, and the
+    # baseline is the longest unbroken run ending immediately before it.
+    #
+    # Truncating rather than rejecting outright matters: the real history opens
+    # with four days of arXiv outage, and discarding every window that reaches
+    # back to them would suppress findings for as long as those days stayed in
+    # range.
+    recent = _trailing_run(history[-RECENT_DAYS:], usable)
+    if len(recent) < MINIMUM_RECENT_DAYS:
+        return None
+    earlier = history[: len(history) - len(recent)]
+    baseline = _trailing_run(earlier[-BASELINE_DAYS:], usable)
+    if len(baseline) < MINIMUM_BASELINE_DAYS:
         return None
     if measurement_conflict([*baseline, *recent]):
         return None
@@ -304,7 +352,12 @@ def composition_shift(
     today = history[-1]
 
     candidates = []
-    for category in sorted(_category_shares(today)):
+    # Every category seen anywhere in the window, not only those present today.
+    # A category that collapsed to zero is absent from today's shares, so
+    # iterating today would silently skip the most complete falling shift there
+    # is: 30% throughout the baseline to 0% throughout the recent window.
+    observed = {category for shares in [*baseline_shares, *recent_shares] for category in shares}
+    for category in sorted(observed):
         recent_values = [shares.get(category, 0.0) for shares in recent_shares]
         baseline_values = [shares.get(category, 0.0) for shares in baseline_shares]
         recent_mean = statistics.mean(recent_values)
@@ -321,9 +374,10 @@ def composition_shift(
         if not separated:
             continue
         # Contribution, not presence: the change has to show up independently in
-        # several sources measured against their own baselines.
+        # several sources measured against their own baselines, and in most of
+        # the sources that can be compared at all.
         moved, comparable = _contributing_sources(recent, baseline, category, rising=rising)
-        if moved < MINIMUM_SOURCE_BREADTH:
+        if moved < MINIMUM_SOURCE_BREADTH or moved * 2 <= comparable:
             continue
         count, total = _category_counts(today, category)
         candidates.append(

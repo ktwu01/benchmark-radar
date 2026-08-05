@@ -47,6 +47,13 @@ def _day(
         "date": (date(2026, 7, 1) + timedelta(days=index)).isoformat(),
         "evidence_items": items,
         "ingest_health": health,
+        # Real snapshots always stamp how they were measured. A day recording
+        # none of these keys is incomparable by design.
+        "selection": {
+            "taxonomy_version": "v1",
+            "max_items_per_source": 300,
+            "report_limit": 300,
+        },
     }
 
 
@@ -82,10 +89,21 @@ def test_a_one_day_spike_is_not_reported():
     assert "stayed within" not in findings[0]
 
 
-def test_a_shift_carried_by_too_few_sources_is_not_reported():
+def test_a_shift_carried_by_one_source_is_not_reported():
     # A composition change confined to one connector is that connector's
     # artifact, not a property of the feed.
-    assert composition_shift(_history(10, 40, sources=2)) is None
+    assert composition_shift(_history(10, 40, sources=1)) is None
+
+
+def test_a_shift_needs_a_majority_of_comparable_sources():
+    # Two of four moving is not a majority, so the change is as consistent with
+    # two connectors drifting as with the feed shifting.
+    flat = {"a": 10.0, "b": 10.0, "c": 10.0, "d": 10.0}
+    split = {"a": 40.0, "b": 40.0, "c": 10.0, "d": 10.0}
+    history = [_skewed_day(index, share_by_source=flat) for index in range(9)]
+    history += [_skewed_day(9 + index, share_by_source=split) for index in range(5)]
+
+    assert composition_shift(history, CONFIG) is None
 
 
 def _skewed_day(index: int, *, share_by_source: dict[str, float], per_source: int = 40) -> dict:
@@ -106,6 +124,11 @@ def _skewed_day(index: int, *, share_by_source: dict[str, float], per_source: in
         "date": (date(2026, 7, 1) + timedelta(days=index)).isoformat(),
         "evidence_items": items,
         "ingest_health": [{"source": "arxiv", "ok": True}, {"source": "github", "ok": True}],
+        "selection": {
+            "taxonomy_version": "v1",
+            "max_items_per_source": 300,
+            "report_limit": 300,
+        },
     }
 
 
@@ -135,17 +158,29 @@ def test_a_shift_moving_in_several_sources_is_reported():
     assert finding["sources_comparable"] == 4
 
 
-def test_a_thin_day_is_excluded_from_the_comparison():
-    # A one-item day yields 0% or 100% in every category and would manufacture
-    # separation from a handful of records. It is dropped from the window rather
-    # than contributing a share.
+def test_a_thin_day_truncates_the_window_rather_than_being_skipped():
+    # A one-item day yields 0% or 100% in every category. Skipping it and
+    # comparing the days either side would describe non-adjacent days as
+    # consecutive, so the run ends there instead. Two usable recent days is
+    # below the persistence floor, so nothing is reported.
     history = _history(10, 30)
     history[-3] = _day(11, total=1, agentic=1)
 
-    finding = composition_shift(history)
+    assert composition_shift(history) is None
+
+
+def test_a_thin_day_at_the_window_edge_shortens_a_still_valid_run():
+    # Truncation is not rejection: an unusable day at the far edge of the
+    # baseline leaves a shorter but genuinely contiguous run that still supports
+    # a claim. This is what keeps the real history usable.
+    history = _history(10, 30, days=15)
+    history[1] = _day(1, total=1, agentic=1)
+
+    finding = composition_shift(history, CONFIG)
 
     assert finding is not None
-    assert finding["recent_days"] == 4
+    assert finding["recent_days"] == 5
+    assert finding["baseline_days"] == 8
 
 
 def test_too_few_usable_recent_days_suppresses_the_claim():
@@ -158,13 +193,14 @@ def test_too_few_usable_recent_days_suppresses_the_claim():
     assert composition_shift(history) is None
 
 
-def test_a_day_missing_a_required_source_is_excluded_from_the_comparison():
-    # An outage day is measuring a different feed, so it must not contribute a
-    # share to either window. The real history opens with four days of arXiv
-    # outage, so rejecting the whole window instead would suppress findings for
-    # as long as those days stayed in range.
-    history = _history(10, 30)
-    history[2] = _day(2, agentic=99, failed=["github"])
+def test_an_outage_day_truncates_the_baseline_without_disqualifying_it():
+    # An outage day is measuring a different feed and must not contribute a
+    # share. Truncating rather than rejecting is what keeps the real history
+    # usable: it opens with four days of arXiv outage, and discarding every
+    # window reaching back to them would suppress findings while they stay in
+    # range.
+    history = _history(10, 30, days=15)
+    history[1] = _day(1, agentic=99, failed=["github"])
 
     finding = composition_shift(history, CONFIG)
 
@@ -177,7 +213,7 @@ def test_a_taxonomy_change_inside_the_window_suppresses_the_claim():
     # the boundary measures the instrument rather than the feed.
     history = _history(10, 30)
     for index, day in enumerate(history):
-        day["selection"] = {"taxonomy_version": "v2" if index >= 9 else "v1"}
+        day["selection"]["taxonomy_version"] = "v2" if index >= 9 else "v1"
 
     assert composition_shift(history) is None
 
@@ -185,7 +221,7 @@ def test_a_taxonomy_change_inside_the_window_suppresses_the_claim():
 def test_a_changed_per_source_cap_inside_the_window_suppresses_the_claim():
     history = _history(10, 30)
     for index, day in enumerate(history):
-        day["selection"] = {"max_items_per_source": 600 if index >= 9 else 300}
+        day["selection"]["max_items_per_source"] = 600 if index >= 9 else 300
 
     assert composition_shift(history) is None
 
@@ -196,7 +232,9 @@ def test_an_unrecorded_measurement_setting_is_unknown_not_different():
     # classified by the same taxonomy.
     history = _history(10, 30)
     for index, day in enumerate(history):
-        day["selection"] = {} if index < 2 else {"taxonomy_version": "v1"}
+        # Early real snapshots stamp the taxonomy but not the caps.
+        if index < 2:
+            day["selection"] = {"taxonomy_version": "v1"}
 
     assert composition_shift(history) is not None
 
@@ -270,10 +308,9 @@ def test_a_day_with_no_items_cannot_manufacture_separation():
     history = _history(10, 30)
     history[-2]["evidence_items"] = []
 
-    finding = composition_shift(history)
-
-    assert finding is not None
-    assert finding["recent_days"] == 4
+    # An empty day reads as 0% in every category, so it must never contribute a
+    # share. Inside the recent window it truncates the run below the floor.
+    assert composition_shift(history) is None
 
 
 def test_the_reported_day_itself_is_never_dropped():
@@ -356,3 +393,71 @@ def test_datetime_import_is_available_for_snapshot_dates():
     from benchmark_radar.briefing import daily_report_run  # noqa: F401
 
     assert datetime.now(UTC).tzinfo is UTC
+
+
+def test_a_contradictory_day_cannot_be_dropped_to_save_a_claim():
+    # The whole point of contiguity: a day that contradicts the shift must break
+    # the run rather than being skipped while the survivors are still described
+    # as consecutive.
+    history = _history(10, 30)
+    history[-2] = _day(12, agentic=10)
+
+    assert composition_shift(history, CONFIG) is None
+
+
+def test_a_day_recording_no_measurement_settings_is_incomparable():
+    # A day produced under settings nobody wrote down cannot be certified as
+    # measured the same way, so admitting it silently would be the stronger
+    # error than declining.
+    history = _history(10, 30)
+    history[-4]["selection"] = {}
+
+    assert composition_shift(history, CONFIG) is None
+
+
+def test_a_changed_report_limit_inside_the_window_suppresses_the_claim():
+    # report_limit truncates the ranked selection directly, so changing it moves
+    # category shares without anything happening in the feed.
+    history = _history(10, 30)
+    for index, day in enumerate(history):
+        day["selection"]["report_limit"] = 600 if index >= 9 else 300
+
+    assert composition_shift(history, CONFIG) is None
+
+
+def test_noise_in_other_sources_cannot_certify_a_one_source_change():
+    # One source moves 10% -> 70% while three drift 10% -> 11%. Counting any
+    # directional change would pass the breadth gate on ~95% single-source
+    # movement, which is the artifact the gate exists to reject.
+    flat = {"a": 10.0, "b": 10.0, "c": 10.0, "d": 10.0}
+    drifted = {"a": 70.0, "b": 11.0, "c": 11.0, "d": 11.0}
+    history = [_skewed_day(index, share_by_source=flat) for index in range(9)]
+    history += [_skewed_day(9 + index, share_by_source=drifted) for index in range(5)]
+
+    assert composition_shift(history, CONFIG) is None
+
+
+def test_a_required_source_with_no_health_row_is_not_counted_as_healthy():
+    # A required connector that never reported is not the same as one that
+    # reported success. Days recorded before a source became required must not
+    # be admitted as fully covered.
+    day = _day(1)
+    day["ingest_health"] = [{"source": "arxiv", "ok": True}]
+
+    coverage = coverage_for(day, CONFIG)
+
+    assert coverage.failed_required == ["github"]
+    assert not coverage.complete
+
+
+def test_a_category_that_collapses_to_zero_is_still_reported():
+    # A category absent from today's shares would never be evaluated if the loop
+    # iterated today, silently skipping the most complete falling shift there is.
+    history = _history(30, 0)
+
+    finding = composition_shift(history, CONFIG)
+
+    assert finding is not None
+    assert finding["category"] == "agentic"
+    assert finding["rising"] is False
+    assert finding["recent_share"] == 0.0
