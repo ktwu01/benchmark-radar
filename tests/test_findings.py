@@ -461,3 +461,57 @@ def test_a_category_that_collapses_to_zero_is_still_reported():
     assert finding["category"] == "agentic"
     assert finding["rising"] is False
     assert finding["recent_share"] == 0.0
+
+
+def test_a_calendar_gap_breaks_the_run():
+    # A day with no snapshot leaves no entry to reject, so walking the list would
+    # step over the gap and call five observations spanning a week "the last 5
+    # days". A persistence claim has to be about consecutive days.
+    history = _history(10, 30)
+    del history[-3]
+
+    assert composition_shift(history, CONFIG) is None
+
+
+def test_one_source_supplying_nearly_all_movement_is_rejected():
+    # 0/0/0 to 100/2/0 satisfies both a count floor of two and a majority rule
+    # while 100 of 102 matching items came from one connector. Counting sources
+    # equally is not enough; the dominant contribution has to be bounded.
+    flat = {"a": 0.0, "b": 0.0, "c": 0.0}
+    lopsided = {"a": 100.0, "b": 2.5, "c": 0.0}
+    history = [_skewed_day(index, share_by_source=flat) for index in range(9)]
+    history += [_skewed_day(9 + index, share_by_source=lopsided) for index in range(5)]
+
+    assert composition_shift(history, CONFIG) is None
+
+
+def test_evenly_distributed_movement_is_accepted():
+    flat = {"a": 5.0, "b": 5.0, "c": 5.0}
+    risen = {"a": 30.0, "b": 32.5, "c": 27.5}
+    history = [_skewed_day(index, share_by_source=flat) for index in range(9)]
+    history += [_skewed_day(9 + index, share_by_source=risen) for index in range(5)]
+
+    finding = composition_shift(history, CONFIG)
+
+    assert finding is not None
+    assert finding["sources_moved"] == 3
+
+
+def test_a_disabled_required_source_does_not_invalidate_coverage():
+    # A disabled source is intentionally not fetched and emits no health row, so
+    # synthesizing a failure would mark every day incomplete and suppress all
+    # findings until someone noticed the stale `required` flag.
+    config = {
+        "sources": {
+            "arxiv": {"required": True},
+            "retired": {"required": True, "enabled": False},
+        }
+    }
+    day = _day(1)
+    day["ingest_health"] = [{"source": "arxiv", "ok": True}]
+
+    coverage = coverage_for(day, config)
+
+    assert coverage.failed_required == []
+    assert coverage.complete
+    assert coverage.caption() == "Coverage: 1/1 connectors healthy."

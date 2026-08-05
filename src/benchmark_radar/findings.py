@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import statistics
 from collections import Counter
+from datetime import date, timedelta
 from typing import Any
 
 # A finding needs enough of the day to be about the day rather than about noise.
@@ -68,6 +69,10 @@ MINIMUM_SOURCE_BREADTH = 2
 # having contributed. Without a floor, noise in three sources can certify a
 # change that came almost entirely from a fourth.
 MINIMUM_SOURCE_SHIFT_POINTS = 2.0
+# The largest share of total movement one source may supply. Counting sources
+# equally lets a connector contributing nearly all of a change hide behind two
+# others that merely cleared the floor.
+MAX_SOURCE_CONTRIBUTION = 0.7
 # Categories are multi-label, so several move together and testing all of them
 # invites reporting whichever crossed the line. Only the largest separated
 # shift is published, which is the same discipline as reporting the gated cell
@@ -132,7 +137,14 @@ def coverage_for(snapshot: dict[str, Any], config: dict[str, Any] | None = None)
     # simply absent from it.
     reported = {str(entry.get("source")) for entry in health}
     for source, settings in sources.items():
-        if (settings or {}).get("required") and source not in reported:
+        settings = settings or {}
+        # A disabled source is intentionally not fetched and emits no health row,
+        # which the pipeline also excludes from its own required-source gate.
+        # Synthesizing a failure for it would mark every day incomplete and
+        # suppress all findings until someone noticed the stale `required` flag.
+        if not settings.get("enabled", True):
+            continue
+        if settings.get("required") and source not in reported:
             failed_required.append(source)
     return Coverage(
         healthy=sum(1 for entry in health if entry.get("ok")),
@@ -200,7 +212,7 @@ def _contributing_sources(
         str(item.get("source")) for day in baseline for item in day["evidence_items"]
     }
     comparable = recent_sources & baseline_sources
-    moved = 0
+    moves: list[float] = []
     for source in comparable:
         recent_share = mean_share(recent, source)
         baseline_share = mean_share(baseline, source)
@@ -214,8 +226,22 @@ def _contributing_sources(
         if abs(change) < MINIMUM_SOURCE_SHIFT_POINTS:
             continue
         if (change > 0) if rising else (change < 0):
-            moved += 1
-    return moved, len(comparable)
+            moves.append(abs(change))
+    return moves, len(comparable)
+
+
+def _dominated_by_one_source(moves: list[float]) -> bool:
+    """Whether one source supplies most of the movement being claimed.
+
+    Counting sources equally is not enough. Three sources moving 0 to 100, 0 to
+    2, and 0 to 0 satisfies both a count floor and a majority rule while 100 of
+    102 matching items came from one connector, which is precisely the artifact
+    the breadth gate exists to reject. So the largest single contribution is
+    bounded as a fraction of the total movement.
+    """
+    if not moves:
+        return True
+    return max(moves) > MAX_SOURCE_CONTRIBUTION * sum(moves)
 
 
 def _category_counts(snapshot: dict[str, Any], category: str) -> tuple[int, int]:
@@ -226,12 +252,24 @@ def _category_counts(snapshot: dict[str, Any], category: str) -> tuple[int, int]
 
 
 def _trailing_run(days: list[dict[str, Any]], usable) -> list[dict[str, Any]]:
-    """Return the longest unbroken run of usable days ending at the last one."""
+    """Return the longest run of usable days on consecutive dates, ending last.
+
+    Usability alone is not adjacency. A day with no snapshot at all leaves no
+    entry to reject, so walking the list would silently step over the gap and
+    describe five observations spanning a week as "the last 5 days". Requiring
+    consecutive calendar dates makes a missing day end the run, which is what a
+    persistence claim needs: the run has to be what it says it is.
+    """
     run: list[dict[str, Any]] = []
+    expected: date | None = None
     for day in reversed(days):
         if not usable(day):
             break
+        current = date.fromisoformat(str(day["date"]))
+        if expected is not None and current != expected:
+            break
         run.append(day)
+        expected = current - timedelta(days=1)
     return list(reversed(run))
 
 
@@ -374,10 +412,14 @@ def composition_shift(
         if not separated:
             continue
         # Contribution, not presence: the change has to show up independently in
-        # several sources measured against their own baselines, and in most of
-        # the sources that can be compared at all.
-        moved, comparable = _contributing_sources(recent, baseline, category, rising=rising)
+        # several sources measured against their own baselines, in most of the
+        # sources that can be compared at all, and without one of them supplying
+        # nearly all of the movement.
+        moves, comparable = _contributing_sources(recent, baseline, category, rising=rising)
+        moved = len(moves)
         if moved < MINIMUM_SOURCE_BREADTH or moved * 2 <= comparable:
+            continue
+        if _dominated_by_one_source(moves):
             continue
         count, total = _category_counts(today, category)
         candidates.append(
