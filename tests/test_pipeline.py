@@ -1235,3 +1235,11 @@ def test_a_watchlisted_record_is_not_counted_as_dropped():
     assert selection["qualified"] == 1
     assert selection["suppressed_below_minimum"] == 0
     assert selection["suppressed_uncategorized"] == 0
+
+
+def test_a_non_finite_minimum_score_is_rejected():
+    # NaN makes both `< minimum_score` and `>= minimum_score` false, so every
+    # record would fail the predicate while entering none of the counters and the
+    # funnel identity would break silently. `float()` accepts `.nan` from YAML.
+    with pytest.raises(ValueError, match="finite"):
+        _select([_fresh(source_id="a")], minimum_score=float("nan"))

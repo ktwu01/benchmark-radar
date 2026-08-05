@@ -137,6 +137,13 @@ def render_markdown(
         suppressed = int(selection.get("suppressed_as_seen") or 0)
         suppressed_future = int(selection.get("suppressed_future_dated") or 0)
         suppressed_low_value = int(selection.get("suppressed_low_value") or 0)
+        # Issue #124: persisting these was not enough. Without them the rendered
+        # funnel stepped from "after dedupe" straight to "qualified" and left the
+        # largest drop in the whole pipeline, 585 of 686 records on 2026-08-05,
+        # with nothing to explain it. Absent on snapshots written before the
+        # counters existed, where the gap simply cannot be attributed.
+        below_minimum = int(selection.get("suppressed_below_minimum") or 0)
+        uncategorized = int(selection.get("suppressed_uncategorized") or 0)
         lines.extend(
             [
                 ("- Latest-pass selection: " if daily_total is not None else "- Selection: ")
@@ -153,6 +160,12 @@ def render_markdown(
                     if suppressed_low_value
                     else ""
                 )
+                + (
+                    f"**{below_minimum}** below {selection.get('minimum_score', 0):g} → "
+                    if below_minimum
+                    else ""
+                )
+                + (f"**{uncategorized}** uncategorized → " if uncategorized else "")
                 + qualified
                 + f" → **{selection.get('published', 0)}** published"
                 + (

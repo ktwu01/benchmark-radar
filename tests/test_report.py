@@ -158,3 +158,45 @@ def test_report_distinguishes_latest_pass_from_merged_daily_total():
 
     assert "Latest-pass selection" in report
     assert "**2** across today's collection passes" in report
+
+
+def test_the_funnel_shows_why_records_failed_qualification():
+    # Issue #124: the rendered funnel stepped from "after dedupe" straight to
+    # "qualified", leaving the largest drop in the pipeline unexplained.
+    run = _run([_record(1)])
+    run.selection = {
+        "fetched": 700,
+        "deduplicated": 686,
+        "scored": 686,
+        "qualified": 101,
+        "published": 101,
+        "suppressed_low_value": 1,
+        "suppressed_below_minimum": 562,
+        "suppressed_uncategorized": 22,
+        "minimum_score": 40.0,
+        "watchlisted": 0,
+    }
+
+    markdown = render_markdown(run)
+
+    assert "**562** below 40 →" in markdown
+    assert "**22** uncategorized →" in markdown
+
+
+def test_the_funnel_omits_qualification_reasons_on_older_snapshots():
+    # Snapshots written before the counters existed cannot attribute the gap, so
+    # the renderer says nothing rather than printing a misleading zero.
+    run = _run([_record(1)])
+    run.selection = {
+        "fetched": 700,
+        "deduplicated": 686,
+        "scored": 686,
+        "qualified": 101,
+        "published": 101,
+        "minimum_score": 40.0,
+    }
+
+    markdown = render_markdown(run)
+
+    assert "below 40 →" not in markdown
+    assert "uncategorized →" not in markdown

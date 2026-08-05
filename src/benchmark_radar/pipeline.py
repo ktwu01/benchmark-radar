@@ -409,6 +409,14 @@ def _score_and_select(
     logic a second time.
     """
     settings = config["radar"]
+    # Resolved once, above the predicate and the counters that decompose it, so
+    # the two can never read different values. A NaN threshold makes every
+    # comparison false, which would drop records from the predicate while
+    # entering none of the counters and silently break the funnel identity.
+    # `float()` accepts `.nan` from YAML happily, so the check must be explicit.
+    minimum_score = float(settings["minimum_score"])
+    if not math.isfinite(minimum_score):
+        raise ValueError(f"minimum_score must be a finite number, got {minimum_score!r}")
     unique = deduplicate(items)
     scored = apply_watchlist(
         [
@@ -432,10 +440,7 @@ def _score_and_select(
         if not item.suppression_reasons
         # A watchlist hit is published even when the generic score or taxonomy
         # would have dropped it: the reader asked for these by name.
-        and (
-            item.watchlist
-            or (item.total_score >= float(settings["minimum_score"]) and item.categories)
-        )
+        and (item.watchlist or (item.total_score >= minimum_score and item.categories))
     ]
     selected.sort(
         key=lambda item: (bool(item.watchlist), item.total_score, item.published_at),
@@ -460,7 +465,6 @@ def _score_and_select(
     # These three mirror the predicate above in its own precedence order, so
     # each record is attributed to the first reason that dropped it and the
     # three sum to `scored - qualified`. `test_pipeline` asserts that identity.
-    minimum_score = float(settings["minimum_score"])
     suppressed_low_value = sum(1 for item in scored if item.suppression_reasons)
     below_minimum = sum(
         1
@@ -490,8 +494,7 @@ def _score_and_select(
         "watchlisted": sum(
             1
             for item in selected
-            if item.watchlist
-            and not (item.total_score >= float(settings["minimum_score"]) and item.categories)
+            if item.watchlist and not (item.total_score >= minimum_score and item.categories)
         ),
         # Suppression now applies to watchlisted records too, so the count is
         # every suppressed record rather than only the un-watchlisted ones.
@@ -509,7 +512,7 @@ def _score_and_select(
         # per-pass funnel below it, `published_total` describes the file. On
         # 2026-08-05 they read 101 and 272 for exactly that reason.
         "published": len(published),
-        "minimum_score": float(settings["minimum_score"]),
+        "minimum_score": minimum_score,
         "report_limit": int(settings["report_limit"]),
         # A per-source fetch that returned exactly this many rows was truncated,
         # so "300 found" is a ceiling rather than a total. Publishing the cap
