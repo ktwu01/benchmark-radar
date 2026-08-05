@@ -615,9 +615,9 @@
   },
   "briefing": {
     "bullets": [
-      "Agentic artifacts rose to 26.3% of our captured feed over the last 5 days, against a 13.6% baseline across the prior 4 days (+12.7 pp).",
-      "Today 80 of 272 items carry it, and the change appeared independently in 2 of 3 sources comparable across both windows.",
-      "Moderate confidence. Coverage: 5/8 connectors healthy; brave, openreview, semantic_scholar unavailable."
+      "Agentic artifacts rose to 26.3% of our captured feed over the last 5 days, against a 13.6% baseline across the prior 4 days (+12.7 percentage points).",
+      "Personalization and memory recurred in 2 of the 3 leading releases first observed today: When Agents Learn to Be You (privacy leakage, impersonation risk, and defenses in persona skills); MemArena (on-device agentic personal memory assistants at scale); and Measurement Without Validity (compounding reliability problem in agentic AI evaluation).",
+      "The change appeared independently in 2 of the 3 sources present in both windows. Moderate confidence. Coverage: 5/8 connectors healthy; brave, openreview, semantic scholar unavailable."
     ],
     "date": "2026-08-05"
   },

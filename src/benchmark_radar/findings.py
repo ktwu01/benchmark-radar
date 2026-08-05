@@ -38,10 +38,13 @@ shifting" is overclaiming on a keyword-filtered scrape of five sources.
 
 from __future__ import annotations
 
+import re
 import statistics
 from collections import Counter
 from datetime import date, timedelta
 from typing import Any
+
+from .corpus import artifact_alias_map, exact_artifact_key
 
 # A finding needs enough of the day to be about the day rather than about noise.
 MINIMUM_DAY_ITEMS = 25
@@ -78,6 +81,7 @@ MAX_SOURCE_CONTRIBUTION = 0.7
 # shift is published, which is the same discipline as reporting the gated cell
 # rather than the average.
 MAX_FINDINGS = 1
+MAX_EVIDENCE_EXAMPLES = 3
 
 
 class Coverage:
@@ -112,9 +116,11 @@ class Coverage:
     def caption(self) -> str:
         parts = [f"Coverage: {self.healthy}/{self.total} connectors healthy"]
         if self.failed_required:
-            parts.append(f"required source(s) {', '.join(self.failed_required)} unavailable")
+            required = ", ".join(source.replace("_", " ") for source in self.failed_required)
+            parts.append(f"required source(s) {required} unavailable")
         if self.failed_optional:
-            parts.append(f"{', '.join(self.failed_optional)} unavailable")
+            optional = ", ".join(source.replace("_", " ") for source in self.failed_optional)
+            parts.append(f"{optional} unavailable")
         return "; ".join(parts) + "."
 
 
@@ -515,7 +521,138 @@ def _confidence(finding: dict[str, Any], coverage: Coverage) -> str:
     return "High confidence" if not coverage.failed_optional else "Moderate confidence"
 
 
-def describe(finding: dict[str, Any], coverage: Coverage) -> list[str]:
+def _representative_key(item: dict[str, Any]) -> tuple[bool, float, bool]:
+    """Rank evidence for a reader, not merely for ingestion."""
+    return (
+        item.get("event_kind") == "released",
+        float(item.get("total_score") or 0),
+        bool(str(item.get("summary") or "").strip()),
+    )
+
+
+def first_seen_items(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return the best record for each artifact on the day it first appeared.
+
+    Daily snapshots overlap, and one artifact can arrive from several connectors.
+    Examples must therefore be new to the radar, not merely present in today's
+    rolling scan. Alias resolution also prevents a paper and its repository from
+    being presented as independent pieces of evidence.
+    """
+    all_items = [item for day in history for item in day.get("evidence_items") or []]
+    if not all_items:
+        return []
+    aliases = artifact_alias_map(all_items)
+    seen: set[str] = set()
+    today: list[dict[str, Any]] = []
+    for day in history:
+        first_on_day: dict[str, dict[str, Any]] = {}
+        for item in day.get("evidence_items") or []:
+            identity = aliases[exact_artifact_key(item)]
+            if identity in seen:
+                continue
+            existing = first_on_day.get(identity)
+            if existing is None or _representative_key(item) > _representative_key(existing):
+                first_on_day[identity] = item
+        seen.update(first_on_day)
+        today = list(first_on_day.values())
+    return sorted(today, key=_representative_key, reverse=True)
+
+
+_FOCUS_PREFIX = re.compile(
+    r"^(?:an?\s+)?(?:[\w-]+\s+){0,3}benchmark(?:ing)?\s*(?:for|of|on)?\s*",
+    flags=re.IGNORECASE,
+)
+_EVIDENCE_THEMES = (
+    ("personalization and memory", re.compile(r"\b(?:persona\w*|personali[sz]\w*|memor\w*)\b")),
+    (
+        "safety and evaluation integrity",
+        re.compile(
+            r"\b(?:privacy|secur\w*|safety|reliab\w*|validit\w*|adversarial|attack\w*|gaming)\b"
+        ),
+    ),
+    ("coding agents", re.compile(r"\b(?:coding|software|web agents?|web generation|frontend)\b")),
+    ("embodied systems", re.compile(r"\b(?:embodied|robot\w*|home safety|vision-language)\b")),
+    (
+        "evaluation infrastructure",
+        re.compile(r"\b(?:harness\w*|infrastructure|observability|protocol\w*|framework\w*)\b"),
+    ),
+)
+
+
+def _compact_evidence_label(item: dict[str, Any], *, focus_limit: int = 88) -> str:
+    """Turn a source title into a compact statement of what it measures."""
+    title = " ".join(str(item.get("title") or "").split())
+    if not title:
+        return "Untitled artifact"
+    if ":" not in title:
+        return title[:120].rstrip()
+    name, focus = (part.strip() for part in title.split(":", 1))
+    focus = re.sub(r"^(?:the|an?)\s+", "", focus, flags=re.IGNORECASE)
+    focus = _FOCUS_PREFIX.sub("", focus).strip()
+    if not focus:
+        return name[:120].rstrip()
+    if len(focus) > focus_limit:
+        focus = focus[: focus_limit + 1].rsplit(" ", 1)[0].rstrip() + "…"
+    # Source titles are usually title-cased. Preserve real acronyms such as LLM
+    # and AI, while rendering the explanatory phrase as prose rather than a
+    # headline pasted into parentheses.
+    focus = re.sub(
+        r"\b[A-Z][A-Za-z-]*\b",
+        lambda match: match.group(0) if match.group(0).isupper() else match.group(0).lower(),
+        focus,
+    )
+    return f"{name} ({focus})"
+
+
+def _representative_evidence(
+    items: list[dict[str, Any]], category: str, *, limit: int = MAX_EVIDENCE_EXAMPLES
+) -> list[dict[str, Any]]:
+    matching = [
+        item
+        for item in items
+        if category in (item.get("categories") or []) and str(item.get("title") or "").strip()
+    ]
+    released = [item for item in matching if item.get("event_kind") == "released"]
+    pool = released or matching
+    return pool[:limit]
+
+
+def evidence_examples(
+    items: list[dict[str, Any]], category: str, *, limit: int = MAX_EVIDENCE_EXAMPLES
+) -> list[str]:
+    """Name the strongest first-seen releases that make a finding concrete."""
+    return [
+        _compact_evidence_label(item)
+        for item in _representative_evidence(items, category, limit=limit)
+    ]
+
+
+def _evidence_theme(items: list[dict[str, Any]], category: str) -> tuple[str, int, int] | None:
+    """Name a shared topic only when most representative titles support it."""
+    representatives = _representative_evidence(items, category)
+    if len(representatives) < 2:
+        return None
+    scored = []
+    for position, (label, pattern) in enumerate(_EVIDENCE_THEMES):
+        matches = sum(
+            bool(pattern.search(str(item.get("title") or "").lower())) for item in representatives
+        )
+        scored.append((matches, -position, label))
+    matches, _, label = max(scored)
+    return (label, matches, len(representatives)) if matches >= 2 else None
+
+
+def _join_examples(examples: list[str]) -> str:
+    if len(examples) == 1:
+        return examples[0]
+    if len(examples) == 2:
+        return f"{examples[0]} and {examples[1]}"
+    return f"{'; '.join(examples[:-1])}; and {examples[-1]}"
+
+
+def describe(
+    finding: dict[str, Any], coverage: Coverage, *, first_seen: list[dict[str, Any]] | None = None
+) -> list[str]:
     """Render a verified finding as a BLUF-ordered card.
 
     Judgment first, then the evidence that supports it, then the confidence and
@@ -525,21 +662,31 @@ def describe(finding: dict[str, Any], coverage: Coverage) -> list[str]:
     """
     direction = "rose to" if finding["rising"] else "fell to"
     category = finding["category"].replace("_", " ")
-    return [
+    bullets = [
         (
             f"{category.capitalize()} artifacts {direction} "
             f"{finding['recent_share']}% of our captured feed over the last "
             f"{finding['recent_days']} days, against a {finding['baseline_share']}% baseline "
             f"across the prior {finding['baseline_days']} days "
-            f"({finding['shift_points']:+.1f} pp)."
+            f"({finding['shift_points']:+.1f} percentage points)."
         ),
-        (
-            f"Today {finding['count']} of {finding['total']} items carry it, and the change "
-            f"appeared independently in {finding['sources_moved']} of "
-            f"{finding['sources_comparable']} sources comparable across both windows."
-        ),
-        f"{_confidence(finding, coverage)}. {coverage.caption()}",
     ]
+    examples = evidence_examples(first_seen or [], finding["category"])
+    if examples:
+        theme = _evidence_theme(first_seen or [], finding["category"])
+        lead = (
+            f"{theme[0].capitalize()} recurred in {theme[1]} of the "
+            f"{theme[2]} leading releases first observed today:"
+            if theme
+            else "The leading releases in that category first observed today were"
+        )
+        bullets.append(f"{lead} {_join_examples(examples)}.")
+    bullets.append(
+        f"The change appeared independently in {finding['sources_moved']} of "
+        f"the {finding['sources_comparable']} sources present in both windows. "
+        f"{_confidence(finding, coverage)}. {coverage.caption()}"
+    )
+    return bullets
 
 
 def no_finding(
@@ -601,4 +748,4 @@ def daily_findings(
     finding = composition_shift(history, config) if coverage.complete else None
     if finding is None:
         return no_finding(history, coverage, config)
-    return describe(finding, coverage)
+    return describe(finding, coverage, first_seen=first_seen_items(history))

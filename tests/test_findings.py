@@ -3,11 +3,14 @@ from datetime import UTC, date, datetime, timedelta
 from benchmark_radar.findings import (
     MINIMUM_DAY_ITEMS,
     Coverage,
+    _evidence_theme,
     _ranking_key,
     composition_shift,
     coverage_for,
     daily_findings,
     discriminating_power,
+    evidence_examples,
+    first_seen_items,
 )
 
 CONFIG = {
@@ -72,8 +75,8 @@ def test_a_separated_persistent_shift_is_reported():
 
     assert "Agentic artifacts rose to 30.0% of our captured feed" in findings[0]
     assert "against a 10.0% baseline" in findings[0]
-    assert "+20.0 pp" in findings[0]
-    assert "30 of 100 items carry it" in findings[1]
+    assert "+20.0 percentage points" in findings[0]
+    assert "appeared independently in 4 of the 4 sources present in both windows" in findings[-1]
 
 
 def test_a_one_day_spike_is_not_reported():
@@ -289,8 +292,8 @@ def test_failed_optional_sources_do_not_suppress_a_claim():
 
     assert "Agentic artifacts rose" in findings[0]
     # The claim survives, but confidence is capped and the gap is disclosed.
-    assert "Moderate confidence" in findings[2]
-    assert "brave, openreview unavailable" in findings[2]
+    assert "Moderate confidence" in findings[-1]
+    assert "brave, openreview unavailable" in findings[-1]
 
 
 def test_a_thin_day_reports_insufficient_volume():
@@ -332,6 +335,75 @@ def test_only_the_largest_shift_is_published():
     assert len([line for line in findings if "of our captured feed" in line]) == 1
 
 
+def test_a_finding_names_first_seen_evidence_instead_of_repeating_the_counter():
+    history = _history(10, 30)
+    history[-1]["evidence_items"][0].update(
+        {
+            "title": "TrustBench: Benchmarking Privacy Failures in Tool-Using Agents",
+            "summary": "A substantive source description.",
+            "event_kind": "released",
+            "total_score": 99,
+        }
+    )
+
+    findings = daily_findings(history, CONFIG)
+
+    assert "TrustBench (privacy failures in tool-using agents)" in findings[1]
+    assert "Today 30 of 100 items" not in " ".join(findings)
+    assert "appeared independently" in findings[2]
+
+
+def test_first_seen_evidence_omits_an_artifact_repeated_from_yesterday():
+    history = _history(10, 30, days=9)
+    repeated = history[-2]["evidence_items"][0]
+    history[-1]["evidence_items"][0] = {
+        **repeated,
+        "title": "A later update to the same artifact",
+        "total_score": 100,
+    }
+
+    today = first_seen_items(history)
+
+    assert repeated["source_id"] not in {item["source_id"] for item in today}
+
+
+def test_evidence_prefers_releases_and_compacts_the_measurement_focus():
+    items = [
+        {
+            "title": "Old Harness",
+            "event_kind": "updated",
+            "total_score": 100,
+            "categories": ["agentic"],
+        },
+        {
+            "title": "MemArena: An Ego-Centric Benchmark for On-Device Personal Memory",
+            "event_kind": "released",
+            "total_score": 80,
+            "categories": ["agentic"],
+        },
+    ]
+
+    assert evidence_examples(items, "agentic") == ["MemArena (on-device personal memory)"]
+
+
+def test_evidence_theme_requires_a_recurrence_and_reports_its_denominator():
+    items = [
+        {
+            "title": title,
+            "event_kind": "released",
+            "total_score": score,
+            "categories": ["agentic"],
+        }
+        for score, title in [
+            (90, "PersonaBench: Personalized Agent Evaluation"),
+            (80, "MemArena: Long-Term Memory for Agents"),
+            (70, "CodeBench: Coding Agents in Real Repositories"),
+        ]
+    ]
+
+    assert _evidence_theme(items, "agentic") == ("personalization and memory", 2, 3)
+
+
 def test_claims_are_scoped_to_the_captured_feed():
     # The crawler is a keyword-filtered scrape of a handful of sources, not a
     # sample of the field, so no claim may generalize beyond it.
@@ -364,7 +436,7 @@ def test_a_falling_share_is_reported_with_its_direction():
     findings = daily_findings(_history(40, 10), CONFIG)
 
     assert "fell to 10.0%" in findings[0]
-    assert "-30.0 pp" in findings[0]
+    assert "-30.0 percentage points" in findings[0]
 
 
 def test_real_history_reports_the_verified_agentic_shift():
