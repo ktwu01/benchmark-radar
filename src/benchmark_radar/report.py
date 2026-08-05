@@ -4,6 +4,7 @@ from collections import Counter
 from datetime import UTC
 
 from . import __version__
+from .briefing import markdown_bullet
 from .models import RadarItem, RadarRun
 
 
@@ -89,8 +90,15 @@ def render_markdown(
             ]
         )
     if daily_briefing:
+        # Bullets are persisted as canonical plain text, so the Markdown and
+        # HTML escaping happens here rather than in the stored value.
         lines.extend(
-            ["## Daily briefing", "", *[f"- {_escape(bullet)}" for bullet in daily_briefing], ""]
+            [
+                "## Daily briefing",
+                "",
+                *[f"- {_escape(markdown_bullet(bullet))}" for bullet in daily_briefing],
+                "",
+            ]
         )
     lines.extend(
         [

@@ -989,3 +989,76 @@ def test_the_first_stamped_day_does_not_compare_across_the_boundary(tmp_path):
 
     assert not any(trend["comparable"] for trend in data["days"][-1]["category_trends"].values())
     assert any(trend["comparable"] for trend in data["days"][-2]["category_trends"].values())
+
+
+def test_validate_snapshot_rejects_a_briefing_from_another_day():
+    run = radar_run()
+    run.daily_briefing = ["Yesterday's summary."]
+    snapshot = snapshot_for_run(run)
+    snapshot["briefing"]["date"] = "2026-07-26"
+
+    # A briefing carrying the wrong date would be published as if it described
+    # this day. That is a bug in whatever wrote the file, not a day to quietly
+    # regenerate, so it fails loudly.
+    with pytest.raises(SnapshotError, match="does not match snapshot date"):
+        validate_snapshot(snapshot)
+
+
+def test_validate_snapshot_rejects_unusable_briefing_bullets():
+    run = radar_run()
+    run.daily_briefing = ["Real bullet."]
+    snapshot = snapshot_for_run(run)
+
+    snapshot["briefing"]["bullets"] = []
+    with pytest.raises(SnapshotError, match="non-empty array"):
+        validate_snapshot(snapshot)
+
+    snapshot["briefing"]["bullets"] = ["   "]
+    with pytest.raises(SnapshotError, match="non-empty strings"):
+        validate_snapshot(snapshot)
+
+    snapshot["briefing"]["bullets"] = ["a", "b", "c", "d"]
+    with pytest.raises(SnapshotError, match="more than the 3"):
+        validate_snapshot(snapshot)
+
+
+def test_validate_snapshot_accepts_a_day_without_a_briefing():
+    # Every snapshot written before the briefing was persisted stays valid.
+    validate_snapshot(snapshot_for_run(radar_run()))
+
+
+def test_write_snapshot_preserves_the_briefing_across_passes(tmp_path):
+    morning = radar_run()
+    morning.daily_briefing = ["Committed by the first pass."]
+    write_snapshot(morning, tmp_path)
+
+    afternoon = radar_run(title="Another Evaluation Benchmark")
+    write_snapshot(afternoon, tmp_path)
+
+    stored = json.loads((tmp_path / f"{snapshot_for_run(morning)['date']}.json").read_text())
+    # The second pass generated no briefing, so the day keeps the one it has
+    # rather than losing it to the incoming spread.
+    assert stored["briefing"]["bullets"] == ["Committed by the first pass."]
+
+
+def test_rebuild_dashboard_publishes_the_briefing_for_the_day(tmp_path):
+    run = radar_run()
+    run.daily_briefing = ["What changed today."]
+    write_snapshot(run, tmp_path)
+    output = tmp_path / "radar.json"
+
+    rebuild_dashboard(tmp_path, output)
+
+    day = json.loads(output.read_text())["days"][0]
+    assert day["briefing"]["bullets"] == ["What changed today."]
+    assert day["briefing"]["date"] == day["date"]
+
+
+def test_rebuild_dashboard_uses_an_empty_briefing_when_the_day_has_none(tmp_path):
+    write_snapshot(radar_run(), tmp_path)
+    output = tmp_path / "radar.json"
+
+    rebuild_dashboard(tmp_path, output)
+
+    # The dashboard renders its own absent state from this.
+    assert json.loads(output.read_text())["days"][0]["briefing"] == {}

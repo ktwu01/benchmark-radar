@@ -360,6 +360,29 @@ input {
   color: var(--muted);
 }
 
+/* The day's narrative leads the view, so it reads as prose rather than as
+   another panel competing with the listings below it. */
+.daily-briefing {
+  margin-bottom: 1.5rem;
+  padding: 0.9rem 1.4rem;
+  border: 1px solid var(--ink);
+  background: var(--panel);
+}
+
+.daily-briefing-title {
+  margin-bottom: 0.6rem;
+  font-size: 1rem;
+}
+
+.daily-briefing-list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.daily-briefing-list li + li {
+  margin-top: 0.4rem;
+}
+
 .record-card {
   border-bottom: 1px solid var(--line);
 }

@@ -268,8 +268,19 @@ def main() -> None:
     issue_item_limit = config.get("radar", {}).get("issue_item_limit")
     daily_snapshot = current_day_snapshot(snapshots, run)
     report_run = daily_report_run(daily_snapshot, run)
-    daily_briefing = None
-    if api_key := os.getenv("OPENAI_API_KEY"):
+    # One UTC day carries exactly one briefing even though several passes merge
+    # into it. A stored briefing is only reusable when it is both present and
+    # dated today: a briefing carried over from an earlier day would otherwise
+    # be published as if it described this one. When the day has none, because
+    # the first pass had no key or the call failed, a later pass retries.
+    stored_briefing = daily_snapshot.get("briefing") or {}
+    today = run.generated_at.astimezone(UTC).date().isoformat()
+    daily_briefing = (
+        list(stored_briefing.get("bullets") or []) if stored_briefing.get("date") == today else None
+    )
+    if daily_briefing:
+        print(f"Reusing the briefing already stored for {today}")
+    elif api_key := os.getenv("OPENAI_API_KEY"):
         try:
             daily_briefing = generate_daily_briefing(
                 daily_snapshot,
@@ -278,6 +289,9 @@ def main() -> None:
             )
         except (BriefingError, RequestError, ValueError) as error:
             print(f"::warning title=Daily briefing omitted::{error}")
+    # Attach before writing so the snapshot, the dashboard payload, and the
+    # Markdown report all describe the same briefing.
+    run.daily_briefing = daily_briefing
     args.output.write_text(
         render_markdown(
             report_run,
@@ -301,6 +315,14 @@ def main() -> None:
                 ],
                 "producer_health": [health.to_dict() for health in run.producer_health],
                 "selection": run.selection,
+                # Day-scoped, unlike the run-scoped counters above: the briefing
+                # describes the whole UTC day and is shared by every pass over
+                # it. Omitted when the day has none.
+                **(
+                    {"briefing": {"date": today, "bullets": daily_briefing}}
+                    if daily_briefing
+                    else {}
+                ),
             },
             indent=2,
             ensure_ascii=False,

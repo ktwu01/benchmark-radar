@@ -5,6 +5,7 @@ from pathlib import Path
 import yaml
 
 from benchmark_radar import cli
+from benchmark_radar.briefing import BriefingError
 from benchmark_radar.models import ProducerHealth, RadarItem, RadarRun
 from benchmark_radar.pipeline import SOURCE_FETCHERS
 from benchmark_radar.snapshots import write_snapshot
@@ -201,3 +202,114 @@ def test_required_discovery_name_does_not_exempt_attention_failure(monkeypatch, 
     cli._emit_persistent_source_warnings(run, config)
 
     assert "github has failed for 3 consecutive runs" in capsys.readouterr().out
+
+
+def _briefing_argv(tmp_path: Path) -> list[str]:
+    return [
+        "benchmark-radar",
+        "--config",
+        str(_config_path(tmp_path)),
+        "--snapshot-dir",
+        str(tmp_path / "snapshots"),
+        "--output",
+        str(tmp_path / "report.md"),
+        "--json-output",
+        str(tmp_path / "items.json"),
+        "--dashboard-output",
+        str(tmp_path / "radar.json"),
+    ]
+
+
+def _stub_sources(monkeypatch, day: datetime) -> None:
+    item = RadarItem(
+        source="GitHub",
+        source_id="org/repo",
+        title="A benchmark repository for evaluation",
+        url="https://github.com/org/repo",
+        published_at=day,
+        summary="Benchmark suite for language model evaluation.",
+    )
+    monkeypatch.setitem(SOURCE_FETCHERS, "github", lambda config, since, limit: [item])
+    monkeypatch.setitem(SOURCE_FETCHERS, "arxiv", lambda config, since, limit: [item])
+    monkeypatch.setitem(SOURCE_FETCHERS, "huggingface", lambda config, since, limit: [item])
+
+
+def test_second_pass_reuses_the_stored_briefing_without_calling_the_api(
+    monkeypatch, tmp_path, capsys
+):
+    _stub_sources(monkeypatch, datetime.now(UTC))
+    monkeypatch.setenv("OPENAI_API_KEY", "secret")
+    calls = []
+
+    def fake_generate(current, previous, api_key):
+        calls.append(api_key)
+        return ["The day's only briefing."]
+
+    monkeypatch.setattr("benchmark_radar.cli.generate_daily_briefing", fake_generate)
+    monkeypatch.setattr("sys.argv", _briefing_argv(tmp_path))
+
+    cli.main()
+    cli.main()
+
+    # One UTC day holds exactly one briefing, so the second pass over the same
+    # day must not spend another API call or overwrite the stored text.
+    assert calls == ["secret"]
+    assert "Reusing the briefing already stored" in capsys.readouterr().out
+    stored = json.loads(next((tmp_path / "snapshots").glob("*.json")).read_text(encoding="utf-8"))
+    assert stored["briefing"]["bullets"] == ["The day's only briefing."]
+
+
+def test_a_later_pass_retries_after_the_briefing_call_failed(monkeypatch, tmp_path):
+    _stub_sources(monkeypatch, datetime.now(UTC))
+    monkeypatch.setenv("OPENAI_API_KEY", "secret")
+    attempts = []
+
+    def flaky_generate(current, previous, api_key):
+        attempts.append(api_key)
+        if len(attempts) == 1:
+            raise BriefingError("upstream refused")
+        return ["Recovered on the retry."]
+
+    monkeypatch.setattr("benchmark_radar.cli.generate_daily_briefing", flaky_generate)
+    monkeypatch.setattr("sys.argv", _briefing_argv(tmp_path))
+
+    cli.main()
+    cli.main()
+
+    # The first pass stored nothing, so the day still needs a briefing and the
+    # next pass tries again rather than leaving the day permanently blank.
+    assert len(attempts) == 2
+    stored = json.loads(next((tmp_path / "snapshots").glob("*.json")).read_text(encoding="utf-8"))
+    assert stored["briefing"]["bullets"] == ["Recovered on the retry."]
+
+
+def test_a_briefing_stored_for_an_earlier_day_is_not_reused(monkeypatch, tmp_path):
+    now = datetime.now(UTC)
+    _stub_sources(monkeypatch, now)
+    monkeypatch.setenv("OPENAI_API_KEY", "secret")
+    # A snapshot from a previous day that already carries its own briefing.
+    stale = RadarRun(
+        generated_at=now - timedelta(days=1),
+        since=now - timedelta(days=1, hours=48),
+        items=[],
+        health=[],
+        daily_briefing=["Yesterday's summary."],
+    )
+    write_snapshot(stale, tmp_path / "snapshots")
+    generated = []
+
+    def fake_generate(current, previous, api_key):
+        generated.append(api_key)
+        return ["Today's summary."]
+
+    monkeypatch.setattr("benchmark_radar.cli.generate_daily_briefing", fake_generate)
+    monkeypatch.setattr("sys.argv", _briefing_argv(tmp_path))
+
+    cli.main()
+
+    # Reuse requires the stored briefing to be dated today, not merely present,
+    # so yesterday's text is never published beside today's listings.
+    assert generated == ["secret"]
+    today = now.date().isoformat()
+    stored = json.loads((tmp_path / "snapshots" / f"{today}.json").read_text(encoding="utf-8"))
+    assert stored["briefing"] == {"date": today, "bullets": ["Today's summary."]}

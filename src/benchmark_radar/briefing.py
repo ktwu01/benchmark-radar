@@ -166,6 +166,16 @@ def _extract_text(response: Any) -> str:
 
 
 def _safe_bullets(text: str) -> list[str]:
+    """Return canonical plain-text bullets, unescaped.
+
+    The model saw untrusted upstream titles, so its prose must never be
+    published as GitHub-flavored Markdown or HTML. Escaping happens at each
+    render boundary instead of here: these bullets are persisted in the
+    snapshot and read back by the dashboard, which assigns them through DOM
+    `textContent`. Storing Markdown-escaped text would render visible
+    backslashes and HTML entities there, so the stored form stays canonical
+    and `markdown_bullet` below escapes only for the Markdown report.
+    """
     text = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
     bullets: list[str] = []
     for line in text.splitlines():
@@ -174,18 +184,22 @@ def _safe_bullets(text: str) -> list[str]:
         clean = re.sub(r"^(?:[-*•]|\d+[.)])\s*", "", line.strip())
         clean = clean.replace("\r", " ").replace("\n", " ").strip()
         if clean:
-            # The model saw untrusted upstream titles. Publish its prose as
-            # text, never as GitHub-flavored Markdown or HTML: this also makes
-            # an unmatched comment opener harmless instead of hiding the rest
-            # of the issue body.
-            clean = html.escape(clean, quote=False)
-            clean = re.sub(r"([\\`*_{}\[\]()#+.!>])", r"\\\1", clean)
             bullets.append(clean[:400])
         if len(bullets) == MAX_BULLETS:
             break
     if not bullets:
         raise BriefingError("daily briefing response contains no usable bullets")
     return bullets
+
+
+def markdown_bullet(bullet: str) -> str:
+    """Escape one canonical bullet for the Markdown report.
+
+    An unmatched comment opener stays harmless instead of hiding the rest of
+    the issue body, and no upstream title can inject Markdown or HTML.
+    """
+    escaped = html.escape(bullet, quote=False)
+    return re.sub(r"([\\`*_{}\[\]()#+.!>])", r"\\\1", escaped)
 
 
 def generate_daily_briefing(

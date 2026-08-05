@@ -29,6 +29,9 @@ from .rubric import (
 
 SCHEMA_VERSION = 2
 SUPPORTED_SCHEMA_VERSIONS = {1, SCHEMA_VERSION}
+# Mirrors briefing.MAX_BULLETS. Defined here rather than imported because
+# `briefing` imports this module, and a validator cannot depend on its caller.
+MAX_BRIEFING_BULLETS = 3
 
 # Mirrors the `required: true` sources in config.yml: the connectors that need
 # no optional secret and whose failure `run_pipeline` already treats as fatal
@@ -47,11 +50,16 @@ def _iso_utc(value: datetime) -> str:
 
 
 def snapshot_for_run(run: RadarRun) -> dict[str, Any]:
+    date = run.generated_at.astimezone(UTC).date().isoformat()
+    briefing = {"date": date, "bullets": list(run.daily_briefing)} if run.daily_briefing else None
     return {
         "schema_version": SCHEMA_VERSION,
-        "date": run.generated_at.astimezone(UTC).date().isoformat(),
+        "date": date,
         "generated_at": _iso_utc(run.generated_at),
         "since": _iso_utc(run.since),
+        # Omitted entirely when the day has no briefing, so an absent key means
+        # "not generated yet" and a later pass knows to retry.
+        **({"briefing": briefing} if briefing else {}),
         "evidence_items": [item.to_dict() for item in run.items],
         "attention": {
             "observations": [observation.to_dict() for observation in run.attention],
@@ -151,6 +159,27 @@ def _validate_health(values: Any, *, source: str, field: str) -> None:
             <= health.keys()
         ):
             raise SnapshotError(f"{source}: {field} {index} is invalid")
+
+
+def _validate_briefing(briefing: Any, *, source: str, date: str) -> None:
+    if not isinstance(briefing, dict):
+        raise SnapshotError(f"{source}: briefing must be an object")
+    if briefing.get("date") != date:
+        raise SnapshotError(
+            f"{source}: briefing date {briefing.get('date')!r} "
+            f"does not match snapshot date {date!r}"
+        )
+    bullets = briefing.get("bullets")
+    if not isinstance(bullets, list) or not bullets:
+        raise SnapshotError(f"{source}: briefing.bullets must be a non-empty array")
+    if len(bullets) > MAX_BRIEFING_BULLETS:
+        raise SnapshotError(
+            f"{source}: briefing.bullets holds {len(bullets)} entries, "
+            f"more than the {MAX_BRIEFING_BULLETS} a briefing may carry"
+        )
+    for bullet in bullets:
+        if not isinstance(bullet, str) or not bullet.strip():
+            raise SnapshotError(f"{source}: briefing.bullets entries must be non-empty strings")
 
 
 def _validate_attention(attention: Any, *, source: str) -> None:
@@ -268,6 +297,13 @@ def validate_snapshot(snapshot: dict[str, Any], *, source: str = "snapshot") -> 
     # Optional: snapshots written before per-stage counts were tracked stay valid.
     if "selection" in snapshot and not isinstance(snapshot["selection"], dict):
         raise SnapshotError(f"{source}: selection must be an object")
+    # Optional: snapshots written before the briefing was persisted stay valid.
+    # An extra key passing the required-field check is not enough, because a
+    # briefing carrying the wrong date would be reused as if it described this
+    # day. A mismatch is a bug in whatever wrote the file, not a day to
+    # silently regenerate, so it fails loudly here.
+    if "briefing" in snapshot:
+        _validate_briefing(snapshot["briefing"], source=source, date=snapshot["date"])
 
 
 def normalize_snapshot(snapshot: dict[str, Any], *, source: str = "snapshot") -> dict[str, Any]:
@@ -368,6 +404,13 @@ def merge_snapshots(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[
             }
         )
 
+    # One UTC day holds exactly one briefing. `incoming` is a fresh run, so
+    # spreading it below would drop a briefing the earlier pass already
+    # committed. First success wins: the stored text stays, and a later pass
+    # only supplies one when the day still has none. Without this, an earlier
+    # pass's briefing would be silently replaced on every subsequent run.
+    briefing = existing.get("briefing") or incoming.get("briefing")
+
     merged = {
         **incoming,
         "evidence_items": evidence_items,
@@ -376,6 +419,10 @@ def merge_snapshots(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[
         # `since` is the honest lower bound on the window it describes.
         "since": min(existing["since"], incoming["since"]),
     }
+    if briefing:
+        merged["briefing"] = briefing
+    else:
+        merged.pop("briefing", None)
     if selection or existing_selection:
         merged["selection"] = selection
     # `discovery_state` is cumulative by construction: the later pass loads
@@ -691,6 +738,10 @@ def dashboard_data(
                 "ingest_health": snapshot["ingest_health"],
                 "producer_health": snapshot["producer_health"],
                 "selection": snapshot.get("selection") or {},
+                # Empty object on days generated before the briefing was
+                # persisted, or days where the call was skipped or failed. The
+                # dashboard renders its own absent state from that.
+                "briefing": snapshot.get("briefing") or {},
                 "coverage_complete": not coverage_gaps,
                 "coverage_gaps": coverage_gaps,
                 "coverage_signature": coverage_signature,

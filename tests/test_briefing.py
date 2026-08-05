@@ -8,10 +8,11 @@ from benchmark_radar.briefing import (
     current_day_snapshot,
     daily_report_run,
     generate_daily_briefing,
+    markdown_bullet,
     previous_calendar_day,
 )
 from benchmark_radar.models import AttentionObservation, RadarItem, RadarRun
-from benchmark_radar.snapshots import snapshot_for_run
+from benchmark_radar.snapshots import merge_snapshots, snapshot_for_run
 
 
 def _item(index: int, *, title: str | None = None) -> RadarItem:
@@ -204,7 +205,19 @@ def test_generate_daily_briefing_caps_api_and_sanitizes_output(monkeypatch):
 
     bullets = generate_daily_briefing(snapshot_for_run(_run([_item(1)])), None, "secret")
 
+    # Bullets are stored canonically: the dashboard assigns them through DOM
+    # textContent, where stored Markdown escapes would render as visible
+    # backslashes and HTML entities. The heading and the comment are still
+    # dropped, and the ordered-list marker is still stripped.
     assert bullets == [
+        "One new benchmark.",
+        "Evidence rose.",
+        "[click](https://evil.test) <img src=x><!--",
+    ]
+    # Escaping happens at the Markdown boundary instead, so an upstream title
+    # cannot inject Markdown or HTML into the published issue body, and an
+    # unmatched comment opener cannot hide the rest of it.
+    assert [markdown_bullet(bullet) for bullet in bullets] == [
         "One new benchmark\\.",
         "Evidence rose\\.",
         "\\[click\\]\\(https://evil\\.test\\) &lt;img src=x&gt;&lt;\\!--",
@@ -214,3 +227,52 @@ def test_generate_daily_briefing_caps_api_and_sanitizes_output(monkeypatch):
     assert captured["kwargs"]["attempts"] == 2
     assert captured["kwargs"]["timeout"] == 10.0
     assert captured["kwargs"]["headers"] == {"Authorization": "Bearer secret"}
+
+
+def test_snapshot_for_run_persists_the_briefing_with_its_day():
+    run = _run([_item(1)])
+    run.daily_briefing = ["One new benchmark.", "Evidence rose."]
+
+    snapshot = snapshot_for_run(run)
+
+    assert snapshot["briefing"] == {
+        "date": "2026-08-04",
+        "bullets": ["One new benchmark.", "Evidence rose."],
+    }
+
+
+def test_snapshot_for_run_omits_the_briefing_when_the_day_has_none():
+    # An absent key is what tells a later pass the day still needs one, so it
+    # must not be written as an empty placeholder.
+    assert "briefing" not in snapshot_for_run(_run([_item(1)]))
+
+
+def test_merge_snapshots_keeps_the_first_briefing_of_the_day():
+    run = _run([_item(1)])
+    run.daily_briefing = ["First pass."]
+    existing = snapshot_for_run(run)
+    later = _run([_item(2)])
+    later.daily_briefing = ["Second pass."]
+
+    merged = merge_snapshots(existing, snapshot_for_run(later))
+
+    # One briefing per day: the earlier pass committed the day's text and a
+    # later pass must not overwrite it.
+    assert merged["briefing"]["bullets"] == ["First pass."]
+
+
+def test_merge_snapshots_accepts_a_briefing_when_the_day_had_none():
+    existing = snapshot_for_run(_run([_item(1)]))
+    retried = _run([_item(2)])
+    retried.daily_briefing = ["Recovered on a later pass."]
+
+    merged = merge_snapshots(existing, snapshot_for_run(retried))
+
+    # The first pass failed the call or had no key, so a later pass supplies it.
+    assert merged["briefing"]["bullets"] == ["Recovered on a later pass."]
+
+
+def test_merge_snapshots_leaves_no_briefing_key_when_neither_pass_had_one():
+    merged = merge_snapshots(snapshot_for_run(_run([_item(1)])), snapshot_for_run(_run([_item(2)])))
+
+    assert "briefing" not in merged

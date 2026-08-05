@@ -599,3 +599,25 @@ def test_share_card_attributes_its_source_without_overlapping_the_caveat():
     attribution = draw.textlength("github.com/ktwu01/benchmark-radar", font=font(21))
 
     assert caveat + attribution < WIDTH - 2 * MARGIN
+
+
+def test_today_view_leads_with_the_daily_briefing():
+    html = Path("site/index.html").read_text(encoding="utf-8")
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+
+    assert 'id="daily-briefing"' in html
+    assert 'id="daily-briefing-body"' in html
+    # The briefing describes the whole scan date, so it sits above the filters
+    # rather than inside the filtered listing beside them.
+    assert html.index('id="daily-briefing"') < html.index('id="filters"')
+    assert "renderDailyBriefing(day)" in script
+
+
+def test_daily_briefing_withholds_another_days_text_and_names_an_absent_one():
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+
+    # Reuse requires the stored briefing to match the day being rendered, so a
+    # briefing carried over from another date is never shown beside these
+    # listings.
+    assert "briefing.date === day.date" in script
+    assert "No briefing was recorded for this day." in script

@@ -106,6 +106,12 @@
 
     <main id="main-content" tabindex="-1">
       <section class="view" id="today-view" aria-label="Today">
+        <!-- The day's narrative, above the filters because it describes the
+             whole scan date rather than the filtered subset below it. -->
+        <section class="daily-briefing" id="daily-briefing" aria-labelledby="daily-briefing-heading">
+          <h2 class="daily-briefing-title" id="daily-briefing-heading">Daily briefing</h2>
+          <div id="daily-briefing-body"></div>
+        </section>
         <form class="filter-panel today-filters" id="filters">
           <label class="search-field">
             Search

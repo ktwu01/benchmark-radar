@@ -243,11 +243,39 @@ function definition(label, value) {
   ]);
 }
 
+// The briefing is generated once per UTC day and stored in that day's snapshot,
+// so a day can legitimately have none: it predates the feature, no API key was
+// configured, or every pass over the day failed the call. Say which rather than
+// leaving the reader with a heading above blank space.
+function renderDailyBriefing(day) {
+  const briefing = day.briefing || {};
+  const bullets = Array.isArray(briefing.bullets) ? briefing.bullets : [];
+  // A briefing carrying another day's date describes the wrong day, so it is
+  // withheld rather than shown beside this date's listings.
+  const usable = briefing.date === day.date ? bullets.filter((line) => line.trim()) : [];
+  replaceChildren(
+    byId("daily-briefing-body"),
+    usable.length
+      ? [element("ul", { className: "daily-briefing-list" },
+          // `text` assigns textContent, so the stored bullets render as the
+          // plain text they are. They are never inserted as HTML.
+          usable.map((line) => element("li", { text: line })))]
+      : [
+          element("p", {
+            className: "empty-state",
+            text: "No briefing was recorded for this day.",
+          }),
+        ],
+  );
+}
+
 function renderToday() {
   const day = dailySnapshot();
   if (!day) return;
   state.todayDate = day.date;
   byId("today-date").value = day.date;
+
+  renderDailyBriefing(day);
 
   syncFilters();
   const observations = filteredObservations();
