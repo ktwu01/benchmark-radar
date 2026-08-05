@@ -274,15 +274,16 @@ function renderToday() {
     ...day.ingest_health.map((entry) => ({ ...entry, layer: "Radar ingest" })),
     ...day.producer_health.map((entry) => ({ ...entry, layer: "Producer report" })),
   ];
-  // Fetch plumbing is not what the reader came for, so the roster collapses to
-  // one line. It opens itself only when a connector failed, which is the one
-  // case where the panel explains a gap in the list beside it.
+  // Fetch plumbing is not what the reader came for, so the roster stays
+  // collapsed to one line and the reader expands it on demand. The summary
+  // still carries the failure count, so a gap is legible without opening the
+  // panel: connector failures are usually long-lived and known, and
+  // force-opening on every one of them buried the list beside it.
   const failedCount = healthEntries.filter((entry) => !entry.ok).length;
   byId("health-status").textContent = failedCount
     ? `${failedCount} of ${healthEntries.length} failed`
     : `${healthEntries.length} ok`;
   byId("health-status").classList.toggle("has-failure", failedCount > 0);
-  byId("health-panel-details").open = failedCount > 0;
   // Absent on snapshots written before the cap was published, in which case no
   // count can be identified as truncated and all are shown as-is.
   const ingestCap = day.selection?.max_items_per_source ?? null;
