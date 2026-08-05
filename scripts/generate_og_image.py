@@ -38,15 +38,32 @@ PALE = "#EEF2F4"
 
 MARGIN = 64
 ROWS = 5
+TITLE_SIZE = 46
+# "Benchmark" measures ~234px at 46px in DejaVu and Helvetica, and ~55px through
+# Pillow's unscaled default. 150 sits clear of both, so the check does not turn
+# into a per-font tolerance to maintain.
+MIN_TITLE_PROBE_WIDTH = 150
 
 
 def font(size: int, *, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    # DejaVu ships on the Ubuntu runner that publishes the card, so it stays
+    # first and the published image is unchanged. The macOS paths exist so a
+    # maintainer regenerating locally gets a real card rather than a silently
+    # degraded one: PIL's default is an unscalable bitmap face, which ignores
+    # every size below and renders a 46px title at roughly 10px.
     names = [
         "DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
         if bold
         else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/System/Library/Fonts/Supplemental/DejaVuSans-Bold.ttf"
+        if bold
+        else "/System/Library/Fonts/Supplemental/DejaVuSans.ttf",
+        "/System/Library/Fonts/HelveticaNeue.ttc"
+        if bold
+        else "/System/Library/Fonts/Helvetica.ttc",
+        "/System/Library/Fonts/Helvetica.ttc",
     ]
     for name in names:
         try:
@@ -54,6 +71,30 @@ def font(size: int, *, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont
         except OSError:
             continue
     return ImageFont.load_default()
+
+
+def _assert_scalable_fonts() -> None:
+    """Refuse to write a card whose text ignored the requested size.
+
+    Checked by measuring rather than by inspecting the font class. Pillow's
+    `load_default()` returns a scalable FreeTypeFont on Pillow 11+ and an
+    unscalable bitmap face before that, so a type check passes on new Pillow
+    while still rendering a 46px title at roughly 10px. Size is the property
+    that actually matters, and it holds across both.
+
+    This fails loudly because the failure is otherwise invisible: the card
+    still writes, and a share image is only ever checked by looking at it.
+    """
+    probe = "Benchmark"
+    title_width = font(TITLE_SIZE, bold=True).getbbox(probe)[2]
+    if title_width < MIN_TITLE_PROBE_WIDTH:
+        raise SystemExit(
+            f"Fonts resolved to a face that ignores the requested size: "
+            f'"{probe}" measured {title_width}px wide at {TITLE_SIZE}px, '
+            f"expected at least {MIN_TITLE_PROBE_WIDTH}px. Install DejaVu "
+            "(`brew install --cask font-dejavu` on macOS, "
+            "`apt-get install fonts-dejavu-core` on Debian/Ubuntu) and re-run."
+        )
 
 
 def _truncate(draw: ImageDraw.ImageDraw, text: str, typeface, limit: int) -> str:
@@ -80,7 +121,7 @@ def render(leaderboard: dict, output: Path) -> Path:
     # glance in a feed without spending vertical space the ranking needs.
     draw.rectangle([0, 0, 12, HEIGHT], fill=TEAL)
 
-    title = font(46, bold=True)
+    title = font(TITLE_SIZE, bold=True)
     question = font(31)
     row_face = font(30)
     row_bold = font(30, bold=True)
@@ -187,6 +228,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("site/assets/og-card.png"))
     args = parser.parse_args()
 
+    _assert_scalable_fonts()
     path = render(build_adoption_rank(args.registry), args.output)
     print(f"Wrote {path}")
 
