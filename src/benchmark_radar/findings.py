@@ -230,6 +230,51 @@ def _contributing_sources(
     return moves, len(comparable)
 
 
+def discriminating_power(baseline_share: float) -> float:
+    """How much a category's presence distinguishes one artifact from another.
+
+    A tag carried by almost everything says almost nothing about the artifact
+    carrying it. In this corpus `benchmark` sits near 83% of items and `dataset`
+    near 69%, because virtually everything a benchmark tracker collects is both;
+    `agentic` sits near 12%, so knowing an artifact is agentic is genuinely
+    informative. A ten-point move in a near-universal tag and a ten-point move
+    in a discriminating one are not equally worth a reader's attention, even
+    when both are equally verified.
+
+    Scored as the absent fraction, `(100 - share) / 100`: the probability that
+    an arbitrary artifact does *not* carry the tag, which is exactly how much
+    the tag narrows the field when it does appear. This is the self-information
+    of the label expressed linearly, and it is a stated property of the data
+    rather than a threshold chosen to produce a preferred answer.
+
+    Deliberately one-sided. Bernoulli variance, `share * (100 - share)`, was the
+    first thing tried and is wrong here: it peaks at 50% and so scores `dataset`
+    at 69% above `agentic` at 14%, penalising a rare category as heavily as a
+    near-universal one. A rare category is informative, not less so; only
+    universality dilutes a claim.
+    """
+    share = max(0.0, min(100.0, baseline_share))
+    return (100.0 - share) / 100.0
+
+
+def _ranking_key(finding: dict[str, Any]) -> tuple[float, float, str]:
+    """Rank verified candidates by how much a reader learns from them.
+
+    Size alone ranked the `dataset` decline above the `agentic` rise on real
+    data, which is defensible arithmetic and a poor briefing: `dataset` tags
+    most of the corpus, so its share moving is closer to a restatement of volume
+    than to news about composition.
+
+    Direction is deliberately not part of this. Preferring rises because they
+    read as better news would choose the story over the evidence, and on a day
+    whose only real signal is a decline it would surface a weaker rise instead.
+    The category name breaks ties so the ordering is total and stable rather
+    than dependent on dictionary iteration.
+    """
+    weight = discriminating_power(finding["baseline_share"])
+    return weight * abs(finding["shift_points"]), abs(finding["shift_points"]), finding["category"]
+
+
 def _dominated_by_one_source(moves: list[float]) -> bool:
     """Whether one source supplies most of the movement being claimed.
 
@@ -439,9 +484,11 @@ def composition_shift(
         )
     if not candidates:
         return None
-    # Largest absolute move wins. Publishing every category that cleared the
-    # bar would let a reader pick the most flattering one.
-    candidates.sort(key=lambda finding: abs(finding["shift_points"]), reverse=True)
+    # Exactly one finding is published. Categories are multi-label and move
+    # together, so several candidates are usually the same underlying shift
+    # described three ways, and publishing all of them would let a reader pick
+    # the most flattering framing.
+    candidates.sort(key=_ranking_key, reverse=True)
     return candidates[0]
 
 

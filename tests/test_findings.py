@@ -6,6 +6,7 @@ from benchmark_radar.findings import (
     composition_shift,
     coverage_for,
     daily_findings,
+    discriminating_power,
 )
 
 CONFIG = {
@@ -515,3 +516,86 @@ def test_a_disabled_required_source_does_not_invalidate_coverage():
     assert coverage.failed_required == []
     assert coverage.complete
     assert coverage.caption() == "Coverage: 1/1 connectors healthy."
+
+
+def test_a_discriminating_category_outranks_a_larger_move_in_a_universal_tag():
+    # Real data: `dataset` fell 15.4 pp from a 69% baseline while `agentic` rose
+    # 12.3 pp from 13.6%. Size alone reports the dataset decline, which is closer
+    # to a restatement of volume than news about composition, because almost
+    # everything in a benchmark tracker is a dataset.
+    days = []
+    for index in range(14):
+        recent = index >= 9
+        items = []
+        for position in range(200):
+            categories = []
+            # `dataset` is near-universal and falls; `agentic` is rare and rises.
+            if position < (108 if recent else 138):
+                categories.append("dataset")
+            if position < (52 if recent else 27):
+                categories.append("agentic")
+            items.append(
+                {
+                    "source": f"source-{position % 4}",
+                    "source_id": f"item-{index}-{position}",
+                    "categories": categories,
+                }
+            )
+        day = _day(index)
+        day["evidence_items"] = items
+        days.append(day)
+
+    finding = composition_shift(days, CONFIG)
+
+    assert finding is not None
+    assert finding["category"] == "agentic"
+    assert finding["rising"] is True
+
+
+def test_discriminating_power_only_discounts_universality():
+    # One-sided by design. Bernoulli variance was tried first and is wrong here:
+    # it peaks at 50% and scores a 69% tag above a 14% one, penalising a rare
+    # category as heavily as a near-universal one.
+    assert discriminating_power(14.0) > discriminating_power(69.0)
+    assert discriminating_power(2.0) > discriminating_power(50.0)
+    assert discriminating_power(0.0) == 1.0
+    assert discriminating_power(100.0) == 0.0
+
+
+def test_ranking_does_not_prefer_rises_over_declines():
+    # Preferring rises because they read as better news would choose the story
+    # over the evidence. A decline in a discriminating category must still win
+    # over a smaller rise in a more universal one.
+    days = []
+    for index in range(14):
+        recent = index >= 9
+        items = []
+        for position in range(200):
+            categories = ["benchmark"] if position < (168 if recent else 160) else []
+            if position < (20 if recent else 60):
+                categories.append("agentic")
+            items.append(
+                {
+                    "source": f"source-{position % 4}",
+                    "source_id": f"item-{index}-{position}",
+                    "categories": categories,
+                }
+            )
+        day = _day(index)
+        day["evidence_items"] = items
+        days.append(day)
+
+    finding = composition_shift(days, CONFIG)
+
+    assert finding is not None
+    assert finding["category"] == "agentic"
+    assert finding["rising"] is False
+
+
+def test_a_high_discrimination_category_cannot_be_promoted_without_a_shift():
+    # Weighting multiplies the shift, so a rare category that did not move
+    # cannot outrank one that did. `data_quality` scores the highest
+    # discrimination on real data and correctly ranks last.
+    assert discriminating_power(1.8) > discriminating_power(13.6)
+    findings = daily_findings(_history(10, 30), CONFIG)
+    assert "Agentic artifacts rose" in findings[0]
