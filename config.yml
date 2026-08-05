@@ -215,7 +215,10 @@ sources:
       - data contamination benchmark
       - agentic benchmark evaluation
     page_size: 100
-    max_requests: 3
+    # The budget is shared across every search, not per search, so a value below
+    # the search count silently starves the trailing queries. Five covers all
+    # four searches plus one pagination follow-up.
+    max_requests: 5
     # A free individual API key starts at one request per second.
     request_delay_seconds: 1.1
     attempts: 3
