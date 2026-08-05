@@ -404,12 +404,14 @@ def merge_snapshots(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[
             }
         )
 
-    # One UTC day holds exactly one briefing. `incoming` is a fresh run, so
-    # spreading it below would drop a briefing the earlier pass already
-    # committed. First success wins: the stored text stays, and a later pass
-    # only supplies one when the day still has none. Without this, an earlier
-    # pass's briefing would be silently replaced on every subsequent run.
-    briefing = existing.get("briefing") or incoming.get("briefing")
+    # One UTC day holds exactly one briefing, and since #127 it is computed
+    # from the day's corpus rather than generated once. The incoming pass
+    # derived its finding from the union this merge is producing, so it is the
+    # one that describes the merged day; preferring the existing briefing here
+    # would persist a first-pass finding while the report and dashboard payload
+    # carried the recomputed one. Fall back to existing only when the incoming
+    # pass has none, so a day never loses a briefing it already had.
+    briefing = incoming.get("briefing") or existing.get("briefing")
 
     merged = {
         **incoming,

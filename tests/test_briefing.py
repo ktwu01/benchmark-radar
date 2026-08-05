@@ -128,7 +128,7 @@ def test_snapshot_for_run_omits_the_briefing_when_the_day_has_none():
     assert "briefing" not in snapshot_for_run(_run([_item(1)]))
 
 
-def test_merge_snapshots_keeps_the_first_briefing_of_the_day():
+def test_merge_snapshots_takes_the_recomputed_briefing_of_the_day():
     run = _run([_item(1)])
     run.daily_briefing = ["First pass."]
     existing = snapshot_for_run(run)
@@ -137,20 +137,22 @@ def test_merge_snapshots_keeps_the_first_briefing_of_the_day():
 
     merged = merge_snapshots(existing, snapshot_for_run(later))
 
-    # One briefing per day: the earlier pass committed the day's text and a
-    # later pass must not overwrite it.
-    assert merged["briefing"]["bullets"] == ["First pass."]
+    # Findings are computed from the day's corpus (issue #127), and the incoming
+    # pass derived its finding from the union this merge produces. Keeping the
+    # first pass's text would persist a stale finding while the report and the
+    # dashboard payload carried the recomputed one.
+    assert merged["briefing"]["bullets"] == ["Second pass."]
 
 
-def test_merge_snapshots_accepts_a_briefing_when_the_day_had_none():
-    existing = snapshot_for_run(_run([_item(1)]))
-    retried = _run([_item(2)])
-    retried.daily_briefing = ["Recovered on a later pass."]
+def test_merge_snapshots_keeps_an_existing_briefing_when_the_incoming_pass_has_none():
+    run = _run([_item(1)])
+    run.daily_briefing = ["Already recorded."]
+    existing = snapshot_for_run(run)
 
-    merged = merge_snapshots(existing, snapshot_for_run(retried))
+    merged = merge_snapshots(existing, snapshot_for_run(_run([_item(2)])))
 
-    # The first pass failed the call or had no key, so a later pass supplies it.
-    assert merged["briefing"]["bullets"] == ["Recovered on a later pass."]
+    # A day never loses a briefing it already had.
+    assert merged["briefing"]["bullets"] == ["Already recorded."]
 
 
 def test_merge_snapshots_leaves_no_briefing_key_when_neither_pass_had_one():

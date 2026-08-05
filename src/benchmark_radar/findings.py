@@ -49,7 +49,12 @@ MINIMUM_DAY_ITEMS = 25
 # are not available. Five and four are the smallest windows where a fully
 # separated split is not routine chance, and both are checked below.
 RECENT_DAYS = 5
+MINIMUM_RECENT_DAYS = 4
 MINIMUM_BASELINE_DAYS = 4
+# The baseline is a bounded trailing window, not all recorded history. Left
+# unbounded, one old extreme share would block separation permanently as the
+# archive grows, silently suppressing every later real shift.
+BASELINE_DAYS = 9
 # Percentage points. Below this a composition change is not worth a reader's
 # attention even when it is real and separated.
 MINIMUM_SHIFT_POINTS = 5.0
@@ -140,15 +145,54 @@ def _category_shares(snapshot: dict[str, Any]) -> dict[str, float]:
     return {category: 100.0 * count / len(items) for category, count in counts.items()}
 
 
-def _source_breadth(snapshot: dict[str, Any], category: str) -> tuple[int, int]:
-    """Return how many sources carry this category, and how many are present."""
-    carrying = {
-        str(item.get("source"))
-        for item in snapshot.get("evidence_items") or []
-        if category in (item.get("categories") or [])
+def _per_source_shares(snapshot: dict[str, Any], category: str) -> dict[str, float]:
+    """Return the category's share of each source's own items for one day."""
+    totals: Counter[str] = Counter()
+    matching: Counter[str] = Counter()
+    for item in snapshot.get("evidence_items") or []:
+        source = str(item.get("source"))
+        totals[source] += 1
+        if category in (item.get("categories") or []):
+            matching[source] += 1
+    return {source: 100.0 * matching[source] / total for source, total in totals.items() if total}
+
+
+def _contributing_sources(
+    recent: list[dict[str, Any]], baseline: list[dict[str, Any]], category: str, *, rising: bool
+) -> tuple[int, int]:
+    """Return how many sources independently moved, and how many are comparable.
+
+    Presence is not contribution. A category can appear on many sources while
+    its entire increase comes from one connector, which is the single-source
+    artifact this gate exists to reject. So each source is measured against its
+    own baseline share and counted only if it moved in the same direction as the
+    aggregate claim. Only sources present in both windows are comparable: a
+    connector that switched on mid-window has no baseline to move away from, and
+    counting it would credit onboarding as a feed-wide shift.
+    """
+
+    def mean_share(days: list[dict[str, Any]], source: str) -> float | None:
+        values = [
+            shares[source]
+            for shares in (_per_source_shares(day, category) for day in days)
+            if source in shares
+        ]
+        return statistics.mean(values) if values else None
+
+    recent_sources = {str(item.get("source")) for day in recent for item in day["evidence_items"]}
+    baseline_sources = {
+        str(item.get("source")) for day in baseline for item in day["evidence_items"]
     }
-    present = {str(item.get("source")) for item in snapshot.get("evidence_items") or []}
-    return len(carrying), len(present)
+    comparable = recent_sources & baseline_sources
+    moved = 0
+    for source in comparable:
+        recent_share = mean_share(recent, source)
+        baseline_share = mean_share(baseline, source)
+        if recent_share is None or baseline_share is None:
+            continue
+        if (recent_share > baseline_share) if rising else (recent_share < baseline_share):
+            moved += 1
+    return moved, len(comparable)
 
 
 def _category_counts(snapshot: dict[str, Any], category: str) -> tuple[int, int]:
@@ -158,32 +202,106 @@ def _category_counts(snapshot: dict[str, Any], category: str) -> tuple[int, int]
     return matching, len(items)
 
 
-def composition_shift(history: list[dict[str, Any]]) -> dict[str, Any] | None:
-    """Return the largest verified composition shift, or None.
+MEASUREMENT_KEYS = ("taxonomy_version", "max_items_per_source")
 
-    `history` is chronological and ends with the day being reported. A shift is
-    published only when the recent window is fully separated from the earlier
-    one: every recent day above every baseline day, or every recent day below.
-    Full separation is a deliberately blunt instrument, and it is doing the work
-    a significance test cannot here. The trailing window contains the shift
-    being detected, so a robust z-score against it scores the real 12.3% to
-    25.9% agentic move at 1.54 and rejects it. Separation instead asks whether
-    the two windows describe the same regime, which is the actual question.
+
+def measurement_conflict(window: list[dict[str, Any]]) -> bool:
+    """Whether the window spans a change in how the corpus was measured.
+
+    Category shares are only comparable across days classified by the same
+    taxonomy and capped the same way. A taxonomy edit reclassifies artifacts
+    wholesale, and a changed per-source cap changes which items are present at
+    all, so either can produce a fully separated share change that reflects the
+    instrument rather than the feed.
+
+    Only recorded values are compared. Early snapshots predate these fields, and
+    an absent value is unknown rather than different: treating a missing key as
+    its own signature rejected the entire real history here, where every day was
+    in fact classified by the same taxonomy. Unknown settings are a reason to
+    read a claim carefully, not evidence that the instrument changed.
+    """
+    for key in MEASUREMENT_KEYS:
+        recorded = {
+            (day.get("selection") or {}).get(key)
+            for day in window
+            if (day.get("selection") or {}).get(key) is not None
+        }
+        if len(recorded) > 1:
+            return True
+    return False
+
+
+def comparable_window(
+    history: list[dict[str, Any]], config: dict[str, Any] | None = None
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]] | None:
+    """Return (recent, baseline) days fit to compare, or None.
+
+    Every day in both windows has to clear the same bars, not just the day being
+    reported. A one-item day yields 0% or 100% in every category and manufactures
+    separation from a handful of records; a day missing a required connector can
+    fake a composition change on its own; and days measured under different
+    taxonomies are not measuring the same thing.
     """
     if len(history) < RECENT_DAYS + MINIMUM_BASELINE_DAYS:
         return None
-    today = history[-1]
-    if len(today.get("evidence_items") or []) < MINIMUM_DAY_ITEMS:
-        return None
 
-    recent = history[-RECENT_DAYS:]
-    baseline = history[:-RECENT_DAYS]
+    def usable(day: dict[str, Any]) -> bool:
+        """Whether a day can stand in a comparison at all.
+
+        A thin day yields 0% or 100% in every category and manufactures
+        separation out of a handful of records. A day missing a required
+        connector is measuring a different feed. Either one has to be excluded
+        from both windows, not merely from the reported day.
+        """
+        return (
+            len(day.get("evidence_items") or []) >= MINIMUM_DAY_ITEMS
+            and coverage_for(day, config).complete
+        )
+
+    # The reported day itself is never dropped: if it cannot be compared, there
+    # is nothing to report and the caller renders the reason instead.
+    if not usable(history[-1]):
+        return None
+    # Unusable days are excluded rather than rejecting the whole window. The
+    # real history here opens with four days of arXiv outage, and discarding
+    # every window that reaches back to them would suppress findings for as
+    # long as those days stayed in range. Dropping them and requiring enough
+    # clean days to remain keeps the comparison honest without making one old
+    # outage permanently disqualifying.
+    recent = [day for day in history[-RECENT_DAYS:] if usable(day)]
+    baseline = [
+        day for day in history[-(RECENT_DAYS + BASELINE_DAYS) : -RECENT_DAYS] if usable(day)
+    ]
+    if len(recent) < MINIMUM_RECENT_DAYS or len(baseline) < MINIMUM_BASELINE_DAYS:
+        return None
+    if measurement_conflict([*baseline, *recent]):
+        return None
+    return recent, baseline
+
+
+def composition_shift(
+    history: list[dict[str, Any]], config: dict[str, Any] | None = None
+) -> dict[str, Any] | None:
+    """Return the largest verified composition shift, or None.
+
+    `history` is chronological and ends with the day being reported. A shift is
+    published only when the recent window is fully separated from the baseline:
+    every recent day above every baseline day, or every recent day below.
+
+    Full separation is a deliberately blunt instrument, and it is doing work a
+    significance test cannot here. The trailing window contains the shift being
+    detected, so a robust z-score against it scores the real 12.3% to 25.9%
+    agentic move at 1.54 and rejects it. Separation asks instead whether the two
+    windows describe the same regime, which is the actual question, and it
+    rejects the one-day spikes a point test would happily report.
+    """
+    window = comparable_window(history, config)
+    if window is None:
+        return None
+    recent, baseline = window
     recent_shares = [_category_shares(day) for day in recent]
     baseline_shares = [_category_shares(day) for day in baseline]
-    # A day with no items has no composition and would otherwise read as 0% in
-    # every category, manufacturing separation out of an outage.
-    if any(not shares for shares in recent_shares + baseline_shares):
-        return None
+    today = history[-1]
 
     candidates = []
     for category in sorted(_category_shares(today)):
@@ -202,8 +320,10 @@ def composition_shift(history: list[dict[str, Any]]) -> dict[str, Any] | None:
         )
         if not separated:
             continue
-        breadth, present = _source_breadth(today, category)
-        if breadth < MINIMUM_SOURCE_BREADTH:
+        # Contribution, not presence: the change has to show up independently in
+        # several sources measured against their own baselines.
+        moved, comparable = _contributing_sources(recent, baseline, category, rising=rising)
+        if moved < MINIMUM_SOURCE_BREADTH:
             continue
         count, total = _category_counts(today, category)
         candidates.append(
@@ -217,8 +337,8 @@ def composition_shift(history: list[dict[str, Any]]) -> dict[str, Any] | None:
                 "baseline_days": len(baseline_values),
                 "count": count,
                 "total": total,
-                "source_breadth": breadth,
-                "sources_present": present,
+                "sources_moved": moved,
+                "sources_comparable": comparable,
             }
         )
     if not candidates:
@@ -241,7 +361,7 @@ def _confidence(finding: dict[str, Any], coverage: Coverage) -> str:
     """
     if not coverage.complete:
         return "Low confidence"
-    if finding["source_breadth"] < finding["sources_present"]:
+    if finding["sources_moved"] < finding["sources_comparable"]:
         return "Moderate confidence"
     return "High confidence" if not coverage.failed_optional else "Moderate confidence"
 
@@ -265,25 +385,34 @@ def describe(finding: dict[str, Any], coverage: Coverage) -> list[str]:
             f"({finding['shift_points']:+.1f} pp)."
         ),
         (
-            f"Today {finding['count']} of {finding['total']} items carry it, "
-            f"across {finding['source_breadth']} of {finding['sources_present']} reporting sources."
+            f"Today {finding['count']} of {finding['total']} items carry it, and the change "
+            f"appeared independently in {finding['sources_moved']} of "
+            f"{finding['sources_comparable']} sources comparable across both windows."
         ),
         f"{_confidence(finding, coverage)}. {coverage.caption()}",
     ]
 
 
-def no_finding(history: list[dict[str, Any]], coverage: Coverage) -> list[str]:
+def no_finding(
+    history: list[dict[str, Any]], coverage: Coverage, config: dict[str, Any] | None = None
+) -> list[str]:
     """Render the absent case, which is a result rather than a failure.
 
     Most days in a niche feed genuinely have no pattern. Saying so is the
-    correct output, and the three states are kept distinct so a quiet day is
-    never confused with an outage or with a feed too small to read.
+    correct output, and the states are kept distinct so a quiet day is never
+    confused with an outage or with a feed too small to read.
+
+    The wording is deliberately conservative about *why* nothing was published.
+    A candidate can clear separation and still be rejected for materiality or
+    for coming from too few sources, so claiming every share stayed within its
+    baseline would be false in exactly the cases a reader would most want to
+    know about.
     """
     today = history[-1] if history else {}
     items = len(today.get("evidence_items") or [])
     if not coverage.complete:
         return [
-            f"No pattern assessed for {items} items: connector coverage was incomplete, "
+            f"No pattern assessed for {items} items: a required connector was unavailable, "
             "so a composition change cannot be separated from missing sources.",
             coverage.caption(),
         ]
@@ -293,15 +422,16 @@ def no_finding(history: list[dict[str, Any]], coverage: Coverage) -> list[str]:
             f"{MINIMUM_DAY_ITEMS} needed for a composition claim.",
             coverage.caption(),
         ]
-    if len(history) < RECENT_DAYS + MINIMUM_BASELINE_DAYS:
+    if comparable_window(history, config) is None:
         return [
-            f"Insufficient history to assess a pattern: {len(history)} days recorded, "
-            f"{RECENT_DAYS + MINIMUM_BASELINE_DAYS} needed for a baseline.",
+            f"Insufficient comparable history to assess a pattern: "
+            f"{MINIMUM_RECENT_DAYS} recent and {MINIMUM_BASELINE_DAYS} earlier days are needed "
+            "with full required coverage, the same taxonomy, and enough volume each.",
             coverage.caption(),
         ]
     return [
-        f"No material pattern detected among {items} items. Every category share "
-        "stayed within its trailing baseline.",
+        f"No material pattern detected among {items} items. No category shifted far enough, "
+        "persistently enough, and across enough sources to report.",
         coverage.caption(),
     ]
 
@@ -319,7 +449,7 @@ def daily_findings(
     if not history:
         return []
     coverage = coverage_for(history[-1], config)
-    finding = composition_shift(history) if coverage.complete else None
+    finding = composition_shift(history, config) if coverage.complete else None
     if finding is None:
-        return no_finding(history, coverage)
+        return no_finding(history, coverage, config)
     return describe(finding, coverage)
