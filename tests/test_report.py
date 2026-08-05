@@ -141,3 +141,20 @@ def test_report_places_escaped_daily_briefing_before_counts():
 
     assert "- One new benchmark \\| from GitHub" in report
     assert report.index("## Daily briefing") < report.index("## At a glance")
+
+
+def test_report_distinguishes_latest_pass_from_merged_daily_total():
+    run = _run([_record(1), _record(2)])
+    run.selection = {
+        "fetched": 4,
+        "deduplicated": 3,
+        "qualified": 1,
+        "published": 1,
+        "published_total": 2,
+        "minimum_score": 40,
+    }
+
+    report = render_markdown(run)
+
+    assert "Latest-pass selection" in report
+    assert "**2** across today's collection passes" in report

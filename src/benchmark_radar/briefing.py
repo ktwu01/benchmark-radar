@@ -5,12 +5,13 @@ from __future__ import annotations
 import json
 import re
 from collections import Counter
-from datetime import UTC, timedelta
+from dataclasses import fields, replace
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from .corpus import artifact_alias_map, exact_artifact_key
 from .http import post_json
-from .models import RadarRun
+from .models import AttentionObservation, RadarItem, RadarRun
 from .snapshots import merge_snapshots, snapshot_for_run
 
 RESPONSES_URL = "https://api.openai.com/v1/responses"
@@ -40,7 +41,44 @@ def current_day_snapshot(snapshots: list[dict[str, Any]], run: RadarRun) -> dict
         (snapshot for snapshot in reversed(snapshots) if snapshot["date"] == incoming["date"]),
         None,
     )
-    return merge_snapshots(existing, incoming) if existing else incoming
+    if not existing:
+        return incoming
+    merged = merge_snapshots(existing, incoming)
+    attention = {
+        item["observation_id"]: item
+        for item in (existing.get("attention") or {}).get("observations") or []
+    }
+    attention.update(
+        {
+            item["observation_id"]: item
+            for item in (incoming.get("attention") or {}).get("observations") or []
+        }
+    )
+    merged["attention"] = {"observations": list(attention.values())}
+    return merged
+
+
+def _record_from_dict(record_type, value: dict[str, Any]):
+    values = {field.name: value[field.name] for field in fields(record_type) if field.name in value}
+    for name in ("published_at", "updated_at", "discovered_at", "retrieved_at", "observed_at"):
+        if values.get(name):
+            values[name] = datetime.fromisoformat(str(values[name]).replace("Z", "+00:00"))
+    return record_type(**values)
+
+
+def daily_report_run(snapshot: dict[str, Any], latest_run: RadarRun) -> RadarRun:
+    """Project a merged daily snapshot back into the report's typed view."""
+    return replace(
+        latest_run,
+        generated_at=datetime.fromisoformat(str(snapshot["generated_at"]).replace("Z", "+00:00")),
+        since=datetime.fromisoformat(str(snapshot["since"]).replace("Z", "+00:00")),
+        items=[_record_from_dict(RadarItem, item) for item in snapshot["evidence_items"]],
+        attention=[
+            _record_from_dict(AttentionObservation, item)
+            for item in (snapshot.get("attention") or {}).get("observations") or []
+        ],
+        selection=dict(snapshot.get("selection") or {}),
+    )
 
 
 def _counts(items: list[dict[str, Any]], field: str) -> Counter[str]:
@@ -65,9 +103,12 @@ def briefing_input(current: dict[str, Any], previous: dict[str, Any] | None) -> 
     previous_items = list((previous or {}).get("evidence_items") or [])
     aliases = artifact_alias_map([*previous_items, *current_items])
     previous_ids = {aliases[exact_artifact_key(item)] for item in previous_items}
-    new_items = [
-        item for item in current_items if aliases[exact_artifact_key(item)] not in previous_ids
-    ]
+    new_by_identity: dict[str, dict[str, Any]] = {}
+    for item in current_items:
+        identity = aliases[exact_artifact_key(item)]
+        if identity not in previous_ids:
+            new_by_identity.setdefault(identity, item)
+    new_items = list(new_by_identity.values())
     previous_attention = ((previous or {}).get("attention") or {}).get("observations") or []
     current_attention = (current.get("attention") or {}).get("observations") or []
 

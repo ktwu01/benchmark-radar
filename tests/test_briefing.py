@@ -6,10 +6,11 @@ from benchmark_radar.briefing import (
     MAX_INPUT_CHARS,
     briefing_input,
     current_day_snapshot,
+    daily_report_run,
     generate_daily_briefing,
     previous_calendar_day,
 )
-from benchmark_radar.models import RadarItem, RadarRun
+from benchmark_radar.models import AttentionObservation, RadarItem, RadarRun
 from benchmark_radar.snapshots import snapshot_for_run
 
 
@@ -21,6 +22,21 @@ def _item(index: int, *, title: str | None = None) -> RadarItem:
         url=f"https://github.com/org/repo-{index}",
         published_at=datetime(2026, 8, 4, tzinfo=UTC),
         categories=["benchmark"],
+    )
+
+
+def _attention(index: int) -> AttentionObservation:
+    observed = datetime(2026, 8, 4, tzinfo=UTC)
+    return AttentionObservation(
+        observation_id=f"producer:{index}",
+        producer="producer",
+        source="Hacker News",
+        source_id=str(index),
+        title=f"Discussion {index}",
+        url=f"https://news.ycombinator.com/item?id={index}",
+        published_at=observed,
+        discovered_at=observed,
+        observed_at=observed,
     )
 
 
@@ -82,6 +98,30 @@ def test_current_day_snapshot_merges_both_scheduled_passes():
     }
 
 
+def test_current_day_snapshot_unions_attention_from_both_passes():
+    morning_run = _run([_item(1)])
+    morning_run.attention = [_attention(1)]
+    afternoon_run = _run([_item(2)])
+    afternoon_run.attention = [_attention(2)]
+
+    merged = current_day_snapshot([snapshot_for_run(morning_run)], afternoon_run)
+
+    assert {item["observation_id"] for item in merged["attention"]["observations"]} == {
+        "producer:1",
+        "producer:2",
+    }
+
+
+def test_daily_report_run_uses_the_merged_snapshot_scope():
+    morning = snapshot_for_run(_run([_item(1)]))
+    merged = current_day_snapshot([morning], _run([_item(2)]))
+
+    report_run = daily_report_run(merged, _run([_item(2)]))
+
+    assert {item.source_id for item in report_run.items} == {"org/repo-1", "org/repo-2"}
+    assert report_run.selection["published_total"] == 2
+
+
 def test_new_items_use_cross_source_artifact_identity():
     prior_item = _item(1).to_dict()
     current_item = RadarItem(
@@ -100,6 +140,24 @@ def test_new_items_use_cross_source_artifact_identity():
 
     assert value["new_item_count"] == 0
     assert value["highlights"] == []
+
+
+def test_new_items_are_unique_after_alias_resolution():
+    repository = _item(1)
+    paper = RadarItem(
+        source="arXiv",
+        source_id="2608.00001",
+        title="Paper for the repository",
+        url="https://arxiv.org/abs/2608.00001",
+        artifact_urls=[repository.url],
+        published_at=datetime(2026, 8, 4, tzinfo=UTC),
+        categories=["benchmark"],
+    )
+
+    value = briefing_input(snapshot_for_run(_run([repository, paper])), None)
+
+    assert value["new_item_count"] == 1
+    assert len(value["highlights"]) == 1
 
 
 def test_generate_daily_briefing_caps_api_and_sanitizes_output(monkeypatch):
