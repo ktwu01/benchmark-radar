@@ -386,6 +386,22 @@ def test_evidence_prefers_releases_and_compacts_the_measurement_focus():
     assert evidence_examples(items, "agentic") == ["MemArena (on-device personal memory)"]
 
 
+def test_non_release_evidence_is_not_called_a_release():
+    history = _history(10, 30)
+    history[-1]["evidence_items"][0].update(
+        {
+            "title": "Agent Harness Refresh",
+            "event_kind": "updated",
+            "total_score": 99,
+        }
+    )
+
+    findings = daily_findings(history, CONFIG)
+
+    assert "leading artifacts" in findings[1]
+    assert "leading releases" not in findings[1]
+
+
 def test_evidence_theme_requires_a_recurrence_and_reports_its_denominator():
     items = [
         {

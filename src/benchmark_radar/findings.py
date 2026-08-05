@@ -620,7 +620,7 @@ def _representative_evidence(
 def evidence_examples(
     items: list[dict[str, Any]], category: str, *, limit: int = MAX_EVIDENCE_EXAMPLES
 ) -> list[str]:
-    """Name the strongest first-seen releases that make a finding concrete."""
+    """Name the strongest first-seen artifacts that make a finding concrete."""
     return [
         _compact_evidence_label(item)
         for item in _representative_evidence(items, category, limit=limit)
@@ -671,14 +671,20 @@ def describe(
             f"({finding['shift_points']:+.1f} percentage points)."
         ),
     ]
-    examples = evidence_examples(first_seen or [], finding["category"])
+    representatives = _representative_evidence(first_seen or [], finding["category"])
+    examples = [_compact_evidence_label(item) for item in representatives]
     if examples:
         theme = _evidence_theme(first_seen or [], finding["category"])
+        evidence_noun = (
+            "releases"
+            if all(item.get("event_kind") == "released" for item in representatives)
+            else "artifacts"
+        )
         lead = (
             f"{theme[0].capitalize()} recurred in {theme[1]} of the "
-            f"{theme[2]} leading releases first observed today:"
+            f"{theme[2]} leading {evidence_noun} first observed today:"
             if theme
-            else "The leading releases in that category first observed today were"
+            else f"The leading {evidence_noun} in that category first observed today were"
         )
         bullets.append(f"{lead} {_join_examples(examples)}.")
     bullets.append(
