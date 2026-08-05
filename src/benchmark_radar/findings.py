@@ -551,8 +551,26 @@ def first_seen_items(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
             if identity in seen:
                 continue
             existing = first_on_day.get(identity)
-            if existing is None or _representative_key(item) > _representative_key(existing):
-                first_on_day[identity] = item
+            if existing is None:
+                first_on_day[identity] = {
+                    **item,
+                    "categories": list(item.get("categories") or []),
+                }
+                continue
+            # Corroborating connectors can classify the same artifact
+            # differently. Keep the best display record, but preserve the
+            # union of what those observations say it is; otherwise alias
+            # collapse can erase the very category the finding is explaining.
+            categories = sorted(
+                {
+                    *(existing.get("categories") or []),
+                    *(item.get("categories") or []),
+                }
+            )
+            representative = (
+                item if _representative_key(item) > _representative_key(existing) else existing
+            )
+            first_on_day[identity] = {**representative, "categories": categories}
         seen.update(first_on_day)
         today = list(first_on_day.values())
     return sorted(today, key=_representative_key, reverse=True)
@@ -570,7 +588,7 @@ _EVIDENCE_THEMES = (
             r"\b(?:privacy|secur\w*|safety|reliab\w*|validit\w*|adversarial|attack\w*|gaming)\b"
         ),
     ),
-    ("coding agents", re.compile(r"\b(?:coding|software|web agents?|web generation|frontend)\b")),
+    ("coding agents", re.compile(r"\b(?:coding|software|web generation|frontend)\b")),
     ("embodied systems", re.compile(r"\b(?:embodied|robot\w*|home safety|vision-language)\b")),
     (
         "evaluation infrastructure",

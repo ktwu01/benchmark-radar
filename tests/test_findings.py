@@ -367,6 +367,37 @@ def test_first_seen_evidence_omits_an_artifact_repeated_from_yesterday():
     assert repeated["source_id"] not in {item["source_id"] for item in today}
 
 
+def test_first_seen_aliases_preserve_categories_from_every_observation():
+    history = _history(10, 30)
+    history[-1]["evidence_items"] = [
+        {
+            "source": "arxiv",
+            "source_id": "2608.01234",
+            "title": "Shared Artifact",
+            "url": "https://arxiv.org/abs/2608.01234",
+            "artifact_urls": ["https://github.com/example/shared-artifact"],
+            "event_kind": "released",
+            "total_score": 80,
+            "categories": ["benchmark"],
+        },
+        {
+            "source": "github",
+            "source_id": "example/shared-artifact",
+            "title": "example/shared-artifact",
+            "url": "https://github.com/example/shared-artifact",
+            "event_kind": "updated",
+            "total_score": 90,
+            "categories": ["agentic"],
+        },
+    ]
+
+    today = first_seen_items(history)
+
+    assert len(today) == 1
+    assert today[0]["categories"] == ["agentic", "benchmark"]
+    assert evidence_examples(today, "agentic") == ["Shared Artifact"]
+
+
 def test_evidence_prefers_releases_and_compacts_the_measurement_focus():
     items = [
         {
@@ -418,6 +449,23 @@ def test_evidence_theme_requires_a_recurrence_and_reports_its_denominator():
     ]
 
     assert _evidence_theme(items, "agentic") == ("personalization and memory", 2, 3)
+
+
+def test_browser_agents_are_not_mislabeled_as_coding_agents():
+    items = [
+        {
+            "title": title,
+            "event_kind": "released",
+            "total_score": score,
+            "categories": ["agentic"],
+        }
+        for score, title in [
+            (90, "TrailBench: Personalized Web Agents through Browsing Trails"),
+            (80, "ShopBench: Web Agents for Product Research"),
+        ]
+    ]
+
+    assert _evidence_theme(items, "agentic") is None
 
 
 def test_claims_are_scoped_to_the_captured_feed():
