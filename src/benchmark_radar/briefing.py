@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import json
 import re
 from collections import Counter
@@ -173,6 +174,12 @@ def _safe_bullets(text: str) -> list[str]:
         clean = re.sub(r"^(?:[-*•]|\d+[.)])\s*", "", line.strip())
         clean = clean.replace("\r", " ").replace("\n", " ").strip()
         if clean:
+            # The model saw untrusted upstream titles. Publish its prose as
+            # text, never as GitHub-flavored Markdown or HTML: this also makes
+            # an unmatched comment opener harmless instead of hiding the rest
+            # of the issue body.
+            clean = html.escape(clean, quote=False)
+            clean = re.sub(r"([\\`*_{}\[\]()#+.!>])", r"\\\1", clean)
             bullets.append(clean[:400])
         if len(bullets) == MAX_BULLETS:
             break

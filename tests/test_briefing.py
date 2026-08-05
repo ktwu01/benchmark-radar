@@ -191,7 +191,8 @@ def test_generate_daily_briefing_caps_api_and_sanitizes_output(monkeypatch):
                             "type": "output_text",
                             "text": (
                                 "## Briefing\n- One new benchmark.\n"
-                                "<!-- hidden -->\n2. Evidence rose."
+                                "<!-- hidden -->\n2. Evidence rose.\n"
+                                "- [click](https://evil.test) <img src=x><!--"
                             ),
                         }
                     ],
@@ -203,7 +204,11 @@ def test_generate_daily_briefing_caps_api_and_sanitizes_output(monkeypatch):
 
     bullets = generate_daily_briefing(snapshot_for_run(_run([_item(1)])), None, "secret")
 
-    assert bullets == ["One new benchmark.", "Evidence rose."]
+    assert bullets == [
+        "One new benchmark\\.",
+        "Evidence rose\\.",
+        "\\[click\\]\\(https://evil\\.test\\) &lt;img src=x&gt;&lt;\\!--",
+    ]
     assert captured["payload"]["max_output_tokens"] == 220
     assert len(captured["payload"]["input"]) <= MAX_INPUT_CHARS
     assert captured["kwargs"]["attempts"] == 2
