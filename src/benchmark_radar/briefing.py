@@ -44,6 +44,14 @@ def current_day_snapshot(snapshots: list[dict[str, Any]], run: RadarRun) -> dict
     if not existing:
         return incoming
     merged = merge_snapshots(existing, incoming)
+    merged["evidence_items"].sort(
+        key=lambda item: (
+            bool(item.get("watchlist")),
+            float(item.get("total_score") or 0),
+            str(item.get("published_at") or ""),
+        ),
+        reverse=True,
+    )
     attention = {
         item["observation_id"]: item
         for item in (existing.get("attention") or {}).get("observations") or []

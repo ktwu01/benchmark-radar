@@ -98,6 +98,23 @@ def test_current_day_snapshot_merges_both_scheduled_passes():
     }
 
 
+def test_current_day_snapshot_reranks_the_merged_items():
+    morning_item = _item(1)
+    morning_item.total_score = 50
+    afternoon_item = _item(2)
+    afternoon_item.total_score = 90
+
+    merged = current_day_snapshot(
+        [snapshot_for_run(_run([morning_item]))],
+        _run([afternoon_item]),
+    )
+
+    assert [item["source_id"] for item in merged["evidence_items"]] == [
+        "org/repo-2",
+        "org/repo-1",
+    ]
+
+
 def test_current_day_snapshot_unions_attention_from_both_passes():
     morning_run = _run([_item(1)])
     morning_run.attention = [_attention(1)]
