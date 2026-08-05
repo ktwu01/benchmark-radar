@@ -55,12 +55,33 @@ def get_text(
     return _request(url, request_headers, attempts, timeout=timeout).decode("utf-8")
 
 
+def post_json(
+    url: str,
+    payload: dict[str, Any],
+    *,
+    headers: dict[str, str] | None = None,
+    attempts: int = 2,
+    timeout: float = 10.0,
+) -> Any:
+    request_headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": USER_AGENT,
+    }
+    request_headers.update(headers or {})
+    body = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    return json.loads(
+        _request(url, request_headers, attempts, timeout=timeout, data=body).decode("utf-8")
+    )
+
+
 def _request(
     url: str,
     headers: dict[str, str],
     attempts: int,
     *,
     timeout: float,
+    data: bytes | None = None,
 ) -> bytes:
     if attempts < 1:
         raise ValueError("attempts must be at least 1")
@@ -70,7 +91,7 @@ def _request(
     for attempt in range(attempts):
         try:
             with urllib.request.urlopen(
-                urllib.request.Request(url, headers=headers),
+                urllib.request.Request(url, headers=headers, data=data),
                 timeout=timeout,
                 context=ssl.create_default_context(cafile=certifi.where()),
             ) as response:

@@ -59,6 +59,7 @@ def render_markdown(
     dashboard_url: str | None = None,
     *,
     issue_item_limit: int | None = None,
+    daily_briefing: list[str] | None = None,
 ) -> str:
     date = run.generated_at.astimezone(UTC).date().isoformat()
     category_counts = Counter(category for item in run.items for category in item.categories)
@@ -86,6 +87,10 @@ def render_markdown(
                 f"**[Explore this day on the dashboard]({dashboard_url}{separator}date={date})**",
                 "",
             ]
+        )
+    if daily_briefing:
+        lines.extend(
+            ["## Daily briefing", "", *[f"- {_escape(bullet)}" for bullet in daily_briefing], ""]
         )
     lines.extend(
         [

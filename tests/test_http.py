@@ -3,7 +3,7 @@ import urllib.error
 
 import pytest
 
-from benchmark_radar.http import RequestError, get_json
+from benchmark_radar.http import RequestError, get_json, post_json
 
 
 class Response:
@@ -96,3 +96,23 @@ def test_http_failure_never_exposes_query_credentials(monkeypatch):
 
     assert "do-not-print" not in str(captured.value)
     assert "?" not in str(captured.value)
+
+
+def test_post_json_sends_compact_json_and_headers(monkeypatch):
+    captured = {}
+
+    def fake_urlopen(request, **kwargs):
+        captured.update(request=request, kwargs=kwargs)
+        return Response(b'{"output": []}')
+
+    monkeypatch.setattr("benchmark_radar.http.urllib.request.urlopen", fake_urlopen)
+
+    assert post_json(
+        "https://example.test/responses",
+        {"input": "brief me"},
+        headers={"Authorization": "Bearer secret"},
+        attempts=1,
+    ) == {"output": []}
+    assert captured["request"].data == b'{"input":"brief me"}'
+    assert captured["request"].get_header("Content-type") == "application/json"
+    assert captured["request"].get_header("Authorization") == "Bearer secret"
