@@ -5,6 +5,7 @@ import pytest
 
 from benchmark_radar.models import ProducerHealth, RadarItem, SourceHealth
 from benchmark_radar.pipeline import (
+    _score_and_select,
     apply_watchlist,
     assert_no_boilerplate_summaries,
     canonical_url,
@@ -1081,3 +1082,156 @@ def test_simulate_backfill_chains_discovery_state_across_simulated_dates(monkeyp
     )
 
     assert all(run.discovery_state["arxiv"]["seed"] for run in runs)
+
+
+def _funnel_config(**radar):
+    settings = {
+        "lookback_hours": 48,
+        "max_items_per_source": 300,
+        "report_limit": 300,
+        "minimum_score": 40,
+    }
+    settings.update(radar)
+    return {
+        "radar": settings,
+        "taxonomy": {"benchmark": ["benchmark"], "dataset": ["dataset"]},
+    }
+
+
+FUNNEL_NOW = datetime(2026, 8, 5, 12, tzinfo=UTC)
+
+
+def _fresh(**overrides):
+    """A record inside the lookback window, with an identity of its own.
+
+    The shared `item()` helper dates records nine days before these tests' `now`,
+    so recency alone would drop them under the threshold, and it reuses one URL,
+    so several records would dedupe into one before the funnel ever saw them.
+    """
+    values = {"published_at": FUNNEL_NOW - timedelta(hours=6)}
+    values.update(overrides)
+    values.setdefault("url", f"https://example.test/{values.get('source_id', 'x')}")
+    return item(**values)
+
+
+def _select(items, **radar):
+    now = FUNNEL_NOW
+    return _score_and_select(
+        items,
+        _funnel_config(**radar),
+        now=now,
+        fetched_count=len(items),
+        suppressed_count=0,
+        future_dated_count=0,
+    )[1]
+
+
+def test_the_qualification_counters_sum_to_the_drop():
+    # Issue #124: `scored` to `qualified` is the largest single drop in the
+    # funnel, and the only counter describing it reported 1 of 585 on real data.
+    # A reader concluded the score threshold barely fired, which the metadata
+    # could not distinguish from the opposite. The three reasons must reconcile.
+    items = [
+        # On topic and well above the threshold.
+        _fresh(source_id="keep-1", title="A New Benchmark Dataset For Evaluation"),
+        # Off topic but widely adopted, so it clears the score on adoption alone
+        # and is dropped purely for matching no taxonomy category. This is the
+        # branch the old single counter could never distinguish.
+        _fresh(
+            source_id="drop-uncategorized",
+            title="Assorted Utilities For Unrelated Work",
+            summary="A grab bag of helper scripts.",
+            metrics={"stars": 900},
+            authors=["A", "B", "C"],
+        ),
+        # Thin enough to fall below the score threshold.
+        _fresh(source_id="drop-thin", title="x", summary=""),
+    ]
+
+    selection = _select(items)
+
+    gap = selection["scored"] - selection["qualified"]
+    parts = (
+        selection["suppressed_low_value"]
+        + selection["suppressed_below_minimum"]
+        + selection["suppressed_uncategorized"]
+    )
+    assert gap == parts
+    # Both drop reasons fire, and each is attributed to its own counter rather
+    # than collapsing into one number.
+    assert selection["suppressed_uncategorized"] == 1
+    assert selection["suppressed_below_minimum"] == 1
+    assert gap == 2
+
+
+def test_the_funnel_reconciles_when_nothing_qualifies():
+    items = [_fresh(source_id=f"thin-{index}", title="x", summary="") for index in range(12)]
+
+    selection = _select(items)
+
+    assert selection["qualified"] == 0
+    assert (
+        selection["suppressed_low_value"]
+        + selection["suppressed_below_minimum"]
+        + selection["suppressed_uncategorized"]
+        == selection["scored"]
+    )
+
+
+def test_the_funnel_reconciles_when_everything_qualifies():
+    items = [
+        _fresh(
+            source_id=f"keep-{index}",
+            title=f"Benchmark Dataset {index} For Language Model Evaluation",
+            # Distinct summaries: an identical one across records trips the
+            # templated-description guard before the funnel is reached.
+            summary=f"Benchmark {index} covers a distinct evaluation dataset.",
+        )
+        for index in range(6)
+    ]
+
+    selection = _select(items)
+
+    assert selection["qualified"] == selection["scored"]
+    assert selection["suppressed_below_minimum"] == 0
+    assert selection["suppressed_uncategorized"] == 0
+    assert selection["suppressed_low_value"] == 0
+
+
+def test_below_minimum_and_uncategorized_are_counted_separately():
+    # They are different findings. A record under the threshold is a quality
+    # judgment; a record with no category is a statement about taxonomy
+    # coverage, and a large count there would be a finding about the taxonomy.
+    uncategorized = _fresh(
+        source_id="off-topic",
+        title="Assorted Utilities For Unrelated Work",
+        summary="A grab bag of helper scripts.",
+        metrics={"stars": 900},
+        authors=["A", "B", "C"],
+    )
+
+    selection = _select([uncategorized])
+
+    assert selection["suppressed_uncategorized"] == 1
+    assert selection["suppressed_below_minimum"] == 0
+
+
+def test_a_watchlisted_record_is_not_counted_as_dropped():
+    # A watchlist hit qualifies despite the score and taxonomy, so it never
+    # enters the drop counters and the identity still has to hold.
+    watchlisted = _fresh(source_id="mle", title="MLE-bench update", summary="")
+    config = _funnel_config()
+    config["watchlist"] = WATCHLIST
+
+    selection = _score_and_select(
+        [watchlisted],
+        config,
+        now=datetime(2026, 8, 5, 12, tzinfo=UTC),
+        fetched_count=1,
+        suppressed_count=0,
+        future_dated_count=0,
+    )[1]
+
+    assert selection["qualified"] == 1
+    assert selection["suppressed_below_minimum"] == 0
+    assert selection["suppressed_uncategorized"] == 0

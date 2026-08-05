@@ -446,6 +446,35 @@ def _score_and_select(
     # The dashboard previously showed "228 found" beside 8 published records
     # with nothing to explain the gap. Persist each stage so the drop-off is
     # auditable rather than looking like lost data.
+    #
+    # Issue #124: recording the stage boundaries was not enough. `scored` to
+    # `qualified` is the largest single drop in the funnel, 585 of 686 records on
+    # 2026-08-05, and the only counter describing it reported 1, because
+    # `suppressed_low_value` counts explicit suppression rules while the
+    # qualification predicate also drops records on score and on category.
+    # Nothing attributed the other 584. That is worse than an absent counter: it
+    # reads as "the threshold barely fires" and cannot be distinguished from
+    # "the threshold fires constantly and is not counted here", which is exactly
+    # the wrong conclusion a reader drew from it.
+    #
+    # These three mirror the predicate above in its own precedence order, so
+    # each record is attributed to the first reason that dropped it and the
+    # three sum to `scored - qualified`. `test_pipeline` asserts that identity.
+    minimum_score = float(settings["minimum_score"])
+    suppressed_low_value = sum(1 for item in scored if item.suppression_reasons)
+    below_minimum = sum(
+        1
+        for item in scored
+        if not item.suppression_reasons and not item.watchlist and item.total_score < minimum_score
+    )
+    uncategorized = sum(
+        1
+        for item in scored
+        if not item.suppression_reasons
+        and not item.watchlist
+        and item.total_score >= minimum_score
+        and not item.categories
+    )
     selection = {
         "fetched": fetched_count,
         # arXiv records already seen in a previous run, dropped before dedupe.
@@ -466,7 +495,19 @@ def _score_and_select(
         ),
         # Suppression now applies to watchlisted records too, so the count is
         # every suppressed record rather than only the un-watchlisted ones.
-        "suppressed_low_value": sum(1 for item in scored if item.suppression_reasons),
+        "suppressed_low_value": suppressed_low_value,
+        # Scored below `minimum_score`: a quality judgment about the record.
+        "suppressed_below_minimum": below_minimum,
+        # Cleared the score but matched no taxonomy category. A different kind of
+        # finding from the one above: a large count here is a statement about
+        # taxonomy coverage, not about the records.
+        "suppressed_uncategorized": uncategorized,
+        # This pass only, and never more than `report_limit`. The whole day can
+        # hold more, because two or more passes merge into one snapshot and their
+        # unions are counted by `published_total` in `merge_snapshots`. The two
+        # are different scopes, not a discrepancy: `published` belongs to the
+        # per-pass funnel below it, `published_total` describes the file. On
+        # 2026-08-05 they read 101 and 272 for exactly that reason.
         "published": len(published),
         "minimum_score": float(settings["minimum_score"]),
         "report_limit": int(settings["report_limit"]),
