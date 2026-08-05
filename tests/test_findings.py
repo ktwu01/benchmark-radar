@@ -3,6 +3,7 @@ from datetime import UTC, date, datetime, timedelta
 from benchmark_radar.findings import (
     MINIMUM_DAY_ITEMS,
     Coverage,
+    _ranking_key,
     composition_shift,
     coverage_for,
     daily_findings,
@@ -599,3 +600,23 @@ def test_a_high_discrimination_category_cannot_be_promoted_without_a_shift():
     assert discriminating_power(1.8) > discriminating_power(13.6)
     findings = daily_findings(_history(10, 30), CONFIG)
     assert "Agentic artifacts rose" in findings[0]
+
+
+def test_a_mathematical_tie_is_broken_by_the_larger_move():
+    # A 20% baseline moving 6 pp and a 40% baseline moving 8 pp both weight to
+    # 4.8, but in binary floats the first is 4.800000000000001 and would win on
+    # noise, skipping the tie-break that is supposed to decide it.
+    smaller = {"baseline_share": 20.0, "shift_points": 6.0, "category": "b"}
+    larger = {"baseline_share": 40.0, "shift_points": 8.0, "category": "a"}
+
+    assert max([smaller, larger], key=_ranking_key) is larger
+
+
+def test_ranking_is_a_total_and_stable_order():
+    # The category name breaks a genuine tie so the ordering never depends on
+    # dictionary iteration.
+    first = {"baseline_share": 50.0, "shift_points": 10.0, "category": "aaa"}
+    second = {"baseline_share": 50.0, "shift_points": 10.0, "category": "bbb"}
+
+    assert max([first, second], key=_ranking_key) is second
+    assert max([second, first], key=_ranking_key) is second

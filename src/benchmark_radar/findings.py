@@ -272,7 +272,13 @@ def _ranking_key(finding: dict[str, Any]) -> tuple[float, float, str]:
     than dependent on dictionary iteration.
     """
     weight = discriminating_power(finding["baseline_share"])
-    return weight * abs(finding["shift_points"]), abs(finding["shift_points"]), finding["category"]
+    # Rounded before the tie-breakers run. Binary floats make products that are
+    # mathematically equal compare unequal: a 20% baseline moving 6 pp and a 40%
+    # baseline moving 8 pp both score 4.8, but the first evaluates to
+    # 4.800000000000001 and would win on noise, silently skipping the larger-move
+    # tie-break that is supposed to decide it.
+    score = round(weight * abs(finding["shift_points"]), 6)
+    return score, abs(finding["shift_points"]), finding["category"]
 
 
 def _dominated_by_one_source(moves: list[float]) -> bool:
