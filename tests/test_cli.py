@@ -49,6 +49,46 @@ def _real_snapshot(tmp_path: Path, date: datetime) -> None:
     write_snapshot(run, tmp_path / "snapshots")
 
 
+def test_default_dashboard_build_also_publishes_the_feed(monkeypatch, tmp_path):
+    _real_snapshot(tmp_path, datetime(2026, 7, 30, tzinfo=UTC))
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "benchmark-radar",
+            "rebuild",
+            "--snapshot-dir",
+            str(tmp_path / "snapshots"),
+        ],
+    )
+
+    cli.main()
+
+    assert (tmp_path / "site" / "data" / "radar.json").exists()
+    assert (tmp_path / "site" / "feed.xml").exists()
+
+
+def test_custom_dashboard_does_not_overwrite_the_default_feed(monkeypatch, tmp_path):
+    _real_snapshot(tmp_path, datetime(2026, 7, 30, tzinfo=UTC))
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "benchmark-radar",
+            "rebuild",
+            "--snapshot-dir",
+            str(tmp_path / "snapshots"),
+            "--dashboard-output",
+            str(tmp_path / "custom-radar.json"),
+        ],
+    )
+
+    cli.main()
+
+    assert (tmp_path / "custom-radar.json").exists()
+    assert not (tmp_path / "site" / "feed.xml").exists()
+
+
 def test_simulate_history_skips_days_with_no_reachable_records(monkeypatch, tmp_path):
     # Regression: GitHub/HF search APIs are recency-sorted with no per-day
     # cursor, so a single broad fetch thins out fast going further back. A

@@ -25,6 +25,9 @@ from .snapshots import (
     write_snapshot,
 )
 
+DEFAULT_DASHBOARD_OUTPUT = Path("site/data/radar.json")
+DEFAULT_FEED_OUTPUT = Path("site/feed.xml")
+
 
 def _emit_persistent_source_warnings(run, config: dict) -> None:
     """Raise visible Actions warnings for optional sources that keep failing."""
@@ -92,7 +95,17 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("out/report.md"))
     parser.add_argument("--json-output", type=Path, default=Path("out/items.json"))
     parser.add_argument("--snapshot-dir", type=Path, default=Path("data/snapshots"))
-    parser.add_argument("--dashboard-output", type=Path, default=Path("site/data/radar.json"))
+    parser.add_argument("--dashboard-output", type=Path, default=DEFAULT_DASHBOARD_OUTPUT)
+    parser.add_argument(
+        "--feed-output",
+        type=Path,
+        default=None,
+        help=(
+            "Public RSS feed generated from the daily snapshot history. Defaults to "
+            "site/feed.xml when the default dashboard output is used; custom dashboard "
+            "builds publish no feed unless this option is passed."
+        ),
+    )
     parser.add_argument(
         "--model-cards",
         type=Path,
@@ -185,6 +198,9 @@ def main() -> None:
         ),
     )
     args = parser.parse_args()
+    feed_output = args.feed_output
+    if feed_output is None and args.dashboard_output == DEFAULT_DASHBOARD_OUTPUT:
+        feed_output = DEFAULT_FEED_OUTPUT
 
     if args.command == "classify":
         summary = backfill_classifications(
@@ -198,6 +214,7 @@ def main() -> None:
         dashboard = rebuild_dashboard(
             args.snapshot_dir,
             args.dashboard_output,
+            feed_output=feed_output,
             registry_path=args.model_cards,
             scores_path=args.benchmark_scores,
             kw_bench_store_path=args.kw_bench_store,
@@ -229,6 +246,7 @@ def main() -> None:
         data = rebuild_dashboard(
             args.snapshot_dir,
             args.dashboard_output,
+            feed_output=feed_output,
             registry_path=args.model_cards,
             scores_path=args.benchmark_scores,
             kw_bench_store_path=args.kw_bench_store,
@@ -294,6 +312,7 @@ def main() -> None:
         dashboard = rebuild_dashboard(
             args.snapshot_dir,
             args.dashboard_output,
+            feed_output=feed_output,
             registry_path=args.model_cards,
             scores_path=args.benchmark_scores,
             kw_bench_store_path=args.kw_bench_store,
@@ -310,6 +329,7 @@ def main() -> None:
         dashboard = rebuild_dashboard(
             args.snapshot_dir,
             args.dashboard_output,
+            feed_output=feed_output,
             registry_path=args.model_cards,
             scores_path=args.benchmark_scores,
             kw_bench_store_path=args.kw_bench_store,
@@ -336,6 +356,7 @@ def main() -> None:
         dashboard = rebuild_dashboard(
             args.snapshot_dir,
             args.dashboard_output,
+            feed_output=feed_output,
             registry_path=args.model_cards,
             scores_path=args.benchmark_scores,
             kw_bench_store_path=args.kw_bench_store,
@@ -444,6 +465,7 @@ def main() -> None:
     dashboard = rebuild_dashboard(
         args.snapshot_dir,
         args.dashboard_output,
+        feed_output=feed_output,
         registry_path=args.model_cards,
         scores_path=args.benchmark_scores,
         kw_bench_store_path=args.kw_bench_store,

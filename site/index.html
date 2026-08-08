@@ -31,6 +31,7 @@
     >
     <meta name="twitter:card" content="summary_large_image">
 
+    <link rel="alternate" type="application/rss+xml" title="Benchmark Radar RSS" href="feed.xml">
     <link rel="stylesheet" href="assets/styles.css">
     <script src="assets/app.js" type="module"></script>
   </head>
@@ -45,6 +46,19 @@
         <strong>Benchmark Radar</strong>
       </a>
       <div class="masthead-end">
+        <a
+          class="repo-badge feed-badge"
+          href="feed.xml"
+          title="Subscribe to Benchmark Radar via RSS"
+          aria-label="Subscribe to Benchmark Radar via RSS"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="5" cy="19" r="2"></circle>
+            <path d="M4 11a9 9 0 0 1 9 9"></path>
+            <path d="M4 4a16 16 0 0 1 16 16"></path>
+          </svg>
+          <span class="repo-badge-label">RSS</span>
+        </a>
         <!--
           Each badge is a call to action, not a link to a roster. Starring has no
           GET endpoint (GitHub requires an authenticated POST with a CSRF token,

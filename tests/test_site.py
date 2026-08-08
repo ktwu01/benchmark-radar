@@ -304,11 +304,15 @@ def test_static_html_references_existing_local_assets():
     parser = SiteParser()
     parser.feed(Path("site/index.html").read_text(encoding="utf-8"))
 
+    # Pages generates these from validated source data before upload. Their
+    # generators and rendered structure have dedicated tests, while this check
+    # remains about static assets that must exist in a clean checkout.
+    generated_assets = {"feed.xml"}
     missing = []
     for reference in parser.local_refs:
         path = urlsplit(reference).path
         target = Path("site") if path in {"", ".", "./"} else Path("site") / path
-        if not target.exists():
+        if not target.exists() and path not in generated_assets:
             missing.append(reference)
 
     assert not missing

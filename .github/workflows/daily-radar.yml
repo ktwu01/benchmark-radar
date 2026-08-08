@@ -135,6 +135,9 @@ jobs:
           git commit -m "Record daily radar snapshot"
           git push origin HEAD:main
 
+  # Issue #37: keep the daily Issue as a secondary, GitHub-native discussion
+  # channel after RSS ships. The dashboard and site/feed.xml are the primary
+  # reading and subscription surfaces; this job no longer fills a feed gap.
   publish-issue:
     needs: [build-report, persist-snapshot]
     if: >-

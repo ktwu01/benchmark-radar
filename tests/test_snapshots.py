@@ -1,6 +1,7 @@
 import json
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from xml.etree import ElementTree as ET
 
 import pytest
 
@@ -230,6 +231,25 @@ def test_rebuild_is_deterministic(tmp_path):
     assert first["days"][0]["evidence_count"] == 1
     assert first["days"][0]["attention"]["new_count"] == 1
     assert first["days"][0]["attention"]["active_count"] == 1
+
+
+def test_rebuild_can_publish_the_feed_from_the_same_snapshot_history(tmp_path):
+    snapshot_dir = tmp_path / "snapshots"
+    write_snapshot(radar_run(26), snapshot_dir)
+    write_snapshot(radar_run(27), snapshot_dir)
+    feed_output = tmp_path / "site" / "feed.xml"
+
+    rebuild_dashboard(
+        snapshot_dir,
+        tmp_path / "site" / "data" / "radar.json",
+        feed_output=feed_output,
+    )
+
+    root = ET.parse(feed_output).getroot()
+    assert [item.findtext("title") for item in root.findall("./channel/item")] == [
+        "Benchmark Radar — 2026-07-27",
+        "Benchmark Radar — 2026-07-26",
+    ]
 
 
 def test_rescore_applies_a_new_category_to_older_snapshots(tmp_path):

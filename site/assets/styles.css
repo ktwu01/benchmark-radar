@@ -208,6 +208,20 @@ th {
   font-weight: 700;
 }
 
+.feed-badge svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
+.feed-badge svg circle {
+  fill: currentColor;
+  stroke: none;
+}
+
 .view-nav {
   display: flex;
   align-items: stretch;

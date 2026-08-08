@@ -12,6 +12,7 @@ on:
       - "data/model_cards.yml"
       - "site/**"
       - "src/benchmark_radar/snapshots.py"
+      - "src/benchmark_radar/feed.py"
       - "src/benchmark_radar/corpus.py"
       - "src/benchmark_radar/model_cards.py"
       - "src/benchmark_radar/cli.py"
@@ -52,6 +53,8 @@ jobs:
           # The classification store is derived and intentionally untracked.
           # Build it in the fresh Pages checkout before publishing radar.json.
           # The MVP uses NullExtractor, so this makes no external/model calls.
+          # This rebuild also writes site/feed.xml from the same validated
+          # snapshot history as radar.json (issue #37).
           benchmark-radar classify
           # Standalone citable artifacts alongside the dashboard bundle (issue
           # #88). Written into site/data/ so they deploy with the rest of the

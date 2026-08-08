@@ -17,6 +17,7 @@ from .corpus import (
     exact_artifact_key,
     organizations_for_item,
 )
+from .feed import write_feed
 from .insights import build_insights
 from .kw_bench_tracks import classification_layer, derive_tracks
 from .model_cards import DEFAULT_REGISTRY_PATH, adoption_rank, load_registry
@@ -903,17 +904,21 @@ def rebuild_dashboard(
     snapshot_dir: Path,
     output: Path,
     *,
+    feed_output: Path | None = None,
     registry_path: Path | None = None,
     scores_path: Path | None = None,
     kw_bench_store_path: Path | None = None,
 ) -> dict[str, Any]:
+    snapshots = load_snapshots(snapshot_dir)
     value = dashboard_data(
-        load_snapshots(snapshot_dir),
+        snapshots,
         registry_path=registry_path,
         scores_path=scores_path,
         kw_bench_store_path=kw_bench_store_path,
     )
     _write_json(output, value)
+    if feed_output is not None:
+        write_feed(snapshots, feed_output)
     return value
 
 

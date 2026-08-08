@@ -54,8 +54,10 @@ The ranking above is the curated half of this project. The other half runs every
 GitHub Actions queries primary or structured sources for newly released benchmarks,
 evaluation methods, datasets, and data-quality work, deduplicates records, classifies
 them with a transparent taxonomy, ranks them using explainable signals, and publishes a
-GitHub Issue and a
-[cumulative dashboard](https://ktwu01.github.io/benchmark-radar/). It is inspired by
+[cumulative dashboard](https://ktwu01.github.io/benchmark-radar/) with a
+[daily RSS feed](https://ktwu01.github.io/benchmark-radar/feed.xml). The automated daily
+GitHub Issue remains as a secondary channel for GitHub-native discussion; the site and
+RSS feed are the primary reading and subscription surfaces. It is inspired by
 [agents-radar](https://github.com/duanyytop/agents-radar), with sources and scoring
 redesigned for benchmark and AI-data research.
 
