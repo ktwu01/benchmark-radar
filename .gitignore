@@ -24,6 +24,14 @@ out/
 # store before publishing; the MVP's null extractor makes no external calls.
 /data/kw_bench_classifications.jsonl
 
+# Commit emails harvested by `benchmark-radar authors --author-emails` (issue
+# #156). `git log` publishes an author's address and most contributors do not
+# realise it, so a committed list of them is a spam and doxxing vector whatever
+# the intent. The survey itself carries public professional signals only and is
+# safe to share; this file is not.
+/out/benchmark-author-contacts.json
+benchmark-author-contacts.json
+
 .gstack/
 .DS_Store
 .worktrees/

@@ -8,6 +8,7 @@ from pathlib import Path
 
 import yaml
 
+from .authors import survey as author_survey
 from .briefing import BriefingError, current_day_snapshot, daily_report_run, generate_daily_briefing
 from .export import DEFAULT_TABLE_LIMIT, write_exports
 from .findings import daily_findings
@@ -81,15 +82,40 @@ def main() -> None:
             "simulate-history",
             "export",
             "classify",
+            "authors",
         ),
         default="run",
         help=(
             "Collect a daily run, rebuild/backfill cumulative data from saved snapshots, "
             "migrate snapshot schemas, rescore stored taxonomy categories against the "
             "current config, simulate missing historical snapshots, export the "
-            "Model Card Adoption Rank as standalone citable files, or classify canonical "
-            "benchmark tracks against the KW-Bench L0-L5 capability rubric."
+            "Model Card Adoption Rank as standalone citable files, classify canonical "
+            "benchmark tracks against the KW-Bench L0-L5 capability rubric, or survey "
+            "the public profiles of authors behind popular benchmark repositories."
         ),
+    )
+    parser.add_argument(
+        "--author-output",
+        type=Path,
+        default=Path("out/benchmark-authors.json"),
+        help="Where `authors` writes its shareable survey of public profiles.",
+    )
+    parser.add_argument(
+        "--author-contacts",
+        type=Path,
+        default=Path("out/benchmark-author-contacts.json"),
+        help=(
+            "Where `authors --author-emails` writes harvested commit emails. Kept "
+            "out of the survey and untracked: publishing addresses people did not "
+            "knowingly share invites spam regardless of intent."
+        ),
+    )
+    parser.add_argument("--author-repo-limit", type=int, default=40)
+    parser.add_argument("--author-contributors", type=int, default=20)
+    parser.add_argument(
+        "--author-emails",
+        action="store_true",
+        help="Also collect commit emails into the untracked contacts file (issue #156).",
     )
     parser.add_argument("--config", type=Path, default=Path("config.yml"))
     parser.add_argument("--output", type=Path, default=Path("out/report.md"))
@@ -201,6 +227,37 @@ def main() -> None:
     feed_output = args.feed_output
     if feed_output is None and args.dashboard_output == DEFAULT_DASHBOARD_OUTPUT:
         feed_output = DEFAULT_FEED_OUTPUT
+
+    if args.command == "authors":
+        result = author_survey(
+            load_snapshots(args.snapshot_dir),
+            repo_limit=args.author_repo_limit,
+            per_repo=args.author_contributors,
+            include_emails=args.author_emails,
+        )
+        report = result["report"]
+        args.author_output.parent.mkdir(parents=True, exist_ok=True)
+        args.author_output.write_text(
+            json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        print(
+            f"Surveyed {report['repository_count']} popular repositories and "
+            f"{report['author_count']} contributors"
+        )
+        print(f"  {report['data_author_count']} describe data work in their own profile")
+        print(f"  report: {args.author_output}")
+        if result["contacts"]:
+            # Untracked by design: a committed list of harvested addresses is a
+            # spam vector no matter why it was gathered.
+            args.author_contacts.parent.mkdir(parents=True, exist_ok=True)
+            args.author_contacts.write_text(
+                json.dumps(result["contacts"], ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            print(f"  contacts: {args.author_contacts} (gitignored, {len(result['contacts'])})")
+        for failure in report["failures"][:5]:
+            print(f"  ::warning:: {failure}")
+        return
 
     if args.command == "classify":
         summary = backfill_classifications(
