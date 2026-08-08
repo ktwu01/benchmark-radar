@@ -765,11 +765,21 @@ def fetch_openalex(
             # resolution; an undated row is skipped rather than dated "now",
             # which would have handed it maximum recency.
             published = _optional_date(row.get("publication_date"))
+            # OpenAlex serves `display_name: null` for works whose metadata is
+            # incomplete or withdrawn. Every other connector coerces its title,
+            # so this was the one path that could hand a None title to the
+            # shared scorer, where normalized_title() crashed the whole daily
+            # run on it. An untitled work cannot be deduplicated by title or
+            # given a heading a reader could act on, and unlike Brave or GitHub
+            # Release there is no second human-meaningful field to fall back to,
+            # so it is dropped the same way an undated work is.
+            title = str(row.get("display_name") or "").strip()
             # Keep a defensive client-side bound as well as the API filter: a
             # malformed or ignored upstream filter must not grant future work
             # maximum recency in the shared scorer.
             if (
-                published is None
+                not title
+                or published is None
                 or published.date() < since.date()
                 or _reject_future(config, source_id, published)
             ):
@@ -777,7 +787,7 @@ def fetch_openalex(
             found[source_id] = RadarItem(
                 source="OpenAlex",
                 source_id=source_id,
-                title=row["display_name"],
+                title=title,
                 url=url,
                 published_at=published,
                 event_kind="released",

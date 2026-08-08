@@ -711,6 +711,42 @@ def test_openalex_skips_undated_works(monkeypatch):
     assert [item.title for item in items] == ["Dated benchmark"]
 
 
+def test_openalex_skips_untitled_works(monkeypatch):
+    monkeypatch.setenv("OPENALEX_API_KEY", "key")
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, params: {
+            "results": [
+                {
+                    # OpenAlex serves this for withdrawn or metadata-incomplete
+                    # works. It reached the shared scorer as title=None and
+                    # aborted the whole daily run in normalized_title().
+                    "id": "https://openalex.org/W1",
+                    "display_name": None,
+                    "publication_date": "2026-07-27",
+                    "primary_location": {"landing_page_url": "https://example.com/w1"},
+                },
+                {
+                    "id": "https://openalex.org/W2",
+                    "display_name": "   ",
+                    "publication_date": "2026-07-27",
+                    "primary_location": {"landing_page_url": "https://example.com/w2"},
+                },
+                {
+                    "id": "https://openalex.org/W3",
+                    "display_name": "Titled benchmark",
+                    "publication_date": "2026-07-27",
+                    "primary_location": {"landing_page_url": "https://example.com/w3"},
+                },
+            ]
+        },
+    )
+
+    items = fetch_openalex({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert [item.title for item in items] == ["Titled benchmark"]
+
+
 def test_brave_rejects_a_shapeless_payload(monkeypatch):
     monkeypatch.setenv("BRAVE_API_KEY", "key")
     monkeypatch.setattr("benchmark_radar.sources.get_json", lambda url, params, headers: {})

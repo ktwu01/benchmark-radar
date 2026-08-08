@@ -46,6 +46,52 @@ def test_title_normalization():
     assert normalized_title("  New: AI-Bench! ") == "new ai bench"
 
 
+def test_a_missing_title_does_not_abort_the_whole_collection():
+    # The 2026-08-08 daily run died here: one OpenAlex row with a null title
+    # raised AttributeError inside deduplicate() and threw away every other
+    # source's evidence for the day. Connectors reject untitled records, but
+    # one slipping through must not be fatal to the entire run.
+    assert normalized_title(None) == ""
+    untitled = item(title=None, source_id="w1", url="https://openalex.org/W1")
+    healthy = item(source_id="w2", url="https://openalex.org/W2", title="Real title")
+    assert [record.title for record in deduplicate([untitled, healthy])] == [None, "Real title"]
+
+
+def test_an_untitled_record_never_reaches_publication():
+    # Surviving dedup is not enough: report._escape() raises on None, so an
+    # untitled record that scored well would move the same crash from
+    # collection to publication. It has to leave the funnel entirely.
+    from benchmark_radar.report import _escape
+
+    with pytest.raises(AttributeError):
+        _escape(None)
+
+    published, selection = _score_and_select(
+        [
+            _fresh(source_id="untitled", title=None),
+            _fresh(source_id="keep", title="A New Benchmark Dataset For Evaluation"),
+        ],
+        _funnel_config(),
+        now=FUNNEL_NOW,
+        fetched_count=2,
+        suppressed_count=0,
+    )
+
+    assert [record.title for record in published] == ["A New Benchmark Dataset For Evaluation"]
+    assert all(record.title for record in published)
+
+    # The drop is billed to its own counter, not silently to dedupe, or the
+    # funnel would report a connector bug as ordinary duplicate removal.
+    assert selection["suppressed_untitled"] == 1
+    assert selection["fetched"] - selection["suppressed_untitled"] == selection["deduplicated"]
+
+
+def test_a_healthy_run_reports_no_untitled_suppression():
+    selection = _select([_fresh(source_id="keep", title="A New Benchmark Dataset For Evaluation")])
+
+    assert selection["suppressed_untitled"] == 0
+
+
 def test_dedupe_merges_cross_source_urls():
     first = item()
     second = item(source="GitHub", source_id="org/repo", url="https://github.com/org/repo")

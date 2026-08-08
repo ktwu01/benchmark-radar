@@ -166,6 +166,7 @@ def render_markdown(
         watchlisted = int(selection.get("watchlisted") or 0)
         suppressed = int(selection.get("suppressed_as_seen") or 0)
         suppressed_future = int(selection.get("suppressed_future_dated") or 0)
+        suppressed_untitled = int(selection.get("suppressed_untitled") or 0)
         suppressed_low_value = int(selection.get("suppressed_low_value") or 0)
         uncategorized = int(selection.get("suppressed_uncategorized") or 0)
         if "eligible" in selection:
@@ -186,6 +187,13 @@ def render_markdown(
                 + (
                     f"**{suppressed_future}** future-dated records quarantined → "
                     if suppressed_future
+                    else ""
+                )
+                # Only ever non-zero when a connector regresses, so it stays out
+                # of the line on every healthy run.
+                + (
+                    f"**{suppressed_untitled}** untitled records dropped → "
+                    if suppressed_untitled
                     else ""
                 )
                 + f"**{selection.get('deduplicated', 0)}** after dedupe → "

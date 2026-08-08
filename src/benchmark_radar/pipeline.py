@@ -26,8 +26,12 @@ def canonical_url(url: str) -> str:
     return urlunsplit((parts.scheme.lower(), parts.netloc.lower(), path, urlencode(query), ""))
 
 
-def normalized_title(title: str) -> str:
-    return " ".join(re.findall(r"[a-z0-9]+", title.lower()))
+def normalized_title(title: str | None) -> str:
+    # A connector that lets an upstream null through used to abort the entire
+    # daily run here, losing every other source's evidence to one malformed
+    # row. Connectors are still responsible for rejecting untitled records;
+    # this only keeps that mistake from being fatal to the whole collection.
+    return " ".join(re.findall(r"[a-z0-9]+", (title or "").lower()))
 
 
 def dedupe_keys(item: RadarItem) -> list[str]:
@@ -417,7 +421,15 @@ def _score_and_select(
         raise ValueError(
             f"minimum_score must be a finite recommendation threshold, got {recommendation_score!r}"
         )
-    unique = deduplicate(items)
+    # A record with no title cannot be rendered: report._escape() raises on
+    # None, so letting one through here only moves the crash from dedup to
+    # publication. Connectors already reject untitled records, and this drops
+    # any that a future connector lets slip rather than failing the whole run.
+    # Counted separately so the funnel does not silently bill the drop to
+    # dedupe, which would hide the connector bug this is compensating for.
+    titled = [item for item in items if (item.title or "").strip()]
+    untitled_count = len(items) - len(titled)
+    unique = deduplicate(titled)
     scored = apply_watchlist(
         [
             score_item(
@@ -474,6 +486,10 @@ def _score_and_select(
         # Invalid upstream dates are removed before scoring so they cannot get
         # maximum recency or displace legitimate current records.
         "suppressed_future_dated": future_dated_count,
+        # Records a connector emitted with no usable title. Always 0 unless a
+        # connector regresses, so a non-zero value here is the signal that one
+        # has, rather than an unexplained gap between fetched and deduplicated.
+        "suppressed_untitled": untitled_count,
         "deduplicated": len(unique),
         "scored": len(scored),
         "eligible": len(selected),
