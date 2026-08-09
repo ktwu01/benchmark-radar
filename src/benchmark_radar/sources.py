@@ -20,6 +20,123 @@ class ConnectorPayloadError(ValueError):
 FUTURE_TIMESTAMP_TOLERANCE = timedelta(minutes=5)
 
 
+def _xml_local_name(tag: str) -> str:
+    return tag.rsplit("}", 1)[-1]
+
+
+def _feed_child(element: ET.Element, name: str) -> ET.Element | None:
+    return next((child for child in element if _xml_local_name(child.tag) == name), None)
+
+
+def _feed_text(element: ET.Element, *names: str) -> str:
+    for name in names:
+        child = _feed_child(element, name)
+        if child is not None:
+            text = " ".join("".join(child.itertext()).split())
+            if text:
+                return text
+    return ""
+
+
+def _feed_date(value: str) -> datetime | None:
+    if not value:
+        return None
+    parsed = _optional_date(value)
+    if parsed is not None:
+        return parsed
+    try:
+        return parsedate_to_datetime(value).astimezone(UTC)
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
+def _feed_link(entry: ET.Element) -> str:
+    # RSS puts the URL in the node text; Atom uses an href attribute and may
+    # include alternate, self, and enclosure links.
+    for child in entry:
+        if _xml_local_name(child.tag) != "link":
+            continue
+        href = str(child.get("href") or child.text or "").strip()
+        if href and child.get("rel", "alternate") == "alternate":
+            return href
+    return ""
+
+
+def fetch_first_party_feeds(
+    config: dict[str, Any], since: datetime, limit: int
+) -> list[RadarItem]:
+    """Collect relevant announcements from an explicit first-party RSS/Atom allowlist."""
+    keywords = [
+        str(value).casefold()
+        for value in config.get(
+            "keywords",
+            [
+                "benchmark",
+                "evaluation",
+                "evals",
+                "leaderboard",
+                "dataset",
+                "test set",
+                "data contamination",
+            ],
+        )
+        if str(value).strip()
+    ]
+    feeds = config.get("feeds") or []
+    if not isinstance(feeds, list):
+        raise ConnectorPayloadError("First-party feeds must be an array")
+    found: dict[str, RadarItem] = {}
+    for feed in feeds:
+        if not isinstance(feed, dict) or not feed.get("name") or not feed.get("url"):
+            raise ConnectorPayloadError("First-party feed is missing name or url")
+        name = str(feed["name"]).strip()
+        feed_url = str(feed["url"]).strip()
+        root = ET.fromstring(get_text(feed_url, **_request_options(config)))
+        root_name = _xml_local_name(root.tag)
+        if root_name == "rss":
+            channel = _feed_child(root, "channel")
+            entries = [] if channel is None else [
+                child for child in channel if _xml_local_name(child.tag) == "item"
+            ]
+        elif root_name == "feed":
+            entries = [child for child in root if _xml_local_name(child.tag) == "entry"]
+        else:
+            raise ConnectorPayloadError(f"{name} returned an incompatible feed document")
+        for entry in entries:
+            title = _feed_text(entry, "title")
+            summary = clean_card_text(_feed_text(entry, "description", "summary", "content"))
+            haystack = f"{title} {summary}".casefold()
+            if not title or (keywords and not any(keyword in haystack for keyword in keywords)):
+                continue
+            url = _feed_link(entry)
+            source_id = _feed_text(entry, "id", "guid") or url
+            published = _feed_date(_feed_text(entry, "published", "pubDate", "date"))
+            updated = _feed_date(_feed_text(entry, "updated")) or published
+            activity = updated or published
+            if not url or not source_id or published is None or activity is None:
+                raise ConnectorPayloadError(f"{name} feed item is missing required fields")
+            identity = f"{name}:{source_id}"
+            if activity < since or _reject_future(config, identity, published, updated):
+                continue
+            found[identity] = RadarItem(
+                source="First-party feed",
+                source_id=identity,
+                title=title,
+                url=url,
+                published_at=published,
+                updated_at=updated,
+                summary=summary,
+                event_kind="updated" if updated > published else "released",
+                raw={"xml": ET.tostring(entry, encoding="unicode")},
+                parser_version="first-party-rss-atom/1",
+            )
+    return sorted(
+        found.values(),
+        key=lambda item: (item.updated_at or item.published_at, item.source_id),
+        reverse=True,
+    )[:limit]
+
+
 def _latest_allowed(config: dict[str, Any]) -> datetime:
     collection_now = config.get("_collection_now")
     if not isinstance(collection_now, datetime):
@@ -625,6 +742,7 @@ def fetch_github_releases(
     regular_requests = 0
     replacement_requests = 0
     found: dict[str, RadarItem] = {}
+    failures: list[Exception] = []
     for repository in repositories:
         page = 1
         page_limit = max_pages
@@ -636,12 +754,20 @@ def fetch_github_releases(
                 or len(found) >= limit
             ):
                 break
-            payload = get_json(
-                f"https://api.github.com/repos/{repository}/releases",
-                params={"per_page": min(page_size, limit - len(found)), "page": page},
-                headers=headers,
-                **_request_options(config),
-            )
+            try:
+                payload = get_json(
+                    f"https://api.github.com/repos/{repository}/releases",
+                    params={"per_page": min(page_size, limit - len(found)), "page": page},
+                    headers=headers,
+                    **_request_options(config),
+                )
+            except Exception as error:
+                # Degrade per repository: one renamed, archived, or temporarily
+                # unavailable project must not erase every healthy release.
+                warnings = config.setdefault("_source_warnings", [])
+                warnings.append(f"{repository}: {type(error).__name__}: {error}")
+                failures.append(error)
+                break
             if is_replacement:
                 replacement_requests += 1
             else:
@@ -711,6 +837,9 @@ def fetch_github_releases(
             page += 1
         if regular_requests >= budget or len(found) >= limit:
             break
+    warnings = config.get("_source_warnings") or []
+    if repositories and len(warnings) == len(repositories):
+        raise failures[0]
     return sorted(found.values(), key=lambda item: item.published_at, reverse=True)[:limit]
 
 
@@ -867,6 +996,7 @@ SOURCE_FETCHERS = {
     "openreview": fetch_openreview,
     "semantic_scholar": fetch_semantic_scholar,
     "github_releases": fetch_github_releases,
+    "first_party_feeds": fetch_first_party_feeds,
     "openalex": fetch_openalex,
     "brave": fetch_brave,
 }

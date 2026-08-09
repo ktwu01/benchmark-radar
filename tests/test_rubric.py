@@ -37,7 +37,7 @@ def test_published_rubric_describes_every_scored_component():
 
     assert keys == list(rubric.WEIGHTS)
     assert reference["score_max"] == 100
-    assert reference["scoring_version"] == 2
+    assert reference["scoring_version"] == 3
     for component in reference["components"]:
         assert component["weight"] == rubric.WEIGHTS[component["key"]]
         assert component["summary"].strip()

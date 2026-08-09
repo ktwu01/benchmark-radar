@@ -672,16 +672,15 @@ def run_pipeline(
             fetched, rejected_future = _drop_future_dated_items(fetched, now=now)
             rejected_future += connector_rejected
             future_dated_count += rejected_future
+            source_notes = [str(value) for value in fetch_config.get("_source_warnings", [])]
+            if rejected_future:
+                source_notes.insert(0, f"Discarded {rejected_future} future-dated record(s)")
             health.append(
                 SourceHealth(
                     source=source_name,
                     ok=True,
                     item_count=len(fetched),
-                    error=(
-                        f"Discarded {rejected_future} future-dated record(s)"
-                        if rejected_future
-                        else None
-                    ),
+                    error="; ".join(source_notes) if source_notes else None,
                 )
             )
             for item in fetched:

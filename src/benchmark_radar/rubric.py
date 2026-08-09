@@ -12,7 +12,7 @@ import hashlib
 import json
 from typing import Any
 
-SCORING_VERSION = 2
+SCORING_VERSION = 3
 SCORE_MAX = 100.0
 DEFAULT_LOOKBACK_HOURS = 48.0
 
@@ -29,7 +29,13 @@ WEIGHTS: dict[str, float] = {
 
 # Evidence is explicit and additive on a 0-100 scale.
 EVIDENCE_BASE = 10.0
-EVIDENCE_PRIMARY_SOURCES = ("arXiv", "OpenAlex", "OpenReview", "Semantic Scholar")
+EVIDENCE_PRIMARY_SOURCES = (
+    "arXiv",
+    "First-party feed",
+    "OpenAlex",
+    "OpenReview",
+    "Semantic Scholar",
+)
 EVIDENCE_PRIMARY_CREDIT = 40.0
 EVIDENCE_ARTIFACT_SOURCES = ("GitHub", "GitHub Release", "Hugging Face")
 EVIDENCE_ARTIFACT_CREDIT = 30.0
@@ -170,7 +176,7 @@ def _components(*, lookback_hours: float) -> list[dict[str, Any]]:
             ),
             "bands": [
                 f"{EVIDENCE_BASE:.0f} baseline for any record that passed ingest",
-                f"+{EVIDENCE_PRIMARY_CREDIT:.0f} from a primary scholarly record "
+                f"+{EVIDENCE_PRIMARY_CREDIT:.0f} from a primary or structured record "
                 f"({', '.join(EVIDENCE_PRIMARY_SOURCES)})",
                 f"+{EVIDENCE_ARTIFACT_CREDIT:.0f} from a structured artifact registry "
                 f"({', '.join(EVIDENCE_ARTIFACT_SOURCES)})",
@@ -240,6 +246,21 @@ def rubric_reference(
         ],
         "lookback_hours": float(lookback_hours),
     }
+    return value
+
+
+def v2_rubric_reference(
+    *, lookback_hours: float = DEFAULT_LOOKBACK_HOURS
+) -> dict[str, Any]:
+    """Describe v2 without retroactively granting its records the v3 feed tier."""
+    value = rubric_reference(lookback_hours=lookback_hours)
+    value["scoring_version"] = 2
+    for component in value["components"]:
+        if component["key"] != "evidence":
+            continue
+        component["bands"] = [
+            band.replace(", First-party feed", "") for band in component["bands"]
+        ]
     return value
 
 

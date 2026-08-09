@@ -17,6 +17,7 @@ CORPUS_SCHEMA_VERSION = 1
 AGGREGATE_WINDOW_DAYS = 7
 PRIMARY_SOURCE_RANK = {
     "arXiv": 1,
+    "First-party feed": 1,
     "OpenReview": 1,
     "GitHub Release": 1,
     "GitHub": 1,

@@ -230,19 +230,122 @@ sources:
       - stanford-crfm/helm
       - EleutherAI/lm-evaluation-harness
       - LiveBench/LiveBench
-      - princeton-nlp/SWE-bench
+      - SWE-bench/SWE-bench
       - evalplus/evalplus
       - openai/evals
       - mlcommons/inference
       - ARCPrize/ARC-AGI
+      - arcprize/ARC-AGI-3-Agents
+      # Curated first-party benchmark and evaluation repositories. Some
+      # projects release infrequently; an empty Releases response is healthy.
+      - openai/simple-evals
+      - openai/human-eval
+      - THUDM/AgentBench
+      - THUDM/LongBench
+      - modelscope/evalscope
+      - open-compass/opencompass
+      - huggingface/lighteval
+      - embeddings-benchmark/mteb
+      - EvolvingLMMs-Lab/lmms-eval
+      - LiveCodeBench/LiveCodeBench
+      - SWE-agent/SWE-agent
+      - lmarena/arena-hard-auto
+      - MMMU-Benchmark/MMMU
+      - MME-Benchmarks/Video-MME
+      - OpenGVLab/MMT-Bench
+      - AILab-CVC/SEED-Bench
+      - centerforaisafety/HarmBench
+      - centerforaisafety/wmdp
+      - NVIDIA/garak
+      - microsoft/BIPIA
+      - OSU-NLP-Group/Mind2Web
+      - OpenBMB/ToolBench
+      - ServiceNow/BrowserGym
+      - web-arena-x/webarena
+      - facebookresearch/CRAG
+      - confident-ai/deepeval
+      - vibrantlabsai/ragas
+      - UKGovernmentBEIS/inspect_ai
+      - OpenMOSS/VLABench
+      - EmbodiedBench/EmbodiedBench
+      - thu-coai/SafetyBench
+      # First-party model and agent repositories from Alina's feed audit.
+      # Their releases enter the radar only when the normal benchmark/data
+      # taxonomy finds relevant source text; ordinary model releases drop out.
+      - QwenLM/Qwen3
+      - QwenLM/Qwen-Agent
+      - deepseek-ai/DeepSeek-V3
+      - deepseek-ai/DeepSeek-R1
+      - PaddlePaddle/ERNIE
+      - PaddlePaddle/Paddle
+      - Tencent-Hunyuan/HunyuanVideo
+      - verl-project/verl
+      - zai-org/GLM-4
+      - zai-org/CogVideo
+      - MoonshotAI/Kimi-k1.5
+      - InternLM/InternLM
+      - meituan-longcat/LongCat-Next
+      - Kwai-Kolors/Kolors
+      - MiniMax-AI/MiniMax-01
+      - stepfun-ai/Step-Audio
+      - stepfun-ai/Step-Video-T2V
+      - bytedance/UI-TARS
+      - black-forest-labs/flux
+      - 01-ai/Yi
+      - meta-llama/llama-models
+      - openclaw/openclaw
+      - karpathy/autoresearch
+      - xai-org/grok-1
     page_size: 30
     max_pages_per_repository: 1
-    max_requests: 8
+    max_requests: 64
     # Invalid future-dated rows may consume a page slot. Replacement requests
     # use a separate cap so they cannot steal the first request from later repos.
     future_replacement_requests: 2
     attempts: 3
     timeout_seconds: 30
+
+  # Audited from data/feeds_curated_by_alina_allowed_to_go_public.yaml.
+  # Only live feeds hosted by the organization that authored the content are
+  # admitted here. Media, social proxies, community feeds, broad arXiv feeds,
+  # broken endpoints, and third-party Anthropic mirrors stay out of scored
+  # evidence. Entries are filtered locally for benchmark/data relevance.
+  first_party_feeds:
+    enabled: true
+    required: false
+    allow_empty: true
+    attempts: 3
+    timeout_seconds: 30
+    keywords:
+      - benchmark
+      - evaluation
+      - evals
+      - leaderboard
+      - dataset
+      - test set
+      - data contamination
+      - data quality
+    feeds:
+      - name: Meituan Engineering
+        url: https://tech.meituan.com/rss.xml
+      - name: OpenAI News
+        url: https://openai.com/news/rss.xml
+      - name: Google AI
+        url: https://blog.google/innovation-and-ai/technology/ai/rss/
+      - name: Google DeepMind
+        url: https://deepmind.google/blog/rss.xml
+      - name: Google Research
+        url: https://research.google/blog/rss/
+      - name: Apple Machine Learning Research
+        url: https://machinelearning.apple.com/rss.xml
+      - name: AWS Machine Learning
+        url: https://aws.amazon.com/blogs/machine-learning/feed/
+      - name: Hugging Face Blog
+        url: https://huggingface.co/blog/feed.xml
+      - name: Microsoft Research
+        url: https://www.microsoft.com/en-us/research/feed/
+      - name: NVIDIA AI Blog
+        url: https://blogs.nvidia.com/feed/
 
   openalex:
     enabled: true
@@ -259,6 +362,16 @@ sources:
       - new LLM benchmark leaderboard
       - AI dataset release data quality
       - new agentic AI benchmark leaderboard
+      # Official pages whose RSS endpoints in Alina's list are missing,
+      # unofficial, or broken. Search remains first-party-domain constrained.
+      - site:anthropic.com/news benchmark evaluation dataset
+      - site:anthropic.com/research benchmark evaluation dataset
+      - site:anthropic.com/engineering benchmark evaluation dataset
+      - site:ai.meta.com/blog benchmark evaluation dataset
+      - site:blogs.microsoft.com/ai benchmark evaluation dataset
+      - site:mistral.ai/news benchmark evaluation dataset
+      - site:stability.ai/news benchmark evaluation dataset
+      - site:01.ai/blog benchmark evaluation dataset
 
 attention:
   hacker_news:

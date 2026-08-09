@@ -28,6 +28,7 @@ from .rubric import (
     legacy_rubric_reference,
     rubric_reference,
     taxonomy_version,
+    v2_rubric_reference,
 )
 
 SCHEMA_VERSION = 2
@@ -898,6 +899,11 @@ def dashboard_data(
         # v2 arithmetic.
         "rubrics": {
             "1": legacy_rubric_reference(),
+            "2": v2_rubric_reference(
+                lookback_hours=(
+                    (days[-1].get("selection") or {}).get("lookback_hours") or 48 if days else 48
+                ),
+            ),
             str(SCORING_VERSION): rubric_reference(
                 lookback_hours=(
                     (days[-1].get("selection") or {}).get("lookback_hours") or 48 if days else 48

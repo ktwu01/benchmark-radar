@@ -77,6 +77,7 @@ Default sources:
 | Hugging Face Hub | No | Dataset repository discovery |
 | GitHub | No in Actions | Code and artifact discovery |
 | GitHub Releases | No in Actions | Curated first-party release discovery |
+| First-party feeds | No | Curated official lab and engineering announcements |
 | Semantic Scholar | Optional `SEMANTIC_SCHOLAR_API_KEY` | Structured scholarly discovery |
 | OpenAlex | Free `OPENALEX_API_KEY` | Scholarly metadata enrichment |
 | Brave Search | `BRAVE_API_KEY` | Web and lab-blog discovery |

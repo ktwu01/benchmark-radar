@@ -8,6 +8,7 @@ from benchmark_radar.sources import (
     ConnectorPayloadError,
     fetch_arxiv,
     fetch_brave,
+    fetch_first_party_feeds,
     fetch_github,
     fetch_github_releases,
     fetch_huggingface,
@@ -15,6 +16,83 @@ from benchmark_radar.sources import (
     fetch_openreview,
     fetch_semantic_scholar,
 )
+
+FIRST_PARTY_RSS = """\
+<rss version="2.0"><channel>
+  <item>
+    <title>A new agent evaluation benchmark</title>
+    <link>https://lab.example/benchmark</link>
+    <guid>benchmark-one</guid>
+    <pubDate>Sat, 08 Aug 2026 12:00:00 GMT</pubDate>
+    <description>We release a dataset and evaluation suite.</description>
+  </item>
+  <item>
+    <title>Office update</title>
+    <link>https://lab.example/office</link>
+    <guid>office-one</guid>
+    <pubDate>Sat, 08 Aug 2026 13:00:00 GMT</pubDate>
+    <description>News about a new office.</description>
+  </item>
+</channel></rss>
+"""
+
+
+FIRST_PARTY_ATOM = """\
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <entry>
+    <id>tag:lab.example,2026:leaderboard</id>
+    <title>Leaderboard evaluation update</title>
+    <link rel="alternate" href="https://lab.example/leaderboard"/>
+    <published>2026-08-08T14:00:00Z</published>
+    <updated>2026-08-08T15:00:00Z</updated>
+    <summary>Updated benchmark results.</summary>
+  </entry>
+</feed>
+"""
+
+
+def test_first_party_feeds_parse_rss_and_atom_and_filter_noise(monkeypatch):
+    payloads = {
+        "https://lab.example/rss": FIRST_PARTY_RSS,
+        "https://lab.example/atom": FIRST_PARTY_ATOM,
+    }
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_text",
+        lambda url, attempts=3, timeout=30: payloads[url],
+    )
+
+    items = fetch_first_party_feeds(
+        {
+            "feeds": [
+                {"name": "Lab RSS", "url": "https://lab.example/rss"},
+                {"name": "Lab Atom", "url": "https://lab.example/atom"},
+            ]
+        },
+        datetime(2026, 8, 8, 0, tzinfo=UTC),
+        10,
+    )
+
+    assert [item.title for item in items] == [
+        "Leaderboard evaluation update",
+        "A new agent evaluation benchmark",
+    ]
+    assert items[0].event_kind == "updated"
+    assert items[0].source == "First-party feed"
+    assert items[0].source_id == "Lab Atom:tag:lab.example,2026:leaderboard"
+
+
+def test_first_party_feeds_reject_non_feed_documents(monkeypatch):
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_text",
+        lambda url, attempts=3, timeout=30: "<html><body>Not a feed</body></html>",
+    )
+
+    with pytest.raises(ConnectorPayloadError, match="incompatible feed document"):
+        fetch_first_party_feeds(
+            {"feeds": [{"name": "Broken", "url": "https://lab.example/feed"}]},
+            datetime(2026, 8, 8, 0, tzinfo=UTC),
+            10,
+        )
 
 ARXIV_XML = """\
 <feed xmlns="http://www.w3.org/2005/Atom">
@@ -440,6 +518,25 @@ def test_github_releases_success_uses_release_notes(monkeypatch):
     assert items[0].summary == "The upstream release notes."
     assert items[0].metrics["downloads"] == 7
     assert items[0].parser_version == "github-releases/1"
+
+
+def test_github_releases_isolates_one_repository_failure(monkeypatch):
+    def fake_get_json(url, **kwargs):
+        if "/repos/broken/benchmark/" in url:
+            raise RequestError("HTTP 404 from https://api.github.com/repos/broken/benchmark")
+        return []
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+    config = {
+        "repositories": ["broken/benchmark", "healthy/benchmark"],
+        "max_requests": 2,
+    }
+
+    assert fetch_github_releases(config, datetime(2026, 7, 26, tzinfo=UTC), 10) == []
+    assert config["_source_warnings"] == [
+        "broken/benchmark: RequestError: HTTP 404 from "
+        "https://api.github.com/repos/broken/benchmark"
+    ]
 
 
 def test_github_releases_replaces_a_page_consumed_by_future_rows(monkeypatch):

@@ -5,6 +5,12 @@ feeds:
   # LLM prompt 已优化，会自动过滤噪音（学术论文、非AI内容等）
   # ============================================================
 
+  # --- Benchmark Radar（聚合后的公开输出；只需订阅这一个 RSS）---
+  - name: "Benchmark Radar"
+    url: "https://ktwu01.github.io/benchmark-radar/feed.xml"
+    lang: "en"
+    category: "行业动态"
+
   # --- 橘鸦AI早报（核心参考源）---
   - name: "橘鸦AI早报"
     url: "https://imjuya.github.io/juya-ai-daily/rss.xml"
@@ -34,7 +40,7 @@ feeds:
 
   # --- 国内大模型厂商 ---
   - name: "美团技术博客"
-    url: "https://tech.meituan.com/feed/"
+    url: "https://tech.meituan.com/rss.xml"
     lang: "zh"
     category: "官方动态"
 
