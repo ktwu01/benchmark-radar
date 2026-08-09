@@ -62,9 +62,7 @@ def _feed_link(entry: ET.Element) -> str:
     return ""
 
 
-def fetch_first_party_feeds(
-    config: dict[str, Any], since: datetime, limit: int
-) -> list[RadarItem]:
+def fetch_first_party_feeds(config: dict[str, Any], since: datetime, limit: int) -> list[RadarItem]:
     """Collect relevant announcements from an explicit first-party RSS/Atom allowlist."""
     keywords = [
         str(value).casefold()
@@ -95,9 +93,11 @@ def fetch_first_party_feeds(
         root_name = _xml_local_name(root.tag)
         if root_name == "rss":
             channel = _feed_child(root, "channel")
-            entries = [] if channel is None else [
-                child for child in channel if _xml_local_name(child.tag) == "item"
-            ]
+            entries = (
+                []
+                if channel is None
+                else [child for child in channel if _xml_local_name(child.tag) == "item"]
+            )
         elif root_name == "feed":
             entries = [child for child in root if _xml_local_name(child.tag) == "entry"]
         else:

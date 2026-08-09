@@ -94,6 +94,7 @@ def test_first_party_feeds_reject_non_feed_documents(monkeypatch):
             10,
         )
 
+
 ARXIV_XML = """\
 <feed xmlns="http://www.w3.org/2005/Atom">
   <entry>

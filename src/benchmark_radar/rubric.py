@@ -249,18 +249,14 @@ def rubric_reference(
     return value
 
 
-def v2_rubric_reference(
-    *, lookback_hours: float = DEFAULT_LOOKBACK_HOURS
-) -> dict[str, Any]:
+def v2_rubric_reference(*, lookback_hours: float = DEFAULT_LOOKBACK_HOURS) -> dict[str, Any]:
     """Describe v2 without retroactively granting its records the v3 feed tier."""
     value = rubric_reference(lookback_hours=lookback_hours)
     value["scoring_version"] = 2
     for component in value["components"]:
         if component["key"] != "evidence":
             continue
-        component["bands"] = [
-            band.replace(", First-party feed", "") for band in component["bands"]
-        ]
+        component["bands"] = [band.replace(", First-party feed", "") for band in component["bands"]]
     return value
 
 
