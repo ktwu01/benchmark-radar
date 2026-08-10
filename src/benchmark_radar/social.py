@@ -225,7 +225,7 @@ def render_social_section(
     channels: list[dict],
     post_sample: str | None = None,
 ) -> str:
-    """Render the section that gets appended to the day's radar issue."""
+    """Render the section that ships as out/social.md for the day's radar run."""
     lines = [
         SECTION_HEADING,
         "",

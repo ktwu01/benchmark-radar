@@ -55,9 +55,10 @@ GitHub Actions queries primary or structured sources for newly released benchmar
 evaluation methods, datasets, and data-quality work, deduplicates records, classifies
 them with a transparent taxonomy, ranks them using explainable signals, and publishes a
 [cumulative dashboard](https://ktwu01.github.io/benchmark-radar/) with a
-[daily RSS feed](https://ktwu01.github.io/benchmark-radar/feed.xml). The automated daily
-GitHub Issue remains as a secondary channel for GitHub-native discussion; the site and
-RSS feed are the primary reading and subscription surfaces. It is inspired by
+[daily RSS feed](https://ktwu01.github.io/benchmark-radar/feed.xml). The dashboard and RSS
+feed are the reading and subscription surfaces; the daily GitHub Issue that once served as a
+secondary discussion channel was retired (issue #37), and the day's social posting material
+ships as `out/social.md` in each run's evidence artifact. It is inspired by
 [agents-radar](https://github.com/duanyytop/agents-radar), with sources and scoring
 redesigned for benchmark and AI-data research.
 
@@ -232,22 +233,22 @@ pytest -q
 ## Configure
 
 Edit [`config.yml`](config.yml) to change the lookback, recommendation threshold, queries,
-taxonomy, and Issue size. Copy `.env.example` to `.env` only for local use; never commit
+taxonomy, and report size. Copy `.env.example` to `.env` only for local use; never commit
 credentials.
 
-Record volume and presentation are controlled separately, so the daily Issue stays
+Record volume and presentation are controlled separately, so the daily report stays
 readable without discarding eligible records from the corpus:
 
 | Key | Effect |
 |---|---|
 | `max_items_per_source` | Upper bound on records fetched from each source |
-| `issue_item_limit` | Records written into the daily Issue body |
+| `issue_item_limit` | Records written into the daily report body |
 | `minimum_score` | Adds the **Recommended** badge; never controls inclusion |
 
 Every taxonomy-matching, non-suppressed record is retained. Explicitly watchlisted records
 are retained even without a taxonomy match. Every run records its drop-off
 (`fetched → deduplicated → eligible → retained`) plus the recommended/not-recommended split
-in the snapshot and at the top of the Issue.
+in the snapshot and at the top of the report.
 
 GitHub search is rate-limited to 10 requests per minute without a token and 30 with one,
 so pagination is bounded by `sources.github.max_requests` and spaced by
@@ -303,26 +304,23 @@ Repository variable: RADAR_APP_ID
 Actions secret:      RADAR_APP_PRIVATE_KEY
 ```
 
-The built-in `GITHUB_TOKEN` continues to authenticate discovery and Issue publishing;
-the snapshot push uses the App token so its `main` push can trigger deployment.
+The built-in `GITHUB_TOKEN` authenticates discovery; the snapshot push uses the App token so
+its `main` push can trigger deployment.
 
 ## Daily publishing
 
-`.github/workflows/daily-radar.yml` targets 06:15 and 12:15 UTC and can also be
-started manually. GitHub scheduled events are best-effort and may start late under
-Actions load, so the two targets provide a same-day retry. Every scheduled run records
-its target, actual runner start, and latency in the job summary, with a warning after
-30 minutes. The workflow:
+`.github/workflows/daily-radar.yml` runs once daily at 01:00 UTC and can also be started
+manually. GitHub scheduled events are best-effort and may start late under Actions load.
+Every scheduled run records its target, actual runner start, and latency in the job summary,
+with a warning after 240 minutes. The workflow:
 
 1. collects evidence plus public Hacker News attention and renders with read-only
    repository permission;
 2. validates and uses the snapshot-writer App to persist one snapshot on `main`;
-3. creates or updates the date-filtered daily Issue;
+3. renders the day's social posting material into `out/social.md` inside the evidence
+   artifact;
 4. lets that App-authenticated push trigger the standalone Pages workflow;
-5. prevents duplicate snapshots and daily Issues on reruns.
-
-The workflow needs repository Issues enabled. The labels `daily-radar` and `automated`
-must exist; they are created during initial repository setup.
+5. prevents duplicate snapshots on reruns.
 
 ## Provenance and limitations
 
