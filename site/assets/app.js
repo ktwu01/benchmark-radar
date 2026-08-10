@@ -539,8 +539,20 @@ function questionsProvenance(questions) {
 }
 
 // The Q&A is opt-in and generated once per UTC day, so a day can legitimately
-// have none: it predates the feature, no API key was configured, or the calls
-// failed. Say which rather than leaving a heading above blank space.
+// have none: it predates the feature, was disabled, or the calls failed. The
+// snapshot's `questions.status` says which, so the empty state names the
+// actual reason instead of one generic message for all three.
+function absentQuestionsMessage(questions) {
+  const status = questions.status;
+  if (status === "disabled") {
+    return questions.reason || "Daily questions were not enabled for this run.";
+  }
+  if (status === "error") {
+    return `Daily questions failed to generate: ${questions.reason || "unknown error"}.`;
+  }
+  return "No questions were answered for this day.";
+}
+
 function renderDailyQuestions(day) {
   const questions = day.questions || {};
   const groups = Array.isArray(questions.groups) ? questions.groups : [];
@@ -584,7 +596,7 @@ function renderDailyQuestions(day) {
       : [
           element("p", {
             className: "empty-state",
-            text: "No questions were answered for this day.",
+            text: absentQuestionsMessage(questions),
           }),
         ],
   );

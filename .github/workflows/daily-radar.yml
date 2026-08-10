@@ -77,6 +77,14 @@ jobs:
           # violating the purpose of this production run: prove a real GPT
           # synthesis occurred and retain its model/usage metadata.
           OPENAI_BRIEFING_REQUIRED: "true"
+          # Issue #159: the Q&A implementation shipped opt-in behind this flag
+          # and production never set it, so every run silently skipped
+          # question generation despite a successful briefing. Enabling and
+          # requiring it here closes that gap the same way the briefing is
+          # required above: a green run must carry real answers, not a quiet
+          # absence.
+          OPENAI_QUESTIONS: "true"
+          OPENAI_QUESTIONS_REQUIRED: "true"
         run: benchmark-radar
       - name: Upload evidence artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

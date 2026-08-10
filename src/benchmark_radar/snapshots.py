@@ -72,7 +72,9 @@ def snapshot_for_run(run: RadarRun) -> dict[str, Any]:
         # Omitted entirely when the day has no briefing, so an absent key means
         # "not generated yet" and a later pass knows to retry.
         **({"briefing": briefing} if briefing else {}),
-        # Same contract for the opt-in daily Q&A.
+        # Q&A always carries a `status` (generated/disabled/error) so a
+        # skip or failure is distinguishable from "not attempted yet" instead
+        # of collapsing into one absent key.
         **({"questions": run.daily_questions} if run.daily_questions else {}),
         "evidence_items": [item.to_dict() for item in run.items],
         "attention": {
@@ -467,9 +469,19 @@ def merge_snapshots(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[
     # that describes the merged day. Fall back to the existing briefing only
     # when the incoming pass has none, so a day never loses one it already had.
     briefing = incoming.get("briefing") or existing.get("briefing")
-    # The Q&A follows the same rule: the incoming pass answered from the union,
-    # so it wins, and a day never loses answers it already had.
-    day_questions = incoming.get("questions") or existing.get("questions")
+    # The Q&A mostly follows the same rule: the incoming pass answered from the
+    # union, so it wins. The exception is a day that already has real answers
+    # (status "generated") and the incoming pass only disabled/errored, e.g. a
+    # transient failure on the second scheduled run: keep the existing answers
+    # rather than overwriting them with a status object.
+    incoming_questions = incoming.get("questions")
+    existing_questions = existing.get("questions")
+    if incoming_questions and incoming_questions.get("status") == "generated":
+        day_questions = incoming_questions
+    elif existing_questions and existing_questions.get("status") == "generated":
+        day_questions = existing_questions
+    else:
+        day_questions = incoming_questions or existing_questions
 
     merged = {
         **incoming,

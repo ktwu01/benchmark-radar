@@ -966,6 +966,37 @@ def test_rendered_questions_report_an_absent_set_rather_than_blank_space(tmp_pat
     assert not any(node["className"] == "question-group" for node in _flatten(rendered))
 
 
+def test_rendered_questions_name_a_disabled_run_rather_than_the_generic_message(tmp_path):
+    """Issue #159: a disabled run must say so, not collapse into the generic empty state."""
+
+    def disable(fixture):
+        fixture["questions"] = {
+            "status": "disabled",
+            "reason": "OPENAI_QUESTIONS is not enabled",
+        }
+
+    rendered = _render_with(disable, tmp_path)
+    assert "OPENAI_QUESTIONS is not enabled" in rendered["text"]
+    assert "No questions were answered for this day." not in rendered["text"]
+    assert not any(node["className"] == "question-group" for node in _flatten(rendered))
+
+
+def test_rendered_questions_name_a_failed_run_rather_than_the_generic_message(tmp_path):
+    """Issue #159: a failed generation must say so, not collapse into the generic empty state."""
+
+    def fail(fixture):
+        fixture["questions"] = {
+            "status": "error",
+            "reason": "BriefingError: OpenAI structured output is not valid JSON",
+        }
+
+    rendered = _render_with(fail, tmp_path)
+    assert "Daily questions failed to generate" in rendered["text"]
+    assert "OpenAI structured output is not valid JSON" in rendered["text"]
+    assert "No questions were answered for this day." not in rendered["text"]
+    assert not any(node["className"] == "question-group" for node in _flatten(rendered))
+
+
 def test_rendered_questions_drop_an_evidence_citation_with_an_unsafe_url(tmp_path):
     """An id-shaped citation without a safe URL must not become a link."""
 

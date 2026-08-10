@@ -16,6 +16,8 @@ from benchmark_radar.snapshots import write_snapshot
 def _isolate_openai_credentials(monkeypatch):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.delenv("OPENAI_BRIEFING_REQUIRED", raising=False)
+    monkeypatch.delenv("OPENAI_QUESTIONS", raising=False)
+    monkeypatch.delenv("OPENAI_QUESTIONS_REQUIRED", raising=False)
 
 
 def _config_path(tmp_path: Path) -> Path:
@@ -339,6 +341,108 @@ def test_cli_persists_real_gpt_briefing_metadata(monkeypatch, tmp_path):
     assert stored["briefing"]["generator"] == "openai-responses"
     assert stored["briefing"]["response_id"] == "resp_real"
     assert stored["briefing"]["usage"]["total_tokens"] == 8200
+
+
+def test_questions_are_skipped_and_marked_disabled_without_the_flag(monkeypatch, tmp_path):
+    monkeypatch.setenv("OPENAI_API_KEY", "secret")
+    _stub_sources(monkeypatch, datetime.now(UTC))
+    monkeypatch.setattr("sys.argv", _briefing_argv(tmp_path))
+
+    cli.main()
+
+    stored = json.loads(next((tmp_path / "snapshots").glob("*.json")).read_text(encoding="utf-8"))
+    assert stored["questions"]["status"] == "disabled"
+    assert "OPENAI_QUESTIONS" in stored["questions"]["reason"]
+
+
+def test_daily_radar_yml_enables_and_requires_questions_in_production():
+    """Issue #159: production ran Q&A-eligible days with no Q&A because the
+    workflow set OPENAI_API_KEY and OPENAI_BRIEFING_REQUIRED but never set
+    OPENAI_QUESTIONS, so the CLI skipped question generation by design."""
+    workflow_path = Path(".github/workflows/daily-radar.yml")
+    workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+    collect_step = next(
+        step
+        for step in workflow["jobs"]["build-report"]["steps"]
+        if step.get("name") == "Collect evidence and public attention"
+    )
+    env = collect_step["env"]
+    assert str(env.get("OPENAI_QUESTIONS")).lower() == "true"
+    assert str(env.get("OPENAI_QUESTIONS_REQUIRED")).lower() == "true"
+
+
+def test_questions_required_raises_without_a_flag_or_key(monkeypatch, tmp_path):
+    monkeypatch.setenv("OPENAI_QUESTIONS_REQUIRED", "true")
+    _stub_sources(monkeypatch, datetime.now(UTC))
+    monkeypatch.setattr("sys.argv", _briefing_argv(tmp_path))
+
+    with pytest.raises(RuntimeError, match="OPENAI_QUESTIONS_REQUIRED"):
+        cli.main()
+
+
+def test_questions_required_raises_when_generation_fails(monkeypatch, tmp_path):
+    monkeypatch.setenv("OPENAI_API_KEY", "secret")
+    monkeypatch.setenv("OPENAI_QUESTIONS", "true")
+    monkeypatch.setenv("OPENAI_QUESTIONS_REQUIRED", "true")
+    _stub_sources(monkeypatch, datetime.now(UTC))
+    monkeypatch.setattr("sys.argv", _briefing_argv(tmp_path))
+    monkeypatch.setattr(
+        cli,
+        "generate_daily_questions",
+        lambda *args, **kwargs: (_ for _ in ()).throw(cli.BriefingError("boom")),
+    )
+
+    with pytest.raises(RuntimeError, match="required daily questions failed"):
+        cli.main()
+
+
+def test_questions_best_effort_persists_error_status_without_failing_the_run(monkeypatch, tmp_path):
+    monkeypatch.setenv("OPENAI_API_KEY", "secret")
+    monkeypatch.setenv("OPENAI_QUESTIONS", "true")
+    _stub_sources(monkeypatch, datetime.now(UTC))
+    monkeypatch.setattr("sys.argv", _briefing_argv(tmp_path))
+    monkeypatch.setattr(
+        cli,
+        "generate_daily_questions",
+        lambda *args, **kwargs: (_ for _ in ()).throw(cli.BriefingError("boom")),
+    )
+
+    cli.main()
+
+    stored = json.loads(next((tmp_path / "snapshots").glob("*.json")).read_text(encoding="utf-8"))
+    assert stored["questions"]["status"] == "error"
+    assert "boom" in stored["questions"]["reason"]
+
+
+def test_questions_generated_status_is_persisted_when_enabled(monkeypatch, tmp_path):
+    monkeypatch.setenv("OPENAI_API_KEY", "secret")
+    monkeypatch.setenv("OPENAI_QUESTIONS", "true")
+    _stub_sources(monkeypatch, datetime.now(UTC))
+    monkeypatch.setattr("sys.argv", _briefing_argv(tmp_path))
+    monkeypatch.setattr(
+        cli,
+        "generate_daily_questions",
+        lambda *args, **kwargs: {
+            "schema_version": 1,
+            "date": datetime.now(UTC).date().isoformat(),
+            "status": "generated",
+            "generator": "openai-responses",
+            "model": "gpt-5.6",
+            "comparable": False,
+            "comparability_note": "no certified window",
+            "groups": [],
+            "stat_registry": [],
+            "usage": {"input_tokens": 10, "output_tokens": 5},
+            "calls": 3,
+            "coverage": {},
+        },
+    )
+
+    cli.main()
+
+    stored = json.loads(next((tmp_path / "snapshots").glob("*.json")).read_text(encoding="utf-8"))
+    assert stored["questions"]["status"] == "generated"
+    assert stored["questions"]["calls"] == 3
 
 
 def test_a_thin_day_reports_insufficient_volume_rather_than_a_pattern(monkeypatch, tmp_path):

@@ -454,6 +454,45 @@ def test_merge_snapshots_leaves_no_briefing_key_when_neither_pass_had_one():
     assert "briefing" not in merged
 
 
+def test_merge_snapshots_takes_the_recomputed_questions_of_the_day():
+    run = _run([_item(1)])
+    run.daily_questions = {"status": "generated", "groups": [{"id": "first"}]}
+    existing = snapshot_for_run(run)
+    later = _run([_item(2)])
+    later.daily_questions = {"status": "generated", "groups": [{"id": "second"}]}
+
+    merged = merge_snapshots(existing, snapshot_for_run(later))
+
+    assert merged["questions"]["groups"] == [{"id": "second"}]
+
+
+def test_merge_snapshots_keeps_real_answers_when_the_incoming_pass_only_errored():
+    # Issue #159: a day that already has real answers must not lose them to a
+    # later pass's transient failure or a disabled second run.
+    run = _run([_item(1)])
+    run.daily_questions = {"status": "generated", "groups": [{"id": "first"}]}
+    existing = snapshot_for_run(run)
+    later = _run([_item(2)])
+    later.daily_questions = {"status": "error", "reason": "boom"}
+
+    merged = merge_snapshots(existing, snapshot_for_run(later))
+
+    assert merged["questions"]["status"] == "generated"
+    assert merged["questions"]["groups"] == [{"id": "first"}]
+
+
+def test_merge_snapshots_keeps_the_incoming_status_when_neither_pass_generated():
+    run = _run([_item(1)])
+    run.daily_questions = {"status": "disabled", "reason": "OPENAI_QUESTIONS is not enabled"}
+    existing = snapshot_for_run(run)
+    later = _run([_item(2)])
+    later.daily_questions = {"status": "error", "reason": "boom"}
+
+    merged = merge_snapshots(existing, snapshot_for_run(later))
+
+    assert merged["questions"]["status"] == "error"
+
+
 def test_markdown_bullet_escapes_interpolated_values():
     # Both model prose and source-derived values are data at this boundary.
     assert markdown_bullet("data_quality rose 5%") == "data\\_quality rose 5%"

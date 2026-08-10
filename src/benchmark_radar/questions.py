@@ -398,6 +398,7 @@ def generate_daily_questions(
     return {
         "schema_version": QA_SCHEMA_VERSION,
         "date": current.get("date"),
+        "status": "generated",
         "generator": "openai-responses",
         "model": model,
         "comparable": registry["comparable"],

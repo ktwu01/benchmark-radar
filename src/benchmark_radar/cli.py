@@ -18,7 +18,7 @@ from .kw_bench_store import STORE_FILENAME as KW_BENCH_STORE_FILENAME
 from .kw_bench_tracks import DEFAULT_BATCH_SIZE
 from .kw_bench_tracks import backfill as backfill_classifications
 from .pipeline import _failure_streak_key, run_pipeline, simulate_backfill
-from .questions import generate_daily_questions
+from .questions import QA_SCHEMA_VERSION, generate_daily_questions
 from .report import render_markdown
 from .snapshots import (
     load_snapshots,
@@ -468,10 +468,18 @@ def main() -> None:
     elif briefing_required:
         raise RuntimeError("OPENAI_BRIEFING_REQUIRED is true but OPENAI_API_KEY is missing")
 
-    # The daily Q&A is opt-in: it costs one API call per question group, and a
-    # failure here must never cost the run its briefing or its snapshot.
+    # The daily Q&A is opt-in: it costs one API call per question group. By
+    # default a failure here must never cost the run its briefing or its
+    # snapshot, but OPENAI_QUESTIONS_REQUIRED lets production demand it the
+    # same way OPENAI_BRIEFING_REQUIRED demands the briefing.
+    questions_enabled = os.getenv("OPENAI_QUESTIONS", "").lower() in {"1", "true", "yes"}
+    questions_required = os.getenv("OPENAI_QUESTIONS_REQUIRED", "").lower() in {
+        "1",
+        "true",
+        "yes",
+    }
     daily_questions: dict | None = None
-    if api_key and os.getenv("OPENAI_QUESTIONS", "").lower() in {"1", "true", "yes"}:
+    if questions_enabled and api_key:
         try:
             daily_questions = generate_daily_questions(
                 history,
@@ -482,7 +490,34 @@ def main() -> None:
                 config=config,
             )
         except (BriefingError, RequestError, ValueError) as error:
+            if questions_required:
+                raise RuntimeError(f"required daily questions failed: {error}") from error
             print(f"::warning title=Daily questions skipped::{error}")
+            daily_questions = {
+                "schema_version": QA_SCHEMA_VERSION,
+                "date": today,
+                "status": "error",
+                "reason": f"{type(error).__name__}: {error}",
+            }
+    elif questions_required:
+        raise RuntimeError(
+            "OPENAI_QUESTIONS_REQUIRED is true but OPENAI_QUESTIONS is not enabled "
+            "or OPENAI_API_KEY is missing"
+        )
+    elif not questions_enabled:
+        daily_questions = {
+            "schema_version": QA_SCHEMA_VERSION,
+            "date": today,
+            "status": "disabled",
+            "reason": "OPENAI_QUESTIONS is not enabled",
+        }
+    elif not api_key:
+        daily_questions = {
+            "schema_version": QA_SCHEMA_VERSION,
+            "date": today,
+            "status": "disabled",
+            "reason": "OPENAI_API_KEY is not configured",
+        }
 
     # Attach before writing so the snapshot, the dashboard payload, and the
     # Markdown report all describe the same briefing.
