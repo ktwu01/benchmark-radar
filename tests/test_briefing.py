@@ -325,7 +325,7 @@ def test_generate_daily_briefing_uses_real_responses_contract_and_records_usage(
     assert captured["payload"]["text"]["format"]["strict"] is True
     assert captured["payload"]["store"] is False
     assert captured["kwargs"]["headers"] == {"Authorization": "Bearer secret"}
-    assert captured["kwargs"]["attempts"] == 4
+    assert captured["kwargs"]["attempts"] == 5
     assert captured["kwargs"]["timeout"] == 90.0
 
 

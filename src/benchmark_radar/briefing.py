@@ -557,7 +557,13 @@ def generate_daily_briefing(
         RESPONSES_URL,
         payload,
         headers={"Authorization": f"Bearer {api_key}"},
-        attempts=4,
+        # Token-bucket 429s (type=tokens) often carry no Retry-After header and
+        # need a full per-minute window to refill, not a fast exponential
+        # backoff meant for transient server errors. 5 attempts against a
+        # 60s-capped backoff (1+2+4+8+16=31s minimum, up to 4*60=240s worst
+        # case) gives a token-bucket limit real time to reset within the CI
+        # job's 20-minute budget.
+        attempts=5,
         timeout=90.0,
     )
     try:

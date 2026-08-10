@@ -13,7 +13,7 @@ import certifi
 
 USER_AGENT = "benchmark-radar/0.1 (+https://github.com/ktwu01/benchmark-radar)"
 DEFAULT_TIMEOUT_SECONDS = 30.0
-MAX_RETRY_DELAY_SECONDS = 30.0
+MAX_RETRY_DELAY_SECONDS = 60.0
 
 
 class RequestError(RuntimeError):
