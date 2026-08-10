@@ -91,6 +91,14 @@ LOW_VALUE_SIGNALS: tuple[dict[str, Any], ...] = (
         "deduction": 25.0,
         "action": "suppress",
     },
+    {
+        "label": "sponsor-bait resource listing",
+        "pattern": (
+            r"\bsponsor\b.{0,40}\bobtain\b.{0,20}\b(?:full|complete)\b.{0,20}\b(?:data|dataset)\b"
+        ),
+        "deduction": 30.0,
+        "action": "suppress",
+    },
 )
 MAX_LOW_VALUE_DEDUCTION = 60.0
 

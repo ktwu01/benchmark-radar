@@ -329,6 +329,23 @@ def test_low_value_follower_leaderboard_is_explicitly_demoted():
     assert any("Demoted: follower-count leaderboard" in reason for reason in low_value.rationale)
 
 
+def test_sponsor_bait_resource_listing_is_suppressed():
+    taxonomy = {"dataset": ["dataset"]}
+    spam = score_item(
+        item(
+            source="GitHub",
+            source_id="lonlonago/a-large-scale-fish-taxonomy-dataset",
+            title="lonlonago/a-large-scale-fish-taxonomy-dataset",
+            summary="Dataset / resource listing. Sponsor to obtain the full data files.",
+        ),
+        taxonomy,
+        datetime(2026, 7, 27, 1, tzinfo=UTC),
+    )
+
+    assert spam.relevance_score == 0
+    assert "sponsor-bait resource listing" in spam.suppression_reasons
+
+
 def test_recency_uses_the_configured_collection_window():
     taxonomy = {"benchmark": ["benchmark"]}
     published = datetime(2026, 7, 27, tzinfo=UTC)
