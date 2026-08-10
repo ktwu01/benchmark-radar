@@ -323,6 +323,7 @@ def test_generate_daily_briefing_uses_real_responses_contract_and_records_usage(
     assert "identical collection_signature" in captured["payload"]["instructions"]
     assert "only when observed_today is true" in captured["payload"]["instructions"]
     assert captured["payload"]["text"]["format"]["strict"] is True
+    assert captured["payload"]["max_output_tokens"] == 4_000
     assert captured["payload"]["store"] is False
     assert captured["kwargs"]["headers"] == {"Authorization": "Bearer secret"}
     assert captured["kwargs"]["attempts"] == 5

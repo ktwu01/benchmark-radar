@@ -30,7 +30,11 @@ DEFAULT_BRIEFING_MODEL = "gpt-5.6"
 # than dropped in silence.
 MAX_INPUT_CHARS = 260_000
 MAX_REQUEST_TOKENS = 60_000
-MAX_OUTPUT_TOKENS = 1_400
+# The structured response can contain three 800-character findings, three
+# 800-character explanations, a 1,000-character caveat, JSON framing, and
+# reasoning tokens. 1,400 tokens truncated valid responses mid-string in
+# production before the schema-sized answer could finish.
+MAX_OUTPUT_TOKENS = 4_000
 MAX_EVIDENCE_ITEMS = 120
 # Every attention observation the collector retains. The former cap of 8
 # discarded more than half of a typical day's 20 public-attention records
