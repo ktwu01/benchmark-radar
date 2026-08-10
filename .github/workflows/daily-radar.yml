@@ -2,15 +2,13 @@ name: Daily Benchmark Radar
 
 on:
   schedule:
-    # Issue #44: one early run catches overnight arXiv/HF activity before the
-    # day starts. The mid-morning run provides same-day retry coverage and a
-    # second discovery window: on 2026-08-02 it found 27 evidence items missed
-    # by the early run (41 appeared in both; 21 appeared only in the early run).
-    # Issue #104 makes the two runs additive. Both land in early hours Chicago.
-    # 06:15 UTC = 01:15 America/Chicago during daylight saving time.
-    - cron: "15 6 * * *"
-    # 12:15 UTC = 07:15 America/Chicago during daylight saving time.
-    - cron: "15 12 * * *"
+    # One run daily at 01:00 UTC = 09:00 Asia/Singapore (UTC+8, no DST), timed
+    # so the GPT briefing and Q&A read same-day insight over breakfast in
+    # Singapore. Supersedes the twice-daily Chicago-anchored schedule from
+    # issues #44/#104: that pair existed for same-day retry coverage against
+    # missed evidence, which this single run trades away for a predictable,
+    # once-a-day cadence.
+    - cron: "0 1 * * *"
   workflow_dispatch:
     inputs:
       publish:
