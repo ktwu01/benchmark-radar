@@ -3557,6 +3557,12 @@ footer {
     padding-inline: 0;
   }
 
+  .repo-badges .repo-badge {
+    width: auto;
+    min-width: var(--utility-button-size);
+    padding-inline: 0.5rem;
+  }
+
   .view-nav {
     overflow-x: auto;
   }
