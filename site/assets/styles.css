@@ -183,15 +183,11 @@ th {
 }
 
 .repo-badges .repo-badge {
-  width: var(--utility-button-size);
-  height: var(--utility-button-size);
+  min-height: var(--utility-button-size);
 }
 
 .repo-badge {
   display: inline-flex;
-  width: var(--utility-button-size);
-  height: var(--utility-button-size);
-  min-width: var(--utility-button-size);
   min-height: var(--utility-button-size);
   gap: 0.4rem;
   align-items: center;
@@ -3557,6 +3553,7 @@ footer {
   .repo-badge {
     width: var(--utility-button-size);
     min-width: var(--utility-button-size);
+    height: var(--utility-button-size);
     padding-inline: 0;
   }
 
