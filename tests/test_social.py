@@ -322,7 +322,9 @@ def test_social_command_writes_section(monkeypatch, tmp_path: Path):
         "    一个反常识的发现：样本。\n"
         "  channels:\n"
         "    - name: X / Twitter\n"
-        "    - name: LinkedIn\n",
+        "      daily: true\n"
+        "    - name: LinkedIn\n"
+        "      daily: true\n",
         encoding="utf-8",
     )
     output = tmp_path / "social.md"
