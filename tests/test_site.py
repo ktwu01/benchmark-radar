@@ -148,7 +148,10 @@ def test_top_right_utilities_use_shared_icon_geometry_and_contact_control():
     assert 'id="badge-discord"' not in html
     assert 'id="lang-toggle"' in html
     assert 'class="repo-badge"' in html
-    assert "min-height: 2rem" in styles
+    assert "--utility-button-size: 2.6rem" in styles
+    assert "width: var(--utility-button-size)" in styles
+    assert "height: var(--utility-button-size)" in styles
+    assert ".repo-badges .repo-badge" in styles
     assert "flex: 0 0 0.9rem" in styles
     assert ".repo-badge svg," in styles
 

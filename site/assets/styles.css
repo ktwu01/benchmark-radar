@@ -168,6 +168,7 @@ th {
 }
 
 .masthead-end {
+  --utility-button-size: 2.6rem;
   display: flex;
   gap: 0.7rem;
   flex-wrap: wrap;
@@ -181,10 +182,17 @@ th {
   align-items: center;
 }
 
+.repo-badges .repo-badge {
+  width: var(--utility-button-size);
+  height: var(--utility-button-size);
+}
+
 .repo-badge {
   display: inline-flex;
-  min-height: 2rem;
-  min-width: 2rem;
+  width: var(--utility-button-size);
+  height: var(--utility-button-size);
+  min-width: var(--utility-button-size);
+  min-height: var(--utility-button-size);
   gap: 0.4rem;
   align-items: center;
   justify-content: center;
@@ -3547,8 +3555,9 @@ footer {
   }
 
   .repo-badge {
-    min-width: 2.2rem;
-    padding-inline: 0.5rem;
+    width: var(--utility-button-size);
+    min-width: var(--utility-button-size);
+    padding-inline: 0;
   }
 
   .view-nav {
