@@ -94,6 +94,77 @@ def test_briefing_translation_rejects_a_missing_confidence_marker(monkeypatch):
         translate_briefing_to_zh([_EN_BULLET], "caveat", "k")
 
 
+def test_briefing_translation_rejects_a_changed_confidence_level(monkeypatch):
+    # Presence alone is not enough: swapping Medium for High would publish a
+    # fabricated confidence reading on the dashboard.
+    swapped = _ZH_BULLET.replace("High confidence.", "Medium confidence.")
+    _run(monkeypatch, {"bullets_zh": [swapped], "caveat_zh": "x"})
+
+    with pytest.raises(BriefingError, match="confidence level"):
+        translate_briefing_to_zh([_EN_BULLET], "caveat", "k")
+
+
+def test_briefing_translation_rejects_an_empty_bullet(monkeypatch):
+    _run(monkeypatch, {"bullets_zh": [""], "caveat_zh": "x"})
+
+    with pytest.raises(BriefingError, match="empty bullet_zh"):
+        translate_briefing_to_zh([_EN_BULLET], "caveat", "k")
+
+
+def test_briefing_translation_rejects_an_empty_caveat(monkeypatch):
+    _run(monkeypatch, {"bullets_zh": [_ZH_BULLET], "caveat_zh": ""})
+
+    with pytest.raises(BriefingError, match="empty caveat_zh"):
+        translate_briefing_to_zh([_EN_BULLET], "caveat", "k")
+
+
+def test_briefing_translation_omits_caveat_zh_when_the_english_caveat_is_empty(monkeypatch):
+    # A day with insights but no caveat is legitimate; the zh field is left
+    # absent rather than stored empty (snapshot validation rejects empties).
+    _run(monkeypatch, {"bullets_zh": [_ZH_BULLET], "caveat_zh": ""})
+
+    result = translate_briefing_to_zh([_EN_BULLET], "", "k")
+
+    assert result["bullets_zh"] == [_ZH_BULLET]
+    assert "caveat_zh" not in result
+
+
+def test_briefing_translation_rejects_a_dropped_sign(monkeypatch):
+    en = "Downloads fell -5% today. Why it matters: Usage cooled. Evidence: E001. Low confidence."
+    zh = "下载量今日上升 5%。Why it matters: 使用降温。Evidence: E001. Low confidence."
+    _run(monkeypatch, {"bullets_zh": [zh], "caveat_zh": "x"})
+
+    with pytest.raises(BriefingError, match="changed a quantity"):
+        translate_briefing_to_zh([en], "caveat", "k")
+
+
+def test_briefing_translation_rejects_a_dropped_percent_sign(monkeypatch):
+    en = "Coverage reached 40% today. Why it matters: Gaps narrow. Evidence: E001. Low confidence."
+    zh = "覆盖率今日达到 40。Why it matters: 差距缩小。Evidence: E001. Low confidence."
+    _run(monkeypatch, {"bullets_zh": [zh], "caveat_zh": "x"})
+
+    with pytest.raises(BriefingError, match="changed a quantity"):
+        translate_briefing_to_zh([en], "caveat", "k")
+
+
+def test_briefing_translation_accepts_a_fully_assembled_long_bullet(monkeypatch):
+    # Generation assembles a bullet from an 800-char finding plus an 800-char
+    # rationale, so the translator must accept bullets well past 800 chars or
+    # every long briefing would silently lose its Chinese rendering.
+    finding = "Long finding. " * 57
+    why = "Long rationale. " * 50
+    en = f"{finding} Why it matters: {why} Evidence: E001. High confidence."
+    zh_finding = "这是一个很长的中文发现。" * 57
+    zh_why = "这是一条很长的中文理由。" * 50
+    zh = f"{zh_finding} Why it matters: {zh_why} Evidence: E001. High confidence."
+    assert len(en) > 800
+    _run(monkeypatch, {"bullets_zh": [zh], "caveat_zh": "x"})
+
+    result = translate_briefing_to_zh([en], "caveat", "k")
+
+    assert result["bullets_zh"] == [zh]
+
+
 def test_briefing_translation_rejects_a_wrong_bullet_count(monkeypatch):
     _run(monkeypatch, {"bullets_zh": [_ZH_BULLET, _ZH_BULLET], "caveat_zh": "x"})
 
@@ -238,3 +309,64 @@ def test_answers_translation_rejects_a_malformed_index(monkeypatch):
 
     with pytest.raises(BriefingError, match="malformed answer index"):
         translate_answers_to_zh(answers, "k")
+
+
+def test_answers_translation_rejects_an_empty_zh_field(monkeypatch):
+    answers = [
+        {
+            "signal": "One signal.",
+            "plain_english": "One.",
+            "takeaway": "One.",
+            "counter_view": "None.",
+        }
+    ]
+    _run(
+        monkeypatch,
+        {
+            "answers_zh": [
+                {
+                    "index": 0,
+                    "signal_zh": "",
+                    "plain_chinese": "一个。",
+                    "takeaway_zh": "一个。",
+                    "counter_view_zh": "无。",
+                }
+            ]
+        },
+    )
+
+    with pytest.raises(BriefingError, match="empty signal_zh"):
+        translate_answers_to_zh(answers, "k")
+
+
+def test_answers_translation_omits_zh_fields_for_empty_english_fields(monkeypatch):
+    # An answer field that is empty in English has nothing to translate; the zh
+    # field is left absent so the dashboard falls back per field, and the empty
+    # string never reaches snapshot validation.
+    answers = [
+        {
+            "signal": "",
+            "plain_english": "One.",
+            "takeaway": "One.",
+            "counter_view": "None.",
+        }
+    ]
+    _run(
+        monkeypatch,
+        {
+            "answers_zh": [
+                {
+                    "index": 0,
+                    "signal_zh": "",
+                    "plain_chinese": "一个。",
+                    "takeaway_zh": "一个。",
+                    "counter_view_zh": "无。",
+                }
+            ]
+        },
+    )
+
+    zh, _ = translate_answers_to_zh(answers, "k")
+
+    assert "signal_zh" not in zh[0]
+    assert zh[0]["plain_chinese"] == "一个。"

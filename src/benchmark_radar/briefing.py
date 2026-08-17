@@ -660,7 +660,11 @@ def generate_daily_briefing(
         try:
             zh = translate_briefing_to_zh(bullets, caveat, api_key, model=model)
             metadata["bullets_zh"] = zh["bullets_zh"]
-            metadata["caveat_zh"] = zh["caveat_zh"]
+            # A day with insights but no caveat has no caveat_zh; the key is
+            # omitted rather than stored empty, because snapshot validation
+            # rejects empty zh fields and the dashboard falls back per field.
+            if zh.get("caveat_zh"):
+                metadata["caveat_zh"] = zh["caveat_zh"]
             metadata["zh_translation"] = {
                 "model": zh["model"],
                 "response_id": zh["response_id"],

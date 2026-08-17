@@ -41,9 +41,12 @@ from .http import post_json
 # the day's prose, not its evidence packet, so it needs far less headroom.
 MAX_ZH_REQUEST_TOKENS = 30_000
 MAX_ZH_OUTPUT_TOKENS = 4_000
-# Chinese prose is more compact than English, but a translated bullet must not
-# silently grow past the reading length its English original was capped at.
-MAX_ZH_BULLET_CHARS = 1_000
+# Generation assembles a bullet from an 800-char finding and an 800-char
+# rationale plus markers (briefing.py), so an assembled bullet can reach
+# roughly 1,700 chars. The zh rendering is capped at the same ceiling rather
+# than a shorter one, or long valid briefings would silently lose their
+# Chinese rendering every day.
+MAX_BULLET_CHARS = 1_800
 MAX_ZH_CAVEAT_CHARS = 1_400
 MAX_ZH_ANSWER_CHARS = 900
 
@@ -56,8 +59,9 @@ _ZH_INSTRUCTIONS = (
     "Hard rules, in priority order:\n"
     "1. Preserve every token of the form E### (evidence id) or S### (statistic id) "
     "exactly, including the leading letter.\n"
-    "2. Preserve every run of Arabic digits exactly, including decimals, percentages, "
-    "and thousands separators (3, 20, 40, 12.5, 40%, 4,000). Never write a quantity "
+    "2. Preserve every run of Arabic digits exactly, including its sign, "
+    "decimals, percentages, and thousands separators (-5%, 3, 20, 40, 12.5, 40%, "
+    "4,000). Never write a quantity "
     "with a Chinese numeral such as 三 or 二十. The translated prose must contain "
     "exactly the same Arabic digit runs as the English.\n"
     "3. For briefing bullets, keep the English structural markers exactly as written: "
@@ -74,12 +78,13 @@ _ZH_INSTRUCTIONS = (
 )
 
 _BULLET_MARKERS = ("Why it matters:", "Evidence:")
-_CONFIDENCE_PHRASE = re.compile(r"\b(?:High|Medium|Low|Moderate|Mixed)\s+confidence\.?\s*$")
+_CONFIDENCE_LEVEL = re.compile(r"\b(High|Medium|Low|Moderate|Mixed)\s+confidence\.?\s*$")
 _ID_TOKEN = re.compile(r"\b[ES]\d{3}\b")
 # Mirrors the English Q&A validator's number shape so the same "every digit
-# survives" check works in either language; thousands separators are normalized
-# away so 4,000 and 4000 compare equal.
-_DIGIT_RUN = re.compile(r"\d[\d,]*(?:\.\d+)?")
+# survives" check works in either language. Sign and percent sign are part of
+# the quantity (-5% and 5 are different measurements); thousands separators
+# are normalized away so 4,000 and 4000 compare equal.
+_DIGIT_RUN = re.compile(r"[-+]?\d[\d,]*(?:\.\d+)?%?")
 
 # One prose field per answer, in the shape the dashboard reads. The zh name of
 # the plain-English field stays `plain_chinese` because the answer already
@@ -161,6 +166,19 @@ def _digit_runs(text: str) -> list[str]:
     return sorted(token.replace(",", "") for token in _DIGIT_RUN.findall(text))
 
 
+def _require_zh_text(value: Any, *, field: str, max_chars: int) -> str:
+    """A translation that comes back empty is a failure, not prose to store.
+
+    An empty zh field would pass grounding on a digit-free English original
+    and then fail snapshot validation at save time, so it is rejected here,
+    where the caller can still fall back to the English rendering.
+    """
+    text = _output_text(value, field=field, max_chars=max_chars)
+    if not text:
+        raise BriefingError(f"zh translation returned an empty {field}")
+    return text
+
+
 def _check_grounding(en_text: str, zh_text: str, field: str) -> None:
     """Reject a translation that dropped, renamed, or changed an id or a number."""
     if set(_ID_TOKEN.findall(en_text)) != set(_ID_TOKEN.findall(zh_text)):
@@ -179,8 +197,16 @@ def _check_bullet(en_bullet: str, zh_bullet: str) -> None:
     for marker in _BULLET_MARKERS:
         if marker in en_bullet and marker not in zh_bullet:
             raise BriefingError(f"zh briefing bullet dropped the marker {marker!r}")
-    if _CONFIDENCE_PHRASE.search(en_bullet) and not _CONFIDENCE_PHRASE.search(zh_bullet):
-        raise BriefingError("zh briefing bullet dropped the confidence marker")
+    en_confidence = _CONFIDENCE_LEVEL.search(en_bullet)
+    if en_confidence:
+        zh_confidence = _CONFIDENCE_LEVEL.search(zh_bullet)
+        if not zh_confidence:
+            raise BriefingError("zh briefing bullet dropped the confidence marker")
+        # Presence alone is not enough: the dashboard publishes this level, so
+        # translating "Medium confidence." as "High confidence." would put a
+        # fabricated reading on the page.
+        if zh_confidence.group(1).lower() != en_confidence.group(1).lower():
+            raise BriefingError("zh briefing bullet changed the confidence level")
     _check_grounding(en_bullet, zh_bullet, "briefing bullet")
 
 
@@ -231,7 +257,8 @@ def translate_briefing_to_zh(
     fall back to the English-only briefing.
     """
     en_bullets = [
-        _output_text(bullet, field="briefing bullet", max_chars=800) for bullet in bullets
+        _output_text(bullet, field="briefing bullet", max_chars=MAX_BULLET_CHARS)
+        for bullet in bullets
     ]
     en_caveat = _output_text(caveat, field="caveat", max_chars=1_000)
     parsed, meta = _translate(
@@ -245,16 +272,22 @@ def translate_briefing_to_zh(
     if len(raw_bullets) != len(en_bullets):
         raise BriefingError("zh briefing returned the wrong number of bullets")
     bullets_zh = [
-        _output_text(item, field="bullet_zh", max_chars=MAX_ZH_BULLET_CHARS)
+        _require_zh_text(item, field="bullet_zh", max_chars=MAX_BULLET_CHARS)
         for item in raw_bullets
     ]
     for en, zh in zip(en_bullets, bullets_zh, strict=True):
         _check_bullet(en, zh)
-    caveat_zh = _output_text(
-        parsed.get("caveat_zh"), field="caveat_zh", max_chars=MAX_ZH_CAVEAT_CHARS
-    )
-    _check_grounding(en_caveat, caveat_zh, "caveat")
-    return {**meta, "bullets_zh": bullets_zh, "caveat_zh": caveat_zh}
+    result = {**meta, "bullets_zh": bullets_zh}
+    # An empty caveat is a legitimate briefing shape (the day had insights but
+    # no caveat), so it is skipped rather than translated; a non-empty caveat
+    # whose zh rendering comes back empty is a translation failure.
+    if en_caveat:
+        caveat_zh = _require_zh_text(
+            parsed.get("caveat_zh"), field="caveat_zh", max_chars=MAX_ZH_CAVEAT_CHARS
+        )
+        _check_grounding(en_caveat, caveat_zh, "caveat")
+        result["caveat_zh"] = caveat_zh
+    return result
 
 
 def translate_answers_to_zh(
@@ -302,8 +335,15 @@ def translate_answers_to_zh(
             raise BriefingError("zh translation returned a malformed answer")
         zh_answer: dict[str, Any] = {"index": index}
         for en_field, zh_field in _ANSWER_FIELD_PAIRS:
-            value = _output_text(item.get(zh_field), field=zh_field, max_chars=MAX_ZH_ANSWER_CHARS)
-            _check_grounding(en_answer[en_field], value, zh_field)
+            en_value = en_answer[en_field]
+            if not en_value:
+                # Nothing to translate; leave the zh field absent so the
+                # dashboard falls back to the (empty) English field.
+                continue
+            value = _require_zh_text(
+                item.get(zh_field), field=zh_field, max_chars=MAX_ZH_ANSWER_CHARS
+            )
+            _check_grounding(en_value, value, zh_field)
             zh_answer[zh_field] = value
         translated.append(zh_answer)
     return translated, meta

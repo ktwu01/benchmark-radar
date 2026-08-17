@@ -448,8 +448,11 @@ def generate_daily_questions(
         try:
             zh_answers, zh_meta = translate_answers_to_zh(flat, api_key, model=model)
             for answer, zh in zip(flat, zh_answers, strict=True):
+                # Empty English prose fields get no zh rendering; the field is
+                # left absent so the dashboard falls back per field.
                 for zh_field in ZH_ANSWER_FIELDS:
-                    answer[zh_field] = zh[zh_field]
+                    if zh_field in zh:
+                        answer[zh_field] = zh[zh_field]
             zh_translation = zh_meta
         except (BriefingError, RequestError, ValueError) as error:
             print(f"::warning title=zh Q&A translation skipped::{error}")
