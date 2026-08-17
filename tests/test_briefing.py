@@ -578,9 +578,7 @@ def _briefing_zh_response(bullets_zh, caveat_zh):
                 "content": [
                     {
                         "type": "output_text",
-                        "text": json.dumps(
-                            {"bullets_zh": bullets_zh, "caveat_zh": caveat_zh}
-                        ),
+                        "text": json.dumps({"bullets_zh": bullets_zh, "caveat_zh": caveat_zh}),
                     }
                 ],
             }
@@ -619,16 +617,12 @@ def test_generate_daily_briefing_translates_to_chinese_when_requested(monkeypatc
                                             "finding": (
                                                 "Memory evaluation is moving toward persistence."
                                             ),
-                                            "why_it_matters": (
-                                                "Teams need longitudinal tests."
-                                            ),
+                                            "why_it_matters": ("Teams need longitudinal tests."),
                                             "evidence_ids": ["E001"],
                                             "confidence": "medium",
                                         }
                                     ],
-                                    "caveat": (
-                                        "One captured release does not establish a trend."
-                                    ),
+                                    "caveat": ("One captured release does not establish a trend."),
                                 }
                             ),
                         }
@@ -657,8 +651,12 @@ def test_generate_daily_briefing_translates_to_chinese_when_requested(monkeypatc
     monkeypatch.setattr("benchmark_radar.translate_zh.post_json", fake_translate)
 
     result = generate_daily_briefing(
-        [current], current, ["Insufficient comparable history."], "secret",
-        model="gpt-5.6", translate_zh=True,
+        [current],
+        current,
+        ["Insufficient comparable history."],
+        "secret",
+        model="gpt-5.6",
+        translate_zh=True,
     )
 
     assert "Evidence: E001" in result.bullets[0]
@@ -697,9 +695,7 @@ def test_generate_daily_briefing_keeps_english_when_zh_translation_fails(monkeyp
                                             "finding": (
                                                 "Memory evaluation is moving toward persistence."
                                             ),
-                                            "why_it_matters": (
-                                                "Teams need longitudinal tests."
-                                            ),
+                                            "why_it_matters": ("Teams need longitudinal tests."),
                                             "evidence_ids": ["E001"],
                                             "confidence": "medium",
                                         }
@@ -722,10 +718,7 @@ def test_generate_daily_briefing_keeps_english_when_zh_translation_fails(monkeyp
 
     def fake_translate(url, payload, **kwargs):
         return _briefing_zh_response(
-            [
-                "记忆评估正在向持久化方向发展。团队需要纵向测试。"
-                "Evidence: E001. Medium confidence."
-            ],
+            ["记忆评估正在向持久化方向发展。团队需要纵向测试。Evidence: E001. Medium confidence."],
             "仅一个发布不足以确立趋势。",
         )
 
@@ -733,8 +726,12 @@ def test_generate_daily_briefing_keeps_english_when_zh_translation_fails(monkeyp
     monkeypatch.setattr("benchmark_radar.translate_zh.post_json", fake_translate)
 
     result = generate_daily_briefing(
-        [current], current, ["Insufficient comparable history."], "secret",
-        model="gpt-5.6", translate_zh=True,
+        [current],
+        current,
+        ["Insufficient comparable history."],
+        "secret",
+        model="gpt-5.6",
+        translate_zh=True,
     )
 
     assert "Why it matters" in result.bullets[0]

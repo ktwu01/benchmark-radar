@@ -65,8 +65,8 @@ _ZH_INSTRUCTIONS = (
     "with a Chinese numeral such as 三 or 二十. The translated prose must contain "
     "exactly the same Arabic digit runs as the English.\n"
     "3. For briefing bullets, keep the English structural markers exactly as written: "
-    "the phrases \"Why it matters:\" and \"Evidence:\", and the trailing confidence "
-    "phrase such as \"High confidence.\" or \"Medium confidence.\". Translate only the "
+    'the phrases "Why it matters:" and "Evidence:", and the trailing confidence '
+    'phrase such as "High confidence." or "Medium confidence.". Translate only the '
     "prose around them. The dashboard splits bullets on these markers.\n"
     "4. Keep proper nouns that are identifiers or names (benchmark names, repository "
     "names, model names, paper titles) as-is or in their common English form.\n"
@@ -182,9 +182,7 @@ def _require_zh_text(value: Any, *, field: str, max_chars: int) -> str:
 def _check_grounding(en_text: str, zh_text: str, field: str) -> None:
     """Reject a translation that dropped, renamed, or changed an id or a number."""
     if set(_ID_TOKEN.findall(en_text)) != set(_ID_TOKEN.findall(zh_text)):
-        raise BriefingError(
-            f"zh translation of {field} dropped or changed an E###/S### id"
-        )
+        raise BriefingError(f"zh translation of {field} dropped or changed an E###/S### id")
     if _digit_runs(en_text) != _digit_runs(zh_text):
         raise BriefingError(
             f"zh translation of {field} changed a quantity; every Arabic digit "
