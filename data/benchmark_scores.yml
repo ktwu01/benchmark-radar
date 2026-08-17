@@ -2341,6 +2341,198 @@ results:
     read_from: html_text
 
   # ---------------------------------------------------------------------------
+  # DeepSeek-V4 technical report (arXiv 2606.19348), Table 4 ("DeepSeek-V4-Flash
+  # ... DeepSeek-V4-Pro" main comparison, the column labeled Max). The report is
+  # the primary source for the DeepSeek-V4 *series*; the DeepSeek-V4-Pro numbers
+  # in this table are identical to the DeepSeek-V4-Pro model card already scored
+  # above, so only the previously-unsored model -- DeepSeek-V4-Flash -- is added
+  # here. Flash Max is the high-reasoning setting, recorded with the same protocol
+  # strings as the V4-Pro Max rows so the two lines can sit on one axis. Base
+  # (pretrained, non-instruct) scores from Table 2 are out of scope: the registry
+  # tracks chat/instruct models, and a base score is not comparable to a chat one.
+  # ---------------------------------------------------------------------------
+
+  - benchmark_id: mmlu_pro
+    instrument: mmlu_pro
+    protocol: think max
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 87.5
+    read_from: html_text
+
+  - benchmark_id: simpleqa
+    instrument: simpleqa_verified
+    protocol: think max, pass@1
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 34.1
+    read_from: html_text
+
+  - benchmark_id: gpqa_diamond
+    instrument: gpqa_diamond
+    protocol: think max, pass@1
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 88.1
+    read_from: html_text
+
+  - benchmark_id: hle
+    instrument: hle
+    protocol: think max, pass@1, no tools
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 34.8
+    read_from: html_text
+
+  - benchmark_id: livecodebench
+    instrument: livecodebench
+    protocol: think max, pass@1
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 91.6
+    read_from: html_text
+
+  - benchmark_id: codeforces
+    instrument: codeforces
+    protocol: think max, rating
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 3052
+    read_from: html_text
+
+  - benchmark_id: hmmt
+    instrument: hmmt_2026_feb
+    protocol: think max, pass@1
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 94.8
+    read_from: html_text
+
+  - benchmark_id: imo_answer_bench
+    instrument: imo_answer_bench
+    protocol: think max, pass@1
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 88.4
+    read_from: html_text
+
+  - benchmark_id: apex_agents
+    instrument: apex_agents
+    protocol: think max, pass@1
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 33.0
+    read_from: html_text
+
+  - benchmark_id: mrcr
+    instrument: mrcr_1m
+    protocol: think max, MMR
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 78.7
+    read_from: html_text
+
+  - benchmark_id: terminal_bench
+    instrument: terminal_bench_2.0
+    protocol: think max
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 56.9
+    read_from: html_text
+
+  - benchmark_id: swe_bench_verified
+    instrument: swe_bench_verified
+    protocol: think max, resolved
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 79.0
+    read_from: html_text
+
+  - benchmark_id: swe_bench_pro
+    instrument: swe_bench_pro
+    protocol: think max, resolved
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 52.6
+    read_from: html_text
+
+  - benchmark_id: swe_bench_multilingual
+    instrument: swe_bench_multilingual
+    protocol: think max, resolved
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 73.3
+    read_from: html_text
+
+  - benchmark_id: browsecomp
+    instrument: browsecomp
+    protocol: think max, pass@1
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 73.2
+    read_from: html_text
+
+  - benchmark_id: gdpval
+    instrument: gdpval_aa
+    protocol: think max, Elo
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 1395
+    read_from: html_text
+
+  - benchmark_id: mcp_atlas
+    instrument: mcp_atlas_public
+    protocol: think max, pass@1
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 69.0
+    read_from: html_text
+
+  - benchmark_id: tool_decathlon
+    instrument: tool_decathlon
+    protocol: think max, pass@1
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_technical_report
+    reported_at: 2026-06-25
+    value: 47.8
+    read_from: html_text
+
+  # ---------------------------------------------------------------------------
   # xAI Grok 4.5 release post (x.ai/news/grok-4-5). HTML; figures are
   # SVG bars but the Grok 4.5 numbers appear in caption text.
 
@@ -3016,40 +3208,26 @@ results:
 #                                   SWE-bench figures above were text.
 #   anthropic_claude_fable_5_mythos_5  Headline comparison table is an image;
 #                                   prose gives ratios, not absolute scores.
-#   deepseek_v4_technical_report    arXiv PDF not fetched in this pass.
-#   zai_glm_5_paper                 HuggingFace /papers/ page carries no
-#                                   benchmark table; the arXiv PDF was not
-#                                   fetched.
+#   zai_glm_5_paper                 HuggingFace /papers/ page (arXiv 2602.15763)
+#                                   renders its benchmark figures as images; the
+#                                   prose gives only Vending Bench 2 ($4,432),
+#                                   which the GLM-5 model card already covers.
+#                                   Not machine-readable for the tracked set.
 #
 # Resolved in the issue #98 pass (scores above): Claude Opus 5 (system card
 # PDF via pdftotext), Gemini 3.1 Pro, Gemma 4, Qwen3.5, DeepSeek-V4-Pro,
 # DeepSeek-V4-Pro-0813, Kimi K3, GLM-5, GLM-5.1, GLM-5.2, Grok 4.5.
+#
+# Resolved in a follow-up (DeepSeek-V4 technical report, arXiv 2606.19348):
+# the report's main comparison table is machine-readable HTML. Its
+# DeepSeek-V4-Pro columns duplicate the DeepSeek-V4-Pro model card already
+# scored, so only the previously-absent DeepSeek-V4-Flash (Max mode) is added.
+# DeepSeek-V4-Pro-Max rows already exist; the report adds no new Pro benchmark.
 #
 # Note on the Gemma 4 OmniDocBench row: the card reports OmniDocBench as an
 # average edit distance (0.131, lower is better), while Qwen3.5 and Kimi K3
 # report it as an accuracy percent (~91%, higher is better). One benchmark_id
 # carries one metric, so the edit-distance reading is omitted here rather
 # than mixed onto the accuracy axis.
-# --------------------------------------------------------------------------- documents in the registry whose scores could not be read, and why.
-# Recorded so the gap is visible instead of looking like "not yet curated".
-# Values will be added only when the figure can be read with certainty.
-#
-#   openai_gpt_5_system_card        HTTP 403 -- openai.com blocks automated
-#                                   fetching. Not readable.
-#   openai_o3_o4_mini_system_card   Same. Note that o3 figures DO appear above
-#                                   as third-party citations from Google's
-#                                   Table 4, which is weaker evidence than
-#                                   OpenAI's own document.
-#   openai_gpt_4_1                  Same.
-#   xai_grok_4_model_card           HTTP 403 -- x.ai blocks automated fetching.
-#   meta_llama_3_1                  Benchmark table published as an image.
-#   meta_llama_4                    Benchmark table published as an image.
-#   mistral_medium_3                Benchmark table published as an image.
-#   anthropic_claude_3_7_sonnet     Reasoning table is an image; only the two
-#                                   SWE-bench figures above were text.
-#
-# Every 2026-dated card in the registry (Claude Opus 5, Claude Fable 5 /
-# Mythos 5, GPT-5.6, Gemini 3.1 Pro, Gemma 4, Qwen3.5, DeepSeek-V4, Kimi K3,
-# GLM-5, Grok 4.5, Mistral Large 3) is likewise unrecorded here: none were
-# fetched and verified in this pass, so no value is asserted for them.
 # ---------------------------------------------------------------------------
+

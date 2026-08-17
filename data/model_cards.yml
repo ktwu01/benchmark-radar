@@ -1427,16 +1427,30 @@ model_cards:
     published: 2026-06-25
     url: https://arxiv.org/abs/2606.19348
     retrieved_at: 2026-08-02
+    # Main comparison table (Table 4) reports the full DeepSeek-V4 series:
+    # DeepSeek-V4-Flash, DeepSeek-V4-Pro and DeepSeek-V4-Pro-Max. The
+    # DeepSeek-V4-Pro columns duplicate the DeepSeek-V4-Pro model card, so only
+    # DeepSeek-V4-Flash is scored from this source (see benchmark_scores.yml).
     benchmarks:
       - mmlu_pro
+      - simpleqa
       - gpqa_diamond
       - hle
       - livecodebench
-      - swe_bench_verified
-      - terminal_bench
+      - codeforces
+      - hmmt
+      - imo_answer_bench
+      - apex_agents
       - mrcr
-      - longbench
+      - terminal_bench
+      - swe_bench_verified
+      - swe_bench_pro
+      - swe_bench_multilingual
       - browsecomp
+      - gdpval
+      - mcp_atlas
+      - tool_decathlon
+      - longbench
 
   - id: moonshot_kimi_k3_model_card
     organization: Moonshot AI
