@@ -747,7 +747,9 @@ benchmarks:
       preparedness threshold, not a leaderboard to top. Reported as a
       capability percentage, and no public specification of the task set has
       been published, so the number cannot be independently reproduced. In use
-      by 2026-06-09; no announced publication date.
+      by 2026-06-09; no announced publication date. The fullest public
+      description is GPT-5.6 Preview System Card §9.1.2.4.1 (41 V8 N-day
+      vulnerabilities, 16 grader-verified capability flags).
 
   # ---------------------------------------------------------------------------
   # Instruments first observed in Anthropic's 2026-06-09 Claude Fable 5 /
@@ -785,23 +787,30 @@ benchmarks:
     name: Blueprint-Bench 2
     aliases: ["Blueprint-Bench 2", "Blueprint-Bench", "BlueprintBench 2"]
     domain: spatial_reasoning
-    url: null
+    url: https://andonlabs.com/evals/blueprint-bench-2
+    # Unset: the Andon Labs eval page states "released in May 2026" with no
+    # day. A guessed day would be a fabricated release date, and this field's
+    # contract is to say nothing rather than carry one.
     released: null
     caveat: >-
-      Spatial-reasoning set named in Anthropic's comparison table with no
-      published task specification, so scores cannot be reproduced or audited
-      outside the vendor.
+      Spatial-reasoning set: 50 apartments, ~20 photos each, scored by a
+      connectivity-graph grader, with a public leaderboard on the Andon Labs
+      eval page (run in-house; dataset not openly downloadable). Builds on the
+      original Blueprint-Bench paper (arXiv:2509.25229). Released May 2026;
+      no day published.
 
   - id: legal_agent_benchmark
     name: Legal Agent Benchmark
     aliases: ["Legal Agent Benchmark"]
     domain: legal
-    url: null
-    released: null
+    url: https://www.harvey.ai/blog/introducing-harveys-legal-agent-benchmark
+    released: 2026-05-06
     caveat: >-
-      Absolute scores are very low across all models (0-13%), so ordering at
-      the top is decided by a handful of tasks and small gaps are noise. No
-      public task specification.
+      Open-source agent benchmark from Harvey (github.com/harveyai/harvey-
+      labs): 1,200+ tasks across 24 practice areas, all-pass LLM-judge
+      grading. Absolute scores are very low across all models (0-13%), so
+      ordering at the top is decided by a handful of tasks and small gaps are
+      noise.
 
   - id: biomysterybench
     name: BioMysteryBench
@@ -813,18 +822,23 @@ benchmarks:
       Reported in two splits ("hard" and "human solved") that differ by more
       than 35 points, so a bare score is unreadable without its split.
       Anthropic notes its own safety refusals depress this number, which means
-      the score mixes capability with policy.
+      the score mixes capability with policy. Anthropic-internal evaluation:
+      no published task set or release date. The Fable 5 system card §8.20.1
+      describes it without a citation or dataset link.
 
   - id: gdp_pdf
     name: GDP.pdf
     aliases: ["GDP.pdf"]
     domain: multimodal
-    url: null
-    released: null
+    url: https://surgehq.ai/blog/gdp-pdf-can-100b-ai-models-master-the-documents-that-run-the-world
+    released: 2026-04-14
     caveat: >-
-      Vision-based knowledge work, reported no-tools. Named in Anthropic's
-      table without a published specification; the name resembles GDPval but
-      the two are separate instruments and must not be merged.
+      Vision-based knowledge work over 100 PDFs across 10 domains, reported
+      no-tools. Published by Surge AI with a public dataset
+      (huggingface.co/datasets/surgeai/GDP.pdf), harness
+      (github.com/surge-ai/gdp-pdf) and paper (arXiv:2607.11192). The name
+      resembles GDPval but the two are separate instruments and must not be
+      merged.
 
   - id: vibench
     name: ViBench
@@ -833,23 +847,23 @@ benchmarks:
     url: null
     released: null
     caveat: >-
-      Anthropic's own end-to-end vibe-coding benchmark, described in prose
-      rather than scored in the table. First-party to the vendor reporting it,
-      with no published task set.
+      End-to-end vibe-coding benchmark named in a customer testimonial in
+      Anthropic's Claude Fable 5 / Mythos 5 launch post, not in Anthropic's
+      own prose or its system card. Described qualitatively, not scored in the
+      comparison table. No published task set.
 
   - id: healthbench_professional
     name: HealthBench Professional
     aliases: ["HealthBench Professional"]
     domain: health
-    url: https://openai.com/index/healthbench/
-    # Unset: the Professional split postdates HealthBench's own 2025-05-12
-    # release, but no announcement dates it, and the 2026-06-09 table that
-    # reports it only establishes when it was first seen in use.
-    released: null
+    url: https://cdn.openai.com/dd128428-0184-4e25-b155-3a7686c7d744/HealthBench-Professional.pdf
+    released: 2026-04-22
     caveat: >-
       A distinct, harder split from the HealthBench variants recorded
       separately in this registry, so its scores are not comparable to them.
-      Graded by an LLM against physician-written rubrics.
+      Published as an OpenAI paper (525 examples, 3 clinician use cases) with
+      a public dataset; released 2026-04-22 per PDF metadata. Graded by an LLM
+      against physician-written rubrics.
 
 # Model cards, technical reports and release posts.
 #
