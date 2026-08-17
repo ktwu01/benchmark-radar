@@ -346,6 +346,22 @@ sources:
         url: https://www.microsoft.com/en-us/research/feed/
       - name: NVIDIA AI Blog
         url: https://blogs.nvidia.com/feed/
+      # Added issue #98 pass: major LLM vendors with a verified live
+      # first-party feed. Each was fetched and confirmed to return XML before
+      # admission. Vendors whose sites serve no first-party syndication feed
+      # (Anthropic, xAI, Cohere, DeepSeek, Qwen, Moonshot, Z.ai, Reka,
+      # Cerebras, AI21, Databricks, Perplexity) stay out: a missing feed is
+      # not filled with a third-party proxy.
+      - name: Mistral AI
+        url: https://mistral.ai/news/rss
+      - name: Meta Research
+        url: https://research.facebook.com/feed/
+      - name: Ai2
+        url: https://allenai.org/rss.xml
+      - name: Together AI
+        url: https://www.together.ai/blog/rss.xml
+      - name: Sakana AI
+        url: https://sakana.ai/feed.xml
 
   openalex:
     enabled: true
