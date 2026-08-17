@@ -531,6 +531,13 @@ def main() -> None:
         "true",
         "yes",
     }
+    # Issue #231: optional Simplified Chinese rendering of the day's GPT prose,
+    # one extra call each. Each flag is independent of its generation flag, so
+    # a run can translate the briefing without translating the Q&A and vice
+    # versa. A failed translation never fails the run: the zh fields are absent
+    # and the dashboard shows English.
+    briefing_zh = os.getenv("OPENAI_BRIEFING_ZH", "").lower() in {"1", "true", "yes"}
+    questions_zh = os.getenv("OPENAI_QUESTIONS_ZH", "").lower() in {"1", "true", "yes"}
     daily_briefing = deterministic_findings
     briefing_metadata: dict = {
         "generator": "deterministic-fallback",
@@ -544,6 +551,7 @@ def main() -> None:
                 deterministic_findings,
                 api_key,
                 model=os.getenv("OPENAI_BRIEFING_MODEL", "").strip() or "gpt-5.6",
+                translate_zh=briefing_zh,
             )
             daily_briefing = generated.bullets
             briefing_metadata = generated.metadata
@@ -575,6 +583,7 @@ def main() -> None:
                 api_key,
                 model=os.getenv("OPENAI_BRIEFING_MODEL", "").strip() or "gpt-5.6",
                 config=config,
+                translate_zh=questions_zh,
             )
         except (BriefingError, RequestError, ValueError) as error:
             if questions_required:

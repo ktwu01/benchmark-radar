@@ -566,3 +566,177 @@ def test_briefing_packet_reports_how_much_of_the_corpus_reached_the_model():
     assert coverage["corpus_evidence_records"] == 5
     assert coverage["evidence_injected"] == 5
     assert coverage["evidence_dropped_for_size"] == 0
+
+
+def _briefing_zh_response(bullets_zh, caveat_zh):
+    return {
+        "id": "resp_zh",
+        "model": "gpt-5.6-2026-08-01",
+        "output": [
+            {
+                "type": "message",
+                "content": [
+                    {
+                        "type": "output_text",
+                        "text": json.dumps(
+                            {"bullets_zh": bullets_zh, "caveat_zh": caveat_zh}
+                        ),
+                    }
+                ],
+            }
+        ],
+        "usage": {
+            "input_tokens": 500,
+            "output_tokens": 300,
+            "total_tokens": 800,
+            "input_tokens_details": {"cached_tokens": 0},
+            "output_tokens_details": {"reasoning_tokens": 20},
+        },
+    }
+
+
+def test_generate_daily_briefing_translates_to_chinese_when_requested(monkeypatch):
+    item = _item(1, title="MemoryBench: Long-horizon personal memory")
+    item.summary = "Measures memory persistence."
+    item.event_kind = "released"
+    current = snapshot_for_run(_run([item]))
+
+    def fake_briefing(url, payload, **kwargs):
+        return {
+            "id": "resp_real",
+            "model": "gpt-5.6-2026-08-01",
+            "output": [
+                {
+                    "type": "message",
+                    "content": [
+                        {
+                            "type": "output_text",
+                            "text": json.dumps(
+                                {
+                                    "status": "insight",
+                                    "insights": [
+                                        {
+                                            "finding": (
+                                                "Memory evaluation is moving toward persistence."
+                                            ),
+                                            "why_it_matters": (
+                                                "Teams need longitudinal tests."
+                                            ),
+                                            "evidence_ids": ["E001"],
+                                            "confidence": "medium",
+                                        }
+                                    ],
+                                    "caveat": (
+                                        "One captured release does not establish a trend."
+                                    ),
+                                }
+                            ),
+                        }
+                    ],
+                }
+            ],
+            "usage": {
+                "input_tokens": 8123,
+                "output_tokens": 241,
+                "total_tokens": 8364,
+                "input_tokens_details": {"cached_tokens": 100},
+                "output_tokens_details": {"reasoning_tokens": 80},
+            },
+        }
+
+    def fake_translate(url, payload, **kwargs):
+        return _briefing_zh_response(
+            [
+                "记忆评估正在向持久化方向发展。Why it matters: 团队需要纵向测试。"
+                "Evidence: E001. Medium confidence."
+            ],
+            "仅一个发布不足以确立趋势。",
+        )
+
+    monkeypatch.setattr("benchmark_radar.briefing.post_json", fake_briefing)
+    monkeypatch.setattr("benchmark_radar.translate_zh.post_json", fake_translate)
+
+    result = generate_daily_briefing(
+        [current], current, ["Insufficient comparable history."], "secret",
+        model="gpt-5.6", translate_zh=True,
+    )
+
+    assert "Evidence: E001" in result.bullets[0]
+    assert result.metadata["bullets_zh"][0] == (
+        "记忆评估正在向持久化方向发展。Why it matters: 团队需要纵向测试。"
+        "Evidence: E001. Medium confidence."
+    )
+    assert result.metadata["caveat_zh"] == "仅一个发布不足以确立趋势。"
+    assert result.metadata["zh_translation"]["response_id"] == "resp_zh"
+
+
+def test_generate_daily_briefing_keeps_english_when_zh_translation_fails(monkeypatch):
+    # A translation that drops the "Why it matters" marker would render as one
+    # unparsable paragraph on the dashboard, so it is rejected and the day keeps
+    # its English-only briefing rather than failing the whole run.
+    item = _item(1, title="MemoryBench: Long-horizon personal memory")
+    item.summary = "Measures memory persistence."
+    item.event_kind = "released"
+    current = snapshot_for_run(_run([item]))
+
+    def fake_briefing(url, payload, **kwargs):
+        return {
+            "id": "resp_real",
+            "model": "gpt-5.6-2026-08-01",
+            "output": [
+                {
+                    "type": "message",
+                    "content": [
+                        {
+                            "type": "output_text",
+                            "text": json.dumps(
+                                {
+                                    "status": "insight",
+                                    "insights": [
+                                        {
+                                            "finding": (
+                                                "Memory evaluation is moving toward persistence."
+                                            ),
+                                            "why_it_matters": (
+                                                "Teams need longitudinal tests."
+                                            ),
+                                            "evidence_ids": ["E001"],
+                                            "confidence": "medium",
+                                        }
+                                    ],
+                                    "caveat": "One captured release does not establish a trend.",
+                                }
+                            ),
+                        }
+                    ],
+                }
+            ],
+            "usage": {
+                "input_tokens": 8123,
+                "output_tokens": 241,
+                "total_tokens": 8364,
+                "input_tokens_details": {"cached_tokens": 100},
+                "output_tokens_details": {"reasoning_tokens": 80},
+            },
+        }
+
+    def fake_translate(url, payload, **kwargs):
+        return _briefing_zh_response(
+            [
+                "记忆评估正在向持久化方向发展。团队需要纵向测试。"
+                "Evidence: E001. Medium confidence."
+            ],
+            "仅一个发布不足以确立趋势。",
+        )
+
+    monkeypatch.setattr("benchmark_radar.briefing.post_json", fake_briefing)
+    monkeypatch.setattr("benchmark_radar.translate_zh.post_json", fake_translate)
+
+    result = generate_daily_briefing(
+        [current], current, ["Insufficient comparable history."], "secret",
+        model="gpt-5.6", translate_zh=True,
+    )
+
+    assert "Why it matters" in result.bullets[0]
+    assert "bullets_zh" not in result.metadata
+    assert "caveat_zh" not in result.metadata

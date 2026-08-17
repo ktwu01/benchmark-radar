@@ -1147,6 +1147,166 @@ def test_snapshot_persists_and_validates_openai_provenance():
     assert snapshot["briefing"]["usage"]["input_tokens"] == 8000
 
 
+def test_validate_snapshot_accepts_a_briefing_with_chinese_rendering():
+    run = radar_run()
+    run.daily_briefing = ["Grounded GPT finding. Evidence: E001. High confidence."]
+    run.daily_briefing_metadata = {
+        "generator": "openai-responses",
+        "model": "gpt-5.6",
+        "response_id": "resp_123",
+        "usage": {"input_tokens": 8000, "output_tokens": 200, "total_tokens": 8200},
+        "input": {"evidence_items": 40},
+        "citations": [
+            {
+                "id": "E001",
+                "title": "MemoryBench",
+                "url": "https://example.test/memory",
+                "source": "arXiv",
+            }
+        ],
+        "bullets_zh": ["有据可依的 GPT 发现。Evidence: E001. High confidence."],
+        "caveat_zh": "仅注入部分记录。",
+        "zh_translation": {
+            "model": "gpt-5.6-2026-08-01",
+            "response_id": "resp_zh",
+            "usage": {"input_tokens": 500, "output_tokens": 300, "total_tokens": 800},
+        },
+    }
+
+    snapshot = snapshot_for_run(run)
+    validate_snapshot(snapshot)
+
+    assert snapshot["briefing"]["bullets_zh"] == [
+        "有据可依的 GPT 发现。Evidence: E001. High confidence."
+    ]
+
+
+def test_validate_snapshot_rejects_a_mismatched_zh_bullet_array():
+    run = radar_run()
+    run.daily_briefing = ["Grounded GPT finding. Evidence: E001.", "Second finding."]
+    run.daily_briefing_metadata = {
+        "generator": "openai-responses",
+        "model": "gpt-5.6",
+        "response_id": "resp_123",
+        "usage": {"input_tokens": 8000, "output_tokens": 200, "total_tokens": 8200},
+        "input": {"evidence_items": 40},
+        "citations": [],
+        "bullets_zh": ["只有一条。"],
+    }
+
+    snapshot = snapshot_for_run(run)
+    with pytest.raises(SnapshotError, match="matching bullets in count"):
+        validate_snapshot(snapshot)
+
+
+def test_validate_snapshot_rejects_an_empty_zh_caveat():
+    run = radar_run()
+    run.daily_briefing = ["Grounded GPT finding. Evidence: E001."]
+    run.daily_briefing_metadata = {
+        "generator": "openai-responses",
+        "model": "gpt-5.6",
+        "response_id": "resp_123",
+        "usage": {"input_tokens": 8000, "output_tokens": 200, "total_tokens": 8200},
+        "input": {"evidence_items": 40},
+        "citations": [],
+        "bullets_zh": ["有据可依的 GPT 发现。Evidence: E001."],
+        "caveat_zh": "   ",
+    }
+
+    snapshot = snapshot_for_run(run)
+    with pytest.raises(SnapshotError, match="caveat_zh must be a non-empty string"):
+        validate_snapshot(snapshot)
+
+
+def test_validate_snapshot_accepts_generated_questions_with_chinese_fields():
+    run = radar_run()
+    snapshot = snapshot_for_run(run)
+    snapshot["questions"] = {
+        "schema_version": 1,
+        "date": snapshot["date"],
+        "status": "generated",
+        "generator": "openai-responses",
+        "model": "gpt-5.6",
+        "groups": [
+            {
+                "id": "arrivals",
+                "title": "What arrived",
+                "answers": [
+                    {
+                        "question": "Q1?",
+                        "signal": "One.",
+                        "plain_english": "One.",
+                        "takeaway": "One.",
+                        "counter_view": "None.",
+                        "signal_zh": "一个。",
+                        "plain_chinese": "一个。",
+                        "takeaway_zh": "一个。",
+                        "counter_view_zh": "无。",
+                    }
+                ],
+            }
+        ],
+        "zh_translation": {
+            "model": "gpt-5.6-2026-08-01",
+            "response_id": "resp_zh",
+            "usage": {"input_tokens": 500, "output_tokens": 300, "total_tokens": 800},
+        },
+    }
+    validate_snapshot(snapshot)
+
+
+def test_validate_snapshot_rejects_an_empty_zh_answer_field():
+    run = radar_run()
+    snapshot = snapshot_for_run(run)
+    snapshot["questions"] = {
+        "schema_version": 1,
+        "date": snapshot["date"],
+        "status": "generated",
+        "groups": [
+            {
+                "id": "arrivals",
+                "answers": [
+                    {
+                        "question": "Q1?",
+                        "signal": "One.",
+                        "plain_chinese": "  ",
+                    }
+                ],
+            }
+        ],
+    }
+
+    with pytest.raises(SnapshotError, match="plain_chinese must be a non-empty string"):
+        validate_snapshot(snapshot)
+
+
+def test_validate_snapshot_accepts_questions_written_before_the_zh_feature():
+    # Snapshots written before issue #231 never carried zh answer fields; they
+    # must keep validating.
+    run = radar_run()
+    snapshot = snapshot_for_run(run)
+    snapshot["questions"] = {
+        "schema_version": 1,
+        "date": snapshot["date"],
+        "status": "generated",
+        "groups": [
+            {
+                "id": "arrivals",
+                "answers": [
+                    {
+                        "question": "Q1?",
+                        "signal": "One.",
+                        "plain_english": "One.",
+                        "takeaway": "One.",
+                        "counter_view": "None.",
+                    }
+                ],
+            }
+        ],
+    }
+    validate_snapshot(snapshot)
+
+
 def test_write_snapshot_preserves_the_briefing_across_passes(tmp_path):
     morning = radar_run()
     morning.daily_briefing = ["Committed by the first pass."]

@@ -879,7 +879,7 @@ def test_daily_briefing_renders_scannable_insight_blocks():
     assert "parts.body" in script
 
 
-def _rendered_briefing(fixture: str | None = None):
+def _rendered_briefing(fixture: str | None = None, lang: str | None = None):
     """Run the real briefing renderer over a fixture and return the DOM tree."""
     import json
     import shutil
@@ -891,7 +891,12 @@ def _rendered_briefing(fixture: str | None = None):
 
         pytest.skip("node is not installed")
     result = subprocess.run(
-        [node, "tests/render_briefing_harness.mjs", *([fixture] if fixture else [])],
+        [
+            node,
+            "tests/render_briefing_harness.mjs",
+            *([fixture] if fixture else []),
+            *([lang] if lang else []),
+        ],
         capture_output=True,
         text=True,
         timeout=60,
@@ -937,6 +942,46 @@ def test_rendered_briefing_splits_each_bullet_into_head_body_and_meta():
     assert "Evidence:" not in subtext(fbhead)
     assert "Medium confidence" in subtext(fbmeta)
     assert "2 sources" in subtext(fbmeta)
+
+
+def test_rendered_briefing_shows_chinese_when_the_snapshot_has_it():
+    """Under the zh interface, the snapshot's zh rendering replaces the English.
+
+    The zh bullets are validated at generation to carry the same E### ids, the
+    same markers, and the same digits, so the renderer treats them as drop-in
+    replacements: markers still split, evidence still lifts to the meta line.
+    """
+    nodes = list(_flatten(_rendered_briefing("tests/fixtures/daily_briefing_zh.json", "zh")))
+    insights = [n for n in nodes if n["className"] == "briefing-insight"]
+
+    assert len(insights) == 2
+    head = next(n for n in insights[0]["children"] if n["className"] == "briefing-insight-head")
+    body = next(n for n in insights[0]["children"] if n["className"] == "briefing-insight-body")
+    meta = next(n for n in insights[0]["children"] if n["className"] == "briefing-insight-meta")
+    assert "本次捕获的流中" in head["text"]
+    assert "评估者应选择能复现目标技术栈" in body["text"]
+    # The zh bullet keeps the English markers, so the splitter still removes them
+    # from the running text just as it does for English bullets.
+    assert "Why it matters" not in head["text"]
+    assert "Evidence:" not in body["text"]
+    assert "High" in meta["text"]
+    # The translated caveat is shown instead of the English one.
+    caveat = next(n for n in nodes if n["className"] == "daily-briefing-caveat")
+    assert "仅注入了" in caveat["text"]
+    assert "Only 25 of 164" not in caveat["text"]
+
+
+def test_rendered_briefing_falls_back_to_english_without_zh_fields():
+    """A day whose snapshot carries no zh fields stays English under zh."""
+    nodes = list(_flatten(_rendered_briefing("tests/fixtures/daily_briefing.json", "zh")))
+    heads = [
+        n["text"]
+        for n in nodes
+        if n["className"] == "briefing-insight-head" and n["text"].startswith("Several")
+    ]
+    assert heads and "Several new releases in this captured feed" in heads[0]
+    caves = [n["text"] for n in nodes if n["className"] == "daily-briefing-caveat"]
+    assert caves and "Only 25 of 164" in caves[0]
 
 
 def test_today_view_renders_the_daily_questions_under_the_briefing():
@@ -1024,7 +1069,7 @@ def test_daily_questions_link_only_validated_http_evidence():
     assert "validBriefingCitations(answer?.cited_evidence)" in script
 
 
-def _rendered_questions(fixture: str | None = None):
+def _rendered_questions(fixture: str | None = None, lang: str | None = None):
     """Run the real renderer over a fixture and return the resulting DOM tree.
 
     Source assertions cannot distinguish "renders the answer" from "mentions the
@@ -1041,7 +1086,12 @@ def _rendered_questions(fixture: str | None = None):
 
         pytest.skip("node is not installed")
     result = subprocess.run(
-        [node, "tests/render_questions_harness.mjs", *([fixture] if fixture else [])],
+        [
+            node,
+            "tests/render_questions_harness.mjs",
+            *([fixture] if fixture else []),
+            *([lang] if lang else []),
+        ],
         capture_output=True,
         text=True,
         timeout=60,
@@ -1084,6 +1134,33 @@ def test_rendered_questions_carry_every_answer_field_and_registry_value():
     assert "Evidence is insufficient to answer this today." in text
     assert "No certified comparison window" in text
     assert "Answered by gpt-5 in 3 calls" in text
+
+
+def test_rendered_questions_show_chinese_prose_and_questions_under_zh():
+    """Under zh, fixed question strings come from the I18N table and the day's
+    answer prose from the snapshot's zh fields when the run produced them."""
+    nodes = list(_flatten(_rendered_questions("tests/fixtures/daily_questions_zh.json", "zh")))
+    classes = {n["className"] for n in nodes}
+    text = next(iter(nodes))["text"]
+
+    assert {"question-group", "answer", "answer-signal", "answer-takeaway"} <= classes
+    # Group titles and the fixed question strings translate through the table.
+    assert "今日新增" in text
+    assert "雷达今天首次看到了哪些基准、数据集或评估方法？" in text
+    # The model prose is the snapshot's zh rendering, not the English original.
+    assert "今天首次观察到的记录大多是智能体评估框架。" in text
+    assert "Most of today's first-observed records" not in text
+    assert "未找到可信的反方观点。" in text
+
+
+def test_rendered_questions_keep_english_prose_when_zh_fields_are_absent():
+    """Without zh prose fields, only the fixed question strings translate."""
+    nodes = list(_flatten(_rendered_questions("tests/fixtures/daily_questions.json", "zh")))
+    text = next(iter(nodes))["text"]
+
+    assert "雷达今天首次看到了哪些基准、数据集或评估方法？" in text
+    assert "Most of today's first-observed records are agentic evaluation harnesses." in text
+    assert "今天首次观察到的记录大多是智能体评估框架。" not in text
 
 
 def test_dashboard_and_markdown_format_statistics_identically():

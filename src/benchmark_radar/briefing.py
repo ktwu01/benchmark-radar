@@ -14,7 +14,7 @@ import tiktoken
 
 from .corpus import build_corpus
 from .findings import first_seen_items
-from .http import post_json
+from .http import RequestError, post_json
 from .models import AttentionObservation, RadarItem, RadarRun
 from .snapshots import merge_snapshots, snapshot_for_run
 
@@ -532,8 +532,15 @@ def generate_daily_briefing(
     api_key: str,
     *,
     model: str = DEFAULT_BRIEFING_MODEL,
+    translate_zh: bool = False,
 ) -> GeneratedBriefing:
-    """Ask GPT for grounded synthesis and retain proof of the real API call."""
+    """Ask GPT for grounded synthesis and retain proof of the real API call.
+
+    With translate_zh, one extra call renders the validated bullets and caveat
+    in Simplified Chinese (issue #231). A translation failure must not cost the
+    day its English briefing, so it is reported as a warning and the zh fields
+    are simply absent; the dashboard falls back to English.
+    """
     evidence_packet = briefing_input(history, current, deterministic_findings)
     # This loop used to discard 41 of 51 selected records without recording it,
     # so a run that reached the model with 20% of its evidence published a
@@ -645,6 +652,22 @@ def generate_daily_briefing(
         "caveat": caveat,
         "citations": citations,
     }
+    if translate_zh:
+        # Function-level import: translate_zh imports this module's OpenAI
+        # plumbing at module scope, so a module-level import here would cycle.
+        from .translate_zh import translate_briefing_to_zh
+
+        try:
+            zh = translate_briefing_to_zh(bullets, caveat, api_key, model=model)
+            metadata["bullets_zh"] = zh["bullets_zh"]
+            metadata["caveat_zh"] = zh["caveat_zh"]
+            metadata["zh_translation"] = {
+                "model": zh["model"],
+                "response_id": zh["response_id"],
+                "usage": zh["usage"],
+            }
+        except (BriefingError, RequestError, ValueError) as error:
+            print(f"::warning title=zh briefing translation skipped::{error}")
     return GeneratedBriefing(bullets=bullets, metadata=metadata)
 
 

@@ -407,6 +407,71 @@ def test_daily_radar_yml_enables_and_requires_questions_in_production():
     assert str(env.get("OPENAI_QUESTIONS_REQUIRED")).lower() == "true"
 
 
+def test_daily_radar_yml_enables_chinese_rendering_in_production():
+    """Issue #231: production must ask for the zh rendering, or the flags would
+    exist but never be set and the Chinese dashboard would always show English."""
+    workflow_path = Path(".github/workflows/daily-radar.yml")
+    workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+    collect_step = next(
+        step
+        for step in workflow["jobs"]["build-report"]["steps"]
+        if step.get("name") == "Collect evidence and public attention"
+    )
+    env = collect_step["env"]
+    assert str(env.get("OPENAI_BRIEFING_ZH")).lower() == "true"
+    assert str(env.get("OPENAI_QUESTIONS_ZH")).lower() == "true"
+
+
+def test_zh_flags_reach_the_briefing_and_questions_generators(monkeypatch, tmp_path):
+    """The env flags are read once and passed through as translate_zh so the
+    generators own the translation call and its failure handling."""
+    monkeypatch.setenv("OPENAI_API_KEY", "secret")
+    monkeypatch.setenv("OPENAI_BRIEFING_ZH", "true")
+    monkeypatch.setenv("OPENAI_QUESTIONS", "true")
+    monkeypatch.setenv("OPENAI_QUESTIONS_ZH", "true")
+    _stub_sources(monkeypatch, datetime.now(UTC))
+    monkeypatch.setattr("sys.argv", _briefing_argv(tmp_path))
+    captured = {}
+
+    def fake_briefing(*args, **kwargs):
+        captured["briefing"] = kwargs.get("translate_zh")
+        return GeneratedBriefing(
+            bullets=["A real GPT synthesis. Evidence: E001."],
+            metadata={
+                "generator": "openai-responses",
+                "model": "gpt-5.6",
+                "response_id": "resp_real",
+                "usage": {"input_tokens": 8000, "output_tokens": 200, "total_tokens": 8200},
+                "input": {"evidence_items": 30},
+                "citations": [],
+            },
+        )
+
+    def fake_questions(*args, **kwargs):
+        captured["questions"] = kwargs.get("translate_zh")
+        return {
+            "schema_version": 1,
+            "date": datetime.now(UTC).date().isoformat(),
+            "status": "generated",
+            "generator": "openai-responses",
+            "model": "gpt-5.6",
+            "comparable": False,
+            "comparability_note": "no certified window",
+            "groups": [],
+            "stat_registry": [],
+            "usage": {"input_tokens": 10, "output_tokens": 5},
+            "calls": 3,
+            "coverage": {},
+        }
+
+    monkeypatch.setattr(cli, "generate_daily_briefing", fake_briefing)
+    monkeypatch.setattr(cli, "generate_daily_questions", fake_questions)
+
+    cli.main()
+
+    assert captured == {"briefing": True, "questions": True}
+
+
 def test_daily_radar_yml_renders_social_material_instead_of_an_issue():
     """Issue #88: the dashboard and site/feed.xml remain the reading surface
     (issue #37), so the daily Issue carries only the social posting checklist.

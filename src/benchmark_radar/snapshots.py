@@ -198,6 +198,38 @@ def _validate_briefing(briefing: Any, *, source: str, date: str) -> None:
     for bullet in bullets:
         if not isinstance(bullet, str) or not bullet.strip():
             raise SnapshotError(f"{source}: briefing.bullets entries must be non-empty strings")
+    # Optional Chinese rendering (issue #231). Present only when the run asked
+    # for it and the translation passed; when present it must mirror the
+    # English, because the dashboard swaps the two arrays wholesale.
+    bullets_zh = briefing.get("bullets_zh")
+    if bullets_zh is not None:
+        if not isinstance(bullets_zh, list) or len(bullets_zh) != len(bullets):
+            raise SnapshotError(
+                f"{source}: briefing.bullets_zh must be an array matching bullets in count"
+            )
+        for bullet in bullets_zh:
+            if not isinstance(bullet, str) or not bullet.strip():
+                raise SnapshotError(
+                    f"{source}: briefing.bullets_zh entries must be non-empty strings"
+                )
+    if briefing.get("caveat_zh") is not None and (
+        not isinstance(briefing["caveat_zh"], str) or not briefing["caveat_zh"].strip()
+    ):
+        raise SnapshotError(f"{source}: briefing.caveat_zh must be a non-empty string")
+    zh_translation = briefing.get("zh_translation")
+    if zh_translation is not None:
+        if (
+            not isinstance(zh_translation, dict)
+            or not str(zh_translation.get("model") or "").strip()
+            or not str(zh_translation.get("response_id") or "").startswith("resp_")
+        ):
+            raise SnapshotError(f"{source}: OpenAI briefing zh_translation is invalid")
+        usage = zh_translation.get("usage")
+        if not isinstance(usage, dict) or any(
+            not isinstance(usage.get(field), int) or usage[field] < 0
+            for field in ("input_tokens", "output_tokens", "total_tokens")
+        ):
+            raise SnapshotError(f"{source}: OpenAI briefing zh_translation usage is invalid")
     if briefing.get("generator") != "openai-responses":
         return
     if not str(briefing.get("model") or "").strip():
@@ -226,6 +258,42 @@ def _validate_briefing(briefing: Any, *, source: str, date: str) -> None:
             or not str(citation.get("url") or "").startswith(("https://", "http://"))
         ):
             raise SnapshotError(f"{source}: OpenAI briefing citation is invalid")
+
+
+def _validate_questions(questions: Any, *, source: str, date: str) -> None:
+    if not isinstance(questions, dict):
+        raise SnapshotError(f"{source}: questions must be an object")
+    if questions.get("status") != "generated":
+        return
+    if questions.get("date") != date:
+        raise SnapshotError(
+            f"{source}: questions date {questions.get('date')!r} "
+            f"does not match snapshot date {date!r}"
+        )
+    groups = questions.get("groups")
+    if not isinstance(groups, list):
+        raise SnapshotError(f"{source}: generated questions must hold a groups array")
+    # Optional Chinese rendering (issue #231): the zh answer fields are
+    # accepted when present and never required, so snapshots written before the
+    # feature stay valid.
+    for group_index, group in enumerate(groups):
+        if not isinstance(group, dict) or not isinstance(group.get("answers"), list):
+            raise SnapshotError(
+                f"{source}: questions group {group_index} is missing its answers array"
+            )
+        for answer_index, answer in enumerate(group["answers"]):
+            if not isinstance(answer, dict):
+                raise SnapshotError(
+                    f"{source}: questions group {group_index} answer {answer_index} "
+                    "must be an object"
+                )
+            for field in ("signal_zh", "plain_chinese", "takeaway_zh", "counter_view_zh"):
+                value = answer.get(field)
+                if value is not None and (not isinstance(value, str) or not value.strip()):
+                    raise SnapshotError(
+                        f"{source}: questions group {group_index} answer {answer_index} "
+                        f"{field} must be a non-empty string when present"
+                    )
 
 
 def _validate_attention(attention: Any, *, source: str) -> None:
@@ -350,6 +418,9 @@ def validate_snapshot(snapshot: dict[str, Any], *, source: str = "snapshot") -> 
     # silently regenerate, so it fails loudly here.
     if "briefing" in snapshot:
         _validate_briefing(snapshot["briefing"], source=source, date=snapshot["date"])
+    # Optional: snapshots written before the daily Q&A was persisted stay valid.
+    if "questions" in snapshot:
+        _validate_questions(snapshot["questions"], source=source, date=snapshot["date"])
 
 
 def normalize_snapshot(snapshot: dict[str, Any], *, source: str = "snapshot") -> dict[str, Any]:

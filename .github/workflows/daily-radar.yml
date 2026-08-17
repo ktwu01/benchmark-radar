@@ -89,6 +89,11 @@ jobs:
           # absence.
           OPENAI_QUESTIONS: "true"
           OPENAI_QUESTIONS_REQUIRED: "true"
+          # Issue #231: render the day's GPT briefing and Q&A prose in
+          # Simplified Chinese as well. Each flag is independent; a failed
+          # translation never fails the run, it just leaves the zh fields out.
+          OPENAI_BRIEFING_ZH: "true"
+          OPENAI_QUESTIONS_ZH: "true"
         run: benchmark-radar
       # The day's social post material used to live on a daily GitHub Issue
       # (issue #88), but that Issue stopped earning its keep once the dashboard

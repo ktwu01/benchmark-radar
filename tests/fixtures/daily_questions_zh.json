@@ -1,0 +1,129 @@
+{
+ "date": "2026-08-08",
+ "questions": {
+  "schema_version": 1,
+  "date": "2026-08-08",
+  "generator": "openai-responses",
+  "model": "gpt-5",
+  "comparable": false,
+  "comparability_note": "No certified comparison window: collection changed on 2026-08-06.",
+  "calls": 3,
+  "usage": {
+   "input_tokens": 41234,
+   "output_tokens": 2810
+  },
+  "groups": [
+   {
+    "id": "arrivals",
+    "title": "What arrived",
+    "answers": [
+     {
+      "question": "What benchmarks, datasets, or evaluation methods did the radar first see today?",
+      "signal": "Most of today's first-observed records are agentic evaluation harnesses.",
+      "plain_english": "Most new items today test whether a model can carry out a task, not just answer a question.",
+      "takeaway": "Expect harness setup cost, not just a scoring script.",
+      "counter_view": "The feed is keyword-filtered, so agentic wording may be over-represented.",
+      "stat_ids": [
+       "S001"
+      ],
+      "evidence_ids": [
+       "E001"
+      ],
+      "confidence": "medium",
+      "sufficient_evidence": true,
+      "cited_stats": [
+       {
+        "id": "S001",
+        "label": "First-observed records today",
+        "value": 40,
+        "unit": "count",
+        "window": "today"
+       }
+      ],
+      "cited_evidence": [
+       {
+        "id": "E001",
+        "title": "A harness for long-horizon agent tasks",
+        "url": "https://arxiv.org/abs/2608.00001",
+        "source": "arxiv"
+       }
+      ],
+      "signal_zh": "今天首次观察到的记录大多是智能体评估框架。",
+      "plain_chinese": "今天的大部分新条目测试的是模型能否执行一项任务，而不仅仅是回答问题。",
+      "takeaway_zh": "预期的成本在于框架搭建，而不只是一个评分脚本。",
+      "counter_view_zh": "该流按关键词过滤，因此智能体相关措辞可能被过度代表。"
+     },
+     {
+      "question": "Which of today's arrivals document how they score an answer?",
+      "signal": "Scoring documentation is absent from the captured metadata for most arrivals.",
+      "plain_english": "For most new items we cannot tell how they decide an answer is correct.",
+      "takeaway": "Treat unscored arrivals as unverified until the repository is read.",
+      "counter_view": "No credible counter-view found.",
+      "stat_ids": [],
+      "evidence_ids": [],
+      "confidence": "low",
+      "sufficient_evidence": false,
+      "cited_stats": [],
+      "cited_evidence": [],
+      "signal_zh": "大多数新增条目的捕获元数据中没有评分文档。",
+      "plain_chinese": "对于大多数新条目，我们无法判断它们如何判定一个答案是否正确。",
+      "takeaway_zh": "在阅读仓库之前，将未评分的新增条目视为未经核实。",
+      "counter_view_zh": "未找到可信的反方观点。"
+     }
+    ]
+   },
+   {
+    "id": "movement",
+    "title": "What is still moving",
+    "answers": [
+     {
+      "question": "Which artifacts the radar already tracked moved measurably, and over what span?",
+      "signal": "Tracked artifacts moved on cumulative download counts across their whole tracked span.",
+      "plain_english": "Some items the radar has followed for a while kept gaining downloads overall.",
+      "takeaway": "Read the movement as a total since first sighting, not as a one-day jump.",
+      "counter_view": "Only one connector reported the movement, so it is uncorroborated.",
+      "stat_ids": [
+       "S014",
+       "S021"
+      ],
+      "evidence_ids": [],
+      "confidence": "low",
+      "sufficient_evidence": true,
+      "cited_stats": [
+       {
+        "id": "S014",
+        "label": "Tracked artifacts with movement",
+        "value": 12,
+        "unit": "count",
+        "window": "since 2026-07-23 (17 days)"
+       },
+       {
+        "id": "S021",
+        "label": "Mean days between sightings",
+        "value": 1234.56789,
+        "unit": "days",
+        "window": "today"
+       }
+      ],
+      "cited_evidence": [],
+      "signal_zh": "被跟踪的条目在其整个跟踪跨度内以累计下载量变动。",
+      "plain_chinese": "雷达跟踪了一段时间的一些条目总体仍在增加下载量。",
+      "takeaway_zh": "把变动理解为自首次发现以来的累计值，而非某一天的跳跃。",
+      "counter_view_zh": "只有单一数据源报告了该变动，因此未得到交叉印证。"
+     }
+    ]
+   }
+  ],
+  "zh_translation": {
+   "model": "gpt-5.6-2026-08-01",
+   "response_id": "resp_zh_qa",
+   "usage": {
+    "input_tokens": 900,
+    "cached_input_tokens": 0,
+    "output_tokens": 700,
+    "reasoning_tokens": 40,
+    "total_tokens": 1600
+   }
+  }
+ }
+}

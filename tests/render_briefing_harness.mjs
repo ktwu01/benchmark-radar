@@ -80,8 +80,13 @@ globalThis.window = { addEventListener: () => {}, location: { search: "", hash: 
 globalThis.fetch = () => new Promise(() => {});
 
 const harness =
-  `globalThis.__render = { renderDailyBriefing };\n${source}`;
+  `globalThis.__render = { renderDailyBriefing, setLang, getLang };\n${source}`;
 new Function(harness)();
+
+// A caller may pass "zh" as a third argument to exercise the Chinese rendering
+// (issue #231); default stays English.
+const lang = process.argv[3];
+if (lang) globalThis.__render.setLang(lang);
 
 const fixturePath = process.argv[2] || join(here, "fixtures", "daily_briefing.json");
 const day = JSON.parse(readFileSync(fixturePath, "utf8"));

@@ -422,3 +422,107 @@ def test_question_requests_do_not_retain_data_server_side():
     payload = questions._payload("gpt-5.6", "{}")
 
     assert payload["store"] is False
+
+
+def test_generate_daily_questions_translates_answers_to_chinese_when_requested(monkeypatch):
+    import json
+
+    current = snapshot_for_run(_run([_item(1), _item(2)]))
+
+    def fake_questions(url, payload, **kwargs):
+        prompt_questions = json.loads(payload["input"])["questions"]
+        return {
+            "id": "resp_qa",
+            "model": "gpt-5.6-2026-08-01",
+            "output": [
+                {
+                    "type": "message",
+                    "content": [
+                        {
+                            "type": "output_text",
+                            "text": json.dumps(
+                                {
+                                    "answers": [
+                                        {
+                                            "question": question,
+                                            "signal": "No supporting evidence today.",
+                                            "plain_english": (
+                                                "Nothing in the captured feed supports an "
+                                                "answer today."
+                                            ),
+                                            "takeaway": "Treat the day as quiet.",
+                                            "counter_view": "No credible counter-view found.",
+                                            "stat_ids": [],
+                                            "evidence_ids": [],
+                                            "confidence": "low",
+                                            "sufficient_evidence": False,
+                                        }
+                                        for question in prompt_questions
+                                    ]
+                                }
+                            ),
+                        }
+                    ],
+                }
+            ],
+            "usage": {
+                "input_tokens": 100,
+                "output_tokens": 50,
+                "total_tokens": 150,
+                "input_tokens_details": {"cached_tokens": 0},
+                "output_tokens_details": {"reasoning_tokens": 5},
+            },
+        }
+
+    def fake_translate(url, payload, **kwargs):
+        count = len(json.loads(payload["input"])["answers"])
+        return {
+            "id": "resp_zh",
+            "model": "gpt-5.6-2026-08-01",
+            "output": [
+                {
+                    "type": "message",
+                    "content": [
+                        {
+                            "type": "output_text",
+                            "text": json.dumps(
+                                {
+                                    "answers_zh": [
+                                        {
+                                            "index": index,
+                                            "signal_zh": "今天没有支持性的证据。",
+                                            "plain_chinese": "今天的捕获流中没有任何内容支持答案。",
+                                            "takeaway_zh": "把今天视为平静的一天。",
+                                            "counter_view_zh": "未找到可信的反方观点。",
+                                        }
+                                        for index in range(count)
+                                    ]
+                                }
+                            ),
+                        }
+                    ],
+                }
+            ],
+            "usage": {
+                "input_tokens": 500,
+                "output_tokens": 300,
+                "total_tokens": 800,
+                "input_tokens_details": {"cached_tokens": 0},
+                "output_tokens_details": {"reasoning_tokens": 20},
+            },
+        }
+
+    monkeypatch.setattr("benchmark_radar.questions.post_json", fake_questions)
+    monkeypatch.setattr("benchmark_radar.translate_zh.post_json", fake_translate)
+
+    result = questions.generate_daily_questions(
+        [], current, [], "secret", model="gpt-5.6", translate_zh=True
+    )
+
+    answers = [a for group in result["groups"] for a in group["answers"]]
+    assert len(answers) == 6
+    assert all(
+        a["signal_zh"] and a["plain_chinese"] and a["takeaway_zh"] and a["counter_view_zh"]
+        for a in answers
+    )
+    assert result["zh_translation"]["response_id"] == "resp_zh"

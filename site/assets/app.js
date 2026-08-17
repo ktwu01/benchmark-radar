@@ -186,6 +186,14 @@ function t(key, params) {
   return value;
 }
 
+// The day's GPT prose (briefing bullets, caveat, Q&A answers) is English by
+// default. Under the Chinese interface the snapshot's zh rendering is
+// preferred when the run produced it (issue #231); a day whose zh fields are
+// absent falls back to English.
+function l10nProse(en, zh) {
+  return getLang() === "zh" && zh ? zh : en;
+}
+
 function initialLang() {
   const param = new URLSearchParams(window.location.search).get("lang");
   if (LANGS.includes(param)) return param;
@@ -322,6 +330,25 @@ const I18N = {
     Rubric: "评分标准",
     "Daily briefing": "每日简报",
     "Questions for today": "今日问答",
+    // The Q&A question strings are fixed (questions.py QUESTION_GROUPS) and
+    // stored in English in every snapshot, so they are translated here against
+    // the exact stored text rather than by a second server-side field (issue
+    // #231). Group titles ship the same way.
+    "What arrived": "今日新增",
+    "What is still moving": "仍在变动",
+    "What it means": "这意味着什么",
+    "What benchmarks, datasets, or evaluation methods did the radar first see today?":
+      "雷达今天首次看到了哪些基准、数据集或评估方法？",
+    "Which of today's arrivals document how they score an answer?":
+      "今天的哪些新增条目记录了它们如何给答案评分？",
+    "Which artifacts the radar already tracked moved measurably, and over what span?":
+      "雷达已跟踪的哪些条目出现了可测变动，跨度如何？",
+    "Which of that movement is corroborated by more than one connector?":
+      "其中哪些变动得到了不止一个数据源的印证？",
+    "What should someone building or evaluating AI systems do differently today?":
+      "构建或评估 AI 系统的人今天应该做哪些不同的选择？",
+    "What does today's evidence fail to show, and what would change the reading?":
+      "今天的证据未能说明什么，什么会改变这一解读？",
     Search: "搜索",
     "Title, summary, or source": "标题、摘要或来源",
     "Scan date": "扫描日期",
@@ -1215,10 +1242,11 @@ function briefingEvidenceList(citations) {
 
 function briefingDetails(briefing, citations) {
   const provenance = briefingProvenance(briefing);
-  const caveat = briefing.caveat
+  const caveatText = l10nProse(briefing.caveat, briefing.caveat_zh);
+  const caveat = caveatText
     ? element("p", { className: "daily-briefing-caveat" }, [
         element("strong", { text: t("Caveat: ") }),
-        document.createTextNode(String(briefing.caveat)),
+        document.createTextNode(String(caveatText)),
       ])
     : null;
   const evidence = briefingEvidenceList(citations);
@@ -1241,7 +1269,9 @@ function briefingDetails(briefing, citations) {
 // leaving the reader with a heading above blank space.
 function renderDailyBriefing(day) {
   const briefing = day.briefing || {};
-  const bullets = Array.isArray(briefing.bullets) ? briefing.bullets : [];
+  const enBullets = Array.isArray(briefing.bullets) ? briefing.bullets : [];
+  const zhBullets = Array.isArray(briefing.bullets_zh) ? briefing.bullets_zh : [];
+  const bullets = getLang() === "zh" && zhBullets.length ? zhBullets : enBullets;
   const citations = validBriefingCitations(briefing.citations);
   // A briefing carrying another day's date describes the wrong day, so it is
   // withheld rather than shown beside this date's listings.
@@ -1357,7 +1387,7 @@ function answerBlock(answer) {
   const detail = element("div", { className: "answer-detail" }, [
     element("p", { className: "answer-plain" }, [
       element("em", { text: t("In plain English: ") }),
-      document.createTextNode(String(answer?.plain_english || "")),
+      document.createTextNode(l10nProse(String(answer?.plain_english || ""), answer?.plain_chinese)),
     ]),
     citations,
     // Stated on the answer rather than hidden in a tooltip: "the evidence does
@@ -1372,13 +1402,13 @@ function answerBlock(answer) {
       : []),
     element("p", { className: "answer-takeaway" }, [
       element("strong", { text: t("Takeaway: ") }),
-      document.createTextNode(String(answer?.takeaway || "")),
+      document.createTextNode(l10nProse(String(answer?.takeaway || ""), answer?.takeaway_zh)),
     ]),
     // The counter-view is the point of the format: an answer that only ever
     // confirms itself teaches a reader nothing about how much to trust it.
     element("p", { className: "answer-counter-view" }, [
       element("strong", { text: t("Counter-view: ") }),
-      document.createTextNode(String(answer?.counter_view || "")),
+      document.createTextNode(l10nProse(String(answer?.counter_view || ""), answer?.counter_view_zh)),
     ]),
   ]);
   return element("article", { className: "answer" }, [
@@ -1386,9 +1416,9 @@ function answerBlock(answer) {
     // beneath it rather than pinned to the question's own line, so a scan of a
     // day's answers stays a scan of the questions themselves.
     element("h4", { className: "answer-question" }, [
-      document.createTextNode(String(answer?.question || "")),
+      document.createTextNode(t(String(answer?.question || ""))),
     ]),
-    element("p", { className: "answer-signal", text: String(answer?.signal || "") }),
+    element("p", { className: "answer-signal", text: l10nProse(String(answer?.signal || ""), answer?.signal_zh) }),
     meta,
     element("details", { className: "answer-disclosure" }, [
       element("summary", { className: "answer-disclosure-summary" }, [
@@ -1436,7 +1466,7 @@ function renderDailyQuestions(day) {
       element("section", { className: "question-group" }, [
         element("h3", {
           className: "question-group-title",
-          text: String(group?.title || "Questions"),
+          text: t(String(group?.title || "Questions")),
         }),
         ...answers,
       ]),

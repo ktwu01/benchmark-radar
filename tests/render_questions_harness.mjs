@@ -87,11 +87,16 @@ globalThis.fetch = () => new Promise(() => {});
 // the export is placed at the TOP of the harness: it then captures the render
 // helpers before any bootstrap statement can throw on a browser-only API.
 const harness =
-  `globalThis.__render = { renderDailyQuestions, formatStatValue };\n${source}`;
+  `globalThis.__render = { renderDailyQuestions, formatStatValue, setLang, getLang };\n${source}`;
 // A bootstrap failure is NOT swallowed. The stubs above cover every browser API
 // app.js touches on load, so a throw here means the real script would break in a
 // browser too, and a renderer test that still passed would be hiding it.
 new Function(harness)();
+
+// A caller may pass "zh" as a third argument to exercise the Chinese rendering
+// (issue #231); default stays English.
+const lang = process.argv[3];
+if (lang) globalThis.__render.setLang(lang);
 
 // A caller may pass a different fixture to exercise an absent or stale Q&A.
 const fixturePath = process.argv[2] || join(here, "fixtures", "daily_questions.json");

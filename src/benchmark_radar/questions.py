@@ -41,8 +41,9 @@ from .briefing import (
     _usage,
     briefing_input,
 )
-from .http import post_json
+from .http import RequestError, post_json
 from .stats import build_registry, stat_index
+from .translate_zh import ZH_ANSWER_FIELDS, translate_answers_to_zh
 
 QA_SCHEMA_VERSION = 1
 MAX_ANSWER_CHARS = 600
@@ -383,8 +384,15 @@ def generate_daily_questions(
     *,
     model: str = DEFAULT_BRIEFING_MODEL,
     config: dict[str, Any] | None = None,
+    translate_zh: bool = False,
 ) -> dict[str, Any]:
-    """Answer today's question set, one call per group, and keep the proof."""
+    """Answer today's question set, one call per group, and keep the proof.
+
+    With translate_zh, one extra call renders every answer's prose in
+    Simplified Chinese (issue #231). A translation failure must not cost the
+    day its English answers, so it is reported as a warning and the zh fields
+    are simply absent; the dashboard falls back to English.
+    """
     registry = build_registry(history, current, config)
     stats_by_id = stat_index(registry)
     base = briefing_input(history, current, deterministic_findings)
@@ -434,7 +442,19 @@ def generate_daily_questions(
             }
         )
 
-    return {
+    zh_translation: dict[str, Any] | None = None
+    if translate_zh:
+        flat = [answer for group in groups for answer in group["answers"]]
+        try:
+            zh_answers, zh_meta = translate_answers_to_zh(flat, api_key, model=model)
+            for answer, zh in zip(flat, zh_answers, strict=True):
+                for zh_field in ZH_ANSWER_FIELDS:
+                    answer[zh_field] = zh[zh_field]
+            zh_translation = zh_meta
+        except (BriefingError, RequestError, ValueError) as error:
+            print(f"::warning title=zh Q&A translation skipped::{error}")
+
+    result = {
         "schema_version": QA_SCHEMA_VERSION,
         "date": current.get("date"),
         "status": "generated",
@@ -448,3 +468,6 @@ def generate_daily_questions(
         "calls": len(groups),
         "coverage": base.get("coverage"),
     }
+    if zh_translation:
+        result["zh_translation"] = zh_translation
+    return result
