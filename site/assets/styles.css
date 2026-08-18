@@ -1690,11 +1690,59 @@ td a {
 }
 
 .map-summary {
+  display: block;
+  margin-top: 0.35rem;
   color: var(--muted);
   font-family: var(--utility);
   font-size: 0.75rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.relationship-explorer {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+}
+
+.relationship-explorer > summary {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.relationship-explorer > summary::-webkit-details-marker {
+  display: none;
+}
+
+.relationship-explorer > summary::after {
+  content: "+";
+  flex: none;
+  color: var(--blue-deep);
+  font-family: var(--utility);
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+.relationship-explorer[open] > summary::after {
+  content: "−";
+}
+
+.relationship-explorer > summary strong {
+  display: block;
+  margin-top: 0.25rem;
+  font-family: var(--display);
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+}
+
+.relationship-explorer-note {
+  max-width: 720px;
+  margin: 0 0 1rem;
+  color: var(--muted);
 }
 
 .map-insights {
@@ -3697,6 +3745,25 @@ footer {
 
   .heading-note {
     text-align: left;
+  }
+
+  .relationship-explorer > summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem 1rem;
+    align-items: start;
+  }
+
+  .relationship-explorer > summary::after {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    align-self: center;
+  }
+
+  .relationship-explorer .map-summary {
+    grid-row: 2;
+    grid-column: 1;
+    margin-top: 0;
   }
 
   .frontier-heading-row {

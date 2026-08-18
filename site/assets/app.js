@@ -326,7 +326,7 @@ const I18N = {
     Today: "今日",
     Leaderboard: "排行榜",
     Trends: "趋势",
-    "Trend map": "趋势图",
+    Explore: "探索",
     Rubric: "评分标准",
     "Daily briefing": "每日简报",
     "Questions for today": "今日问答",
@@ -361,7 +361,7 @@ const I18N = {
     "Matching observations": "匹配结果",
     "Show more results": "显示更多结果",
     Sources: "来源",
-    "Corpus totals": "语料统计",
+    "All-time totals": "全部统计",
     All: "全部",
     "view.today.matching": "匹配结果",
     // --- Leaderboard ---------------------------------------------------------
@@ -412,9 +412,10 @@ const I18N = {
     "pareto.readiness.note2":
       "有了这些观测数据,Harbor 风格视图可以把成本或延迟放在 x 轴、分数放在 y 轴,只连接不受支配的观测点,并用发布时间滑块揭示前沿如何移动。",
     "map.heading.note":
-      "总览概括整个语料。关系画布包含每个工件及其关联的机构、来源与主题;选择一个节点会把它带进今天的筛选器。",
+      "看看哪些内容最常出现,以及它们来自哪里。想查看某个具体条目时,再打开连接视图。",
+    "map.explorer.note": "这里有很多点。选择一个点即可查看它与什么相连,或打开匹配结果。",
     "map.detail.note":
-      "主题、来源和机构节点会设置对应的今日筛选器。工件节点会设置日期与标题搜索。",
+      "选择主题、来源或机构,即可在今日页面只看相关结果。选择条目即可查看它每次出现的记录。",
     "trends.heading.note": "计数描述的是发现数量,不是科学质量。",
     "trends.daily.title": "每日证据与关注量",
     "trends.daily.note": "类别标签会有重叠。每个条形都是独立计数,不是堆叠总量的一部分。",
@@ -568,7 +569,7 @@ const I18N = {
     "Open official benchmark source ↗": "打开官方基准来源 ↗",
     "Benchmarks": "基准",
     // --- Trends --------------------------------------------------------------
-    "Corpus rhythm": "语料节奏",
+    "Recent activity": "最近动态",
     "Signals over time": "随时间变化的信号",
     "Counts describe discovery volume, not scientific quality.": "计数描述的是发现量,不是科学质量。",
     "New by domain": "按领域的新内容",
@@ -589,11 +590,14 @@ const I18N = {
     Attention: "关注度",
     "Fetch health": "抓取状态",
     // --- Map ----------------------------------------------------------------
-    "Cumulative corpus": "累计语料",
-    "Artifacts and their context": "工件及其背景",
+    "Big picture": "整体概览",
+    "What we found": "我们发现了什么",
+    "Want more detail?": "想看更多细节?",
+    "See how everything connects": "看看所有内容如何相连",
     "view.map.note":
       "总览概括了整个语料库。关系画布包含每一个工件以及与其相连的机构、来源和主题;选择节点即可将其带入今日筛选。",
-    "Inspect a relationship": "检查一个关系",
+    "Pick a dot": "选择一个点",
+    "See what it connects to": "看看它连接了什么",
     "view.map.detail.note": "主题、来源和机构节点会设置对应的今日筛选。工件节点会设置日期和标题搜索。",
     // --- Frontier / workbench -------------------------------------------------
     "Priority & evidence": "优先度与证据",
@@ -790,6 +794,32 @@ const I18N = {
     "two versions are not directly comparable, and past records are not rescored.":
       "两个版本不可直接比较,过去的记录不会重新评分。",
     weight: "权重",
+    "Also connected to": "还连接到",
+    "At a glance": "一眼看懂",
+    "Change over": "过去",
+    "Days it appeared": "出现天数",
+    "First found": "首次发现",
+    Items: "条目",
+    "Items connected to topics, organizations, and sources": "与主题、机构和来源相连的条目",
+    "Last found": "最近发现",
+    "Latest priority score": "最新优先级分数",
+    "No organizations yet.": "还没有机构。",
+    "No sources yet.": "还没有来源。",
+    "No topics yet.": "还没有主题。",
+    "Nothing found yet.": "还没有发现任何内容。",
+    Selected: "已选择",
+    "Times found": "发现次数",
+    "What it is about": "内容主题",
+    "Where we found it": "发现来源",
+    "Who appears most": "谁出现得最多",
+    item: "条目",
+    items: "条目",
+    "not enough earlier data": "没有足够的早期数据",
+    "AI agents": "AI 智能体",
+    benchmarks: "基准",
+    datasets: "数据集",
+    evaluations: "评测",
+    "times found": "次发现",
     "with a dated card": "有日期的模型卡",
   },
 };
@@ -2587,39 +2617,42 @@ function mapFilterFor(entity) {
 function selectMapNode(entity, relatedEntities) {
   state.entity = entity.id;
   mapFilterFor(entity);
+  const typeLabel = {
+    artifact: t("item"),
+    topic: t("topic"),
+    source: t("source"),
+    organization: t("organization"),
+  }[entity.type] || entity.type;
   const topicAggregate = (state.data.corpus.aggregates.topics || []).find(
     (entry) => `topic:${entry.topic}` === entity.id,
   );
   const stats = [
-    definition("Type", entity.type),
-    definition("First seen", formatDate(entity.first_seen_at, { dateStyle: "medium" })),
-    definition("Last seen", formatDate(entity.last_seen_at, { dateStyle: "medium" })),
-    definition("Observed days", Number(entity.seen_days?.length || 0).toLocaleString()),
+    definition(t("Kind"), typeLabel),
+    definition(t("First found"), formatDate(entity.first_seen_at, { dateStyle: "medium" })),
+    definition(t("Last found"), formatDate(entity.last_seen_at, { dateStyle: "medium" })),
+    definition(t("Days it appeared"), Number(entity.seen_days?.length || 0).toLocaleString()),
     ...(entity.type === "artifact"
       ? [
-          definition("Observations", Number(entity.observation_count || 0).toLocaleString()),
+          definition(t("Times found"), Number(entity.observation_count || 0).toLocaleString()),
           definition(
-            "Latest priority",
+            t("Latest priority score"),
             entity.latest_score === null || entity.latest_score === undefined
-              ? "not scored"
+              ? t("not scored")
               : Number(entity.latest_score).toFixed(2),
           ),
         ]
       : []),
     ...(topicAggregate
       ? [
-          definition("Artifact count", topicAggregate.entity_count),
-          definition("Source breadth", topicAggregate.source_breadth),
-          // The window is nominally 7 days but divides by the days actually
-          // observed, so early in the archive "7-day" named a span that does
-          // not exist yet. The label states the span that was measured.
+          definition(t("Items"), topicAggregate.entity_count),
+          definition(t("Sources"), topicAggregate.source_breadth),
           definition(
-            `${
+            `${t("Change over")} ${
               state.data.corpus.aggregates.observed_window_days ??
               state.data.corpus.aggregates.window_days
-            }-day velocity`,
+            } ${t("days")}`,
             topicAggregate.velocity === null
-              ? "needs a prior window"
+              ? t("not enough earlier data")
               : `${topicAggregate.velocity >= 0 ? "+" : ""}${topicAggregate.velocity}/day`,
           ),
         ]
@@ -2636,19 +2669,19 @@ function selectMapNode(entity, relatedEntities) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
   replaceChildren(byId("map-detail"), [
-    element("p", { className: "eyebrow", text: t("Selected node") }),
+    element("p", { className: "eyebrow", text: t("Selected") }),
     element("h2", { text: entity.label }),
     element("p", {
       text:
         entity.type === "artifact"
-          ? "The corresponding date and exact title search are now set for Today."
-          : `The ${entity.type} filter is now set for Today.`,
+          ? "Today is now ready to show this item."
+          : `Today is now filtered by this ${typeLabel}.`,
     }),
     element("dl", {}, stats),
     relatedEntities.length
       ? element("p", {
           className: "discovery-note",
-          text: `${t("Connected to")} ${relatedEntities
+          text: `${t("Also connected to")} ${relatedEntities
             .slice(0, 8)
             .map((related) => related.label)
             .join(", ")}${relatedEntities.length > 8 ? "…" : ""}`,
@@ -2740,34 +2773,43 @@ function renderMapInsights(corpus) {
         a.topic.localeCompare(b.topic),
     )
     .map((topic) => [
-      topic.topic.replaceAll("_", " "),
-      `${metricLabel(topic.entity_count, "artifact")} · ${metricLabel(
+      ({
+        agentic: t("AI agents"),
+        benchmark: t("benchmarks"),
+        dataset: t("datasets"),
+        evaluation: t("evaluations"),
+        data_quality: t("data quality"),
+      }[topic.topic] || topic.topic.replaceAll("_", " ")),
+      `${Number(topic.entity_count || 0).toLocaleString()} ${t("items")} · ${metricLabel(
         topic.source_breadth,
         "source",
       )}`,
     ]);
   const sourceEntries = rankedCounts(aggregates.sources).map(([source, count]) => [
     source,
-    metricLabel(count, "observation"),
+    `${Number(count || 0).toLocaleString()} ${t("times found")}`,
   ]);
   const organizationEntries = rankedCounts(aggregates.organizations).map(
-    ([organization, count]) => [organization, metricLabel(count, "observation")],
+    ([organization, count]) => [
+      organization,
+      `${Number(count || 0).toLocaleString()} ${t("times found")}`,
+    ],
   );
   const coverageEntries = [
-    [t("Artifacts"), Number(entityTypes.artifact || 0).toLocaleString()],
+    [t("Items"), Number(entityTypes.artifact || 0).toLocaleString()],
     [t("Organizations"), Number(entityTypes.organization || 0).toLocaleString()],
     [t("Authors"), Number(entityTypes.person || 0).toLocaleString()],
-    [t("Discovery sources"), Number(entityTypes.source || 0).toLocaleString()],
+    [t("Sources"), Number(entityTypes.source || 0).toLocaleString()],
     [t("Topics"), Number(entityTypes.topic || 0).toLocaleString()],
   ];
   replaceChildren(byId("map-insights"), [
-    mapInsightCard(t("Corpus coverage"), coverageEntries, t("No corpus entities yet.")),
-    mapInsightCard(t("Topic coverage"), topicEntries, t("No topics assigned yet.")),
-    mapInsightCard(t("Discovery sources"), sourceEntries, t("No discovery sources yet.")),
+    mapInsightCard(t("At a glance"), coverageEntries, t("Nothing found yet.")),
+    mapInsightCard(t("What it is about"), topicEntries, t("No topics yet.")),
+    mapInsightCard(t("Where we found it"), sourceEntries, t("No sources yet.")),
     mapInsightCard(
-      t("Most represented organizations"),
+      t("Who appears most"),
       organizationEntries,
-      t("No organizations identified yet."),
+      t("No organizations yet."),
     ),
   ]);
 }
@@ -5009,6 +5051,32 @@ function renderTrendMap() {
   if (!corpus) return;
   const entityById = new Map(corpus.entities.map((entity) => [entity.id, entity]));
   const selectedFromUrl = entityById.get(state.entity);
+  const explorer = byId("relationship-explorer");
+  const entityTypes = corpus.aggregates?.entity_types || {};
+
+  renderMapInsights(corpus);
+  byId("map-summary").textContent =
+    `${Number(entityTypes.artifact || 0).toLocaleString()} ${t("items")} · ` +
+    `${Number(entityTypes.organization || 0).toLocaleString()} ${t("organizations")} · ` +
+    `${Number(entityTypes.source || 0).toLocaleString()} ${t("sources")} · ` +
+    `${Number(entityTypes.topic || 0).toLocaleString()} ${t("topics")}`;
+
+  // A permalink to a node is an explicit request for the deep view. Otherwise
+  // keep the expensive, thousands-of-node canvas out of the DOM until the
+  // reader asks for it.
+  if (selectedFromUrl) explorer.open = true;
+  if (!explorer.dataset.renderBound) {
+    explorer.dataset.renderBound = "true";
+    explorer.addEventListener("toggle", () => {
+      if (explorer.open) renderTrendMap();
+      else replaceChildren(byId("map-canvas"), []);
+    });
+  }
+  if (!explorer.open) {
+    replaceChildren(byId("map-canvas"), []);
+    return;
+  }
+
   const artifacts = corpus.entities
     .filter((entity) => entity.type === "artifact")
     .sort(
@@ -5080,7 +5148,7 @@ function renderTrendMap() {
     // hiding every node from assistive tech. Same choice the adoption
     // frontier documents for its marker buttons.
     role: "group",
-    "aria-label": t("Artifact nodes connected to topics, organizations, and discovery sources"),
+    "aria-label": t("Items connected to topics, organizations, and sources"),
   });
   typeOrder.forEach((type) => {
     svg.append(
@@ -5092,7 +5160,12 @@ function renderTrendMap() {
           "text-anchor": "middle",
           class: "map-column-label",
         },
-        `${type}s`,
+        {
+          source: t("Sources"),
+          organization: t("Organizations"),
+          artifact: t("Items"),
+          topic: t("Topics"),
+        }[type],
       ),
     );
   });
@@ -5142,16 +5215,7 @@ function renderTrendMap() {
     });
     svg.append(group);
   });
-  renderMapInsights(corpus);
   replaceChildren(byId("map-canvas"), [svg]);
-  const authorCount = Number(corpus.aggregates?.entity_types?.person || 0);
-  byId("map-summary").textContent =
-    `${t("Showing all")} ${artifacts.length.toLocaleString()} ${t("artifacts")} · ` +
-    `${groups.organization.length.toLocaleString()} ${t("organizations")} · ` +
-    `${groups.source.length.toLocaleString()} ${t("sources")} · ${groups.topic.length.toLocaleString()} ${t("topics")}` +
-    (authorCount
-      ? ` · ${authorCount.toLocaleString()} ${t("author nodes summarized above and omitted from the canvas")}`
-      : "");
   if (selectedFromUrl) {
     const related = corpus.edges
       .filter(

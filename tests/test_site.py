@@ -380,16 +380,20 @@ def test_dashboard_links_are_validated_escaped_and_non_swallowing():
     assert 'replaceChildren(byId("frontier-org-key"), [])' in script
 
 
-def test_trend_map_shows_the_complete_corpus_and_summarizes_its_shape():
+def test_corpus_view_progressively_discloses_the_complete_relationship_map():
     html = Path("site/index.html").read_text(encoding="utf-8")
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
 
+    assert 'data-view="map"' in html
+    assert 'data-i18n="Explore">Explore</button>' in html
     assert 'id="map-insights"' in html
+    assert '<details class="relationship-explorer" id="relationship-explorer">' in html
     assert "renderMapInsights(corpus)" in script
-    assert "Most represented organizations" in script
-    assert '${t("Showing all")} ${artifacts.length.toLocaleString()}' in script
+    assert "Who appears most" in script
+    assert 'if (!explorer.open)' in script
+    assert 'replaceChildren(byId("map-canvas"), [])' in script
+    assert "if (selectedFromUrl) explorer.open = true" in script
     assert ".slice(0, 16)" not in script
-    assert "author nodes summarized above and omitted from the canvas" in script
 
 
 def test_trends_gate_comparisons_on_connector_coverage():

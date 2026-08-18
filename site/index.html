@@ -190,7 +190,7 @@
         Leaderboard
       </button>
       <button type="button" data-view="trends" aria-controls="trends-view" data-i18n="Trends">Trends</button>
-      <button type="button" data-view="map" aria-controls="map-view" data-i18n="Trend map">Trend map</button>
+      <button type="button" data-view="map" aria-controls="map-view" data-i18n="Explore">Explore</button>
       <button type="button" id="rubric-nav" aria-haspopup="dialog" data-i18n="Rubric">Rubric</button>
     </nav>
 
@@ -275,7 +275,7 @@
             <aside class="health-panel corpus-totals-panel" aria-labelledby="corpus-totals-heading">
               <details id="corpus-totals-details">
                 <summary>
-                  <span class="health-panel-title" id="corpus-totals-heading" data-i18n="Corpus totals">Corpus totals</span>
+                  <span class="health-panel-title" id="corpus-totals-heading" data-i18n="All-time totals">All-time totals</span>
                   <span class="health-panel-status" id="corpus-totals-status"></span>
                 </summary>
                 <ul id="corpus-totals-list"></ul>
@@ -466,40 +466,51 @@
       <section class="view" id="map-view" aria-labelledby="map-heading" hidden>
         <header class="view-heading">
           <div>
-            <p class="eyebrow" data-i18n="Cumulative corpus">Cumulative corpus</p>
-            <h1 id="map-heading" data-i18n="Artifacts and their context">Artifacts and their context</h1>
+            <p class="eyebrow" data-i18n="Big picture">Big picture</p>
+            <h1 id="map-heading" data-i18n="What we found">What we found</h1>
           </div>
           <p class="heading-note" data-i18n="map.heading.note">
-            The overview summarizes the full corpus. The relationship canvas includes every
-            artifact and connected organization, source, and topic; select a node to carry it
-            into the Today filters.
+            See what shows up most often and where it came from. Open the connections view
+            when you want to look at a specific item.
           </p>
         </header>
-        <div class="map-insights" id="map-insights" aria-label="Corpus overview"></div>
-        <p class="map-summary" id="map-summary"></p>
-        <div class="map-layout">
-          <div
-            class="map-canvas"
-            id="map-canvas"
-            role="region"
-            aria-label="Interactive artifact relationship map"
-            tabindex="0"
-          ></div>
-          <aside class="map-detail" id="map-detail" aria-live="polite">
-            <p class="eyebrow" data-i18n="Select a node">Select a node</p>
-            <h2 data-i18n="Inspect a relationship">Inspect a relationship</h2>
-            <p data-i18n="map.detail.note">
-              Topic, source, and organization nodes set the corresponding Today filter.
-              Artifact nodes set the date and title search.
-            </p>
-          </aside>
-        </div>
+        <div class="map-insights" id="map-insights" aria-label="Overview"></div>
+        <details class="relationship-explorer" id="relationship-explorer">
+          <summary>
+            <span>
+              <span class="eyebrow" data-i18n="Want more detail?">Want more detail?</span>
+              <strong data-i18n="See how everything connects">See how everything connects</strong>
+            </span>
+            <span class="map-summary" id="map-summary"></span>
+          </summary>
+          <p class="relationship-explorer-note" data-i18n="map.explorer.note">
+            There are a lot of dots here. Pick one to see what it connects to, or open the
+            matching results.
+          </p>
+          <div class="map-layout">
+            <div
+              class="map-canvas"
+              id="map-canvas"
+              role="region"
+              aria-label="Explore how items connect"
+              tabindex="0"
+            ></div>
+            <aside class="map-detail" id="map-detail" aria-live="polite">
+              <p class="eyebrow" data-i18n="Pick a dot">Pick a dot</p>
+              <h2 data-i18n="See what it connects to">See what it connects to</h2>
+              <p data-i18n="map.detail.note">
+                Choose a topic, source, or organization to show only its results on Today.
+                Choose an item to find every time it appeared.
+              </p>
+            </aside>
+          </div>
+        </details>
       </section>
 
       <section class="view" id="trends-view" aria-labelledby="trends-heading" hidden>
         <header class="view-heading">
           <div>
-            <p class="eyebrow" data-i18n="Corpus rhythm">Corpus rhythm</p>
+            <p class="eyebrow" data-i18n="Recent activity">Recent activity</p>
             <h1 id="trends-heading" data-i18n="Signals over time">Signals over time</h1>
           </div>
           <p class="heading-note" data-i18n="trends.heading.note">Counts describe discovery volume, not scientific quality.</p>
