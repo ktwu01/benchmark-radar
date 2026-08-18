@@ -390,7 +390,7 @@ def test_corpus_view_progressively_discloses_the_complete_relationship_map():
     assert '<details class="relationship-explorer" id="relationship-explorer">' in html
     assert "renderMapInsights(corpus)" in script
     assert "Who appears most" in script
-    assert 'if (!explorer.open)' in script
+    assert "if (!explorer.open)" in script
     assert 'replaceChildren(byId("map-canvas"), [])' in script
     assert "if (selectedFromUrl) explorer.open = true" in script
     assert ".slice(0, 16)" not in script
