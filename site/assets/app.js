@@ -2331,13 +2331,14 @@ function closeFiltersDrawer() {
 
 function filteredObservations() {
   const query = state.q.trim().toLowerCase();
+  const sourceLower = state.source.trim().toLowerCase();
   return allObservations().filter((item) => {
     const haystack = `${item.title} ${item.summary} ${item.source}`.toLowerCase();
     return (
       (state.todayDate === "all" || item.snapshot_date === state.todayDate) &&
       (!state.kind || item.observation_kind === state.kind) &&
       (!state.category || (item.categories || []).includes(state.category)) &&
-      (!state.source || item.source === state.source) &&
+      (!state.source || item.source.toLowerCase() === sourceLower) &&
       (!state.organization || (item.organizations || []).includes(state.organization)) &&
       (!state.event || item.event_kind === state.event) &&
       (!query || haystack.includes(query))
