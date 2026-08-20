@@ -56,3 +56,7 @@ graphify-out/
 # it is committed and reviewed. identity_candidates.yml beside it is generated
 # and stays ignored like the rest of the derived catalog.
 !/data/external/identity.yml
+# Same exception, same reason: reviewed identity for llm-stats benchmarks with
+# no donor record anywhere else in the corpus, written by hand from a crawl and
+# never regenerated from one.
+!/data/external/llm_stats_identity_overrides.yml

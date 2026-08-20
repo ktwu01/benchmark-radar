@@ -1,0 +1,322 @@
+# Hand-reviewed identity for llm-stats benchmarks that have no donor record
+# anywhere else in the corpus. Keyed by source_benchmark_id, holding only the
+# fields STRUCTURE.md Layer 1 defines. This is not identity.yml: that file
+# carries cross-source equivalence and variant links and never per-benchmark
+# fields.
+#
+# Every row here cleared the two-anchor gate: a paper naming the benchmark plus
+# a repo that self-identifies with the same name, a repo linking its paper, or
+# a dataset card naming both. One matching page is not an anchor. The crawl this
+# was reviewed from returned 50 benchmarks; the 31 it could not anchor twice are
+# deliberately absent rather than present with guesses, and stay in the issue
+# thread until a second anchor is found for them.
+#
+# Reviewer corrections applied to the crawl, recorded so they are not silently
+# re-introduced by a later pass:
+#   math-500  Both artifact URLs were wrong: the splits live at
+#             prm800k/math_splits, not math_splits at the repo root. Both
+#             original paths 404. The 500-problem count they support is right
+#             (test.jsonl is 500 lines through Git LFS).
+#   mmmlu     The crawl reported 393,176 items, which is Hugging Face's
+#             dataset-level total. That double-counts: the `default` config
+#             holds 196,588 rows and the 14 per-language configs hold the same
+#             196,588 between them. Recorded as 14,042 per language, which is
+#             what a score against one language is measured over. Summing
+#             across splits is exactly what STRUCTURE.md forbids.
+#
+# Sizes carry only the STRUCTURE.md vocabulary. Coverage counts the crawl also
+# returned (how many tools, languages or applications a set spans) are dropped:
+# they describe reach, not set size, and `sizes` is read as a denominator.
+#
+# openness.status is NOT set here. It is derived from code_license,
+# data_license and data_located by the truth table in STRUCTURE.md.
+schema_version: 1
+
+benchmarks:
+  "swe-bench-verified":
+    repo_url: https://github.com/princeton-nlp/SWE-bench/tree/main/swebench/harness
+    dataset_url: https://huggingface.co/datasets/princeton-nlp/SWE-bench_Verified
+    site_url: https://openai.com/index/introducing-swe-bench-verified/
+    publisher: {name: "OpenAI", role: maintainer}
+    released: 2024-08-13
+    released_basis: dataset_published
+    code_license: MIT
+    data_located: found
+    sizes:
+      - {value: 500, unit: tasks, split: "test", measures: eval_set}
+    note: >-
+      OpenAI's release post and the Princeton dataset agree on the exact human-
+      validated 500-task subset; the harness is shared with SWE-bench.
+
+  "humanity's-last-exam":
+    paper_url: https://arxiv.org/abs/2501.14249
+    repo_url: https://github.com/centerforaisafety/hle
+    dataset_url: https://huggingface.co/datasets/cais/hle
+    site_url: https://lastexam.ai/
+    publisher: {name: "Center for AI Safety", role: paper_org}
+    released: 2025-01-24
+    released_basis: paper_first_version
+    code_license: MIT
+    data_license: MIT
+    data_located: gated
+    sizes:
+      - {value: 2500, unit: questions, split: "total", measures: eval_set}
+    note: >-
+      Official sources identify Center for AI Safety and Scale AI as
+      collaborators. Dataset access requires sharing contact information.
+
+  "mmmu-pro":
+    paper_url: https://arxiv.org/abs/2409.02813
+    repo_url: https://github.com/MMMU-Benchmark/MMMU/tree/main/mmmu-pro
+    dataset_url: https://huggingface.co/datasets/MMMU/MMMU_Pro
+    released: 2024-09-04
+    released_basis: paper_first_version
+    code_license: Apache-2.0
+    data_license: Apache-2.0
+    data_located: found
+    sizes:
+      - {value: 1730, unit: questions, split: "test", measures: eval_set}
+    note: >-
+      The official paper, version-specific repository location, and HF dataset
+      agree. The paper also describes a corresponding vision-only configuration;
+      it is not summed with the standard test configuration.
+
+  "browsecomp":
+    paper_url: https://arxiv.org/abs/2504.12516
+    repo_url: https://github.com/openai/simple-evals/blob/main/browsecomp_eval.py
+    site_url: https://openai.com/index/browsecomp/
+    publisher: {name: "OpenAI", role: maintainer}
+    released: 2025-04-10
+    released_basis: dataset_published
+    code_license: MIT
+    data_located: found
+    sizes:
+      - {value: 1266, unit: questions, split: "total", measures: eval_set}
+    note: >-
+      BrowseComp is implemented inside the shared MIT-licensed simple-evals
+      repository; the specific evaluator file is used rather than the repository
+      root.
+
+  "terminal-bench":
+    paper_url: https://openreview.net/forum?id=a7Qa4CcHak
+    repo_url: https://github.com/harbor-framework/terminal-bench-1
+    site_url: https://www.tbench.ai/
+    released: 2025-01-17
+    released_basis: repo_created
+    code_license: Apache-2.0
+    data_located: found
+    sizes:
+      - {value: 80, unit: tasks, split: "total", measures: eval_set}
+    note: >-
+      Official tbench site identifies version 1.0 as the original 80-task
+      benchmark and the version-specific repository is Apache-2.0. The linked
+      later conference paper is retained as supporting canonical documentation,
+      while the release date remains repository creation.
+
+  "terminal-bench-2":
+    repo_url: https://github.com/harbor-framework/terminal-bench-2
+    site_url: https://www.tbench.ai/benchmarks/terminal-bench-2
+    released: 2025-09-25
+    released_basis: repo_created
+    code_license: Apache-2.0
+    data_located: found
+    sizes:
+      - {value: 89, unit: tasks, split: "total", measures: eval_set}
+    note: >-
+      Official site and version-specific repository agree. Task data are
+      embedded in the repository, not a separate dataset page.
+
+  "terminal-bench-2.1":
+    paper_url: https://arxiv.org/abs/2601.11868
+    repo_url: https://github.com/harbor-framework/terminal-bench-2-1
+    dataset_url: https://hub.harborframework.com/datasets/terminal-bench/terminal-bench-2-1/latest
+    site_url: https://www.tbench.ai/
+    released: 2026-05-05
+    released_basis: repo_created
+    code_license: Apache-2.0
+    data_located: found
+    note: >-
+      Official site and version-specific repo agree. The repository reports 26
+      modified tasks versus 2.0 but did not state a complete 2.1 task count;
+      none is inferred.
+
+  "swe-bench-pro":
+    repo_url: https://github.com/scaleapi/SWE-bench_Pro-os
+    dataset_url: https://huggingface.co/datasets/ScaleAI/SWE-bench_Pro
+    publisher: {name: "Scale AI", role: maintainer}
+    released: 2025-09-05
+    released_basis: repo_created
+    code_license: MIT
+    data_located: found
+    sizes:
+      - {value: 731, unit: tasks, split: "test", measures: eval_set}
+    note: >-
+      Scale's exact repository and its ScaleAI HF dataset agree on the Pro
+      variant.
+
+  "swe-bench-multilingual":
+    repo_url: https://github.com/princeton-nlp/SWE-bench
+    dataset_url: https://huggingface.co/datasets/SWE-bench/SWE-bench_Multilingual
+    site_url: https://www.swebench.com/multilingual.html
+    code_license: MIT
+    data_license: MIT
+    data_located: found
+    sizes:
+      - {value: 300, unit: tasks, split: "test", measures: eval_set}
+      - {value: 42, unit: repos, split: "total", measures: unclear}
+    note: >-
+      Official SWE-bench multilingual page and exact dataset card agree. Its
+      original SWE-bench paper does not itself introduce this later variant.
+
+  "mmmlu":
+    repo_url: https://github.com/openai/simple-evals/blob/main/multilingual_mmlu_benchmark_results.md
+    dataset_url: https://huggingface.co/datasets/openai/MMMLU
+    publisher: {name: "OpenAI", role: maintainer}
+    code_license: MIT
+    data_license: MIT
+    data_located: found
+    sizes:
+      - {value: 14042, unit: questions, split: "test, per language", measures: eval_set}
+    note: >-
+      The dataset card and exact simple-evals results document agree on the
+      14-language professionally translated MMLU artifact. No separately
+      introduced MMMLU paper was verified.
+
+  "mmlu-redux":
+    paper_url: https://arxiv.org/abs/2406.04127
+    repo_url: https://github.com/aryopg/mmlu-redux
+    dataset_url: https://huggingface.co/datasets/edinburgh-dawg/mmlu-redux
+    released: 2024-06-06
+    released_basis: paper_first_version
+    code_license: CC-BY-4.0
+    data_license: CC-BY-4.0
+    data_located: found
+    sizes:
+      - {value: 3000, unit: questions, split: "total", measures: eval_set}
+      - {value: 100, unit: questions, split: "each of 30 subjects", measures: eval_set}
+    note: >-
+      This record uses the repository-linked MMLU-Redux artifact. The paper's
+      newer 5,700-question MMLU-Redux 2.0 reference was not silently
+      substituted.
+
+  "simpleqa":
+    paper_url: https://arxiv.org/abs/2411.04368
+    repo_url: https://github.com/openai/simple-evals/blob/main/simpleqa_eval.py
+    dataset_url: https://openaipublic.blob.core.windows.net/simple-evals/simple_qa_test_set.csv
+    site_url: https://openai.com/index/introducing-simpleqa/
+    publisher: {name: "OpenAI", role: maintainer}
+    released: 2024-10-30
+    released_basis: dataset_published
+    code_license: MIT
+    data_located: found
+    sizes:
+      - {value: 4326, unit: questions, split: "total", measures: eval_set}
+    note: >-
+      Announcement, paper, and exact evaluator file agree. The test CSV is a
+      public direct artifact but no distinct data-license statement was
+      observed.
+
+  "toolathlon":
+    paper_url: https://arxiv.org/abs/2510.25726
+    repo_url: https://github.com/hkust-nlp/Toolathlon
+    dataset_url: https://huggingface.co/datasets/hkust-nlp/Toolathlon-Trajectories
+    site_url: https://toolathlon.xyz/
+    released: 2025-10-29
+    released_basis: paper_first_version
+    data_license: CC-BY-4.0
+    data_located: found
+    sizes:
+      - {value: 108, unit: tasks, split: "total", measures: eval_set}
+    note: >-
+      The task definitions are in the official repository. The listed HF asset
+      is the official gated trajectory collection, whose CC-BY-4.0 license
+      applies to trajectories rather than task definitions.
+
+  "tau2-airline":
+    paper_url: https://arxiv.org/abs/2506.07982
+    repo_url: https://github.com/sierra-research/tau2-bench
+    publisher: {name: "Sierra", role: paper_org}
+    released: 2025-06-09
+    released_basis: paper_first_version
+    code_license: MIT
+    data_located: found
+    sizes:
+      - {value: 50, unit: tasks, split: "airline", measures: eval_set}
+    note: >-
+      tau2-Bench paper and official Sierra repository agree; task data reside in
+      the repository.
+
+  "tau2-retail":
+    paper_url: https://arxiv.org/abs/2506.07982
+    repo_url: https://github.com/sierra-research/tau2-bench
+    publisher: {name: "Sierra", role: paper_org}
+    released: 2025-06-09
+    released_basis: paper_first_version
+    code_license: MIT
+    data_located: found
+    sizes:
+      - {value: 115, unit: tasks, split: "retail", measures: eval_set}
+    note: >-
+      tau2-Bench paper and official Sierra repository agree; task data reside in
+      the repository.
+
+  "tau2-telecom":
+    paper_url: https://arxiv.org/abs/2506.07982
+    repo_url: https://github.com/sierra-research/tau2-bench
+    publisher: {name: "Sierra", role: paper_org}
+    released: 2025-06-09
+    released_basis: paper_first_version
+    code_license: MIT
+    data_located: found
+    sizes:
+      - {value: 114, unit: tasks, split: "telecom", measures: eval_set}
+    note: >-
+      tau2-Bench paper and official Sierra repository agree. The paper reports 114
+      sampled telecom tasks; the larger generated-pool count is not used as the
+      benchmark task count.
+
+  "ifbench":
+    paper_url: https://arxiv.org/abs/2507.02833
+    repo_url: https://github.com/allenai/IFBench
+    dataset_url: https://huggingface.co/datasets/allenai/IFBench_test
+    publisher: {name: "Allen Institute for AI", role: paper_org}
+    released: 2025-07-03
+    released_basis: paper_first_version
+    code_license: Apache-2.0
+    data_license: ODC-BY-1.0
+    data_located: found
+    sizes:
+      - {value: 300, unit: questions, split: "train", measures: eval_set}
+    note: >-
+      The official repo links the paper and named official test dataset. The
+      dataset's displayed split is named train despite serving as the released
+      evaluation artifact.
+
+  "math-500":
+    repo_url: https://github.com/openai/prm800k/tree/main/prm800k/math_splits
+    dataset_url: https://github.com/openai/prm800k/blob/main/prm800k/math_splits/test.jsonl
+    publisher: {name: "OpenAI", role: maintainer}
+    code_license: MIT
+    data_located: found
+    sizes:
+      - {value: 500, unit: questions, split: "test", measures: eval_set}
+    note: >-
+      PRM800K identifies the held-out 500-problem MATH test split; OpenAI
+      simple-evals independently labels it MATH-500. This embedded subset has no
+      separately verified introducing paper.
+
+  "mgsm":
+    paper_url: https://arxiv.org/abs/2210.03057
+    repo_url: https://github.com/google-research/url-nlp/tree/main/mgsm
+    dataset_url: https://huggingface.co/datasets/juletxara/mgsm
+    released: 2022-10-06
+    released_basis: paper_first_version
+    data_license: CC-BY-SA-4.0
+    data_located: found
+    sizes:
+      - {value: 250, unit: questions, split: "test per language", measures: eval_set}
+      - {value: 8, unit: questions, split: "train per language", measures: train_set}
+    note: >-
+      Paper, Google source repository, and independent evaluator/dataset records
+      agree. Counts are not multiplied across the 11 translated language
+      configurations.
