@@ -687,8 +687,8 @@ const I18N = {
     "self reported": "自行报告",
     "model release date": "模型发布日期",
     "Best reported score:": "报告的最高分:",
-    "model release date · {n} row(s) with no release date are in the table below only":
-      "模型发布日期 · 另有 {n} 行没有发布日期,仅列于下方表格",
+    "{n} row(s) have no release date, so they carry no position on this axis and are not drawn.":
+      "有 {n} 行没有发布日期,因此在此坐标轴上没有位置,未被绘制。",
     "{count} scores reported to {source}, placed at each model's release date, which is the only date recorded and is not when the score was measured. Highest {best} by {model}, lowest {low}.":
       "向 {source} 报告的 {count} 个分数,按各模型的发布日期排布;这是唯一记录在案的日期,并非分数的测量时间。最高 {best},来自 {model};最低 {low}。",
     "Date (model release)": "日期（模型发布）",
@@ -1027,7 +1027,22 @@ function readUrl() {
   state.rubric = new URLSearchParams(window.location.hash.slice(1)).get("rubric") || "";
 }
 
-function writeUrl() {
+// `push` adds a history entry; `replace` overwrites the current one.
+//
+// Every call used to replace, so no navigation was ever backable: a reader who
+// searched, opened a benchmark and pressed Back left the site entirely, because
+// the search URL had been overwritten rather than kept (issue #286).
+//
+// Pushing everything is the wrong fix. The filter boxes call this on a debounce
+// as the reader types, so `q=m`, `q=mm`, `q=mml`, `q=mmlu` would each become an
+// entry and Back would walk backwards through their own typing one keystroke at
+// a time. The split is by what the reader did:
+//
+//   push    a discrete navigation they chose -- changing view, selecting a
+//           benchmark, opening an entity
+//   replace continuous refinement of the view they are already on -- typing in
+//           a filter, moving the date, toggling a facet, closing a dialog
+function writeUrl(mode = "replace") {
   const params = new URLSearchParams();
   if (state.view !== "today") params.set("view", state.view);
   // Every filter below belongs to exactly one view, so only that view may write
@@ -1066,14 +1081,51 @@ function writeUrl() {
   const hashParams = new URLSearchParams();
   if (state.rubric) hashParams.set("rubric", state.rubric);
   const hash = hashParams.toString();
-  window.history.replaceState(
-    null,
-    "",
-    `${window.location.pathname}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`,
-  );
+  const url = `${window.location.pathname}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`;
+  // Pushing a URL identical to the current one would make Back a no-op that
+  // looks broken: the reader presses it, the address bar does not change, and
+  // they press it again. Re-selecting the benchmark already shown is the
+  // common way to hit this.
+  const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  if (mode === "push" && url !== current) {
+    window.history.pushState(null, "", url);
+    return;
+  }
+  window.history.replaceState(null, "", url);
 }
 
-function setView(view, update = true) {
+// A pushed entry changes the URL on Back without re-rendering anything, so the
+// page would silently disagree with its own address bar. This is what makes the
+// pushes above safe: the restored URL is read back into state and the view it
+// describes is drawn (issue #286).
+function onPopState() {
+  if (!state.data) return;
+  readUrl();
+  // A leaderboard permalink on a build with no curated registry has nothing to
+  // show, same fallback initialize() applies. Without it, Back into such an
+  // entry opens an empty section behind a hidden nav button.
+  if (state.view === "leaderboard" && !state.data.model_card_leaderboard) {
+    state.view = "today";
+  }
+  setView(state.view, false);
+  // The renderers read their own controls back from state (the date picker at
+  // renderToday, the leaderboard search at renderLeaderboardFilters), so this
+  // restores the form values as well as the content.
+  rerenderCurrentView();
+  // The rubric lives in the hash rather than the query, so it is restored
+  // separately: Back out of an open dialog should close it.
+  const dialog = byId("rubric-dialog");
+  if (state.rubric && state.data.rubrics?.[state.rubric]) {
+    if (!dialog?.open) openRubric(null, state.rubric);
+  } else if (dialog?.open) {
+    dialog.close();
+  }
+}
+
+// `update` false is for restoring a view that is already in the URL (boot and
+// popstate), where writing history again would either duplicate the entry or
+// fight the entry being restored.
+function setView(view, update = true, mode = "push") {
   if (view !== "leaderboard" && selectedFrontierPoint) {
     clearFrontierPointSelection();
   }
@@ -1088,7 +1140,7 @@ function setView(view, update = true) {
       button.removeAttribute("aria-current");
     }
   });
-  if (update) writeUrl();
+  if (update) writeUrl(mode);
 }
 
 function selectFrontier(benchmarkId) {
@@ -3056,7 +3108,7 @@ function selectMapNode(entity, relatedEntities) {
         })
       : null,
   ]);
-  writeUrl();
+  writeUrl("push");
 }
 
 function rankedCounts(values, limit = 6) {
@@ -3563,7 +3615,7 @@ function benchmarkResultRow(record, { navigate = false, inert = false } = {}) {
     renderBenchmarkSearch();
     const board = state.data?.model_card_leaderboard;
     if (board) renderAdoptionFrontier(board);
-    writeUrl();
+    writeUrl("push");
   });
   return button;
 }
@@ -3665,7 +3717,7 @@ function curatedResultRow(entry, { navigate = false, inert = false } = {}) {
     renderBenchmarkSearch();
     const board = state.data?.model_card_leaderboard;
     if (board) renderAdoptionFrontier(board);
-    writeUrl();
+    writeUrl("push");
   });
   return button;
 }
@@ -4058,13 +4110,12 @@ function externalScoreChart(source, payload) {
   // chart: a point can only be drawn at a position, and there is no honest
   // position for a value that is not a number. A row with no parseable release
   // date is out for the same reason once the axis is time: there is no honest
-  // x for it. Both exclusions are stated under the chart rather than left to
-  // be inferred from a count that does not add up.
+  // x for it. Both exclusions are declared in the source's (i) note rather than
+  // left to be inferred from a count that does not add up.
   const numeric = (payload.rows || []).filter(
     (row) => typeof row.value === "number" && Number.isFinite(row.value),
   );
   const dated = numeric.filter((row) => Number.isFinite(dateValue(row.reported_date)));
-  const undatedCount = numeric.length - dated.length;
   // Sorted by date so the axis reads left to right in time. Ties broken by
   // score so same-day releases land in a stable order rather than whatever
   // order the crawl happened to return.
@@ -4313,14 +4364,10 @@ function externalScoreChart(source, payload) {
         class: "frontier-axis-label",
       },
       // Says which date this is on the axis itself, not only in a tooltip a
-      // reader has to open. "Model release date" is the whole claim: nothing
-      // here records when any of these scores was actually measured.
-      undatedCount
-        ? t("model release date · {n} row(s) with no release date are in the table below only").replace(
-            "{n}",
-            undatedCount.toLocaleString(),
-          )
-        : t("model release date"),
+      // reader has to open. Nothing here records when any of these scores was
+      // actually measured; that qualification lives in the (i) note and the
+      // chart's aria-label, so the axis names the date and stops.
+      t("model release date"),
     ),
   );
   return svg;
@@ -4344,6 +4391,23 @@ function externalSourceTable(source, payload) {
   // The chart replaces the table entirely: it draws the same shape the
   // curated saturation chart draws, from the same rows, and the table added
   // nothing the chart plus its pinned point cards did not already say.
+  // Rows the chart cannot place are declared in the (i) note rather than on the
+  // axis label, which names the date and nothing else (issue #298). Dropping
+  // the count entirely would hide scores that exist.
+  const undated = (payload.rows || []).filter(
+    (row) =>
+      typeof row.value === "number" &&
+      Number.isFinite(row.value) &&
+      !Number.isFinite(dateValue(row.reported_date)),
+  ).length;
+  if (undated) {
+    notes.push(
+      t("{n} row(s) have no release date, so they carry no position on this axis and are not drawn.").replace(
+        "{n}",
+        undated.toLocaleString(),
+      ),
+    );
+  }
   const chart = externalScoreChart(source, payload);
   // The source name and the score count are on the panel subline now, so this
   // block carries no heading of its own: it repeated both and pushed the chart
@@ -4386,7 +4450,7 @@ function externalSiblingsBlock(shard) {
       selectFrontier(sibling.slug);
       const board = state.data?.model_card_leaderboard;
       if (board) renderAdoptionFrontier(board);
-      writeUrl();
+      writeUrl("push");
     });
     return element("li", {}, [
       link,
@@ -4663,7 +4727,7 @@ function renderBenchmarkNavigator(board) {
         card.addEventListener("click", () => {
           selectFrontier(entry.benchmark_id);
           renderAdoptionFrontier(board);
-          writeUrl();
+          writeUrl("push");
         });
         return card;
       }),
@@ -5795,7 +5859,7 @@ function findingCard(finding, board) {
     jump.addEventListener("click", () => {
       selectFrontier(target.benchmark_id);
       renderAdoptionFrontier(board);
-      writeUrl();
+      writeUrl("push");
       byId("adoption-frontier").scrollIntoView({ behavior: "smooth", block: "start" });
     });
     children.push(jump);
@@ -5936,7 +6000,7 @@ function leaderboardRow(entry) {
   frontierButton?.addEventListener("click", () => {
     selectFrontier(entry.benchmark_id);
     renderAdoptionFrontier(board);
-    writeUrl();
+    writeUrl("push");
     byId("adoption-frontier").scrollIntoView({ behavior: "smooth", block: "start" });
   });
 
@@ -6782,6 +6846,10 @@ const scheduleLeaderboardRender = debounce(() => {
 });
 
 function bindEvents() {
+  // Without this a pushed entry would change the URL on Back and leave the
+  // page showing the previous view, silently disagreeing with its own address
+  // bar (issue #286).
+  window.addEventListener("popstate", onPopState);
   const langToggle = byId("lang-toggle");
   if (langToggle) langToggle.addEventListener("click", toggleLang);
   document.querySelectorAll("[data-view]").forEach((button) => {
@@ -6822,7 +6890,7 @@ function bindEvents() {
   byId("frontier-benchmark").addEventListener("change", (event) => {
     selectFrontier(event.target.value);
     renderAdoptionFrontier(state.data.model_card_leaderboard);
-    writeUrl();
+    writeUrl("push");
   });
   byId("today-date").addEventListener("change", (event) => {
     state.todayDate = event.target.value;

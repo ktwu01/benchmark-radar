@@ -380,10 +380,20 @@ def test_every_crawled_score_is_a_plotted_point():
     # The x-axis is a date now (issue #279), so a row with no parseable release
     # date has no honest position either. That drops nothing today -- all 5,544
     # numeric crawled rows carry a reported_date -- but if it ever does, the
-    # count is stated under the chart rather than left to be inferred from a
-    # total that does not add up.
-    assert "undatedCount" in chart
-    assert "with no release date are in the table below only" in chart
+    # count is declared rather than left to be inferred from a total that does
+    # not add up.
+    #
+    # Issue #298 moved that declaration off the axis label, which now names the
+    # date and stops, and into the source's (i) provenance note. The rows are
+    # still counted and still stated; only where they are said changed.
+    assert "undatedCount" not in chart, "the axis label no longer carries the count"
+    table = script.split("function externalSourceTable(source, payload)", 1)[1].split(
+        "\nfunction ", 1
+    )[0]
+    assert "const undated = (payload.rows || []).filter(" in table
+    assert "!Number.isFinite(dateValue(row.reported_date))" in table
+    assert "carry no position on this axis and are not drawn" in table
+    assert "notes.push(" in table
 
 
 def test_the_crawled_chart_axis_is_release_date_and_says_so():
