@@ -852,3 +852,49 @@ def test_issue_298_the_sidebar_row_leads_with_the_benchmark_name():
     # Matching is untouched: the fields left the display, not the query.
     matcher = script.split("function searchCuratedEntries(", 1)[1].split("\nfunction ", 1)[0]
     assert "domain" in matcher
+
+
+def test_issue_288_the_charts_draw_a_running_best_not_an_invented_cost_axis():
+    """Asked for a Pareto frontier "just like harbor-index.org".
+
+    Harbor plots cost against pass rate. This corpus records no cost and no
+    latency for any score: a curated observation carries value, model,
+    organization, reported_at, instrument and protocol; a crawled row carries
+    value, model_name and reported_date. Drawing Harbor's chart here would mean
+    inventing the x-axis.
+
+    What is drawable is the same idea on the axes these charts already have --
+    the set of points nothing else beats, which on one score axis over time is
+    the running maximum.
+    """
+    script = source("site/assets/app.js")
+    styles = source("site/assets/styles.css")
+
+    steps = script.split("function runningBestSteps(points", 1)[1].split("\n}\n", 1)[0]
+    # Better is not always larger, so the frontier follows the metric rather
+    # than the number, or it would trace the worst result on a lower-is-better
+    # benchmark.
+    assert "descends ? point.value < best : point.value > best" in steps
+    # A line through one date asserts nothing, so it is not drawn.
+    assert "if (dated.length < 2) return [];" in steps
+    assert "if (new Set(dated.map((point) => point.time)).size < 2) return [];" in steps
+
+    # Stepped, never diagonal: a slope would imply the score moved continuously
+    # between two reports, which is interpolation this corpus cannot support.
+    path = script.split("function runningBestPath(steps, x, y, endX)", 1)[1].split("\n}\n", 1)[0]
+    assert '`H ${x(step.time)}`' in path
+    assert '`V ${y(step.value)}`' in path
+    assert "L " not in path
+
+    # Both charts draw it, and the curated one passes the direction flag.
+    assert script.count("class: \"score-frontier-line\"") == 2
+    assert "{ descends: scoreDescends }" in script
+    assert ".score-frontier-line {" in styles
+
+    # And it did not reintroduce the join the evidence rules forbid: the
+    # running best says "nothing had beaten this yet", never "these points are
+    # a series".
+    chart = script.split("function scoreTrackChart(", 1)[1].split(
+        "\nfunction clearAdoptionFrontier", 1
+    )[0]
+    assert "polyline" not in chart

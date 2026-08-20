@@ -2828,6 +2828,17 @@ td a {
   r: 13px;
 }
 
+/* The running best (issue #288). Solid and stepped, deliberately unlike any
+   point-to-point join: the steps are horizontal and vertical only, so the eye
+   reads "held, then rose" rather than "moved continuously between these two
+   reports", which is the interpolation this corpus cannot support. */
+.score-frontier-line {
+  stroke: #4c948b;
+  stroke-width: 1.75;
+  stroke-linejoin: miter;
+  opacity: 0.85;
+}
+
 .score-best-line {
   stroke: #8fd0c4;
   stroke-dasharray: 2 4;
@@ -4115,30 +4126,11 @@ footer {
   font-weight: 600;
 }
 
-.benchmark-result-facts,
-.benchmark-result-meta {
+.benchmark-result-facts {
   font-size: 0.76rem;
   color: var(--muted);
 }
 
-.benchmark-result-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  align-items: center;
-}
-
-/* Curated rows are marked in the search list rather than left to be told apart
-   by the absence of a source chip. The curated layer is the one with a protocol
-   and a time axis, so which layer a result came from is the first thing a
-   reader needs before clicking it. */
-.benchmark-result-source-curated {
-  border: 1px solid var(--accent);
-  border-radius: 999px;
-  padding: 0.05rem 0.45rem;
-  font-size: 0.72rem;
-  color: var(--accent);
-}
 
 /* Openness is a statement about what we know, so `unknown` is neutral rather
    than a warning. Only a positive verdict gets emphasis. */
@@ -4293,16 +4285,6 @@ footer {
   font-size: 0.76rem;
 }
 
-.external-source-heading {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.3rem;
-}
-
-.external-source-heading h4 {
-  margin: 0;
-}
 
 /* A round (i) toggle for one line of provenance text. The marker itself is
    the affordance -- an outlined circle, always visible, brightened on

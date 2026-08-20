@@ -507,7 +507,6 @@ def test_the_adoption_marks_are_gone_from_the_chart():
         "card-rug-tick",
         "card-rug-baseline",
         "frontier-release-line",
-        "frontier-line",
         "MIN_TICK_GAP",
         "organizationCount",
         "maxOrganizations",
@@ -515,6 +514,16 @@ def test_the_adoption_marks_are_gone_from_the_chart():
     ):
         assert mark not in script, f"{mark} still drawn"
         assert mark not in styles, f"{mark} still styled"
+
+    # `frontier-line` was the adoption staircase's join. It is checked apart
+    # from the list above because issue #288 added `score-frontier-line` -- the
+    # running best -- and a bare substring test cannot tell the two apart. The
+    # retired class is gone; the new one is a different mark making a different
+    # claim (nothing had beaten this yet, rather than these points are a line).
+    for text in (script, styles):
+        assert "score-frontier-line" in text
+        assert '"frontier-line"' not in text
+        assert ".frontier-line" not in text
 
     # The score marks are untouched. They carry their own classes, so a check
     # that the adoption ones are absent cannot pass by emptying the chart.

@@ -410,7 +410,6 @@ const I18N = {
     "Jump to a benchmark": "跳转到某个基准",
     model: "个模型",
     models: "个模型",
-    "See all {n} benchmarks": "查看全部 {n} 个基准",
     "No model card in this registry reports a benchmark yet.": "此登记册中还没有任何模型卡报告基准。",
     "Search benchmarks, tasks, domains…": "搜索基准、任务、领域…",
     "{n} benchmarks": "{n} 个基准",
@@ -440,7 +439,6 @@ const I18N = {
     "leaderboard.ledger.note":
       "这是计算排名的精选来源列表。展开任意一张卡可看到其报告的全部基准,并按源文档的分组方式分组,以便我们的数据能逐行对照原文核查。",
     "Benchmarks with this name": "同名的基准",
-    "no score read from a document yet": "尚无从文档中读到的分数",
     "Showing {shown} of {total} registry records matching \u201c{q}\u201d. Narrow the search to see the rest.":
       "显示与\u201c{q}\u201d匹配的 {total} 条登记册记录中的 {shown} 条。缩小搜索范围可查看其余记录。",
     "Still checking the benchmark registry\u2026": "正在查询基准登记册\u2026",
@@ -3562,15 +3560,13 @@ function opennessChip(status) {
 }
 
 function benchmarkResultRow(record, { navigate = false, inert = false } = {}) {
-  const facts = [];
-  // Every one of these renders an explicit "not established" rather than being
-  // hidden. Hiding an empty field reads as "not applicable", and whether these
-  // are known is precisely the reader's question.
-  facts.push(record.publisher || t("publisher not established"));
-  if (record.released) facts.push(String(record.released).slice(0, 4));
-  if (record.has_size) facts.push(t("size recorded"));
-  else facts.push(t("size not established"));
-
+  // The name is the scanning target, and the count is the measure. Publisher,
+  // size, openness and the source chip printed on every row -- three of them
+  // as "not established" on most crawled records -- so a reader scanned past
+  // four grey fields to reach the next name (issue #298).
+  //
+  // Those fields still exist on the record and are still searchable; the
+  // detail panel is where a reader who wants them asks for them.
   const button = element("button", {
     className: "benchmark-result",
     attrs: {
@@ -3579,24 +3575,14 @@ function benchmarkResultRow(record, { navigate = false, inert = false } = {}) {
     },
   }, [
     element("span", { className: "benchmark-result-name", text: record.name }),
-    element("span", { className: "benchmark-result-facts", text: facts.join(" \u00b7 ") }),
-    element("span", { className: "benchmark-result-meta" }, [
-      opennessChip(record.openness),
-      element("span", {
-        className: "benchmark-result-source",
-        text: record.source === "llm_stats" ? "LLM Stats" : "OpenCompass",
-      }),
-      // A count of collected numbers, never a quality signal: 239 rows means
-      // llm-stats collected 239 numbers, not that the benchmark is better.
-      element("span", {
-        className: "benchmark-result-scores",
-        text: record.score_count
-          ? `${record.score_count} ${
-              record.score_count === 1 ? t("reported score") : t("reported scores")
-            }`
-          : t("no scores collected"),
-      }),
-    ]),
+    // A count of collected numbers, never a quality signal: 239 rows means
+    // llm-stats collected 239 numbers, not that the benchmark is better.
+    element("span", {
+      className: "benchmark-result-facts",
+      text: record.score_count
+        ? metricLabel(record.score_count, "reported score", "reported scores")
+        : t("no scores collected"),
+    }),
   ]);
   if (inert) {
     button.disabled = true;
@@ -4218,6 +4204,26 @@ function externalScoreChart(source, payload) {
   }
 
   const bestY = scoreY(bestValue);
+  // The frontier: where the best-so-far actually rose, rather than one flat
+  // rule at the final maximum (issue #288). The flat rule stays as the
+  // reference the label sits on; the steps say when it was reached.
+  //
+  // This layer records no protocol, so the line carries a stronger caveat than
+  // the curated one: it traces what was REPORTED, and two rows may not be
+  // comparable at all. That is still a weaker claim than joining adjacent
+  // points, which this chart refuses to do and still does not do.
+  const bestSteps = runningBestSteps(
+    plotted.map((row) => ({ time: dateValue(row.reported_date), value: row.value })),
+  );
+  if (bestSteps.length) {
+    svg.append(
+      svgElement("path", {
+        d: runningBestPath(bestSteps, x, scoreY, margin.left + plotWidth),
+        class: "score-frontier-line",
+        fill: "none",
+      }),
+    );
+  }
   svg.append(
     svgElement("line", {
       x1: margin.left,
@@ -4816,6 +4822,55 @@ function spansTime(record) {
 // the interesting movement into a sliver. The band is padded around the observed
 // range instead, and the axis is labelled with its real bounds so a reader
 // cannot mistake a zoomed axis for a full one.
+// The running best: for each date, the highest score anyone had reached by
+// then (issue #288). Requested as a Pareto frontier "just like
+// harbor-index.org", whose frontier plots cost against pass rate. This corpus
+// records neither cost nor latency for any score -- a curated observation
+// carries value/model/organization/reported_at/instrument/protocol, a crawled
+// row carries value/model_name/reported_date -- so that chart cannot be drawn
+// here without inventing the axis. Tracked separately.
+//
+// What IS drawable is the same idea on the axes this chart already has: the
+// set of points nothing else beats, which on one score axis over time is the
+// running maximum. It is a weaker claim than a connecting segment and does not
+// reintroduce the one the join rule forbids: it says "nothing had beaten this
+// yet", never "these points are a series".
+//
+// Returns [] when the line would assert nothing: fewer than two distinct dates,
+// or a single point.
+function runningBestSteps(points, { descends = false } = {}) {
+  const dated = points
+    .filter((point) => Number.isFinite(point.time) && Number.isFinite(point.value))
+    .sort((a, b) => a.time - b.time);
+  if (dated.length < 2) return [];
+  if (new Set(dated.map((point) => point.time)).size < 2) return [];
+  const steps = [];
+  let best = null;
+  for (const point of dated) {
+    // "Better" is not always larger: a lower-is-better metric improves
+    // downward, and the frontier has to follow the metric rather than the
+    // number, or it would trace the worst result on those benchmarks.
+    const improves = best === null || (descends ? point.value < best : point.value > best);
+    if (!improves) continue;
+    best = point.value;
+    steps.push({ time: point.time, value: best });
+  }
+  return steps.length >= 2 ? steps : [];
+}
+
+// Steps as an SVG path: horizontal to the next improvement's date, then
+// vertical to its value. A diagonal would imply the score moved continuously
+// between two reports, which is the interpolation this corpus cannot support.
+function runningBestPath(steps, x, y, endX) {
+  const parts = [`M ${x(steps[0].time)} ${y(steps[0].value)}`];
+  for (const step of steps.slice(1)) {
+    parts.push(`H ${x(step.time)}`);
+    parts.push(`V ${y(step.value)}`);
+  }
+  parts.push(`H ${endX}`);
+  return parts.join(" ");
+}
+
 function scoreBand(record) {
   const values = record.observations.map((observation) => observation.value);
   const low = Math.min(...values);
@@ -5435,6 +5490,34 @@ function scoreTrackChart(entry, board) {
     // comparison readout below the chart, which says in words what a pair of
     // dates does and does not support. Words can carry that caveat; a line
     // cannot.
+
+    // The frontier: where the best-so-far actually rose (issue #288). The
+    // requested cost-versus-score chart cannot be drawn from this corpus, which
+    // records no cost for any score; this is the same idea on the axes the
+    // chart already has. It asserts only that nothing had beaten a value yet,
+    // never that the points between are a series -- which is why it coexists
+    // with the join rule that forbids connecting adjacent points.
+    const frontierSteps = runningBestSteps(
+      record.observations.map((observation) => ({
+        time: new Date(`${observation.reported_at}T00:00:00Z`).getTime(),
+        value: observation.value,
+      })),
+      { descends: scoreDescends },
+    );
+    if (frontierSteps.length) {
+      svg.append(
+        svgElement("path", {
+          d: runningBestPath(
+            frontierSteps,
+            (time) => x(new Date(time).toISOString().slice(0, 10)),
+            scoreY,
+            margin.left + plotWidth,
+          ),
+          class: "score-frontier-line",
+          fill: "none",
+        }),
+      );
+    }
 
     // The best-on-record marker. Drawn as a horizontal rule rather than a point
     // because it is a fact about the whole corpus to date, not about one date.
