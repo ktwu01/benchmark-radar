@@ -2102,8 +2102,13 @@ td a {
   margin-bottom: 0.9rem;
 }
 
+/* Same size as the ranking heading below it. At the global h1 scale (48px)
+   this line was the largest thing on the page and outweighed both the ranking
+   it introduces and the figure it sits above, while saying less than either. */
 .leaderboard-title-block h1 {
   max-width: 920px;
+  font-size: 1.35rem;
+  line-height: 1.25;
 }
 
 .leaderboard-deck {
@@ -2118,44 +2123,8 @@ td a {
   line-height: 1.45;
 }
 
-.method-note {
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--ink);
-}
-
-.method-note summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 48px;
-  color: var(--blue-deep);
-  cursor: pointer;
-  font-family: var(--utility);
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
-  list-style: none;
-  text-transform: uppercase;
-}
-
-.method-note summary::after {
-  content: "+";
-  font-size: 3rem;
-  line-height: 1;
-  font-weight: 300;
-}
-
-.method-note[open] summary::after {
-  content: "−";
-}
-
-.method-note summary::-webkit-details-marker,
 .ledger-summary::-webkit-details-marker {
   display: none;
-}
-
-.method-note p {
-  color: var(--muted);
-  font-size: 0.82rem;
 }
 
 .evidence-strip {
@@ -2443,8 +2412,21 @@ td a {
   overflow-y: auto;
   padding: 1.25rem;
   border: 1px solid var(--ink);
-  background: var(--canvas);
+  /* A real grey, not the page background. At --canvas the panel was the exact
+     colour of the page behind it, so beside the near-black figure it read as
+     something floating on the page rather than part of it. The search field
+     keeps its white fill and heavy border, so the control the panel exists for
+     still carries the contrast. */
+  background: #c3ccd1;
   box-shadow: var(--shadow);
+}
+
+/* Muted greys chosen against a near-white surface do not carry on the darker
+   panel, so the supporting text inside it darkens with the background. */
+.benchmark-navigator .benchmark-search-status,
+.benchmark-navigator .benchmark-result-facts,
+.benchmark-navigator .benchmark-example-meta {
+  color: #3d4d54;
 }
 
 .benchmark-navigator h2 {

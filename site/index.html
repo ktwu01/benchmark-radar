@@ -338,26 +338,21 @@
         aria-labelledby="leaderboard-heading"
         hidden
       >
+        <!-- The eyebrow, the deck and the "How to read this evidence" note all
+             said something about one ranking, and between them filled the space
+             where the figure should have been. They are one (i) beside the
+             ranking heading now (issue #298 follow-up). The h1 stays: it is the
+             view's accessible name via aria-labelledby, and it is the one line
+             that says what the page is. -->
         <header class="leaderboard-intro">
           <div class="leaderboard-title-block">
-            <p class="eyebrow" data-i18n="Model Card Adoption Rank">Model Card Adoption Rank</p>
             <h1 id="leaderboard-heading" data-i18n="Which benchmarks do model cards report?">Which benchmarks do model cards report?</h1>
-            <p class="leaderboard-deck" id="leaderboard-measures"></p>
+            <!-- Still written, still published data, but read rather than
+                 displayed: the visible copy lives in the (i) beside the
+                 ranking. A screen reader announces it with the heading, where
+                 sighted readers get it from the toggle. -->
+            <p class="leaderboard-deck visually-hidden" id="leaderboard-measures"></p>
           </div>
-          <details class="method-note">
-            <summary data-i18n="How to read this evidence">How to read this evidence</summary>
-            <p data-i18n="leaderboard.method.note1">
-              This ranks reporting convention, not benchmark quality. One model card
-              contributes at most one mention to a benchmark, however many configurations
-              it reports.
-            </p>
-            <p data-i18n="leaderboard.method.note2">
-              Some model cards publish their benchmark table as an image, and those rows
-              were transcribed by OCR. A transcription can be wrong. The
-              <a href="#leaderboard-cards-heading">source ledger</a> lists every recorded
-              benchmark with the original document so each count can be checked.
-            </p>
-          </details>
         </header>
 
         <section class="leaderboard-top" aria-labelledby="leaderboard-top-heading">
@@ -366,6 +361,7 @@
             <span id="leaderboard-top-info"></span>
           </div>
           <ol class="leaderboard-top-list" id="leaderboard-top-list"></ol>
+          <button class="secondary-link leaderboard-top-more" id="leaderboard-top-more" type="button"></button>
         </section>
 
         <div class="benchmark-workbench">

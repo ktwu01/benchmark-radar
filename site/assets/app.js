@@ -391,14 +391,8 @@ const I18N = {
     "Sort: Date, then Priority ↓": "排序:日期,再按优先度 ↓",
     "Sort: Date ↓": "排序:日期 ↓",
     // --- Leaderboard ---------------------------------------------------------
-    "Model Card Adoption Rank": "模型卡采用排名",
     "Which benchmarks do model cards report?": "模型卡报告了哪些基准?",
-    "How to read this evidence": "如何解读这些证据",
     "What does this source record?": "这个来源记录了什么？",
-    "leaderboard.method.note1":
-      "这是报告惯例的排名,不是基准质量排名。一张模型卡无论报告了多少种配置,对同一基准最多计为一次提及。",
-    "leaderboard.method.note2":
-      "部分模型卡把基准表做成图片发布,这些行是通过 OCR 转录的,转录结果可能出错。<a href=\"#leaderboard-cards-heading\">来源台账</a> 列出了每一条记录的基准和原始文档,以便逐条核对每个计数。",
     "Registry overview": "总览",
     "What the two layers say": "两层信息说了什么",
     "Stated findings": "明确结论",
@@ -408,6 +402,10 @@ const I18N = {
     "Search every benchmark": "搜索全部基准",
     "Most reported in model cards": "模型卡中报告最多",
     "Jump to a benchmark": "跳转到某个基准",
+    "Show all {n} ranked benchmarks": "显示全部 {n} 个排名基准",
+    "Show the top {n}": "只显示前 {n} 个",
+    "One model card contributes at most one mention to a benchmark, however many configurations it reports. Some cards publish their table as an image and those rows were transcribed by OCR, so the source ledger below lists every recorded benchmark with its original document.":
+      "无论一张模型卡报告了多少种配置，它对某个基准最多只贡献一次提及。部分模型卡以图片形式发布其表格，这些行由 OCR 转写，因此下方的来源清单列出了每条记录及其原始文档。",
     model: "个模型",
     models: "个模型",
     "No model card in this registry reports a benchmark yet.": "此登记册中还没有任何模型卡报告基准。",
@@ -898,6 +896,7 @@ const state = {
   benchmarkIndexLoaded: false,
   benchmarkQuery: "",
   leaderboardShowAll: false,
+  leaderboardTopExpanded: false,
   todayResultsKey: "",
   todayResultsLimit: ALL_DATES_PAGE_SIZE,
   observations: null,
@@ -3345,19 +3344,21 @@ function frontierDefaultEntry(board) {
     (entry) => entry.card_count > 0 && scoreRecord(entry.benchmark_id),
   );
   const datedCount = (entry) => scoreRecord(entry.benchmark_id)?.dated_observation_count || 0;
-  const byNewestSignal = (a, b) =>
-    (b.released || "").localeCompare(a.released || "") ||
-    datedCount(b) - datedCount(a) ||
-    a.name.localeCompare(b.name);
-  // A one-point plot is technically recent but visually says nothing. Open on
-  // the newest instrument that already carries three or more dated readings;
-  // the full select still makes every scored benchmark reachable and shareable.
-  const newScoredSignals = scored.filter(
-    (entry) => isNewBenchmark(entry, board) && datedCount(entry) >= 3,
-  );
-  if (newScoredSignals.length) return [...newScoredSignals].sort(byNewestSignal)[0];
-  const sharedSignals = scored.filter((entry) => datedCount(entry) >= 2);
-  return [...(sharedSignals.length ? sharedSignals : scored)].sort(byNewestSignal)[0];
+  // The page opens on the benchmark it ranks first, so the figure answers the
+  // question the ranking above it just raised. It used to open on the NEWEST
+  // scored instrument, which put AutomationBench under a page headed "most
+  // reported in model cards" -- a benchmark the reader had not seen named
+  // anywhere above the figure.
+  //
+  // `scored` is already in adoption_rank order (rank 1 first), so the ranking
+  // and the default agree by construction rather than by a second sort that
+  // could drift from it.
+  //
+  // A one-point plot says nothing visually, so a benchmark with fewer than two
+  // dated readings is passed over even if it ranks higher; the picker still
+  // reaches every scored benchmark.
+  const drawable = scored.filter((entry) => datedCount(entry) >= 2);
+  return (drawable.length ? drawable : scored)[0];
 }
 
 const BENCHMARK_TASK_SHAPES = {
@@ -6145,9 +6146,32 @@ const LEADERBOARD_TOP_LIMIT = 5;
 function renderLeaderboardTop(board) {
   const host = byId("leaderboard-top-list");
   if (!host) return;
-  const entries = (board.entries || [])
-    .filter((entry) => entry.card_count > 0)
-    .slice(0, LEADERBOARD_TOP_LIMIT);
+  // The eyebrow, the h1, the deck and the "How to read this evidence" note all
+  // sat between the page title and the figure, saying four things about one
+  // ranking. They are one (i) beside the heading now: a reader who wants the
+  // caveat opens it, and a reader who wants the ranking sees the ranking.
+  const infoHost = byId("leaderboard-top-info");
+  if (infoHost && !infoHost.firstChild) {
+    // `board.measures` is published data, not a string restated here. A reader
+    // who takes this order as a quality ranking draws the opposite of the
+    // intended conclusion, and the correction has to travel with the payload
+    // that produced the order rather than drift from it in the browser.
+    infoHost.append(
+      infoDisclosure(
+        [
+          board.measures,
+          t(
+            "One model card contributes at most one mention to a benchmark, however many configurations it reports. Some cards publish their table as an image and those rows were transcribed by OCR, so the source ledger below lists every recorded benchmark with its original document.",
+          ),
+        ]
+          .filter(Boolean)
+          .join(" "),
+      ),
+    );
+  }
+  const ranked = (board.entries || []).filter((entry) => entry.card_count > 0);
+  const entries = state.leaderboardTopExpanded ? ranked : ranked.slice(0, LEADERBOARD_TOP_LIMIT);
+  const more = byId("leaderboard-top-more");
   // A registry where nothing is reported yet is a real state, not a bug, and
   // five blank lines is a worse answer than saying so.
   if (!entries.length) {
@@ -6157,12 +6181,13 @@ function renderLeaderboardTop(board) {
         text: t("No model card in this registry reports a benchmark yet."),
       }),
     ]);
+    if (more) more.hidden = true;
     return;
   }
   replaceChildren(
     host,
-    entries.map((entry) => {
-      const row = element("li", { className: "leaderboard-top-row" }, [
+    entries.map((entry) =>
+      element("li", { className: "leaderboard-top-row" }, [
         element("span", {
           className: "leaderboard-top-rank",
           text: String(entry.rank).padStart(2, "0"),
@@ -6172,10 +6197,15 @@ function renderLeaderboardTop(board) {
           className: "leaderboard-top-count",
           text: metricLabel(entry.card_count, "model card"),
         }),
-      ]);
-      return row;
-    }),
+      ]),
+    ),
   );
+  if (more) {
+    more.hidden = ranked.length <= LEADERBOARD_TOP_LIMIT;
+    more.textContent = state.leaderboardTopExpanded
+      ? t("Show the top {n}").replace("{n}", String(LEADERBOARD_TOP_LIMIT))
+      : t("Show all {n} ranked benchmarks").replace("{n}", String(ranked.length));
+  }
 }
 
 function renderLeaderboard() {
@@ -6964,6 +6994,10 @@ function bindEvents() {
     byId("leaderboard-search").value = "";
     renderLeaderboard();
     writeUrl();
+  });
+  byId("leaderboard-top-more").addEventListener("click", () => {
+    state.leaderboardTopExpanded = !state.leaderboardTopExpanded;
+    renderLeaderboardTop(state.data.model_card_leaderboard);
   });
   byId("leaderboard-show-all").addEventListener("click", () => {
     state.leaderboardShowAll = !state.leaderboardShowAll;

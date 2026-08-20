@@ -5,18 +5,28 @@ def source(path: str) -> str:
     return Path(path).read_text(encoding="utf-8")
 
 
-def test_frontier_opens_on_a_new_signal_with_three_readable_scores():
-    # The panel is the score track, so the benchmark it opens on is chosen by the
-    # same reading: the newest instrument that already carries three or more
-    # dated values. A one-point plot is technically recent but says nothing.
+def test_the_frontier_opens_on_the_benchmark_the_page_ranks_first():
+    """The figure answers the question the ranking above it just raised.
+
+    It used to open on the NEWEST scored instrument, which put AutomationBench
+    under a page headed "most reported in model cards" -- a benchmark the
+    reader had not seen named anywhere above the figure. The ranking and the
+    default now agree by construction: `scored` is already in adoption_rank
+    order, so the first drawable entry is rank 1.
+    """
     script = source("site/assets/app.js")
 
     default_entry = script.split("function frontierDefaultEntry(board)", 1)[1].split(
         "\nconst BENCHMARK_TASK_SHAPES", 1
     )[0]
-    assert "isNewBenchmark(entry, board)" in default_entry
-    assert "datedCount(entry) >= 3" in default_entry
-    assert "sharedSignals.length ? sharedSignals : scored" in default_entry
+    # Read in rank order, never re-sorted -- a second sort here could drift
+    # from the ranking the page prints five lines of.
+    assert "(drawable.length ? drawable : scored)[0]" in default_entry
+    assert ".sort(" not in default_entry
+    assert "isNewBenchmark" not in default_entry
+    # A one-point plot says nothing visually, so a higher-ranked benchmark with
+    # a single dated reading is still passed over.
+    assert "datedCount(entry) >= 2" in default_entry
     # And every candidate has a score record, so the default can never be a
     # benchmark the panel cannot draw.
     assert "entry.card_count > 0 && scoreRecord(entry.benchmark_id)" in default_entry
@@ -914,3 +924,45 @@ def test_issue_288_the_charts_draw_a_running_best_not_an_invented_cost_axis():
         "\nfunction clearAdoptionFrontier", 1
     )[0]
     assert "polyline" not in chart
+
+
+def test_the_ranking_expands_and_the_intro_condensed_into_one_toggle():
+    """Four elements said something about one ranking, above the figure.
+
+    An eyebrow ("Model Card Adoption Rank"), the h1, the deck, and a "How to
+    read this evidence" note filled the space where the figure should have
+    been. They are one (i) beside the ranking heading now. The h1 stays: it is
+    the view's accessible name via aria-labelledby.
+    """
+    html = source("site/index.html")
+    script = source("site/assets/app.js")
+
+    for gone in (
+        'data-i18n="Model Card Adoption Rank"',
+        'class="method-note"',
+        'data-i18n="How to read this evidence"',
+    ):
+        assert gone not in html, f"{gone} still sits above the figure"
+    assert 'id="leaderboard-heading"' in html
+    assert 'aria-labelledby="leaderboard-heading"' in html
+
+    # The deck is still written and still published data -- read rather than
+    # displayed, so a screen reader gets it with the heading.
+    assert 'id="leaderboard-measures"' in html
+    assert "visually-hidden" in html.split('id="leaderboard-measures"', 1)[0][-200:]
+    renderer = script.split("function renderLeaderboardTop(board)", 1)[1].split(
+        "\nfunction ", 1
+    )[0]
+    assert "board.measures" in renderer
+    # The caveat travels with the payload that produced the order rather than
+    # being restated in the browser, where it could drift from it.
+    assert "vendor attention, not benchmark quality" not in script
+
+    # Five lines by default, all 79 on request, and back again.
+    assert 'id="leaderboard-top-more"' in html
+    assert "state.leaderboardTopExpanded ? ranked : ranked.slice(0, LEADERBOARD_TOP_LIMIT)" in renderer
+    assert "more.hidden = ranked.length <= LEADERBOARD_TOP_LIMIT;" in renderer
+    toggle = script.split('byId("leaderboard-top-more").addEventListener("click"', 1)[1].split(
+        "});", 1
+    )[0]
+    assert "state.leaderboardTopExpanded = !state.leaderboardTopExpanded;" in toggle
