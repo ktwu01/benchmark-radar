@@ -3187,6 +3187,11 @@ const LEADERBOARD_ERAS = [
   { value: "2026", label: "Released in 2026", from: "2026-01-01", to: "2027-01-01" },
   { value: "2025", label: "Released 2025 or later", from: "2025-01-01" },
   { value: "pre2024", label: "Released before 2024", to: "2024-01-01" },
+  // A benchmark with no release date is excluded by every dated era above, so
+  // without this option it would be unreachable from the era control entirely
+  // (issue #292). An era filter is a claim about dates, and "we do not know
+  // this one's date" is an answer a reader has to be able to ask for.
+  { value: "undated", label: "No release date recorded", undated: true },
 ];
 
 function leaderboardEntries() {
@@ -3197,7 +3202,9 @@ function leaderboardEntries() {
   return (board.entries || []).filter((entry) => {
     if (state.ldomain && entry.domain !== state.ldomain) return false;
     if (state.lorg && !(entry.organizations || []).includes(state.lorg)) return false;
-    if (era) {
+    if (era?.undated) {
+      if (entry.released) return false;
+    } else if (era) {
       // ISO dates compare correctly as strings, so no Date parsing is needed
       // and no timezone can shift a benchmark across a year boundary.
       if (!entry.released) return false;
