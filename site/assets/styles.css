@@ -2383,8 +2383,19 @@ td a {
 .frontier-title-row {
   display: flex;
   align-items: baseline;
-  gap: 0.4rem;
+  gap: 0.6rem;
   flex-wrap: wrap;
+}
+
+/* The explainer toggle rides on the title line, so its own vertical margin
+   would push the title off its baseline. Its expanded body takes the full row
+   instead of becoming a flex sibling of the heading. */
+.frontier-title-row .frontier-explainer-sub {
+  margin: 0;
+}
+
+.frontier-title-row .frontier-explainer-sub[open] {
+  flex-basis: 100%;
 }
 
 .frontier-subline {
