@@ -407,6 +407,11 @@ const I18N = {
     "All tracked benchmarks": "所有追踪的基准",
     "Search every benchmark": "搜索全部基准",
     "Most reported in model cards": "模型卡中报告最多",
+    "Jump to a benchmark": "跳转到某个基准",
+    model: "个模型",
+    models: "个模型",
+    "See all {n} benchmarks": "查看全部 {n} 个基准",
+    "No model card in this registry reports a benchmark yet.": "此登记册中还没有任何模型卡报告基准。",
     "Search benchmarks, tasks, domains…": "搜索基准、任务、领域…",
     "{n} benchmarks": "{n} 个基准",
     "Curated registry": "精选登记册",
@@ -680,10 +685,10 @@ const I18N = {
     "Reported score": "报告的分数",
     "Score as reported": "报告的分数",
     "self reported": "自行报告",
-    "model release date, not when the score was measured": "模型发布日期,而不是分数的测量时间",
-    "model release date, not when the score was measured · {n} row(s) with no release date are in the table below only":
-      "模型发布日期,而不是分数的测量时间 · 另有 {n} 行没有发布日期,仅列于下方表格",
-    "best reported": "报告的最高分",
+    "model release date": "模型发布日期",
+    "Best reported score:": "报告的最高分:",
+    "model release date · {n} row(s) with no release date are in the table below only":
+      "模型发布日期 · 另有 {n} 行没有发布日期,仅列于下方表格",
     "{count} scores reported to {source}, placed at each model's release date, which is the only date recorded and is not when the score was measured. Highest {best} by {model}, lowest {low}.":
       "向 {source} 报告的 {count} 个分数,按各模型的发布日期排布;这是唯一记录在案的日期,并非分数的测量时间。最高 {best},来自 {model};最低 {low}。",
     "Date (model release)": "日期（模型发布）",
@@ -3617,21 +3622,16 @@ function searchCuratedEntries(board, query, { includeUnscored = false } = {}) {
   return scored.map((item) => item.entry);
 }
 
-// A curated result states what the crawled rows cannot: how many values were
-// read verbatim, and that this record charts. The layer is named on the row
-// rather than left to the reader to infer from the absence of a source chip.
 // `navigate` is for rows rendered outside the leaderboard. There, selecting a
 // benchmark updates a panel the reader is not looking at, so the click would
 // register as nothing happening. Carrying them to the panel is the only
 // behaviour that matches what the row looks like it promises.
 function curatedResultRow(entry, { navigate = false, inert = false } = {}) {
-  // May be absent: a curated entry is a benchmark model cards report, which is
-  // a separate fact from whether any score was read from a document for it.
-  const record = scoreRecord(entry.benchmark_id);
-  const facts = [];
-  if (entry.domain) facts.push(String(entry.domain).replaceAll("_", " "));
-  if (entry.released) facts.push(String(entry.released).slice(0, 4));
-  facts.push(metricLabel(entry.card_count, "model card"));
+  // The name is the scanning target. Domain, release year, source chip and
+  // score count rendered on every row and turned the list into a wall of grey
+  // text that had to be read before a name could be found (issue #298). The
+  // count stays because it is the measure this registry is built on; the rest
+  // is still searchable, just not printed.
   const button = element("button", {
     className: "benchmark-result benchmark-result-curated",
     attrs: {
@@ -3640,23 +3640,10 @@ function curatedResultRow(entry, { navigate = false, inert = false } = {}) {
     },
   }, [
     element("span", { className: "benchmark-result-name", text: entry.name }),
-    element("span", { className: "benchmark-result-facts", text: facts.join(" \u00b7 ") }),
-    element("span", { className: "benchmark-result-meta" }, [
-      element("span", {
-        className: "benchmark-result-source benchmark-result-source-curated",
-        text: t("Curated registry"),
-      }),
-      element("span", {
-        className: "benchmark-result-scores",
-        text: record
-          ? metricLabel(
-              record.observation_count,
-              "score read from a document",
-              "scores read from a document",
-            )
-          : t("no score read from a document yet"),
-      }),
-    ]),
+    element("span", {
+      className: "benchmark-result-facts",
+      text: metricLabel(entry.card_count, "model", "models"),
+    }),
   ]);
   // Nothing to navigate to and no panel on screen to update: an enabled
   // control whose click does nothing visible is a worse answer than a row that
@@ -4026,8 +4013,11 @@ function externalSizesBlock(detail) {
 function externalScoresBlock(shard) {
   const bySource = shard.scores_by_source || {};
   const sources = Object.keys(bySource).sort();
+  // No "Scores" heading: the panel title names the benchmark and the subline
+  // names the source and the count, so this said nothing the reader had not
+  // just read, and it was the top half of ~150px of dead space above the
+  // chart (issue #298).
   return element("section", { className: "external-block" }, [
-    element("h3", { text: t("Scores") }),
     // Spread, not nesting: element() appends children verbatim, so a mapped
     // array passed as one child would stringify into "[object HTMLDivElement]".
     ...(sources.length
@@ -4140,7 +4130,23 @@ function externalScoreChart(source, payload) {
   // values 0.067 to 1.0 -- announced an axis from "-0.1" to "1.17": a negative
   // score and a ceiling above anything observed, neither of which exists in
   // the data (issue #269).
-  for (const value of [high, low]) {
+  // Intermediate ticks so a point's height can be read rather than inferred
+  // (issue #298). Generated strictly inside [low, high]: the extremes are the
+  // real observed values, and a tick outside them would reintroduce exactly
+  // the padded-bound axis issue #269 removed ("-0.1" to "1.17" on AIME 2025).
+  const yTicks = [high, low];
+  if (high > low) {
+    for (const fraction of [0.25, 0.5, 0.75]) {
+      const value = low + (high - low) * fraction;
+      // Rounded for the label, then kept only if rounding left it inside the
+      // observed range and distinct from the extremes it sits between.
+      const rounded = Number(value.toFixed(2));
+      if (rounded > low && rounded < high && !yTicks.includes(rounded)) {
+        yTicks.push(rounded);
+      }
+    }
+  }
+  for (const value of yTicks) {
     const gridY = scoreY(value);
     svg.append(
       svgElement("line", {
@@ -4170,11 +4176,14 @@ function externalScoreChart(source, payload) {
       class: "score-best-line",
     }),
   );
+  // Attached to the left end of the reference line it annotates. Anchored at
+  // the far right it floated away from the rule and read as a stray number
+  // (issue #298).
   svg.append(
     svgElement(
       "text",
-      { x: width - margin.right, y: bestY - 6, "text-anchor": "end", class: "score-best-label" },
-      `${t("best reported")} ${bestValue}`,
+      { x: margin.left + 6, y: bestY - 6, "text-anchor": "start", class: "score-best-label" },
+      `${t("Best reported score:")} ${bestValue.toFixed(2)}`,
     ),
   );
 
@@ -4255,6 +4264,44 @@ function externalScoreChart(source, payload) {
         ),
       );
     }
+    // Quarter boundaries between the endpoints, so a point's date can be read
+    // off the axis rather than interpolated (issue #298). Only quarters that
+    // fall strictly inside the observed span are drawn, and only where they
+    // clear the endpoint labels: the extremes stay the real first and last
+    // release date, never a rounded range.
+    const quarterGap = 46;
+    const first = new Date(firstTime);
+    const cursor = new Date(
+      Date.UTC(first.getUTCFullYear(), Math.ceil((first.getUTCMonth() + 1) / 3) * 3, 1),
+    );
+    while (cursor.getTime() < lastTime) {
+      const tickX = x(cursor.getTime());
+      if (
+        tickX - margin.left > quarterGap &&
+        margin.left + plotWidth - tickX > quarterGap
+      ) {
+        svg.append(
+          svgElement("line", {
+            x1: tickX,
+            y1: scoreTop + scoreHeight,
+            x2: tickX,
+            y2: scoreTop + scoreHeight + 5,
+            class: "frontier-grid",
+          }),
+        );
+        svg.append(
+          svgElement(
+            "text",
+            { x: tickX, y: height - 26, "text-anchor": "middle", class: "frontier-tick" },
+            formatDate(cursor.toISOString().slice(0, 10), {
+              year: "numeric",
+              month: "short",
+            }),
+          ),
+        );
+      }
+      cursor.setUTCMonth(cursor.getUTCMonth() + 3);
+    }
   }
   svg.append(
     svgElement(
@@ -4269,11 +4316,11 @@ function externalScoreChart(source, payload) {
       // reader has to open. "Model release date" is the whole claim: nothing
       // here records when any of these scores was actually measured.
       undatedCount
-        ? t("model release date, not when the score was measured · {n} row(s) with no release date are in the table below only").replace(
+        ? t("model release date · {n} row(s) with no release date are in the table below only").replace(
             "{n}",
             undatedCount.toLocaleString(),
           )
-        : t("model release date, not when the score was measured"),
+        : t("model release date"),
     ),
   );
   return svg;
@@ -4298,17 +4345,13 @@ function externalSourceTable(source, payload) {
   // curated saturation chart draws, from the same rows, and the table added
   // nothing the chart plus its pinned point cards did not already say.
   const chart = externalScoreChart(source, payload);
+  // The source name and the score count are on the panel subline now, so this
+  // block carries no heading of its own: it repeated both and pushed the chart
+  // ~150px down the page (issue #298). The provenance note is the one thing
+  // that was only here, so it moves to the (i) beside the panel title.
+  const infoHost = byId("frontier-heading-info");
+  if (infoHost) replaceChildren(infoHost, [infoDisclosure(notes.join(" "))]);
   return element("div", { className: "external-source" }, [
-    element("div", { className: "external-source-heading" }, [
-      element("h4", {
-        text: `${meta.name} · ${metricLabel(rows.length, "reported score")}`,
-      }),
-      // The provenance note (what this source did and did not record) behind
-      // an (i) toggle rather than a paragraph that always runs under the
-      // heading: it's one sentence readers need once, not on every visit to
-      // an already-familiar source block.
-      infoDisclosure(notes.join(" ")),
-    ]),
     // frontier-chart's own layout class (position: relative, full-width svg)
     // rather than a bespoke one: the pinned tooltip's positioning math reads
     // its own parentElement as the clamp box, and reusing this class is what
@@ -4458,15 +4501,44 @@ function renderFrontierPicker(scored, selectedValue) {
   );
 }
 
-function renderExternalShell(board, scored, { eyebrow, heading, badge, message, prependOption }) {
+// "External benchmark · 115 reported scores · LLM Stats": what the eyebrow, the
+// badge and the scores-block heading used to say between them, on one line
+// (issue #298). The score count comes from the record rather than the shard so
+// it is present before the shard lands.
+function externalSubline(record, meta) {
+  const parts = [t("External benchmark")];
+  if (record.score_count) {
+    parts.push(metricLabel(record.score_count, "reported score", "reported scores"));
+  }
+  parts.push(meta.name);
+  return parts.join(" \u00b7 ");
+}
+
+function renderExternalShell(
+  board,
+  scored,
+  { eyebrow, heading, badge, message, prependOption, subline },
+) {
   clearFrontierPointSelection();
   setCanonicalFrontierChrome(false);
-  byId("frontier-eyebrow").textContent = eyebrow;
+  // An empty eyebrow or badge is hidden rather than rendered blank: a crawled
+  // record states its source once, on the subline, and repeating it in a
+  // non-interactive chip beside the title read as broken state (issue #298).
+  const eyebrowNode = byId("frontier-eyebrow");
+  eyebrowNode.textContent = eyebrow || "";
+  eyebrowNode.hidden = !eyebrow;
   byId("frontier-heading").textContent = heading;
   const stage = byId("frontier-stage");
   stage.className = "frontier-stage";
-  stage.hidden = false;
-  stage.textContent = badge;
+  stage.hidden = !badge;
+  stage.textContent = badge || "";
+  const sublineNode = byId("frontier-subline");
+  if (sublineNode) {
+    sublineNode.textContent = subline || "";
+    sublineNode.hidden = !subline;
+  }
+  const infoHost = byId("frontier-heading-info");
+  if (infoHost) replaceChildren(infoHost, []);
   renderFrontierPicker(scored, state.lfrontier);
   if (prependOption) {
     const picker = byId("frontier-benchmark");
@@ -4482,10 +4554,14 @@ function renderExternalShell(board, scored, { eyebrow, heading, badge, message, 
 
 function renderExternalBenchmark(board, scored, record) {
   const meta = externalSourceMeta(record.source);
+  // One title, one metadata line. The eyebrow ("External catalog record") and
+  // the source badge both said what this line says, and the reader had to read
+  // three elements to learn one fact (issue #298).
   renderExternalShell(board, scored, {
-    eyebrow: t("External catalog record"),
+    eyebrow: "",
     heading: record.name,
-    badge: meta.name,
+    badge: "",
+    subline: externalSubline(record, meta),
     message: t("Loading benchmark details…"),
   });
   // Scored crawled records are in the picker already. An unscored one is not,
@@ -4539,7 +4615,7 @@ function renderBenchmarkNavigator(board) {
   if (infoHost && !infoHost.firstChild) {
     const disclosure = infoDisclosure(
         t(
-          "Ranked by how many curated model cards report each benchmark, which measures vendor reporting convention rather than benchmark quality. A crawled score count answers a different question: AIME 2025 carries 115 crawled scores and GPQA Diamond 26 model cards, and those are different measures rather than competing ones. The second figure on each card is how many of those mentions carried a number this project could read verbatim, which is what the chart plots: MATH-500 is named by 10 cards and charts 3.",
+          "Ranked by how many curated model cards report each benchmark, which measures vendor reporting convention rather than benchmark quality. A crawled score count answers a different question: AIME 2025 carries 115 crawled scores and GPQA Diamond 26 model cards, and those are different measures rather than competing ones.",
       ),
     );
     // The panel is fixed (see styles.css: the navigator scrolls and would clip
@@ -4575,17 +4651,13 @@ function renderBenchmarkNavigator(board) {
           },
         }, [
           element("span", { className: "benchmark-example-name", text: entry.name }),
-          // Two counts, because clicking this card opens a chart drawn from the
-          // second one. MATH-500 read "10 model cards" here and plotted three
-          // points, with nothing on the page explaining the drop (issue #261).
-          // A mention is a card naming the benchmark; a readable score is a
-          // published number this project could read verbatim. 56 of 79
-          // benchmarks report fewer scores than mentions, so this is the rule
-          // rather than a MATH-500 quirk, and it belongs on the card that
-          // sets the expectation.
+          // One count, and it is a fact about the world rather than about this
+          // pipeline: how many vendors chose to report the benchmark. How many
+          // of those mentions we could read a number out of is a statement
+          // about our own collection, which is noise beside a figure.
           element("small", {
             className: "benchmark-example-meta",
-            text: `${metricLabel(entry.card_count, "model card")} · ${chartedScoreLabel(entry.benchmark_id)}`,
+            text: metricLabel(entry.card_count, "model card"),
           }),
         ]);
         card.addEventListener("click", () => {
@@ -4673,16 +4745,6 @@ function spansTime(record) {
       record.last_reported_at &&
       record.first_reported_at !== record.last_reported_at,
   );
-}
-
-// How many points a benchmark's chart will actually draw. A card mention is not
-// a score: a model card can name MATH-500 in its prose or publish its table as
-// an image, and neither yields a number this project can read. The chart plots
-// only the numbers, so any row that advertises a benchmark by its mention count
-// prints this alongside, and the reader is never surprised by the drop.
-function chartedScoreLabel(benchmarkId) {
-  const record = scoreRecord(benchmarkId);
-  return metricLabel(record?.observation_count || 0, "score read from a document", "scores read from a document");
 }
 
 // The plotted band for a score axis. Percent metrics are NOT drawn 0-100: every
@@ -5624,7 +5686,7 @@ function renderAdoptionFrontier(board) {
     // panel when the fetch settles.
     renderBenchmarkNavigator(board);
     renderExternalShell(board, scored, {
-      eyebrow: t("External catalog record"),
+      eyebrow: t("Scores over time"),
       heading: state.lfrontier,
       badge: "",
       message: t("Loading benchmark details…"),
@@ -5636,7 +5698,7 @@ function renderAdoptionFrontier(board) {
     // outright; the selection and the URL stay as the reader wrote them.
     renderBenchmarkNavigator(board);
     renderExternalShell(board, scored, {
-      eyebrow: t("External catalog record"),
+      eyebrow: t("Scores over time"),
       heading: state.lfrontier,
       badge: "",
       message: t("Could not load details for this benchmark."),
@@ -5922,6 +5984,53 @@ function renderLeaderboardFilters(board) {
   }
 }
 
+// The page is named after this ranking, so it leads (issue #256). Five lines,
+// one measure, and nothing about how the number was computed: a reader who
+// wants only the ranking never has to read the methodology, and the full table
+// underneath still carries the filters and every remaining benchmark.
+//
+// `board.entries` arrives ranked by adoption_rank (model_cards.py), which
+// breaks card-count ties on organization count and then name. Re-sorting here
+// on card_count alone would disagree with entry.rank and print a row numbered
+// 05 in position 04, so the order is read, never recomputed.
+const LEADERBOARD_TOP_LIMIT = 5;
+
+function renderLeaderboardTop(board) {
+  const host = byId("leaderboard-top-list");
+  if (!host) return;
+  const entries = (board.entries || [])
+    .filter((entry) => entry.card_count > 0)
+    .slice(0, LEADERBOARD_TOP_LIMIT);
+  // A registry where nothing is reported yet is a real state, not a bug, and
+  // five blank lines is a worse answer than saying so.
+  if (!entries.length) {
+    replaceChildren(host, [
+      element("li", {
+        className: "empty-state",
+        text: t("No model card in this registry reports a benchmark yet."),
+      }),
+    ]);
+    return;
+  }
+  replaceChildren(
+    host,
+    entries.map((entry) => {
+      const row = element("li", { className: "leaderboard-top-row" }, [
+        element("span", {
+          className: "leaderboard-top-rank",
+          text: String(entry.rank).padStart(2, "0"),
+        }),
+        element("span", { className: "leaderboard-top-name", text: entry.name }),
+        element("span", {
+          className: "leaderboard-top-count",
+          text: metricLabel(entry.card_count, "model card"),
+        }),
+      ]);
+      return row;
+    }),
+  );
+}
+
 function renderLeaderboard() {
   const board = state.data?.model_card_leaderboard;
   const navButton = document.querySelector('[data-view="leaderboard"]');
@@ -5935,6 +6044,7 @@ function renderLeaderboard() {
   if (navButton) navButton.hidden = false;
 
   byId("leaderboard-measures").textContent = board.measures || "";
+  renderLeaderboardTop(board);
   renderLeaderboardFilters(board);
   renderBenchmarkFindings(board);
   renderAdoptionFrontier(board);

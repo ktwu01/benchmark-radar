@@ -365,10 +365,18 @@ def test_every_crawled_score_is_a_plotted_point():
     # is dropped, and it is dropped by testing the value rather than by a cap.
     assert 'typeof row.value === "number" && Number.isFinite(row.value)' in chart
     # No cap. The bare .slice() copies before sorting so the source array is
-    # not mutated; the only .slice(0, N) is ISO-date truncation, not a row
-    # limit. A truncating slice over the rows would silently hide scores.
+    # not mutated; every .slice(0, N) is ISO-date truncation, not a row limit.
+    # A truncating slice over the rows would silently hide scores.
+    #
+    # Counting instances is not the guarantee -- issue #298 added a second
+    # date truncation for the quarterly axis ticks, which drops nothing. The
+    # guarantee is that each one slices a date string to 10 chars, so any
+    # slice with a different length, or one applied to the rows, fails here.
     assert ".slice()" in chart
-    assert ".slice(0, 10)" in chart and chart.count(".slice(0,") == 1
+    assert chart.count(".slice(0,") == chart.count(".slice(0, 10)")
+    assert ".slice(0, 10)" in chart
+    for cap in ("plotted.slice(0,", "numeric.slice(0,", "dated.slice(0,", "rows.slice(0,"):
+        assert cap not in chart, f"{cap} would silently hide scores"
     # The x-axis is a date now (issue #279), so a row with no parseable release
     # date has no honest position either. That drops nothing today -- all 5,544
     # numeric crawled rows carry a reported_date -- but if it ever does, the
@@ -408,9 +416,19 @@ def test_the_crawled_chart_axis_is_release_date_and_says_so():
     # The visible axis label, the aria-label and the pinned card all name the
     # date as a release date. Losing any one of them is how a chart starts
     # implying it plots measurements.
-    assert "model release date, not when the score was measured" in chart
-    assert "is not when the score was measured" in chart
+    #
+    # Issue #298 shortened the VISIBLE label to "model release date": the
+    # qualifying clause was reported as noise on the axis itself. The claim it
+    # carried is not weakened, it is relocated -- the aria-label and the source
+    # provenance note both still spell out that this is not a measurement time,
+    # and those assertions are below. What must never happen is the axis
+    # calling this a plain "date".
+    assert "model release date" in chart
     assert '"Date (model release)"' in script
+    # The full statement survives where a reader who asks for it will find it:
+    # the chart's own aria-label, and the (i) provenance note for the source.
+    assert "is not when the score was measured" in chart
+    assert "not when the score was measured" in script
 
     # `plotted` is in date order, so the last element is the newest model, not
     # the best score. Reading the best off the end of the array is the specific
@@ -597,8 +615,15 @@ def test_the_crawled_chart_ticks_label_real_values_not_padded_bounds():
         "\nfunction externalSourceTable", 1
     )[0]
 
-    assert "for (const value of [high, low])" in chart
+    # The tick set starts from the real extremes, and issue #298 added
+    # intermediate ticks between them so a point's height can be read rather
+    # than inferred. Those are generated from `low`/`high` and filtered to
+    # `> low && < high`, so the padded bound still cannot reach a label.
+    assert "const yTicks = [high, low];" in chart
+    assert "for (const value of yTicks)" in chart
+    assert "rounded > low && rounded < high" in chart
     assert "for (const value of [band.high, band.low])" not in chart
+    assert "band.low" not in chart.split("const yTicks", 1)[1].split("const bestY", 1)[0]
     # The band itself still pads; only the labels changed.
     assert "band = { low: low - pad, high: high + pad }" in chart
 
@@ -658,3 +683,162 @@ def test_a_benchmark_with_no_adopters_answers_for_itself():
     # no option and the browser shows the first one instead: a <select> reading
     # AA-LCR beside a panel headed RSI-Bench is lying about the state.
     assert "prependOption" in body
+
+
+def test_issue_256_the_ranking_leads_the_page_it_names():
+    """The tab is called Leaderboard and the ranking was the sixth block on it.
+
+    A reader opening it passed a method note, an evidence strip, a findings
+    panel, a search box and a 480px chart before reaching the thing the tab is
+    named after, which shipped collapsed. The ranking now leads, in five lines
+    carrying one measure, and everything about how the number was computed
+    stays below it.
+    """
+    html = source("site/index.html")
+    script = source("site/assets/app.js")
+
+    # Above the workbench, which is where the search box and the chart live.
+    assert html.index('class="leaderboard-top"') < html.index('class="benchmark-workbench"')
+    # And above the full table, which is now nested inside it as the expandable.
+    assert html.index('class="leaderboard-top"') < html.index('id="adoption-table"')
+    assert html.index('id="adoption-table"') < html.index('class="benchmark-workbench"')
+
+    renderer = script.split("function renderLeaderboardTop(board)", 1)[1].split(
+        "\nfunction ", 1
+    )[0]
+    # Five lines, and the cap is a named constant rather than a literal buried
+    # in the slice.
+    assert "LEADERBOARD_TOP_LIMIT" in renderer
+    assert "const LEADERBOARD_TOP_LIMIT = 5;" in script
+    # One measure. No domain, no organization count, no release year, no bar:
+    # those are what made the full table a wall rather than a few lines.
+    assert 'metricLabel(entry.card_count, "model card")' in renderer
+    for absent in ("entry.domain", "organization_count", "entry.released", "adoptionBar("):
+        assert absent not in renderer, f"{absent} belongs to the full table, not the summary"
+
+    # The order is read, never recomputed. adoption_rank breaks card-count ties
+    # on organization count and then name, so re-sorting here on card_count
+    # alone would print a row numbered 05 in position 04.
+    assert "entry.rank" in renderer
+    assert ".sort(" not in renderer
+
+    # A registry with nothing reported yet says so rather than drawing blanks.
+    assert "No model card in this registry reports a benchmark yet." in renderer
+
+    # The full ranking is still one click away and still collapsed by default,
+    # so #240's contract holds for the bulk material it was written about.
+    assert '<details class="trend-panel adoption-table" id="adoption-table">' in html
+    assert 'adoption-table" open' not in html
+    # Its filters travelled with it.
+    assert html.index('id="adoption-table"') < html.index('id="leaderboard-filters"')
+
+
+def test_issue_256_the_figure_region_carries_no_pipeline_coverage_count():
+    """"26 model cards · 3 scores read from a document" beside a chart.
+
+    The card count is a fact about the world: how many vendors chose to report
+    the benchmark. The second number was a fact about this pipeline -- how many
+    of those mentions we could read a value out of -- which is noise next to a
+    figure, and it is gone along with the helper that produced it.
+    """
+    script = source("site/assets/app.js")
+
+    assert "chartedScoreLabel" not in script
+    navigator = script.split("function renderBenchmarkNavigator(board)", 1)[1].split(
+        "\nfunction ", 1
+    )[0]
+    assert 'metricLabel(entry.card_count, "model card")' in navigator
+    assert "score read from a document" not in navigator
+    # The keys the helper used are still live for the search rows and the score
+    # readout, so removing the helper must not have taken them with it.
+    assert '"score read from a document": ' in script
+
+
+def test_issue_298_a_crawled_record_names_itself_once():
+    """The panel said "AIME 2025" twice and "LLM Stats" twice, and looked broken.
+
+    An eyebrow reading "External catalog record", the benchmark name as the
+    title, a non-interactive "LLM Stats" chip, and a second heading inside the
+    scores block repeating the source and the count. Four elements, two facts.
+    There is now one title and one subline, and the picker still mirrors the
+    selection because a <select> disagreeing with the panel is a lie about
+    state rather than a duplicate.
+    """
+    html = source("site/index.html")
+    script = source("site/assets/app.js")
+
+    external = script.split("function renderExternalBenchmark(board, scored, record)", 1)[1].split(
+        "\nfunction ", 1
+    )[0]
+    # No eyebrow and no badge on this path; both are passed empty and hidden.
+    assert 'eyebrow: ""' in external
+    assert 'badge: ""' in external
+    assert 'eyebrow: t("External catalog record")' not in script
+    assert "subline: externalSubline(record, meta)" in external
+
+    shell = script.split("function renderExternalShell(", 1)[1].split("\nfunction ", 1)[0]
+    # Empty means hidden, not rendered blank.
+    assert "eyebrowNode.hidden = !eyebrow;" in shell
+    assert "stage.hidden = !badge;" in shell
+
+    # Neither the block nor its per-source renderer carries a heading now.
+    scores = script.split("function externalScoresBlock(shard)", 1)[1].split("\n}\n", 1)[0]
+    assert 'element("h3", { text: t("Scores") })' not in scores
+    table = script.split("function externalSourceTable(source, payload)", 1)[1].split(
+        "\nfunction ", 1
+    )[0]
+    assert "external-source-heading" not in table
+    assert 'element("h4"' not in table
+    # But the provenance note survives, moved to the (i) beside the title.
+    assert 'byId("frontier-heading-info")' in table
+    assert "infoDisclosure(notes.join" in table
+    assert 'id="frontier-heading-info"' in html
+    # The (i) sits with the title rather than in a separate block.
+    assert html.index('id="frontier-heading"') < html.index('id="frontier-heading-info"')
+    assert html.index('id="frontier-heading-info"') < html.index('id="frontier-benchmark"')
+
+
+def test_issue_298_the_crawled_axes_can_be_read_rather_than_inferred():
+    """Two y ticks and two x ticks made the reader interpolate every position."""
+    script = source("site/assets/app.js")
+    chart = script.split("function externalScoreChart(source, payload)", 1)[1].split(
+        "\nfunction externalSourceTable", 1
+    )[0]
+
+    # Intermediate score ticks, bounded by the real observed extremes.
+    assert "for (const fraction of [0.25, 0.5, 0.75])" in chart
+    assert "rounded > low && rounded < high" in chart
+    # Quarterly date ticks, strictly inside the observed span and never
+    # colliding with the endpoint labels that carry the real first and last.
+    assert "cursor.setUTCMonth(cursor.getUTCMonth() + 3);" in chart
+    assert "cursor.getTime() < lastTime" in chart
+    assert "quarterGap" in chart
+
+    # The best-on-record annotation reads as a sentence and sits on its line.
+    assert 't("Best reported score:")' in chart
+    assert "bestValue.toFixed(2)" in chart
+    assert '"text-anchor": "start", class: "score-best-label"' in chart
+
+
+def test_issue_298_the_sidebar_row_leads_with_the_benchmark_name():
+    """Every row printed domain, year, a source chip and a score count.
+
+    Four grey fields per row, repeated down the list, so finding a name meant
+    reading past them. The count stays because it is the measure this registry
+    is built on. What the search MATCHES is unchanged -- domain, publisher and
+    modality are still queried, they are simply not printed.
+    """
+    script = source("site/assets/app.js")
+    row = script.split("function curatedResultRow(entry, { navigate = false, inert = false } = {})", 1)[1].split(
+        "\nfunction ", 1
+    )[0]
+
+    assert 'metricLabel(entry.card_count, "model", "models")' in row
+    for absent in ("benchmark-result-meta", "Curated registry", "benchmark-result-scores"):
+        assert absent not in row, f"{absent} is the grey wall this removed"
+    assert "entry.domain" not in row
+    assert "entry.released" not in row
+
+    # Matching is untouched: the fields left the display, not the query.
+    matcher = script.split("function searchCuratedEntries(", 1)[1].split("\nfunction ", 1)[0]
+    assert "domain" in matcher

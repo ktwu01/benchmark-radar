@@ -2329,6 +2329,83 @@ td a {
   border-top: 1px dashed var(--line);
 }
 
+/* The ranking leads the page it is named after (issue #256). One line per
+   benchmark: the name is the scanning target, the count is the measure, and
+   the rank is a small fixed-width marker rather than a competing number. */
+.leaderboard-top {
+  margin: 1.5rem 0 0;
+}
+
+.leaderboard-top-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+
+.leaderboard-top-heading h2 {
+  font-family: var(--display);
+  font-size: 1.35rem;
+  margin: 0;
+}
+
+.leaderboard-top-list {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.leaderboard-top-row {
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: baseline;
+  padding: 0.5rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.leaderboard-top-row:last-child {
+  border-bottom: none;
+}
+
+.leaderboard-top-rank {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.leaderboard-top-name {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.leaderboard-top-count {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* The title and its (i) sit on one line, with the source and score count on a
+   single subline underneath (issue #298). Replaces an eyebrow, a badge and a
+   second heading that between them said the same two facts three times. */
+.frontier-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.frontier-subline {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
 .benchmark-workbench {
   display: grid;
   grid-template-columns: minmax(230px, 280px) minmax(0, 1fr);
@@ -2337,6 +2414,10 @@ td a {
   margin: 1.75rem 0 2.5rem;
 }
 
+/* --canvas rather than --panel: against the main area the brighter surface
+   read as an overlay sitting on top of the page rather than part of it
+   (issue #298). The search field keeps its white fill and heavy border, so
+   the control the panel exists for still carries the contrast. */
 .benchmark-navigator {
   position: sticky;
   top: 1rem;
@@ -2344,7 +2425,7 @@ td a {
   overflow-y: auto;
   padding: 1.25rem;
   border: 1px solid var(--ink);
-  background: var(--panel);
+  background: var(--canvas);
   box-shadow: var(--shadow);
 }
 
