@@ -733,23 +733,24 @@ benchmarks:
     name: ExploitBench
     aliases: ["ExploitBench", "ExploitBench (Cap%)"]
     domain: security
-    url: https://deploymentsafety.openai.com/gpt-5-6-preview
-    # Unset rather than guessed. This previously carried 2026-06-26, the
-    # publication date of the GPT-5.6 preview the URL points at, which records
-    # when OpenAI reported the benchmark rather than when the instrument was
-    # published. That reading was demonstrably wrong: Anthropic's 2026-06-09
-    # table already measures against it. The earlier date is evidence the
-    # benchmark existed by then, but "first seen" is not a release date, and
-    # this field's contract is to say nothing rather than carry a guess.
-    released: null
+    # The benchmark's own project site. This previously pointed at the GPT-5.6
+    # preview system card, which reports scores against the instrument rather
+    # than publishing it.
+    url: https://exploitbench.ai/
+    # arXiv:2605.14153 v1, submitted 2026-05-13. Not the 2026-06-26 GPT-5.6
+    # preview date this field once carried: that records when OpenAI reported
+    # the benchmark, and Anthropic's 2026-06-09 table already measured against
+    # it, so the reporting date cannot be the release date.
+    released: 2026-05-13
     caveat: >-
       Offensive-security capability measured as a risk indicator against a
       preparedness threshold, not a leaderboard to top. Reported as a
-      capability percentage, and no public specification of the task set has
-      been published, so the number cannot be independently reproduced. In use
-      by 2026-06-09; no announced publication date. The fullest public
-      description is GPT-5.6 Preview System Card §9.1.2.4.1 (41 V8 N-day
-      vulnerabilities, 16 grader-verified capability flags).
+      capability percentage. Published by Seunghyun Lee and David Brumley
+      (Carnegie Mellon; Brumley also lists Bugcrowd) as arXiv:2605.14153 with
+      code at github.com/exploitbench/exploitbench. 41 V8 N-day
+      vulnerabilities scored by 16 grader-verified capability flags; vendor
+      runs report the capability percentage without publishing per-flag
+      results, so a reported number is not reproducible from the paper alone.
 
   # ---------------------------------------------------------------------------
   # Instruments first observed in Anthropic's 2026-06-09 Claude Fable 5 /
@@ -788,16 +789,16 @@ benchmarks:
     aliases: ["Blueprint-Bench 2", "Blueprint-Bench", "BlueprintBench 2"]
     domain: spatial_reasoning
     url: https://andonlabs.com/evals/blueprint-bench-2
-    # Unset: the Andon Labs eval page states "released in May 2026" with no
-    # day. A guessed day would be a fabricated release date, and this field's
-    # contract is to say nothing rather than carry one.
-    released: null
+    # The eval page states only "released in May 2026". The day comes from Andon
+    # Labs' own launch post, x.com/andonlabs/status/2051348274666504587
+    # ("Introducing Blueprint-Bench 2", 2026-05-04, linking this eval page).
+    released: 2026-05-04
     caveat: >-
       Spatial-reasoning set: 50 apartments, ~20 photos each, scored by a
       connectivity-graph grader, with a public leaderboard on the Andon Labs
       eval page (run in-house; dataset not openly downloadable). Builds on the
-      original Blueprint-Bench paper (arXiv:2509.25229). Released May 2026;
-      no day published.
+      original Blueprint-Bench paper (arXiv:2509.25229), a distinct instrument
+      released 2025-09-24 whose scores must not be compared across versions.
 
   - id: legal_agent_benchmark
     name: Legal Agent Benchmark
@@ -816,15 +817,20 @@ benchmarks:
     name: BioMysteryBench
     aliases: ["BioMysteryBench"]
     domain: biology
-    url: null
-    released: null
+    # The dataset itself, not the system card that reports scores against it.
+    url: https://huggingface.co/datasets/Anthropic/BioMysteryBench-full
+    # Anthropic's own announcement post, 2026-04-29. The Fable 5 system card
+    # §8.20.1 reports it without citing this publication, which is why the
+    # entry read as unpublished until the announcement was located.
+    released: 2026-04-29
     caveat: >-
       Reported in two splits ("hard" and "human solved") that differ by more
       than 35 points, so a bare score is unreadable without its split.
       Anthropic notes its own safety refusals depress this number, which means
-      the score mixes capability with policy. Anthropic-internal evaluation:
-      no published task set or release date. The Fable 5 system card §8.20.1
-      describes it without a citation or dataset link.
+      the score mixes capability with policy. First-party to Anthropic, which
+      built it and publishes the dataset. The task set was revised after an
+      answer-key audit, so the item count moved and scores are not comparable
+      across dataset versions.
 
   - id: gdp_pdf
     name: GDP.pdf
@@ -844,13 +850,21 @@ benchmarks:
     name: ViBench
     aliases: ["ViBench"]
     domain: coding_agent
-    url: null
-    released: null
+    url: https://vibench.ai/
+    # The CAIS '26 paper, published 2026-05-26 (doi:10.1145/3786335.3813162).
+    # The public repository's first import predates it (2026-05-13); the formal
+    # publication date is used, and the repo date is recorded here as the
+    # earliest public artifact.
+    released: 2026-05-26
     caveat: >-
-      End-to-end vibe-coding benchmark named in a customer testimonial in
-      Anthropic's Claude Fable 5 / Mythos 5 launch post, not in Anthropic's
-      own prose or its system card. Described qualitatively, not scored in the
-      comparison table. No published task set.
+      End-to-end vibe-coding benchmark by authors at Replit and Georgian AI
+      Lab, scoring web applications from the user's perspective. Tasks are
+      derived from anonymized Replit production traces, so the benchmark is
+      first-party to one of the agents it measures. It reaches this registry
+      through a customer testimonial in Anthropic's Claude Fable 5 / Mythos 5
+      launch post, where it is described qualitatively and never scored in the
+      comparison table. Distinct from VBench, an unrelated video-generation
+      benchmark.
 
   - id: healthbench_professional
     name: HealthBench Professional
