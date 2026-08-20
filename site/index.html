@@ -360,76 +360,12 @@
           </details>
         </header>
 
-        <div class="evidence-strip" id="leaderboard-insights" aria-label="Registry overview" data-i18n-aria="Registry overview"></div>
-
-        <details class="findings-panel" id="benchmark-findings" aria-labelledby="findings-heading" hidden>
-          <summary class="section-title findings-summary">
-            <span>
-              <span class="eyebrow" data-i18n="What the two layers say">What the two layers say</span>
-              <strong id="findings-heading" data-i18n="Stated findings">Stated findings</strong>
-            </span>
-            <span id="findings-count" aria-live="polite"></span>
-          </summary>
-          <p class="section-note" id="findings-measures"></p>
-          <div class="findings-list" id="findings-list"></div>
-          <p class="section-note findings-limits" id="findings-limits"></p>
-        </details>
-
-        <!-- The ranking leads the page it is named after (issue #256). Five
-             lines, one measure: how many curated model cards report each
-             benchmark. Everything that explains how the number was computed
-             stays below, and the full 80-row table with its filters is the
-             expandable underneath. -->
         <section class="leaderboard-top" aria-labelledby="leaderboard-top-heading">
           <div class="leaderboard-top-heading">
             <h2 id="leaderboard-top-heading" data-i18n="Most reported in model cards">Most reported in model cards</h2>
             <span id="leaderboard-top-info"></span>
           </div>
           <ol class="leaderboard-top-list" id="leaderboard-top-list"></ol>
-          <details class="trend-panel adoption-table" id="adoption-table">
-            <summary class="section-title adoption-table-summary">
-              <span>
-                <strong id="leaderboard-table-heading">Benchmarks by model card adoption</strong>
-              </span>
-              <span id="leaderboard-count" aria-live="polite"></span>
-            </summary>
-            <form class="filter-panel leaderboard-filters" id="leaderboard-filters">
-              <label class="search-field">
-                Search
-                <input
-                  id="leaderboard-search"
-                  name="lq"
-                  type="search"
-                  placeholder="Benchmark name or alias"
-                >
-              </label>
-              <label>
-                Domain
-                <select id="leaderboard-domain" name="ldomain"></select>
-              </label>
-              <label>
-                Organization
-                <select id="leaderboard-organization" name="lorg"></select>
-              </label>
-              <label>
-                Benchmark released
-                <select id="leaderboard-era" name="lera"></select>
-              </label>
-              <button class="clear-button" id="leaderboard-clear" type="button">
-                Clear filters
-              </button>
-            </form>
-            <p class="section-note" data-i18n="leaderboard.filters.note">
-              Each model card counts once per benchmark. A card reporting AIME in four
-              configurations counts the same as a card reporting it once, so a long appendix
-              cannot outweigh a different vendor. Organizations breaks the tie: the same count
-              from six vendors is a shared standard, from one vendor a house style.
-            </p>
-            <div class="leaderboard-list" id="leaderboard-list"></div>
-            <div class="leaderboard-list-actions">
-              <button class="secondary-link" id="leaderboard-show-all" type="button"></button>
-            </div>
-          </details>
         </section>
 
         <div class="benchmark-workbench">
@@ -526,6 +462,71 @@
             </div>
           </section>
         </div>
+
+        <div class="evidence-strip" id="leaderboard-insights" aria-label="Registry overview" data-i18n-aria="Registry overview"></div>
+
+        <details class="findings-panel" id="benchmark-findings" aria-labelledby="findings-heading" hidden>
+          <summary class="section-title findings-summary">
+            <span>
+              <span class="eyebrow" data-i18n="What the two layers say">What the two layers say</span>
+              <strong id="findings-heading" data-i18n="Stated findings">Stated findings</strong>
+            </span>
+            <span id="findings-count" aria-live="polite"></span>
+          </summary>
+          <p class="section-note" id="findings-measures"></p>
+          <div class="findings-list" id="findings-list"></div>
+          <p class="section-note findings-limits" id="findings-limits"></p>
+        </details>
+
+        <!-- The ranking leads the page it is named after (issue #256). Five
+             lines, one measure: how many curated model cards report each
+             benchmark. Everything that explains how the number was computed
+             stays below, and the full 80-row table with its filters is the
+             expandable underneath. -->
+        <details class="trend-panel adoption-table" id="adoption-table">
+          <summary class="section-title adoption-table-summary">
+            <span>
+              <strong id="leaderboard-table-heading">Benchmarks by model card adoption</strong>
+            </span>
+            <span id="leaderboard-count" aria-live="polite"></span>
+          </summary>
+          <form class="filter-panel leaderboard-filters" id="leaderboard-filters">
+            <label class="search-field">
+              Search
+              <input
+                id="leaderboard-search"
+                name="lq"
+                type="search"
+                placeholder="Benchmark name or alias"
+              >
+            </label>
+            <label>
+              Domain
+              <select id="leaderboard-domain" name="ldomain"></select>
+            </label>
+            <label>
+              Organization
+              <select id="leaderboard-organization" name="lorg"></select>
+            </label>
+            <label>
+              Benchmark released
+              <select id="leaderboard-era" name="lera"></select>
+            </label>
+            <button class="clear-button" id="leaderboard-clear" type="button">
+              Clear filters
+            </button>
+          </form>
+          <p class="section-note" data-i18n="leaderboard.filters.note">
+            Each model card counts once per benchmark. A card reporting AIME in four
+            configurations counts the same as a card reporting it once, so a long appendix
+            cannot outweigh a different vendor. Organizations breaks the tie: the same count
+            from six vendors is a shared standard, from one vendor a house style.
+          </p>
+          <div class="leaderboard-list" id="leaderboard-list"></div>
+          <div class="leaderboard-list-actions">
+            <button class="secondary-link" id="leaderboard-show-all" type="button"></button>
+          </div>
+        </details>
 
         <details class="ledger" aria-labelledby="leaderboard-cards-heading">
           <summary class="ledger-summary">

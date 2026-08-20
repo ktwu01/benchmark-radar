@@ -707,11 +707,27 @@ def test_issue_256_the_ranking_leads_the_page_it_names():
     html = source("site/index.html")
     script = source("site/assets/app.js")
 
-    # Above the workbench, which is where the search box and the chart live.
-    assert html.index('class="leaderboard-top"') < html.index('class="benchmark-workbench"')
-    # And above the full table, which is now nested inside it as the expandable.
-    assert html.index('class="leaderboard-top"') < html.index('id="adoption-table"')
-    assert html.index('id="adoption-table"') < html.index('class="benchmark-workbench"')
+    # The order the page reads in. The figure is the primary evidence, so only
+    # the title and the five-line ranking may precede it; everything that
+    # summarises or interprets follows it.
+    #
+    # Measured before this order: the chart began at y=1356 on a 1440x900
+    # laptop, entirely below the fold, behind ~1180px of KPI cards, a findings
+    # accordion and the full 80-row table. It now begins at y=824.
+    order = [
+        'class="leaderboard-intro"',
+        'class="leaderboard-top"',
+        'class="benchmark-workbench"',
+        'id="leaderboard-insights"',
+        'id="benchmark-findings"',
+        'id="adoption-table"',
+        'aria-labelledby="leaderboard-cards-heading"',
+    ]
+    positions = [html.index(marker) for marker in order]
+    assert positions == sorted(positions), (
+        "leaderboard blocks are out of order: "
+        f"{[m for _, m in sorted(zip(positions, order))]}"
+    )
 
     renderer = script.split("function renderLeaderboardTop(board)", 1)[1].split(
         "\nfunction ", 1

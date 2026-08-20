@@ -383,6 +383,15 @@ main {
   padding: clamp(2.25rem, 4vw, 3.75rem) 0 6rem;
 }
 
+/* The leaderboard's primary object is the figure, so its top chrome is a
+   budget rather than a canvas: on a 1440x900 laptop the chart began at
+   y=1356, entirely below the fold, behind KPI cards and accordions that
+   summarise it. Those moved below the figure; this recovers the last of the
+   gap so the visualization is visibly underway on load. */
+#leaderboard-view {
+  padding-top: clamp(1.25rem, 2vw, 1.75rem);
+}
+
 .view-heading {
   display: flex;
   gap: 2rem;
@@ -839,7 +848,8 @@ input {
 
 .answer-disclosure-summary::before {
   content: "›";
-  font-size: 0.9rem;
+  font-size: 2.7rem;
+  line-height: 1;
   line-height: 1;
   transition: transform 140ms ease;
 }
@@ -895,13 +905,13 @@ input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 48px;
+  height: 48px;
   border: 1px solid var(--line);
   border-radius: 50%;
   color: var(--blue-deep);
   font-family: var(--utility);
-  font-size: 1rem;
+  font-size: 2.2rem;
   line-height: 1;
   transition:
     transform 140ms ease,
@@ -1948,8 +1958,9 @@ td a {
   flex: none;
   color: var(--blue-deep);
   font-family: var(--utility);
-  font-size: 1.5rem;
-  font-weight: 400;
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: 300;
 }
 
 .relationship-explorer[open] > summary::after {
@@ -2088,7 +2099,7 @@ td a {
   grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.8fr);
   gap: clamp(2rem, 5vw, 5rem);
   align-items: end;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.9rem;
 }
 
 .leaderboard-title-block h1 {
@@ -2096,10 +2107,15 @@ td a {
 }
 
 .leaderboard-deck {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
   max-width: 780px;
-  margin: 1rem 0 0;
+  margin: 0.45rem 0 0;
   color: var(--muted);
-  font-size: clamp(0.95rem, 1.3vw, 1.12rem);
+  font-size: clamp(0.92rem, 1.2vw, 1.02rem);
+  line-height: 1.45;
 }
 
 .method-note {
@@ -2123,7 +2139,9 @@ td a {
 
 .method-note summary::after {
   content: "+";
-  font-size: 1rem;
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: 300;
 }
 
 .method-note[open] summary::after {
@@ -2205,7 +2223,7 @@ td a {
   right: 0;
   color: var(--blue-deep);
   font-family: var(--utility);
-  font-size: 1rem;
+  font-size: 3rem;
   line-height: 1;
   transition: transform 140ms ease;
 }
@@ -2274,7 +2292,7 @@ td a {
   content: "›";
   color: var(--blue-deep);
   font-family: var(--utility);
-  font-size: 0.9rem;
+  font-size: 2.7rem;
   line-height: 1;
   transition: transform 140ms ease;
 }
@@ -2333,14 +2351,14 @@ td a {
    benchmark: the name is the scanning target, the count is the measure, and
    the rank is a small fixed-width marker rather than a competing number. */
 .leaderboard-top {
-  margin: 1.5rem 0 0;
+  margin: 0 0 0.9rem;
 }
 
 .leaderboard-top-heading {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.35rem;
 }
 
 .leaderboard-top-heading h2 {
@@ -2351,7 +2369,7 @@ td a {
 
 .leaderboard-top-list {
   list-style: none;
-  margin: 0 0 0.75rem;
+  margin: 0;
   padding: 0;
   border: 1px solid var(--line);
   background: var(--panel);
@@ -2359,10 +2377,10 @@ td a {
 
 .leaderboard-top-row {
   display: grid;
-  grid-template-columns: 2.2rem minmax(0, 1fr) auto;
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
   gap: 0.75rem;
   align-items: baseline;
-  padding: 0.5rem 0.85rem;
+  padding: 0.22rem 0.85rem;
   border-bottom: 1px solid var(--line);
 }
 
@@ -2378,7 +2396,7 @@ td a {
 
 .leaderboard-top-name {
   font-family: var(--display);
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   color: var(--ink);
   overflow-wrap: anywhere;
 }
@@ -2448,7 +2466,7 @@ td a {
 }
 
 .frontier-panel {
-  padding: clamp(1.25rem, 3vw, 2rem);
+  padding: clamp(1rem, 2vw, 1.35rem) clamp(1.25rem, 3vw, 2rem) clamp(1.25rem, 3vw, 2rem);
   border: 1px solid var(--ink);
   background: #0d1519;
   color: #f3f6f7;
@@ -4164,7 +4182,9 @@ footer {
 .findings-summary::after,
 .adoption-table-summary::after {
   content: "+";
-  font-size: 1rem;
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: 300;
 }
 
 .findings-panel[open] .findings-summary::after,
@@ -4298,14 +4318,14 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 32px;
+  height: 32px;
   border: 1px solid #6ea8dc;
   border-radius: 50%;
   color: #6ea8dc;
   cursor: pointer;
   font-family: var(--utility);
-  font-size: 0.68rem;
+  font-size: 1.2rem;
   font-style: italic;
   line-height: 1;
   list-style: none;
