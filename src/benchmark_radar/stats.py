@@ -157,7 +157,7 @@ def build_registry(
         "comparable": comparable,
         "comparability_note": (
             "Windows certified by findings.comparable_window: every day clears the "
-            "item floor, connector coverage, and identical measurement settings."
+            "item floor, data source coverage, and identical measurement settings."
             if comparable
             else "No certified comparison window today. Do not use trend language: "
             "differences between days may be collection changes rather than field changes."
@@ -203,12 +203,12 @@ def _corpus_statistics(
         entity for entity in returning if len(entity.get("sources") or []) >= CORROBORATION_SOURCES
     ]
     add(
-        "tracked artifacts today seen by more than one connector",
+        "tracked artifacts today seen by more than one data source",
         len(corroborated),
         detail={
             "note": (
-                "independent sighting of the artifact; a single connector twice is one "
-                "observation. This does not mean both connectors measured the same metric: "
+                "independent sighting of the artifact; a single data source twice is one "
+                "observation. This does not mean both data sources measured the same metric: "
                 "per-metric corroboration is reported on each movement statistic."
             )
         },

@@ -67,7 +67,7 @@ QUESTION_GROUPS: tuple[dict[str, Any], ...] = (
         "title": "What is still moving",
         "questions": (
             "Which artifacts the radar already tracked moved measurably, and over what span?",
-            "Which of that movement is corroborated by more than one connector?",
+            "Which of that movement is corroborated by more than one data source?",
         ),
     },
     {
@@ -133,7 +133,7 @@ _INSTRUCTIONS = (
     "never a one-day change. Always state the span.\n"
     "- Category tags overlap; shares do not sum to 100%. Never present them as a "
     "partition of the day's records.\n"
-    "- Treat movement as corroborated only when more than one connector reported it.\n"
+    "- Treat movement as corroborated only when more than one data source reported it.\n"
     "- Use trend language such as rising, surging, or accelerating ONLY when the "
     "registry reports comparable=true. When it is false, differences between days may "
     "be collection changes rather than field changes; say that instead.\n"

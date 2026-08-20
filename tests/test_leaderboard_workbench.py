@@ -82,7 +82,7 @@ def test_trajectory_points_expose_and_pin_record_details():
     assert 'event.key === "Escape"' in script
     assert 'classList.add("is-selected")' in script
     assert '"aria-pressed": "false"' in script
-    assert 'label: t("Protocol")' in script
+    assert 'label: t("Run conditions")' in script
     assert 'label: t("Source")' in script
     assert ".score-point.is-selected .score-point-face" in styles
     assert "pinned: selectedFrontierPoint === group" in script
@@ -110,7 +110,7 @@ def test_trajectory_points_expose_and_pin_record_details():
     assert ".frontier-tooltip.is-pinned" in styles
     # Score points are now the only pinnable marks, so they carry the whole
     # tooltip contract that the advance diamond and the rug ticks used to share.
-    assert 'kind: t("Readable score")' in script
+    assert 'kind: t("Score read from a document")' in script
     assert "title: `${observation.organization} · ${observation.model}`" in script
     assert "function scoreOnlyChart(" not in script
     assert "`${event.organization} · ${event.model} · first report · count" not in script

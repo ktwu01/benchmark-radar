@@ -123,7 +123,7 @@ def test_the_reading_gap_is_labelled_rather_than_drawn_through():
     # is the actual one.
     script = source("site/assets/app.js")
 
-    assert "no readable score in this window" in script
+    assert "no score read from a document in this window" in script
     assert "score-gap-line" in script
 
 
@@ -136,7 +136,7 @@ def test_the_reading_gap_encodes_no_score_value():
     # horizontal on the plot floor, carrying no y-value.
     script = source("site/assets/app.js")
     gap = script.split("const lastScoreX = x(record.last_reported_at);", 1)[1].split(
-        "no readable score in this window", 1
+        "no score read from a document in this window", 1
     )[0]
 
     assert "scoreY(" not in gap, "the gap span must not be positioned by any score value"
@@ -478,7 +478,7 @@ def test_the_reading_gap_ends_at_this_benchmarks_own_latest_mention():
     # newer than their last score -- drew a long gap nothing supported.
     script = source("site/assets/app.js")
     gap = script.split("const lastMention = frontierEvents(entry)", 1)[1].split(
-        "no readable score in this window", 1
+        "no score read from a document in this window", 1
     )[0]
 
     assert "lastMention > record.last_reported_at" in gap
@@ -716,7 +716,7 @@ def test_the_explainer_leaves_saturation_as_the_readers_judgement():
     assert "no newer number could be read" in html
     assert "the gap is marked rather than drawn through" in html
     assert "stays a reading you make, not a score this panel prints" in html
-    assert "connected only where the instrument and protocol" in html
+    assert "connected only where the test variant and run conditions" in html
     # And it names the date the x axis carries, rather than leaving "time" to be
     # read as an evaluation date.
     dateline = "placed at the date that document was published rather than at any evaluation date"

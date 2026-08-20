@@ -785,8 +785,8 @@ def test_new_benchmarks_are_visually_prioritized_without_changing_the_rank():
 
     assert "function isNewBenchmark(entry, board)" in script
     assert "cutoff.setUTCDate(cutoff.getUTCDate() - 548)" in script
-    assert 'text: t("new instrument")' in script
-    assert '"New instruments"' in script
+    assert 'text: t("new benchmark")' in script
+    assert '"New benchmarks"' in script
     assert ".benchmark-new" in styles
     assert "board.entries?.[0]?.card_count" in script
 

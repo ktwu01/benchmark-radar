@@ -322,7 +322,7 @@ const I18N = {
       "今天的哪些新增条目记录了它们如何给答案评分？",
     "Which artifacts the radar already tracked moved measurably, and over what span?":
       "雷达已跟踪的哪些条目出现了可测变动，跨度如何？",
-    "Which of that movement is corroborated by more than one connector?":
+    "Which of that movement is corroborated by more than one data source?":
       "其中哪些变动得到了不止一个数据源的印证？",
     "What should someone building or evaluating AI systems do differently today?":
       "构建或评估 AI 系统的人今天应该做哪些不同的选择？",
@@ -375,7 +375,7 @@ const I18N = {
     "Registry overview": "总览",
     "What the two layers say": "两层信息说了什么",
     "Stated findings": "明确结论",
-    "The saturation curve": "饱和曲线",
+    "Scores over time": "分数随时间变化",
     "Benchmark reported scores over time": "基准报告分数随时间的变化",
     "All tracked benchmarks": "所有追踪的基准",
     "Search every benchmark": "搜索全部基准",
@@ -383,7 +383,7 @@ const I18N = {
     "Search benchmarks, tasks, domains…": "搜索基准、任务、领域…",
     "{n} benchmarks": "{n} 个基准",
     "Curated registry": "精选登记册",
-    "No benchmark in this registry has a readable score yet.": "此登记册中还没有任何基准具有可读分数。",
+    "No benchmark in this registry has a score read from a document yet.": "此登记册中还没有任何基准有从文档中读到的分数。",
     "What would make this a true Pareto frontier?": "怎样才算真正的帕累托前沿?",
     "Benchmarks by model card adoption": "按模型卡采用排名的基准",
     "Benchmark name or alias": "基准名称或别名",
@@ -401,7 +401,7 @@ const I18N = {
     "All dates": "所有日期",
     "How to read this chart": "如何解读这张图",
     "frontier.explainer.sub":
-      "每个能从引文文档中逐字读到的数值,按该文档的发布日期放置(而非任何评测日期),只在工具与协议完全一致时才相连。末端趋于平直通常意味着没有更新的数字可读,因此缺口被标出而不是用线穿过。一条曲线是否已经饱和,由你来判读,本面板不会给出饱和分数。",
+      "每个能从引文文档中逐字读到的数值,按该文档的发布日期放置(而非任何评测日期),只在测试变体与运行条件完全一致时才相连。末端趋于平直通常意味着没有更新的数字可读,因此缺口被标出而不是用线穿过。一条曲线是否已经饱和,由你来判读,本面板不会给出饱和分数。",
     "leaderboard.filters.note":
       "每张模型卡对同一基准只计一次。一张在四个配置中报告 AIME 的卡,与只报告一次的卡计数相同,因此冗长的附录不能压过不同的供应商。机构可以打破平局:六个供应商报告同一计数是共同标准,只有一个供应商报告则是自家风格。",
     "leaderboard.ledger.note":
@@ -433,8 +433,8 @@ const I18N = {
     "evidence record": "条证据",
     "model card": "张模型卡",
     "model cards": "张模型卡",
-    "readable score": "个可读分数",
-    "readable scores": "个可读分数",
+    "score read from a document": "个从文档读到的分数",
+    "scores read from a document": "个从文档读到的分数",
     organization: "个机构",
     benchmark: "个基准",
     benchmarks: "个基准",
@@ -494,14 +494,14 @@ const I18N = {
     "active attention signals": "条活跃关注信号",
     "Two snapshots are available. The chart shows the first comparable daily change; broader trend language begins with three snapshots.":
       "已有两个快照。图表显示第一次可比较的日变化;更完整的趋势表述需要三个快照。",
-    "Two snapshots are available, but their connector coverage or report limit differs, so the change between them is not comparable.":
-      "已有两个快照,但两者的连接器覆盖范围或报告上限不同,因此它们之间的变化不可比较。",
+    "Two snapshots are available, but they covered different data sources or a different report limit, so the change between them is not comparable.":
+      "已有两个快照,但两者覆盖的数据源或报告上限不同,因此它们之间的变化不可比较。",
     "Compared with": "与",
     "surfaced evidence is": "相比,已出现的证据",
     "active attention is": ",活跃关注度",
     "Biggest domain moves": "最大的领域变化",
-    "used different connector coverage or a different report limit than": "使用了与",
-    "so the two scans": "不同的连接器覆盖范围或报告上限,因此这两次扫描",
+    "covered different data sources or used a different report limit than": "覆盖的数据源或报告上限不同于",
+    "so the two scans": "因此这两次扫描",
     "are not directly comparable. Counts are shown without a change figure.": "不可直接比较。计数将不附带变化数值显示。",
     "vs previous scan": "对比上次扫描",
     "not comparable": "不可比较",
@@ -621,16 +621,16 @@ const I18N = {
     "Readable values": "可读数值",
     "Supports: ": "支持: ",
     "Does not support: ": "不支持: ",
-    "Readable score": "可读分数",
+    "Score read from a document": "从文档读到的分数",
     Model: "模型",
     Adoption: "采用",
     "Open source record ↗": "打开来源记录 ↗",
     "Open source document ↗": "打开来源文档 ↗",
     "Read from": "读取自",
     "Cited by": "被引用",
-    Instrument: "工具",
-    Protocol: "协议",
-    "new instrument": "新工具",
+    "Test variant": "测试变体",
+    "Run conditions": "运行条件",
+    "new benchmark": "新基准",
     "Not yet reported": "尚未报告",
     "not yet reported in these cards": "这些模型卡中尚未报告",
     "Reported by": "报告机构",
@@ -659,7 +659,7 @@ const I18N = {
     "Benchmarks tracked": "追踪的基准数",
     "Benchmarks reported at least once": "被报告至少一次的基准数",
     "The subset a ranked row can speak to.": "排名行所能覆盖的子集。",
-    "New instruments": "新工具",
+    "New benchmarks": "新基准",
     "Benchmarks this document reports": "此文档报告的基准",
     "Last curated on": "最后整理于",
     "date unknown": "日期未知",
@@ -683,8 +683,8 @@ const I18N = {
     " · superseded": " · 已取代",
     "(zoom)": "(缩放)",
     "(zoomed)": "(已缩放)",
-    "A wrong row in the adoption ranking is a real bug. So is a connector that stopped collecting, or a benchmark you expected the radar to see.":
-      "采用排行中的一行错误就是真实的 bug;连接器停止采集,或者一个你期待雷达发现的基准没有出现,同样是 bug。",
+    "A wrong row in the adoption ranking is a real bug. So is a data source that stopped returning anything, or a benchmark you expected the radar to see.":
+      "采用排行中的一行错误就是真实的 bug;某个数据源停止采集,或者一个你期待雷达发现的基准没有出现,同样是 bug。",
     "All domains": "所有领域",
     "All organizations": "所有机构",
     "Any release date": "任意发布日期",
@@ -695,10 +695,9 @@ const I18N = {
     "Click the marker to pin these details": "点击标记以固定这些详情",
     "Click to pin record details": "点击固定记录详情",
     Comments: "评论",
-    "Corpus coverage": "语料覆盖",
     "Discovery sources": "发现来源",
-    "Doing related-work research, or hunting for a benchmark on a topic? This database aggregates every benchmark, evaluation, and dataset the radar has surfaced, and you can query it by topic, source, or organization before you export. The full corpus below is the same data the dashboard renders.":
-      "在做相关工作研究,或想按主题查找基准?这个数据库汇总了雷达发现过的每一个基准、评测与数据集,可以在导出前按主题、来源或机构查询。下方的完整语料与仪表盘渲染的是同一份数据。",
+    "Doing related-work research, or hunting for a benchmark on a topic? This database aggregates every benchmark, evaluation, and dataset the radar has surfaced, and you can query it by topic, source, or organization before you export. Everything listed below is the same data the dashboard renders.":
+      "在做相关工作研究,或想按主题查找基准?这个数据库汇总了雷达发现过的每一个基准、评测与数据集,可以在导出前按主题、来源或机构查询。下方列出的所有内容与仪表盘渲染的是同一份数据。",
     "Every benchmark this document puts in front of readers, counted once each. These are mentions, not scores: the source records the configuration, and this registry deliberately does not.":
       "此文档呈现给读者的每个基准,各计一次。这是提及次数,不是分数:来源记录了配置,而这个登记册刻意不记录。",
     "Every record matching at least one taxonomy category is retained. A score of":
@@ -707,17 +706,16 @@ const I18N = {
     "Leaderboard (CSV)": "排行榜 (CSV)",
     "Most represented organizations": "出现最多的机构",
     "No benchmark is reported by a curated card yet.": "目前还没有精选模型卡报告任何基准。",
-    "No corpus entities yet.": "还没有语料实体。",
     "No description published at the source.": "来源没有发布描述。",
     "No discovery sources yet.": "还没有发现来源。",
     "No further description beyond the preview above.": "除了上面的预览,没有更多描述。",
     "No organizations identified yet.": "还没有识别出机构。",
     "No source documents in the registry yet.": "登记册中还没有来源文档。",
     "No topics assigned yet.": "还没有分配主题。",
-    "Not a verbatim benchmark item. This description paraphrases the official source; open it for exact tasks and protocol.":
-      "不是逐字的基准条目。此描述转述自官方来源;请打开它以查看确切的题目与协议。",
-    "Not a verbatim benchmark item. This is an illustrative format based on the recorded domain; use the official source for exact tasks and protocol.":
-      "不是逐字的基准条目。这是根据记录领域生成的示例格式;请使用官方来源查看确切的题目与协议。",
+    "Not a verbatim benchmark item. This description paraphrases the official source; open it for the exact tasks and scoring rules.":
+      "不是逐字的基准条目。此描述转述自官方来源;请打开它以查看确切的题目与评分规则。",
+    "Not a verbatim benchmark item. This is an illustrative format based on the recorded domain; use the official source for the exact tasks and scoring rules.":
+      "不是逐字的基准条目。这是根据记录领域生成的示例格式;请使用官方来源查看确切的题目与评分规则。",
     "No score for this benchmark could be read verbatim from the cited documents, so there is no track to draw. An absent value is not a zero and not a plateau.":
       "无法从引文文档中逐字读到该基准的分数,因此没有可绘制的轨道。缺失的数值既不是零,也不是平台期。",
     "No score for this benchmark could be read verbatim from the cited documents. An absent value is not a zero and not a plateau.":
@@ -765,7 +763,7 @@ const I18N = {
     "here are third parties": "有第三方",
     "here is a third party": "有第三方",
     listed: "已列出",
-    "no readable score in this window": "此窗口中无可读分数",
+    "no score read from a document in this window": "此窗口中没有从文档中读到的分数",
     // Issue #254: why the Today list is empty, when a source filter emptied it.
     "No observations match these filters. Clear one or more filters to widen the view.":
       "没有符合这些筛选条件的结果。请清除一个或多个筛选条件以扩大范围。",
@@ -779,7 +777,7 @@ const I18N = {
     "one value read verbatim from a cited document": "一个从引文文档中逐字读到的数值",
     "not yet reported": "尚未报告",
     "points to zero, the floor of this metric": "指向零,该指标的底线",
-    protocol: "协议",
+    "run conditions": "运行条件",
     "document publication date": "文档发布日期",
     "quoting another vendor's figure, marked with a ring on the chart":
       "引用另一家供应商的数据,图表中以圆环标出",
@@ -1921,7 +1919,7 @@ function renderTrends() {
     )
       ? t("Two snapshots are available. The chart shows the first comparable daily change; broader trend language begins with three snapshots.") +
         coverageNote(state.data.days[1])
-      : t("Two snapshots are available, but their connector coverage or report limit differs, so the change between them is not comparable.");
+      : t("Two snapshots are available, but they covered different data sources or a different report limit, so the change between them is not comparable.");
     trendChart.hidden = false;
   } else {
     const latest = state.data.days[dayCount - 1];
@@ -1946,7 +1944,7 @@ function renderTrends() {
         coverageNote(latest);
     } else {
       trendMessage.textContent =
-        `${latest.date} ${t("used different connector coverage or a different report limit than")} ${previous.date}, ${t("so the two scans")} ` +
+        `${latest.date} ${t("covered different data sources or used a different report limit than")} ${previous.date}, ${t("so the two scans")} ` +
         t("are not directly comparable. Counts are shown without a change figure.");
     }
     trendChart.hidden = false;
@@ -3451,7 +3449,7 @@ function curatedResultRow(entry) {
       }),
       element("span", {
         className: "benchmark-result-scores",
-        text: metricLabel(record.observation_count, "readable score"),
+        text: metricLabel(record.observation_count, "score read from a document", "scores read from a document"),
       }),
     ]),
   ]);
@@ -4335,8 +4333,8 @@ function renderFrontierTaskPreview(entry) {
     element("p", {
       className: "task-shape-note",
       text: shape.provenance
-        ? t("Not a verbatim benchmark item. This description paraphrases the official source; open it for exact tasks and protocol.")
-        : t("Not a verbatim benchmark item. This is an illustrative format based on the recorded domain; use the official source for exact tasks and protocol."),
+        ? t("Not a verbatim benchmark item. This description paraphrases the official source; open it for the exact tasks and scoring rules.")
+        : t("Not a verbatim benchmark item. This is an illustrative format based on the recorded domain; use the official source for the exact tasks and scoring rules."),
     }),
     entry.caveat
       ? element("div", { className: "frontier-caveat" }, [
@@ -4394,7 +4392,7 @@ function spansTime(record) {
 // prints this alongside, and the reader is never surprised by the drop.
 function chartedScoreLabel(benchmarkId) {
   const record = scoreRecord(benchmarkId);
-  return metricLabel(record?.observation_count || 0, "readable score");
+  return metricLabel(record?.observation_count || 0, "score read from a document", "scores read from a document");
 }
 
 // The plotted band for a score axis. Percent metrics are NOT drawn 0-100: every
@@ -4839,7 +4837,7 @@ function renderFrontierLegend(entry, record) {
   if (record) {
     items.push([
       "legend-swatch-score",
-      t("Readable score"),
+      t("Score read from a document"),
       t("one value read verbatim from a cited document"),
     ]);
   }
@@ -4968,9 +4966,10 @@ function scoreTrackChart(entry, board) {
     // accessibility tree, which would hide the interactive marker buttons.
     role: "group",
     "aria-label":
-      `${entry.name} readable scores over time. ${metricLabel(
+      `${entry.name} scores over time. ${metricLabel(
         record.observation_count,
-        "readable score",
+        "score read from a document",
+        "scores read from a document",
       )} from ${formatDate(record.first_reported_at, { dateStyle: "medium" })} to ` +
       `${formatDate(record.last_reported_at, { dateStyle: "medium" })}, best ` +
       `${record.saturation.best_value}.`,
@@ -5060,7 +5059,7 @@ function scoreTrackChart(entry, board) {
           `${observation.value} ${record.metric} ${t("by")} ${observation.model} ` +
           `(${observation.organization}), ${formatDate(observation.reported_at, {
             dateStyle: "medium",
-          })}, ${t("protocol")} ${observation.protocol}` +
+          })}, ${t("run conditions")} ${observation.protocol}` +
           (observation.reported_by ? `, ${t("cited by")} ${observation.reported_by}` : "") +
           `. ${t("Click to pin record details")}.`,
       });
@@ -5095,7 +5094,7 @@ function scoreTrackChart(entry, board) {
         ),
       );
       makeFrontierPointInteractive(group, {
-        kind: t("Readable score"),
+        kind: t("Score read from a document"),
         title: `${observation.organization} · ${observation.model}`,
         rows: [
           { label: t("Organization"), value: observation.organization },
@@ -5108,8 +5107,8 @@ function scoreTrackChart(entry, board) {
             label: t("Score"),
             value: `${observation.value}${record.unit === "percent" ? "%" : ` ${record.unit}`} ${record.metric}`,
           },
-          { label: t("Instrument"), value: observation.instrument },
-          { label: t("Protocol"), value: observation.protocol },
+          { label: t("Test variant"), value: observation.instrument },
+          { label: t("Run conditions"), value: observation.protocol },
           { label: t("Source"), value: sourceLabel },
           { label: t("Read from"), value: observation.read_from.replaceAll("_", " ") },
           ...(observation.reported_by
@@ -5181,7 +5180,7 @@ function scoreTrackChart(entry, board) {
             "text-anchor": gapReachesAxisEnd ? "end" : "middle",
             class: "score-gap-label",
           },
-          t("no readable score in this window"),
+          t("no score read from a document in this window"),
         ),
       );
     }
@@ -5236,7 +5235,7 @@ function clearAdoptionFrontier(message) {
   // restored here rather than at each call site: an external selection that
   // hid it must not leave the next canonical render missing its chart blocks.
   setCanonicalFrontierChrome(true);
-  byId("frontier-eyebrow").textContent = t("The saturation curve");
+  byId("frontier-eyebrow").textContent = t("Scores over time");
   const stage = byId("frontier-stage");
   stage.textContent = "";
   // The badge only carries the source name on the external path; an empty one
@@ -5264,7 +5263,7 @@ function renderAdoptionFrontier(board) {
   const scored = adopted.filter((entry) => scoreRecord(entry.benchmark_id));
   const defaultEntry = frontierDefaultEntry(board);
   if (!scored.length || !defaultEntry) {
-    clearAdoptionFrontier(t("No benchmark in this registry has a readable score yet."));
+    clearAdoptionFrontier(t("No benchmark in this registry has a score read from a document yet."));
     return;
   }
   // Resolution order is the permalink contract (display plan step 6): an exact
@@ -5296,7 +5295,7 @@ function renderAdoptionFrontier(board) {
   if (unscoredEntry) {
     renderBenchmarkNavigator(board);
     renderExternalShell(board, scored, {
-      eyebrow: t("The saturation curve"),
+      eyebrow: t("Scores over time"),
       heading: unscoredEntry.name,
       badge: "",
       message: t(
@@ -5338,7 +5337,7 @@ function renderAdoptionFrontier(board) {
     entry = defaultEntry;
   }
   setCanonicalFrontierChrome(true);
-  byId("frontier-eyebrow").textContent = t("The saturation curve");
+  byId("frontier-eyebrow").textContent = t("Scores over time");
   // The stage badge is an adoption reading ("Saturated reporting" is a judgement
   // about who reports, not about scores), so the canonical path leaves it empty
   // and hidden. The external path reuses the element for the source name.
@@ -5546,7 +5545,7 @@ function leaderboardRow(entry) {
   const isNew = isNewBenchmark(entry, board);
   if (isNew) {
     header.querySelector(".signal-meta").prepend(
-      element("span", { className: "benchmark-new-badge", text: t("new instrument") }),
+      element("span", { className: "benchmark-new-badge", text: t("new benchmark") }),
     );
   }
 
@@ -5776,7 +5775,7 @@ function renderLeaderboard() {
     ),
     element("details", { className: "evidence-thesis evidence-thesis-disclosure" }, [
       element("summary", { className: "evidence-thesis-summary" }, [
-        element("strong", { text: t("New instruments") }),
+        element("strong", { text: t("New benchmarks") }),
         element("span", {
           text: t(" · {count} released in the newest 18-month window already appear across three or more dated organizations. Follow their trajectories before reading the raw rank.", {
             count: metricLabel(newSharedSignals.length, "benchmark"),
@@ -6261,7 +6260,7 @@ function openExport() {
     }),
     element("p", {
       className: "detail-summary",
-      text: t("Doing related-work research, or hunting for a benchmark on a topic? This database aggregates every benchmark, evaluation, and dataset the radar has surfaced, and you can query it by topic, source, or organization before you export. The full corpus below is the same data the dashboard renders."),
+      text: t("Doing related-work research, or hunting for a benchmark on a topic? This database aggregates every benchmark, evaluation, and dataset the radar has surfaced, and you can query it by topic, source, or organization before you export. Everything listed below is the same data the dashboard renders."),
     }),
     element("div", { className: "export-actions" }, [
       element("a", {
@@ -6316,7 +6315,7 @@ function openContact() {
     }),
     element("p", {
       className: "detail-summary",
-      text: t("A wrong row in the adoption ranking is a real bug. So is a connector that stopped collecting, or a benchmark you expected the radar to see."),
+      text: t("A wrong row in the adoption ranking is a real bug. So is a data source that stopped returning anything, or a benchmark you expected the radar to see."),
     }),
     element("ul", { className: "contact-list" }, [
       element("li", {}, [
