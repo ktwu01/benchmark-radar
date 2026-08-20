@@ -455,11 +455,16 @@ def adoption_rank(registry: dict[str, Any]) -> dict[str, Any]:
         # Stated in the data rather than only in the UI, so any consumer of
         # radar.json inherits the caveat instead of re-deriving the ranking's
         # meaning from its column headers.
+        # Plain words on purpose (issue #241): "vendor attention", "saturated"
+        # and "contaminated" all named the right ideas in vocabulary a reader
+        # has to already have. The claim is unchanged -- a benchmark near the
+        # top is one everybody reports, which is not the same as a good one.
         "measures": (
-            "How many curated model cards report each benchmark. This measures "
-            "vendor attention, not benchmark quality: a saturated or contaminated "
-            "benchmark can rank highly precisely because it is conventional to "
-            "report it."
+            "When an AI lab releases a model, it publishes a report listing the "
+            "tests it ran. This counts how many of those reports mention each "
+            "test. A test near the top is one almost everyone runs, which is not "
+            "the same as a good one: labs keep running a popular test out of "
+            "habit, even after the scores stop telling anyone much."
         ),
     }
 

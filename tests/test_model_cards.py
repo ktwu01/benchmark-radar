@@ -220,7 +220,15 @@ def test_measures_statement_travels_with_the_data():
 
     # Any consumer of radar.json inherits the disclaimer instead of inferring
     # the ranking's meaning from its column headers.
-    assert "not benchmark quality" in board["measures"]
+    # Asserted as the claim rather than the phrasing. Issue #241 rewrote this
+    # for a 16-year-old reader ("vendor attention", "saturated" and
+    # "contaminated" were vocabulary a reader had to already have), and a test
+    # that pins the old words would force the jargon back.
+    #
+    # The load-bearing part is that popularity is not quality, and that the
+    # statement travels with the data rather than living only in the UI.
+    assert "not the same as a good one" in board["measures"]
+    assert "how many" in board["measures"].lower()
 
 
 def test_adoption_rank_links_are_exact_inverses():

@@ -338,27 +338,18 @@
         aria-labelledby="leaderboard-heading"
         hidden
       >
-        <!-- The eyebrow, the deck and the "How to read this evidence" note all
-             said something about one ranking, and between them filled the space
-             where the figure should have been. They are one (i) beside the
-             ranking heading now (issue #298 follow-up). The h1 stays: it is the
-             view's accessible name via aria-labelledby, and it is the one line
-             that says what the page is. -->
-        <header class="leaderboard-intro">
-          <div class="leaderboard-title-block">
-            <h1 id="leaderboard-heading" data-i18n="Which benchmarks do model cards report?">Which benchmarks do model cards report?</h1>
-            <!-- Still written, still published data, but read rather than
-                 displayed: the visible copy lives in the (i) beside the
-                 ranking. A screen reader announces it with the heading, where
-                 sighted readers get it from the toggle. -->
-            <p class="leaderboard-deck visually-hidden" id="leaderboard-measures"></p>
-          </div>
-        </header>
-
-        <section class="leaderboard-top" aria-labelledby="leaderboard-top-heading">
+        <!-- One title, not three. "Which benchmarks do model cards report?",
+             "How many curated model cards report each benchmark..." and "Most
+             reported in model cards" were the same sentence written three ways,
+             stacked above the figure. This heading is the view's accessible
+             name, and the (i) beside it carries the caveat. -->
+        <section class="leaderboard-top" aria-labelledby="leaderboard-heading">
           <div class="leaderboard-top-heading">
-            <h2 id="leaderboard-top-heading" data-i18n="Most reported in model cards">Most reported in model cards</h2>
+            <h1 id="leaderboard-heading" data-i18n="Most reported in model cards">Most reported in model cards</h1>
             <span id="leaderboard-top-info"></span>
+            <!-- Written but not shown: the visible copy is in the (i). A screen
+                 reader announces it with the heading. -->
+            <p class="leaderboard-deck visually-hidden" id="leaderboard-measures"></p>
           </div>
           <ol class="leaderboard-top-list" id="leaderboard-top-list"></ol>
           <button class="secondary-link leaderboard-top-more" id="leaderboard-top-more" type="button"></button>

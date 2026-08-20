@@ -402,10 +402,11 @@ const I18N = {
     "Search every benchmark": "搜索全部基准",
     "Most reported in model cards": "模型卡中报告最多",
     "Jump to a benchmark": "跳转到某个基准",
+    "One score, copied from the report that published it": "一个分数，照抄自发布它的报告",
     "Show all {n} ranked benchmarks": "显示全部 {n} 个排名基准",
     "Show the top {n}": "只显示前 {n} 个",
-    "One model card contributes at most one mention to a benchmark, however many configurations it reports. Some cards publish their table as an image and those rows were transcribed by OCR, so the source ledger below lists every recorded benchmark with its original document.":
-      "无论一张模型卡报告了多少种配置，它对某个基准最多只贡献一次提及。部分模型卡以图片形式发布其表格，这些行由 OCR 转写，因此下方的来源清单列出了每条记录及其原始文档。",
+    "A report counts once per test, even if it lists that test several times. Some reports publish their results as a picture rather than text, and we read those with software that can misread a digit, so the list at the bottom of this page links every count back to the report it came from.":
+      "一份报告对同一项测试只计一次，即使它列出了多次。有些报告以图片而非文字发布结果，我们用软件读取，可能会看错数字，因此本页底部的清单把每个计数链接回它的来源报告。",
     model: "个模型",
     models: "个模型",
     "No model card in this registry reports a benchmark yet.": "此登记册中还没有任何模型卡报告基准。",
@@ -5307,11 +5308,10 @@ function renderFrontierLegend(entry, record) {
   const swatch = (className) => element("span", { className: `legend-swatch ${className}` });
   const items = [];
   if (record) {
-    items.push([
-      "legend-swatch-score",
-      t("Score read from a document"),
-      t("one value read verbatim from a cited document"),
-    ]);
+    // One phrase, not a label plus a restatement of the label. "Score read
+    // from a document / one value read verbatim from a cited document" said
+    // the same thing twice beside a single dot.
+    items.push(["legend-swatch-score", t("One score, copied from the report that published it"), ""]);
   }
   replaceChildren(
     host,
@@ -5859,7 +5859,6 @@ function renderAdoptionFrontier(board) {
     entry = defaultEntry;
   }
   setCanonicalFrontierChrome(true);
-  byId("frontier-eyebrow").textContent = t("Scores over time");
   // The stage badge is an adoption reading ("Saturated reporting" is a judgement
   // about who reports, not about scores), so the canonical path leaves it empty
   // and hidden. The external path reuses the element for the source name.
@@ -5879,9 +5878,14 @@ function renderAdoptionFrontier(board) {
   // all share one date span no time however many there are, so counting rows
   // would be the wrong question to ask even though no benchmark is in that
   // state today.
-  byId("frontier-heading").textContent = spansTime(record)
-    ? `${entry.name} ${t("reported scores over time")}`
-    : `${entry.name} ${metricLabel(record?.observation_count || 0, "charted score")}`;
+  // The heading is the benchmark's name. What kind of picture this is -- a
+  // track over time, or a single reading that is not one -- moves to the
+  // eyebrow above it, which used to say "Scores over time" regardless and so
+  // repeated the heading rather than qualifying it.
+  byId("frontier-heading").textContent = entry.name;
+  byId("frontier-eyebrow").textContent = spansTime(record)
+    ? t("Scores over time")
+    : metricLabel(record?.observation_count || 0, "charted score");
   renderFrontierLegend(entry, record);
   renderFrontierOrgKey(record);
   clearFrontierPointSelection();
@@ -6161,7 +6165,7 @@ function renderLeaderboardTop(board) {
         [
           board.measures,
           t(
-            "One model card contributes at most one mention to a benchmark, however many configurations it reports. Some cards publish their table as an image and those rows were transcribed by OCR, so the source ledger below lists every recorded benchmark with its original document.",
+            "A report counts once per test, even if it lists that test several times. Some reports publish their results as a picture rather than text, and we read those with software that can misread a digit, so the list at the bottom of this page links every count back to the report it came from.",
           ),
         ]
           .filter(Boolean)

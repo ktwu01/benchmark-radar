@@ -725,7 +725,6 @@ def test_issue_256_the_ranking_leads_the_page_it_names():
     # laptop, entirely below the fold, behind ~1180px of KPI cards, a findings
     # accordion and the full 80-row table. It now begins at y=824.
     order = [
-        'class="leaderboard-intro"',
         'class="leaderboard-top"',
         'class="benchmark-workbench"',
         'id="leaderboard-insights"',

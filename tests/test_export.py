@@ -110,7 +110,15 @@ def test_every_export_carries_the_measures_caveat(tmp_path):
     written = write_exports(tmp_path / "out", registry_path=registry_path)
     exported = json.loads(written["json"].read_text(encoding="utf-8"))
     assert exported["measures"] == leaderboard["measures"]
-    assert "not benchmark quality" in exported["measures"]
+    # Asserted as the claim rather than the phrasing. Issue #241 rewrote this
+    # for a 16-year-old reader ("vendor attention", "saturated" and
+    # "contaminated" were vocabulary a reader had to already have), and a test
+    # that pins the old words would force the jargon back.
+    #
+    # The load-bearing part is that popularity is not quality, and that the
+    # statement travels with the data rather than living only in the UI.
+    assert "not the same as a good one" in exported["measures"]
+    assert "how many" in exported["measures"].lower()
 
     assert leaderboard["measures"] in leaderboard_markdown(leaderboard)
 

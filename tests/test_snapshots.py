@@ -825,7 +825,15 @@ def test_dashboard_publishes_the_model_card_adoption_rank(tmp_path):
 
     assert board["model_card_count"] > 0
     assert board["entries"][0]["rank"] == 1
-    assert "not benchmark quality" in board["measures"]
+    # Asserted as the claim rather than the phrasing. Issue #241 rewrote this
+    # for a 16-year-old reader ("vendor attention", "saturated" and
+    # "contaminated" were vocabulary a reader had to already have), and a test
+    # that pins the old words would force the jargon back.
+    #
+    # The load-bearing part is that popularity is not quality, and that the
+    # statement travels with the data rather than living only in the UI.
+    assert "not the same as a good one" in board["measures"]
+    assert "how many" in board["measures"].lower()
 
 
 def test_dashboard_omits_the_leaderboard_when_the_registry_is_absent(tmp_path):

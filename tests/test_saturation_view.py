@@ -569,7 +569,15 @@ def test_the_axis_and_header_name_the_score_reading():
     html = source("site/index.html")
     script = source("site/assets/app.js")
 
-    assert 't("reported scores over time")' in script
+    # The heading is the benchmark's name and the eyebrow says what kind of
+    # picture it is. They used to say the same thing twice: an eyebrow reading
+    # "Scores over time" above a heading reading "<name> reported scores over
+    # time". What must not drift is that a single reading is never presented as
+    # a track over time.
+    assert 'byId("frontier-heading").textContent = entry.name;' in script
+    assert 'spansTime(record)' in script
+    assert 't("Scores over time")' in script
+    assert '"charted score"' in script
     assert "adoption trajectory" not in script
     # The counts line and the reporting-stage sentence are gone from the markup,
     # so nothing can repopulate them.
