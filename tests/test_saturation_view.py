@@ -580,7 +580,7 @@ def test_the_axis_and_header_name_the_score_reading():
     # time". What must not drift is that a single reading is never presented as
     # a track over time.
     assert 'byId("frontier-heading").textContent = entry.name;' in script
-    assert 'spansTime(record)' in script
+    assert "spansTime(record)" in script
     assert 't("Scores over time")' in script
     assert '"charted score"' in script
     assert "adoption trajectory" not in script

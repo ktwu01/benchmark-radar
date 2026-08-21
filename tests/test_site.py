@@ -126,7 +126,7 @@ def test_automatic_frontier_default_does_not_leak_into_unrelated_urls():
 
 def test_each_view_serializes_only_the_filters_it_reads():
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
-    body = script.split("function writeUrl(mode = \"replace\")", 1)[1].split("\nfunction ", 1)[0]
+    body = script.split('function writeUrl(mode = "replace")', 1)[1].split("\nfunction ", 1)[0]
 
     # Issue #123: a reader clicking a trend date got
     # ?date=...&lfrontier=apex_agents, and switching to the leaderboard carried
@@ -1711,14 +1711,14 @@ def test_issue_286_navigation_is_backable_but_typing_is_not():
     """
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
 
-    assert "function writeUrl(mode = \"replace\")" in script
-    assert "window.history.pushState(null, \"\", url);" in script
-    assert "window.history.replaceState(null, \"\", url);" in script
+    assert 'function writeUrl(mode = "replace")' in script
+    assert 'window.history.pushState(null, "", url);' in script
+    assert 'window.history.replaceState(null, "", url);' in script
 
     # A discrete navigation the reader chose pushes. Changing view is the one
     # the issue measured; selecting a benchmark is the one that made it easy to
     # hit, because it carries a reader from a search into another view.
-    assert "function setView(view, update = true, mode = \"push\")" in script
+    assert 'function setView(view, update = true, mode = "push")' in script
     assert "if (update) writeUrl(mode);" in script
     picker = script.split('byId("frontier-benchmark").addEventListener("change"', 1)[1].split(
         "});", 1

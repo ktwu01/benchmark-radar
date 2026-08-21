@@ -740,12 +740,10 @@ def test_issue_256_the_ranking_leads_the_page_it_names():
     positions = [html.index(marker) for marker in order]
     assert positions == sorted(positions), (
         "leaderboard blocks are out of order: "
-        f"{[m for _, m in sorted(zip(positions, order))]}"
+        f"{[m for _, m in sorted(zip(positions, order, strict=True))]}"
     )
 
-    renderer = script.split("function renderLeaderboardTop(board)", 1)[1].split(
-        "\nfunction ", 1
-    )[0]
+    renderer = script.split("function renderLeaderboardTop(board)", 1)[1].split("\nfunction ", 1)[0]
     # Five lines, and the cap is a named constant rather than a literal buried
     # in the slice.
     assert "LEADERBOARD_TOP_LIMIT" in renderer
@@ -774,7 +772,7 @@ def test_issue_256_the_ranking_leads_the_page_it_names():
 
 
 def test_issue_256_the_figure_region_carries_no_pipeline_coverage_count():
-    """"26 model cards · 3 scores read from a document" beside a chart.
+    """ "26 model cards · 3 scores read from a document" beside a chart.
 
     The card count is a fact about the world: how many vendors chose to report
     the benchmark. The second number was a fact about this pipeline -- how many
@@ -869,9 +867,8 @@ def test_issue_298_the_sidebar_row_leads_with_the_benchmark_name():
     modality are still queried, they are simply not printed.
     """
     script = source("site/assets/app.js")
-    row = script.split("function curatedResultRow(entry, { navigate = false, inert = false } = {})", 1)[1].split(
-        "\nfunction ", 1
-    )[0]
+    signature = "function curatedResultRow(entry, { navigate = false, inert = false } = {})"
+    row = script.split(signature, 1)[1].split("\nfunction ", 1)[0]
 
     assert 'metricLabel(entry.card_count, "model", "models")' in row
     for absent in ("benchmark-result-meta", "Curated registry", "benchmark-result-scores"):
@@ -912,8 +909,8 @@ def test_issue_288_the_charts_draw_a_running_best_not_an_invented_cost_axis():
     # Stepped, never diagonal: a slope would imply the score moved continuously
     # between two reports, which is interpolation this corpus cannot support.
     path = script.split("function runningBestPath(steps, x, y, endX)", 1)[1].split("\n}\n", 1)[0]
-    assert '`H ${x(step.time)}`' in path
-    assert '`V ${y(step.value)}`' in path
+    assert "`H ${x(step.time)}`" in path
+    assert "`V ${y(step.value)}`" in path
     assert "L " not in path
 
     # A maximum is a comparability claim -- it says these numbers can be ranked
@@ -979,9 +976,7 @@ def test_the_ranking_expands_and_the_intro_condensed_into_one_toggle():
     # displayed, so a screen reader gets it with the heading.
     assert 'id="leaderboard-measures"' in html
     assert "visually-hidden" in html.split('id="leaderboard-measures"', 1)[0][-200:]
-    renderer = script.split("function renderLeaderboardTop(board)", 1)[1].split(
-        "\nfunction ", 1
-    )[0]
+    renderer = script.split("function renderLeaderboardTop(board)", 1)[1].split("\nfunction ", 1)[0]
     assert "board.measures" in renderer
     # The caveat travels with the payload that produced the order rather than
     # being restated in the browser, where it could drift from it.
@@ -989,7 +984,8 @@ def test_the_ranking_expands_and_the_intro_condensed_into_one_toggle():
 
     # Five lines by default, all 79 on request, and back again.
     assert 'id="leaderboard-top-more"' in html
-    assert "state.leaderboardTopExpanded ? ranked : ranked.slice(0, LEADERBOARD_TOP_LIMIT)" in renderer
+    sliced = "state.leaderboardTopExpanded ? ranked : ranked.slice(0, LEADERBOARD_TOP_LIMIT)"
+    assert sliced in renderer
     assert "more.hidden = ranked.length <= LEADERBOARD_TOP_LIMIT;" in renderer
     toggle = script.split('byId("leaderboard-top-more").addEventListener("click"', 1)[1].split(
         "});", 1
