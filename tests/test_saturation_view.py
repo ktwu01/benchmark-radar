@@ -52,6 +52,11 @@ def test_the_score_layer_draws_no_connecting_line_at_all():
     )[0]
 
     assert "polyline" not in chart
+    # A <path> draws the same segment a <polyline> would, so the ban names the
+    # shape rather than one element. The running-best line is stepped (H/V
+    # only): "nothing had beaten this yet", not a trajectory between points.
+    for command in (" L ", "`L ${"):
+        assert command not in chart, "a diagonal path segment is a trajectory claim"
     assert "if (!series.connectable) continue;" not in chart
     assert "score-line" not in script
     assert "score-line" not in styles

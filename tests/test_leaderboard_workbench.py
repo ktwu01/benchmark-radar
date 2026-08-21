@@ -461,6 +461,11 @@ def test_the_crawled_chart_axis_is_release_date_and_says_so():
     # through models that were never a series, which is the claim the curated
     # chart earns with a protocol and this one does not.
     assert "polyline" not in chart
+    # A <path> draws the same segment a <polyline> would, so the ban names the
+    # shape rather than one element. The running-best line is stepped (H/V
+    # only): "nothing had beaten this yet", not a trajectory between points.
+    for command in (" L ", "`L ${"):
+        assert command not in chart, "a diagonal path segment is a trajectory claim"
 
 
 def test_the_crawled_chart_reuses_the_curated_chart_classes():
@@ -911,10 +916,30 @@ def test_issue_288_the_charts_draw_a_running_best_not_an_invented_cost_axis():
     assert '`V ${y(step.value)}`' in path
     assert "L " not in path
 
-    # Both charts draw it, and the curated one passes the direction flag.
-    assert script.count("class: \"score-frontier-line\"") == 2
+    # A maximum is a comparability claim -- it says these numbers can be ranked
+    # against each other -- so the line is drawn ONLY where that holds.
+    #
+    # The curated layer partitions by instrument AND protocol, the same rule the
+    # join uses: GPQA Diamond carries "Pass@1, 8K output limit" beside "averaged
+    # over 10 samples", and a max across those asserts they measure the same
+    # thing. 22 of 59 curated benchmarks have two dates inside one such group.
+    assert script.count('class: "score-frontier-line"') == 1
     assert "{ descends: scoreDescends }" in script
     assert ".score-frontier-line {" in styles
+    curated = script.split("function scoreTrackChart(", 1)[1].split(
+        "\nfunction clearAdoptionFrontier", 1
+    )[0]
+    assert 'observation.instrument || ""' in curated
+    assert 'observation.protocol || ""' in curated
+
+    # The crawled layer draws none. Its normalizer records `direction: None` and
+    # comparability `none` because the source states neither, so ranking its
+    # rows against each other would assume both.
+    crawled = script.split("function externalScoreChart(source, payload)", 1)[1].split(
+        "\nfunction externalSourceTable", 1
+    )[0]
+    assert "score-frontier-line" not in crawled
+    assert "runningBestSteps" not in crawled
 
     # And it did not reintroduce the join the evidence rules forbid: the
     # running best says "nothing had beaten this yet", never "these points are
@@ -923,6 +948,11 @@ def test_issue_288_the_charts_draw_a_running_best_not_an_invented_cost_axis():
         "\nfunction clearAdoptionFrontier", 1
     )[0]
     assert "polyline" not in chart
+    # A <path> draws the same segment a <polyline> would, so the ban names the
+    # shape rather than one element. The running-best line is stepped (H/V
+    # only): "nothing had beaten this yet", not a trajectory between points.
+    for command in (" L ", "`L ${"):
+        assert command not in chart, "a diagonal path segment is a trajectory claim"
 
 
 def test_the_ranking_expands_and_the_intro_condensed_into_one_toggle():

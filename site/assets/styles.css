@@ -2094,23 +2094,9 @@ td a {
 
 /* Model Card Adoption Rank (issue #83) */
 
-.leaderboard-intro {
-  display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.8fr);
-  gap: clamp(2rem, 5vw, 5rem);
-  align-items: end;
-  margin-bottom: 0.9rem;
-}
-
 /* Same size as the ranking heading below it. At the global h1 scale (48px)
    this line was the largest thing on the page and outweighed both the ranking
    it introduces and the figure it sits above, while saying less than either. */
-.leaderboard-title-block h1 {
-  max-width: 920px;
-  font-size: 1.35rem;
-  line-height: 1.25;
-}
-
 .leaderboard-deck {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -3772,12 +3758,6 @@ footer {
 
   .view-heading {
     display: grid;
-    align-items: start;
-  }
-
-  .leaderboard-intro {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
     align-items: start;
   }
 

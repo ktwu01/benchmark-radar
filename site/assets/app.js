@@ -1097,8 +1097,12 @@ function writeUrl(mode = "replace") {
 // pushes above safe: the restored URL is read back into state and the view it
 // describes is drawn (issue #286).
 function onPopState() {
-  if (!state.data) return;
+  // Before the payload lands, state is not yet drawable. Read the URL anyway:
+  // initialize() renders from state once the fetch settles, and skipping the
+  // read here would leave it rendering whatever the reader navigated away
+  // from while the address bar showed the restored entry.
   readUrl();
+  if (!state.data) return;
   // A leaderboard permalink on a build with no curated registry has nothing to
   // show, same fallback initialize() applies. Without it, Back into such an
   // entry opens an empty section behind a hidden nav button.
@@ -4206,26 +4210,18 @@ function externalScoreChart(source, payload) {
   }
 
   const bestY = scoreY(bestValue);
-  // The frontier: where the best-so-far actually rose, rather than one flat
-  // rule at the final maximum (issue #288). The flat rule stays as the
-  // reference the label sits on; the steps say when it was reached.
+  // No running-best line on this layer, deliberately (issue #288 review).
   //
-  // This layer records no protocol, so the line carries a stronger caveat than
-  // the curated one: it traces what was REPORTED, and two rows may not be
-  // comparable at all. That is still a weaker claim than joining adjacent
-  // points, which this chart refuses to do and still does not do.
-  const bestSteps = runningBestSteps(
-    plotted.map((row) => ({ time: dateValue(row.reported_date), value: row.value })),
-  );
-  if (bestSteps.length) {
-    svg.append(
-      svgElement("path", {
-        d: runningBestPath(bestSteps, x, scoreY, margin.left + plotWidth),
-        class: "score-frontier-line",
-        fill: "none",
-      }),
-    );
-  }
+  // A maximum is a comparability claim: it says these numbers can be ranked
+  // against each other. This layer cannot support that. The normalizer records
+  // `direction: None` because the source states no metric direction, and
+  // `comparability_class: none` because it records no protocol -- see
+  // external_catalog.py, "the only honest comparability class is none". Taking
+  // a max over those rows would assume larger-is-better and assume the rows are
+  // measuring the same thing, and neither is in evidence.
+  //
+  // The flat best-on-record rule stays: it labels one row's own value, which is
+  // a fact about that row rather than a ranking across rows.
   svg.append(
     svgElement("line", {
       x1: margin.left,
@@ -4834,9 +4830,13 @@ function spansTime(record) {
 //
 // What IS drawable is the same idea on the axes this chart already has: the
 // set of points nothing else beats, which on one score axis over time is the
-// running maximum. It is a weaker claim than a connecting segment and does not
-// reintroduce the one the join rule forbids: it says "nothing had beaten this
-// yet", never "these points are a series".
+// running maximum. It says "nothing had beaten this yet", never "these points
+// are a series", so it does not reintroduce the segment the join rule forbids.
+//
+// But a maximum is still a comparability claim -- it says these numbers can be
+// ranked against each other -- so callers must pass points that share an
+// instrument and a protocol. The crawled layer cannot: it records neither, and
+// its normalizer sets comparability to none, so it draws no line at all.
 //
 // Returns [] when the line would assert nothing: fewer than two distinct dates,
 // or a single point.
@@ -5498,14 +5498,27 @@ function scoreTrackChart(entry, board) {
     // chart already has. It asserts only that nothing had beaten a value yet,
     // never that the points between are a series -- which is why it coexists
     // with the join rule that forbids connecting adjacent points.
-    const frontierSteps = runningBestSteps(
-      record.observations.map((observation) => ({
+    // Partitioned by instrument AND protocol, the same rule the join uses. A
+    // max across protocols is still a comparability claim: on GPQA Diamond the
+    // observations run "Pass@1, 8K output limit" beside "averaged over 10
+    // samples", and ranking those against each other asserts they measure the
+    // same thing (issue #288 review).
+    //
+    // The largest comparable group wins the line, so the chart draws the one
+    // run it can actually speak to rather than a mixture it cannot.
+    const runs = new Map();
+    for (const observation of record.observations) {
+      const key = `${observation.instrument || ""}\u0000${observation.protocol || ""}`;
+      if (!runs.has(key)) runs.set(key, []);
+      runs.get(key).push({
         time: new Date(`${observation.reported_at}T00:00:00Z`).getTime(),
         value: observation.value,
-      })),
-      { descends: scoreDescends },
-    );
-    if (frontierSteps.length) {
+      });
+    }
+    const frontierSteps = [...runs.values()]
+      .map((points) => runningBestSteps(points, { descends: scoreDescends }))
+      .sort((a, b) => b.length - a.length)[0];
+    if (frontierSteps?.length) {
       svg.append(
         svgElement("path", {
           d: runningBestPath(
@@ -5854,9 +5867,22 @@ function renderAdoptionFrontier(board) {
     return;
   }
   if (!entry) {
+    // The requested benchmark does not exist. Falling back to the default is
+    // right -- an empty panel is worse -- but the URL must stop naming a
+    // benchmark the panel is not showing, or a shared link reads as evidence
+    // about the wrong thing (the defect issue #287 fixed for canonical ids,
+    // which crawled slugs could still reach).
+    //
+    // Repaired here rather than at the call sites because this is the one
+    // place the substitution happens, and it happens on three different paths:
+    // first load, the re-render after the crawled index settles, and Back.
+    const substituted = Boolean(state.lfrontier);
     state.lfrontier = defaultEntry.benchmark_id;
     state.lfrontierExplicit = false;
     entry = defaultEntry;
+    // replaceState, never push: the reader did not navigate, an address that
+    // was already wrong got corrected.
+    if (substituted && state.view === "leaderboard") writeUrl();
   }
   setCanonicalFrontierChrome(true);
   // The stage badge is an adoption reading ("Saturated reporting" is a judgement
