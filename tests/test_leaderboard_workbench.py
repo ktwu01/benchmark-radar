@@ -991,3 +991,40 @@ def test_the_ranking_expands_and_the_intro_condensed_into_one_toggle():
         "});", 1
     )[0]
     assert "state.leaderboardTopExpanded = !state.leaderboardTopExpanded;" in toggle
+
+
+def test_issue_304_an_unresolved_slug_stops_naming_itself_in_the_url():
+    """A shared link must not name one benchmark while the panel shows another.
+
+    `?lfrontier=<gone>` falls back to the default, which is right -- an empty
+    panel is worse. What is not right is leaving the dead slug in the address
+    bar, because the link then reads as evidence about a benchmark nobody is
+    looking at. That is the defect #287 fixed for canonical ids, and crawled
+    slugs could reach it too.
+    """
+    script = source("site/assets/app.js")
+    dispatch = script.split("function renderAdoptionFrontier(board)", 1)[1].split("\nfunction ", 1)[
+        0
+    ]
+
+    # The substitution and the repair are in the same block, so no caller can
+    # perform one without the other. Three paths reach it: first load, the
+    # re-render after the crawled index settles, and Back.
+    fallback = dispatch.split("if (!entry) {", 1)[1].split("}", 1)[0]
+    assert "const substituted = Boolean(state.lfrontier);" in fallback
+    assert "state.lfrontier = defaultEntry.benchmark_id;" in fallback
+    assert 'if (substituted && state.view === "leaderboard") writeUrl();' in fallback
+
+    # replaceState, never push: the reader did not navigate, an address that
+    # was already wrong got corrected. A push would put the dead slug into
+    # history and make Back return to it.
+    assert 'writeUrl("push")' not in fallback
+
+    # A selection the reader never made stays out of the URL entirely.
+    assert "state.lfrontierExplicit = false;" in fallback
+
+    # The two absences that must NOT substitute silently: an index still on the
+    # wire holds the selection, and a failed index says so outright rather than
+    # showing the default under the reader's own slug.
+    assert "!state.benchmarkIndexLoaded" in dispatch
+    assert "Could not load details for this benchmark." in dispatch
