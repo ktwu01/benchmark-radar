@@ -763,8 +763,9 @@ const I18N = {
     "Download the dataset": "下载数据集",
     "Star the repository": "给仓库点 Star",
     "Free dataset. No crawler needed.": "免费数据集，无需爬虫。",
-    "If this saved you research time, star the repository and help other eval builders find it.":
-      "如果它帮你节省了研究时间，请给仓库点 Star，让更多评测开发者找到它。",
+    "If this saved you research time, cite the work, star the repo and help other eval builders find it.":
+      "如果它帮你节省了研究时间，请引用这项工作、给仓库点 Star，让更多评测开发者找到它。",
+    Cite: "引用",
     "Share Benchmark Radar": "分享 Benchmark Radar",
     "Copy link": "复制链接",
     Copied: "已复制",

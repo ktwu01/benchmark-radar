@@ -1,6 +1,10 @@
-# Benchmark Radar
+<div align="right">
 
-**简体中文:** [README.zh-CN.md](README.zh-CN.md)
+[中文](README.zh-CN.md)
+
+</div>
+
+# Benchmark Radar
 
 <!-- The record-count badge is data-driven: it is regenerated from the corpus on
 every collection, so it states what the project actually holds rather than a
@@ -10,8 +14,8 @@ hand-edited number (issue #197). -->
 
 I kept running into new benchmarks while doing benchmark research, so I built a
 crawler that continuously collects benchmark-related signals from across the
-web. It pulls evidence from **arXiv, GitHub, Hugging Face, OpenAlex, OpenReview,
-first-party lab feeds, Brave Search, Semantic Scholar, Hacker News, and more**
+web. It pulls evidence from arXiv, GitHub, Hugging Face, OpenAlex, OpenReview,
+first-party lab feeds, Brave Search, Semantic Scholar, Hacker News, and more
 every day, and keeps updating.
 
 **Click the image to watch how reported AIME 2025 scores saturated over time.**
@@ -46,3 +50,25 @@ If Benchmark Radar saves you research time, **[star the repository](https://gith
 Scan the QR code to join the WeChat group for daily benchmark updates and eval discussions:
 
 <img src="assets/wechat-group-qr.jpg" alt="WeChat group QR code" width="280" />
+
+## Acknowledgements
+
+The frontier-model score layer (including the AIME 2025 chart above) is built on
+benchmark data collected by [LLM Stats](https://llm-stats.com). Thank you for
+keeping that data open.
+
+## Citation
+
+If Benchmark Radar supports your research or evaluation work, please cite it:
+
+```bibtex
+@misc{wu2026benchmarkradar,
+  title        = {Benchmark Radar: A Daily, Evidence-First Radar and Machine-Readable Corpus for AI Benchmarks},
+  author       = {Wu, Koutian},
+  year         = {2026},
+  howpublished = {\url{https://github.com/ktwu01/benchmark-radar}},
+  note         = {Daily benchmark radar and open dataset}
+}
+```
+
+See [`CITATION.cff`](CITATION.cff) for machine-readable citation metadata.

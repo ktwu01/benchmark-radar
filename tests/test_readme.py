@@ -86,10 +86,12 @@ def test_chinese_readme_mirrors_the_english_one():
     if not README_ZH.exists():  # pragma: no cover
         return
     zh = README_ZH.read_text(encoding="utf-8")
-    en = README.read_text(encoding="utf-8")
 
     url = "https://koutian.is-a.dev/benchmark-radar/data/records-badge.json"
     quoted = quote(url, safe="")
     assert f"https://img.shields.io/endpoint?url={quoted}" in zh
-    assert "[README.md](README.md)" in zh
-    assert "[README.zh-CN.md](README.zh-CN.md)" in en
+    assert "[English](README.md)" in zh
+    # The language switch sits at the top-right, above the title, with a plain
+    # language label rather than a filename.
+    assert '<div align="right">' in zh.split("# Benchmark Radar")[0]
+    assert "[README.md](README.md)" not in zh

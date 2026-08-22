@@ -34,8 +34,12 @@ def test_readmes_offer_free_data_and_an_earned_star_request():
     english = Path("README.md").read_text(encoding="utf-8")
     chinese = Path("README.zh-CN.md").read_text(encoding="utf-8")
 
-    assert "[README.zh-CN.md](README.zh-CN.md)" in english
-    assert "[README.md](README.md)" in chinese
+    # Language switch sits top-right above the title with a plain label.
+    assert '<div align="right">' in english.split("# Benchmark Radar")[0]
+    assert "[中文](README.zh-CN.md)" in english
+    assert "[README.zh-CN.md](README.zh-CN.md)" not in english
+    assert '<div align="right">' in chinese.split("# Benchmark Radar")[0]
+    assert "[English](README.md)" in chinese
     assert "Click the image" in english
     assert "点击图片" in chinese
     assert "data/radar.json" in english and "no crawler or contact required" in english
