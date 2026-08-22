@@ -790,6 +790,17 @@ def test_issue_312_the_saturation_view_reveals_left_to_right():
     )[0]
     assert "frontierPointRevealDelay" in external
 
+    # The issue's definition is enforced in the same pass: points that hold
+    # the best value as of their date are the line; every other reading fades
+    # back behind it, and recovers on hover or focus.
+    assert "const frontierMarks = new Set();" in chart
+    assert "point.value === best" in chart
+    assert '" score-point-dim"' in chart
+    dim = styles.split(".score-point-dim .score-point-face {", 1)[1][:200]
+    assert "fill-opacity: 0.6;" in dim
+    assert ".score-point-dim:hover .score-point-face" in styles
+    assert ".score-point-dim.is-selected .score-point-glyph" in styles
+
     # The entrance is gated to arrivals: a render adds the class only when
     # the selection changed AND the leaderboard is the visible view, so a
     # redraw into a hidden panel never spends an entrance the reader has yet

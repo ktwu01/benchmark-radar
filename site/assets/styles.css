@@ -2875,6 +2875,37 @@ td a {
   }
 }
 
+/* "其他的点可以淡化" (issue #312): readings off the saturation line recede
+   behind it instead of competing with it for the eye. The de-emphasis sits on
+   the marks inside the group rather than the group's own opacity, which the
+   entrance animation owns. Reading one still works: hover and focus bring a
+   receded point back to full strength. */
+.score-point-dim .score-point-face {
+  fill-opacity: 0.6;
+  stroke-opacity: 0.45;
+}
+
+.score-point-dim .score-point-citation-ring,
+.score-point-dim .score-point-glyph {
+  opacity: 0.5;
+}
+
+.score-point-dim:hover .score-point-face,
+.score-point-dim:focus .score-point-face,
+.score-point-dim.is-selected .score-point-face {
+  fill-opacity: 1;
+  stroke-opacity: 1;
+}
+
+.score-point-dim:hover .score-point-citation-ring,
+.score-point-dim:focus .score-point-citation-ring,
+.score-point-dim.is-selected .score-point-citation-ring,
+.score-point-dim:hover .score-point-glyph,
+.score-point-dim:focus .score-point-glyph,
+.score-point-dim.is-selected .score-point-glyph {
+  opacity: 1;
+}
+
 /* The entrance is presentation, not information: readers who ask for reduced
    motion get the finished chart immediately. */
 @media (prefers-reduced-motion: reduce) {

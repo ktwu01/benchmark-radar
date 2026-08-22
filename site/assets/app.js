@@ -5563,9 +5563,32 @@ function scoreTrackChart(entry, board) {
         value: observation.value,
       });
     }
-    const frontierSteps = [...runs.values()]
-      .map((points) => runningBestSteps(points, { descends: scoreDescends }))
-      .sort((a, b) => b.length - a.length)[0];
+    // The line belongs to exactly one comparable run -- the one with the most
+    // advances (issue #288). Its steps draw it; its best-so-far holders light
+    // up with it.
+    const runSteps = [...runs.values()].map((points) => ({
+      points,
+      steps: runningBestSteps(points, { descends: scoreDescends }),
+    }));
+    const frontier = runSteps.sort((a, b) => b.steps.length - a.steps.length)[0];
+    const frontierSteps = frontier?.steps;
+    // Which points the saturation line is made of (issue #312's definition):
+    // within that run, every reading that holds the best value as of its
+    // date. These stay at full emphasis; all other points fade back so the
+    // eye lands on the line first. Keyed by time and value, which is what a
+    // step records, so ties on both are line members too.
+    const frontierMarks = new Set();
+    if (frontier) {
+      let best = null;
+      for (const point of frontier.points) {
+        if (best === null || (scoreDescends ? point.value < best : point.value > best)) {
+          best = point.value;
+        }
+        if (point.value === best) {
+          frontierMarks.add(`${point.time}\u0000${point.value}`);
+        }
+      }
+    }
     if (frontierSteps?.length) {
       svg.append(
         svgElement("path", {
@@ -5617,13 +5640,21 @@ function scoreTrackChart(entry, board) {
         : observation.source_id.replaceAll("_", " ");
       const pointX = x(observation.reported_at);
       const pointY = scoreY(observation.value);
+      // "其他的点可以淡化" (issue #312): readings that are not part of the
+      // saturation line recede behind it. Hover and focus restore them, so
+      // de-emphasis never costs legibility.
+      const onFrontier = frontierMarks.has(
+        `${new Date(`${observation.reported_at}T00:00:00Z`).getTime()}\u0000${observation.value}`,
+      );
       // Entrance order follows the axis (issue #312): each point brightens
       // while the drawing front crosses its date, so the reveal reads left to
       // right the way the data does. The timing is shared with the crawled
       // layer's chart so both figures reveal the same way.
       const revealDelay = frontierPointRevealDelay(pointX, margin, plotWidth);
       const group = svgElement("g", {
-        class: `score-point${observation.reported_by ? " score-point-third-party" : ""}`,
+        class: `score-point${
+          onFrontier ? "" : " score-point-dim"
+        }${observation.reported_by ? " score-point-third-party" : ""}`,
         tabindex: "0",
         role: "button",
         "aria-pressed": "false",
