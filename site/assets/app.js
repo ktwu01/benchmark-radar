@@ -4628,6 +4628,12 @@ function renderExternalShell(
   ]);
 }
 
+// Superseded shard paints are dropped: if the same record is rendered twice
+// before its (cached) shard promise settles, only the latest call may paint,
+// or the second paint would clear the entrance class before the browser ever
+// drew the first frame.
+let externalRenderSeq = 0;
+
 function renderExternalBenchmark(board, scored, record) {
   const meta = externalSourceMeta(record.source);
   // One title, one metadata line. The eyebrow ("External catalog record") and
@@ -4649,10 +4655,13 @@ function renderExternalBenchmark(board, scored, record) {
   if (existing) existing.selected = true;
   else picker.prepend(option(record.slug, `${record.name} · ${meta.name}`, true));
   const container = byId("frontier-external");
+  const renderToken = ++externalRenderSeq;
   loadBenchmarkShard(record.slug).then((shard) => {
     // The reader may have moved on while the shard was on the wire; only paint
-    // if this record is still the selection.
+    // if this record is still the selection -- and only if no newer render of
+    // this panel has superseded this callback.
     if (state.lfrontier !== record.slug) return;
+    if (renderToken !== externalRenderSeq) return;
     if (!shard) {
       // A failed shard fetch leaves the index row and the selection in place;
       // only the panel reports the failure (display plan step 7).
@@ -5405,10 +5414,14 @@ function frontierPointRevealDelay(pointX, margin, plotWidth) {
 // The entrance plays when the reader arrives at a benchmark, not on every
 // incidental redraw of the panel they are already reading (the crawled index
 // settling, an unrelated filter keystroke, a language toggle). Each drawn
-// selection is remembered; redrawing the same one skips the replay.
+// selection is remembered; redrawing the same one skips the replay. The key
+// commits only while the Leaderboard is the visible view: a redraw into a
+// hidden panel (a resize crossing from Trends, an index settling after the
+// reader moved on) must not spend the entrance the reader has yet to see.
 let lastFrontierEntranceKey = null;
 
 function frontierShouldAnimate(key) {
+  if (state.view !== "leaderboard") return false;
   const animate = lastFrontierEntranceKey !== key;
   lastFrontierEntranceKey = key;
   return animate;

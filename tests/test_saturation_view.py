@@ -791,13 +791,25 @@ def test_issue_312_the_saturation_view_reveals_left_to_right():
     assert "frontierPointRevealDelay" in external
 
     # The entrance is gated to arrivals: a render adds the class only when
-    # the selection changed, so incidental redraws (index fetch settling,
-    # unrelated filters, language toggle) repaint finished instead of
-    # collapsing and replaying.
+    # the selection changed AND the leaderboard is the visible view, so a
+    # redraw into a hidden panel never spends an entrance the reader has yet
+    # to see, and incidental same-chart repaints stay finished.
     assert "function frontierShouldAnimate(key)" in script
+    gate = script.split("function frontierShouldAnimate(key)", 1)[1].split("\n}", 1)[0]
+    assert 'if (state.view !== "leaderboard") return false;' in gate
     assert 'frontierShouldAnimate(`curated:${entry.benchmark_id}`)' in script
     assert 'frontierShouldAnimate(`external:${record.slug}`)' in script
     assert script.count('"score-chart-enter"') == 2
+
+    # A superseded shard callback may not paint: two renders of one record
+    # before its cached shard settles would otherwise let the second paint
+    # clear the entrance class before the browser drew a frame.
+    assert "let externalRenderSeq = 0;" in script
+    external_render = script.split("function renderExternalBenchmark(board, scored, record)", 1)[
+        1
+    ].split("\nfunction ", 1)[0]
+    assert "const renderToken = ++externalRenderSeq;" in external_render
+    assert "if (renderToken !== externalRenderSeq) return;" in external_render
 
     line_rule = styles.split(".score-chart-enter .score-frontier-line {", 1)[1][:400]
     assert "stroke-dasharray: 1;" in line_rule
