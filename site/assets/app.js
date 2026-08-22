@@ -1169,10 +1169,60 @@ function onPopState() {
   }
 }
 
+// Issue #236. Crawlers see one document; these four states are still four
+// different pages a reader can land on and link to, so each one restates its
+// own title, description, and canonical URL when it becomes active. The
+// canonicals carry only the view parameter: filter permutations (q, date,
+// lq, lfrontier, ...) consolidate into the clean view URL instead of
+// fragmenting ranking signals across every state of the same page. These
+// strings are English on purpose: they describe the site to a search engine,
+// while the visible interface translates through data-i18n.
+const VIEW_SEO = {
+  today: {
+    title: "Benchmark Radar — today's new AI benchmarks",
+    description:
+      "A daily evidence-first map of new AI benchmarks, evaluations, and datasets, collected every day from arXiv, GitHub, Hugging Face, OpenReview, Semantic Scholar, Hacker News, and first-party lab feeds.",
+    query: "",
+  },
+  leaderboard: {
+    title: "Most reported AI benchmarks in frontier model cards | Benchmark Radar",
+    description:
+      "Which benchmarks frontier labs actually report: a live Model Card Adoption Rank computed from curated model cards and system cards, plus reported score progression over time.",
+    query: "view=leaderboard",
+  },
+  trends: {
+    title: "AI benchmark discovery trends over time | Benchmark Radar",
+    description:
+      "Daily volume of new AI benchmark evidence by category, source, and event, with a ledger of every collection day in the corpus.",
+    query: "view=trends",
+  },
+  map: {
+    title: "Explore connections across AI benchmarks | Benchmark Radar",
+    description:
+      "See how benchmarks, datasets, evaluations, sources, and organizations connect across the Benchmark Radar corpus, and jump from any topic into the filtered daily list.",
+    query: "view=map",
+  },
+};
+
+function applyViewSeo(view) {
+  const seo = VIEW_SEO[view] || VIEW_SEO.today;
+  document.title = seo.title;
+  const description = document.querySelector('meta[name="description"]');
+  if (description) description.setAttribute("content", seo.description);
+  const canonical = document.querySelector('link[rel="canonical"]');
+  if (canonical) {
+    const url = new URL(window.location.pathname, window.location.origin);
+    if (seo.query) url.search = seo.query;
+    else url.search = "";
+    canonical.setAttribute("href", url.href);
+  }
+}
+
 // `update` false is for restoring a view that is already in the URL (boot and
 // popstate), where writing history again would either duplicate the entry or
 // fight the entry being restored.
 function setView(view, update = true, mode = "push") {
+  applyViewSeo(view);
   if (view !== "leaderboard" && selectedFrontierPoint) {
     clearFrontierPointSelection();
   }

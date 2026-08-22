@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+# Regenerated on every dashboard build by src/benchmark_radar/site_seo.py,
+# so it can never list a view the deployed site does not serve.
+Sitemap: https://ktwu01.github.io/benchmark-radar/sitemap.xml

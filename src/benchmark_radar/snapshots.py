@@ -31,6 +31,7 @@ from .rubric import (
     v2_rubric_reference,
     v3_rubric_reference,
 )
+from .site_seo import write_sitemap
 
 SCHEMA_VERSION = 2
 SUPPORTED_SCHEMA_VERSIONS = {1, SCHEMA_VERSION}
@@ -1062,6 +1063,10 @@ def rebuild_dashboard(
     badge_path = output.parent / "records-badge.json"
     badge_path.parent.mkdir(parents=True, exist_ok=True)
     badge_path.write_text(records_badge(value), encoding="utf-8")
+    # The sitemap lives beside radar.json for the same reason the badge does:
+    # written per build, never committed, so it can only describe what this
+    # build actually published (issue #236).
+    write_sitemap(snapshots, output.parent / "sitemap.xml")
     if feed_output is not None:
         write_feed(snapshots, feed_output)
     return value

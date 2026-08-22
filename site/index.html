@@ -30,6 +30,61 @@
       content="Benchmark Radar: the most-reported benchmarks across frontier model cards, led by GPQA Diamond, SWE-bench Verified, and LiveCodeBench."
     >
     <meta name="twitter:card" content="summary_large_image">
+    <!-- Mirrors og:image for consumers that read the Twitter namespace only
+         and do not fall back to the Open Graph tags. -->
+    <meta name="twitter:image" content="https://ktwu01.github.io/benchmark-radar/assets/og-card.png">
+
+    <!-- Issue #236. Every view is a query-string variant of this one path, so
+         each view restates its own canonical (VIEW_SEO in assets/app.js) and
+         filter permutations consolidate into these four clean URLs rather
+         than fragmenting ranking signals across every ?view=...&lq=... state.
+         The static default below is what crawlers fetch before any script
+         runs; app.js rewrites it per view on navigation. -->
+    <link rel="canonical" href="https://ktwu01.github.io/benchmark-radar/">
+
+    <!-- Structured data for the two things this project actually is: a
+         searchable site and a dataset. The SearchAction target is the real
+         search endpoint (the leaderboard's lq filter), not a pretend one, so
+         a search result lands on a page that answers it. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Benchmark Radar",
+        "url": "https://ktwu01.github.io/benchmark-radar/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://ktwu01.github.io/benchmark-radar/?view=leaderboard&lq={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Dataset",
+        "name": "Benchmark Radar cumulative corpus",
+        "description": "A daily-updated machine-readable corpus of AI benchmark, evaluation, and dataset signals collected from arXiv, GitHub, Hugging Face, OpenAlex, OpenReview, Semantic Scholar, Hacker News, and first-party lab feeds.",
+        "url": "https://ktwu01.github.io/benchmark-radar/data/radar.json",
+        "license": "https://opensource.org/licenses/MIT",
+        "creator": {
+          "@type": "Person",
+          "name": "Koutian Wu",
+          "url": "https://github.com/ktwu01"
+        },
+        "sameAs": "https://github.com/ktwu01/benchmark-radar",
+        "distribution": [
+          {
+            "@type": "DataDownload",
+            "encodingFormat": "application/json",
+            "contentUrl": "https://ktwu01.github.io/benchmark-radar/data/radar.json"
+          }
+        ]
+      }
+    </script>
 
     <link rel="icon" href="icon.svg" type="image/svg+xml">
     <link rel="alternate" type="application/rss+xml" title="Benchmark Radar RSS" href="feed.xml">
