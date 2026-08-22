@@ -95,7 +95,7 @@ def test_scan_date_can_be_reset_to_all_dates():
     assert 'params.set("date", "all")' in script
     # The list is bounded and scroll-fed (issue #311): one page at a time, no
     # button, a status line saying how much is loaded.
-    assert "observations.slice(0, state.todayResultsLimit)" in script
+    assert "observations.slice(0, todayPageLimit())" in script
     assert "state.todayResultsLimit += TODAY_PAGE_SIZE" in script
     assert "const TODAY_PAGE_SIZE = 20;" in script
     assert 'id="today-loaded"' in html
@@ -112,7 +112,7 @@ def test_dashboard_bounds_work_before_and_during_filtering():
 
     assert "state.observations = [...evidence, ...attention].sort" in script
     assert "if (state.observations) return state.observations" in script
-    assert "const visibleObservations = observations.slice(0, state.todayResultsLimit)" in script
+    assert "const visibleObservations = observations.slice(0, todayPageLimit())" in script
     assert "renderToday({ resultsOnly: true })" in script
     assert 'if (state.view === "today") renderToday()' in script
     assert 'if (state.view === "leaderboard") renderLeaderboard()' in script
@@ -1865,7 +1865,7 @@ def test_issue_311_the_today_list_loads_one_page_at_a_time():
         "\nfunction ", 1
     )[0]
     assert "state.todayResultsLimit = TODAY_PAGE_SIZE;" in renderer
-    assert "const visibleObservations = observations.slice(0, state.todayResultsLimit);" in renderer
+    assert "const visibleObservations = observations.slice(0, todayPageLimit());" in renderer
 
     # Scroll loads; no button competes with it.
     assert "function watchTodaySentinel(" in script
