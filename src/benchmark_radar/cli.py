@@ -325,16 +325,12 @@ def main() -> None:
             encoding="utf-8",
         )
 
-        # One index over both sources, one row per source record. Two sources
-        # describing the same benchmark stay two rows until identity.yml says
-        # otherwise under human review.
         series_by_key = {row["key"]: row for row in normalized["score_series"]}
         all_records = normalized["source_records"] + opencompass["source_records"]
-        index = build_benchmark_index(all_records, series_by_key)
-        index_path = write_benchmark_index(index, Path("site/data/benchmark-index.json"))
 
         from .external_identity import (
             DEFAULT_CANDIDATES_PATH,
+            apply_inherited_identity,
             build_identity_candidates,
             load_identity,
             write_identity_candidates,
@@ -343,13 +339,27 @@ def main() -> None:
 
         # Regenerate the review candidates every run so a recrawl surfaces new
         # collisions, but never touch identity.yml: that file is promoted by
-        # hand, and the candidates only feed that review.
+        # hand, and the candidates only feed that review. Candidates are built
+        # from the raw records, before inheritance, so a borrowed anchor never
+        # manufactures a machine candidate.
         candidates = build_identity_candidates(all_records)
         write_identity_candidates(candidates, DEFAULT_CANDIDATES_PATH)
 
+        # Resolve the reviewed join, then let a record in an `equivalent` group
+        # show its donor's identity. The index and shards render the resolved
+        # records; the raw records above stay the honest source-level state.
         identity = load_identity(all_records)
+        resolved_records = apply_inherited_identity(all_records, identity)
+        inherited_count = sum(1 for row in resolved_records if "identity_inheritance" in row)
+
+        # One index over both sources, one row per source record. Two sources
+        # describing the same benchmark stay two rows until identity.yml says
+        # otherwise under human review.
+        index = build_benchmark_index(resolved_records, series_by_key)
+        index_path = write_benchmark_index(index, Path("site/data/benchmark-index.json"))
+
         shard_report = write_shards(
-            all_records,
+            resolved_records,
             identity=identity,
             series=normalized["score_series"],
             observations=normalized["score_observations"],
@@ -366,6 +376,7 @@ def main() -> None:
             f"{shard_report['total_bytes'] / 1024:.0f} KiB -> {shard_report['output_dir']}\n"
             f"identity candidates: {candidates['equivalent_candidate_count']} anchor-backed, "
             f"{candidates['name_only_count']} name-only -> {DEFAULT_CANDIDATES_PATH}\n"
+            f"identity inherited: {inherited_count} records show a reviewed donor's identity\n"
             f"catalog written to {written['source_records'].parent}"
         )
         return

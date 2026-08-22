@@ -4424,6 +4424,19 @@ footer {
   font-size: 0.85rem;
 }
 
+/* The #262 inheritance note: a borrowed identity is flagged, never silent. A
+   left rule and muted panel set it apart from the record's own description. */
+.external-inherited {
+  max-width: 75ch;
+  margin: 0 0 0.8rem;
+  padding: 0.5rem 0.7rem;
+  border-left: 3px solid #4a6b73;
+  background: rgba(74, 107, 115, 0.12);
+  border-radius: 0 4px 4px 0;
+  color: #cdd9dc;
+  font-size: 0.8rem;
+}
+
 .external-openness-chip {
   margin: 0 0 0.7rem;
 }

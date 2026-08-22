@@ -138,9 +138,36 @@ variants:
 ```
 
 `anchors` is the reviewable evidence: a shared arXiv id, a shared `owner/repo`, or a
-shared `hf:owner/name`. A shared *name* is not an anchor. **A group with fewer than two
-independent anchors does not go in `equivalent`**, it goes in a `candidates:` block for
-a human to clear.
+shared `hf:owner/name`. A shared *name* is not an anchor. **A machine-promoted group with
+fewer than two independent anchors does not go in `equivalent`**, it goes in a
+`candidates:` block for a human to clear.
+
+**`basis: reviewer_asserted` is the hand-review escape from the two-anchor bar.** llm-stats
+carries no artifacts, so no llm-stats-to-OpenCompass equivalence can ever clear two machine
+anchors, yet a reviewer reading both cards can still confirm the two rows are one
+instrument (#262). On such a group the reviewer's signature is the second warrant: the
+loader drops the floor to one donor anchor and makes `reviewed_by` / `reviewed_at`
+mandatory. The `anchors` listed are then the *donor's* artifacts that ground the identity,
+not anchors shared with the scoreless side.
+
+```yaml
+equivalent:
+  - group_id: gpqa
+    basis: reviewer_asserted
+    members: [llm-stats:gpqa, opencompass:1135]
+    inherit_from: opencompass:1135   # whose identity the others may display
+    anchors: [arxiv:2311.12022, gh:idavidrein/gpqa]
+    reviewed_by: ktwu01
+    reviewed_at: 2026-08-22
+```
+
+**`inherit_from` carries identity across the group, never scores.** It names the member
+whose publisher, artifacts, release date, size and openness the other members may display
+when they carry none of their own. `apply_inherited_identity` only ever fills an empty
+field and attaches an `identity_inheritance` note naming the donor source, so a GPQA record
+showing "Anthropic" makes clear the value came from the OpenCompass card. The two rows stay
+two rows: no score joins another source's series, and `openness.status` is inherited already
+mechanically-derived, never hand-set.
 
 `equivalent` groups do not require a `canonical_id`. 76 names collide between the two
 crawls and most of those benchmarks are in neither the registry nor each other's
@@ -225,7 +252,9 @@ Without this the honesty rules are prose an implementer will route around.
   checks `model_cards.py` and `benchmark_scores.py` already do, and reusing
   `leaderboard_snapshots.py` from the legacy branch rather than replacing it. Reject: duplicate `key`,
   duplicate `obs_id`, a score whose `key` has no source record, an `identity.yml` member
-  that does not exist, an `equivalent` group with fewer than two anchors.
+  that does not exist, a machine-promoted `equivalent` group with fewer than two anchors, a
+  `reviewer_asserted` group missing `reviewed_by`/`reviewed_at` or a donor anchor, an
+  `inherit_from` that is not a member.
 - Deterministic output: sorted keys, stable row order, no build timestamp inside the
   payload. Otherwise every rebuild is a full diff.
 - Shards are written to a fresh directory and swapped, and stale shards are deleted, so a

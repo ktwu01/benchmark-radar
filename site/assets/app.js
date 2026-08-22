@@ -727,6 +727,8 @@ const I18N = {
     "modality not established": "模态尚未确定",
     "No paper, repository, dataset or site link established.":
       "尚未确定论文、代码仓库、数据集或站点链接。",
+    "Identity below is inherited from the {donor} card for a reviewed equivalent benchmark; scores are unchanged.":
+      "以下基本信息继承自 {donor} 中经人工核对为同一基准的记录；分数不受影响。",
     Openness: "开放性",
     "openness not established": "开放性尚未确定",
     open: "开放",
@@ -4013,6 +4015,25 @@ function externalFactList(facts) {
 // empty one says "not established" instead of disappearing: hiding an empty
 // field reads as "not applicable", and whether these facts are known is
 // precisely the reader's question (display plan step 4).
+// A record with no identity of its own may show a reviewed equivalent's
+// (issue #262): llm-stats carries the scores and the OpenCompass card carries
+// the publisher, artifacts and dates. When it does, the borrowed values are
+// never presented as this source's own -- this note names the donor card and
+// the review, so "Anthropic" reads as "from the OpenCompass card", not "from
+// LLM Stats".
+function externalInheritanceNote(detail) {
+  const inheritance = detail.identity_inheritance;
+  if (!inheritance) return null;
+  const donorName = externalSourceMeta(inheritance.donor_source).name;
+  return element("p", {
+    className: "external-inherited",
+    text: t(
+      "Identity below is inherited from the {donor} card for a reviewed equivalent benchmark; scores are unchanged.",
+      { donor: donorName },
+    ),
+  });
+}
+
 function externalIdentityBlock(detail) {
   const publisher = detail.publisher;
   const description = l10nProse(detail.description?.en, detail.description?.zh);
@@ -4027,6 +4048,7 @@ function externalIdentityBlock(detail) {
       className: "external-description",
       text: description || t("description not established"),
     }),
+    externalInheritanceNote(detail),
     externalFactList([
       [
         t("Publisher"),

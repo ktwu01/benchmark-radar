@@ -469,6 +469,248 @@ def test_missing_identity_file_is_not_an_error(all_records: list[dict], tmp_path
     assert identity.siblings_for(all_records[0]["key"]) == []
 
 
+# Reviewer-asserted equivalence and identity inheritance (#262)
+
+
+def _llm_and_oc(all_records: list[dict]) -> tuple[str, str]:
+    """One real llm-stats key and one real OpenCompass key, for group fixtures."""
+    llm = next(r["key"] for r in all_records if r["source"] == "llm_stats")
+    oc = next(r["key"] for r in all_records if r["source"] == "opencompass_hub")
+    return llm, oc
+
+
+def test_reviewer_asserted_group_clears_with_one_donor_anchor(
+    all_records: list[dict], tmp_path: Path
+) -> None:
+    """A signed hand review is the second warrant; one donor anchor is the floor."""
+    from benchmark_radar.external_identity import load_identity
+
+    llm, oc = _llm_and_oc(all_records)
+    path = _write_identity(
+        tmp_path,
+        {
+            "schema_version": 1,
+            "equivalent": [
+                {
+                    "group_id": "g",
+                    "basis": "reviewer_asserted",
+                    "members": [llm, oc],
+                    "inherit_from": oc,
+                    "anchors": ["arxiv:1"],
+                    "reviewed_by": "ktwu01",
+                    "reviewed_at": "2026-08-22",
+                }
+            ],
+        },
+    )
+    identity = load_identity(all_records, path)
+    assert identity.siblings_for(llm)
+    assert identity.inheritance_for(llm)["donor_key"] == oc
+
+
+def test_reviewer_asserted_group_needs_a_signature(
+    all_records: list[dict], tmp_path: Path
+) -> None:
+    from benchmark_radar.external_identity import IdentityError, load_identity
+
+    llm, oc = _llm_and_oc(all_records)
+    path = _write_identity(
+        tmp_path,
+        {
+            "schema_version": 1,
+            "equivalent": [
+                {
+                    "group_id": "g",
+                    "basis": "reviewer_asserted",
+                    "members": [llm, oc],
+                    "anchors": ["arxiv:1"],
+                }
+            ],
+        },
+    )
+    with pytest.raises(IdentityError, match="reviewed_by and reviewed_at"):
+        load_identity(all_records, path)
+
+
+def test_reviewer_asserted_group_needs_a_donor_anchor(
+    all_records: list[dict], tmp_path: Path
+) -> None:
+    """Human review relaxes the bar to one anchor, not to a pure-name match."""
+    from benchmark_radar.external_identity import IdentityError, load_identity
+
+    llm, oc = _llm_and_oc(all_records)
+    path = _write_identity(
+        tmp_path,
+        {
+            "schema_version": 1,
+            "equivalent": [
+                {
+                    "group_id": "g",
+                    "basis": "reviewer_asserted",
+                    "members": [llm, oc],
+                    "anchors": [],
+                    "reviewed_by": "ktwu01",
+                    "reviewed_at": "2026-08-22",
+                }
+            ],
+        },
+    )
+    with pytest.raises(IdentityError, match="no donor anchor"):
+        load_identity(all_records, path)
+
+
+def test_loader_rejects_inherit_from_that_is_not_a_member(
+    all_records: list[dict], tmp_path: Path
+) -> None:
+    from benchmark_radar.external_identity import IdentityError, load_identity
+
+    llm, oc = _llm_and_oc(all_records)
+    path = _write_identity(
+        tmp_path,
+        {
+            "schema_version": 1,
+            "equivalent": [
+                {
+                    "group_id": "g",
+                    "basis": "reviewer_asserted",
+                    "members": [llm, oc],
+                    "inherit_from": "opencompass:does-not-exist",
+                    "anchors": ["arxiv:1", "gh:a/b"],
+                    "reviewed_by": "ktwu01",
+                    "reviewed_at": "2026-08-22",
+                }
+            ],
+        },
+    )
+    with pytest.raises(IdentityError, match="is not one of its members"):
+        load_identity(all_records, path)
+
+
+def test_inheritance_fills_empty_identity_and_attributes_the_donor(
+    all_records: list[dict], tmp_path: Path
+) -> None:
+    """The llm-stats record shows the donor's publisher, flagged as borrowed."""
+    from benchmark_radar.external_identity import apply_inherited_identity, load_identity
+
+    llm = "llm-stats:gpqa"
+    oc = "opencompass:1135"
+    path = _write_identity(
+        tmp_path,
+        {
+            "schema_version": 1,
+            "equivalent": [
+                {
+                    "group_id": "gpqa",
+                    "basis": "reviewer_asserted",
+                    "members": [llm, oc],
+                    "inherit_from": oc,
+                    "anchors": ["arxiv:2311.12022", "gh:idavidrein/gpqa"],
+                    "reviewed_by": "ktwu01",
+                    "reviewed_at": "2026-08-22",
+                }
+            ],
+        },
+    )
+    identity = load_identity(all_records, path)
+    resolved = {r["key"]: r for r in apply_inherited_identity(all_records, identity)}
+    donor = {r["key"]: r for r in all_records}[oc]
+
+    inherited = resolved[llm]
+    assert inherited["publisher"] == donor["publisher"]
+    assert inherited["publisher"]["name"] == "Anthropic"
+    assert inherited["artifacts"] == donor["artifacts"]
+    assert inherited["released"] == donor["released"]
+    note = inherited["identity_inheritance"]
+    assert note["donor_key"] == oc
+    assert note["donor_source"] == "opencompass_hub"
+    assert "publisher" in note["fields"]
+
+
+def test_inheritance_never_touches_scores_or_other_records(
+    normalized: dict, all_records: list[dict], tmp_path: Path
+) -> None:
+    """Only the recipient changes, and only its identity: no series, no donor edit."""
+    from benchmark_radar.external_identity import apply_inherited_identity, load_identity
+
+    llm = "llm-stats:gpqa"
+    oc = "opencompass:1135"
+    path = _write_identity(
+        tmp_path,
+        {
+            "schema_version": 1,
+            "equivalent": [
+                {
+                    "group_id": "gpqa",
+                    "basis": "reviewer_asserted",
+                    "members": [llm, oc],
+                    "inherit_from": oc,
+                    "anchors": ["arxiv:2311.12022", "gh:idavidrein/gpqa"],
+                    "reviewed_by": "ktwu01",
+                    "reviewed_at": "2026-08-22",
+                }
+            ],
+        },
+    )
+    identity = load_identity(all_records, path)
+    resolved = {r["key"]: r for r in apply_inherited_identity(all_records, identity)}
+
+    # The donor is unchanged and carries no inheritance note of its own.
+    assert "identity_inheritance" not in resolved[oc]
+    # A record outside the group is returned untouched (same object).
+    by_key = {r["key"]: r for r in all_records}
+    other = next(k for k in by_key if k not in {llm, oc})
+    assert resolved[other] is by_key[other]
+    # No score observation gained a cross-source field; scores stay by source.
+    assert all("identity_inheritance" not in obs for obs in normalized["score_observations"])
+
+
+def test_seed_inherits_gpqa_identity_and_leaves_near_matches_alone(
+    all_records: list[dict],
+) -> None:
+    """The checked-in seed resolves GPQA's donor and keeps mmbench-v1.1 a variant."""
+    from benchmark_radar.external_identity import (
+        DEFAULT_IDENTITY_PATH,
+        apply_inherited_identity,
+        load_identity,
+    )
+
+    identity = load_identity(all_records, DEFAULT_IDENTITY_PATH)
+    resolved = {r["key"]: r for r in apply_inherited_identity(all_records, identity)}
+
+    # An exact-name pair inherits identity and names its donor.
+    gpqa = resolved["llm-stats:gpqa"]
+    assert gpqa["publisher"]["name"] == "Anthropic"
+    assert gpqa["identity_inheritance"]["donor_source"] == "opencompass_hub"
+
+    # A near-match is cross-linked as a variant but inherits nothing: it is
+    # related, not the same instrument, so it still has no publisher of its own.
+    near = resolved["llm-stats:mmbench-v1.1"]
+    assert "identity_inheritance" not in near
+    assert near["publisher"] is None
+    assert identity.siblings_for("llm-stats:mmbench-v1.1")
+
+
+def test_all_twenty_one_exact_name_pairs_inherit_a_publisher_or_artifacts(
+    all_records: list[dict],
+) -> None:
+    """Every #262 exact-name recipient stops reading 'not established' somewhere."""
+    from benchmark_radar.external_identity import (
+        DEFAULT_IDENTITY_PATH,
+        apply_inherited_identity,
+        load_identity,
+    )
+
+    identity = load_identity(all_records, DEFAULT_IDENTITY_PATH)
+    resolved = {r["key"]: r for r in apply_inherited_identity(all_records, identity)}
+    recipients = [key for key in identity.inheritance_by_key if key.startswith("llm-stats:")]
+    assert len(recipients) == 21
+    for key in recipients:
+        record = resolved[key]
+        assert record.get("identity_inheritance")
+        # Each donor supplies at least one of the reader's identity questions.
+        assert record["publisher"] or record["artifacts"] or record["released"]
+
+
 # Shards
 
 
@@ -558,6 +800,35 @@ def test_variant_siblings_are_cross_linked_in_the_shard(shard_inputs: dict, tmp_
     )
     siblings = {sibling["key"] for sibling in shard["siblings"]}
     assert "opencompass:516" in siblings
+
+
+def test_resolved_shard_serializes_the_inheritance_note(
+    shard_inputs: dict, tmp_path: Path
+) -> None:
+    """The #262 note reaches disk as JSON, dates and all, and names its donor."""
+    import json
+
+    from benchmark_radar.external_identity import apply_inherited_identity
+    from benchmark_radar.external_shards import write_shards
+
+    resolved = apply_inherited_identity(shard_inputs["records"], shard_inputs["identity"])
+    write_shards(
+        resolved,
+        identity=shard_inputs["identity"],
+        series=shard_inputs["series"],
+        observations=shard_inputs["observations"],
+        output_dir=tmp_path / "benchmarks",
+    )
+    shard = json.loads(
+        (tmp_path / "benchmarks" / "llm-stats-gpqa.json").read_text(encoding="utf-8")
+    )
+    record = shard["record"]
+    assert record["publisher"]["name"] == "Anthropic"
+    note = record["identity_inheritance"]
+    assert note["donor_source"] == "opencompass_hub"
+    assert isinstance(note["reviewed_at"], str)
+    # The scores are still the llm-stats series, untouched by the join.
+    assert len(shard["scores_by_source"]["llm_stats"]["rows"]) == 239
 
 
 def test_stale_shards_are_swapped_out(shard_inputs: dict, tmp_path: Path) -> None:

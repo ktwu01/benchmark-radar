@@ -27,6 +27,25 @@ a suggestion. The loader rejects a member key that no record carries, an
 `equivalent` group with fewer than two anchors, a duplicate `group_id`, and a
 key claimed by two `equivalent` groups, because each of those would let a bad
 merge reach the site looking reviewed.
+
+THE TWO-ANCHOR GATE AND HAND REVIEW. The two-anchor rule governs the machine
+pass: `build_identity_candidates` may only offer a pair a reviewer never has to
+trust it. A group hand-written into `identity.yml` under `basis:
+reviewer_asserted` is the other case -- llm-stats carries no anchor at all, so no
+llm-stats-to-OpenCompass equivalence can ever clear two machine anchors, yet a
+reviewer reading two cards can still confirm that llm-stats `gpqa` and
+OpenCompass `1135` are one instrument. There the reviewer is one independent
+warrant and the donor's own artifact is the second, so the floor drops to one
+donor anchor and `reviewed_by` / `reviewed_at` become mandatory: the signature
+is what replaces the missing second machine anchor, and it is recorded.
+
+INHERITING IDENTITY ACROSS A REVIEWED GROUP (`apply_inherited_identity`). Once a
+group is confirmed, a record that carries no identity of its own (every
+llm-stats record) may show the donor's publisher, artifacts, release date, size
+and openness instead of "not established". That crossing is deliberate and
+attributed: an inherited value arrives wrapped in an `identity_inheritance` note
+naming the donor source, never silently merged, and it never touches scores --
+those stay partitioned by source in the shard and two rows stay two rows.
 """
 
 from __future__ import annotations
@@ -172,9 +191,15 @@ class IdentityIndex:
     variants: list[dict[str, Any]] = field(default_factory=list)
     # key -> the other members of its equivalent group, as sibling descriptors.
     siblings_by_key: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
+    # key -> the donor it inherits identity from, for records in a reviewed
+    # `equivalent` group that named an `inherit_from`.
+    inheritance_by_key: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     def siblings_for(self, key: str) -> list[dict[str, Any]]:
         return self.siblings_by_key.get(key, [])
+
+    def inheritance_for(self, key: str) -> dict[str, Any] | None:
+        return self.inheritance_by_key.get(key)
 
 
 def _sibling(record: dict[str, Any], relation: str) -> dict[str, Any]:
@@ -214,6 +239,7 @@ def load_identity(
     seen_group_ids: set[str] = set()
     key_to_group: dict[str, str] = {}
     siblings_by_key: dict[str, list[dict[str, Any]]] = {}
+    inheritance_by_key: dict[str, dict[str, Any]] = {}
 
     for group in equivalent:
         group_id = group.get("group_id")
@@ -224,7 +250,22 @@ def load_identity(
         seen_group_ids.add(group_id)
 
         anchors = group.get("anchors") or []
-        if len(anchors) < 2:
+        if group.get("basis") == "reviewer_asserted":
+            # A hand-reviewed cross-source equivalence. The two-anchor bar
+            # governs machine candidates; here the reviewer's signature is the
+            # second warrant, so it is mandatory and the donor need supply only
+            # one anchor (llm-stats can supply none). See the module docstring.
+            if not group.get("reviewed_by") or not group.get("reviewed_at"):
+                raise IdentityError(
+                    f"{path}: reviewer_asserted group {group_id!r} needs "
+                    "reviewed_by and reviewed_at"
+                )
+            if len(anchors) < 1:
+                raise IdentityError(
+                    f"{path}: reviewer_asserted group {group_id!r} has no donor anchor; "
+                    "at least one is required"
+                )
+        elif len(anchors) < 2:
             # STRUCTURE.md: a group with fewer than two independent anchors is a
             # candidate, not an equivalence. This is the enforcement point.
             raise IdentityError(
@@ -251,6 +292,29 @@ def load_identity(
                 _sibling(record_by_key[other], "equivalent") for other in members if other != member
             ]
 
+        # `inherit_from` names the member whose identity the others may show.
+        # It must be one of the members, and it drives `apply_inherited_identity`.
+        inherit_from = group.get("inherit_from")
+        if inherit_from is not None:
+            if inherit_from not in members:
+                raise IdentityError(
+                    f"{path}: equivalent group {group_id!r} inherit_from "
+                    f"{inherit_from!r} is not one of its members"
+                )
+            # `reviewed_at` is often written unquoted, which YAML parses to a
+            # date; the note lands in a shard and is JSON-serialized, so it is
+            # stringified here rather than crashing json.dumps.
+            reviewed_at = group.get("reviewed_at")
+            for member in members:
+                if member == inherit_from:
+                    continue
+                inheritance_by_key[member] = {
+                    "donor_key": inherit_from,
+                    "group_id": group_id,
+                    "reviewed_by": group.get("reviewed_by"),
+                    "reviewed_at": str(reviewed_at) if reviewed_at is not None else None,
+                }
+
     for variant in variants:
         key = variant.get("key")
         if key not in record_by_key:
@@ -270,4 +334,78 @@ def load_identity(
         equivalent_groups=list(equivalent),
         variants=list(variants),
         siblings_by_key=siblings_by_key,
+        inheritance_by_key=inheritance_by_key,
     )
+
+
+# The identity fields a record may inherit from its equivalent-group donor.
+# Scores are deliberately absent: they are partitioned by source in the shard
+# and never join here, so inheritance can only ever fill in provenance.
+INHERITED_IDENTITY_FIELDS = ("publisher", "artifacts", "released", "sizes", "openness")
+
+
+def _is_empty_identity(value: Any) -> bool:
+    """Whether a field holds nothing a reader could act on.
+
+    None, an empty list and an empty dict are empty. An `openness` block is
+    empty when it reached no verdict -- status `unknown` with neither licence --
+    which is exactly the state every llm-stats record ships in.
+    """
+    if value is None:
+        return True
+    if isinstance(value, dict):
+        if not value:
+            return True
+        if value.get("status") == "unknown":
+            return not value.get("code_license") and not value.get("data_license")
+        return False
+    if isinstance(value, list):
+        return not value
+    return False
+
+
+def apply_inherited_identity(
+    records: list[dict[str, Any]],
+    identity: IdentityIndex,
+) -> list[dict[str, Any]]:
+    """Fill a record's empty identity fields from its reviewed-group donor.
+
+    A record is only ever *given* a value it did not already have, and the value
+    arrives with an `identity_inheritance` note naming the donor source, so the
+    site can say "Anthropic (via the OpenCompass card)" and never presents a
+    borrowed value as the source's own. Records outside a reviewed `inherit_from`
+    group pass through untouched, and no score is read or written: inheritance is
+    Layer 2 identity only.
+    """
+    by_key = {record["key"]: record for record in records}
+    resolved: list[dict[str, Any]] = []
+    for record in records:
+        inheritance = identity.inheritance_for(record["key"])
+        donor = by_key.get(inheritance["donor_key"]) if inheritance else None
+        if donor is None:
+            resolved.append(record)
+            continue
+        merged = dict(record)
+        inherited_fields: list[str] = []
+        for field_name in INHERITED_IDENTITY_FIELDS:
+            # Only ever fill a field the record itself left empty, and only from
+            # a donor that actually carries one.
+            if not _is_empty_identity(merged.get(field_name)):
+                continue
+            donor_value = donor.get(field_name)
+            if _is_empty_identity(donor_value):
+                continue
+            merged[field_name] = donor_value
+            inherited_fields.append(field_name)
+        if inherited_fields:
+            merged["identity_inheritance"] = {
+                "donor_key": donor["key"],
+                "donor_source": donor["source"],
+                "donor_name": donor["name"],
+                "group_id": inheritance["group_id"],
+                "reviewed_by": inheritance["reviewed_by"],
+                "reviewed_at": inheritance["reviewed_at"],
+                "fields": inherited_fields,
+            }
+        resolved.append(merged)
+    return resolved
