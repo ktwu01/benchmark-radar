@@ -403,10 +403,13 @@ const I18N = {
     "All tracked benchmarks": "所有追踪的基准",
     "Search every benchmark": "搜索全部基准",
     "Most reported benchmarks in model cards": "模型卡中报告最多的benchmark",
+    Rank: "排名",
+    Benchmark: "基准",
+    "leaderboard.column.model_cards": "模型卡数量",
     "Jump to a benchmark": "跳转到某个基准",
     "One score, copied from the report that published it": "一个分数，照抄自发布它的报告",
-    "Show all {n} ranked benchmarks": "显示全部 {n} 个排名基准",
-    "Show the top {n}": "只显示前 {n} 个",
+    "Show all {n} benchmarks": "显示全部 {n} 个基准",
+    "Show top {n}": "只显示前 {n} 个",
     "A report counts once per test, even if it lists that test several times. Some reports publish their results as a picture rather than text, and we read those with software that can misread a digit, so the list at the bottom of this page links every count back to the report it came from.":
       "一份报告对同一项测试只计一次，即使它列出了多次。有些报告以图片而非文字发布结果，我们用软件读取，可能会看错数字，因此本页底部的清单把每个计数链接回它的来源报告。",
     model: "个模型",
@@ -6277,6 +6280,10 @@ function renderLeaderboardTop(board) {
     if (more) more.hidden = true;
     return;
   }
+  // Each row's bar is scaled against the top entry currently on screen, so the
+  // gap the reader is meant to see (e.g. GPQA Diamond vs. everything below it)
+  // stays visible whether five rows are shown or all of them are (issue #314).
+  const maxCount = Math.max(...entries.map((entry) => entry.card_count));
   replaceChildren(
     host,
     entries.map((entry) =>
@@ -6286,6 +6293,12 @@ function renderLeaderboardTop(board) {
           text: String(entry.rank).padStart(2, "0"),
         }),
         element("span", { className: "leaderboard-top-name", text: entry.name }),
+        element("span", { className: "leaderboard-top-bar" }, [
+          element("span", {
+            className: "leaderboard-top-bar-fill",
+            attrs: { style: `width:${((entry.card_count / maxCount) * 100).toFixed(1)}%` },
+          }),
+        ]),
         element("span", {
           className: "leaderboard-top-count",
           text: metricLabel(entry.card_count, "model card"),
@@ -6296,8 +6309,8 @@ function renderLeaderboardTop(board) {
   if (more) {
     more.hidden = ranked.length <= LEADERBOARD_TOP_LIMIT;
     more.textContent = state.leaderboardTopExpanded
-      ? t("Show the top {n}").replace("{n}", String(LEADERBOARD_TOP_LIMIT))
-      : t("Show all {n} ranked benchmarks").replace("{n}", String(ranked.length));
+      ? `${t("Show top {n}").replace("{n}", String(LEADERBOARD_TOP_LIMIT))} ↑`
+      : `${t("Show all {n} benchmarks").replace("{n}", String(ranked.length))} ↓`;
   }
 }
 

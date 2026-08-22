@@ -2323,6 +2323,27 @@ td a {
   margin: 0;
 }
 
+/* Named columns, not a wall of whitespace between the name and the count
+   (issue #314): a fixed rank marker, a name column capped so a short benchmark
+   name doesn't force the reader's eye across the full row width, a bar that
+   makes the gap between ranks visible at a glance, and a fixed count. */
+.leaderboard-top-columns {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 16rem) minmax(0, 1fr) 6.5rem;
+  gap: 0.75rem;
+  padding: 0 0.85rem 0.3rem;
+  color: var(--muted);
+  font-family: var(--utility);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.leaderboard-top-columns-count {
+  grid-column: 4;
+  text-align: right;
+}
+
 .leaderboard-top-list {
   list-style: none;
   margin: 0;
@@ -2333,10 +2354,10 @@ td a {
 
 .leaderboard-top-row {
   display: grid;
-  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  grid-template-columns: 2rem minmax(0, 16rem) minmax(0, 1fr) 6.5rem;
   gap: 0.75rem;
-  align-items: baseline;
-  padding: 0.22rem 0.85rem;
+  align-items: center;
+  padding: 0.3rem 0.85rem;
   border-bottom: 1px solid var(--line);
 }
 
@@ -2357,11 +2378,45 @@ td a {
   overflow-wrap: anywhere;
 }
 
+.leaderboard-top-bar {
+  display: block;
+  height: 0.55rem;
+  background: var(--canvas);
+}
+
+.leaderboard-top-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--blue);
+}
+
 .leaderboard-top-count {
   font-variant-numeric: tabular-nums;
   font-size: 0.82rem;
   color: var(--muted);
+  text-align: right;
   white-space: nowrap;
+}
+
+/* A disclosure toggle for the rest of the ranking, not an action button
+   (issue #314): the heavy bordered all-caps control it replaces read as a
+   destructive or system command for what is really "show more of this list". */
+.leaderboard-top-more {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--blue-deep);
+  font-family: var(--body);
+  font-size: 0.85rem;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.leaderboard-top-more:hover,
+.leaderboard-top-more:focus-visible {
+  color: var(--blue);
 }
 
 /* The title and its (i) sit on one line, with the source and score count on a
@@ -3915,6 +3970,24 @@ footer {
 
   footer {
     display: grid;
+  }
+}
+
+@media (max-width: 560px) {
+  /* The bar's job is comparing rows at a glance; on a narrow screen there is
+     no spare width left for it once rank, name and count are legible, so it
+     drops rather than squeezing everything past readable. */
+  .leaderboard-top-columns,
+  .leaderboard-top-row {
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+  }
+
+  .leaderboard-top-columns-count {
+    grid-column: 3;
+  }
+
+  .leaderboard-top-bar {
+    display: none;
   }
 }
 
