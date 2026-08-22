@@ -1028,3 +1028,48 @@ def test_issue_304_an_unresolved_slug_stops_naming_itself_in_the_url():
     # showing the default under the reader's own slug.
     assert "!state.benchmarkIndexLoaded" in dispatch
     assert "Could not load details for this benchmark." in dispatch
+
+
+def test_issue_314_the_ranking_reads_as_a_data_product():
+    """A 1940px row made the eye sweep the screen to read one benchmark.
+
+    The list now names its columns, encodes the count as a bar against the
+    leader so a row reads in place, stays at a readable width, and its
+    expander is a lightweight disclosure instead of a bordered all-caps
+    button that looked like a system command.
+    """
+    script = source("site/assets/app.js")
+    styles = source("site/assets/styles.css")
+    html = source("site/index.html")
+
+    renderer = script.split("function renderLeaderboardTop(board)", 1)[1].split(
+        "\nfunction ", 1
+    )[0]
+
+    # Column semantics: named columns, hidden from assistive tech because the
+    # ordered list already announces rank and value per row.
+    assert 'className: "leaderboard-top-columns"' in renderer
+    assert 'text: t("Rank")' in renderer
+    assert 'text: t("Benchmark")' in renderer
+    assert 'text: t("Model cards")' in renderer
+    assert '"aria-hidden": "true"' in renderer
+
+    # The bar is scaled against the leader's count.
+    assert "const maxCount = ranked[0].card_count || 1;" in renderer
+    assert "entry.card_count / maxCount" in renderer
+    assert 'className: "leaderboard-top-bar"' in renderer
+    assert 'className: "leaderboard-top-bar-fill"' in renderer
+
+    # A readable width, and a phone layout that keeps the name dominant.
+    list_rule = styles.split(".leaderboard-top-list {", 1)[1].split("}", 1)[0]
+    assert "max-width: 62rem;" in list_rule
+    assert "grid-template-columns: 2rem minmax(7rem, max-content) minmax(3rem, 1fr) auto;" in styles
+
+    # The expander is a disclosure: sentence case with an arrow, no heavy box.
+    more_rule = styles.split(".leaderboard-top-more {", 1)[1].split("}", 1)[0]
+    assert "border: none;" in more_rule
+    assert "text-transform: none;" in more_rule
+    button = html.split('id="leaderboard-top-more"', 1)[0][-200:]
+    assert "secondary-link" not in button
+    assert "Show top {n} ↑" in renderer
+    assert "Show all {n} benchmarks ↓" in renderer

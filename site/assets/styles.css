@@ -2303,26 +2303,16 @@ td a {
 }
 
 /* The ranking leads the page it is named after (issue #256). One line per
-   benchmark: the name is the scanning target, the count is the measure, and
-   the rank is a small fixed-width marker rather than a competing number. */
+   benchmark: the name is the scanning target, the bar carries the magnitude
+   against the leader (issue #314), and the count is the measure. The list is
+   capped at a readable width: a 1940px row made the eye sweep the whole
+   screen to read one benchmark. */
 .leaderboard-top {
   margin: 0 0 0.9rem;
 }
 
-.leaderboard-top-heading {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-bottom: 0.35rem;
-}
-
-.leaderboard-top-heading h2 {
-  font-family: var(--display);
-  font-size: 1.35rem;
-  margin: 0;
-}
-
 .leaderboard-top-list {
+  max-width: 62rem;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -2330,13 +2320,24 @@ td a {
   background: var(--panel);
 }
 
+.leaderboard-top-columns,
 .leaderboard-top-row {
   display: grid;
-  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  grid-template-columns: 2rem minmax(7rem, max-content) minmax(3rem, 1fr) auto;
   gap: 0.75rem;
-  align-items: baseline;
+  align-items: center;
   padding: 0.22rem 0.85rem;
   border-bottom: 1px solid var(--line);
+}
+
+.leaderboard-top-columns {
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+  color: var(--muted);
+  font-family: var(--utility);
+  font-size: 0.66rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 
 .leaderboard-top-row:last-child {
@@ -2356,11 +2357,62 @@ td a {
   overflow-wrap: anywhere;
 }
 
+/* Same visual language as the adoption bar in the full table below: a thin
+   track, the sea fill, no text of its own to double-announce. */
+.leaderboard-top-bar {
+  height: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: transparent;
+}
+
+.leaderboard-top-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--sea);
+}
+
 .leaderboard-top-count {
   font-variant-numeric: tabular-nums;
   font-size: 0.82rem;
   color: var(--muted);
   white-space: nowrap;
+}
+
+.leaderboard-top-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.35rem;
+}
+
+.leaderboard-top-heading h2 {
+  font-family: var(--display);
+  font-size: 1.35rem;
+  margin: 0;
+}
+
+/* A lightweight disclosure (issue #314): expanding this same list, so it
+   reads as a sentence with a direction rather than as the bordered,
+   all-caps action button it used to be. */
+.leaderboard-top-more {
+  margin-top: 0.45rem;
+  padding: 0.15rem 0;
+  border: none;
+  background: none;
+  color: var(--blue);
+  font-family: var(--body);
+  font-size: 0.85rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-transform: none;
+  letter-spacing: normal;
+  cursor: pointer;
+}
+
+.leaderboard-top-more:hover,
+.leaderboard-top-more:focus-visible {
+  color: var(--ink);
 }
 
 /* The title and its (i) sit on one line, with the source and score count on a
@@ -3783,6 +3835,19 @@ footer {
 
   .view-nav {
     overflow-x: auto;
+  }
+
+  /* On a phone the bars would squeeze the name they exist to support, so the
+     ranking row falls back to rank, name and count (issue #314). */
+  .leaderboard-top-columns,
+  .leaderboard-top-row {
+    grid-template-columns: 1.6rem minmax(0, 1fr) auto;
+    gap: 0.5rem;
+  }
+
+  .leaderboard-top-columns span:nth-child(n + 3),
+  .leaderboard-top-bar {
+    display: none;
   }
 
   .view-nav button,

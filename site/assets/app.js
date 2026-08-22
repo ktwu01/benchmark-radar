@@ -403,8 +403,10 @@ const I18N = {
     "Most reported benchmarks in model cards": "模型卡中报告最多的benchmark",
     "Jump to a benchmark": "跳转到某个基准",
     "One score, copied from the report that published it": "一个分数，照抄自发布它的报告",
-    "Show all {n} ranked benchmarks": "显示全部 {n} 个排名基准",
-    "Show the top {n}": "只显示前 {n} 个",
+    "Show all {n} benchmarks ↓": "显示全部 {n} 个基准 ↓",
+    "Show top {n} ↑": "只看前 {n} 个 ↑",
+    Rank: "排名",
+    Benchmark: "基准",
     "A report counts once per test, even if it lists that test several times. Some reports publish their results as a picture rather than text, and we read those with software that can misread a digit, so the list at the bottom of this page links every count back to the report it came from.":
       "一份报告对同一项测试只计一次，即使它列出了多次。有些报告以图片而非文字发布结果，我们用软件读取，可能会看错数字，因此本页底部的清单把每个计数链接回它的来源报告。",
     model: "个模型",
@@ -6219,27 +6221,60 @@ function renderLeaderboardTop(board) {
     if (more) more.hidden = true;
     return;
   }
+  // Column semantics (issue #314): the header names what each position means,
+  // so the list reads as a data product rather than three floating numbers.
+  // It is aria-hidden: the ordered list already announces rank and value per
+  // row, and a spoken column row would repeat all of it.
+  //
+  // The bar encodes the count against the leader's, which is what lets a row
+  // be read in place instead of by sweeping from the far-left name to the
+  // far-right number on a wide screen. Like the bar itself, its track carries
+  // no text for assistive tech to double-announce.
+  const maxCount = ranked[0].card_count || 1;
+  const columns = element("li", {
+    className: "leaderboard-top-columns",
+    attrs: { "aria-hidden": "true" },
+  }, [
+    element("span", { text: t("Rank") }),
+    element("span", { text: t("Benchmark") }),
+    element("span"),
+    element("span", { text: t("Model cards") }),
+  ]);
   replaceChildren(
     host,
-    entries.map((entry) =>
-      element("li", { className: "leaderboard-top-row" }, [
-        element("span", {
-          className: "leaderboard-top-rank",
-          text: String(entry.rank).padStart(2, "0"),
-        }),
-        element("span", { className: "leaderboard-top-name", text: entry.name }),
-        element("span", {
-          className: "leaderboard-top-count",
-          text: metricLabel(entry.card_count, "model card"),
-        }),
-      ]),
-    ),
+    [
+      columns,
+      ...entries.map((entry) =>
+        element("li", { className: "leaderboard-top-row" }, [
+          element("span", {
+            className: "leaderboard-top-rank",
+            text: String(entry.rank).padStart(2, "0"),
+          }),
+          element("span", { className: "leaderboard-top-name", text: entry.name }),
+          element("span", { className: "leaderboard-top-bar", attrs: { "aria-hidden": "true" } }, [
+            element("span", {
+              className: "leaderboard-top-bar-fill",
+              attrs: {
+                style: `width:${Math.round((entry.card_count / maxCount) * 100)}%`,
+              },
+            }),
+          ]),
+          element("span", {
+            className: "leaderboard-top-count",
+            text: metricLabel(entry.card_count, "model card"),
+          }),
+        ]),
+      ),
+    ],
   );
   if (more) {
     more.hidden = ranked.length <= LEADERBOARD_TOP_LIMIT;
+    // A lightweight disclosure, not a system command (issue #314): sentence
+    // case with a direction arrow, reading as "there is more of this same
+    // list" rather than as a competing action button.
     more.textContent = state.leaderboardTopExpanded
-      ? t("Show the top {n}").replace("{n}", String(LEADERBOARD_TOP_LIMIT))
-      : t("Show all {n} ranked benchmarks").replace("{n}", String(ranked.length));
+      ? t("Show top {n} ↑").replace("{n}", String(LEADERBOARD_TOP_LIMIT))
+      : t("Show all {n} benchmarks ↓").replace("{n}", String(ranked.length));
   }
 }
 
