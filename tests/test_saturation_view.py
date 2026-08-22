@@ -755,3 +755,44 @@ def test_the_score_layer_is_keyed_by_the_same_benchmark_id_as_adoption():
     script = source("site/assets/app.js")
 
     assert "benchmark_score_progression?.benchmarks?.[benchmarkId]" in script
+
+
+def test_issue_312_the_saturation_view_reveals_left_to_right():
+    """The chart popped in fully drawn, so the reader never saw the shape form.
+
+    The running-best line now draws itself across the axis and each point
+    brightens while the drawing front crosses its date: the reveal reads in
+    the same direction the data does. The entrance is presentation only -- a
+    reduced-motion reader gets the finished chart immediately.
+    """
+    script = source("site/assets/app.js")
+    styles = source("site/assets/styles.css")
+    chart = script.split("function scoreTrackChart(", 1)[1].split(
+        "\nfunction clearAdoptionFrontier", 1
+    )[0]
+
+    # The line declares its length, so CSS can draw it with a dash offset
+    # instead of script measuring geometry on a detached tree.
+    assert 'pathLength: "1",' in chart
+
+    # Each point carries its own delay on the timeline, derived from where it
+    # sits on the x axis rather than from its row order.
+    assert "const revealDelay = Math.round(" in chart
+    assert "(pointX - margin.left) / plotWidth" in chart
+    assert 'style: `--reveal-delay:${revealDelay}ms`,' in chart
+
+    line_rule = styles.split(".score-frontier-line {", 1)[1][:800]
+    assert "stroke-dasharray: 1;" in line_rule
+    assert "stroke-dashoffset: 1;" in line_rule
+    assert "animation: score-frontier-draw" in line_rule
+    assert "@keyframes score-frontier-draw" in styles
+
+    point_rule = styles.split(".score-point {", 1)[1][:500]
+    assert "animation: score-point-reveal" in point_rule
+    assert "animation-delay: var(--reveal-delay, 0ms);" in point_rule
+
+    # And the whole entrance collapses for prefers-reduced-motion.
+    guard = styles.split("@media (prefers-reduced-motion: reduce)", 1)[1][:500]
+    assert ".score-point" in guard
+    assert ".score-frontier-line" in guard
+    assert "stroke-dashoffset: 0;" in guard

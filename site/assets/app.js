@@ -5534,6 +5534,11 @@ function scoreTrackChart(entry, board) {
           ),
           class: "score-frontier-line",
           fill: "none",
+          // Normalized length: the entrance animation (issue #312) draws the
+          // line with a dash offset from 1 to 0, which needs a total length
+          // known in advance. Measuring geometry on this detached tree is not
+          // portable, so the length is declared instead.
+          pathLength: "1",
         }),
       );
     }
@@ -5567,12 +5572,22 @@ function scoreTrackChart(entry, board) {
             source.document_type || t("model card"),
           ).replaceAll("_", " ")})`
         : observation.source_id.replaceAll("_", " ");
+      const pointX = x(observation.reported_at);
+      const pointY = scoreY(observation.value);
+      // Entrance order follows the axis (issue #312): each point brightens
+      // while the drawing front crosses its date, so the reveal reads left to
+      // right the way the data does. 120ms lets the line start first; 780ms
+      // spreads the points across its drawing window.
+      const revealDelay = Math.round(
+        120 + ((pointX - margin.left) / plotWidth) * 780,
+      );
       const group = svgElement("g", {
         class: `score-point${observation.reported_by ? " score-point-third-party" : ""}`,
         tabindex: "0",
         role: "button",
         "aria-pressed": "false",
         "data-frontier-point": "",
+        style: `--reveal-delay:${revealDelay}ms`,
         "aria-label":
           `${observation.value} ${record.metric} ${t("by")} ${observation.model} ` +
           `(${observation.organization}), ${formatDate(observation.reported_at, {
@@ -5581,8 +5596,6 @@ function scoreTrackChart(entry, board) {
           (observation.reported_by ? `, ${t("cited by")} ${observation.reported_by}` : "") +
           `. ${t("Click to pin record details")}.`,
       });
-      const pointX = x(observation.reported_at);
-      const pointY = scoreY(observation.value);
       group.append(
         svgElement("circle", {
           cx: pointX,

@@ -2572,6 +2572,22 @@ td a {
 
 .score-point {
   cursor: pointer;
+  /* Entrance (issue #312): points fade up one by one, ordered by their date.
+     The delay is a custom property so the drawing code can place each point
+     on the timeline without knowing anything about the CSS. */
+  opacity: 0;
+  animation: score-point-reveal 420ms ease-out forwards;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+@keyframes score-point-reveal {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .frontier-tick,
@@ -2834,6 +2850,34 @@ td a {
   stroke-width: 1.75;
   stroke-linejoin: miter;
   opacity: 0.85;
+  /* Entrance (issue #312): the line draws itself left to right while the
+     points brighten along it. The path declares pathLength="1", so a dash of
+     length 1 is the whole line and the offset animates from hidden to drawn
+     without measuring geometry in script. */
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: score-frontier-draw 900ms ease-out 120ms forwards;
+}
+
+@keyframes score-frontier-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* The entrance is presentation, not information: readers who ask for reduced
+   motion get the finished chart immediately. */
+@media (prefers-reduced-motion: reduce) {
+  .score-point {
+    animation: none;
+    opacity: 1;
+  }
+
+  .score-frontier-line {
+    animation: none;
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
 }
 
 .score-best-line {
