@@ -2311,9 +2311,22 @@ td a {
 
 .leaderboard-top-heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem;
   margin-bottom: 0.35rem;
+}
+
+/* Half the global h1 scale (issue #313). The old 48px uppercase line was the
+   largest object on the page and compressed the ranking it names; and because
+   the wrapped title filled its whole max-width box, the (i) beside it landed
+   hundreds of pixels away in empty space with no anchor. At this size the
+   heading fits one line, so the toggle sits immediately after its last
+   glyph, and wrap keeps that true on narrow screens by stacking instead. */
+.leaderboard-top-heading h1 {
+  margin: 0;
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  line-height: 1.05;
 }
 
 .leaderboard-top-heading h2 {
