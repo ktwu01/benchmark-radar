@@ -2572,9 +2572,16 @@ td a {
 
 .score-point {
   cursor: pointer;
-  /* Entrance (issue #312): points fade up one by one, ordered by their date.
-     The delay is a custom property so the drawing code can place each point
-     on the timeline without knowing anything about the CSS. */
+}
+
+/* Entrance (issue #312): points fade up one by one, ordered by their date,
+   while the running-best line draws itself across the axis. The whole block
+   is gated on .score-chart-enter, which a render adds only when the reader
+   arrived at a new selection -- incidental redraws of the same chart repaint
+   it finished, not from zero. Point delays arrive as a custom property set
+   per point, so the drawing code places each mark on the timeline without
+   knowing anything about the CSS. */
+.score-chart-enter .score-point {
   opacity: 0;
   animation: score-point-reveal 420ms ease-out forwards;
   animation-delay: var(--reveal-delay, 0ms);
@@ -2850,10 +2857,13 @@ td a {
   stroke-width: 1.75;
   stroke-linejoin: miter;
   opacity: 0.85;
-  /* Entrance (issue #312): the line draws itself left to right while the
-     points brighten along it. The path declares pathLength="1", so a dash of
-     length 1 is the whole line and the offset animates from hidden to drawn
-     without measuring geometry in script. */
+}
+
+/* Entrance (issue #312): the line draws itself left to right while the
+   points brighten along it. The path declares pathLength="1", so a dash of
+   length 1 is the whole line and the offset animates from hidden to drawn
+   without measuring geometry in script. Scoped like the points, to arrivals. */
+.score-chart-enter .score-frontier-line {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
   animation: score-frontier-draw 900ms ease-out 120ms forwards;
@@ -2868,12 +2878,12 @@ td a {
 /* The entrance is presentation, not information: readers who ask for reduced
    motion get the finished chart immediately. */
 @media (prefers-reduced-motion: reduce) {
-  .score-point {
+  .score-chart-enter .score-point {
     animation: none;
     opacity: 1;
   }
 
-  .score-frontier-line {
+  .score-chart-enter .score-frontier-line {
     animation: none;
     stroke-dasharray: none;
     stroke-dashoffset: 0;

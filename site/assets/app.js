@@ -4664,6 +4664,12 @@ function renderExternalBenchmark(board, scored, record) {
       ]);
       return;
     }
+    // The entrance is keyed to arriving at this record; a re-render after an
+    // unrelated panel redraw does not replay it.
+    container.classList.toggle(
+      "score-chart-enter",
+      frontierShouldAnimate(`external:${record.slug}`),
+    );
     replaceChildren(container, externalBenchmarkDetail(shard));
   });
 }
@@ -5396,6 +5402,18 @@ function frontierPointRevealDelay(pointX, margin, plotWidth) {
   return Math.round(120 + ((pointX - margin.left) / plotWidth) * 780);
 }
 
+// The entrance plays when the reader arrives at a benchmark, not on every
+// incidental redraw of the panel they are already reading (the crawled index
+// settling, an unrelated filter keystroke, a language toggle). Each drawn
+// selection is remembered; redrawing the same one skips the replay.
+let lastFrontierEntranceKey = null;
+
+function frontierShouldAnimate(key) {
+  const animate = lastFrontierEntranceKey !== key;
+  lastFrontierEntranceKey = key;
+  return animate;
+}
+
 function scoreTrackChart(entry, board) {
   const record = scoreRecord(entry.benchmark_id);
   // Callers only ever select a benchmark that has a score record; this guard is
@@ -5943,6 +5961,10 @@ function renderAdoptionFrontier(board) {
   renderFrontierLegend(entry, record);
   renderFrontierOrgKey(record);
   clearFrontierPointSelection();
+  byId("frontier-chart").classList.toggle(
+    "score-chart-enter",
+    frontierShouldAnimate(`curated:${entry.benchmark_id}`),
+  );
   replaceChildren(byId("frontier-chart"), [scoreTrackChart(entry, board), frontierTooltip()]);
   renderScoreReadout(entry);
   renderFrontierTaskPreview(entry);

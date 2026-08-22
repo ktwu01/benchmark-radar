@@ -790,18 +790,29 @@ def test_issue_312_the_saturation_view_reveals_left_to_right():
     )[0]
     assert "frontierPointRevealDelay" in external
 
-    line_rule = styles.split(".score-frontier-line {", 1)[1][:800]
+    # The entrance is gated to arrivals: a render adds the class only when
+    # the selection changed, so incidental redraws (index fetch settling,
+    # unrelated filters, language toggle) repaint finished instead of
+    # collapsing and replaying.
+    assert "function frontierShouldAnimate(key)" in script
+    assert 'frontierShouldAnimate(`curated:${entry.benchmark_id}`)' in script
+    assert 'frontierShouldAnimate(`external:${record.slug}`)' in script
+    assert script.count('"score-chart-enter"') == 2
+
+    line_rule = styles.split(".score-chart-enter .score-frontier-line {", 1)[1][:400]
     assert "stroke-dasharray: 1;" in line_rule
     assert "stroke-dashoffset: 1;" in line_rule
     assert "animation: score-frontier-draw" in line_rule
     assert "@keyframes score-frontier-draw" in styles
 
-    point_rule = styles.split(".score-point {", 1)[1][:500]
+    point_rule = styles.split(".score-chart-enter .score-point {", 1)[1][:300]
+    assert "opacity: 0;" in point_rule
     assert "animation: score-point-reveal" in point_rule
     assert "animation-delay: var(--reveal-delay, 0ms);" in point_rule
 
-    # And the whole entrance collapses for prefers-reduced-motion.
-    guard = styles.split("@media (prefers-reduced-motion: reduce)", 1)[1][:500]
-    assert ".score-point" in guard
-    assert ".score-frontier-line" in guard
+    # And the whole entrance collapses for prefers-reduced-motion. The guard
+    # must match the gated selectors or it would lose the cascade.
+    guard = styles.split("@media (prefers-reduced-motion: reduce)", 1)[1][:600]
+    assert ".score-chart-enter .score-point" in guard
+    assert ".score-chart-enter .score-frontier-line" in guard
     assert "stroke-dashoffset: 0;" in guard
