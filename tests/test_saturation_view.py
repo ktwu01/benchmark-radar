@@ -817,7 +817,13 @@ def test_issue_312_the_saturation_view_reveals_left_to_right():
     assert "drawnFrontierEntranceKey = null;" in shell
     clear_fn = script.split("function clearAdoptionFrontier(message)", 1)[1].split("\n}", 1)[0]
     assert "drawnFrontierEntranceKey = null;" in clear_fn
-    assert '" score-point-dim"' in chart
+    # Dimming itself is gated on a line being drawn: with no comparable pair
+    # there is no reference, and every point keeps full emphasis rather than
+    # all of them receding together.
+    assert (
+        "const offTheLine = Boolean(frontierSteps?.length) && !onFrontier;" in chart
+    )
+    assert "offTheLine ? \" score-point-dim\" : \"\"" in chart
     dim = styles.split(".score-point-dim .score-point-face {", 1)[1][:200]
     assert "fill-opacity: 0.6;" in dim
     assert ".score-point-dim:hover .score-point-face" in styles

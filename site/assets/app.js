@@ -5689,15 +5689,19 @@ function scoreTrackChart(entry, board) {
       const pointX = x(observation.reported_at);
       const pointY = scoreY(observation.value);
       // "其他的点可以淡化" (issue #312): readings that are not part of the
-      // saturation line recede behind it. Hover and focus restore them, so
-      // de-emphasis never costs legibility. Membership is looked up under the
-      // observation's own comparable run, so a same-date same-value reading
-      // from another run stays off the line.
+      // saturation line recede behind it -- but only while there IS a line.
+      // A benchmark with no comparable pair draws no reference, so every
+      // point keeps full emphasis rather than all of it receding together.
+      // Hover and focus restore a receded point, so de-emphasis never costs
+      // legibility. Membership is looked up under the observation's own
+      // comparable run, so a same-date same-value reading from another run
+      // stays off the line.
       const onFrontier = frontierMarks.has(
         `${observation.instrument || ""}\u0000${observation.protocol || ""}\u0000${new Date(
           `${observation.reported_at}T00:00:00Z`,
         ).getTime()}\u0000${observation.value}`,
       );
+      const offTheLine = Boolean(frontierSteps?.length) && !onFrontier;
       // Entrance order follows the axis (issue #312): each point brightens
       // while the drawing front crosses its date, so the reveal reads left to
       // right the way the data does. The timing is shared with the crawled
@@ -5705,7 +5709,7 @@ function scoreTrackChart(entry, board) {
       const revealDelay = frontierPointRevealDelay(pointX, margin, plotWidth);
       const group = svgElement("g", {
         class: `score-point${
-          onFrontier ? "" : " score-point-dim"
+          offTheLine ? " score-point-dim" : ""
         }${observation.reported_by ? " score-point-third-party" : ""}`,
         tabindex: "0",
         role: "button",
