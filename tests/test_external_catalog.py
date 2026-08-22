@@ -508,9 +508,7 @@ def test_reviewer_asserted_group_clears_with_one_donor_anchor(
     assert identity.inheritance_for(llm)["donor_key"] == oc
 
 
-def test_reviewer_asserted_group_needs_a_signature(
-    all_records: list[dict], tmp_path: Path
-) -> None:
+def test_reviewer_asserted_group_needs_a_signature(all_records: list[dict], tmp_path: Path) -> None:
     from benchmark_radar.external_identity import IdentityError, load_identity
 
     llm, oc = _llm_and_oc(all_records)
@@ -802,9 +800,7 @@ def test_variant_siblings_are_cross_linked_in_the_shard(shard_inputs: dict, tmp_
     assert "opencompass:516" in siblings
 
 
-def test_resolved_shard_serializes_the_inheritance_note(
-    shard_inputs: dict, tmp_path: Path
-) -> None:
+def test_resolved_shard_serializes_the_inheritance_note(shard_inputs: dict, tmp_path: Path) -> None:
     """The #262 note reaches disk as JSON, dates and all, and names its donor."""
     import json
 
