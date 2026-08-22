@@ -21,6 +21,13 @@ on:
       # identity edit must rebuild the published shards, or the site keeps
       # serving last month's catalog.
       - "data/leaderboard_snapshots/**"
+      # The registry beside those CSVs, not just the CSVs. `normalize-external`
+      # reads this file for the crawl id, the column mapping and crawled_at, so
+      # a commit that only corrects one of those changes the catalog the build
+      # produces. Missing here, such a commit would never deploy: the shards it
+      # would have changed are ignored now, so there is no companion `site/**`
+      # edit left to trigger the build on its behalf.
+      - "data/leaderboard_snapshots.yml"
       - "data/external/identity.yml"
       - "site/**"
       # The dashboard build imports the package transitively through
@@ -66,6 +73,20 @@ jobs:
       - name: Build validated dashboard data
         run: |
           python -m pip install -e '.[dev]'
+          # FIRST, because the rest of the build reads what it writes. The
+          # search index and the 1,148 per-benchmark shards are derived and
+          # untracked, so a fresh checkout has neither, and `classify` builds
+          # site/data/models.json by globbing the shard directory for the
+          # crawled half of the model registry. Run it after `classify` and
+          # models.json records only the 34 curated models instead of all 355,
+          # which the registry test cannot catch because it skips itself when
+          # the shards are missing. The site would publish the smaller registry
+          # with nothing failing.
+          #
+          # Rebuilding here is also what makes a recrawl or an identity edit
+          # reach the published site rather than serving whatever the last
+          # commit happened to carry.
+          benchmark-radar normalize-external
           # The classification store is derived and intentionally untracked.
           # Build it in the fresh Pages checkout before publishing radar.json.
           # The MVP uses NullExtractor, so this makes no external/model calls.
@@ -81,11 +102,6 @@ jobs:
           # Regenerated rather than served from the commit, so a share card can
           # never advertise counts the registry has moved past.
           python scripts/generate_og_image.py
-          # Rebuild the search index and the 1,148 per-benchmark shards from the
-          # committed crawl CSVs and identity.yml, so a recrawl or an identity
-          # edit reaches the published site rather than serving what the last
-          # commit happened to carry.
-          benchmark-radar normalize-external
           # Freeze IDs for any model or organization that appeared since the
           # last run. Never ran in CI before, which is how the registry drifted
           # to 357 models against models.json's 355 and nothing noticed.

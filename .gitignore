@@ -60,3 +60,13 @@ graphify-out/
 # no donor record anywhere else in the corpus, written by hand from a crawl and
 # never regenerated from one.
 !/data/external/llm_stats_identity_overrides.yml
+
+# Written by the same `benchmark-radar normalize-external` run as the ignored
+# catalog above, from the same committed crawl CSVs, and rebuilt by pages.yml on
+# every deploy. They were committed anyway, so the published site served whatever
+# the last commit happened to carry while the CSVs beside them moved on. That is
+# the failure the radar.json rule already names: a stale derivation reviewed as
+# if it were source. The build is deterministic, so nothing is lost by dropping
+# them; `normalize-external` reproduces all 1,148 shards byte for byte.
+/site/data/benchmark-index.json
+/site/data/benchmarks/

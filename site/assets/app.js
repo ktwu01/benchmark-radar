@@ -870,6 +870,7 @@ const I18N = {
     datasets: "数据集",
     evaluations: "评测",
     "times found": "次发现",
+    "also tracked in the registry above": "上方登记表中已收录",
   },
 };
 
@@ -1803,9 +1804,12 @@ function renderTodayBenchmarks() {
     0,
     Math.max(0, BENCHMARK_SEARCH_LIMIT - curatedShown.length),
   );
+  const curatedNames = curatedNameSet(curatedShown);
   const rows = [
     ...curatedShown.map((entry) => curatedResultRow(entry, { navigate, inert: !navigate })),
-    ...externalShown.map((record) => benchmarkResultRow(record, { navigate, inert: !navigate })),
+    ...externalShown.map((record) =>
+      benchmarkResultRow(record, { navigate, inert: !navigate, curatedNames }),
+    ),
   ];
   // Still on the wire. Zero matches is not yet a fact, so the empty list must
   // not print the sentence this whole change exists to stop printing: on a
@@ -3520,6 +3524,29 @@ function foldName(value) {
   return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
 
+// The names the curated rows ON SCREEN answer to, folded.
+//
+// Built from the rows actually rendered, never from the whole registry. The
+// caption these feed says "above", which is a claim about the list the reader
+// is looking at, and the two sets come apart: a query can match a crawled
+// record on publisher or modality rather than on its name, so searching "text"
+// returns the llm-stats GPQA row while no curated GPQA row matched or rendered.
+// Checking the full registry would caption that row "also tracked in the
+// registry above" and point the reader at nothing.
+//
+// Passing the shown rows also handles the search cap for free: a curated match
+// pushed past BENCHMARK_SEARCH_LIMIT is not above either.
+function curatedNameSet(entries) {
+  const names = new Set();
+  for (const entry of entries || []) {
+    for (const name of [entry.name, ...(entry.aliases || [])]) {
+      const folded = foldName(name);
+      if (folded) names.add(folded);
+    }
+  }
+  return names;
+}
+
 function searchBenchmarkIndex(records, query) {
   const needle = foldName(query);
   if (!needle) return [];
@@ -3570,7 +3597,24 @@ function opennessChip(status) {
   });
 }
 
-function benchmarkResultRow(record, { navigate = false, inert = false } = {}) {
+// `curatedNames` is the set from curatedNameSet(). A crawled record whose name
+// is in it is another source's record OF a benchmark the registry already
+// names, and the curated row for it is already on screen. Rendering it as a
+// plain sibling made "GPQA" return three unlabelled rows -- one curated, one
+// llm-stats, one OpenCompass -- with nothing saying which was which, so the
+// reader had to guess whether they were three benchmarks or one.
+//
+// The row is still rendered and still clickable: the crawled record is real
+// evidence, it carries the repo and paper the curated entry has never had, and
+// hiding it would drop the artifact this whole catalog exists to surface. Only
+// the label changes, and only to say what the row already is.
+//
+// This is display-layer only. It asserts nothing in the data: `identity.yml`
+// still holds the equivalence claims, still demands two anchors, and still
+// records that these name matches do not clear that bar. A name match is
+// enough to caption a row, and not enough to merge one.
+function benchmarkResultRow(record, { navigate = false, inert = false, curatedNames = null } = {}) {
+  const alsoCurated = Boolean(curatedNames && curatedNames.has(foldName(record.name)));
   // The name is the scanning target, and the count is the measure. Publisher,
   // size, openness and the source chip printed on every row -- three of them
   // as "not established" on most crawled records -- so a reader scanned past
@@ -3578,8 +3622,14 @@ function benchmarkResultRow(record, { navigate = false, inert = false } = {}) {
   //
   // Those fields still exist on the record and are still searchable; the
   // detail panel is where a reader who wants them asks for them.
+  // The source is printed only on these rows. Elsewhere it was noise on every
+  // record (issue #298); here it is the fact that separates two rows carrying
+  // the same name, so it is the one thing the reader needs.
+  const facts = record.score_count
+    ? metricLabel(record.score_count, "reported score", "reported scores")
+    : t("no scores collected");
   const button = element("button", {
-    className: "benchmark-result",
+    className: alsoCurated ? "benchmark-result benchmark-result-also-curated" : "benchmark-result",
     attrs: {
       type: "button",
       "aria-pressed": record.slug === state.lfrontier ? "true" : "false",
@@ -3590,9 +3640,9 @@ function benchmarkResultRow(record, { navigate = false, inert = false } = {}) {
     // llm-stats collected 239 numbers, not that the benchmark is better.
     element("span", {
       className: "benchmark-result-facts",
-      text: record.score_count
-        ? metricLabel(record.score_count, "reported score", "reported scores")
-        : t("no scores collected"),
+      text: alsoCurated
+        ? `${t("also tracked in the registry above")} · ${externalSourceMeta(record.source).name} · ${facts}`
+        : facts,
     }),
   ]);
   if (inert) {
@@ -3763,9 +3813,10 @@ function renderBenchmarkSearch() {
     Math.max(0, BENCHMARK_SEARCH_LIMIT - shownCurated.length),
   );
   const total = curatedMatches.length + externalMatches.length;
+  const curatedNames = curatedNameSet(shownCurated);
   replaceChildren(container, [
     ...shownCurated.map(curatedResultRow),
-    ...shownExternal.map(benchmarkResultRow),
+    ...shownExternal.map((record) => benchmarkResultRow(record, { curatedNames })),
   ]);
   status.textContent = total
     ? t("{shown} of {total} matches")

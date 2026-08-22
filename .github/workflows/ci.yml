@@ -20,5 +20,20 @@ jobs:
       - run: python -m pip install -e '.[dev]'
       - run: ruff check .
       - run: ruff format --check .
-      - run: pytest -q
+      # Both generators run before pytest, and in this order.
+      #
+      # site/data/benchmark-index.json, the 1,148 shards and radar.json are all
+      # derived and untracked, so a fresh checkout has none of them.
+      # `normalize-external` writes the first two and `classify` writes the
+      # third from them, which is why the order is fixed: reversed, classify
+      # globs a shard directory that does not exist yet and builds the crawled
+      # half of site/data/models.json out of nothing.
+      #
+      # Running both before pytest is what makes the corpus-backed tests
+      # execute. `needs_corpus` in tests/test_models_registry.py skips on a
+      # missing radar.json or shard directory, so with either generator after
+      # pytest those tests skip, and they had never run in CI at all -- which
+      # is how a models.json short by 321 models could stay green.
+      - run: benchmark-radar normalize-external
       - run: benchmark-radar classify
+      - run: pytest -q

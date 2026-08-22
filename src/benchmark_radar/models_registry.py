@@ -167,9 +167,26 @@ def summarize(registry: dict[str, ModelRecord]) -> dict[str, Any]:
 
 
 def write_model_registry(radar_path: Path, shard_dir: Path, output: Path) -> dict[str, Any]:
-    """Build the registry and write it beside the rest of the site's data."""
+    """Build the registry and write it beside the rest of the site's data.
+
+    Raises when the shard directory is absent. The shards are derived and
+    untracked, so a fresh checkout has none until `benchmark-radar
+    normalize-external` writes them, and `_crawled_models()` reaches them with a
+    glob: a missing directory yields nothing rather than failing. Without this
+    check the crawled half of the registry silently disappears and the file is
+    rewritten with the 34 curated models in place of all 355, which is the kind
+    of wrong answer that reads as a real one. Refusing to write is the honest
+    outcome, and the message names the command that fixes it.
+    """
+    shard_dir = Path(shard_dir)
+    if not shard_dir.is_dir():
+        raise FileNotFoundError(
+            f"{shard_dir} does not exist, so the crawled half of the model registry "
+            "would be silently dropped and models.json rewritten with the curated "
+            "models alone. Run `benchmark-radar normalize-external` first."
+        )
     radar = json.loads(Path(radar_path).read_text(encoding="utf-8"))
-    registry = build_registry(radar, Path(shard_dir))
+    registry = build_registry(radar, shard_dir)
     report = summarize(registry)
     output.parent.mkdir(parents=True, exist_ok=True)
     # The index, not the payloads. Every source record embedded inline came to

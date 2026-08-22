@@ -4165,6 +4165,15 @@ footer {
   color: var(--muted);
 }
 
+/* A crawled record of a benchmark the registry above already names. The rule
+   is a relationship marker, not a warning: the row is real evidence and stays
+   as readable as any other. Colour alone would carry the whole meaning, so the
+   row also says so in words, which is what a screen reader and a monochrome
+   display get. */
+.benchmark-result-also-curated {
+  border-left: 3px solid var(--blue);
+}
+
 
 /* Openness is a statement about what we know, so `unknown` is neutral rather
    than a warning. Only a positive verdict gets emphasis. */
