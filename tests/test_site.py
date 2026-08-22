@@ -1883,6 +1883,12 @@ def test_issue_311_the_today_list_loads_one_page_at_a_time():
     assert "listHost.append(" in renderer
     assert "state.todayRenderedCount = visibleObservations.length;" in renderer
 
+    # No IntersectionObserver, no scroll trigger, no button: the cap would
+    # strand every row past the first page, so the bound is removed instead.
+    fallback = script.split("function todayPageLimit()", 1)[1].split("\nfunction ", 1)[0]
+    assert "return Infinity;" in fallback
+    assert "observations.slice(0, todayPageLimit())" in renderer
+
     # The bottom line reports what loaded.
     assert "{loaded} of {total} results loaded · scroll for more" in renderer
     assert "All {total} results loaded" in renderer

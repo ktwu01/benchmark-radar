@@ -1852,12 +1852,18 @@ function renderTodayBenchmarks() {
 // something scrollable exists, without ever carding the whole day up front.
 let todaySentinelObserver = null;
 
+function todayPageLimit() {
+  // Without IntersectionObserver there is no scroll trigger, and the manual
+  // button is gone; capping the list there would strand every row past the
+  // first page behind a control that does not exist. The bound is the scroll
+  // loading mechanism, so an engine without one gets the uncapped list.
+  if (typeof IntersectionObserver === "undefined") return Infinity;
+  return state.todayResultsLimit;
+}
+
 function watchTodaySentinel(remainingResults) {
   const sentinel = byId("today-sentinel");
   if (!sentinel) return;
-  // No observer support, no scroll loading: the note still reports what is
-  // loaded, and the reader gets every result on the renders that filters
-  // already trigger rather than a dead end.
   if (typeof IntersectionObserver === "undefined") return;
   if (!todaySentinelObserver) {
     todaySentinelObserver = new IntersectionObserver((entries) => {
@@ -1916,7 +1922,7 @@ function renderToday({ resultsOnly = false } = {}) {
   // A single busy scan can carry hundreds of observations. Bound every render,
   // not just the all-dates archive, so initial load and filter feedback never
   // have to build the entire card list before the reader can interact.
-  const visibleObservations = observations.slice(0, state.todayResultsLimit);
+  const visibleObservations = observations.slice(0, todayPageLimit());
   const remainingResults = observations.length - visibleObservations.length;
   // The legend is two readings, not three (issue #311): the class breakdown
   // and the order. The raw total repeated what the breakdown already adds up
