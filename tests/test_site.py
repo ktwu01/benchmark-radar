@@ -1881,6 +1881,7 @@ def test_issue_311_the_today_list_loads_one_page_at_a_time():
     # so a card the reader expanded stays open under them.
     assert "const growsInPlace =" in renderer
     assert "listHost.append(" in renderer
+    assert "observationCard(item, renderedCount + offset))" in renderer
     assert "state.todayRenderedCount = visibleObservations.length;" in renderer
 
     # No IntersectionObserver, no scroll trigger, no button: the cap would

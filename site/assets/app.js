@@ -1953,8 +1953,12 @@ function renderToday({ resultsOnly = false } = {}) {
   const growsInPlace =
     !resultsKeyChanged && renderedCount > 0 && visibleObservations.length > renderedCount;
   if (growsInPlace) {
+    // The appended slice maps from zero, so the rank offset travels with it:
+    // page two continues at 21, not back at 01.
     listHost.append(
-      ...visibleObservations.slice(renderedCount).map(observationCard),
+      ...visibleObservations
+        .slice(renderedCount)
+        .map((item, offset) => observationCard(item, renderedCount + offset)),
     );
   } else {
     replaceChildren(
