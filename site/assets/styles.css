@@ -2317,9 +2317,14 @@ td a {
   margin-bottom: 0.35rem;
 }
 
-.leaderboard-top-heading h2 {
+.leaderboard-top-heading h1 {
   font-family: var(--display);
   font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  text-transform: none;
+  line-height: 1.2;
+  max-width: none;
   margin: 0;
 }
 
