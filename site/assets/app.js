@@ -4597,6 +4597,9 @@ function renderExternalShell(
 ) {
   clearFrontierPointSelection();
   setCanonicalFrontierChrome(false);
+  // A shell replaces whatever chart was on screen, so no completion timer may
+  // spend a reveal the reader is no longer looking at.
+  drawnFrontierEntranceKey = null;
   // An empty eyebrow or badge is hidden rather than rendered blank: a crawled
   // record states its source once, on the subline, and repeating it in a
   // non-interactive chip beside the title read as broken state (issue #298).
@@ -5583,10 +5586,31 @@ function scoreTrackChart(entry, board) {
         value: observation.value,
       });
     }
+    // Same-date readings collapse to their directional best before anything
+    // reads them: drawn in source order, the line could step twice on one
+    // date and pass through an inferior number that shares a better reading's
+    // date. Collapsing here means the steps, and the membership marks derived
+    // from them, can never disagree.
+    const collapsedRuns = [...runs.entries()].map(([key, points]) => {
+      const bestByDate = new Map();
+      for (const point of points) {
+        const current = bestByDate.get(point.time);
+        if (
+          current === undefined ||
+          (scoreDescends ? point.value < current : point.value > current)
+        ) {
+          bestByDate.set(point.time, point.value);
+        }
+      }
+      const collapsed = [...bestByDate.entries()]
+        .sort((a, b) => a[0] - b[0])
+        .map(([time, value]) => ({ time, value }));
+      return { key, points: collapsed };
+    });
     // The line belongs to exactly one comparable run -- the one with the most
     // advances (issue #288). Its steps draw it; its best-so-far holders light
     // up with it.
-    const runSteps = [...runs.entries()].map(([key, points]) => ({
+    const runSteps = collapsedRuns.map(({ key, points }) => ({
       key,
       points,
       steps: runningBestSteps(points, { descends: scoreDescends }),
@@ -5603,27 +5627,13 @@ function scoreTrackChart(entry, board) {
     // nothing may dim behind an absent reference.
     const frontierMarks = new Set();
     if (frontier && frontier.steps.length) {
-      // Same-date readings collapse to their directional best first: read in
-      // source order, an inferior number could otherwise be marked best-so-far
-      // merely because it was seen before the better reading on its own date.
-      const bestByDate = new Map();
-      for (const point of frontier.points) {
-        const current = bestByDate.get(point.time);
-        if (
-          current === undefined ||
-          (scoreDescends ? point.value < current : point.value > current)
-        ) {
-          bestByDate.set(point.time, point.value);
-        }
-      }
       let best = null;
-      for (const time of [...bestByDate.keys()].sort((a, b) => a - b)) {
-        const value = bestByDate.get(time);
-        if (best === null || (scoreDescends ? value < best : value > best)) {
-          best = value;
+      for (const point of frontier.points) {
+        if (best === null || (scoreDescends ? point.value < best : point.value > best)) {
+          best = point.value;
         }
-        if (value === best) {
-          frontierMarks.add(`${frontier.key}\u0000${time}\u0000${value}`);
+        if (point.value === best) {
+          frontierMarks.add(`${frontier.key}\u0000${point.time}\u0000${point.value}`);
         }
       }
     }
@@ -5880,6 +5890,9 @@ function clearAdoptionFrontier(message) {
   // restored here rather than at each call site: an external selection that
   // hid it must not leave the next canonical render missing its chart blocks.
   setCanonicalFrontierChrome(true);
+  // The empty state replaces any chart on screen, so a running completion
+  // timer must not spend its reveal.
+  drawnFrontierEntranceKey = null;
   byId("frontier-eyebrow").textContent = t("Scores over time");
   const stage = byId("frontier-stage");
   stage.textContent = "";

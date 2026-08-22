@@ -796,18 +796,27 @@ def test_issue_312_the_saturation_view_reveals_left_to_right():
     # line actually existing -- no line, nothing recedes behind it.
     assert "const frontierMarks = new Set();" in chart
     assert "if (frontier && frontier.steps.length) {" in chart
-    assert "if (value === best) {" in chart
+    assert "if (point.value === best) {" in chart
     # Membership carries the comparable run's own key, so an unrelated run
     # reporting the same number on the same date is not drawn onto the line.
-    assert "`${frontier.key}\\u0000${time}\\u0000${value}`" in chart
+    assert "`${frontier.key}\\u0000${point.time}\\u0000${point.value}`" in chart
     assert (
         "`${observation.instrument || \"\"}\\u0000${observation.protocol || \"\"}\\u0000" in chart
     )
-    # Same-date readings collapse to their directional best before marking:
-    # source order must not crown an inferior number best-so-far on its own
-    # date.
+    # Same-date readings collapse to their directional best before the steps
+    # are built, so what is drawn and what is emphasized cannot disagree: the
+    # line never steps through an inferior number that shares a better
+    # reading's date.
     assert "const bestByDate = new Map();" in chart
-    assert "for (const time of [...bestByDate.keys()].sort((a, b) => a - b)) {" in chart
+    assert ".sort((a, b) => a[0] - b[0])" in chart
+    assert "runningBestSteps(points, { descends: scoreDescends })" in chart
+
+    # A shell or empty state replaces the chart on screen, so a running
+    # completion timer may not spend the reveal it can no longer show.
+    shell = script.split("function renderExternalShell(", 1)[1].split("\nfunction ", 1)[0]
+    assert "drawnFrontierEntranceKey = null;" in shell
+    clear_fn = script.split("function clearAdoptionFrontier(message)", 1)[1].split("\n}", 1)[0]
+    assert "drawnFrontierEntranceKey = null;" in clear_fn
     assert '" score-point-dim"' in chart
     dim = styles.split(".score-point-dim .score-point-face {", 1)[1][:200]
     assert "fill-opacity: 0.6;" in dim
