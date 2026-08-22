@@ -709,6 +709,43 @@ const I18N = {
     "shown": "显示",
     "tracked": "追踪",
     "of": "共",
+    // --- External catalog detail (issue #316) --------------------------------
+    // The crawled benchmark detail panel (identity / openness / size) shipped
+    // its section headings, field labels and "not established" placeholders in
+    // English under zh, so only the shared "Released" line came through. These
+    // cover the rest of that panel; the benchmark's own description text stays
+    // as authored because it is source data, not chrome.
+    Identity: "基本信息",
+    "description not established": "简介尚未确定",
+    Publisher: "发布方",
+    "publisher not established": "发布方尚未确定",
+    "release date not established": "发布日期尚未确定",
+    Modality: "模态",
+    "modality not established": "模态尚未确定",
+    "No paper, repository, dataset or site link established.":
+      "尚未确定论文、代码仓库、数据集或站点链接。",
+    Openness: "开放性",
+    "openness not established": "开放性尚未确定",
+    open: "开放",
+    restricted: "受限",
+    "Code licence": "代码许可证",
+    "Data licence": "数据许可证",
+    "not established": "尚未确定",
+    "No openness evidence recorded.": "未记录开放性证据。",
+    Size: "规模",
+    "size not established": "规模尚未确定",
+    "counts the": "统计的是",
+    "what it counts is unclear": "统计对象不明",
+    "evidence ↗": "证据 ↗",
+    // Publisher roles and artifact kinds are label maps keyed by a raw enum, so
+    // an unmapped role/kind still falls back to its raw value rather than blank.
+    "published the hub card": "发布了 Hub 卡片",
+    "organization behind the paper": "论文背后的机构",
+    maintainer: "维护者",
+    Paper: "论文",
+    "Code repository": "代码仓库",
+    Dataset: "数据集",
+    "Project site": "项目站点",
     // --- Contact --------------------------------------------------------------
     "Benchmark Radar": "Benchmark 雷达日报",
     "Get in touch": "联系我",

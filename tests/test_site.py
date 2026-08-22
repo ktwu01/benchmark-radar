@@ -212,6 +212,50 @@ def test_language_toggle_and_contact_labels_are_translated():
         assert key in script
 
 
+def test_issue_316_benchmark_detail_labels_are_translated():
+    # The crawled benchmark detail panel (identity / openness / size) rendered
+    # its headings, field labels and "not established" placeholders through t(),
+    # but only "Released" had a zh entry -- so under Chinese the whole panel
+    # except that one line fell back to English. Every label the panel draws
+    # must have a zh translation.
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+
+    for key in (
+        'Identity: "基本信息"',
+        'Publisher: "发布方"',
+        'Modality: "模态"',
+        'Openness: "开放性"',
+        'Size: "规模"',
+        '"Code licence": "代码许可证"',
+        '"Data licence": "数据许可证"',
+        '"not established": "尚未确定"',
+        '"description not established": "简介尚未确定"',
+        '"publisher not established": "发布方尚未确定"',
+        '"release date not established": "发布日期尚未确定"',
+        '"modality not established": "模态尚未确定"',
+        '"openness not established": "开放性尚未确定"',
+        '"size not established": "规模尚未确定"',
+        '"No openness evidence recorded.": "未记录开放性证据。"',
+        'open: "开放"',
+        'restricted: "受限"',
+        'Paper: "论文"',
+        '"Code repository": "代码仓库"',
+        'Dataset: "数据集"',
+        '"Project site": "项目站点"',
+        'maintainer: "维护者"',
+        '"published the hub card": "发布了 Hub 卡片"',
+        '"organization behind the paper": "论文背后的机构"',
+        '"counts the": "统计的是"',
+        '"what it counts is unclear": "统计对象不明"',
+        '"evidence ↗": "证据 ↗"',
+    ):
+        assert key in script, f"missing zh translation for {key!r}"
+
+    # The longest placeholder wraps onto its own line in the source, so assert
+    # the value rather than a single-line "key": "value" pair.
+    assert "尚未确定论文、代码仓库、数据集或站点链接。" in script
+
+
 def test_language_toggle_click_handler_is_wired():
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
 
