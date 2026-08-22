@@ -792,8 +792,10 @@ def test_issue_312_the_saturation_view_reveals_left_to_right():
 
     # The issue's definition is enforced in the same pass: points that hold
     # the best value as of their date are the line; every other reading fades
-    # back behind it, and recovers on hover or focus.
+    # back behind it, and recovers on hover or focus. Dimming is gated on the
+    # line actually existing -- no line, nothing recedes behind it.
     assert "const frontierMarks = new Set();" in chart
+    assert "if (frontier && frontier.steps.length) {" in chart
     assert "point.value === best" in chart
     assert '" score-point-dim"' in chart
     dim = styles.split(".score-point-dim .score-point-face {", 1)[1][:200]
@@ -801,13 +803,14 @@ def test_issue_312_the_saturation_view_reveals_left_to_right():
     assert ".score-point-dim:hover .score-point-face" in styles
     assert ".score-point-dim.is-selected .score-point-glyph" in styles
 
-    # The entrance is gated to arrivals: a render adds the class only when
-    # the selection changed AND the leaderboard is the visible view, so a
-    # redraw into a hidden panel never spends an entrance the reader has yet
-    # to see, and incidental same-chart repaints stay finished.
+    # The entrance is gated to arrivals and runs to completion before it is
+    # spent: a redraw into a hidden panel never spends an entrance, and the
+    # crawled catalog settling mid-reveal replays rather than cancels it.
     assert "function frontierShouldAnimate(key)" in script
     gate = script.split("function frontierShouldAnimate(key)", 1)[1].split("\n}", 1)[0]
     assert 'if (state.view !== "leaderboard") return false;' in gate
+    assert "completedFrontierEntranceKey === key" in gate
+    assert "const FRONTIER_ENTRANCE_MS = 1400;" in script
     assert 'frontierShouldAnimate(`curated:${entry.benchmark_id}`)' in script
     assert 'frontierShouldAnimate(`external:${record.slug}`)' in script
     assert script.count('"score-chart-enter"') == 2

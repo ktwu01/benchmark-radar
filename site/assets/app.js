@@ -5411,20 +5411,28 @@ function frontierPointRevealDelay(pointX, margin, plotWidth) {
   return Math.round(120 + ((pointX - margin.left) / plotWidth) * 780);
 }
 
-// The entrance plays when the reader arrives at a benchmark, not on every
-// incidental redraw of the panel they are already reading (the crawled index
-// settling, an unrelated filter keystroke, a language toggle). Each drawn
-// selection is remembered; redrawing the same one skips the replay. The key
-// commits only while the Leaderboard is the visible view: a redraw into a
-// hidden panel (a resize crossing from Trends, an index settling after the
-// reader moved on) must not spend the entrance the reader has yet to see.
-let lastFrontierEntranceKey = null;
+// The entrance plays when the reader arrives at a benchmark and runs to
+// completion before it is spent. The crawled catalog settling mid-reveal
+// re-renders this panel, and a key spent on first paint would cancel the very
+// reveal it was drawn for: same-selection repaints inside the window replay
+// the entrance from its start rather than cutting it off, and once the window
+// closes the selection counts as seen, so later repaints render finished.
+// The key commits only while the Leaderboard is the visible view: a redraw
+// into a hidden panel must not spend an entrance the reader has yet to see.
+const FRONTIER_ENTRANCE_MS = 1400;
+let completedFrontierEntranceKey = null;
+let frontierEntranceTimer = null;
 
 function frontierShouldAnimate(key) {
   if (state.view !== "leaderboard") return false;
-  const animate = lastFrontierEntranceKey !== key;
-  lastFrontierEntranceKey = key;
-  return animate;
+  const done = completedFrontierEntranceKey === key;
+  if (!done) {
+    clearTimeout(frontierEntranceTimer);
+    frontierEntranceTimer = setTimeout(() => {
+      completedFrontierEntranceKey = key;
+    }, FRONTIER_ENTRANCE_MS);
+  }
+  return !done;
 }
 
 function scoreTrackChart(entry, board) {
@@ -5576,9 +5584,11 @@ function scoreTrackChart(entry, board) {
     // within that run, every reading that holds the best value as of its
     // date. These stay at full emphasis; all other points fade back so the
     // eye lands on the line first. Keyed by time and value, which is what a
-    // step records, so ties on both are line members too.
+    // step records, so ties on both are line members too. Gated on the line
+    // actually existing -- a benchmark whose history holds no comparable pair
+    // draws no line, so nothing may dim behind an absent reference.
     const frontierMarks = new Set();
-    if (frontier) {
+    if (frontier && frontier.steps.length) {
       let best = null;
       for (const point of frontier.points) {
         if (best === null || (scoreDescends ? point.value < best : point.value > best)) {
