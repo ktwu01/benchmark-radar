@@ -2323,7 +2323,10 @@ td a {
 .leaderboard-top-columns,
 .leaderboard-top-row {
   display: grid;
-  grid-template-columns: 2rem minmax(7rem, max-content) minmax(3rem, 1fr) auto;
+  /* The name track is a fixed width, not max-content: each row is its own
+     grid, and a content-sized track would give every row a different bar
+     width -- equal counts rendering unequal, headers drifting out of line. */
+  grid-template-columns: 2rem 12rem minmax(3rem, 1fr) auto;
   gap: 0.75rem;
   align-items: center;
   padding: 0.22rem 0.85rem;

@@ -1063,7 +1063,13 @@ def test_issue_314_the_ranking_reads_as_a_data_product():
     # A readable width, and a phone layout that keeps the name dominant.
     list_rule = styles.split(".leaderboard-top-list {", 1)[1].split("}", 1)[0]
     assert "max-width: 62rem;" in list_rule
-    assert "grid-template-columns: 2rem minmax(7rem, max-content) minmax(3rem, 1fr) auto;" in styles
+    # Every row is its own grid, so a content-sized name track would give each
+    # row a different bar width: equal counts could render unequal. The track
+    # is one fixed width for all rows and headers alike.
+    row_rule = styles.split(".leaderboard-top-columns,\n.leaderboard-top-row {", 1)[
+        1
+    ].split("}", 1)[0]
+    assert "grid-template-columns: 2rem 12rem minmax(3rem, 1fr) auto;" in row_rule
 
     # The expander is a disclosure: sentence case with an arrow, no heavy box.
     more_rule = styles.split(".leaderboard-top-more {", 1)[1].split("}", 1)[0]
