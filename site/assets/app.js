@@ -5603,13 +5603,27 @@ function scoreTrackChart(entry, board) {
     // nothing may dim behind an absent reference.
     const frontierMarks = new Set();
     if (frontier && frontier.steps.length) {
-      let best = null;
+      // Same-date readings collapse to their directional best first: read in
+      // source order, an inferior number could otherwise be marked best-so-far
+      // merely because it was seen before the better reading on its own date.
+      const bestByDate = new Map();
       for (const point of frontier.points) {
-        if (best === null || (scoreDescends ? point.value < best : point.value > best)) {
-          best = point.value;
+        const current = bestByDate.get(point.time);
+        if (
+          current === undefined ||
+          (scoreDescends ? point.value < current : point.value > current)
+        ) {
+          bestByDate.set(point.time, point.value);
         }
-        if (point.value === best) {
-          frontierMarks.add(`${frontier.key}\u0000${point.time}\u0000${point.value}`);
+      }
+      let best = null;
+      for (const time of [...bestByDate.keys()].sort((a, b) => a - b)) {
+        const value = bestByDate.get(time);
+        if (best === null || (scoreDescends ? value < best : value > best)) {
+          best = value;
+        }
+        if (value === best) {
+          frontierMarks.add(`${frontier.key}\u0000${time}\u0000${value}`);
         }
       }
     }
