@@ -14,7 +14,11 @@ import {
   modelGlyph,
 } from "./glyphs.js";
 
-const ALL_DATES_PAGE_SIZE = 100;
+// One page of results, in the list and at a time (issue #311). The first
+// paint carries 20 cards; each further page is loaded by scrolling to the
+// sentinel below the list. 100 at once was the archive bound, and a busy day
+// paid for all of it before the reader could scroll.
+const TODAY_PAGE_SIZE = 20;
 // Snapshots recorded before SourceHealth.method existed carry no method
 // field; this fills the gap for historical dates only (issue #174).
 const LEGACY_SOURCE_COLLECTION_METHODS = {
@@ -317,7 +321,6 @@ const I18N = {
     "Site utilities": "网站工具",
     "Switch to Chinese (中文)": "切换到中文",
     "Switch to English": "切换到英文",
-    "Export the dataset": "导出数据集",
     "Get in touch · Email, WeChat, Discord": "联系我 · 邮件、微信、Discord",
     Data: "数据",
     Contact: "联系",
@@ -371,7 +374,6 @@ const I18N = {
     "Refresh data": "刷新数据",
     "Today's radar": "今日雷达",
     "Matching observations": "匹配结果",
-    "Show more results": "显示更多结果",
     Sources: "来源",
     "All-time totals": "全部统计",
     All: "全部",
@@ -383,10 +385,10 @@ const I18N = {
     "{n}h ago": "{n} 小时前",
     "{n}d ago": "{n} 天前",
     "yesterday": "昨天",
-    "result": "条结果",
-    "results": "条结果",
+    "{loaded} of {total} results loaded · scroll for more":
+      "已加载 {loaded}/{total} 条结果 · 下滑加载更多",
+    "All {total} results loaded": "已加载全部 {total} 条结果",
     "normal": "正常",
-    "need attention": "需关注",
     "Sort: Priority ↓": "排序:优先度 ↓",
     "Sort: Date, then Priority ↓": "排序:日期,再按优先度 ↓",
     "Sort: Date ↓": "排序:日期 ↓",
@@ -516,13 +518,8 @@ const I18N = {
     new: "新增",
     active: "活跃",
     none: "无",
-    result: "条结果",
-    results: "条结果",
     evidence: "条证据",
-    attention: "个关注信号",
-    Show: "显示",
-    more: "更多",
-    remaining: "条剩余",
+    attention: "关注",
     flat: "持平",
     up: "上升",
     down: "下降",
@@ -712,16 +709,19 @@ const I18N = {
     "shown": "显示",
     "tracked": "追踪",
     "of": "共",
-    // --- Export / contact -----------------------------------------------------
-    "Benchmark Radar · data export": "Benchmark Radar · 数据导出",
-    "Take the data with you": "把数据带走",
-    "Download full dataset (JSON)": "下载全量数据集 (JSON)",
-    "Download current view (CSV · {rows} rows)": "下载当前视图 (CSV · {rows} 行)",
+    // --- Contact --------------------------------------------------------------
     "Benchmark Radar": "Benchmark 雷达日报",
     "Get in touch": "联系我",
     Email: "邮件",
     WeChat: "微信",
     Discord: "Discord",
+    "Want the full dataset? No crawler needed: star the repository, then get in touch and I will share a one-click export.":
+      "想要完整数据集？不需要爬虫：先给仓库点个 Star，然后联系我，我会告诉你怎么一键导出。",
+    "Star the repository": "给仓库点 Star",
+    "Want the dataset? No crawler needed: star the repository, then":
+      "想要数据集？不需要爬虫：先给仓库点 Star，然后",
+    "contact the author": "联系作者",
+    "for a one-click export.": "即可一键导出。",
     // --- Remaining dynamic strings ------------------------------------------
     " on a": " 以",
     " scored records on": " 项已评分记录,以",
@@ -742,14 +742,11 @@ const I18N = {
     "Click to pin record details": "点击固定记录详情",
     Comments: "评论",
     "Discovery sources": "发现来源",
-    "Doing related-work research, or hunting for a benchmark on a topic? This database aggregates every benchmark, evaluation, and dataset the radar has surfaced, and you can query it by topic, source, or organization before you export. Everything listed below is the same data the dashboard renders.":
-      "在做相关工作研究,或想按主题查找基准?这个数据库汇总了雷达发现过的每一个基准、评测与数据集,可以在导出前按主题、来源或机构查询。下方列出的所有内容与仪表盘渲染的是同一份数据。",
     "Every benchmark this document puts in front of readers, counted once each. These are mentions, not scores: the source records the configuration, and this registry deliberately does not.":
       "此文档呈现给读者的每个基准,各计一次。这是提及次数,不是分数:来源记录了配置,而这个登记册刻意不记录。",
     "Every record matching at least one taxonomy category is retained. A score of":
       "只要匹配至少一个分类类别的记录都会被保留。达到分数",
     "How priority is scored": "优先度如何评分",
-    "Leaderboard (CSV)": "排行榜 (CSV)",
     "Most represented organizations": "出现最多的机构",
     "No benchmark is reported by a curated card yet.": "目前还没有精选模型卡报告任何基准。",
     "No description published at the source.": "来源没有发布描述。",
@@ -904,7 +901,7 @@ const state = {
   leaderboardShowAll: false,
   leaderboardTopExpanded: false,
   todayResultsKey: "",
-  todayResultsLimit: ALL_DATES_PAGE_SIZE,
+  todayResultsLimit: TODAY_PAGE_SIZE,
   observations: null,
 };
 
@@ -1846,6 +1843,34 @@ function renderTodayBenchmarks() {
   return !total && indexPending ? "pending" : total;
 }
 
+// Loads the next page when the sentinel below the list scrolls into view
+// (issue #311). One observer for the session: the sentinel never leaves the
+// DOM, so a render only re-teaches it how many results remain. A load bumps
+// the bound and re-renders, which re-fires this callback while the sentinel
+// is still on screen -- that is what keeps filling a short first page until
+// something scrollable exists, without ever carding the whole day up front.
+let todaySentinelObserver = null;
+
+function watchTodaySentinel(remainingResults) {
+  const sentinel = byId("today-sentinel");
+  if (!sentinel) return;
+  // No observer support, no scroll loading: the note still reports what is
+  // loaded, and the reader gets every result on the renders that filters
+  // already trigger rather than a dead end.
+  if (typeof IntersectionObserver === "undefined") return;
+  if (!todaySentinelObserver) {
+    todaySentinelObserver = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      const total = filteredObservations().length;
+      if (state.todayResultsLimit >= total) return;
+      state.todayResultsLimit += TODAY_PAGE_SIZE;
+      renderToday({ resultsOnly: true });
+    });
+  }
+  todaySentinelObserver.disconnect();
+  todaySentinelObserver.observe(sentinel);
+}
+
 function renderToday({ resultsOnly = false } = {}) {
   // Events are bound before the data file resolves (initialize), so a nav
   // click or filter keystroke in the load window must no-op, not throw.
@@ -1883,28 +1908,23 @@ function renderToday({ resultsOnly = false } = {}) {
   ].join("\u0000");
   if (resultsKey !== state.todayResultsKey) {
     state.todayResultsKey = resultsKey;
-    state.todayResultsLimit = ALL_DATES_PAGE_SIZE;
+    state.todayResultsLimit = TODAY_PAGE_SIZE;
   }
   // A single busy scan can carry hundreds of observations. Bound every render,
   // not just the all-dates archive, so initial load and filter feedback never
   // have to build the entire card list before the reader can interact.
   const visibleObservations = observations.slice(0, state.todayResultsLimit);
   const remainingResults = observations.length - visibleObservations.length;
-  const showMore = byId("today-show-more");
-  showMore.hidden = remainingResults <= 0;
-  showMore.textContent = remainingResults > 0
-    ? `${t("Show")} ${Math.min(ALL_DATES_PAGE_SIZE, remainingResults)} ${t("more")} · ${remainingResults} ${t("remaining")}`
-    : t("Show more results");
+  // The legend is two readings, not three (issue #311): the class breakdown
+  // and the order. The raw total repeated what the breakdown already adds up
+  // to, and the attention noun lost its verb now that it stands beside
+  // "normal" instead of a sentence.
   const evidenceCount = observations.filter(
     (item) => item.observation_kind === "evidence",
   ).length;
   const attentionCount = observations.length - evidenceCount;
-  byId("today-count").textContent =
-    `${observations.length} ${observations.length === 1 ? t("result") : t("results")}`;
-  // The two classes are mutually exclusive, so name them instead of leaving
-  // EVIDENCE and ATTENTION as unexplained jargon (issue #248).
   byId("today-breakdown").textContent =
-    `${evidenceCount} ${t("normal")} · ${attentionCount} ${t("need attention")}`;
+    `${evidenceCount} ${t("normal")} · ${attentionCount} ${t("attention")}`;
   // The list is sorted by priority within a day; say so at the point of use
   // rather than making the reader infer it. Attention rows carry no priority,
   // so a kind-filtered attention set falls back to date order, and in All
@@ -1927,6 +1947,17 @@ function renderToday({ resultsOnly = false } = {}) {
           }),
         ],
   );
+  // What is loaded, said where more loads from (issue #311). Scrolling this
+  // paragraph into view pulls the next page, so the count doubles as the
+  // control's own status line.
+  byId("today-loaded").textContent =
+    remainingResults > 0
+      ? t("{loaded} of {total} results loaded · scroll for more", {
+          loaded: visibleObservations.length,
+          total: observations.length,
+        })
+      : t("All {total} results loaded", { total: observations.length });
+  watchTodaySentinel(remainingResults);
 
   if (resultsOnly) {
     writeUrl();
@@ -6825,119 +6856,16 @@ function brandIcon(name) {
   return svg;
 }
 
-function observationsToCsv(observations) {
-  const columns = [
-    "date",
-    "kind",
-    "title",
-    "summary",
-    "source",
-    "event_kind",
-    "categories",
-    "organizations",
-    "url",
-    "score",
-  ];
-  const escape = (value) => {
-    const text = String(value ?? "");
-    // Quotes and separators force quoting; a leading =, +, -, or @ is also
-    // quoted so a scraped cell cannot execute as a spreadsheet formula.
-    const mustQuote = /[",\n\r]/.test(text) || /^[=+\-@]/.test(text);
-    return mustQuote ? `"${text.replaceAll('"', '""')}"` : text;
-  };
-  const rows = observations.map((item) =>
-    [
-      item.snapshot_date,
-      item.observation_kind,
-      escape(item.title),
-      escape(item.summary || ""),
-      escape(item.source),
-      escape(item.event_kind),
-      escape((item.categories || []).join("; ")),
-      escape((item.organizations || []).join("; ")),
-      escape(item.url || item.primary_artifact_url || ""),
-      Number(item.total_score || 0).toFixed(2),
-    ].join(","),
-  );
-  return [columns.join(","), ...rows].join("\r\n");
-}
-
-function downloadText(filename, text, mimeType = "text/plain") {
-  const blob = new Blob([text], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
-}
-
-// The export dialog (issue #193) does two things at once: it states the
-// usecase that makes this more than a dump, and it puts one-click downloads
-// behind a single control. The usecase is the reason the site exists for a
-// reader doing related-work research: find every benchmark on a topic, or take
-// the whole corpus with you. The JSON link and the client-side CSV are both
-// derived from the same in-memory data the dashboard renders, so an export can
-// never disagree with the screen it came from.
-function openExport() {
-  const dialog = byId("export-dialog");
-  if (!state.data) return;
-  const filtered = filteredObservations();
-  replaceChildren(byId("export-content"), [
-    element("p", { className: "detail-source", text: t("Benchmark Radar · data export") }),
-    element("h2", {
-      className: "detail-title export-title",
-      text: t("Take the data with you"),
-      attrs: { id: "export-title" },
-    }),
-    element("p", {
-      className: "detail-summary",
-      text: t("Doing related-work research, or hunting for a benchmark on a topic? This database aggregates every benchmark, evaluation, and dataset the radar has surfaced, and you can query it by topic, source, or organization before you export. Everything listed below is the same data the dashboard renders."),
-    }),
-    element("div", { className: "export-actions" }, [
-      element("a", {
-        className: "primary-link",
-        text: t("Download full dataset (JSON)"),
-        attrs: { href: "data/radar.json", download: "benchmark-radar.json" },
-      }),
-      element("button", {
-        className: "secondary-link export-csv-button",
-        text: t("Download current view (CSV · {rows} rows)", { rows: filtered.length }),
-        attrs: { type: "button" },
-      }),
-      element("a", {
-        className: "secondary-link",
-        text: t("Leaderboard (CSV)"),
-        attrs: { href: "data/leaderboard.csv", download: "leaderboard.csv" },
-      }),
-    ]),
-    element("p", {
-      className: "discovery-note",
-      text: t("{observations} observations across {snapshots} daily snapshots.", {
-        observations: allObservations().length,
-        snapshots: state.data.snapshot_count,
-      }),
-    }),
-  ]);
-  byId("export-content")
-    .querySelector(".export-csv-button")
-    .addEventListener("click", () => {
-      downloadText(
-        `benchmark-radar-${state.todayDate === "all" ? "all" : state.todayDate}.csv`,
-        observationsToCsv(filtered),
-        "text/csv;charset=utf-8",
-      );
-    });
-  dialog.showModal();
-}
-
 // The contact dialog (issue #191) keeps every reach-out channel in one place:
 // email, WeChat, and Discord. The header badge (issue #213) merged the two
 // separate WeChat and Discord buttons into a single Contact control that
 // opens this dialog, so a reader lands on a choice rather than being launched
 // out of the page on a guess.
+//
+// Since issue #311 it also answers "where is the data": the header export
+// button is gone, and dataset requests are meant to arrive as a conversation.
+// Star first, then ask -- the note says so, so neither side wastes a round
+// trip.
 function openContact() {
   const dialog = byId("contact-dialog");
   replaceChildren(byId("contact-content"), [
@@ -6977,6 +6905,24 @@ function openContact() {
         ]),
         element("span", { className: "contact-value", text: `ID ${DISCORD_ID}` }),
       ]),
+    ]),
+    // The dataset answer travels with the contact channels (issue #311): a
+    // reader opening this sheet to ask for data reads the terms of the ask
+    // before writing it.
+    element("div", { className: "contact-dataset" }, [
+      element("p", {
+        className: "detail-summary",
+        text: t("Want the full dataset? No crawler needed: star the repository, then get in touch and I will share a one-click export."),
+      }),
+      element("a", {
+        className: "secondary-link",
+        text: t("Star the repository"),
+        attrs: {
+          href: `https://github.com/${REPO_SLUG}`,
+          target: "_blank",
+          rel: "noopener noreferrer",
+        },
+      }),
     ]),
   ]);
   dialog.showModal();
@@ -7047,10 +6993,6 @@ function bindEvents() {
   byId("today-date").addEventListener("change", (event) => {
     state.todayDate = event.target.value;
     renderToday();
-  });
-  byId("today-show-more").addEventListener("click", () => {
-    state.todayResultsLimit += ALL_DATES_PAGE_SIZE;
-    renderToday({ resultsOnly: true });
   });
   byId("trend-released-only").addEventListener("change", (event) => {
     state.trendReleasedOnly = event.target.checked;
@@ -7156,12 +7098,10 @@ function bindEvents() {
   // Reachable without a record in hand, for a reader who wants the method
   // before they trust any single row.
   byId("rubric-nav").addEventListener("click", () => openRubric());
-  byId("badge-export").addEventListener("click", openExport);
   byId("badge-contact").addEventListener("click", openContact);
-  byId("export-close").addEventListener("click", () => byId("export-dialog").close());
-  byId("export-dialog").addEventListener("click", (event) => {
-    if (event.target === byId("export-dialog")) byId("export-dialog").close();
-  });
+  // The footer's "contact the author" opens the same sheet as the header
+  // badge (issue #311): one contact surface, two doors.
+  byId("footer-contact").addEventListener("click", openContact);
   byId("contact-close").addEventListener("click", () => byId("contact-dialog").close());
   byId("contact-dialog").addEventListener("click", (event) => {
     if (event.target === byId("contact-dialog")) byId("contact-dialog").close();

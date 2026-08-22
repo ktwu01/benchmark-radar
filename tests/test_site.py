@@ -93,10 +93,15 @@ def test_scan_date_can_be_reset_to_all_dates():
     assert 'state.todayDate === "all" || item.snapshot_date === state.todayDate' in script
     assert 'state.todayDate = "all";' in script
     assert 'params.set("date", "all")' in script
-    assert 'id="today-show-more"' in html
-    assert 'id="source-health-panel"' in html
+    # The list is bounded and scroll-fed (issue #311): one page at a time, no
+    # button, a status line saying how much is loaded.
     assert "observations.slice(0, state.todayResultsLimit)" in script
-    assert "state.todayResultsLimit += ALL_DATES_PAGE_SIZE" in script
+    assert "state.todayResultsLimit += TODAY_PAGE_SIZE" in script
+    assert "const TODAY_PAGE_SIZE = 20;" in script
+    assert 'id="today-loaded"' in html
+    assert 'id="today-sentinel"' in html
+    assert "function watchTodaySentinel(" in script
+    assert 'id="today-show-more"' not in html
     assert 'byId("daily-briefing").hidden = showingAllDates' in script
     assert 'byId("source-health-panel").hidden = showingAllDates' in script
 
@@ -160,17 +165,21 @@ def test_top_right_utilities_use_shared_icon_geometry_and_contact_control():
     styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
 
     assert 'id="badge-contact"' in html
+    # The export badge is gone (issue #311): dataset requests go through the
+    # contact sheet and the footer note, not a header button.
+    assert 'id="badge-export"' not in html
+    assert 'id="export-dialog"' not in html
     assert 'id="badge-wechat"' not in html
     assert 'id="badge-discord"' not in html
     assert 'id="lang-toggle"' in html
     assert 'class="repo-badge"' in html
-    assert "grid-template-columns: repeat(7, 2.6rem)" in styles
+    assert "grid-template-columns: repeat(6, 2.6rem)" in styles
     assert "width: 2.6rem" in styles
     assert "height: 2.6rem" in styles
     assert "grid-column: span 3" in styles
     assert 'class="repo-badge-glyph" id="lang-toggle-label">中<' in html
     assert 'class="brand-icon github-icon"' in html
-    assert "grid-template-columns: repeat(7, 2.1rem)" in styles
+    assert "grid-template-columns: repeat(6, 2.1rem)" in styles
     assert "flex: 0 0 1.5rem" in styles
     assert ".repo-badge svg," in styles
 
@@ -347,10 +356,11 @@ def test_records_expand_inline_without_an_exclusive_accordion_or_record_modal():
     assert "detail-dialog" not in script
     # A shared details[name] would force one row closed when another opens.
     assert "attrs: { name:" not in script
-    # The three dialogs on the page are non-record chrome: the scoring rubric,
-    # the data export, and the contact sheet. Record detail must stay inline,
-    # so any fourth showModal() is a regression to a record modal.
-    assert script.count(".showModal()") == 3
+    # The two dialogs on the page are non-record chrome: the scoring rubric and
+    # the contact sheet (the export dialog went with the export button,
+    # issue #311). Record detail must stay inline, so any third showModal()
+    # is a regression to a record modal.
+    assert script.count(".showModal()") == 2
 
 
 def test_hugging_face_expansion_links_to_the_full_card():
@@ -391,9 +401,11 @@ def test_dashboard_links_are_validated_escaped_and_non_swallowing():
     # Regression guards for the browser-side hardening: every external href is
     # produced by safeHttpUrl; the interactive map is role="group" (ARIA makes
     # descendants of role="img" presentational, hiding its focusable markers);
-    # CSV export quotes cells that would run as spreadsheet formulas; Escape
-    # yields to an open dialog instead of swallowing the first press; and
-    # clearing the adoption frontier also clears its org color key.
+    # Escape yields to an open dialog instead of swallowing the first press;
+    # and clearing the adoption frontier also clears its org color key.
+    #
+    # The CSV formula-quoting guard retired with the client-side export
+    # (issue #311 removed the export dialog and its CSV builder).
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
 
     assert "function safeHttpUrl(" in script
@@ -405,7 +417,6 @@ def test_dashboard_links_are_validated_escaped_and_non_swallowing():
     # tooltip, not role="img", because it is a focusable, clickable marker.
     assert 'role: "group"' in script
     assert script.count('role: "img"') == 1
-    assert "/^[=+\\-@]/" in script
     assert 'document.querySelector("dialog[open]")' in script
     assert "Do not swallow Escape" in script
     assert 'replaceChildren(byId("frontier-org-key"), [])' in script
@@ -1834,3 +1845,58 @@ def test_issue_286_navigation_is_backable_but_typing_is_not():
 
     # Pushing the URL already shown would make Back a no-op that looks broken.
     assert 'if (mode === "push" && url !== current)' in script
+
+
+def test_issue_311_the_today_list_loads_one_page_at_a_time():
+    """A busy day carded 100+ results before the reader could scroll.
+
+    The first paint now carries 20 cards, the legend is two readings instead
+    of three, and more load only when the reader scrolls to the sentinel under
+    the list. The status line at the bottom states how much is on screen, so
+    progressive loading never reads as a truncated list.
+    """
+    html = Path("site/index.html").read_text(encoding="utf-8")
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+
+    # One named page size, applied at first paint and on every filter change.
+    assert "const TODAY_PAGE_SIZE = 20;" in script
+    assert "todayResultsLimit: TODAY_PAGE_SIZE," in script
+    renderer = script.split("function renderToday({ resultsOnly = false } = {})", 1)[1].split(
+        "\nfunction ", 1
+    )[0]
+    assert "state.todayResultsLimit = TODAY_PAGE_SIZE;" in renderer
+    assert "const visibleObservations = observations.slice(0, state.todayResultsLimit);" in renderer
+
+    # Scroll loads; no button competes with it.
+    assert "function watchTodaySentinel(" in script
+    watcher = script.split("function watchTodaySentinel(", 1)[1].split("\nfunction ", 1)[0]
+    assert "new IntersectionObserver(" in watcher
+    assert "state.todayResultsLimit += TODAY_PAGE_SIZE;" in watcher
+    assert "renderToday({ resultsOnly: true });" in watcher
+    assert 'id="today-sentinel"' in html
+    assert "watchTodaySentinel(remainingResults);" in renderer
+    assert 'id="today-show-more"' not in html
+
+    # The bottom line reports what loaded.
+    assert "{loaded} of {total} results loaded · scroll for more" in renderer
+    assert "All {total} results loaded" in renderer
+
+    # The legend keeps the class breakdown and the order; the raw total and
+    # its duplicated noun are gone, and "need attention" lost its verb.
+    assert 'id="today-count"' not in html
+    assert 'byId("today-breakdown").textContent =' in renderer
+    assert '${attentionCount} ${t("attention")}' in renderer
+    assert '"need attention"' not in script
+
+    # Dataset access moved out of the header: contact-first, star-first.
+    assert 'id="badge-export"' not in html
+    assert 'id="export-dialog"' not in html
+    assert "function openExport(" not in script
+    assert "function observationsToCsv(" not in script
+    assert "function downloadText(" not in script
+    footer = html.split('<p class="footer-dataset">', 1)[1].split("</p>", 1)[0]
+    assert "No crawler needed: star the repository" in footer
+    assert 'id="footer-contact"' in footer
+    contact = script.split("function openContact()", 1)[1].split("dialog.showModal();", 1)[0]
+    assert "No crawler needed: star the repository" in contact
+    assert 'className: "contact-dataset"' in contact

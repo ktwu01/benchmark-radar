@@ -78,27 +78,12 @@
           <span class="repo-badge-glyph" id="lang-toggle-label">中</span>
         </button>
         <!--
-          These two open dialogs rather than linking out: exporting a dataset
-          needs a moment of explanation about what is being handed over, and the
-          contact button (issue #213) opens one sheet that keeps email, WeChat,
-          and Discord in a single place. Reachable without navigating away from
-          the current view.
+          The contact button (issue #213) opens one sheet that keeps email,
+          WeChat, and Discord in a single place, reachable without navigating
+          away from the current view. Dataset access (issue #311) travels with
+          it: the header carries no export button any more, and the contact
+          sheet plus the footer note say how to get the data.
         -->
-        <button
-          type="button"
-          class="repo-badge"
-          id="badge-export"
-          aria-haspopup="dialog"
-          title="Export the dataset"
-          data-i18n-title="Export the dataset"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 3v12"></path>
-            <path d="m7 8 5 5 5-5"></path>
-            <path d="M4 21h16"></path>
-          </svg>
-          <span class="repo-badge-label" data-i18n="Data">Data</span>
-        </button>
         <button
           type="button"
           class="repo-badge"
@@ -277,7 +262,6 @@
             <div class="section-title">
               <h2 data-i18n="Today's radar">Today's radar</h2>
               <div class="results-meta" aria-live="polite">
-                <span id="today-count"></span>
                 <span id="today-breakdown"></span>
                 <span id="today-sort"></span>
               </div>
@@ -288,9 +272,15 @@
               <div id="today-benchmarks-results"></div>
             </section>
             <div class="signal-list" id="today-list"></div>
-            <button class="secondary-link today-show-more" id="today-show-more" type="button" hidden data-i18n="Show more results">
-              Show more results
-            </button>
+            <!--
+              The list is bounded (issue #311): the first paint carries one page
+              of results, and this note states how many of the day's results are
+              on screen. Scrolling to it loads the next page in place, so a
+              reader never waits on the whole day (or the whole archive) being
+              carded before they can read.
+            -->
+            <p class="today-loaded-note" id="today-loaded" role="status"></p>
+            <div id="today-sentinel" aria-hidden="true"></div>
           </div>
           <div>
             <!-- The day's narrative and Q&A describe the whole scan date
@@ -673,16 +663,6 @@
       <div id="rubric-content"></div>
     </dialog>
 
-    <dialog id="export-dialog" aria-labelledby="export-title">
-      <button
-        class="dialog-close"
-        id="export-close"
-        type="button"
-        aria-label="Close data export"
-      >×</button>
-      <div id="export-content"></div>
-    </dialog>
-
     <dialog id="contact-dialog" aria-labelledby="contact-title">
       <button
         class="dialog-close"
@@ -695,6 +675,22 @@
 
     <footer>
       <p id="build-meta">Updated —</p>
+      <!--
+        Dataset access without a crawler (issue #311): the header export button
+        is gone, so this note is the standing answer to "where is the data".
+        Star first, then ask; the contact button opens the same sheet as the
+        header badge.
+      -->
+      <p class="footer-dataset">
+        <span data-i18n="Want the dataset? No crawler needed: star the repository, then">Want the dataset? No crawler needed: star the repository, then</span>
+        <button
+          type="button"
+          class="footer-contact-link"
+          id="footer-contact"
+          data-i18n="contact the author"
+        >contact the author</button>
+        <span data-i18n="for a one-click export.">for a one-click export.</span>
+      </p>
     </footer>
   </body>
 </html>
