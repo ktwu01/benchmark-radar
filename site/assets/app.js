@@ -902,6 +902,7 @@ const state = {
   leaderboardTopExpanded: false,
   todayResultsKey: "",
   todayResultsLimit: TODAY_PAGE_SIZE,
+  todayRenderedCount: 0,
   observations: null,
 };
 
@@ -1906,7 +1907,9 @@ function renderToday({ resultsOnly = false } = {}) {
     state.organization,
     state.event,
   ].join("\u0000");
+  let resultsKeyChanged = false;
   if (resultsKey !== state.todayResultsKey) {
+    resultsKeyChanged = true;
     state.todayResultsKey = resultsKey;
     state.todayResultsLimit = TODAY_PAGE_SIZE;
   }
@@ -1936,17 +1939,31 @@ function renderToday({ resultsOnly = false } = {}) {
     : showingAllDates
       ? t("Sort: Date, then Priority ↓")
       : t("Sort: Priority ↓");
-  replaceChildren(
-    byId("today-list"),
-    visibleObservations.length
-      ? visibleObservations.map(observationCard)
-      : [
-          element("p", {
-            className: "empty-state",
-            text: emptyTodayMessage(day, benchmarkMatches),
-          }),
-        ],
-  );
+  // A load-more pass appends the new page rather than rebuilding the list:
+  // replaceChildren would recreate every <details> closed, collapsing a card
+  // the reader had expanded and jumping them up the page mid-read.
+  const listHost = byId("today-list");
+  const renderedCount = state.todayRenderedCount || 0;
+  const growsInPlace =
+    !resultsKeyChanged && renderedCount > 0 && visibleObservations.length > renderedCount;
+  if (growsInPlace) {
+    listHost.append(
+      ...visibleObservations.slice(renderedCount).map(observationCard),
+    );
+  } else {
+    replaceChildren(
+      listHost,
+      visibleObservations.length
+        ? visibleObservations.map(observationCard)
+        : [
+            element("p", {
+              className: "empty-state",
+              text: emptyTodayMessage(day, benchmarkMatches),
+            }),
+          ],
+    );
+  }
+  state.todayRenderedCount = visibleObservations.length;
   // What is loaded, said where more loads from (issue #311). Scrolling this
   // paragraph into view pulls the next page, so the count doubles as the
   // control's own status line.
