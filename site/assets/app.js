@@ -5429,7 +5429,9 @@ function frontierShouldAnimate(key) {
   if (!done) {
     clearTimeout(frontierEntranceTimer);
     frontierEntranceTimer = setTimeout(() => {
-      completedFrontierEntranceKey = key;
+      // Spending the entrance requires that it was seen: a reader who
+      // navigated away mid-reveal gets it again on return.
+      if (state.view === "leaderboard") completedFrontierEntranceKey = key;
     }, FRONTIER_ENTRANCE_MS);
   }
   return !done;

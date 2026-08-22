@@ -810,6 +810,9 @@ def test_issue_312_the_saturation_view_reveals_left_to_right():
     gate = script.split("function frontierShouldAnimate(key)", 1)[1].split("\n}", 1)[0]
     assert 'if (state.view !== "leaderboard") return false;' in gate
     assert "completedFrontierEntranceKey === key" in gate
+    # And the completion callback rechecks visibility: leaving mid-reveal and
+    # returning after the window must still play the entrance.
+    assert 'if (state.view === "leaderboard") completedFrontierEntranceKey = key;' in gate
     assert "const FRONTIER_ENTRANCE_MS = 1400;" in script
     assert 'frontierShouldAnimate(`curated:${entry.benchmark_id}`)' in script
     assert 'frontierShouldAnimate(`external:${record.slug}`)' in script
