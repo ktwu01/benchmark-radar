@@ -5422,16 +5422,26 @@ function frontierPointRevealDelay(pointX, margin, plotWidth) {
 const FRONTIER_ENTRANCE_MS = 1400;
 let completedFrontierEntranceKey = null;
 let frontierEntranceTimer = null;
+let drawnFrontierEntranceKey = null;
 
 function frontierShouldAnimate(key) {
   if (state.view !== "leaderboard") return false;
+  // Remember what is actually on screen: the completion callback below may
+  // fire after the reader has moved to another benchmark.
+  drawnFrontierEntranceKey = key;
   const done = completedFrontierEntranceKey === key;
   if (!done) {
     clearTimeout(frontierEntranceTimer);
     frontierEntranceTimer = setTimeout(() => {
-      // Spending the entrance requires that it was seen: a reader who
-      // navigated away mid-reveal gets it again on return.
-      if (state.view === "leaderboard") completedFrontierEntranceKey = key;
+      // Spending the entrance requires that it was seen to the end: a reader
+      // who navigated away mid-reveal, to another view or another benchmark,
+      // gets it again on return.
+      if (
+        state.view === "leaderboard" &&
+        drawnFrontierEntranceKey === key
+      ) {
+        completedFrontierEntranceKey = key;
+      }
     }, FRONTIER_ENTRANCE_MS);
   }
   return !done;
@@ -5576,7 +5586,8 @@ function scoreTrackChart(entry, board) {
     // The line belongs to exactly one comparable run -- the one with the most
     // advances (issue #288). Its steps draw it; its best-so-far holders light
     // up with it.
-    const runSteps = [...runs.values()].map((points) => ({
+    const runSteps = [...runs.entries()].map(([key, points]) => ({
+      key,
       points,
       steps: runningBestSteps(points, { descends: scoreDescends }),
     }));
@@ -5585,10 +5596,11 @@ function scoreTrackChart(entry, board) {
     // Which points the saturation line is made of (issue #312's definition):
     // within that run, every reading that holds the best value as of its
     // date. These stay at full emphasis; all other points fade back so the
-    // eye lands on the line first. Keyed by time and value, which is what a
-    // step records, so ties on both are line members too. Gated on the line
-    // actually existing -- a benchmark whose history holds no comparable pair
-    // draws no line, so nothing may dim behind an absent reference.
+    // eye lands on the line first. Membership is keyed by run, then time and
+    // value, so an unrelated run reporting the same number on the same date
+    // is not mistaken for the line. Gated on the line actually existing -- a
+    // benchmark whose history holds no comparable pair draws no line, so
+    // nothing may dim behind an absent reference.
     const frontierMarks = new Set();
     if (frontier && frontier.steps.length) {
       let best = null;
@@ -5597,7 +5609,7 @@ function scoreTrackChart(entry, board) {
           best = point.value;
         }
         if (point.value === best) {
-          frontierMarks.add(`${point.time}\u0000${point.value}`);
+          frontierMarks.add(`${frontier.key}\u0000${point.time}\u0000${point.value}`);
         }
       }
     }
@@ -5654,9 +5666,13 @@ function scoreTrackChart(entry, board) {
       const pointY = scoreY(observation.value);
       // "其他的点可以淡化" (issue #312): readings that are not part of the
       // saturation line recede behind it. Hover and focus restore them, so
-      // de-emphasis never costs legibility.
+      // de-emphasis never costs legibility. Membership is looked up under the
+      // observation's own comparable run, so a same-date same-value reading
+      // from another run stays off the line.
       const onFrontier = frontierMarks.has(
-        `${new Date(`${observation.reported_at}T00:00:00Z`).getTime()}\u0000${observation.value}`,
+        `${observation.instrument || ""}\u0000${observation.protocol || ""}\u0000${new Date(
+          `${observation.reported_at}T00:00:00Z`,
+        ).getTime()}\u0000${observation.value}`,
       );
       // Entrance order follows the axis (issue #312): each point brightens
       // while the drawing front crosses its date, so the reveal reads left to

@@ -797,6 +797,12 @@ def test_issue_312_the_saturation_view_reveals_left_to_right():
     assert "const frontierMarks = new Set();" in chart
     assert "if (frontier && frontier.steps.length) {" in chart
     assert "point.value === best" in chart
+    # Membership carries the comparable run's own key, so an unrelated run
+    # reporting the same number on the same date is not drawn onto the line.
+    assert "`${frontier.key}\\u0000${point.time}\\u0000${point.value}`" in chart
+    assert (
+        "`${observation.instrument || \"\"}\\u0000${observation.protocol || \"\"}\\u0000" in chart
+    )
     assert '" score-point-dim"' in chart
     dim = styles.split(".score-point-dim .score-point-face {", 1)[1][:200]
     assert "fill-opacity: 0.6;" in dim
@@ -810,9 +816,12 @@ def test_issue_312_the_saturation_view_reveals_left_to_right():
     gate = script.split("function frontierShouldAnimate(key)", 1)[1].split("\n}", 1)[0]
     assert 'if (state.view !== "leaderboard") return false;' in gate
     assert "completedFrontierEntranceKey === key" in gate
-    # And the completion callback rechecks visibility: leaving mid-reveal and
-    # returning after the window must still play the entrance.
-    assert 'if (state.view === "leaderboard") completedFrontierEntranceKey = key;' in gate
+    # And the completion callback rechecks visibility and the drawn selection:
+    # leaving mid-reveal, to another view or another benchmark, must still
+    # play the entrance on return.
+    assert 'if (state.view === "leaderboard") completedFrontierEntranceKey = key;' not in gate
+    assert "drawnFrontierEntranceKey === key" in gate
+    assert "state.view === \"leaderboard\" &&\n        drawnFrontierEntranceKey === key" in gate
     assert "const FRONTIER_ENTRANCE_MS = 1400;" in script
     assert 'frontierShouldAnimate(`curated:${entry.benchmark_id}`)' in script
     assert 'frontierShouldAnimate(`external:${record.slug}`)' in script
