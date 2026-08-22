@@ -10,9 +10,7 @@ NS = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 
 
 def test_sitemap_covers_every_indexable_view():
-    tree = sitemap_tree(
-        [{"generated_at": "2026-08-21T02:17:00+00:00", "date": "2026-08-21"}]
-    )
+    tree = sitemap_tree([{"generated_at": "2026-08-21T02:17:00+00:00", "date": "2026-08-21"}])
     root = tree.getroot()
     urls = [node.text for node in root.findall("sm:url/sm:loc", NS)]
     assert urls == [
@@ -60,9 +58,7 @@ def test_each_view_has_its_own_title_and_description():
 
 def test_write_sitemap_writes_valid_xml_beside_the_data(tmp_path):
     output = tmp_path / "site" / "sitemap.xml"
-    written = write_sitemap(
-        [{"generated_at": "2026-08-21T02:17:00+00:00"}], output
-    )
+    written = write_sitemap([{"generated_at": "2026-08-21T02:17:00+00:00"}], output)
     assert written == output
     parsed = ET.parse(output)
     assert parsed.getroot().tag == f"{{{NS['sm']}}}urlset"
@@ -74,7 +70,7 @@ def test_published_head_and_robots_match_the_generated_sitemap():
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
 
     # Canonical default in the static head; app.js restates it per view.
-    assert '<link rel="canonical" href="https://ktwu01.github.io/benchmark-radar/">' in html
+    assert f'<link rel="canonical" href="{SITE_URL}/">' in html
     assert 'link[rel="canonical"]' in script
 
     # The four canonical view URLs in app.js are exactly the ones the
@@ -86,6 +82,8 @@ def test_published_head_and_robots_match_the_generated_sitemap():
     # robots.txt points at the sitemap URL the build actually writes.
     sitemap_url = f"{SITE_URL}/sitemap.xml"
     assert sitemap_url in robots
+    assert "https://ktwu01.github.io/benchmark-radar" not in html
+    assert "https://ktwu01.github.io/benchmark-radar" not in robots
 
 
 def test_structured_data_describes_a_searchable_site_and_a_dataset():

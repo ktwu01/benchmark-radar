@@ -68,6 +68,8 @@ def test_default_dashboard_build_also_publishes_the_feed(monkeypatch, tmp_path):
 
     assert (tmp_path / "site" / "data" / "radar.json").exists()
     assert (tmp_path / "site" / "feed.xml").exists()
+    assert (tmp_path / "site" / "sitemap.xml").exists()
+    assert not (tmp_path / "site" / "data" / "sitemap.xml").exists()
 
 
 def test_custom_dashboard_does_not_overwrite_the_default_feed(monkeypatch, tmp_path):

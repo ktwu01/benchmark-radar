@@ -254,17 +254,20 @@ def test_rebuild_can_publish_the_feed_from_the_same_snapshot_history(tmp_path):
     ]
 
 
-def test_rebuild_writes_the_sitemap_beside_the_data(tmp_path):
-    """Issue #236: the sitemap is generated per build rather than committed,
-    so it can only ever describe views this build actually publishes."""
+def test_rebuild_writes_the_sitemap_at_the_site_root(tmp_path):
+    """The Pages build must publish the URL advertised by robots.txt."""
     snapshot_dir = tmp_path / "snapshots"
     write_snapshot(radar_run(27), snapshot_dir)
     data_output = tmp_path / "site" / "data" / "radar.json"
+    feed_output = tmp_path / "site" / "feed.xml"
 
-    rebuild_dashboard(snapshot_dir, data_output)
+    rebuild_dashboard(snapshot_dir, data_output, feed_output=feed_output)
 
     ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
-    root = ET.parse(data_output.parent / "sitemap.xml").getroot()
+    sitemap_output = tmp_path / "site" / "sitemap.xml"
+    assert sitemap_output.exists()
+    assert not (data_output.parent / "sitemap.xml").exists()
+    root = ET.parse(sitemap_output).getroot()
     urls = [node.text for node in root.findall("sm:url/sm:loc", ns)]
     assert urls == [
         f"{SITE_URL}/",

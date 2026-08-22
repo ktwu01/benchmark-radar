@@ -855,7 +855,7 @@ def test_share_card_is_declared_with_an_absolute_url():
     # og:image silently yields the same blank grey card as no tag at all
     # (issue #88). The failure is invisible from inside the site.
     assert 'property="og:image"' in html
-    assert "https://ktwu01.github.io/benchmark-radar/assets/og-card.png" in html
+    assert "https://koutian.is-a.dev/benchmark-radar/assets/og-card.png" in html
     assert 'name="twitter:card" content="summary_large_image"' in html
     # Declared dimensions let a consumer reserve the large-image layout before
     # the file is fetched; without them some fall back to a small thumbnail.

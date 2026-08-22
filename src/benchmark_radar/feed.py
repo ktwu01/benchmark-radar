@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 from xml.etree import ElementTree as ET
 
-SITE_URL = "https://ktwu01.github.io/benchmark-radar"
+SITE_URL = "https://koutian.is-a.dev/benchmark-radar"
 FEED_URL = f"{SITE_URL}/feed.xml"
 ATOM_NAMESPACE = "http://www.w3.org/2005/Atom"
 

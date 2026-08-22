@@ -20,9 +20,9 @@
       property="og:description"
       content="A live ranking of the benchmarks reported in frontier model cards, system cards, and technical reports. Measures vendor reporting convention, not benchmark quality."
     >
-    <meta property="og:url" content="https://ktwu01.github.io/benchmark-radar/">
+    <meta property="og:url" content="https://koutian.is-a.dev/benchmark-radar/">
     <!-- Absolute, because Open Graph consumers do not resolve relative URLs. -->
-    <meta property="og:image" content="https://ktwu01.github.io/benchmark-radar/assets/og-card.png">
+    <meta property="og:image" content="https://koutian.is-a.dev/benchmark-radar/assets/og-card.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta
@@ -32,7 +32,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <!-- Mirrors og:image for consumers that read the Twitter namespace only
          and do not fall back to the Open Graph tags. -->
-    <meta name="twitter:image" content="https://ktwu01.github.io/benchmark-radar/assets/og-card.png">
+    <meta name="twitter:image" content="https://koutian.is-a.dev/benchmark-radar/assets/og-card.png">
 
     <!-- Issue #236. Every view is a query-string variant of this one path, so
          each view restates its own canonical (VIEW_SEO in assets/app.js) and
@@ -40,7 +40,7 @@
          than fragmenting ranking signals across every ?view=...&lq=... state.
          The static default below is what crawlers fetch before any script
          runs; app.js rewrites it per view on navigation. -->
-    <link rel="canonical" href="https://ktwu01.github.io/benchmark-radar/">
+    <link rel="canonical" href="https://koutian.is-a.dev/benchmark-radar/">
 
     <!-- Structured data for the two things this project actually is: a
          searchable site and a dataset. The SearchAction target is the real
@@ -51,12 +51,12 @@
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "Benchmark Radar",
-        "url": "https://ktwu01.github.io/benchmark-radar/",
+        "url": "https://koutian.is-a.dev/benchmark-radar/",
         "potentialAction": {
           "@type": "SearchAction",
           "target": {
             "@type": "EntryPoint",
-            "urlTemplate": "https://ktwu01.github.io/benchmark-radar/?view=leaderboard&lq={search_term_string}"
+            "urlTemplate": "https://koutian.is-a.dev/benchmark-radar/?view=leaderboard&lq={search_term_string}"
           },
           "query-input": "required name=search_term_string"
         }
@@ -68,7 +68,7 @@
         "@type": "Dataset",
         "name": "Benchmark Radar cumulative corpus",
         "description": "A daily-updated machine-readable corpus of AI benchmark, evaluation, and dataset signals collected from arXiv, GitHub, Hugging Face, OpenAlex, OpenReview, Semantic Scholar, Hacker News, and first-party lab feeds.",
-        "url": "https://ktwu01.github.io/benchmark-radar/data/radar.json",
+        "url": "https://koutian.is-a.dev/benchmark-radar/data/radar.json",
         "license": "https://opensource.org/licenses/MIT",
         "creator": {
           "@type": "Person",
@@ -80,7 +80,7 @@
           {
             "@type": "DataDownload",
             "encodingFormat": "application/json",
-            "contentUrl": "https://ktwu01.github.io/benchmark-radar/data/radar.json"
+            "contentUrl": "https://koutian.is-a.dev/benchmark-radar/data/radar.json"
           }
         ]
       }

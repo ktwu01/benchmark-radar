@@ -1063,10 +1063,16 @@ def rebuild_dashboard(
     badge_path = output.parent / "records-badge.json"
     badge_path.parent.mkdir(parents=True, exist_ok=True)
     badge_path.write_text(records_badge(value), encoding="utf-8")
-    # The sitemap lives beside radar.json for the same reason the badge does:
-    # written per build, never committed, so it can only describe what this
-    # build actually published (issue #236).
-    write_sitemap(snapshots, output.parent / "sitemap.xml")
+    # The sitemap is a site-level discovery document, not dashboard data. When
+    # this build also publishes the site-level feed, put the sitemap beside it
+    # so robots.txt's /sitemap.xml URL resolves in the Pages artifact. Custom
+    # data-only builds retain the local beside-output behavior.
+    sitemap_output = (
+        feed_output.with_name("sitemap.xml")
+        if feed_output is not None
+        else output.parent / "sitemap.xml"
+    )
+    write_sitemap(snapshots, sitemap_output)
     if feed_output is not None:
         write_feed(snapshots, feed_output)
     return value
