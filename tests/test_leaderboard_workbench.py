@@ -1045,6 +1045,13 @@ def test_issue_313_the_title_is_half_size_and_its_info_is_anchored():
     rule = styles.split(".leaderboard-top-heading h1 {", 1)[1].split("}", 1)[0]
     assert "font-size: clamp(1.25rem, 2vw, 1.5rem);" in rule
     assert "margin: 0;" in rule
+    # The global h1 caps its width at 800px; the heading is a flex item, so that
+    # cap is what let the title's box stretch and strand the (i). Reset it here
+    # so the title is content-sized and the toggle anchors to its last glyph.
+    assert "max-width: none;" in rule
+    # The old dead h2 selector (markup is <h1> since #256) is gone, not left to
+    # rot beside the rule that replaced it.
+    assert ".leaderboard-top-heading h2" not in styles
 
     heading = styles.split(".leaderboard-top-heading {", 1)[1].split("}", 1)[0]
     assert "flex-wrap: wrap;" in heading

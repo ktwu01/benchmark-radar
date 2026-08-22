@@ -2325,14 +2325,9 @@ td a {
    glyph, and wrap keeps that true on narrow screens by stacking instead. */
 .leaderboard-top-heading h1 {
   margin: 0;
+  max-width: none;
   font-size: clamp(1.25rem, 2vw, 1.5rem);
-  line-height: 1.05;
-}
-
-.leaderboard-top-heading h2 {
-  font-family: var(--display);
-  font-size: 1.35rem;
-  margin: 0;
+  line-height: 1.2;
 }
 
 .leaderboard-top-list {
