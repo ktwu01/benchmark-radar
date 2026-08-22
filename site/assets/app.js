@@ -4251,12 +4251,15 @@ function externalScoreChart(source, payload) {
     const pointX = x(dateValue(row.reported_date));
     const pointY = scoreY(row.value);
     const thirdParty = row.reported_by === "third_party";
+    // Same left-to-right reveal as the curated chart (issue #312): one kind
+    // of mark, one entrance, on both layers.
     const group = svgElement("g", {
       class: `score-point${thirdParty ? " score-point-third-party" : ""}`,
       tabindex: "0",
       role: "button",
       "aria-pressed": "false",
       "data-frontier-point": "",
+      style: `--reveal-delay:${frontierPointRevealDelay(pointX, margin, plotWidth)}ms`,
       "aria-label":
         `${row.model_name || t("not recorded")} ${t("by")} ${row.organization || t("not recorded")}` +
         (thirdParty ? `, ${t("cited by")} ${meta.name}` : "") +
@@ -5384,6 +5387,15 @@ function renderFrontierOrgKey(record) {
 // score band now gets the full height the staircase, the card rug, and the
 // inter-band gaps vacated, and the only marks on the chart are the scores, the
 // connections the join rule permits, and the reading gap.
+// Entrance timing for the score charts (issue #312). A point brightens while
+// the drawing front crosses its date, so the reveal reads left to right the
+// way the data does. 120ms lets the line start first; 780ms spreads the
+// points across the 900ms drawing window. Shared by both layers so a reader
+// never learns two reveal behaviors for one kind of mark.
+function frontierPointRevealDelay(pointX, margin, plotWidth) {
+  return Math.round(120 + ((pointX - margin.left) / plotWidth) * 780);
+}
+
 function scoreTrackChart(entry, board) {
   const record = scoreRecord(entry.benchmark_id);
   // Callers only ever select a benchmark that has a score record; this guard is
@@ -5576,11 +5588,9 @@ function scoreTrackChart(entry, board) {
       const pointY = scoreY(observation.value);
       // Entrance order follows the axis (issue #312): each point brightens
       // while the drawing front crosses its date, so the reveal reads left to
-      // right the way the data does. 120ms lets the line start first; 780ms
-      // spreads the points across its drawing window.
-      const revealDelay = Math.round(
-        120 + ((pointX - margin.left) / plotWidth) * 780,
-      );
+      // right the way the data does. The timing is shared with the crawled
+      // layer's chart so both figures reveal the same way.
+      const revealDelay = frontierPointRevealDelay(pointX, margin, plotWidth);
       const group = svgElement("g", {
         class: `score-point${observation.reported_by ? " score-point-third-party" : ""}`,
         tabindex: "0",

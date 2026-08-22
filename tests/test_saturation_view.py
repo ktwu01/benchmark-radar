@@ -777,9 +777,18 @@ def test_issue_312_the_saturation_view_reveals_left_to_right():
 
     # Each point carries its own delay on the timeline, derived from where it
     # sits on the x axis rather than from its row order.
-    assert "const revealDelay = Math.round(" in chart
-    assert "(pointX - margin.left) / plotWidth" in chart
+    assert "function frontierPointRevealDelay(pointX, margin, plotWidth)" in script
+    assert "(pointX - margin.left) / plotWidth" in script
+    assert "frontierPointRevealDelay(pointX, margin, plotWidth)" in chart
     assert 'style: `--reveal-delay:${revealDelay}ms`,' in chart
+
+    # The crawled layer's points share the same reveal: one kind of mark gets
+    # one entrance, so selecting a crawled benchmark does not fade everything
+    # in at once while the curated one staggers.
+    external = script.split("function externalScoreChart(", 1)[1].split(
+        "\nfunction ", 1
+    )[0]
+    assert "frontierPointRevealDelay" in external
 
     line_rule = styles.split(".score-frontier-line {", 1)[1][:800]
     assert "stroke-dasharray: 1;" in line_rule
