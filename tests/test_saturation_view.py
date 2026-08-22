@@ -780,14 +780,12 @@ def test_issue_312_the_saturation_view_reveals_left_to_right():
     assert "function frontierPointRevealDelay(pointX, margin, plotWidth)" in script
     assert "(pointX - margin.left) / plotWidth" in script
     assert "frontierPointRevealDelay(pointX, margin, plotWidth)" in chart
-    assert 'style: `--reveal-delay:${revealDelay}ms`,' in chart
+    assert "style: `--reveal-delay:${revealDelay}ms`," in chart
 
     # The crawled layer's points share the same reveal: one kind of mark gets
     # one entrance, so selecting a crawled benchmark does not fade everything
     # in at once while the curated one staggers.
-    external = script.split("function externalScoreChart(", 1)[1].split(
-        "\nfunction ", 1
-    )[0]
+    external = script.split("function externalScoreChart(", 1)[1].split("\nfunction ", 1)[0]
     assert "frontierPointRevealDelay" in external
 
     # The issue's definition is enforced in the same pass: points that hold
@@ -800,9 +798,7 @@ def test_issue_312_the_saturation_view_reveals_left_to_right():
     # Membership carries the comparable run's own key, so an unrelated run
     # reporting the same number on the same date is not drawn onto the line.
     assert "`${frontier.key}\\u0000${point.time}\\u0000${point.value}`" in chart
-    assert (
-        "`${observation.instrument || \"\"}\\u0000${observation.protocol || \"\"}\\u0000" in chart
-    )
+    assert '`${observation.instrument || ""}\\u0000${observation.protocol || ""}\\u0000' in chart
     # Same-date readings collapse to their directional best before the steps
     # are built, so what is drawn and what is emphasized cannot disagree: the
     # line never steps through an inferior number that shares a better
@@ -820,10 +816,8 @@ def test_issue_312_the_saturation_view_reveals_left_to_right():
     # Dimming itself is gated on a line being drawn: with no comparable pair
     # there is no reference, and every point keeps full emphasis rather than
     # all of them receding together.
-    assert (
-        "const offTheLine = Boolean(frontierSteps?.length) && !onFrontier;" in chart
-    )
-    assert "offTheLine ? \" score-point-dim\" : \"\"" in chart
+    assert "const offTheLine = Boolean(frontierSteps?.length) && !onFrontier;" in chart
+    assert 'offTheLine ? " score-point-dim" : ""' in chart
     dim = styles.split(".score-point-dim .score-point-face {", 1)[1][:200]
     assert "fill-opacity: 0.6;" in dim
     assert ".score-point-dim:hover .score-point-face" in styles
@@ -840,12 +834,12 @@ def test_issue_312_the_saturation_view_reveals_left_to_right():
     # leaving mid-reveal -- to another view, another benchmark, or a hidden
     # tab -- must still play the entrance on return.
     assert "const spendOrDefer = () => {" in gate
-    assert "document.visibilityState !== \"visible\"" in gate
+    assert 'document.visibilityState !== "visible"' in gate
     assert "drawnFrontierEntranceKey === key" in gate
-    assert "state.view === \"leaderboard\" && drawnFrontierEntranceKey === key" in gate
+    assert 'state.view === "leaderboard" && drawnFrontierEntranceKey === key' in gate
     assert "const FRONTIER_ENTRANCE_MS = 1400;" in script
-    assert 'frontierShouldAnimate(`curated:${entry.benchmark_id}`)' in script
-    assert 'frontierShouldAnimate(`external:${record.slug}`)' in script
+    assert "frontierShouldAnimate(`curated:${entry.benchmark_id}`)" in script
+    assert "frontierShouldAnimate(`external:${record.slug}`)" in script
     assert script.count('"score-chart-enter"') == 2
 
     # A superseded shard callback may not paint: two renders of one record
