@@ -5435,17 +5435,22 @@ function frontierShouldAnimate(key) {
   const done = completedFrontierEntranceKey === key;
   if (!done) {
     clearTimeout(frontierEntranceTimer);
-    frontierEntranceTimer = setTimeout(() => {
-      // Spending the entrance requires that it was seen to the end: a reader
-      // who navigated away mid-reveal, to another view or another benchmark,
-      // gets it again on return.
+    const spendOrDefer = () => {
+      // Spending the entrance requires that it was seen to the end: a hidden
+      // tab defers its own completion, and a reader who navigated away -- to
+      // another view or another benchmark -- gets the reveal again on return.
       if (
-        state.view === "leaderboard" &&
-        drawnFrontierEntranceKey === key
+        typeof document !== "undefined" &&
+        document.visibilityState !== "visible"
       ) {
+        frontierEntranceTimer = setTimeout(spendOrDefer, FRONTIER_ENTRANCE_MS);
+        return;
+      }
+      if (state.view === "leaderboard" && drawnFrontierEntranceKey === key) {
         completedFrontierEntranceKey = key;
       }
-    }, FRONTIER_ENTRANCE_MS);
+    };
+    frontierEntranceTimer = setTimeout(spendOrDefer, FRONTIER_ENTRANCE_MS);
   }
   return !done;
 }

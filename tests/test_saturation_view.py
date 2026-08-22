@@ -837,11 +837,12 @@ def test_issue_312_the_saturation_view_reveals_left_to_right():
     assert 'if (state.view !== "leaderboard") return false;' in gate
     assert "completedFrontierEntranceKey === key" in gate
     # And the completion callback rechecks visibility and the drawn selection:
-    # leaving mid-reveal, to another view or another benchmark, must still
-    # play the entrance on return.
-    assert 'if (state.view === "leaderboard") completedFrontierEntranceKey = key;' not in gate
+    # leaving mid-reveal -- to another view, another benchmark, or a hidden
+    # tab -- must still play the entrance on return.
+    assert "const spendOrDefer = () => {" in gate
+    assert "document.visibilityState !== \"visible\"" in gate
     assert "drawnFrontierEntranceKey === key" in gate
-    assert "state.view === \"leaderboard\" &&\n        drawnFrontierEntranceKey === key" in gate
+    assert "state.view === \"leaderboard\" && drawnFrontierEntranceKey === key" in gate
     assert "const FRONTIER_ENTRANCE_MS = 1400;" in script
     assert 'frontierShouldAnimate(`curated:${entry.benchmark_id}`)' in script
     assert 'frontierShouldAnimate(`external:${record.slug}`)' in script
