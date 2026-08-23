@@ -117,6 +117,7 @@ footer {
 .brand small,
 .eyebrow,
 .section-title span,
+#today-view .section-title h1,
 #today-view .section-title h2,
 .heading-note,
 .date-control,
@@ -497,15 +498,20 @@ input {
   border-bottom: 1px solid var(--ink);
 }
 
+.section-title h1,
 .section-title h2 {
   margin-bottom: 0;
 }
 
 /* The results heading reads as a caption for the list beneath it, so it
    carries the regular weight rather than the display h2 weight (issue #248). */
+#today-view .section-title h1,
 #today-view .section-title h2 {
   color: var(--muted);
   font-weight: 400;
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  text-transform: none;
+  letter-spacing: -0.01em;
 }
 
 .section-title span {
@@ -2324,7 +2330,8 @@ td a {
    hundreds of pixels away in empty space with no anchor. At this size the
    heading fits one line, so the toggle sits immediately after its last
    glyph, and wrap keeps that true on narrow screens by stacking instead. */
-.leaderboard-top-heading h1 {
+.leaderboard-top-heading h1,
+.leaderboard-top-heading h2 {
   margin: 0;
   max-width: none;
   font-size: clamp(1.25rem, 2vw, 1.5rem);
@@ -3804,6 +3811,17 @@ dialog::backdrop {
   cursor: pointer;
 }
 
+.footer-views {
+  display: flex;
+  gap: 1rem;
+  font-family: var(--utility);
+  font-size: 0.75rem;
+}
+
+.footer-views a {
+  color: var(--ink);
+}
+
 .footer-dataset {
   display: grid;
   gap: 0.55rem;
@@ -3898,7 +3916,8 @@ button.stale-banner-action {
   padding: 7rem 0;
 }
 
-.error-state h1 {
+.error-state h1,
+.error-state h2 {
   margin-bottom: 2rem;
   font-size: clamp(2.5rem, 7vw, 5.5rem);
 }

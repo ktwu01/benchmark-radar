@@ -15,7 +15,10 @@
          shows the current top rows rather than a static logo. -->
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Benchmark Radar">
-    <meta property="og:title" content="Which benchmarks do frontier labs actually report?">
+    <meta
+      property="og:title"
+      content="Benchmark Radar"
+    >
     <meta
       property="og:description"
       content="A live ranking of the benchmarks reported in frontier model cards, system cards, and technical reports. Measures vendor reporting convention, not benchmark quality."
@@ -315,7 +318,7 @@
         <div class="content-grid">
           <div>
             <div class="section-title">
-              <h2 data-i18n="Today's radar">Today's radar</h2>
+              <h1 class="today-heading" data-i18n="Today's radar">Today's radar</h1>
               <div class="results-meta" aria-live="polite">
                 <span id="today-breakdown"></span>
                 <span id="today-sort"></span>
@@ -410,7 +413,7 @@
              name, and the (i) beside it carries the caveat. -->
         <section class="leaderboard-top" aria-labelledby="leaderboard-heading">
           <div class="leaderboard-top-heading">
-            <h1 id="leaderboard-heading" data-i18n="Most reported benchmarks in model cards">Most reported benchmarks in model cards</h1>
+            <h2 id="leaderboard-heading" data-i18n="Most reported benchmarks in model cards">Most reported benchmarks in model cards</h2>
             <span id="leaderboard-top-info"></span>
             <!-- Written but not shown: the visible copy is in the (i). A screen
                  reader announces it with the heading. -->
@@ -610,7 +613,7 @@
         <header class="view-heading">
           <div>
             <p class="eyebrow" data-i18n="Big picture">Big picture</p>
-            <h1 id="map-heading" data-i18n="What we found">What we found</h1>
+            <h2 id="map-heading" data-i18n="What we found">What we found</h2>
           </div>
           <p class="heading-note" data-i18n="map.heading.note">
             See what shows up most often and where it came from. Open the connections view
@@ -654,7 +657,7 @@
         <header class="view-heading">
           <div>
             <p class="eyebrow" data-i18n="Recent activity">Recent activity</p>
-            <h1 id="trends-heading" data-i18n="Signals over time">Signals over time</h1>
+            <h2 id="trends-heading" data-i18n="Signals over time">Signals over time</h2>
           </div>
           <p class="heading-note" data-i18n="trends.heading.note">Counts describe discovery volume, not scientific quality.</p>
         </header>
@@ -727,7 +730,7 @@
 
       <section class="error-state" id="error-state" hidden>
         <p class="eyebrow" data-i18n="Dashboard unavailable">Dashboard unavailable</p>
-        <h1 data-i18n="The validated data file could not be loaded.">The validated data file could not be loaded.</h1>
+        <h2 data-i18n="The validated data file could not be loaded.">The validated data file could not be loaded.</h2>
         <p data-i18n="error.note">Try refreshing, or inspect the latest daily Issue while the dashboard rebuilds.</p>
         <a href="https://github.com/ktwu01/benchmark-radar/issues?q=is%3Aissue+label%3Adaily-radar" data-i18n="Open daily Issues">Open daily Issues ↗</a>
       </section>
@@ -755,6 +758,14 @@
 
     <footer>
       <p id="build-meta">Updated —</p>
+      <!-- Crawlable internal links: the view switcher above is buttons, which
+         search engines cannot follow, so the footer restates the views as
+         real anchors pointing at the canonical per-view URLs. -->
+      <nav class="footer-views" aria-label="Site views">
+        <a href="?view=leaderboard" data-i18n="Leaderboard">Leaderboard</a>
+        <a href="?view=trends" data-i18n="Trends">Trends</a>
+        <a href="?view=map" data-i18n="Explore">Explore</a>
+      </nav>
       <div class="footer-dataset">
         <strong data-i18n="Free dataset. No crawler needed.">Free dataset. No crawler needed.</strong>
         <span class="footer-dataset-actions">
