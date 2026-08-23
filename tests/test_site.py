@@ -1376,7 +1376,7 @@ def test_rendered_stale_banner_translates_copy_under_zh():
     link = next(n for n in nodes if n["tag"] == "a")
     button = next(n for n in nodes if n["tag"] == "button")
     assert link["text"] == "哪里出了问题？"
-    assert button["text"] == "联系"
+    assert button["text"] == "联系作者"
     assert "那之后的自动更新一直没有成功。" in banner["children"][0]["text"]
     assert "The automatic update has not succeeded" not in banner["children"][0]["text"]
 

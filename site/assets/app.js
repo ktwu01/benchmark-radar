@@ -760,7 +760,7 @@ const I18N = {
     Discord: "Discord",
     "The complete dataset is free to download. If it saves you research time, star the repository so other eval builders can find it.":
       "完整数据集可以免费下载。如果它帮你节省了研究时间，请给仓库点个 Star，让更多评测开发者找到它。",
-    "Download the dataset": "下载数据集",
+    Download: "下载",
     "Star the repository": "给仓库点 Star",
     "Free dataset. No crawler needed.": "免费数据集，无需爬虫。",
     "If this saved you research time, cite the work, star the repo and help other eval builders find it.":
@@ -769,7 +769,7 @@ const I18N = {
     "Share Benchmark Radar": "分享 Benchmark Radar",
     Share: "分享",
     Copied: "已复制",
-    "contact the author": "联系作者",
+    Contact: "联系作者",
     "for a one-click export.": "即可一键导出。",
     // --- Remaining dynamic strings ------------------------------------------
     " on a": " 以",
@@ -7224,7 +7224,7 @@ function openContact(updateUrl = true) {
       }),
       element("a", {
         className: "primary-link",
-        text: t("Download the dataset"),
+        text: t("Download"),
         attrs: { href: "data/radar.json" },
       }),
       element("a", {
@@ -7442,7 +7442,7 @@ function bindEvents() {
   // before they trust any single row.
   byId("rubric-nav").addEventListener("click", () => openRubric());
   byId("badge-contact").addEventListener("click", openContact);
-  // The footer's "contact the author" opens the same sheet as the header
+  // The footer's "Contact" button opens the same sheet as the header
   // badge (issue #311): one contact surface, two doors.
   byId("footer-contact").addEventListener("click", openContact);
   byId("contact-close").addEventListener("click", () => byId("contact-dialog").close());
