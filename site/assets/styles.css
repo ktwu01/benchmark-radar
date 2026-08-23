@@ -515,18 +515,13 @@ input {
 
 /* The results heading reads as a caption for the list beneath it, so it
    carries the regular weight rather than the display h2 weight (issue #248).
-   The heading is semantically an h1 now, but it must render exactly as it
-   did as an h2: undo the global h1 treatment (uppercase transform, 800px
-   width cap, single-line height) and keep the UA h2 size (1.5em) and the
-   shared display-face letter-spacing (-0.025em) untouched. */
+   The heading is semantically an h1, but it renders exactly like the counts
+   caption beside it: same utility face, same 0.72rem size, inherited from
+   the shared small-caps group above. */
 #today-view .section-title h1,
 #today-view .section-title h2 {
   color: var(--muted);
   font-weight: 400;
-  font-size: 1.5em;
-  line-height: normal;
-  text-transform: none;
-  max-width: none;
 }
 
 .section-title span {
@@ -542,6 +537,9 @@ input {
   align-items: baseline;
   justify-content: flex-end;
   text-align: right;
+  /* Counts read as plain data, not a label; the small-caps transform the
+     section-title group applies to spans is dropped here. */
+  text-transform: none;
 }
 
 #today-sort {
@@ -3950,7 +3948,11 @@ button.stale-banner-action {
 
 footer {
   display: flex;
-  justify-content: space-between;
+  /* Everything hugs the leading edge: dataset card (order -1), then the
+     updated stamp, then the view links. */
+  justify-content: flex-start;
+  gap: 1.5rem;
+  align-items: baseline;
   padding: 1.5rem 0 3rem;
   border-top: 1px solid var(--ink);
   color: var(--muted);

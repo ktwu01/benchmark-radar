@@ -2016,15 +2016,24 @@ def test_heading_outline_and_scale_stay_quiet():
     for old_h1_id in ("leaderboard-heading", "map-heading", "trends-heading"):
         assert f'<h2 id="{old_h1_id}"' in html
 
-    # The h1 keeps the v0.7.0 caption rendering despite the tag change. The
-    # marker appears twice (a shared font-family list earlier in the file),
-    # so take the rule after the last occurrence.
+    # The h1 renders exactly like the counts caption beside it: the shared
+    # small-caps utility group supplies face/size/case, and this rule only
+    # mutes color and weight. No font-size override may reappear here.
     marker = "#today-view .section-title h1,"
     today_rule = styles.split(marker)[-1].split("}", 1)[0]
-    assert "font-size: 1.5em;" in today_rule
+    assert "color: var(--muted);" in today_rule
     assert "font-weight: 400;" in today_rule
-    assert "text-transform: none;" in today_rule
-    assert "line-height: normal;" in today_rule
+    assert "font-size" not in today_rule
+
+    # The counts line reads as plain data: no small-caps transform.
+    meta_rule = _css_rule(styles, ".results-meta {")
+    assert "text-transform: none;" in meta_rule
+
+    # Footer content hugs the left edge instead of spreading space-between.
+    # The unindented selector is the base rule; the indented one is a mobile
+    # media-query override.
+    footer_block = styles.split("\nfooter {")[-1].split("}", 1)[0]
+    assert "justify-content: flex-start;" in footer_block
 
     # View and detail headings share the compact leaderboard scale; none of
     # them may reintroduce the uppercase display treatment.
