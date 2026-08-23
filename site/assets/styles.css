@@ -538,7 +538,11 @@ input {
   justify-content: flex-end;
   text-align: right;
   /* Counts read as plain data, not a label; the small-caps transform the
-     section-title group applies to spans is dropped here. */
+     section-title group applies to these spans directly is dropped here. */
+  text-transform: none;
+}
+
+.results-meta span {
   text-transform: none;
 }
 
@@ -3839,10 +3843,6 @@ dialog::backdrop {
 }
 
 .footer-dataset {
-  /* The footer is a space-between flex row (build meta left, view links
-     middle, this card last); order moves the card to the leading edge so it
-     is always the left-most item without changing the DOM order. */
-  order: -1;
   display: grid;
   gap: 0.55rem;
   margin: 0.7rem 0 0;
@@ -3947,12 +3947,12 @@ button.stale-banner-action {
 }
 
 footer {
+  /* One left-aligned column: updated stamp, view links, then the dataset
+     card underneath them. */
   display: flex;
-  /* Everything hugs the leading edge: dataset card (order -1), then the
-     updated stamp, then the view links. */
-  justify-content: flex-start;
-  gap: 1.5rem;
-  align-items: baseline;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.9rem;
   padding: 1.5rem 0 3rem;
   border-top: 1px solid var(--ink);
   color: var(--muted);

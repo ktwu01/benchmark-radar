@@ -2025,15 +2025,18 @@ def test_heading_outline_and_scale_stay_quiet():
     assert "font-weight: 400;" in today_rule
     assert "font-size" not in today_rule
 
-    # The counts line reads as plain data: no small-caps transform.
+    # The counts line reads as plain data: no small-caps transform, including
+    # on the child spans the shared section-title group targets directly.
     meta_rule = _css_rule(styles, ".results-meta {")
     assert "text-transform: none;" in meta_rule
+    span_rule = _css_rule(styles, ".results-meta span {")
+    assert "text-transform: none;" in span_rule
 
-    # Footer content hugs the left edge instead of spreading space-between.
-    # The unindented selector is the base rule; the indented one is a mobile
-    # media-query override.
+    # Footer is one left-aligned column: updated stamp, view links, dataset
+    # card last (bottom).
     footer_block = styles.split("\nfooter {")[-1].split("}", 1)[0]
-    assert "justify-content: flex-start;" in footer_block
+    assert "flex-direction: column;" in footer_block
+    assert "align-items: flex-start;" in footer_block
 
     # View and detail headings share the compact leaderboard scale; none of
     # them may reintroduce the uppercase display treatment.
