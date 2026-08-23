@@ -7260,7 +7260,10 @@ function bindEvents() {
   const langToggle = byId("lang-toggle");
   if (langToggle) langToggle.addEventListener("click", toggleLang);
   document.querySelectorAll("[data-view]").forEach((button) => {
-    button.addEventListener("click", async () => {
+    button.addEventListener("click", async (event) => {
+      // View nav entries are anchors so crawlers can follow them; keep the
+      // navigation client-side instead of a full page reload.
+      if (event.target.closest("a")) event.preventDefault();
       const view = button.dataset.view;
       try {
         if (["trends", "map"].includes(view)) await ensureFullData();

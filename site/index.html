@@ -229,11 +229,15 @@
 
     <nav class="view-nav" aria-label="Dashboard views" data-i18n-aria="Dashboard views">
       <button type="button" data-view="today" aria-controls="today-view" data-i18n="Today">Today</button>
-      <button type="button" data-view="leaderboard" aria-controls="leaderboard-view" data-i18n="Leaderboard">
+      <!-- The three non-default views are real anchors, not buttons: crawlers
+         do not follow buttons, and without hrefs the site reported zero
+         internal links. app.js intercepts the click so navigation stays
+         client-side; the href is the same canonical URL the view writes. -->
+      <a href="?view=leaderboard" data-view="leaderboard" aria-controls="leaderboard-view" data-i18n="Leaderboard">
         Leaderboard
-      </button>
-      <button type="button" data-view="trends" aria-controls="trends-view" data-i18n="Trends">Trends</button>
-      <button type="button" data-view="map" aria-controls="map-view" data-i18n="Explore">Explore</button>
+      </a>
+      <a href="?view=trends" data-view="trends" aria-controls="trends-view" data-i18n="Trends">Trends</a>
+      <a href="?view=map" data-view="map" aria-controls="map-view" data-i18n="Explore">Explore</a>
       <button type="button" id="rubric-nav" aria-haspopup="dialog" data-i18n="Rubric">Rubric</button>
     </nav>
 

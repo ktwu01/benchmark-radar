@@ -520,7 +520,7 @@ def test_corpus_view_progressively_discloses_the_complete_relationship_map():
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
 
     assert 'data-view="map"' in html
-    assert 'data-i18n="Explore">Explore</button>' in html
+    assert 'data-i18n="Explore">Explore</a>' in html
     assert 'id="map-insights"' in html
     assert '<details class="relationship-explorer" id="relationship-explorer">' in html
     assert "renderMapInsights(corpus)" in script
