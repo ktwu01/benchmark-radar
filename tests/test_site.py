@@ -1990,3 +1990,53 @@ def test_issue_311_the_today_list_loads_one_page_at_a_time():
     assert "The complete dataset is free to download" in contact
     assert 'href: "data/radar.json"' in contact
     assert 'className: "contact-dataset"' in contact
+
+
+def _css_rule(styles: str, selector: str) -> str:
+    """Return the body of the first rule whose selector matches exactly."""
+    assert selector in styles, f"missing selector: {selector}"
+    return styles.split(selector, 1)[1].split("}", 1)[0]
+
+
+def test_heading_outline_and_scale_stay_quiet():
+    """Regression guard for the single-h1 retagging and its typography.
+
+    The page keeps one document h1 ("Today's radar"), rendered as the muted
+    caption it always was; every other view heading is an h2 at the compact
+    leaderboard scale. Before this rule existed the per-view headings carried
+    the display-scale h1 treatment (3rem uppercase), which drowned the content
+    they named.
+    """
+    html = Path("site/index.html").read_text(encoding="utf-8")
+    styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
+
+    # One h1 in the static document, and it is the today view's caption.
+    assert html.count("<h1") == 1
+    assert '<h1 class="today-heading" data-i18n="Today\'s radar">' in html
+    for old_h1_id in ("leaderboard-heading", "map-heading", "trends-heading"):
+        assert f'<h2 id="{old_h1_id}"' in html
+
+    # The h1 keeps the v0.7.0 caption rendering despite the tag change. The
+    # marker appears twice (a shared font-family list earlier in the file),
+    # so take the rule after the last occurrence.
+    marker = "#today-view .section-title h1,"
+    today_rule = styles.split(marker)[-1].split("}", 1)[0]
+    assert "font-size: 1.5em;" in today_rule
+    assert "font-weight: 400;" in today_rule
+    assert "text-transform: none;" in today_rule
+    assert "line-height: normal;" in today_rule
+
+    # View and detail headings share the compact leaderboard scale; none of
+    # them may reintroduce the uppercase display treatment.
+    compact = "clamp(1.25rem, 2vw, 1.5rem);"
+    view_rule = _css_rule(styles, ".view-heading h2 {")
+    assert f"font-size: {compact}" in view_rule
+    assert "line-height: 1.2;" in view_rule
+    assert "text-transform" not in view_rule
+    detail_rule = _css_rule(styles, ".detail-title {")
+    assert f"font-size: {compact}" in detail_rule
+    assert "line-height: 1.2;" in detail_rule
+
+    # The mobile h1 clamp must not reach the quiet h2 headings.
+    mobile_block = styles.split("@media (max-width: 760px)", 1)[1]
+    assert ".view-heading h2," not in mobile_block.split("}", 1)[0]

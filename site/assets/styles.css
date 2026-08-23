@@ -394,16 +394,14 @@ main {
   padding-top: clamp(1.25rem, 2vw, 1.75rem);
 }
 
-/* These two headings are semantically h2 now (the page keeps one h1), but
-   they must render exactly as they did as h1s, so this restates the global
-   h1 treatment they used to inherit. */
+/* View headings are h2s under the page's single h1, and they share the
+   quiet leaderboard-heading scale rather than the display scale the old
+   per-view h1s used. */
 .view-heading h2 {
-  max-width: 800px;
-  margin-bottom: 0;
-  font-size: clamp(1.9rem, 4vw, 3rem);
-  line-height: 1;
-  letter-spacing: -0.015em;
-  text-transform: uppercase;
+  margin: 0;
+  max-width: none;
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  line-height: 1.2;
 }
 
 .view-heading {
@@ -3586,7 +3584,10 @@ dialog::backdrop {
 
 .detail-title {
   padding-right: 2rem;
-  font-size: clamp(2rem, 5vw, 3.4rem);
+  /* Same quiet scale as the view headings; the old display-scale title
+     outweighed the detail content it named. */
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  line-height: 1.2;
 }
 
 .detail-summary {
@@ -4097,11 +4098,7 @@ footer {
     width: 100%;
   }
 
-  /* The view headings were h1s when this rule was written; the selectors
-     follow them so their mobile sizing is unchanged. */
-  h1,
-  .view-heading h2,
-  .error-state h2 {
+  h1 {
     max-width: 100%;
     overflow-wrap: anywhere;
     font-size: clamp(1.7rem, 7vw, 2.3rem);
