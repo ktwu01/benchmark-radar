@@ -3831,17 +3831,6 @@ dialog::backdrop {
   cursor: pointer;
 }
 
-.footer-views {
-  display: flex;
-  gap: 1rem;
-  font-family: var(--utility);
-  font-size: 0.75rem;
-}
-
-.footer-views a {
-  color: var(--ink);
-}
-
 .footer-dataset {
   display: grid;
   gap: 0.55rem;

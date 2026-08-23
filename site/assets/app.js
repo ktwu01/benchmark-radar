@@ -767,7 +767,7 @@ const I18N = {
       "如果它帮你节省了研究时间，请引用这项工作、给仓库点 Star，让更多评测开发者找到它。",
     Cite: "引用",
     "Share Benchmark Radar": "分享 Benchmark Radar",
-    "Copy link": "复制链接",
+    Share: "分享",
     Copied: "已复制",
     "contact the author": "联系作者",
     "for a one-click export.": "即可一键导出。",
@@ -7464,7 +7464,7 @@ function bindEvents() {
       if (navigator.share) await navigator.share(shareData);
       else await navigator.clipboard.writeText(shareData.url);
       button.textContent = t("Copied");
-      setTimeout(() => { button.textContent = t("Copy link"); }, 1600);
+      setTimeout(() => { button.textContent = t("Share"); }, 1600);
     } catch (error) {
       if (error?.name !== "AbortError") console.error(error);
     }
