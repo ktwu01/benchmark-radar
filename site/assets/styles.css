@@ -394,6 +394,18 @@ main {
   padding-top: clamp(1.25rem, 2vw, 1.75rem);
 }
 
+/* These two headings are semantically h2 now (the page keeps one h1), but
+   they must render exactly as they did as h1s, so this restates the global
+   h1 treatment they used to inherit. */
+.view-heading h2 {
+  max-width: 800px;
+  margin-bottom: 0;
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+}
+
 .view-heading {
   display: flex;
   gap: 2rem;
@@ -504,14 +516,19 @@ input {
 }
 
 /* The results heading reads as a caption for the list beneath it, so it
-   carries the regular weight rather than the display h2 weight (issue #248). */
+   carries the regular weight rather than the display h2 weight (issue #248).
+   The heading is semantically an h1 now, but it must render exactly as it
+   did as an h2: undo the global h1 treatment (uppercase transform, 800px
+   width cap, single-line height) and keep the UA h2 size (1.5em) and the
+   shared display-face letter-spacing (-0.025em) untouched. */
 #today-view .section-title h1,
 #today-view .section-title h2 {
   color: var(--muted);
   font-weight: 400;
-  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  font-size: 1.5em;
+  line-height: normal;
   text-transform: none;
-  letter-spacing: -0.01em;
+  max-width: none;
 }
 
 .section-title span {
@@ -3923,7 +3940,11 @@ button.stale-banner-action {
 .error-state h1,
 .error-state h2 {
   margin-bottom: 2rem;
+  /* Restates the global h1 treatment the heading carried as an h1. */
   font-size: clamp(2.5rem, 7vw, 5.5rem);
+  line-height: 1;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
 }
 
 footer {
@@ -4076,7 +4097,11 @@ footer {
     width: 100%;
   }
 
-  h1 {
+  /* The view headings were h1s when this rule was written; the selectors
+     follow them so their mobile sizing is unchanged. */
+  h1,
+  .view-heading h2,
+  .error-state h2 {
     max-width: 100%;
     overflow-wrap: anywhere;
     font-size: clamp(1.7rem, 7vw, 2.3rem);
