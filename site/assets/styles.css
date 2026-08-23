@@ -3823,6 +3823,10 @@ dialog::backdrop {
 }
 
 .footer-dataset {
+  /* The footer is a space-between flex row (build meta left, view links
+     middle, this card last); order moves the card to the leading edge so it
+     is always the left-most item without changing the DOM order. */
+  order: -1;
   display: grid;
   gap: 0.55rem;
   margin: 0.7rem 0 0;
