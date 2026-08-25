@@ -19,10 +19,20 @@
 做 benchmark 研究的时候发现新东西太多了，所以我搞了这个持续爬虫，每天自动从全网抓新的 benchmark 相关信息。它目前每天从 arXiv、GitHub、Hugging Face、OpenAlex、OpenReview、各家实验室官方 feed、Brave Search、Semantic Scholar、Hacker News 等来源采集，并持续更新。你如果需要寻找 related work 或找到适合eval自己的agent 的 bench 或者关注最新的 eval 进展，可以看这里哈哈哈：
 github.com/ktwu01/benchmark-radar，每天更新，并支持一键导出数据
 
-**点击图片即可查看 AIME 2025 报告分数随时间逐渐饱和的过程。**
+## 先看哪里
+
+| Today | Leaderboard |
+| --- | --- |
+| [![Today 页面预览：每日 benchmark 信号、信源检查和问题入口](assets/readme-tab-today.png)](https://koutian.is-a.dev/benchmark-radar/) | [![Leaderboard 页面预览：模型卡采用排名和 AIME 2025 饱和图](assets/readme-tab-leaderboard.png)](https://koutian.is-a.dev/benchmark-radar/?view=leaderboard) |
+
+| Explore | Trends |
+| --- | --- |
+| [![Explore 页面预览：benchmark 地图、类别和信源证据](assets/readme-tab-explore.png)](https://koutian.is-a.dev/benchmark-radar/?view=map) | [![Trends 页面预览：benchmark 类别随时间变化](assets/readme-tab-trends.png)](https://koutian.is-a.dev/benchmark-radar/?view=trends) |
+
+**点击动图查看 AIME 2025 报告分数随时间逐渐饱和的过程。**
 
 <a href="https://koutian.is-a.dev/benchmark-radar/?view=leaderboard&lfrontier=llm-stats-aime-2025">
-  <img src="assets/aime-2025-leaderboard.png" alt="AIME 2025 模型报告分数随发布日期变化的前沿图" width="720" />
+  <img src="assets/aime-2025-saturation.gif" alt="AIME 2025 饱和过程动图，展示后续模型报告逐渐填满前沿" width="720" />
 </a>
 
 ## 使用方法

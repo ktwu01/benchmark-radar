@@ -24,10 +24,20 @@ web. It pulls evidence from arXiv, GitHub, Hugging Face, OpenAlex, OpenReview,
 first-party lab feeds, Brave Search, Semantic Scholar, Hacker News, and more
 every day, and keeps updating.
 
-**Click the image to watch how reported AIME 2025 scores saturated over time.**
+## What you can open first
+
+| Today | Leaderboard |
+| --- | --- |
+| [![Today view preview: daily benchmark signals, source checks, and questions](assets/readme-tab-today.png)](https://koutian.is-a.dev/benchmark-radar/) | [![Leaderboard preview: model-card adoption ranking and AIME 2025 saturation chart](assets/readme-tab-leaderboard.png)](https://koutian.is-a.dev/benchmark-radar/?view=leaderboard) |
+
+| Explore | Trends |
+| --- | --- |
+| [![Explore preview: benchmark map with category and source evidence](assets/readme-tab-explore.png)](https://koutian.is-a.dev/benchmark-radar/?view=map) | [![Trends preview: benchmark category momentum over time](assets/readme-tab-trends.png)](https://koutian.is-a.dev/benchmark-radar/?view=trends) |
+
+**Watch the AIME 2025 reported-score frontier get crowded over time.**
 
 <a href="https://koutian.is-a.dev/benchmark-radar/?view=leaderboard&lfrontier=llm-stats-aime-2025">
-  <img src="assets/aime-2025-leaderboard.png" alt="AIME 2025 leaderboard frontier chart, plotting every reported score against each model's release date" width="720" />
+  <img src="assets/aime-2025-saturation.gif" alt="Animated AIME 2025 saturation chart showing later model reports filling in the frontier over time" width="720" />
 </a>
 
 ## Use it

@@ -40,8 +40,8 @@ def test_readmes_offer_free_data_and_an_earned_star_request():
     assert "[README.zh-CN.md](README.zh-CN.md)" not in english
     assert '<div align="left">' in chinese.split("# Benchmark Radar")[0]
     assert "[English](README.md)" in chinese
-    assert "Click the image" in english
-    assert "点击图片" in chinese
+    assert "Watch the AIME 2025 reported-score frontier" in english
+    assert "点击动图查看 AIME 2025" in chinese
     assert "data/radar.json" in english and "no crawler or contact required" in english
     assert "data/radar.json" in chinese and "无需爬虫或联系作者" in chinese
     assert "star the repository" in english
