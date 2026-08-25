@@ -1,5 +1,5 @@
-name: Show how you use Benchmark Radar
-description: Share a project, paper, evaluation, or workflow that Benchmark Radar helped.
+name: Show how you use Benchmark Radar / 展示你的使用场景
+description: Share a project, paper, evaluation, or workflow that Benchmark Radar helped. / 分享 Benchmark Radar 帮到的项目、论文、评测或工作流。
 title: "Use case: "
 labels: ["use-case"]
 body:
@@ -9,10 +9,13 @@ body:
         Independent use is the best signal that this project is useful. A short
         note is enough, and a public link helps other eval builders learn from it.
 
+        中文也可以。请尽量写清楚：你在做什么、Benchmark Radar 帮你省了
+        哪一步、别人看完这个例子能学到什么。截图、链接或一句结论都很好。
+
   - type: input
     id: project
     attributes:
-      label: What are you building or researching?
+      label: What are you building or researching? / 你在做什么
       placeholder: An agent evaluation suite for customer-support workflows
     validations:
       required: true
@@ -20,16 +23,29 @@ body:
   - type: textarea
     id: use
     attributes:
-      label: How did Benchmark Radar help?
-      description: Name the page, dataset, benchmark, or decision that was useful.
+      label: How did Benchmark Radar help? / Benchmark Radar 怎么帮到你
+      description: Name the page, dataset, benchmark, or decision that was useful. / 写具体页面、数据集、benchmark 或它帮你做出的判断。
+    validations:
+      required: true
+
+  - type: textarea
+    id: worthy
+    attributes:
+      label: Why is this worth showing? / 为什么这个例子值得展示
+      description: |
+        What should another reader notice first: saved research time, a useful
+        benchmark choice, a surprising gap, or a shareable result?
+
+        另一个读者最应该先看到什么：省下的调研时间、一个有用的 benchmark
+        选择、一个意外缺口，还是一个方便传播的结果？
     validations:
       required: true
 
   - type: input
     id: link
     attributes:
-      label: Public link
-      description: Optional project, paper, post, repository, or evaluation link.
+      label: Public link / 公开链接
+      description: Optional project, paper, post, repository, or evaluation link. / 可选：项目、论文、帖子、仓库或评测链接。
       placeholder: https://example.com/my-eval-project
     validations:
       required: false
@@ -37,6 +53,6 @@ body:
   - type: textarea
     id: feedback
     attributes:
-      label: What would make it more useful?
+      label: What would make it more useful? / 还希望它改进什么
     validations:
       required: false

@@ -1,5 +1,5 @@
-name: Tell us about a model card we missed
-description: Name a model card, system card, technical report, or release post the site has not read yet.
+name: Tell us about a model card we missed / 补充模型卡
+description: Name a model card, system card, technical report, or release post the site has not read yet. / 提交站点尚未收录的模型卡、系统卡、技术报告或发布文章。
 title: "Add model card: "
 labels: ["model-card", "good first issue"]
 body:
@@ -15,11 +15,14 @@ body:
         have to make the change yourself. If you would like to, see
         [CONTRIBUTING.md](https://github.com/ktwu01/benchmark-radar/blob/main/CONTRIBUTING.md).
 
+        中文也可以。请尽量回答三个问题：这个文档是什么、它报告了哪些
+        benchmark、为什么值得收录。链接和截图比长解释更有用。
+
   - type: input
     id: url
     attributes:
-      label: Link to the document
-      description: Where the scores are published. This is what lets anyone check the numbers later.
+      label: Link to the document / 文档链接
+      description: Where the scores are published. This is what lets anyone check the numbers later. / 分数发布在哪里；后续核对数字靠这个链接。
       placeholder: https://example.com/frontier-1-model-card
     validations:
       required: true
@@ -27,7 +30,7 @@ body:
   - type: input
     id: organization
     attributes:
-      label: Who released the model
+      label: Who released the model / 发布方
       placeholder: Acme
     validations:
       required: true
@@ -35,7 +38,7 @@ body:
   - type: input
     id: model
     attributes:
-      label: Model name
+      label: Model name / 模型名
       placeholder: Frontier-1
     validations:
       required: true
@@ -43,7 +46,7 @@ body:
   - type: dropdown
     id: document_type
     attributes:
-      label: What kind of document is it
+      label: What kind of document is it / 文档类型
       options:
         - Model card
         - System card
@@ -55,8 +58,8 @@ body:
   - type: input
     id: published
     attributes:
-      label: Date it was published (YYYY-MM-DD)
-      description: The date on the document itself. If the model was announced on a different day, use the document's date.
+      label: Date it was published (YYYY-MM-DD) / 发布日期
+      description: The date on the document itself. If the model was announced on a different day, use the document's date. / 用文档自己的日期；如果模型公告日期不同，也以文档日期为准。
       placeholder: "2026-05-14"
     validations:
       required: true
@@ -64,7 +67,7 @@ body:
   - type: textarea
     id: benchmarks
     attributes:
-      label: Which benchmarks does it report scores for
+      label: Which benchmarks does it report scores for / 报告了哪些 benchmark 分数
       description: |
         One per line. Write the names however the document writes them. We
         will match them to the names the site uses.
@@ -72,6 +75,9 @@ body:
         List what the document actually publishes a score for, not everything
         the model can do. A document that reports one benchmark three
         different ways still counts as reporting it once.
+
+        每行一个，按原文名称写即可。只列文档实际给出分数的 benchmark，
+        不要列模型“可能会做”的能力项。
       placeholder: |
         GPQA Diamond
         SWE-bench Verified
@@ -82,10 +88,13 @@ body:
   - type: textarea
     id: notes
     attributes:
-      label: Anything unusual about it
+      label: Anything unusual about it / 需要特别说明的地方
       description: |
         Optional. Worth mentioning if the document was edited after it went up
         and gained scores later, if it calls a benchmark by a name nobody else
         uses, or if it talks about a test without giving a score.
+
+        可选。如果文档后续补了分数、benchmark 名称很特殊，或只提到测试但
+        没有给分数，请写在这里。
     validations:
       required: false

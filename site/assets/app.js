@@ -730,8 +730,8 @@ const I18N = {
     "modality not established": "模态尚未确定",
     "No paper, repository, dataset or site link established.":
       "尚未确定论文、代码仓库、数据集或站点链接。",
-    "Identity below is inherited from the {donor} card for a reviewed equivalent benchmark; scores are unchanged.":
-      "以下基本信息继承自 {donor} 中经人工核对为同一基准的记录；分数不受影响。",
+    "Identity below comes from the {source} card after review matched it to the same benchmark; scores are unchanged.":
+      "以下基本信息来自 {source} 卡片；人工核对确认它指向同一个基准，分数不受影响。",
     Openness: "开放性",
     "openness not established": "开放性尚未确定",
     open: "开放",
@@ -4246,12 +4246,12 @@ function externalFactList(facts) {
 function externalInheritanceNote(detail) {
   const inheritance = detail.identity_inheritance;
   if (!inheritance) return null;
-  const donorName = externalSourceMeta(inheritance.donor_source).name;
+  const sourceName = externalSourceMeta(inheritance.donor_source).name;
   return element("p", {
     className: "external-inherited",
     text: t(
-      "Identity below is inherited from the {donor} card for a reviewed equivalent benchmark; scores are unchanged.",
-      { donor: donorName },
+      "Identity below comes from the {source} card after review matched it to the same benchmark; scores are unchanged.",
+      { source: sourceName },
     ),
   });
 }

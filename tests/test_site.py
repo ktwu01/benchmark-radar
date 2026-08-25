@@ -293,7 +293,7 @@ def test_issue_316_benchmark_detail_labels_are_translated():
     # the value rather than a single-line "key": "value" pair.
     assert "尚未确定论文、代码仓库、数据集或站点链接。" in script
     # The #262 inheritance note also wraps onto its own line.
-    assert "中经人工核对为同一基准的记录" in script
+    assert "人工核对确认它指向同一个基准" in script
 
 
 def test_language_toggle_click_handler_is_wired():

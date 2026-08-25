@@ -1,11 +1,21 @@
-name: Report something
-description: Anything wrong, confusing, or missing on the site.
+name: Report something / 反馈问题
+description: Anything wrong, confusing, or missing on the site. / 反馈页面上错误、难懂或缺失的信息。
 labels: ["bug"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        English or Chinese is fine. The fastest useful report says: what you
+        saw, where it happened, what you expected, and why it matters to a
+        reader.
+
+        中文也可以。最有用的反馈通常包括：你看到了什么、发生在哪里、
+        你期待看到什么、以及为什么这会影响读者理解。
+
   - type: dropdown
     id: kind
     attributes:
-      label: What kind of problem is it
+      label: What kind of problem is it / 问题类型
       options:
         - Something looks wrong (layout, spacing, colours)
         - A logo is wrong, missing, or too small to read
@@ -21,8 +31,8 @@ body:
   - type: input
     id: where
     attributes:
-      label: Where did you see it
-      description: Paste the address of the page, or just name it.
+      label: Where did you see it / 在哪里看到的
+      description: Paste the address of the page, or just name it. / 贴页面地址，或直接写页面/区域名称。
       placeholder: https://koutian.is-a.dev/benchmark-radar/?view=leaderboard
     validations:
       required: true
@@ -30,9 +40,25 @@ body:
   - type: textarea
     id: what
     attributes:
-      label: What happened
+      label: What happened / 发生了什么
       description: |
         What you saw, and what you expected instead. A screenshot says it
         faster than words: you can paste one straight into this box.
+
+        写清楚你实际看到的内容，以及你原本期待看到什么。截图通常比长
+        描述更快，可以直接粘贴到这里。
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why is this worth fixing / 为什么值得修
+      description: |
+        Who is confused or blocked by this: a newcomer, an eval builder, a
+        benchmark author, or someone sharing the project?
+
+        这个问题会影响谁：第一次看的读者、做 eval 的人、benchmark 作者，
+        还是准备转发项目的人？
     validations:
       required: true
