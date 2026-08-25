@@ -14,10 +14,11 @@ instead of a hand-edited README number (issue #197). -->
 
 [Download dataset](https://koutian.is-a.dev/benchmark-radar/data/radar.json) ·
 [Open dashboard](https://koutian.is-a.dev/benchmark-radar/) ·
-[GitHub](https://github.com/ktwu01/benchmark-radar) ·
-[LinkedIn](https://www.linkedin.com/in/ktwu01) ·
-[Scholar](https://scholar.google.com/citations?user=s9w1k-cAAAAJ&hl=en) ·
-[@ktwu01](https://x.com/ktwu01)
+[GitHub](https://github.com/ktwu01/benchmark-radar)
+
+[![X](https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/ktwu01)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ktwu01)
+[![Google Scholar](https://img.shields.io/badge/Google%20Scholar-4285F4?style=for-the-badge&logo=googlescholar&logoColor=white)](https://scholar.google.com/citations?user=s9w1k-cAAAAJ&hl=en)
 
 I kept running into new benchmarks while doing benchmark research, so I built a
 crawler that continuously collects benchmark-related signals from across the

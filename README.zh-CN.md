@@ -12,10 +12,11 @@
 
 [下载数据集](https://koutian.is-a.dev/benchmark-radar/data/radar.json) ·
 [打开 dashboard](https://koutian.is-a.dev/benchmark-radar/) ·
-[GitHub](https://github.com/ktwu01/benchmark-radar) ·
-[LinkedIn](https://www.linkedin.com/in/ktwu01) ·
-[Scholar](https://scholar.google.com/citations?user=s9w1k-cAAAAJ&hl=en) ·
-[@ktwu01](https://x.com/ktwu01)
+[GitHub](https://github.com/ktwu01/benchmark-radar)
+
+[![X](https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/ktwu01)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ktwu01)
+[![Google Scholar](https://img.shields.io/badge/Google%20Scholar-4285F4?style=for-the-badge&logo=googlescholar&logoColor=white)](https://scholar.google.com/citations?user=s9w1k-cAAAAJ&hl=en)
 
 做 benchmark 研究的时候发现新东西太多了，所以我搞了这个持续爬虫，每天自动从全网抓新的 benchmark 相关信息。它目前每天从 arXiv、GitHub、Hugging Face、OpenAlex、OpenReview、各家实验室官方 feed、Brave Search、Semantic Scholar、Hacker News 等来源采集，并持续更新。你如果需要寻找 related work 或找到适合eval自己的agent 的 bench 或者关注最新的 eval 进展，可以看这里哈哈哈：
 github.com/ktwu01/benchmark-radar，每天更新，并支持一键导出数据
