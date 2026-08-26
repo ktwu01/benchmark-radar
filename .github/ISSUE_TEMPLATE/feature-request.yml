@@ -4,18 +4,13 @@ labels: ["new feature"]
 body:
   - type: markdown
     attributes:
-      value: |
-        English or Chinese is fine. Describe what you want Benchmark Radar to
-        add, who would use it, and how it would improve their work.
-
-        中文也可以。请写清楚希望 Benchmark Radar 增加什么、谁会使用，
-        以及它能如何改善现有工作。
+      value: "English or Chinese is fine. Say what to add and who it helps. / 中英文均可。写清楚要加什么、对谁有用。"
 
   - type: textarea
     id: feature
     attributes:
       label: What should Benchmark Radar add? / 希望 Benchmark Radar 增加什么
-      description: Describe the capability, data source, workflow, or interface change you want. / 描述你希望增加的能力、数据源、工作流或界面改动。
+      description: A capability, data source, workflow, or interface change. / 一项能力、数据源、工作流或界面改动。
     validations:
       required: true
 
@@ -23,6 +18,22 @@ body:
     id: value
     attributes:
       label: Why is it worth adding? / 为什么值得加入
-      description: Who would use it and what task it makes faster or possible. / 谁会用到，它能让哪项任务更快、更清楚或从无法完成变为可以完成。
+      description: What task it makes faster, clearer, or possible at all. / 它能让哪件事更快、更清楚，或从做不到变成做得到。
     validations:
       required: true
+
+  - type: textarea
+    id: users
+    attributes:
+      label: Who would use it? / 谁会使用
+      description: Optional. / 可选。
+    validations:
+      required: false
+
+  - type: textarea
+    id: example
+    attributes:
+      label: Example, sketch, or link / 示例、草图或链接
+      description: Optional screenshot, mockup, paper, or dataset. / 可选：截图、草图、论文或数据集。
+    validations:
+      required: false

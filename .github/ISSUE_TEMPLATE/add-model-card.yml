@@ -4,24 +4,13 @@ labels: ["model-card", "good first issue"]
 body:
   - type: markdown
     attributes:
-      value: |
-        The [Model Card Adoption Rank](https://github.com/ktwu01/benchmark-radar#model-card-adoption-rank)
-        counts how many companies report each benchmark when they launch a
-        model. Every document in it was read by a person, so the site only
-        knows about the ones somebody has pointed at.
-
-        Naming one we missed is a real contribution on its own. You do not
-        have to make the change yourself. If you would like to, see
-        [CONTRIBUTING.md](https://github.com/ktwu01/benchmark-radar/blob/main/CONTRIBUTING.md).
-
-        中文也可以。请尽量回答三个问题：这个文档是什么、它报告了哪些
-        benchmark、为什么值得收录。链接和截图比长解释更有用。
+      value: "The [Model Card Adoption Rank](https://github.com/ktwu01/benchmark-radar#model-card-adoption-rank) only counts documents a person has pointed at, so naming one we missed is the whole contribution. / 排行榜只统计有人提交过的文档，指出我们漏掉的一份就已经是贡献。"
 
   - type: input
     id: url
     attributes:
       label: Link to the document / 文档链接
-      description: Where the scores are published. If you know the model name and date, include them here too. / 分数发布在哪里；如果知道模型名和发布日期也一并贴上，方便核对。
+      description: Where the scores are published. / 分数发布在哪里。
       placeholder: https://example.com/frontier-1-model-card
     validations:
       required: true
@@ -30,15 +19,27 @@ body:
     id: benchmarks
     attributes:
       label: Which benchmarks does it report scores for / 报告了哪些 benchmark 分数
-      description: |
-        One per line, names as the document writes them. We will match them
-        to the names the site uses. Only list what it actually publishes a
-        score for.
-
-        每行一个，按原文名称写即可。只列文档实际给出分数的 benchmark。
+      description: One per line, named as the document writes them. / 每行一个，按原文名称写即可。
       placeholder: |
         GPQA Diamond
         SWE-bench Verified
         AIME 2025
     validations:
       required: true
+
+  - type: input
+    id: details
+    attributes:
+      label: Model and date / 模型与日期
+      description: Optional. / 可选。
+      placeholder: Frontier-1 by Acme, 2026-05-14
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything unusual about it / 需要特别说明的地方
+      description: Optional. For example a benchmark it names differently than everyone else. / 可选：例如它给 benchmark 起了别处没有的名字。
+    validations:
+      required: false

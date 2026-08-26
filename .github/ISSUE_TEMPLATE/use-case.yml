@@ -4,19 +4,14 @@ labels: ["use-case"]
 body:
   - type: markdown
     attributes:
-      value: |
-        Independent use is the best signal that this project is useful. A short
-        note is enough, and a public link helps other eval builders learn from it.
-
-        中文也可以。请尽量写清楚：你在做什么、Benchmark Radar 帮你省了
-        哪一步、别人看完这个例子能学到什么。截图、链接或一句结论都很好。
+      value: "A short note is enough. A public link helps other eval builders learn from it. / 简短说明即可；附上公开链接，别人更容易参考。"
 
   - type: textarea
     id: use
     attributes:
       label: How did Benchmark Radar help? / Benchmark Radar 怎么帮到你
-      description: What you are building and which page, dataset, or benchmark was useful. / 你在做什么，以及哪个页面、数据集或 benchmark 帮到了你。
-      placeholder: An agent evaluation suite for customer-support workflows — the leaderboard helped us pick ... / 面向客服工作流的 agent 评测套件，排行榜帮我们选了 ...
+      description: What you are building, and which page or dataset was useful. / 你在做什么，哪个页面或数据集帮到了你。
+      placeholder: "An agent evaluation suite for customer support: the leaderboard helped us pick ... / 面向客服的 agent 评测套件，排行榜帮我们选了 ..."
     validations:
       required: true
 
@@ -24,6 +19,23 @@ body:
     id: worthy
     attributes:
       label: Why is this worth sharing? / 为什么值得分享
-      description: What should another reader notice first. / 另一个读者最应该先看到什么。
+      description: What another reader should notice first. / 另一个读者最应该先看到什么。
     validations:
       required: true
+
+  - type: input
+    id: link
+    attributes:
+      label: Public link / 公开链接
+      description: Optional project, paper, post, or repository. / 可选：项目、论文、帖子或仓库。
+      placeholder: https://example.com/my-eval-project
+    validations:
+      required: false
+
+  - type: textarea
+    id: feedback
+    attributes:
+      label: What would make it more useful? / 还希望它改进什么
+      description: Optional. / 可选。
+    validations:
+      required: false

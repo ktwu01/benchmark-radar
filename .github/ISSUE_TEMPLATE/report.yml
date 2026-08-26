@@ -4,25 +4,13 @@ labels: ["bug"]
 body:
   - type: markdown
     attributes:
-      value: |
-        English or Chinese is fine. The fastest useful report says: what you
-        saw, where it happened, what you expected, and why it matters to a
-        reader.
-
-        中文也可以。最有用的反馈通常包括：你看到了什么、发生在哪里、
-        你期待看到什么、以及为什么这会影响读者理解。
+      value: "English or Chinese is fine. Say what you saw and what you expected instead. / 中英文均可。写清楚看到了什么、原本期待看到什么。"
 
   - type: textarea
     id: what
     attributes:
       label: What happened / 发生了什么
-      description: |
-        What you saw, and what you expected instead. A screenshot says it
-        faster than words: you can paste one straight into this box. If you
-        remember the page address, include it here too.
-
-        写清楚你实际看到的内容，以及你原本期待看到什么。截图通常比长
-        描述更快，可以直接粘贴到这里；记得页面地址的话一并贴上。
+      description: A screenshot pasted straight into this box says it fastest. / 直接把截图粘贴到这里最快。
     validations:
       required: true
 
@@ -30,7 +18,7 @@ body:
     id: where
     attributes:
       label: Where did you see it / 在哪里看到的
-      description: Optional. Paste the page address or just name the area. / 可选：贴页面地址或写页面/区域名称。
+      description: Optional. The page address, or just the area. / 可选：页面地址，或写页面名称。
       placeholder: https://koutian.is-a.dev/benchmark-radar/?view=leaderboard
     validations:
       required: false
