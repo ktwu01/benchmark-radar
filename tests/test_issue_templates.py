@@ -57,8 +57,18 @@ def test_feature_request_form_has_a_small_required_core() -> None:
     fields = {field.get("id"): field for field in form["body"] if field.get("id")}
 
     assert form["labels"] == ["new feature"]
-    assert set(fields) == {"feature", "users", "value", "example"}
-    required_ids = ("feature", "value")
-    assert all(fields[field_id]["validations"]["required"] for field_id in required_ids)
-    assert fields["users"]["validations"]["required"] is False
-    assert fields["example"]["validations"]["required"] is False
+    # Issue #388: keep the form to two fields, both required, so it never asks
+    # for a third or fourth item.
+    assert set(fields) == {"feature", "value"}
+    assert all(fields[field_id]["validations"]["required"] for field_id in fields)
+
+
+def test_issue_forms_ask_for_at_most_two_fields() -> None:
+    # Issue #388: every form should collect at most two input fields, so a
+    # contributor never faces three or four boxes to fill.
+    for path in FORM_PATHS:
+        if path.name == "config.yml":
+            continue
+        form = load_yaml(path)
+        field_ids = [field.get("id") for field in form["body"] if field.get("id")]
+        assert len(field_ids) <= 2, f"{path.name} has {len(field_ids)} fields"

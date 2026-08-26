@@ -42,26 +42,3 @@ body:
         AIME 2025
     validations:
       required: true
-
-  - type: input
-    id: details
-    attributes:
-      label: Model and date (optional) / 模型与日期（可选）
-      description: Model name, publisher, and date if you have them. / 如有，填写模型名、发布方和日期。
-      placeholder: Frontier-1 by Acme — 2026-05-14
-    validations:
-      required: false
-
-  - type: textarea
-    id: notes
-    attributes:
-      label: Anything unusual about it / 需要特别说明的地方
-      description: |
-        Optional. Worth mentioning if the document was edited after it went up
-        and gained scores later, if it calls a benchmark by a name nobody else
-        uses, or if it talks about a test without giving a score.
-
-        可选。如果文档后续补了分数、benchmark 名称很特殊，或只提到测试但
-        没有给分数，请写在这里。
-    validations:
-      required: false

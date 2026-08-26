@@ -26,19 +26,3 @@ body:
       description: Who would use it and what task it makes faster or possible. / 谁会用到，它能让哪项任务更快、更清楚或从无法完成变为可以完成。
     validations:
       required: true
-
-  - type: textarea
-    id: users
-    attributes:
-      label: Who would use it? / 谁会使用 (optional / 可选)
-      description: Optional. Name the readers, researchers, or eval builders who need it — you can also just mention them above. / 可选：说明哪些读者或研究者会用到，也可直接写在上一栏。
-    validations:
-      required: false
-
-  - type: textarea
-    id: example
-    attributes:
-      label: Example, sketch, or link / 示例、草图或链接
-      description: Optional. Paste a screenshot, mockup, related product, paper, or dataset. / 可选：粘贴截图、草图、相关产品、论文或数据集。
-    validations:
-      required: false

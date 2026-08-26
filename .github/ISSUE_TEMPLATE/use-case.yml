@@ -27,19 +27,3 @@ body:
       description: What should another reader notice first. / 另一个读者最应该先看到什么。
     validations:
       required: true
-
-  - type: input
-    id: link
-    attributes:
-      label: Public link / 公开链接
-      description: Optional project, paper, post, repository, or evaluation link. / 可选：项目、论文、帖子、仓库或评测链接。
-      placeholder: https://example.com/my-eval-project
-    validations:
-      required: false
-
-  - type: textarea
-    id: feedback
-    attributes:
-      label: What would make it more useful? / 还希望它改进什么
-    validations:
-      required: false
