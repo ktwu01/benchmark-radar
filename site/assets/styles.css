@@ -1968,6 +1968,22 @@ td a {
   text-align: center;
 }
 
+.empty-state-try {
+  margin-top: 0.75rem;
+  font-weight: 600;
+}
+
+.empty-state-steps {
+  display: inline-block;
+  margin: 0.35rem 0 0;
+  padding-left: 1.25rem;
+  text-align: left;
+}
+
+.empty-state-steps li {
+  margin: 0.2rem 0;
+}
+
 .map-summary {
   display: block;
   margin-top: 0.35rem;

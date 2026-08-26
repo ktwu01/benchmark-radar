@@ -107,6 +107,41 @@ function zeroItemSources(day) {
 // Only speaks when the source filter alone is active. With a second filter
 // on, the source's own zero is no longer the whole story, and guessing which
 // of the two emptied the list would be a worse answer than the general one.
+// The generic "no filter matches" case gives the reader a short recovery
+// checklist instead of a single sentence: two ways to widen the view, and a
+// way to ask for a benchmark that is genuinely missing (issue #386).
+function noFilterMatchNodes() {
+  return [
+    element("div", { className: "empty-state" }, [
+      element("p", { text: t("No observations match these filters.") }),
+      element("p", { className: "empty-state-try", text: t("Try:") }),
+      element("ol", { className: "empty-state-steps" }, [
+        element("li", { text: t("Clear one or more filters to widen the view.") }),
+        element("li", { text: t('Reset the date to "all dates".') }),
+        element("li", {}, [
+          document.createTextNode(t("Add your wanted benchmark as an ")),
+          element("a", {
+            text: t("issue"),
+            attrs: {
+              href: "https://github.com/ktwu01/benchmark-radar/issues/",
+              target: "_blank",
+              rel: "noopener",
+            },
+          }),
+          document.createTextNode("."),
+        ]),
+      ]),
+    ]),
+  ];
+}
+
+function emptyTodayNodes(day, benchmarkMatches = 0) {
+  const message = emptyTodayMessage(day, benchmarkMatches);
+  if (message === null) return noFilterMatchNodes();
+  return [element("p", { className: "empty-state", text: message })];
+}
+
+
 function emptyTodayMessage(day, benchmarkMatches = 0) {
   // A search that found the benchmark but no daily coverage of it is not a
   // filter that is set too narrow, and telling the reader to widen it sends
@@ -137,12 +172,13 @@ function emptyTodayMessage(day, benchmarkMatches = 0) {
   }
   const others = [state.q.trim(), state.kind, state.category, state.event].filter(Boolean);
   if (!state.source || others.length) {
-    return t("No observations match these filters. Clear one or more filters to widen the view.");
+    // Generic case: emptyTodayNodes() renders the recovery checklist (#386).
+    return null;
   }
   const wanted = state.source.trim().toLowerCase();
   const gap = zeroItemSources(day).find((entry) => entry.name.toLowerCase() === wanted);
   if (!gap) {
-    return t("No observations match these filters. Clear one or more filters to widen the view.");
+    return null;
   }
   // The three states from issue #260, said in the second person because the
   // reader is standing in front of the empty list asking about this source.
@@ -511,6 +547,12 @@ const I18N = {
     "No briefing was recorded for this day.": "这一天没有记录简报。",
     "No observations match these filters. Clear one or more filters to widen the view.":
       "没有符合条件的记录。清除一个或多个筛选条件以扩大范围。",
+    "No observations match these filters.": "没有符合这些筛选条件的记录。",
+    "Clear one or more filters to widen the view.": "清除一个或多个筛选条件以扩大范围。",
+    "Try:": "试试:",
+    'Reset the date to "all dates".': "将日期重置为“全部日期”。",
+    "Add your wanted benchmark as an ": "把你想要的 benchmark 作为一个",
+    issue: "issue 提交",
     "Evidence: ": "证据: ",
     "Attention: active": "关注度:活跃",
     "No categorized records in this scan.": "本次扫描没有分类记录。",
@@ -2107,12 +2149,7 @@ function renderToday({ resultsOnly = false } = {}) {
     listHost,
     visibleObservations.length
       ? visibleObservations.map((item, offset) => observationCard(item, pageStart + offset))
-      : [
-          element("p", {
-            className: "empty-state",
-            text: emptyTodayMessage(day, benchmarkMatches),
-          }),
-        ],
+      : emptyTodayNodes(day, benchmarkMatches),
   );
   byId("today-page-status").textContent = t(
     "Page {page} of {pages} · showing {start}–{end} of {total}",

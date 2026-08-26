@@ -1810,7 +1810,7 @@ def test_an_empty_source_filter_says_why_instead_of_blaming_the_filter():
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
 
     # The empty list asks the helper rather than hardcoding one sentence.
-    assert "text: emptyTodayMessage(day, benchmarkMatches)," in script
+    assert "emptyTodayNodes(day, benchmarkMatches)" in script
     assert "function emptyTodayMessage(day" in script
 
     # It reuses issue #260's three states rather than inventing a fourth
@@ -1827,13 +1827,27 @@ def test_an_empty_source_filter_says_why_instead_of_blaming_the_filter():
     # second filter on, which one did it is a guess.
     assert "others.length" in helper
 
-    # Every sentence it can print is translated, including the general one,
-    # which shipped untranslated before this change.
+    # Every source-specific sentence it can print is translated: the English
+    # key the call site passes and the zh value it looks up.
     for phrase in (
-        "No observations match these filters. Clear one or more filters to widen the view.",
+        "{source} could not be reached on this day, so nothing was collected from it.",
         "Try another date, or clear the filter.",
     ):
         assert script.count(f'"{phrase}"') >= 2, phrase
+
+    # The generic "too narrow" case (issue #386) no longer prints one sentence.
+    # It returns null so emptyTodayNodes() can render a recovery checklist: two
+    # ways to widen the view and a link to open an issue for a missing benchmark.
+    assert "function emptyTodayNodes(day" in script
+    assert "function noFilterMatchNodes()" in script
+    for phrase in (
+        "No observations match these filters.",
+        "Clear one or more filters to widen the view.",
+        'Reset the date to "all dates".',
+        "Add your wanted benchmark as an ",
+    ):
+        assert script.count(f'"{phrase}"') >= 2 or script.count(f"'{phrase}'") >= 2, phrase
+    assert "github.com/ktwu01/benchmark-radar/issues/" in script
 
 
 def test_a_benchmark_name_search_reaches_the_registry_not_only_the_daily_feed():
