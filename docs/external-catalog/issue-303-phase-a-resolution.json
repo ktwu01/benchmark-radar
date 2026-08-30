@@ -230,9 +230,13 @@
         {
           "url": "https://arxiv.org/abs/2411.19799",
           "note": "INCLUDE paper (EPFL NLP + Cohere Labs); the abstract page gives no repository or code URL."
+        },
+        {
+          "url": "https://huggingface.co/datasets/CohereLabs/include-base-44/raw/main/README.md",
+          "note": "Reviewer correction, PR #445: the only GitHub URL on the official dataset card is a commented-out placeholder pointing at a user profile ('<!-- - **Repository**: https://github.com/agromanou/ -->'), not a repository. With no repository candidate to review, this row is not_found rather than needs_review, matching aime-2024. hmmt25 and t2-bench stay needs_review because each does have a real repository candidate."
         }
       ],
-      "resolution_status": "needs_review"
+      "resolution_status": "not_found"
     },
     {
       "benchmark_id": "multichallenge",

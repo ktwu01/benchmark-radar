@@ -341,12 +341,16 @@ benchmarks:
   #                 MMBench but is not MMBench's own paper. The repo README's
   #                 first line links the real one, arXiv 2307.06281, and that is
   #                 what is recorded here.
+  #   include       The crawl returned needs_review with no repository candidate:
+  #                 the only GitHub URL on the official dataset card is a
+  #                 commented-out placeholder pointing at a user profile. With
+  #                 nothing to review it is not_found, like aime-2024.
   #
-  # Eleven of the 38 benchmarks in this tier are deliberately absent: eight
-  # found no repository (aime-2024, arc-c, ai2d, realworldqa, docvqa,
-  # mrcr-v2-(8-needle), polymath, wmt24++) and three anchored only once
-  # (include, hmmt25, t2-bench). They stay in the issue thread rather than
-  # appearing here with a guess.
+  # Eleven of the 38 benchmarks in this tier are deliberately absent: nine
+  # found no repository (aime-2024, arc-c, ai2d, realworldqa, docvqa, include,
+  # mrcr-v2-(8-needle), polymath, wmt24++) and two carry a repository candidate
+  # that could not be pinned to the right instance (hmmt25, t2-bench). They stay
+  # in the issue thread rather than appearing here with a guess.
   # ---------------------------------------------------------------------
 
   "aime-2025":
@@ -355,7 +359,9 @@ benchmarks:
     site_url: https://matharena.ai/competitions
     note: >-
       Shared parent repository, not one specific to this variant: MathArena
-      evaluates AIME 2024/2025/2026 and HMMT from the same codebase. The dataset
+      evaluates AIME 2025, AIME 2026 and the HMMT competitions from the same
+      codebase; it does not list AIME 2024, which is why that row is not_found
+      rather than pointed at this repo. The dataset
       card states the questions were sourced from the AIME 2025 competition,
       converted to LaTeX and verified for the MathArena leaderboard, and links
       this repo. Repository identity only.
