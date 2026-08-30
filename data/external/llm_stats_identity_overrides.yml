@@ -320,3 +320,281 @@ benchmarks:
       Paper, Google source repository, and independent evaluator/dataset records
       agree. Counts are not multiplied across the 11 translated language
       configurations.
+
+  # ---------------------------------------------------------------------
+  # Issue #303 Phase A: repositories resolved for the observation_count >= 20
+  # tier that had no in-corpus donor. Repository identity only: publisher,
+  # release date, licences and sizes are absent because Phase A did not verify
+  # them, not because they do not exist. Rows are ordered by observation count,
+  # continuing the order above.
+  #
+  # Ten rows resolve to a repository that is not specific to the benchmark. The
+  # yml has no repo_kind field, so each such note opens by saying so: nine are
+  # a shared parent (the variant is evaluated from a parent project's repo) and
+  # one is a monorepo subdirectory. A parent's repo is recorded as a finding,
+  # never as a stand-in for a repo the variant does not have.
+  #
+  # Reviewer correction applied to the crawl, recorded so a later pass does not
+  # silently re-introduce it:
+  #   mmbench-v1.1  The crawl's second anchor was arXiv 2311.17076
+  #                 ('Compositional Chain-of-Thought Prompting'), which cites
+  #                 MMBench but is not MMBench's own paper. The repo README's
+  #                 first line links the real one, arXiv 2307.06281, and that is
+  #                 what is recorded here.
+  #
+  # Eleven of the 38 benchmarks in this tier are deliberately absent: eight
+  # found no repository (aime-2024, arc-c, ai2d, realworldqa, docvqa,
+  # mrcr-v2-(8-needle), polymath, wmt24++) and three anchored only once
+  # (include, hmmt25, t2-bench). They stay in the issue thread rather than
+  # appearing here with a guess.
+  # ---------------------------------------------------------------------
+
+  "aime-2025":
+    dataset_url: https://huggingface.co/datasets/MathArena/aime_2025
+    repo_url: https://github.com/eth-sri/matharena
+    site_url: https://matharena.ai/competitions
+    note: >-
+      Shared parent repository, not one specific to this variant: MathArena
+      evaluates AIME 2024/2025/2026 and HMMT from the same codebase. The dataset
+      card states the questions were sourced from the AIME 2025 competition,
+      converted to LaTeX and verified for the MathArena leaderboard, and links
+      this repo. Repository identity only.
+
+  "livecodebench-v6":
+    paper_url: https://arxiv.org/abs/2403.07974
+    repo_url: https://github.com/LiveCodeBench/LiveCodeBench
+    note: >-
+      README identifies this as the official LiveCodeBench repository and
+      documents release_v6 as a dataset version published from it (problems
+      released May 2023 - Apr 2025). The paper describes the same
+      contamination-free code benchmark. Repository identity only.
+
+  "charxiv-r":
+    repo_url: https://github.com/princeton-nlp/CharXiv
+    site_url: https://princeton-nlp.github.io/CharXiv/
+    note: >-
+      Shared parent repository, not one specific to this variant: CharXiv-R is
+      the reasoning question split of CharXiv, and the README (NeurIPS 2024)
+      states the benchmark carries descriptive and reasoning questions from this
+      one repo. The official project page reports both splits separately.
+      Repository identity only.
+
+  "hmmt-2025":
+    dataset_url: https://huggingface.co/datasets/MathArena/hmmt_feb_2025
+    repo_url: https://github.com/eth-sri/matharena
+    site_url: https://matharena.ai/competitions
+    note: >-
+      Shared parent repository, not one specific to this variant: the same
+      MathArena codebase evaluates every competition it publishes. The dataset
+      card states the questions were sourced from HMMT February 2025 and that
+      answers were generated using the MathArena repository. Repository identity
+      only.
+
+  "mcp-atlas":
+    paper_url: https://arxiv.org/html/2602.00933v3
+    repo_url: https://github.com/scaleapi/mcp-atlas
+    note: >-
+      README describes MCP-Atlas as 500 tasks over 36 real MCP servers in a
+      Docker sandbox and links the paper; the paper states the code is released
+      at this repository. Repository identity only.
+
+  "mmlu-prox":
+    paper_url: https://aclanthology.org/2025.emnlp-main.79/
+    repo_url: https://github.com/weihao1115/MMLU-ProX
+    note: >-
+      Repo self-identifies as the official MMLU-ProX repository (EMNLP 2025
+      Main); the paper defines MMLU-ProX as the 29-language extension of
+      MMLU-Pro. Distinct from the mmlu-pro row above, which is a separate
+      benchmark with its own scores. Repository identity only.
+
+  "multichallenge":
+    paper_url: https://arxiv.org/abs/2501.17399
+    repo_url: https://github.com/ekwinox117/multi-challenge
+    note: >-
+      The MultiChallenge paper states the benchmark's data and code are open
+      sourced at this repository, and the README ships the benchmark questions
+      and evaluation code for the same four multi-turn challenge categories.
+      Repository identity only.
+
+  "arena-hard":
+    paper_url: https://arxiv.org/html/2406.11939v2
+    repo_url: https://github.com/lmarena/arena-hard-auto
+    note: >-
+      README describes Arena-Hard-Auto as the automatic benchmark built from
+      Chatbot Arena prompts and ships the prompts and judging pipeline; the
+      BenchBuilder paper describes how the same team curates it. Repository
+      identity only.
+
+  "chartqa":
+    paper_url: https://aclanthology.org/2022.findings-acl.177.pdf
+    repo_url: https://github.com/vis-nlp/ChartQA
+    note: >-
+      The Findings of ACL 2022 paper introducing ChartQA states the code and
+      dataset are available at this repository, and the README presents it as
+      the benchmark repository for that paper. Repository identity only.
+
+  "finance-agent-v2":
+    paper_url: https://arxiv.org/pdf/2508.00828
+    repo_url: https://github.com/vals-ai/finance-agent-v2
+    site_url: https://www.vals.ai/benchmarks/fabv2
+    note: >-
+      README presents the Vals AI Finance Agent v2 task data and evaluation
+      code; the same organisation publishes the v2 leaderboard, and the Finance
+      Agent Benchmark paper defines the task categories v2 extends. Repository
+      identity only.
+
+  "videommmu":
+    repo_url: https://github.com/EvolvingLMMs-Lab/VideoMMMU
+    note: >-
+      Repository is the benchmark's home, titled 'VideoMMMU: Evaluating
+      Knowledge Acquisition from Multi-Discipline Professional Videos'; its
+      README describes the accuracy and delta-accuracy measurement over
+      educational videos and hosts the evaluation. Repository identity only.
+
+  "deepswe-1.1":
+    paper_url: https://arxiv.org/abs/2607.07946
+    repo_url: https://github.com/datacurve-ai/deep-swe
+    note: >-
+      The DeepSWE paper introduces the 113-task benchmark with hand-written
+      verifiers and releases it at this repository; the README publishes those
+      tasks in Harbor format and documents the v1.1 change ('Since v1.1, grading
+      uses Harbor's separate verifier environment'), which is the version this
+      row scores. Repository identity only.
+
+  "lvbench":
+    dataset_url: https://huggingface.co/datasets/THUDM/LVBench
+    repo_url: https://github.com/zai-org/LVBench
+    note: >-
+      README identifies LVBench as the long-video understanding benchmark
+      (ICCV 2025) and links the dataset card, which hosts the questions the
+      benchmark scores. The repo is the former THUDM/LVBench after the
+      organisation rename to zai-org. Repository identity only.
+
+  "screenspot-pro":
+    paper_url: https://huggingface.co/papers/2504.07981
+    repo_url: https://github.com/likaixin2000/ScreenSpot-Pro-GUI-Grounding
+    note: >-
+      README presents ScreenSpot-Pro, 'GUI Grounding for Professional
+      High-Resolution Computer Use', with the evaluation scripts; the paper
+      page describes the same benchmark by the same authors. Repository identity
+      only.
+
+  "tau-bench-retail":
+    paper_url: https://arxiv.org/pdf/2406.12045
+    repo_url: https://github.com/sierra-research/tau-bench
+    note: >-
+      Shared parent repository, not one specific to this variant: tau-bench
+      ships the retail and airline domains from one repo, and the retail domain
+      is what this row scores. Distinct from the tau2-retail row, which is a
+      separate benchmark in sierra-research/tau2-bench. Repository identity only.
+
+  "erqa":
+    repo_url: https://github.com/embodiedreasoning/ERQA
+    site_url: https://deepmind.google/blog/gemini-robotics-er-1-6/
+    note: >-
+      README states the benchmark was open-sourced as part of Google DeepMind's
+      Gemini Robotics release and stores the 400 embodied reasoning examples in
+      the repo; DeepMind's own Gemini Robotics ER pages report ERQA as the
+      benchmark the models are scored on. Repository identity only.
+
+  "mathvista-mini":
+    dataset_url: https://huggingface.co/datasets/AI4Math/MathVista
+    repo_url: https://github.com/lupantech/MathVista
+    note: >-
+      Shared parent repository, not one specific to this variant: MathVista-Mini
+      is the 1,000-example testmini split documented in the MathVista README and
+      dataset card, and it has no repo of its own. Distinct from the mathvista
+      row, which scores the full benchmark. Repository identity only.
+
+  "osworld-verified":
+    repo_url: https://github.com/xlang-ai/OSWorld
+    site_url: https://xlang.ai/blog/osworld-verified
+    note: >-
+      Shared parent repository, not one specific to this variant: the README's
+      'Introducing OSWorld-Verified' section shows the verified variant ships
+      from the OSWorld repo, and XLANG Lab's announcement describes the 300+
+      task fixes behind it. Distinct from the osworld row below, which scores
+      the unverified benchmark. Repository identity only.
+
+  "multi-if":
+    paper_url: https://arxiv.org/abs/2410.15553
+    repo_url: https://github.com/facebookresearch/Multi-IF
+    note: >-
+      The Multi-IF paper describes the 4,501 three-turn multilingual
+      conversations and states the benchmark is open-sourced at this repository,
+      which hosts the data and runner. Repository identity only.
+
+  "tau-bench-airline":
+    paper_url: https://arxiv.org/pdf/2406.12045
+    repo_url: https://github.com/sierra-research/tau-bench
+    note: >-
+      Shared parent repository, not one specific to this variant: the airline
+      domain is one of the two domains tau-bench ships from a single repo.
+      Distinct from the tau2-airline row, which is a separate benchmark in
+      sierra-research/tau2-bench. Repository identity only.
+
+  "aider-polyglot":
+    repo_url: https://github.com/Aider-AI/polyglot-benchmark
+    site_url: https://aider.chat/2024/12/21/polyglot.html
+    note: >-
+      README states the repo holds the coding problems used in aider's polyglot
+      benchmark, curated from Exercism language tracks; aider's own leaderboard
+      announcement defines the benchmark over that released problem set.
+      Repository identity only.
+
+  "aime-2026":
+    dataset_url: https://huggingface.co/datasets/MathArena/aime_2026
+    repo_url: https://github.com/eth-sri/matharena
+    site_url: https://matharena.ai/?comp=aime--aime_2026
+    note: >-
+      Shared parent repository, not one specific to this variant: the MathArena
+      README's competition table lists AIME 2026 with config
+      aime/aime_2026.yaml, and the dataset card states the answers were
+      generated using this repository. Repository identity only.
+
+  "big-bench-hard":
+    repo_url: https://github.com/suzgunmirac/BIG-Bench-Hard
+    note: >-
+      README describes BBH as the 23 BIG-Bench tasks on which prior evaluations
+      did not beat the average human rater, and the repo hosts the task data
+      itself under bbh/ with chain-of-thought prompts under cot-prompts/, so it
+      publishes the benchmark rather than only running it. Repository identity
+      only.
+
+  "scicode":
+    paper_url: https://arxiv.org/pdf/2407.13168
+    repo_url: https://github.com/scicode-bench/SciCode
+    note: >-
+      README describes the 80 main problems decomposed into 338 subproblems with
+      gold solutions and tests, and the paper defines the same scientist-curated
+      benchmark. Repository identity only.
+
+  "imo-answerbench":
+    paper_url: https://arxiv.org/html/2511.01846v1
+    repo_url: https://github.com/google-deepmind/superhuman/tree/main/imobench
+    dataset_url: https://huggingface.co/datasets/OpenEvals/IMO-AnswerBench
+    note: >-
+      Monorepo subdirectory, not a repository specific to this benchmark: the
+      imobench directory of google-deepmind/superhuman hosts the IMO-Bench
+      datasets, of which IMO-AnswerBench is the 400-problem short-answer set
+      defined in 'Towards Robust Mathematical Reasoning'. Not eligible for a
+      contributor crawl for the same reason google-research/google-research is
+      not. Repository identity only.
+
+  "mmbench-v1.1":
+    paper_url: https://arxiv.org/abs/2307.06281
+    repo_url: https://github.com/open-compass/MMBench
+    note: >-
+      Shared parent repository, not one specific to this variant: the official
+      MMBench repository provides the V11 dev/test EN and CN files alongside the
+      other splits, and v1.1 is the cleaned re-release rather than a benchmark
+      with a repo of its own. Repository identity only.
+
+  "osworld":
+    repo_url: https://github.com/xlang-ai/OSWorld
+    site_url: https://osworld-v1.xlang.ai/
+    note: >-
+      README presents '[NeurIPS 2024] OSWorld' and hosts the 369 task
+      definitions under evaluation_examples/ plus the execution environment; the
+      official project site links this repo as the benchmark's code and data
+      home. Repository identity only.

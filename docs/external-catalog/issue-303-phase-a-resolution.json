@@ -1,0 +1,908 @@
+{
+  "benchmarks": [
+    {
+      "benchmark_id": "aime-2025",
+      "repo_url": "https://github.com/eth-sri/matharena",
+      "repo_full_name": "eth-sri/matharena",
+      "repo_kind": "shared_parent",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://huggingface.co/datasets/MathArena/aime_2025",
+          "anchor_type": "dataset_card",
+          "claim": "Dataset card states the questions were sourced from the AIME 2025 competition, extracted, converted to LaTeX and verified, that the set is used for the MathArena Leaderboard, and links the project repository https://github.com/eth-sri/matharena."
+        },
+        {
+          "url": "https://github.com/eth-sri/matharena",
+          "anchor_type": "repo_readme",
+          "claim": "Repo describes itself as MathArena, 'Evaluation of LLMs on latest math competitions', and says it contains all code used for the model evaluations published on matharena.ai."
+        },
+        {
+          "url": "https://matharena.ai/competitions",
+          "anchor_type": "leaderboard",
+          "claim": "MathArena competitions page lists AIME 2025 as one of the competitions the platform evaluates and publishes leaderboards for."
+        }
+      ],
+      "candidate_matches": [
+        {
+          "url": "https://huggingface.co/datasets/math-ai/aime25",
+          "note": "Third-party mirror of AIME 2025 problems; not the publishing project."
+        }
+      ],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "livecodebench-v6",
+      "repo_url": "https://github.com/LiveCodeBench/LiveCodeBench",
+      "repo_full_name": "LiveCodeBench/LiveCodeBench",
+      "repo_kind": "benchmark_source",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/LiveCodeBench/LiveCodeBench/blob/main/README.md",
+          "anchor_type": "repo_readme",
+          "claim": "README states this is the official repository for the LiveCodeBench paper and documents 'release_v6: The updated release of the dataset with problems released between May 2023 and Apr 2025 containing 1055 problems', i.e. the v6 version of the benchmark is published from this repo."
+        },
+        {
+          "url": "https://arxiv.org/abs/2403.07974",
+          "anchor_type": "paper",
+          "claim": "LiveCodeBench paper describes the benchmark as a comprehensive, contamination-free evaluation of LLMs for code that continuously collects new problems over time from contests, and points to the project site livecodebench.github.io."
+        }
+      ],
+      "candidate_matches": [],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "aime-2024",
+      "repo_url": null,
+      "repo_full_name": null,
+      "repo_kind": "not_found",
+      "repo_subpath": null,
+      "evidence": [],
+      "candidate_matches": [
+        {
+          "url": "https://huggingface.co/datasets/Maxwell-Jia/AIME_2024",
+          "note": "Widely used Hugging Face copy of the 30 AIME 2024 problems; a dataset, not a repository, and not published by the competition organizer."
+        },
+        {
+          "url": "https://huggingface.co/datasets/math-ai/aime24",
+          "note": "Alternative third-party Hugging Face copy of AIME 2024."
+        },
+        {
+          "url": "https://matharena.ai/competitions",
+          "note": "MathArena (github.com/eth-sri/matharena) publishes AIME 2025/2026 and HMMT competitions but does not list AIME 2024 as one of its evaluated competitions, so the parent cannot be shown to serve this variant."
+        }
+      ],
+      "resolution_status": "not_found"
+    },
+    {
+      "benchmark_id": "charxiv-r",
+      "repo_url": "https://github.com/princeton-nlp/CharXiv",
+      "repo_full_name": "princeton-nlp/CharXiv",
+      "repo_kind": "shared_parent",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/princeton-nlp/CharXiv/blob/main/README.md",
+          "anchor_type": "repo_readme",
+          "claim": "README presents this as the official CharXiv repository (NeurIPS 2024) and states CharXiv contains two question types - descriptive questions and reasoning questions - the reasoning split being what is reported as CharXiv-R."
+        },
+        {
+          "url": "https://princeton-nlp.github.io/CharXiv/",
+          "anchor_type": "leaderboard",
+          "claim": "Official CharXiv project page and leaderboard reports descriptive and reasoning (CharXiv-R) scores and links the princeton-nlp/CharXiv repository for data and evaluation code."
+        }
+      ],
+      "candidate_matches": [],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "arc-c",
+      "repo_url": null,
+      "repo_full_name": null,
+      "repo_kind": "not_found",
+      "repo_subpath": null,
+      "evidence": [],
+      "candidate_matches": [
+        {
+          "url": "https://allenai.org/data/arc",
+          "note": "Official AI2 distribution page for the ARC dataset (Challenge and Easy sets); a data portal, not a GitHub repository."
+        },
+        {
+          "url": "https://huggingface.co/datasets/allenai/ai2_arc",
+          "note": "Official AI2 Hugging Face dataset card for ARC-Challenge/ARC-Easy; a dataset, not a repository."
+        },
+        {
+          "url": "https://github.com/allenai/ARC-Solvers",
+          "note": "AI2 repo of baseline solvers for ARC; harness/baseline code rather than the benchmark source."
+        }
+      ],
+      "resolution_status": "not_found"
+    },
+    {
+      "benchmark_id": "ai2d",
+      "repo_url": null,
+      "repo_full_name": null,
+      "repo_kind": "not_found",
+      "repo_subpath": null,
+      "evidence": [],
+      "candidate_matches": [
+        {
+          "url": "https://allenai.org/data/diagrams",
+          "note": "Official AI2 page distributing the AI2 Diagrams (AI2D) dataset; a data portal, not a GitHub repository."
+        },
+        {
+          "url": "https://arxiv.org/abs/1603.07396",
+          "note": "'A Diagram Is Worth A Dozen Images' - the AI2D paper; it points to the AI2 data page and does not name a source repository."
+        },
+        {
+          "url": "https://registry.opendata.aws/allenai-diagrams/",
+          "note": "AWS Open Data registry entry hosting the AI2D archive."
+        }
+      ],
+      "resolution_status": "not_found"
+    },
+    {
+      "benchmark_id": "hmmt-2025",
+      "repo_url": "https://github.com/eth-sri/matharena",
+      "repo_full_name": "eth-sri/matharena",
+      "repo_kind": "shared_parent",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://huggingface.co/datasets/MathArena/hmmt_feb_2025",
+          "anchor_type": "dataset_card",
+          "claim": "Dataset card states the questions were sourced from the HMMT February 2025 competition, extracted, converted to LaTeX and verified, and that the set is the one used for the MathArena Leaderboard; the companion outputs card says answers were generated using the MathArena GitHub repository."
+        },
+        {
+          "url": "https://github.com/eth-sri/matharena",
+          "anchor_type": "repo_readme",
+          "claim": "Repo describes itself as MathArena, the codebase used to evaluate LLMs on the latest math competitions published on matharena.ai."
+        },
+        {
+          "url": "https://matharena.ai/competitions",
+          "anchor_type": "leaderboard",
+          "claim": "MathArena competitions page lists HMMT Feb 2025 among the competitions it evaluates and publishes."
+        }
+      ],
+      "candidate_matches": [],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "mcp-atlas",
+      "repo_url": "https://github.com/scaleapi/mcp-atlas",
+      "repo_full_name": "scaleapi/mcp-atlas",
+      "repo_kind": "benchmark_source",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/scaleapi/mcp-atlas",
+          "anchor_type": "repo_readme",
+          "claim": "README states MCP-Atlas evaluates how well AI agents use tools across 36 real MCP servers with 500 tasks in a Docker sandbox, and links the paper (arxiv.org/abs/2602.00933), the Scale leaderboard, and the ScaleAI/MCP-Atlas dataset."
+        },
+        {
+          "url": "https://arxiv.org/html/2602.00933v3",
+          "anchor_type": "paper",
+          "claim": "The MCP-Atlas paper ('A Large-Scale Benchmark for Tool-Use Competency with Real MCP Servers') describes the benchmark and states the code is released at github.com/scaleapi/mcp-atlas."
+        }
+      ],
+      "candidate_matches": [
+        {
+          "url": "https://github.com/iflow-mcp/scaleapi-mcp-atlas",
+          "note": "Third-party mirror of the Scale AI repository."
+        }
+      ],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "mmlu-prox",
+      "repo_url": "https://github.com/weihao1115/MMLU-ProX",
+      "repo_full_name": "weihao1115/MMLU-ProX",
+      "repo_kind": "benchmark_source",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/weihao1115/MMLU-ProX",
+          "anchor_type": "repo_readme",
+          "claim": "Repo describes itself as '[EMNLP 2025 Main] The official repo of MMLU-ProX benchmark', covering the 29-language extension of MMLU-Pro and pointing to the Hugging Face releases and lm-evaluation-harness integration."
+        },
+        {
+          "url": "https://aclanthology.org/2025.emnlp-main.79/",
+          "anchor_type": "paper",
+          "claim": "The MMLU-ProX paper (EMNLP 2025) defines MMLU-ProX as a multilingual benchmark extending MMLU-Pro to 29 languages with 11,829 parallel questions per language."
+        }
+      ],
+      "candidate_matches": [],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "include",
+      "repo_url": null,
+      "repo_full_name": null,
+      "repo_kind": "not_found",
+      "repo_subpath": null,
+      "evidence": [],
+      "candidate_matches": [
+        {
+          "url": "https://huggingface.co/datasets/CohereLabs/include-base-44",
+          "note": "Official Cohere Labs dataset card for INCLUDE (22,637 MCQs across 44 languages); it links the paper but names no GitHub repository."
+        },
+        {
+          "url": "https://arxiv.org/abs/2411.19799",
+          "note": "INCLUDE paper (EPFL NLP + Cohere Labs); the abstract page gives no repository or code URL."
+        }
+      ],
+      "resolution_status": "needs_review"
+    },
+    {
+      "benchmark_id": "multichallenge",
+      "repo_url": "https://github.com/ekwinox117/multi-challenge",
+      "repo_full_name": "ekwinox117/multi-challenge",
+      "repo_kind": "benchmark_source",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://arxiv.org/abs/2501.17399",
+          "anchor_type": "paper",
+          "claim": "The MultiChallenge paper (Scale AI) describes the four-category multi-turn conversation benchmark and states that the data and code of this benchmark are open sourced at github.com/ekwinox117/multi-challenge."
+        },
+        {
+          "url": "https://github.com/ekwinox117/multi-challenge",
+          "anchor_type": "repo_readme",
+          "claim": "README describes MultiChallenge as a benchmark evaluating LLMs on multi-turn conversations across four challenge categories, and ships the benchmark questions at data/benchmark_questions.jsonl plus the evaluation code."
+        }
+      ],
+      "candidate_matches": [],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "realworldqa",
+      "repo_url": null,
+      "repo_full_name": null,
+      "repo_kind": "not_found",
+      "repo_subpath": null,
+      "evidence": [],
+      "candidate_matches": [
+        {
+          "url": "https://huggingface.co/datasets/xai-org/RealworldQA",
+          "note": "Official xAI dataset card for RealWorldQA (700+ images with questions and verifiable answers, CC BY-ND 4.0); a dataset, not a repository."
+        },
+        {
+          "url": "https://x.ai/news/grok-1.5v",
+          "note": "xAI Grok-1.5V announcement that introduces and releases RealWorldQA; links the Hugging Face dataset, no GitHub repo."
+        },
+        {
+          "url": "https://github.com/QwenLM/Qwen3-VL/tree/main/evaluation/RealWorldQA",
+          "note": "Third-party evaluation code for RealWorldQA inside a model repo - harness only, not the benchmark source."
+        }
+      ],
+      "resolution_status": "not_found"
+    },
+    {
+      "benchmark_id": "docvqa",
+      "repo_url": null,
+      "repo_full_name": null,
+      "repo_kind": "not_found",
+      "repo_subpath": null,
+      "evidence": [],
+      "candidate_matches": [
+        {
+          "url": "https://rrc.cvc.uab.es/?ch=17",
+          "note": "Official DocVQA challenge portal (Robust Reading Competition, CVC-UAB) hosting the data downloads and leaderboard; not a GitHub repository."
+        },
+        {
+          "url": "https://www.docvqa.org/datasets/docvqa",
+          "note": "Official DocVQA dataset page from the benchmark authors."
+        },
+        {
+          "url": "https://github.com/VLR-CVC/DocVQA2026",
+          "note": "Official evaluation scripts for the separate DocVQA 2026 (ICDAR 2026) competition - a different variant and harness code, not the original DocVQA benchmark source."
+        }
+      ],
+      "resolution_status": "not_found"
+    },
+    {
+      "benchmark_id": "arena-hard",
+      "repo_url": "https://github.com/lmarena/arena-hard-auto",
+      "repo_full_name": "lmarena/arena-hard-auto",
+      "repo_kind": "benchmark_source",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/lmarena/arena-hard-auto",
+          "anchor_type": "repo_readme",
+          "claim": "README states Arena-Hard-Auto is an automatic LLM benchmark built from Chatbot Arena prompts (v2.0: 500 challenging real-world queries plus 250 creative writing queries) and ships the prompts and judging pipeline."
+        },
+        {
+          "url": "https://arxiv.org/html/2406.11939v2",
+          "anchor_type": "paper",
+          "claim": "'From Crowdsourced Data to High-Quality Benchmarks: Arena-Hard and BenchBuilder Pipeline' describes how Arena-Hard is curated from Chatbot Arena data by the LMArena/LMSYS team that maintains the repo."
+        }
+      ],
+      "candidate_matches": [
+        {
+          "url": "https://github.com/lm-sys/arena-hard",
+          "note": "Earlier lm-sys location of the same project; redirects to the lmarena organization."
+        }
+      ],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "chartqa",
+      "repo_url": "https://github.com/vis-nlp/ChartQA",
+      "repo_full_name": "vis-nlp/ChartQA",
+      "repo_kind": "benchmark_source",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://aclanthology.org/2022.findings-acl.177.pdf",
+          "anchor_type": "paper",
+          "claim": "The ChartQA paper (Findings of ACL 2022) introduces the chart question-answering benchmark and states the code and dataset are publicly available at github.com/vis-nlp/ChartQA."
+        },
+        {
+          "url": "https://github.com/vis-nlp/ChartQA/blob/main/README.md",
+          "anchor_type": "repo_readme",
+          "claim": "README presents this as the ChartQA benchmark repository containing the dataset and evaluation code for the ACL 2022 paper."
+        }
+      ],
+      "candidate_matches": [],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "finance-agent-v2",
+      "repo_url": "https://github.com/vals-ai/finance-agent-v2",
+      "repo_full_name": "vals-ai/finance-agent-v2",
+      "repo_kind": "benchmark_source",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/vals-ai/finance-agent-v2/blob/main/README.md",
+          "anchor_type": "repo_readme",
+          "claim": "README presents the Vals AI Finance Agent v2 benchmark: expert-authored questions requiring tool use over SEC filings and financial statements, with the task data and evaluation code."
+        },
+        {
+          "url": "https://www.vals.ai/benchmarks/fabv2",
+          "anchor_type": "leaderboard",
+          "claim": "Vals AI's official Finance Agent v2 benchmark page describes the v2 task suite and publishes the model leaderboard maintained by the same organization as the repo."
+        },
+        {
+          "url": "https://arxiv.org/pdf/2508.00828",
+          "anchor_type": "paper",
+          "claim": "'Finance Agent Benchmark' paper by Vals AI defines the benchmark's nine financial task categories and expert-authored question methodology that v2 extends."
+        }
+      ],
+      "candidate_matches": [
+        {
+          "url": "https://github.com/vals-ai/finance-agent",
+          "note": "Vals AI repo for the first Finance Agent version; a distinct earlier variant."
+        }
+      ],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "videommmu",
+      "repo_url": "https://github.com/EvolvingLMMs-Lab/VideoMMMU",
+      "repo_full_name": "EvolvingLMMs-Lab/VideoMMMU",
+      "repo_kind": "benchmark_source",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/EvolvingLMMs-Lab/VideoMMMU",
+          "anchor_type": "repo_readme",
+          "claim": "Repository is titled 'VideoMMMU: Evaluating Knowledge Acquisition from Multi-Discipline Professional Videos' and is maintained by EvolvingLMMs-Lab as the benchmark's home."
+        },
+        {
+          "url": "https://github.com/EvolvingLMMs-Lab/VideoMMMU/blob/main/README.md",
+          "anchor_type": "repo_readme",
+          "claim": "README states Video-MMMU is the first benchmark assessing knowledge acquisition from educational videos, measuring both accuracy and delta accuracy after watching the video, and documents the benchmark data and evaluation."
+        }
+      ],
+      "candidate_matches": [
+        {
+          "url": "https://github.com/MMMU-Benchmark/MMMU",
+          "note": "MMMU parent project; related lineage but a different benchmark, not the Video-MMMU source."
+        }
+      ],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "deepswe-1.1",
+      "repo_url": "https://github.com/datacurve-ai/deep-swe",
+      "repo_full_name": "datacurve-ai/deep-swe",
+      "repo_kind": "benchmark_source",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://arxiv.org/abs/2607.07946",
+          "anchor_type": "paper",
+          "claim": "'DeepSWE: Measuring Frontier Coding Agents on Original, Long-Horizon Engineering Tasks' (DataCurve) introduces the 113-task benchmark with hand-written verifiers and releases it at github.com/datacurve-ai/deep-swe and deepswe.datacurve.ai."
+        },
+        {
+          "url": "https://github.com/datacurve-ai/deep-swe",
+          "anchor_type": "repo_readme",
+          "claim": "README publishes the DeepSWE benchmark's 113 tasks in Harbor task format with verifiers, and references the versioned releases explicitly ('Since v1.1, grading uses Harbor's separate verifier environment')."
+        }
+      ],
+      "candidate_matches": [
+        {
+          "url": "https://github.com/agentica-project/rllm",
+          "note": "Unrelated same-name project: 'DeepSWE' the RL-trained coding agent model, not this benchmark."
+        }
+      ],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "hmmt25",
+      "repo_url": null,
+      "repo_full_name": null,
+      "repo_kind": "not_found",
+      "repo_subpath": null,
+      "evidence": [],
+      "candidate_matches": [
+        {
+          "url": "https://llm-stats.com/benchmarks/hmmt25",
+          "note": "The llm-stats HMMT25 page describes the 2025 HMMT cycle as covering both the November 2025 (MIT) and February 2026 (Harvard) tournaments and links only web.mit.edu/HMMT, so which exact competition instance is scored is ambiguous."
+        },
+        {
+          "url": "https://huggingface.co/datasets/MathArena/hmmt_nov_2025",
+          "note": "MathArena HMMT November 2025 problem set (published from github.com/eth-sri/matharena); a plausible match if HMMT25 means Nov 2025."
+        },
+        {
+          "url": "https://huggingface.co/datasets/MathArena/hmmt_feb_2025",
+          "note": "MathArena HMMT February 2025 problem set; a plausible match if HMMT25 is the same instance as the separate 'HMMT 2025' record, which the manifest treats as distinct."
+        }
+      ],
+      "resolution_status": "needs_review"
+    },
+    {
+      "benchmark_id": "lvbench",
+      "repo_url": "https://github.com/zai-org/LVBench",
+      "repo_full_name": "zai-org/LVBench",
+      "repo_kind": "benchmark_source",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/zai-org/LVBench",
+          "anchor_type": "repo_readme",
+          "claim": "README states LVBench is a benchmark for evaluating models on understanding extremely long videos (ICCV 2025), links the paper arXiv:2406.08035 and the dataset at huggingface.co/datasets/THUDM/LVBench; the repo is the former THUDM/LVBench after the org rename to zai-org."
+        },
+        {
+          "url": "https://huggingface.co/datasets/THUDM/LVBench",
+          "anchor_type": "dataset_card",
+          "claim": "Official LVBench dataset card hosts the 1,549 questions over 103 long videos used by the benchmark and points back to the LVBench project."
+        }
+      ],
+      "candidate_matches": [
+        {
+          "url": "https://github.com/THUDM/LVBench",
+          "note": "Prior repository path for the same project; now redirects to zai-org/LVBench."
+        }
+      ],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "screenspot-pro",
+      "repo_url": "https://github.com/likaixin2000/ScreenSpot-Pro-GUI-Grounding",
+      "repo_full_name": "likaixin2000/ScreenSpot-Pro-GUI-Grounding",
+      "repo_kind": "benchmark_source",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/likaixin2000/ScreenSpot-Pro-GUI-Grounding/blob/main/readme.md",
+          "anchor_type": "repo_readme",
+          "claim": "README presents ScreenSpot-Pro - 'GUI Grounding for Professional High-Resolution Computer Use' - with 1,581 samples across 23 professional applications and 3 operating systems, plus the evaluation scripts and leaderboard link."
+        },
+        {
+          "url": "https://huggingface.co/papers/2504.07981",
+          "anchor_type": "paper",
+          "claim": "The ScreenSpot-Pro paper page describes the benchmark for GUI grounding in professional high-resolution environments authored by the same team that maintains the repository."
+        }
+      ],
+      "candidate_matches": [],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "tau-bench-retail",
+      "repo_url": "https://github.com/sierra-research/tau-bench",
+      "repo_full_name": "sierra-research/tau-bench",
+      "repo_kind": "shared_parent",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/sierra-research/tau-bench/blob/main/README.md",
+          "anchor_type": "repo_readme",
+          "claim": "README states this is the code and data for tau-bench and that it ships the retail and airline domains with their tools, policies and tasks - the retail domain being what is reported as TAU-bench Retail."
+        },
+        {
+          "url": "https://arxiv.org/pdf/2406.12045",
+          "anchor_type": "paper",
+          "claim": "The tau-bench paper (Sierra) defines the benchmark for tool-agent-user interaction and describes the retail and airline domains it evaluates."
+        }
+      ],
+      "candidate_matches": [
+        {
+          "url": "https://github.com/sierra-research/tau2-bench",
+          "note": "tau2-bench successor repo, which also contains retail; a distinct later variant per the manifest's variant rule."
+        }
+      ],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "erqa",
+      "repo_url": "https://github.com/embodiedreasoning/ERQA",
+      "repo_full_name": "embodiedreasoning/ERQA",
+      "repo_kind": "benchmark_source",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/embodiedreasoning/ERQA/blob/main/README.md",
+          "anchor_type": "repo_readme",
+          "claim": "README states that as part of Google DeepMind's Gemini Robotics release the team open-sources ERQA, a benchmark of multi-modal embodied reasoning questions, with the 400-example benchmark stored at data/erqa.tfrecord."
+        },
+        {
+          "url": "https://deepmind.google/blog/gemini-robotics-er-1-6/",
+          "anchor_type": "leaderboard",
+          "claim": "Google DeepMind's Gemini Robotics ER pages report ERQA as the embodied reasoning benchmark released with Gemini Robotics and used to score the models."
+        }
+      ],
+      "candidate_matches": [
+        {
+          "url": "https://arxiv.org/abs/2606.17639",
+          "note": "ERQA-Plus, a separate diagnostic extension of ERQA - not the same benchmark."
+        }
+      ],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "mathvista-mini",
+      "repo_url": "https://github.com/lupantech/MathVista",
+      "repo_full_name": "lupantech/MathVista",
+      "repo_kind": "shared_parent",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/lupantech/MathVista/blob/main/README.md",
+          "anchor_type": "repo_readme",
+          "claim": "README states the repo holds the data, code and evaluation for MathVista and documents the split into testmini (1,000 examples, the set reported as MathVista-Mini) and test."
+        },
+        {
+          "url": "https://huggingface.co/datasets/AI4Math/MathVista",
+          "anchor_type": "dataset_card",
+          "claim": "Official MathVista dataset card describes the 6,141-example benchmark and the testmini subset of 1,000 examples used for model development and the public leaderboard."
+        }
+      ],
+      "candidate_matches": [],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "osworld-verified",
+      "repo_url": "https://github.com/xlang-ai/OSWorld",
+      "repo_full_name": "xlang-ai/OSWorld",
+      "repo_kind": "shared_parent",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/xlang-ai/OSWorld/blob/main/README.md",
+          "anchor_type": "repo_readme",
+          "claim": "README announces 'Introducing OSWorld-Verified' - major updates and community-reported fixes with AWS parallelization - and includes an 'Acknowledgement for OSWorld-Verified' section, showing the verified variant ships from this repo (task data under evaluation_examples/)."
+        },
+        {
+          "url": "https://xlang.ai/blog/osworld-verified",
+          "anchor_type": "leaderboard",
+          "claim": "XLANG Lab's OSWorld-Verified announcement describes the 300+ task fixes and the verified evaluation platform/leaderboard for the same OSWorld benchmark."
+        }
+      ],
+      "candidate_matches": [],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "mrcr-v2-(8-needle)",
+      "repo_url": null,
+      "repo_full_name": null,
+      "repo_kind": "not_found",
+      "repo_subpath": null,
+      "evidence": [],
+      "candidate_matches": [
+        {
+          "url": "https://huggingface.co/datasets/openai/mrcr",
+          "note": "Official OpenAI MRCR dataset card describing the 2-, 4- and 8-needle long-context variants; a dataset, not a GitHub repository, and no source repo is linked."
+        }
+      ],
+      "resolution_status": "not_found"
+    },
+    {
+      "benchmark_id": "multi-if",
+      "repo_url": "https://github.com/facebookresearch/Multi-IF",
+      "repo_full_name": "facebookresearch/Multi-IF",
+      "repo_kind": "benchmark_source",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://arxiv.org/abs/2410.15553",
+          "anchor_type": "paper",
+          "claim": "'Multi-IF: Benchmarking LLMs on Multi-Turn and Multilingual Instructions Following' describes the 4,501 three-turn multilingual conversations and states the benchmark is open-sourced at github.com/facebookresearch/Multi-IF."
+        },
+        {
+          "url": "https://github.com/facebookresearch/Multi-IF",
+          "anchor_type": "repo_readme",
+          "claim": "Repository is described as the evaluation code for MultiIF multi-turn and multi-lingual instruction following and hosts the benchmark data and runner."
+        }
+      ],
+      "candidate_matches": [],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "polymath",
+      "repo_url": null,
+      "repo_full_name": null,
+      "repo_kind": "not_found",
+      "repo_subpath": null,
+      "evidence": [],
+      "candidate_matches": [
+        {
+          "url": "https://arxiv.org/abs/2410.14702",
+          "note": "The PolyMATH tracked by llm-stats is the multimodal one ('Polymath: A Challenging Multi-modal Mathematical Reasoning Benchmark', 5,000 images across 10 categories); the paper page names no GitHub repository."
+        },
+        {
+          "url": "https://llm-stats.com/benchmarks/polymath",
+          "note": "llm-stats PolyMATH page confirms the multimodal definition and links only the arXiv paper."
+        },
+        {
+          "url": "https://github.com/QwenLM/PolyMath",
+          "note": "Same-name but different benchmark (Qwen's multilingual math PolyMath, NeurIPS 2025 D&B); must not be used for this record without evidence of a switch."
+        }
+      ],
+      "resolution_status": "not_found"
+    },
+    {
+      "benchmark_id": "t2-bench",
+      "repo_url": null,
+      "repo_full_name": null,
+      "repo_kind": "not_found",
+      "repo_subpath": null,
+      "evidence": [],
+      "candidate_matches": [
+        {
+          "url": "https://llm-stats.com/benchmarks/t2-bench",
+          "note": "Source page describes t2-bench only as an agentic tool-use benchmark measuring tool selection, sequencing and use; it links no paper, site, or repository, so the name cannot be tied to a repo from the source."
+        },
+        {
+          "url": "https://github.com/sierra-research/tau2-bench",
+          "note": "Most likely match: Sierra's tau2-bench (dual-control tool-agent-user benchmark, retail/airline/telecom/banking domains), whose ASCII rendering is commonly 'tau2-bench'; no source seen states the label 't2-bench'."
+        }
+      ],
+      "resolution_status": "needs_review"
+    },
+    {
+      "benchmark_id": "tau-bench-airline",
+      "repo_url": "https://github.com/sierra-research/tau-bench",
+      "repo_full_name": "sierra-research/tau-bench",
+      "repo_kind": "shared_parent",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/sierra-research/tau-bench/blob/main/README.md",
+          "anchor_type": "repo_readme",
+          "claim": "README states this is the code and data for tau-bench and ships the airline domain (tools, policy, task set) alongside retail - the airline domain being what is reported as TAU-bench Airline."
+        },
+        {
+          "url": "https://arxiv.org/pdf/2406.12045",
+          "anchor_type": "paper",
+          "claim": "The tau-bench paper defines the benchmark and its airline customer-service domain with domain-specific API tools and policy compliance."
+        }
+      ],
+      "candidate_matches": [
+        {
+          "url": "https://github.com/sierra-research/tau2-bench",
+          "note": "tau2-bench successor repo, which fixes and re-releases the airline domain; a distinct later variant."
+        }
+      ],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "wmt24++",
+      "repo_url": null,
+      "repo_full_name": null,
+      "repo_kind": "not_found",
+      "repo_subpath": null,
+      "evidence": [],
+      "candidate_matches": [
+        {
+          "url": "https://huggingface.co/datasets/google/wmt24pp",
+          "note": "Official Google dataset card releasing WMT24++ human translations and post-edits for 55 en->xx pairs; it links the paper and mt-metrics-eval but names no repository that publishes the benchmark itself."
+        },
+        {
+          "url": "https://arxiv.org/abs/2502.12404",
+          "note": "WMT24++ paper (Google/Unbabel) describing the expansion of WMT24 to 55 languages and dialects."
+        },
+        {
+          "url": "https://github.com/google-research/mt-metrics-eval",
+          "note": "Linked by the dataset card only for MT/LLM system outputs and automatic metric scores - a metrics/harness repo, not the benchmark source."
+        }
+      ],
+      "resolution_status": "not_found"
+    },
+    {
+      "benchmark_id": "aider-polyglot",
+      "repo_url": "https://github.com/Aider-AI/polyglot-benchmark",
+      "repo_full_name": "Aider-AI/polyglot-benchmark",
+      "repo_kind": "benchmark_source",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/Aider-AI/polyglot-benchmark/blob/main/README.md",
+          "anchor_type": "repo_readme",
+          "claim": "README states the repo holds the coding problems used in aider's polyglot benchmark - exercises curated from Exercism language tracks across C++, Go, Java, JavaScript, Python and Rust."
+        },
+        {
+          "url": "https://aider.chat/2024/12/21/polyglot.html",
+          "anchor_type": "leaderboard",
+          "claim": "Aider's announcement of the polyglot leaderboard defines the benchmark as 225 of Exercism's hardest problems in six languages with two attempts per problem, and points to the released problem set."
+        }
+      ],
+      "candidate_matches": [
+        {
+          "url": "https://github.com/Aider-AI/aider/blob/main/benchmark/README.md",
+          "note": "The aider repo's benchmark harness that runs the polyglot problems - harness, not the problem source."
+        }
+      ],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "aime-2026",
+      "repo_url": "https://github.com/eth-sri/matharena",
+      "repo_full_name": "eth-sri/matharena",
+      "repo_kind": "shared_parent",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://huggingface.co/datasets/MathArena/aime_2026",
+          "anchor_type": "dataset_card",
+          "claim": "Dataset card states the questions were sourced from the AIME 2026 competition, extracted, converted to LaTeX and verified, and are the set used for the MathArena Leaderboard; the outputs card says answers were generated using the MathArena GitHub repository."
+        },
+        {
+          "url": "https://github.com/eth-sri/matharena/blob/main/README.md",
+          "anchor_type": "repo_readme",
+          "claim": "README's competition table lists 'AIME 2026' with config aime/aime_2026.yaml, showing this repo carries the AIME 2026 evaluation configuration."
+        },
+        {
+          "url": "https://matharena.ai/?comp=aime--aime_2026",
+          "anchor_type": "leaderboard",
+          "claim": "MathArena publishes the AIME 2026 competition leaderboard produced by this codebase."
+        }
+      ],
+      "candidate_matches": [
+        {
+          "url": "https://huggingface.co/datasets/math-ai/aime26",
+          "note": "Third-party copy of AIME 2026 problems."
+        }
+      ],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "big-bench-hard",
+      "repo_url": "https://github.com/suzgunmirac/BIG-Bench-Hard",
+      "repo_full_name": "suzgunmirac/BIG-Bench-Hard",
+      "repo_kind": "benchmark_source",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/suzgunmirac/BIG-Bench-Hard/blob/main/README.md",
+          "anchor_type": "repo_readme",
+          "claim": "README describes BBH as the suite of 23 challenging BIG-Bench tasks on which prior model evaluations did not beat the average human rater, and documents that the task files live under /bbh and the chain-of-thought prompts under /cot-prompts."
+        },
+        {
+          "url": "https://github.com/suzgunmirac/BIG-Bench-Hard/blob/main/bbh/boolean_expressions.json",
+          "anchor_type": "repo_readme",
+          "claim": "The repo hosts the actual BBH task data files (e.g. bbh/boolean_expressions.json), confirming it publishes the benchmark rather than only running it."
+        }
+      ],
+      "candidate_matches": [
+        {
+          "url": "https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/bbh/README.md",
+          "note": "lm-evaluation-harness BBH task - harness only."
+        }
+      ],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "scicode",
+      "repo_url": "https://github.com/scicode-bench/SciCode",
+      "repo_full_name": "scicode-bench/SciCode",
+      "repo_kind": "benchmark_source",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/scicode-bench/SciCode/blob/main/README.md",
+          "anchor_type": "repo_readme",
+          "claim": "README describes SciCode as a benchmark that challenges language models to code solutions for scientific research problems - 80 main problems decomposed into 338 subproblems with gold solutions and test cases - and hosts the data and evaluation code."
+        },
+        {
+          "url": "https://arxiv.org/pdf/2407.13168",
+          "anchor_type": "paper",
+          "claim": "'SciCode: A Research Coding Benchmark Curated by Scientists' defines the benchmark's construction across 16 subdomains of physics, math, materials science, biology and chemistry."
+        }
+      ],
+      "candidate_matches": [],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "imo-answerbench",
+      "repo_url": "https://github.com/google-deepmind/superhuman/tree/main/imobench",
+      "repo_full_name": "google-deepmind/superhuman",
+      "repo_kind": "monorepo_subdir",
+      "repo_subpath": "imobench",
+      "evidence": [
+        {
+          "url": "https://arxiv.org/html/2511.01846v1",
+          "anchor_type": "paper",
+          "claim": "'Towards Robust Mathematical Reasoning' (Google DeepMind) introduces IMO-Bench comprising IMO-AnswerBench (400 short-answer olympiad problems), IMO-ProofBench and IMO-GradingBench, and points to the released datasets."
+        },
+        {
+          "url": "https://github.com/google-deepmind/superhuman/tree/main/imobench",
+          "anchor_type": "repo_readme",
+          "claim": "The imobench subdirectory of google-deepmind/superhuman hosts the IMO-Bench datasets, including IMO-AnswerBench."
+        },
+        {
+          "url": "https://huggingface.co/datasets/OpenEvals/IMO-AnswerBench",
+          "anchor_type": "dataset_card",
+          "claim": "Dataset card mirrors the IMO-AnswerBench short-answer problem set defined by the IMO-Bench release."
+        }
+      ],
+      "candidate_matches": [],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "mmbench-v1.1",
+      "repo_url": "https://github.com/open-compass/MMBench",
+      "repo_full_name": "open-compass/MMBench",
+      "repo_kind": "shared_parent",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/open-compass/MMBench/blob/main/README.md",
+          "anchor_type": "repo_readme",
+          "claim": "README states this is the official repository of 'MMBench: Is Your Multi-modal Model an All-around Player?', developed by the OpenCompass community, and provides the dataset download links and the leaderboard submission route for MMBench splits (including the V11 dev/test EN and CN files)."
+        },
+        {
+          "url": "https://arxiv.org/abs/2307.06281",
+          "anchor_type": "paper",
+          "claim": "The MMBench paper 'MMBench: Is Your Multi-modal Model an All-around Player?' defines the ~3,000-question, 20-ability multiple-choice multimodal benchmark evaluated with CircularEval, of which v1.1 is the cleaned re-release. Reviewer correction: the crawl originally cited arXiv 2311.17076, a paper citing MMBench rather than MMBench's own; the official repo README links this id on its first line."
+        }
+      ],
+      "candidate_matches": [
+        {
+          "url": "https://github.com/open-compass/VLMEvalKit",
+          "note": "OpenCompass VLMEvalKit implements MMBench_V11 evaluation and distributes the MMBench_V11.tsv files - official harness from the same org, not the benchmark source repo."
+        }
+      ],
+      "resolution_status": "resolved"
+    },
+    {
+      "benchmark_id": "osworld",
+      "repo_url": "https://github.com/xlang-ai/OSWorld",
+      "repo_full_name": "xlang-ai/OSWorld",
+      "repo_kind": "benchmark_source",
+      "repo_subpath": null,
+      "evidence": [
+        {
+          "url": "https://github.com/xlang-ai/OSWorld/blob/main/README.md",
+          "anchor_type": "repo_readme",
+          "claim": "README presents '[NeurIPS 2024] OSWorld: Benchmarking Multimodal Agents for Open-Ended Tasks in Real Computer Environments' and hosts the 369 task definitions under evaluation_examples/ plus the execution environment."
+        },
+        {
+          "url": "https://osworld-v1.xlang.ai/",
+          "anchor_type": "leaderboard",
+          "claim": "Official OSWorld project site and leaderboard describes the benchmark of real computer-use tasks and links the xlang-ai/OSWorld repository as its code and data home."
+        }
+      ],
+      "candidate_matches": [
+        {
+          "url": "https://github.com/xlang-ai/OSWorld-V2",
+          "note": "OSWorld 2.0, a distinct later benchmark."
+        }
+      ],
+      "resolution_status": "resolved"
+    }
+  ]
+}
