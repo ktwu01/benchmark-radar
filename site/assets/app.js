@@ -847,8 +847,9 @@ const I18N = {
     "More than 10 results.": "结果超过 10 条。",
     "Use the CLI version to export all data.": "使用我们的命令行版本导出全部数据。",
     "Query it locally (CLI version)": "在本地查询（命令行版本）",
-    "This website is the hosted view. The CLI version runs on your own computer: it installs the command-line tool, downloads the searchable data, and answers from those local files.":
-      "本网站是在线版本。命令行版本在你自己的电脑上运行：它会安装命令行工具、下载可搜索的数据，并从这些本地文件中给出答案。",
+    "Install the Agent Skill": "安装 Agent Skill",
+    "This website is the hosted view. For local queries, install the Agent Skill, then let your coding agent configure the command-line tool and searchable data.":
+      "本网站是在线版本。需要本地查询时，先安装 Agent Skill，再让编程助手配置命令行工具和可搜索数据。",
     "Give this prompt to your coding agent": "把这段提示词交给你的编程助手",
     "Read the setup guide": "查看安装指南",
     "Share Benchmark Radar": "分享 Benchmark Radar",
@@ -8168,14 +8169,16 @@ function openCite(updateUrl = true) {
 // drift from the instructions it points at.
 const CLI_SKILL_URL =
   "https://github.com/ktwu01/benchmark-radar/blob/main/skills/benchmark-radar/SKILL.md";
+const CLI_SKILL_INSTALL = "npx skills add ktwu01/benchmark-radar";
 // The README wraps its last sentence across two lines at 80 columns; the card
 // is narrower than that, so keeping the break would re-wrap into ragged text.
 // Only the URL needs a line of its own, and it keeps one.
 const CLI_AGENT_PROMPT = [
-  "Set up Benchmark Radar for local benchmark search. Follow",
+  "Use the installed Benchmark Radar Skill to finish local benchmark search setup. Follow",
   CLI_SKILL_URL,
-  "to install the CLI and consumer Skill, initialize the local data, and verify the" +
-    " setup. Use only consumer commands.",
+  "to install or repair the CLI if needed, initialize the local data, and verify the setup.",
+  "You have permission to install the CLI from the official repository. Use only consumer" +
+    " commands.",
 ].join("\n");
 
 // True only while the open card owns a history entry this page pushed, for the
@@ -8207,12 +8210,12 @@ function openCli(updateUrl = true) {
     element("p", {
       className: "detail-summary",
       text: t(
-        "This website is the hosted view. The CLI version runs on your own computer: " +
-          "it installs the command-line tool, downloads the searchable data, and answers " +
-          "from those local files.",
+        "This website is the hosted view. For local queries, install the Agent Skill, " +
+          "then let your coding agent configure the command-line tool and searchable data.",
       ),
     }),
     element("div", { className: "copy-blocks" }, [
+      copyBlock("Install the Agent Skill", CLI_SKILL_INSTALL, "Click to copy"),
       copyBlock(
         "Give this prompt to your coding agent",
         CLI_AGENT_PROMPT,

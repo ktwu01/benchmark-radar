@@ -11,11 +11,18 @@ selection criteria, and desired output open unless they specify them.
 ## Prepare the data
 
 1. Check availability with `benchmark-radar status --json`.
-2. If the command is missing, report that the CLI is required. Offer installation,
-   but do not install it without permission:
+2. If the command is missing or exits before returning a JSON status response, report
+   that the CLI is missing or broken. Offer installation, but do not install it without
+   permission:
 
    ```bash
    python -m pip install 'git+https://github.com/ktwu01/benchmark-radar.git'
+   ```
+
+   If an existing installation cannot import `benchmark_radar`, offer a clean repair:
+
+   ```bash
+   python -m pip install --force-reinstall 'git+https://github.com/ktwu01/benchmark-radar.git'
    ```
 
 3. If the CLI reports `not_initialized`, run `benchmark-radar init --json`; that

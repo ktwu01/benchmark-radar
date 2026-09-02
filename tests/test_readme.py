@@ -123,6 +123,7 @@ def test_readmes_offer_a_short_agent_setup_prompt():
     english_section = english.split("## Query it locally", 1)[1].split("## More", 1)[0]
     chinese_section = chinese.split("## 在本地查询", 1)[1].split("## 更多", 1)[0]
     for section in (english_section, chinese_section):
+        assert "npx skills add ktwu01/benchmark-radar" in section
         assert "skills/benchmark-radar/SKILL.md" in section
         assert "normalize-external" not in section
         assert "build-data-release" not in section
@@ -134,6 +135,12 @@ def test_readmes_expose_the_consumer_skill():
     skill_path = "skills/benchmark-radar/SKILL.md"
     assert skill_path in README.read_text(encoding="utf-8")
     assert skill_path in README_ZH.read_text(encoding="utf-8")
+
+
+def test_consumer_skill_recovers_a_broken_cli() -> None:
+    text = SKILL.read_text(encoding="utf-8")
+    assert "missing or broken" in text
+    assert "--force-reinstall" in text
 
 
 def test_consumer_skill_keeps_acceptance_with_the_agent() -> None:

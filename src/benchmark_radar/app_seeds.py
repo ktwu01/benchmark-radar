@@ -376,12 +376,14 @@ year = {2026}
 CLI_SKILL_URL = (
     "https://github.com/ktwu01/benchmark-radar/blob/main/skills/benchmark-radar/SKILL.md"
 )
+CLI_SKILL_INSTALL = "npx skills add ktwu01/benchmark-radar"
 CLI_AGENT_PROMPT = "\n".join(
     (
-        "Set up Benchmark Radar for local benchmark search. Follow",
+        "Use the installed Benchmark Radar Skill to finish local benchmark search setup. Follow",
         CLI_SKILL_URL,
-        "to install the CLI and consumer Skill, initialize the local data, and verify the"
-        " setup. Use only consumer commands.",
+        "to install or repair the CLI if needed, initialize the local data, and verify the setup.",
+        "You have permission to install the CLI from the official repository. Use only consumer"
+        " commands.",
     )
 )
 
@@ -432,11 +434,11 @@ def _cli_seed() -> dict[str, str]:
         '<h2 class="detail-title cli-title" id="cli-title">'
         "Query it locally (CLI version)</h2>"
         '<p class="detail-summary">'
-        "This website is the hosted view. The CLI version runs on your own computer: "
-        "it installs the command-line tool, downloads the searchable data, and answers "
-        "from those local files."
+        "This website is the hosted view. For local queries, install the Agent Skill, "
+        "then let your coding agent configure the command-line tool and searchable data."
         "</p>"
         '<div class="copy-blocks">'
+        f"{_copy_block('Install the Agent Skill', CLI_SKILL_INSTALL, 'Click to copy')}"
         f"{_copy_block('Give this prompt to your coding agent', CLI_AGENT_PROMPT, 'Click to copy')}"
         "</div>"
         '<a class="secondary-link dialog-link" '

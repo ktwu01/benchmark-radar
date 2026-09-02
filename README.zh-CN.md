@@ -55,13 +55,20 @@ SWE-bench Verified 的 saturation 过程。**
 
 ## 在本地查询（CLI 版本）
 
-网页版 dashboard 是托管视图。需要离线查询时，请使用 **CLI 版本**：它会安装
-CLI、下载本地可搜索的数据，并从本地文件回答。把下面这段直接发给你的 coding agent：
+先安装 Benchmark Radar Agent Skill：
+
+```bash
+npx skills add ktwu01/benchmark-radar
+```
+
+这条命令只安装 coding agent 使用的操作说明，Python CLI 和本地可搜索数据需要
+单独配置。然后把下面这段直接发给你的 coding agent：
 
 ```text
-请帮我配置 Benchmark Radar 的本地 benchmark 搜索。请遵循
+请使用已安装的 Benchmark Radar Skill 完成本地 benchmark 搜索配置。请遵循
 https://github.com/ktwu01/benchmark-radar/blob/main/skills/benchmark-radar/SKILL.md，
-安装 CLI 和 consumer Skill，初始化本地数据并确认配置成功。只使用面向用户的命令。
+按需安装或修复 CLI、初始化本地数据并确认配置成功。你可以从官方仓库安装 CLI。
+只使用面向用户的命令。
 ```
 
 ## 更多

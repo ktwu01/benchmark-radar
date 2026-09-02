@@ -333,7 +333,7 @@ def test_utility_pages_ship_the_existing_dialog_open_with_content(tmp_path):
 
 def test_seeded_copy_controls_have_names_values_and_fallback_hints(tmp_path):
     _write(tmp_path, _dashboard())
-    for utility, count in (("cli", 1), ("cite", 3)):
+    for utility, count in (("cli", 2), ("cite", 3)):
         page = (tmp_path / utility / "index.html").read_text(encoding="utf-8")
         buttons = re.findall(r'<button class="copy-target"([^>]*)>(.*?)</button>', page, re.DOTALL)
         assert len(buttons) == count

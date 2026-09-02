@@ -60,15 +60,23 @@ If Benchmark Radar saves you research time, **[star the repository](https://gith
 
 ## Query it locally (CLI version)
 
-The web dashboard is the hosted view. For offline querying, use **the CLI
-version**: it installs the CLI, downloads the local searchable data, and
-answers from local files. Give this prompt to your coding agent:
+Install the Benchmark Radar Agent Skill:
+
+```bash
+npx skills add ktwu01/benchmark-radar
+```
+
+This command installs the instructions your coding agent uses. The Python CLI
+and searchable data are configured separately.
+
+Give this prompt to your coding agent:
 
 ```text
-Set up Benchmark Radar for local benchmark search. Follow
+Use the installed Benchmark Radar Skill to finish local benchmark search setup. Follow
 https://github.com/ktwu01/benchmark-radar/blob/main/skills/benchmark-radar/SKILL.md
-to install the CLI and consumer Skill, initialize the local data, and verify the
-setup. Use only consumer commands.
+to install or repair the CLI if needed, initialize the local data, and verify the setup.
+You have permission to install the CLI from the official repository. Use only consumer
+commands.
 ```
 
 ## More

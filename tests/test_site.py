@@ -183,8 +183,9 @@ def test_offline_cli_route_is_in_the_view_bar_behind_a_short_link():
     assert 'canonical: "/cli/"' in script
     assert "function openCli(" in script
 
-    # One copy block, sharing the citation card's control rather than a second
-    # clipboard handler.
+    # Both setup steps share the citation card's copy control rather than adding
+    # another clipboard handler.
+    assert 'copyBlock("Install the Agent Skill", CLI_SKILL_INSTALL' in script
     assert 'copyBlock(\n        "Give this prompt to your coding agent",' in script
 
     # The card holds no data either, so it opens before the fetch and closes on
@@ -214,10 +215,13 @@ def test_offline_cli_route_is_in_the_view_bar_behind_a_short_link():
     )
     assert skill_url in readme_cli
     assert skill_url in script
+    assert "npx skills add ktwu01/benchmark-radar" in readme_cli
+    assert "npx skills add ktwu01/benchmark-radar" in script
     for line in (
-        "Set up Benchmark Radar for local benchmark search. Follow",
-        "to install the CLI and consumer Skill, initialize the local data, and verify the",
-        "setup. Use only consumer commands.",
+        "Use the installed Benchmark Radar Skill to finish local benchmark search setup. Follow",
+        "to install or repair the CLI if needed, initialize the local data, and verify the setup.",
+        "You have permission to install the CLI from the official repository. Use only consumer",
+        "commands.",
     ):
         assert line in readme_cli
         assert line in script
