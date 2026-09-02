@@ -848,8 +848,8 @@ const I18N = {
     "Use the CLI version to export all data.": "使用我们的命令行版本导出全部数据。",
     "Query it locally (CLI version)": "在本地查询（命令行版本）",
     "Install the Agent Skill": "安装 Agent Skill",
-    "This website is the hosted view. For local queries, install the Agent Skill, then let your coding agent configure the command-line tool and searchable data.":
-      "本网站是在线版本。需要本地查询时，先安装 Agent Skill，再让编程助手配置命令行工具和可搜索数据。",
+    "To let your agent use the CLI version, run the command below.":
+      "如果你想让 Agent 使用 CLI 版本，请运行下面的命令。",
     "Give this prompt to your coding agent": "把这段提示词交给你的编程助手",
     "Read the setup guide": "查看安装指南",
     "Share Benchmark Radar": "分享 Benchmark Radar",
@@ -8209,10 +8209,7 @@ function openCli(updateUrl = true) {
     }),
     element("p", {
       className: "detail-summary",
-      text: t(
-        "This website is the hosted view. For local queries, install the Agent Skill, " +
-          "then let your coding agent configure the command-line tool and searchable data.",
-      ),
+      text: t("To let your agent use the CLI version, run the command below."),
     }),
     element("div", { className: "copy-blocks" }, [
       copyBlock("Install the Agent Skill", CLI_SKILL_INSTALL, "Click to copy"),

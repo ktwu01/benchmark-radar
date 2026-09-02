@@ -434,8 +434,7 @@ def _cli_seed() -> dict[str, str]:
         '<h2 class="detail-title cli-title" id="cli-title">'
         "Query it locally (CLI version)</h2>"
         '<p class="detail-summary">'
-        "This website is the hosted view. For local queries, install the Agent Skill, "
-        "then let your coding agent configure the command-line tool and searchable data."
+        "To let your agent use the CLI version, run the command below."
         "</p>"
         '<div class="copy-blocks">'
         f"{_copy_block('Install the Agent Skill', CLI_SKILL_INSTALL, 'Click to copy')}"
