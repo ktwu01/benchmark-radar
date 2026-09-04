@@ -8333,6 +8333,13 @@ function bindEvents() {
       if (view === "map") renderTrendMap();
       try {
         if (view === "trends") await ensureTrendsData();
+        // A trends response can supersede an in-flight /data/radar.json fetch
+        // while the relationship explorer is open. The <details> element never
+        // closed, so no toggle event fires again and the explorer would stay
+        // empty on return. Re-run the state gate here: it re-requests the full
+        // corpus when the open disclosure still needs it and does nothing when
+        // Explore is entered with the canvas collapsed, keeping lazy loading.
+        else if (view === "map") await ensureDataForState();
       } catch (error) {
         console.error(error);
         if (navigationSequence !== viewNavigationSequence) return;

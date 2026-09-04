@@ -795,6 +795,33 @@ def test_initial_page_uses_small_bootstrap_and_lazy_loads_history():
     assert 'if (view === "today" && state.todayDate !== "all")' in nav_today
 
 
+def test_returning_to_explore_after_trends_supersession_reloads_full_data():
+    """Issue #528 review race: full-payload loading -> Trends -> Explore.
+
+    A trends response can supersede an in-flight /data/radar.json fetch while
+    the relationship explorer is open. The <details> element never closes, so
+    no toggle event fires again and the old code left map-canvas with zero
+    children and no new full-data request. The Explore nav click itself must
+    re-run the data gate and redraw once the full corpus lands.
+    """
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+    nav = script.split('document.querySelectorAll("[data-view]")', 1)[1].split(
+        "// Reads every control rather than the event target", 1
+    )[0]
+    assert 'if (view === "map") await ensureDataForState();' in nav
+    await_map = nav.index('if (view === "map") await ensureDataForState();')
+    # The gate runs inside the shared try/catch, so a failed retry falls back
+    # to the generated route exactly like a failed Trends upgrade does.
+    assert await_map < nav.index("window.location.assign(anchor?.href || VIEW_PATHS[view]")
+    # The redraw after the await is the second renderTrendMap() call in the
+    # handler; without it the graph stays empty even after the data arrives.
+    redraw = nav.index('if (view === "map") renderTrendMap();', await_map)
+    assert await_map < redraw
+    # The lazy gate is unchanged: entering Explore with the disclosure closed
+    # and no entity permalink still must not fetch the full corpus.
+    assert 'if (view === "map") await ensureFullData();' not in nav
+
+
 def test_rubric_is_read_from_published_data_not_restated_in_the_browser():
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
 
