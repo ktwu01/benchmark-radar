@@ -7,7 +7,9 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 from pathlib import Path
+from typing import Any
 
 from build_technical_report import (
     AMBER,
@@ -52,8 +54,122 @@ from reportlab.platypus import (
 GREEN = HexColor("#16794A")
 PALE_GREEN = HexColor("#EAF7F0")
 PURPLE = HexColor("#6D4AFF")
-FROZEN_OUTPUT = Path("output/pdf/benchmark-radar-technical-report-v0.9.0.pdf")
 NEXT_DRAFT_OUTPUT = Path("output/pdf/benchmark-radar-technical-report-next-draft.pdf")
+VENDOR_ATTENTION_SPEC_PATH = Path("data/vendor_attention_audit.yml")
+VENDOR_ATTENTION_REGISTRY_PATH = Path("data/model_cards.yml")
+VENDOR_ATTENTION_ISSUE_NUMBER = 456
+VENDOR_ATTENTION_ISSUE_URL = "https://github.com/ktwu01/benchmark-radar/issues/456"
+VENDOR_ATTENTION_CONTRIBUTOR = "Junkai Wang / @JunkaiWang-TheoPhy"
+VENDOR_ATTENTION_SECTION_TITLE = (
+    "6.1 A recurring reporting group with a definition-sensitive boundary"
+)
+
+
+def _load_vendor_attention_analysis_module():
+    module_path = Path(__file__).with_name("analyze_vendor_attention.py")
+    spec = importlib.util.spec_from_file_location("analyze_vendor_attention", module_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Unable to load analysis module from {module_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_vendor_attention_report_data(
+    registry_path: Path = VENDOR_ATTENTION_REGISTRY_PATH,
+    spec_path: Path = VENDOR_ATTENTION_SPEC_PATH,
+) -> dict[str, Any]:
+    module = _load_vendor_attention_analysis_module()
+    result = module.generate_vendor_attention_audit(
+        registry_path=registry_path,
+        spec_path=spec_path,
+    )
+    audit = result["claim_audit"]
+    return {
+        **audit,
+        "scenario_by_id": {row["scenario_id"]: row for row in result["scenario_summaries"]},
+    }
+
+
+def vendor_attention_section_paragraphs(report_data: dict[str, Any]) -> list[str]:
+    scenarios = report_data["scenario_by_id"]
+    baseline = scenarios["canonical_all_t6"]
+    recent = scenarios["trailing_365d_t6"]
+    latest = scenarios["latest_per_organization_t6"]
+    family_projection = scenarios["reviewed_families_t6"]
+    model_cards_only = scenarios["model_cards_only_t6"]
+    return [
+        (
+            f"The original eight-item statement does not reproduce from its stated rule. "
+            f"Across all {baseline['document_count']} reviewed documents from "
+            f"{baseline['organization_count']} organization labels, {baseline['core_count']} "
+            f"canonical benchmark IDs—not eight—appear in documents from at least "
+            f"{baseline['threshold']} organizations. The eight names printed in the prior "
+            "draft are a strict subset of that threshold set and match a ranking truncation, "
+            "not a complete threshold-defined core."
+        ),
+        (
+            f"The boundary changes under the pre-registered alternatives. The trailing "
+            f"365-day window contains {recent['core_count']} IDs at the same threshold; one "
+            f"latest document per organization contains {latest['core_count']}; model-card "
+            f"documents alone contain {model_cards_only['core_count']}; and the explicit "
+            f"reviewed-family projection contains {family_projection['core_count']} resolved "
+            f"identities: {family_projection['core_explicit_family_count']} explicit families "
+            f"and {family_projection['core_singleton_count']} singleton canonical IDs. These "
+            "results support a narrower claim that a recurring reporting group exists in the "
+            "reviewed sample. They do not support an exact eight-benchmark boundary or a "
+            "field-wide statement that vendor attention has converged."
+        ),
+        (
+            f"Method and limits: {VENDOR_ATTENTION_CONTRIBUTOR} contributed the issue "
+            f"#{VENDOR_ATTENTION_ISSUE_NUMBER} audit ({VENDOR_ATTENTION_ISSUE_URL}) at source "
+            f"commit {report_data['source_commit']} and cutoff {report_data['analysis_end']}. "
+            f"The exact-membership median Jaccard is {report_data['robustness']['median_jaccard']:.4f} "
+            f"including the baseline self-comparison (excluding it: "
+            f"{report_data['robustness']['median_jaccard_excluding_baseline']:.4f}; "
+            f"required {report_data['robustness']['required_median_jaccard']:.2f}), so the "
+            "threshold set is not retained as an invariant. Counts are rebuilt from "
+            "data/model_cards.yml as binary organization-by-benchmark "
+            "mention edges; documents, models, benchmark IDs, families, and score tracks remain "
+            "separate. The sensitivity grid varies thresholds, document types, latest-report "
+            "selection, time windows, reviewed families, and missing-report stress tests. The "
+            "registry is a reviewed convenience sample rather than a census: a not-observed "
+            "cell can mean an unread or missing report and is not evidence of vendor omission. "
+            "Every aggregate links back to model-card IDs and URLs in the issue #456 machine-readable "
+            "audit tables [9-10]."
+        ),
+    ]
+
+
+def vendor_attention_evidence_rows(report_data: dict[str, Any]) -> list[tuple[str, str]]:
+    scenarios = report_data["scenario_by_id"]
+    return [
+        (
+            "Full reviewed history",
+            f"{scenarios['canonical_all_t6']['core_count']} canonical IDs · "
+            f"{scenarios['canonical_all_t6']['document_count']} documents · "
+            f"{scenarios['canonical_all_t6']['organization_count']} organizations",
+        ),
+        (
+            "Trailing 365 days",
+            f"{scenarios['trailing_365d_t6']['core_count']} IDs · same 6-organization threshold",
+        ),
+        (
+            "Latest document per organization",
+            f"{scenarios['latest_per_organization_t6']['core_count']} IDs · "
+            f"{scenarios['latest_per_organization_t6']['document_count']} documents",
+        ),
+        (
+            "Reviewed family projection",
+            f"{scenarios['reviewed_families_t6']['core_count']} resolved identities · "
+            f"{scenarios['reviewed_families_t6']['core_explicit_family_count']} families + "
+            f"{scenarios['reviewed_families_t6']['core_singleton_count']} singletons · "
+            "score tracks unmerged",
+        ),
+    ]
+
+
+FROZEN_OUTPUT = Path("output/pdf/benchmark-radar-technical-report-v0.9.0.pdf")
 FROZEN_AUTHORS = ("Koutian Wu",)
 NEXT_DRAFT_AUTHORS = ("Koutian Wu", "Junjie Zhou", "Jiayu Wang")
 NEXT_DRAFT_BYLINE = (
@@ -332,6 +448,8 @@ def story(
 ) -> list:
     st = styles()
     tiny = ParagraphStyle("Tiny", parent=st["small"], fontSize=6.45, leading=8.0)
+    vendor_attention_data = load_vendor_attention_report_data()
+    vendor_attention_paragraphs = vendor_attention_section_paragraphs(vendor_attention_data)
     story: list = []
 
     story.extend(
@@ -403,7 +521,7 @@ def story(
                 st["body"],
             ),
             bullet(
-                "<b>Thirty-six model reports cover 94 curated benchmarks.</b> The same documents supply 285 scores across 69 benchmark tracks when the report includes a readable value and evaluation setup.",
+                "<b>Frozen v0.9.0 population: 36 model reports cover 94 curated benchmarks.</b> Those cutoff counts remain the deposited report baseline. The issue #456 addendum separately audits 37 reviewed documents, 12 organization labels, and 110 benchmark IDs pinned at commit 98c8cf6.",
                 st["body"],
             ),
             bullet(
@@ -589,7 +707,7 @@ def story(
                     ],
                     [
                         p("Verification", st["small_bold"]),
-                        p("Clean-worktree rebuild plus 1,028 passing tests.", st["small"]),
+                        p("Clean-worktree rebuild plus a passing full CI suite.", st["small"]),
                         p("Source coverage still depends on public endpoints.", st["small"]),
                     ],
                 ],
@@ -645,13 +763,13 @@ def story(
                         p("Current web-search reach.", st["small"]),
                     ],
                     [
-                        p("Adoption benchmark", st["small_bold"]),
+                        p("Adoption benchmark (frozen v0.9.0)", st["small_bold"]),
                         p("94", st["small"]),
                         p("Canonical identity in curated registry.", st["small"]),
                         p("Model-card adoption and missing adoption.", st["small"]),
                     ],
                     [
-                        p("Model-card document", st["small_bold"]),
+                        p("Model-card document (frozen v0.9.0)", st["small_bold"]),
                         p("36", st["small"]),
                         p("Curated reports from 11 organizations.", st["small"]),
                         p("Documents read for mentions.", st["small"]),
@@ -680,7 +798,7 @@ def story(
             ),
             p("3.2 Adoption and score findings", st["subsection"]),
             p(
-                "GPQA Diamond appears in 26 of 36 documents from 10 organizations. Humanity's Last Exam, SWE-bench Verified, Terminal-Bench, AIME, LiveCodeBench, MMLU-Pro, and BrowseComp form the rest of the top eight. These counts show which benchmarks vendors choose to report. The score archive finds eight bounded metrics with five points of headroom or less. Six benchmarks gained model-card mentions after their last readable score.",
+                "The issue #456 sensitivity audit rebuilds vendor-reporting counts from the reviewed registry rather than repeating the frozen PDF prose. Its primary full-history rule finds 16 canonical benchmark IDs reported by at least six organizations, while the pre-registered document, time-window, family, and missing-report alternatives produce different boundaries. Section 6.1 reports the result and limitations. The score archive remains separate: it finds eight bounded metrics with five points of headroom or less, and six benchmarks gained model-card mentions after their last readable score.",
                 st["body"],
             ),
         ]
@@ -936,11 +1054,24 @@ def story(
                 "Benchmark Radar turns papers, repositories, datasets, and model reports into records you can search, filter, download, and query offline. Three results stand out in the current data.",
                 st["body"],
             ),
-            p("6.1 Vendor attention has converged on a small reporting core", st["subsection"]),
-            p(
-                "Eight benchmarks appear in documents from at least six organizations: GPQA Diamond, Humanity's Last Exam, SWE-bench Verified, Terminal-Bench, AIME, LiveCodeBench, MMLU-Pro, and BrowseComp. Teams comparing new model reports will encounter this group most often. The score archive shows where these familiar tests have little headroom left.",
-                st["body"],
+            p(VENDOR_ATTENTION_SECTION_TITLE, st["subsection"]),
+            table(
+                [
+                    [
+                        p("Definition", st["table_header"]),
+                        p("Observed threshold set", st["table_header"]),
+                    ],
+                    *[
+                        [p(label, tiny), p(result, tiny)]
+                        for label, result in vendor_attention_evidence_rows(vendor_attention_data)
+                    ],
+                ],
+                [2.35 * inch, 4.25 * inch],
+                tiny=True,
             ),
+            p(vendor_attention_paragraphs[0], st["body"]),
+            p(vendor_attention_paragraphs[1], st["body"]),
+            p(vendor_attention_paragraphs[2], st["small"]),
             p("6.2 Several bounded metrics are near their ceiling", st["subsection"]),
             p(
                 "The curated layer records five points of headroom or less for AIME, Arena-Hard, DeepSearchQA, HMMT, MATH-500, MathVision, SWE-bench Verified, and tau2-bench. Read each value with its reasoning budget, tools, attempts, and evaluator. Those settings often explain score movement between model reports.",
@@ -1092,10 +1223,9 @@ def story(
 
     story.extend(
         [
-            PageBreak(),
             p("7. Reproducibility, access, and citation", st["section"]),
             p(
-                "This report evaluates Benchmark Radar v0.9.0 at Git commit 98c7de3 and data cutoff 2026-08-29. The clean worktree ran the CI sequence: lint and formatting checks, external normalization, KW-Bench classification, checksummed data-release construction, and the full test suite. All 1,028 tests passed.",
+                "This report evaluates Benchmark Radar v0.9.0 at Git commit 98c7de3 and data cutoff 2026-08-29. The clean worktree ran the CI sequence: lint and formatting checks, external normalization, KW-Bench classification, checksummed data-release construction, and the full test suite. The current full CI suite passed.",
                 st["body"],
             ),
             table(
@@ -1148,7 +1278,7 @@ def story(
             ),
             p("Data statement", st["subsection"]),
             p(
-                "Counts were recomputed from site/data/radar.json, site/data/benchmark-index.json, site/data/models.json, data/model_cards.yml, data/benchmark_scores.yml, normalized files under data/external/, and config.yml. The PDF is a dated interpretation. The rolling dashboard may change after the cutoff; cite its current number with a retrieval date.",
+                "The v0.9.0 core and frozen section 3 rows use commit 98c7de3 and cutoff 2026-08-29. The issue #456 addendum separately audits 37 documents, 12 organization labels, and 110 benchmark IDs from a SHA-256-pinned registry at commit 98c8cf6 and cutoff 2026-08-31. Do not combine these populations; cite rolling dashboard values with a retrieval date.",
                 st["body"],
             ),
             p("References", st["section"]),
@@ -1184,7 +1314,15 @@ def story(
                 "[8] L. Xiaopai. BuilderPulse: AI-powered daily intelligence for indie hackers and builders. GitHub, 2026. https://github.com/BuilderPulse/BuilderPulse",
                 st["reference"],
             ),
-            Spacer(1, 9),
+            p(
+                "[9] Benchmark Radar contributors. Reviewed model-card benchmark registry. 2026. https://github.com/ktwu01/benchmark-radar/blob/98c8cf6fb5d1d69c66d438ea9f92242b2205c9ae/data/model_cards.yml",
+                st["reference"],
+            ),
+            p(
+                "[10] J. Wang. Vendor-attention sensitivity audit for issue #456. 2026. https://github.com/ktwu01/benchmark-radar/blob/d620afc/docs/technical-report/vendor-attention-audit/claim-audit.json",
+                st["reference"],
+            ),
+            Spacer(1, 0),
             Table(
                 [
                     [
@@ -1194,8 +1332,8 @@ def story(
                                 "EndCard",
                                 parent=st["body"],
                                 fontName=BOLD,
-                                fontSize=8.6,
-                                leading=12.5,
+                                fontSize=7.0,
+                                leading=8.2,
                                 textColor=NAVY,
                             ),
                         )
@@ -1206,8 +1344,8 @@ def story(
                     [
                         ("BACKGROUND", (0, 0), (-1, -1), SKY),
                         ("BOX", (0, 0), (-1, -1), 0.7, BLUE),
-                        ("TOPPADDING", (0, 0), (-1, -1), 9),
-                        ("BOTTOMPADDING", (0, 0), (-1, -1), 9),
+                        ("TOPPADDING", (0, 0), (-1, -1), 3),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
                     ]
                 ),
             ),
@@ -1216,12 +1354,12 @@ def story(
     return story
 
 
-def main() -> None:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--output",
         type=Path,
-        default=None,
+        default=NEXT_DRAFT_OUTPUT,
     )
     parser.add_argument("--doi", default="10.5281/zenodo.22167102")
     parser.add_argument(
@@ -1229,15 +1367,21 @@ def main() -> None:
         action="store_true",
         help="build the working next-draft artifact with the current contributor byline",
     )
+    return parser
+
+
+def main() -> None:
+    parser = build_parser()
     args = parser.parse_args()
-    output = args.output or (NEXT_DRAFT_OUTPUT if args.next_draft else FROZEN_OUTPUT)
-    if args.next_draft and output.resolve() == FROZEN_OUTPUT.resolve():
+    output = args.output
+    if output.resolve() == FROZEN_OUTPUT.resolve():
         parser.error("--next-draft cannot overwrite the frozen v0.9.0 PDF")
+    draft = args.next_draft or output.resolve() != FROZEN_OUTPUT.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
-    authors = NEXT_DRAFT_AUTHORS if args.next_draft else FROZEN_AUTHORS
-    byline = NEXT_DRAFT_BYLINE if args.next_draft else None
-    affiliations = NEXT_DRAFT_AFFILIATIONS if args.next_draft else ()
-    corresponding_author = NEXT_DRAFT_CORRESPONDING_AUTHOR if args.next_draft else None
+    authors = NEXT_DRAFT_AUTHORS if draft else FROZEN_AUTHORS
+    byline = NEXT_DRAFT_BYLINE if draft else None
+    affiliations = NEXT_DRAFT_AFFILIATIONS if draft else ()
+    corresponding_author = NEXT_DRAFT_CORRESPONDING_AUTHOR if draft else None
     EvaluationDoc(str(output), doi=args.doi, authors=authors).build(
         story(
             args.doi,
@@ -1245,7 +1389,7 @@ def main() -> None:
             byline=byline,
             affiliations=affiliations,
             corresponding_author=corresponding_author,
-            draft=args.next_draft,
+            draft=draft,
         )
     )
     print(output)

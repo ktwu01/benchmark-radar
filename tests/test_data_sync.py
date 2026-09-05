@@ -189,6 +189,7 @@ def test_deploy_and_ci_build_the_downloadable_release_after_its_inputs() -> None
     # Regression: an init command is useless when Pages never publishes its artifact.
     pages = Path(".github/workflows/pages.yml").read_text(encoding="utf-8")
     ci = Path(".github/workflows/ci.yml").read_text(encoding="utf-8")
+    assert "fetch-depth: 0" in ci
     for workflow in (pages, ci):
         assert (
             workflow.index("benchmark-radar normalize-external")
