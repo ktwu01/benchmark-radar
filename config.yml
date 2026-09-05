@@ -221,10 +221,10 @@ sources:
     required: false
     registry_path: data/priority_github_organizations.yml
     tiers: [priority, standard, probation]
-    max_organizations: 360
+    max_organizations: 361
     page_size: 30
     max_pages_per_organization: 1
-    max_requests: 360
+    max_requests: 361
     attempts: 2
     timeout_seconds: 30
 

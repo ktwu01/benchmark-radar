@@ -1,5 +1,6 @@
 # Public GitHub organizations used only to improve candidate discovery.
-# Generated from 24 recorded GitHub Search API responses on 2026-08-27; see docs/source-coverage-audit.zh-CN.md for method and limits.
+# Initially generated from 24 recorded GitHub Search API responses on 2026-08-27; see docs/source-coverage-audit.zh-CN.md for method and limits.
+# Later additions record their individual review evidence below.
 schema_version: 1
 generated_at: '2026-08-27'
 selection_rule: Public GitHub Organizations identified by non-fork repositories returned by recorded AI,
@@ -15486,3 +15487,16 @@ organizations:
       - llm
   added_at: '2026-08-27'
   review_after: '2026-11-27'
+- login: sunblaze-ucb
+  display_name: sunblaze-ucb
+  tier: standard
+  source_evidence: https://github.com/sunblaze-ucb
+  selection_evidence:
+    issue: https://github.com/ktwu01/benchmark-radar/issues/555
+    review_basis: The Vero README documents a benchmark for repository-level implementation and
+      proof synthesis by AI agents, with proof-only and code-and-proof evaluation modes.
+    sample_repositories:
+    - full_name: sunblaze-ucb/vero
+      url: https://github.com/sunblaze-ucb/vero
+  added_at: '2026-09-06'
+  review_after: '2026-12-06'
