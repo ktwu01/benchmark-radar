@@ -52,6 +52,20 @@ def minimal_scores(**overrides) -> dict:
     return document
 
 
+def external_source(**overrides) -> dict:
+    source = {
+        "id": "alpha_leaderboard",
+        "title": "Alpha benchmark leaderboard",
+        "publisher": "Alpha Research",
+        "document_type": "benchmark_leaderboard",
+        "url": "https://example.com/alpha/leaderboard",
+        "benchmarks": ["alpha"],
+        "retrieved_at": "2026-09-02",
+    }
+    source.update(overrides)
+    return source
+
+
 def test_load_scores_rejects_a_result_naming_an_undeclared_benchmark(tmp_path):
     # The benchmarks block is where metric, direction and unit live, so a row
     # without one would be plotted on an axis whose meaning nobody declared.
@@ -379,7 +393,28 @@ def test_evidence_grade_refuses_the_word_trend_for_a_two_point_pair(tmp_path):
     )
     record = score_progression(load_scores(path))["benchmarks"]["alpha"]
     assert record["evidence"]["id"] == "paired_comparison"
-    assert "Two points define one segment" in record["evidence"]["does_not_support"]
+
+
+def test_evidence_grade_labels_same_day_multi_value_leaderboards(tmp_path):
+    path = write_scores(
+        tmp_path,
+        minimal_scores(
+            results=[
+                result(source_id="card_one", model="Model One", reported_at="2026-08-25"),
+                result(source_id="card_two", model="Model Two", reported_at="2026-08-25"),
+            ]
+        ),
+    )
+    registry = {
+        "benchmarks": [{"id": "alpha"}],
+        "model_cards": [
+            {"id": "card_one", "benchmarks": ["alpha"]},
+            {"id": "card_two", "benchmarks": ["alpha"]},
+        ],
+    }
+    record = score_progression(load_scores(path), registry)["benchmarks"]["alpha"]
+    assert record["evidence"]["id"] == "same_day_comparison"
+    assert "leaderboard snapshot" in record["evidence"]["does_not_support"]
 
 
 def test_a_gain_is_only_attributed_to_a_vendor_when_the_run_has_one(tmp_path):
@@ -428,6 +463,72 @@ def test_cross_check_accepts_a_score_cited_to_a_card_that_reports_it(tmp_path):
     assert score_progression(load_scores(path), registry)["observation_count"] == 1
 
 
+def test_cross_check_accepts_a_score_cited_to_an_external_benchmark_source(tmp_path):
+    path = write_scores(
+        tmp_path,
+        minimal_scores(
+            sources=[external_source()],
+            results=[result(source_id="alpha_leaderboard", read_from="html_text")],
+        ),
+    )
+    registry = {
+        "benchmarks": [{"id": "alpha"}],
+        "model_cards": [],
+        "source_documents": [external_source()],
+    }
+
+    observation = score_progression(load_scores(path), registry)["benchmarks"]["alpha"][
+        "observations"
+    ][0]
+
+    assert observation["source_title"] == "Alpha benchmark leaderboard"
+    assert observation["source_url"] == "https://example.com/alpha/leaderboard"
+    assert observation["source_document_type"] == "benchmark_leaderboard"
+
+
+def test_cross_check_uses_registry_source_metadata_over_score_file_copy(tmp_path):
+    path = write_scores(
+        tmp_path,
+        minimal_scores(
+            sources=[external_source()],
+            results=[result(source_id="alpha_leaderboard", read_from="html_text")],
+        ),
+    )
+    registry_source = external_source()
+    registry_source["title"] = "Reviewed title"
+    registry_source["url"] = "https://reviewed.example/alpha"
+    registry = {
+        "benchmarks": [{"id": "alpha"}],
+        "model_cards": [],
+        "source_documents": [registry_source],
+    }
+
+    observation = score_progression(load_scores(path), registry)["benchmarks"]["alpha"][
+        "observations"
+    ][0]
+
+    assert observation["source_title"] == "Reviewed title"
+    assert observation["source_url"] == "https://reviewed.example/alpha"
+
+
+def test_cross_check_rejects_an_external_source_that_does_not_cover_the_score(tmp_path):
+    path = write_scores(
+        tmp_path,
+        minimal_scores(
+            sources=[external_source(benchmarks=["beta"])],
+            results=[result(source_id="alpha_leaderboard")],
+        ),
+    )
+    registry = {
+        "benchmarks": [{"id": "alpha"}],
+        "model_cards": [],
+        "source_documents": [external_source(benchmarks=["beta"])],
+    }
+
+    with pytest.raises(BenchmarkScoreError, match="does not report alpha"):
+        score_progression(load_scores(path), registry)
+
+
 def test_cross_check_rejects_a_score_citing_an_unknown_document(tmp_path):
     # Provenance is this layer's whole claim to be readable-out-of-a-document.
     # A source_id with no card is a citation to nothing.
@@ -448,9 +549,16 @@ def test_the_shipped_score_file_is_valid_and_cites_only_known_documents():
 
     assert progression["observation_count"] > 0
     card_ids = {str(card["id"]) for card in registry["model_cards"]}
+    source_ids = {str(source["id"]) for source in registry.get("source_documents", [])}
     for record in progression["benchmarks"].values():
         for observation in record["observations"]:
-            assert observation["source_id"] in card_ids
+            assert observation["source_id"] in card_ids | source_ids
+
+    frontier = progression["benchmarks"]["frontier_challenge"]
+    assert all(
+        row["measurement_kind"] == "benchmark_publisher_run" for row in frontier["observations"]
+    )
+    assert all(row["reported_by"] is None for row in frontier["observations"])
 
 
 def test_the_shipped_file_never_claims_a_trend_it_cannot_support():

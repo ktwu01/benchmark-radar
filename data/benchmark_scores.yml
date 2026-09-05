@@ -52,10 +52,11 @@
 #
 # PROVENANCE
 #
-# Every row names the `source_id` it was read from, which must exist in
-# model_cards.yml, and `read_from` records how: `pdf_text` and `html_text` were
-# machine-extracted from the document and re-read against the printed table;
-# `table_image` would mean transcribed from a rendered image.
+# Every row names the `source_id` it was read from. A model-card source must
+# exist in model_cards.yml; a benchmark-owned leaderboard or report that is not
+# a model card is declared in `sources` below. `read_from` records how:
+# `pdf_text` and `html_text` were machine-extracted from the document and re-read
+# against the printed table; `table_image` means transcribed from a rendered image.
 #
 # `organization` is whose model was measured. `reported_by` is who published the
 # document. When they differ the row is a third-party citation: the publisher is
@@ -81,6 +82,15 @@
 # not. Then run `benchmark-radar rebuild`.
 
 schema_version: 1
+
+sources:
+  - id: frontier_challenge_leaderboard_2026_08_25
+    title: FrontierChallenge leaderboard
+    publisher: ApodexAI
+    document_type: benchmark_leaderboard
+    url: https://apodexai.github.io/FrontierAgent/benchmarks/FrontierChallenge/
+    benchmarks: [frontier_challenge]
+    retrieved_at: 2026-09-02
 
 # Per-benchmark metric identity. `direction` exists because not every metric
 # improves upward: an edit-distance metric inverts the axis, and a chart that
@@ -168,6 +178,10 @@ benchmarks:
     unit: percent
   - benchmark_id: ifeval
     metric: prompt_strict
+    direction: higher_is_better
+    unit: percent
+  - benchmark_id: frontier_challenge
+    metric: pass_rate
     direction: higher_is_better
     unit: percent
 
@@ -437,6 +451,152 @@ benchmarks:
     unit: percent
 
 results:
+  # FrontierChallenge's official leaderboard reports model-scaffold systems,
+  # not model-only measurements. Preserve the scaffold in every protocol so
+  # changing the agent harness never looks like a comparable model update.
+  - benchmark_id: frontier_challenge
+    instrument: frontier_challenge_97_tasks_2026_08_25
+    protocol: "97 released tasks; one trajectory per system-task pair; pass = native Score >= 99.9; agent scaffold: Codex"
+    model: GPT-5.6 Sol
+    organization: OpenAI
+    source_id: frontier_challenge_leaderboard_2026_08_25
+    reported_at: 2026-08-25
+    value: 20.6
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: frontier_challenge
+    instrument: frontier_challenge_97_tasks_2026_08_25
+    protocol: "97 released tasks; one trajectory per system-task pair; pass = native Score >= 99.9; agent scaffold: Claude Code"
+    model: Grok 4.6
+    organization: xAI
+    source_id: frontier_challenge_leaderboard_2026_08_25
+    reported_at: 2026-08-25
+    value: 20.6
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: frontier_challenge
+    instrument: frontier_challenge_97_tasks_2026_08_25
+    protocol: "97 released tasks; one trajectory per system-task pair; pass = native Score >= 99.9; agent scaffold: Claude Code"
+    model: Kimi K3
+    organization: Moonshot AI
+    source_id: frontier_challenge_leaderboard_2026_08_25
+    reported_at: 2026-08-25
+    value: 17.5
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: frontier_challenge
+    instrument: frontier_challenge_97_tasks_2026_08_25
+    protocol: "97 released tasks; one trajectory per system-task pair; pass = native Score >= 99.9; agent scaffold: Claude Code"
+    model: Claude Opus 5
+    organization: Anthropic
+    source_id: frontier_challenge_leaderboard_2026_08_25
+    reported_at: 2026-08-25
+    value: 17.5
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: frontier_challenge
+    instrument: frontier_challenge_97_tasks_2026_08_25
+    protocol: "97 released tasks; one trajectory per system-task pair; pass = native Score >= 99.9; agent scaffold: Codex"
+    model: GPT-5.6 Terra (max)
+    organization: OpenAI
+    source_id: frontier_challenge_leaderboard_2026_08_25
+    reported_at: 2026-08-25
+    value: 15.5
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: frontier_challenge
+    instrument: frontier_challenge_97_tasks_2026_08_25
+    protocol: "97 released tasks; one trajectory per system-task pair; pass = native Score >= 99.9; agent scaffold: Claude Code"
+    model: Qwen 3.8 Max
+    organization: Qwen
+    source_id: frontier_challenge_leaderboard_2026_08_25
+    reported_at: 2026-08-25
+    value: 15.5
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: frontier_challenge
+    instrument: frontier_challenge_97_tasks_2026_08_25
+    protocol: "97 released tasks; one trajectory per system-task pair; pass = native Score >= 99.9; agent scaffold: Claude Code"
+    model: DeepSeek V4 Pro-0813
+    organization: DeepSeek
+    source_id: frontier_challenge_leaderboard_2026_08_25
+    reported_at: 2026-08-25
+    value: 13.4
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: frontier_challenge
+    instrument: frontier_challenge_97_tasks_2026_08_25
+    protocol: "97 released tasks; one trajectory per system-task pair; pass = native Score >= 99.9; agent scaffold: Claude Code"
+    model: DeepSeek V4 Flash-0731
+    organization: DeepSeek
+    source_id: frontier_challenge_leaderboard_2026_08_25
+    reported_at: 2026-08-25
+    value: 12.4
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: frontier_challenge
+    instrument: frontier_challenge_97_tasks_2026_08_25
+    protocol: "97 released tasks; one trajectory per system-task pair; pass = native Score >= 99.9; agent scaffold: Frontier Agent (Agent Team)"
+    model: Apodex 1.1
+    organization: ApodexAI
+    source_id: frontier_challenge_leaderboard_2026_08_25
+    reported_at: 2026-08-25
+    value: 12.4
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: frontier_challenge
+    instrument: frontier_challenge_97_tasks_2026_08_25
+    protocol: "97 released tasks; one trajectory per system-task pair; pass = native Score >= 99.9; agent scaffold: Claude Code"
+    model: Gemini 3.7 Flash
+    organization: Google
+    source_id: frontier_challenge_leaderboard_2026_08_25
+    reported_at: 2026-08-25
+    value: 10.3
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: frontier_challenge
+    instrument: frontier_challenge_97_tasks_2026_08_25
+    protocol: "97 released tasks; one trajectory per system-task pair; pass = native Score >= 99.9; agent scaffold: Claude Code"
+    model: Apodex 1.1
+    organization: ApodexAI
+    source_id: frontier_challenge_leaderboard_2026_08_25
+    reported_at: 2026-08-25
+    value: 10.3
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: frontier_challenge
+    instrument: frontier_challenge_97_tasks_2026_08_25
+    protocol: "97 released tasks; one trajectory per system-task pair; pass = native Score >= 99.9; agent scaffold: Claude Code"
+    model: Qwen3.5-397B-A17B
+    organization: Qwen
+    source_id: frontier_challenge_leaderboard_2026_08_25
+    reported_at: 2026-08-25
+    value: 4.1
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: frontier_challenge
+    instrument: frontier_challenge_97_tasks_2026_08_25
+    protocol: "97 released tasks; one trajectory per system-task pair; pass = native Score >= 99.9; agent scaffold: Claude Code"
+    model: GLM-5.2
+    organization: Z.ai
+    source_id: frontier_challenge_leaderboard_2026_08_25
+    reported_at: 2026-08-25
+    value: 3.1
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
   # ---------------------------------------------------------------------------
   # Gemini 1.5 technical report (arXiv 2403.05530), Table 11.
   # Read from pdftotext output. Column order in the source is

@@ -4105,9 +4105,7 @@ function frontierAdvances(entry) {
 }
 
 function frontierDefaultEntry(board) {
-  const scored = (board.entries || []).filter(
-    (entry) => entry.card_count > 0 && scoreRecord(entry.benchmark_id),
-  );
+  const scored = (board.entries || []).filter((entry) => scoreRecord(entry.benchmark_id));
   const datedCount = (entry) => scoreRecord(entry.benchmark_id)?.dated_observation_count || 0;
   // The page opens on the benchmark it ranks first, so the figure answers the
   // question the ranking above it just raised. It used to open on the NEWEST
@@ -6596,17 +6594,28 @@ function scoreTrackChart(entry, board) {
       ),
     );
 
+    const collisionCounts = new Map();
     for (const observation of record.observations) {
       const source = (board.model_cards || []).find(
         (card) => card.model_card_id === observation.source_id,
       );
-      const sourceLabel = source
+      const sourceLabel = observation.source_title
+        ? `${observation.source_title} (${String(
+            observation.source_document_type || t("benchmark source"),
+          ).replaceAll("_", " ")})`
+        : source
         ? `${source.organization} · ${source.model} (${String(
             source.document_type || t("model card"),
           ).replaceAll("_", " ")})`
         : observation.source_id.replaceAll("_", " ");
       const pointX = x(observation.reported_at);
-      const pointY = scoreY(observation.value);
+      const collisionKey = `${observation.reported_at}|${observation.value}`;
+      const collisionIndex = collisionCounts.get(collisionKey) || 0;
+      collisionCounts.set(collisionKey, collisionIndex + 1);
+      const collisionOffset = collisionIndex
+        ? (collisionIndex % 2 ? 1 : -1) * Math.ceil(collisionIndex / 2) * 8
+        : 0;
+      const pointY = scoreY(observation.value) + collisionOffset;
       // "其他的点可以淡化" (issue #312): readings that are not part of the
       // historical-best line recede behind it -- but only while there IS a
       // normalized frontier. A chart lacking that payload keeps every point at
@@ -6679,7 +6688,7 @@ function scoreTrackChart(entry, board) {
             ? [{ label: t("Cited by"), value: observation.reported_by }]
             : []),
         ],
-        url: source?.url,
+        url: observation.source_url || source?.url,
       });
       svg.append(group);
     }
@@ -6821,13 +6830,11 @@ function clearAdoptionFrontier(message) {
 }
 
 function renderAdoptionFrontier(board) {
-  const adopted = (board.entries || []).filter((entry) => entry.card_count > 0);
   // The panel is the saturation curve now, so a benchmark enters the picker
-  // only when a score could be read verbatim from a cited document. 20 of the
-  // 79 adopted benchmarks carry card mentions without a single readable score;
-  // with the adoption staircase retired they would render an empty panel, so
-  // they are absent here and a permalink to one falls back to the default.
-  const scored = adopted.filter((entry) => scoreRecord(entry.benchmark_id));
+  // only when a score could be read verbatim from a cited document. This set is
+  // independent of adoption count: a benchmark-publisher leaderboard can have
+  // zero model-card adopters and still expose a valid score track.
+  const scored = (board.entries || []).filter((entry) => scoreRecord(entry.benchmark_id));
   const defaultEntry = frontierDefaultEntry(board);
   if (!scored.length || !defaultEntry) {
     clearAdoptionFrontier(t("No benchmark in this registry has a score read from a document yet."));

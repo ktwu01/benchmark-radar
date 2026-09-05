@@ -711,6 +711,18 @@ benchmarks:
       Published by Zapier over its own automation surface, and cards report
       different task subsets of it.
 
+  - id: frontier_challenge
+    name: FrontierChallenge
+    aliases: ["FrontierChallenge", "Frontier Challenge"]
+    domain: scientific_agent
+    url: https://apodexai.github.io/FrontierAgent/benchmarks/FrontierChallenge/
+    released: 2026-08-25
+    caveat: >-
+      Pass-rate results are model-scaffold measurements over the 97 released
+      tasks with one trajectory per system-task pair, so a reported percentage
+      is not a model-only number and does not estimate reliability beyond this
+      release or under a different scaffold.
+
   - id: bankertoolbench
     name: BankerToolBench
     aliases: ["BankerToolBench", "Banker Tool Bench", "BTB"]
@@ -1208,6 +1220,14 @@ benchmarks:
 # canonical ids that document reports a result for. It is a set, not a ranking:
 # a card that reports AIME once and a card that reports it in four
 # configurations both contribute exactly one adoption.
+source_documents:
+  - id: frontier_challenge_leaderboard_2026_08_25
+    name: FrontierChallenge leaderboard
+    document_type: benchmark_leaderboard
+    url: https://apodexai.github.io/FrontierAgent/benchmarks/FrontierChallenge/
+    benchmarks: [frontier_challenge]
+    retrieved_at: 2026-09-02
+
 model_cards:
   - id: openai_gpt_5_system_card
     organization: OpenAI

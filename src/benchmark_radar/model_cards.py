@@ -49,6 +49,7 @@ DEFAULT_REGISTRY_PATH = Path("data/model_cards.yml")
 # spot-checked on the shipped one.
 _REQUIRED_BENCHMARK_FIELDS = ("id", "name", "domain", "caveat")
 _REQUIRED_CARD_FIELDS = ("id", "organization", "model", "url", "benchmarks")
+_REQUIRED_SOURCE_DOCUMENT_FIELDS = ("id", "name", "url", "document_type", "benchmarks")
 
 
 def _benchmark_summary(benchmark: dict[str, Any]) -> dict[str, Any]:
@@ -159,10 +160,13 @@ def load_registry(path: Path = DEFAULT_REGISTRY_PATH) -> dict[str, Any]:
 
     benchmarks = document.get("benchmarks")
     cards = document.get("model_cards")
+    source_documents = document.get("source_documents", [])
     if not isinstance(benchmarks, list) or not benchmarks:
         raise ModelCardRegistryError(f"{path}: benchmarks must be a non-empty array")
     if not isinstance(cards, list) or not cards:
         raise ModelCardRegistryError(f"{path}: model_cards must be a non-empty array")
+    if not isinstance(source_documents, list):
+        raise ModelCardRegistryError(f"{path}: source_documents must be an array")
 
     by_id: dict[str, dict[str, Any]] = {}
     for index, benchmark in enumerate(benchmarks):
@@ -273,7 +277,40 @@ def load_registry(path: Path = DEFAULT_REGISTRY_PATH) -> dict[str, Any]:
                     f"revised after publication, record the revision date as `revised`"
                 )
 
-    return {"benchmarks": benchmarks, "model_cards": cards}
+    seen_documents: set[str] = set(seen_cards)
+    for index, source in enumerate(source_documents):
+        label = f"{path}: source document {index}"
+        _require(source, _REQUIRED_SOURCE_DOCUMENT_FIELDS, label=label)
+        source_id = str(source["id"])
+        if source_id in seen_documents:
+            raise ModelCardRegistryError(f"{path}: duplicate source document id {source_id!r}")
+        seen_documents.add(source_id)
+        if not str(source["url"]).startswith(("https://", "http://")):
+            raise ModelCardRegistryError(f"{label} url must be HTTP(S)")
+        if not isinstance(source["benchmarks"], list):
+            raise ModelCardRegistryError(f"{label} benchmarks must be a list")
+        unknown = sorted({str(ref) for ref in source["benchmarks"]} - by_id.keys())
+        if unknown:
+            raise ModelCardRegistryError(
+                f"{label} references unknown benchmarks: {', '.join(unknown)}"
+            )
+        if str(source["document_type"]) != "benchmark_leaderboard":
+            raise ModelCardRegistryError(
+                f"{label} must use non-adoption document_type 'benchmark_leaderboard'"
+            )
+        key = urlsplit(str(source["url"]))._replace(fragment="").geturl()
+        if key in seen_urls:
+            raise ModelCardRegistryError(f"{label} repeats a registered document URL")
+        seen_urls[key] = source_id
+        for field in ("published", "retrieved_at"):
+            if source.get(field):
+                _require_date(source[field], label=f"{label} {field}")
+
+    return {
+        "benchmarks": benchmarks,
+        "model_cards": cards,
+        "source_documents": source_documents,
+    }
 
 
 def adoption_rank(registry: dict[str, Any]) -> dict[str, Any]:

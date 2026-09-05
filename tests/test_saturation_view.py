@@ -98,6 +98,20 @@ def test_a_third_party_citation_is_named_on_the_point():
     assert "citation-ring" not in styles
 
 
+def test_a_score_from_a_benchmark_leaderboard_links_to_that_source():
+    # External benchmark leaderboards are score evidence, not model cards. The
+    # point must use source metadata carried by the observation instead of
+    # degrading to a linkless source id when no model-card record exists.
+    script = source("site/assets/app.js")
+    chart = script.split("function scoreTrackChart(", 1)[1].split(
+        "\nfunction clearAdoptionFrontier", 1
+    )[0]
+
+    assert "observation.source_title" in chart
+    assert "observation.source_document_type" in chart
+    assert "url: observation.source_url || source?.url" in chart
+
+
 def test_score_points_carry_recognizable_model_family_marks():
     """Issue #195: saturation points identify models before interaction."""
     script = source("site/assets/app.js")
@@ -189,7 +203,10 @@ def test_only_a_benchmark_with_a_readable_score_can_be_selected():
     script = source("site/assets/app.js")
     render = script.split("function renderAdoptionFrontier(board)", 1)[1].split("\nfunction ", 1)[0]
 
-    assert "const scored = adopted.filter((entry) => scoreRecord(entry.benchmark_id));" in render
+    assert (
+        "const scored = (board.entries || []).filter((entry) => scoreRecord(entry.benchmark_id));"
+        in render
+    )
     # The <select>, the resolution of a ?lfrontier= permalink, and the empty
     # state all read from `scored`, so none of them can surface an unscored one.
     assert "renderFrontierPicker(scored, state.lfrontier);" in render

@@ -69,7 +69,7 @@ def test_the_frontier_opens_on_the_benchmark_the_page_ranks_first():
     assert "datedCount(entry) >= 2" in default_entry
     # And every candidate has a score record, so the default can never be a
     # benchmark the panel cannot draw.
-    assert "entry.card_count > 0 && scoreRecord(entry.benchmark_id)" in default_entry
+    assert "scoreRecord(entry.benchmark_id)" in default_entry
 
 
 def test_a_thin_history_no_longer_falls_back_to_an_adoption_stepper():
