@@ -72,3 +72,11 @@ def test_next_draft_embeds_use_case_screenshots() -> None:
     for name in names:
         assert f"assets/use-case-492/{name}" in source
         assert (ROOT / "assets" / "use-case-492" / name).is_file()
+
+
+def test_frozen_output_is_never_a_write_target() -> None:
+    source = BUILDER.read_text(encoding="utf-8")
+    assert "if output.resolve() == FROZEN_OUTPUT.resolve()" in source
+    assert "cannot overwrite the frozen v0.9.0 PDF" in source
+    assert "--overwrite-frozen" in source
+    assert '"[#457](https://github.com/ktwu01/benchmark-radar/issues/457)"' not in source
