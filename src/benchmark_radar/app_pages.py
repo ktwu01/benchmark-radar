@@ -46,6 +46,7 @@ from .site_shell import breadcrumb_schema, esc, json_ld, webpage_schema
 # Published in this order. "map" is the view key; its path is /explore/.
 APP_VIEWS: tuple[str, ...] = ("leaderboard", "trends", "map")
 UTILITY_PAGES: tuple[str, ...] = ("cli", "cite", "rubric")
+UNLISTED_ROUTES = frozenset({"map", "rubric"})
 
 HEAD_SEO_OPEN = "<!-- br:head-seo -->"
 HEAD_SEO_CLOSE = "<!-- /br:head-seo -->"
@@ -230,7 +231,7 @@ def _with_active_attributes(opening_tag: str) -> str:
 def _activate_navigation(document: str, page: str, *, utility: bool = False) -> str:
     """Ship an honest active navigation state before app.js runs."""
     if utility:
-        element_id = {"cli": "cli-nav", "rubric": "rubric-nav", "cite": "cite-open"}[page]
+        element_id = {"cli": "cli-nav", "cite": "cite-open"}[page]
         selector = re.compile(rf'<(?:a|button)\b(?=[^>]*\bid="{element_id}")[^>]*>')
     else:
         selector = re.compile(rf'<(?:a|button)\b(?=[^>]*\bdata-view="{page}")[^>]*>')
@@ -287,7 +288,8 @@ def render_app_page(
     )
     document = _open_on(document, view)
     document = _deactivate_home_navigation(document)
-    document = _activate_navigation(document, view)
+    if view not in UNLISTED_ROUTES:
+        document = _activate_navigation(document, view)
     for anchor, replacement in seeds.items():
         document = _replace_once(document, anchor, replacement, what=f"{view} seed container")
     return document
@@ -308,7 +310,8 @@ def render_utility_page(
         what="page JSON-LD marker",
     )
     document = _deactivate_home_navigation(document)
-    document = _activate_navigation(document, page, utility=True)
+    if page not in UNLISTED_ROUTES:
+        document = _activate_navigation(document, page, utility=True)
     document = _open_dialog(document, page)
     for anchor, replacement in seeds.items():
         document = _replace_once(document, anchor, replacement, what=f"{page} seed container")

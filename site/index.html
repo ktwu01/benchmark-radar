@@ -192,6 +192,7 @@
          and the BibTeX entry in both READMEs). -->
     <meta name="citation_title" content="Benchmark Radar">
     <meta name="citation_author" content="Wu, Koutian">
+    <meta name="citation_author" content="Zhou, Junjie">
     <meta name="citation_publication_date" content="2026">
     <meta name="citation_dataset_url" content="https://benchmark-radar.org/data/radar.json">
     <link rel="cite-as" href="https://github.com/ktwu01/benchmark-radar">
@@ -268,70 +269,24 @@
           </svg>
           <span class="repo-badge-label" data-i18n="Contact">Contact</span>
         </button>
-        <!--
-          Each badge is a call to action, not a link to a roster. The live counts
-          come from GitHub's public repository API; starring still opens the repo
-          itself, where the visitor can click GitHub's Star control.
-        -->
-        <div class="repo-badges" id="repo-badges" aria-label="Support this repository">
-          <a
-            class="repo-badge"
-            id="badge-stars"
-            href="https://github.com/ktwu01/benchmark-radar"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Open the repository and star it"
-            data-i18n-title="Open the repository and star it"
-          >
-            <svg class="brand-icon github-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M12 2.5a9.5 9.5 0 0 0-3 18.52c.48.09.65-.21.65-.46v-1.67c-2.67.58-3.23-1.13-3.23-1.13-.44-1.12-1.07-1.42-1.07-1.42-.87-.6.07-.59.07-.59.96.07 1.47.99 1.47.99.86 1.47 2.25 1.05 2.8.8.09-.62.34-1.05.61-1.29-2.13-.24-4.37-1.07-4.37-4.75 0-1.05.38-1.91.99-2.58-.1-.24-.43-1.22.09-2.54 0 0 .81-.26 2.63.98A9.16 9.16 0 0 1 12 7.96c.82 0 1.65.11 2.42.33 1.82-1.24 2.63-.98 2.63-.98.52 1.32.19 2.3.09 2.54.61.67.99 1.53.99 2.58 0 3.69-2.25 4.5-4.39 4.74.35.3.65.88.65 1.78v2.63c0 .25.17.55.66.46A9.5 9.5 0 0 0 12 2.5Z"
-              ></path>
-            </svg>
-            <span class="repo-badge-label" data-i18n="Star">Star</span>
-            <span class="repo-badge-count" data-count>—</span>
-          </a>
-          <a
-            class="repo-badge"
-            id="badge-forks"
-            href="https://github.com/ktwu01/benchmark-radar/fork"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Fork this repository"
-            data-i18n-title="Fork this repository"
-          >
-            <svg class="outline-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="12" cy="18" r="3"></circle>
-              <circle cx="6" cy="6" r="3"></circle>
-              <circle cx="18" cy="6" r="3"></circle>
-              <path d="M18 9v2c0 .6-.5 1.2-1.2 1.7l-3.6 2.4"></path>
-              <path d="M6 9v2c0 .6.5 1.2 1.2 1.7l3.6 2.4"></path>
-            </svg>
-            <span class="repo-badge-label" data-i18n="Fork">Fork</span>
-            <span class="repo-badge-count" data-count>—</span>
-          </a>
-          <a
-            class="repo-badge"
-            id="badge-issues"
-            href="https://github.com/ktwu01/benchmark-radar/issues/new"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Open a new issue"
-            data-i18n-title="Open a new issue"
-          >
-            <svg class="outline-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="12" cy="12" r="9"></circle>
-              <circle
-                cx="12"
-                cy="12"
-                r="3"
-                style="fill: currentColor; stroke: none"
-              ></circle>
-            </svg>
-            <span class="repo-badge-label" data-i18n="Issues">Issues</span>
-            <span class="repo-badge-count" data-count>—</span>
-          </a>
-        </div>
+        <!-- GitHub has one job here: open the repository and show its star count. -->
+        <a
+          class="repo-badge"
+          id="badge-stars"
+          href="https://github.com/ktwu01/benchmark-radar"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Open the repository and star it"
+          data-i18n-title="Open the repository and star it"
+        >
+          <svg class="brand-icon github-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 2.5a9.5 9.5 0 0 0-3 18.52c.48.09.65-.21.65-.46v-1.67c-2.67.58-3.23-1.13-3.23-1.13-.44-1.12-1.07-1.42-1.07-1.42-.87-.6.07-.59.07-.59.96.07 1.47.99 1.47.99.86 1.47 2.25 1.05 2.8.8.09-.62.34-1.05.61-1.29-2.13-.24-4.37-1.07-4.37-4.75 0-1.05.38-1.91.99-2.58-.1-.24-.43-1.22.09-2.54 0 0 .81-.26 2.63.98A9.16 9.16 0 0 1 12 7.96c.82 0 1.65.11 2.42.33 1.82-1.24 2.63-.98 2.63-.98.52 1.32.19 2.3.09 2.54.61.67.99 1.53.99 2.58 0 3.69-2.25 4.5-4.39 4.74.35.3.65.88.65 1.78v2.63c0 .25.17.55.66.46A9.5 9.5 0 0 0 12 2.5Z"
+            ></path>
+          </svg>
+          <span class="repo-badge-label" data-i18n="Star">Star</span>
+          <span class="repo-badge-count" data-count>—</span>
+        </a>
       </div>
     </header>
 
@@ -339,32 +294,6 @@
 
     <nav class="view-nav" aria-label="Dashboard views" data-i18n-aria="Dashboard views">
       <button type="button" class="nav-active" data-view="today" aria-controls="today-view" aria-current="page" data-i18n="Today">Today</button>
-      <!-- Real links, not tab buttons. Each one is this same dashboard served
-         at its own path with that view already open and its rows already in the
-         HTML, so a crawler and a reader with a slow connection both get content
-         from the first response. app.js intercepts the click and keeps the
-         navigation client-side for anyone whose script has loaded. -->
-      <a href="/leaderboard/" data-view="leaderboard" aria-controls="leaderboard-view" data-i18n="Leaderboard">
-        Leaderboard
-      </a>
-      <a href="/trends/" data-view="trends" aria-controls="trends-view" data-i18n="Trends">Trends</a>
-      <a href="/explore/" data-view="map" aria-controls="map-view" data-i18n="Explore">Explore</a>
-      <!-- The blog is a set of documents, not a dashboard view, so this link
-           carries no data-view: app.js only intercepts clicks on elements that
-           have one, and a brief has to arrive as a full page load. -->
-      <a href="/blog/" data-i18n="Blog">Blog</a>
-      <!-- These remain the same pop-up panels readers already use, but their
-           hrefs give each one a server-rendered, indexable entry point. -->
-      <a
-        href="/rubric/"
-        id="rubric-nav"
-        aria-haspopup="dialog"
-        aria-controls="rubric-dialog"
-        aria-expanded="false"
-        data-i18n="Rubric"
-      >
-        Rubric
-      </a>
       <a
         href="/cli/"
         id="cli-nav"
@@ -375,6 +304,19 @@
       >
         CLI
       </a>
+      <!-- Real links, not tab buttons. Each one is this same dashboard served
+         at its own path with that view already open and its rows already in the
+         HTML, so a crawler and a reader with a slow connection both get content
+         from the first response. app.js intercepts the click and keeps the
+         navigation client-side for anyone whose script has loaded. -->
+      <a href="/leaderboard/" data-view="leaderboard" aria-controls="leaderboard-view" data-i18n="Leaderboard">
+        Leaderboard
+      </a>
+      <a href="/trends/" data-view="trends" aria-controls="trends-view" data-i18n="Trends">Trends</a>
+      <!-- The blog is a set of documents, not a dashboard view, so this link
+           carries no data-view: app.js only intercepts clicks on elements that
+           have one, and a brief has to arrive as a full page load. -->
+      <a href="/blog/" data-i18n="Blog">Blog</a>
     </nav>
 
     <main id="main-content" tabindex="-1">

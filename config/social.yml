@@ -3,6 +3,8 @@
 # out/social.md, fetched from the evidence artifact. Tick a channel once that
 # day's post is sent there; re-running the social command with --existing-body
 # pointing at a previous render re-applies those ticks.
+# The daily-radar workflow labels those posting issues `automated` and
+# `traction`; it does not use the broader `daily-radar` label.
 #
 # Edit this list freely. Changes apply to future days only: the checked state
 # of past days stays in the issues themselves.
@@ -11,44 +13,331 @@
 #
 # - "daily: true": the channel is a daily posting target and appears in every
 #   day's checklist.
-# - "daily: false": the channel is weekly (issue #206). It is triggered on the
-#   day it enters rotation and then every seven days after that, so direct
-#   messages to individuals, professional self-promotion, and low-volume
-#   subreddits are left alone between trigger days instead of getting a daily
-#   ping that would read as spam.
-# - "monthly: true": the channel is monthly. It appears on the anchor's
-#   day-of-month (the 1st), once per calendar month, for contacts and targets
-#   too low-volume to ping even on the weekly cycle.
+# - "daily: false": the channel appears under the weekly/occasional heading.
+# - "monthly: true": the channel appears under the monthly heading.
 #
-# "post_sample" is the ready-to-copy 发布文案 rendered under each day's issue.
-# It is static text, not re-derived per day: refresh it when the L0-L5 picture
-# it describes moves (issue #150 holds the source analysis).
+# Every heading appears in every issue so the complete checklist is always
+# available. The headings are cadence guidance, not instructions to post to
+# every destination each day.
+#
+# "post_sample" is a bank of ready-to-copy 发布文案 rendered in each day's issue.
+# Examples with counts are marked for a same-day refresh; never post a historical
+# count as though it describes the current corpus.
 social:
   post_sample: |-
-    
-    - [ ] 一个反常识的发现：Agent benchmarks 看起来已经在评测智能体前沿，实际上大多还在测“能不能按要求把事情做完”。
-    按Hejia Geng的 L0–L5 分级，当前主体仍是 L2 执行和 L3 复现；L4 再发现刚开始出现，而要求 Agent 产出 benchmark 创建时未知知识或方法的 L5，本周仍未发现新案例。
-    源码和分析详见：https://github.com/ktwu01/benchmark-radar/issues/150
-
-    - [ ] 开源给大家随意使用哈哈哈：一键导出全网 5,201 条 benchmark/eval/dataset 数据: 我从 GitHub、Hugging Face等 11 个来源，持续抓了25天，持续更新 https://github.com/ktwu01/benchmark-radar 家人们如果需要寻找 related work 或找到适合eval自己的agent 的 bench 或者关注最新的 eval 进展，可以看这里 哈哈哈 也新增了 rss 订阅方式，用rss来看每天的benchmark日报
-
-    - [ ] Open-sourced for everyone to use freely haha: one-click export of 5,201 benchmark/eval/dataset entries from across the web.
-
-    I’ve been continuously collecting data for 25 days from 11 sources, including GitHub and Hugging Face, and it’s still updating: [https://github.com/ktwu01/benchmark-radar](https://github.com/ktwu01/benchmark-radar)
-
-    If you’re looking for related work, trying to find a benchmark to evaluate your own agent, or just want to keep up with the latest progress in evals, you can check it out here haha.
-
-    I also added RSS subscriptions, so you can follow the daily benchmark report through RSS.
+    发前提醒：涉及条目数、来源数、star、日期或榜单名次时，先用当天数据替换`<最新数据>`。标题优先说“免费使用”“一键导出”“开源”，少写“我做了什么”。
+    要多放软广。。少放硬的。
 
 
-    prompt: 标题尽量说“免费可以使用的”，或者“free to use”这样一种利他性的、一键导出的，强调一键导出，“free to use”、“open source”。 不要强调我做的。
+    - [ ] 在别人的微信群，需要cue 他们本地的bench。
+
+    - [ ] 发微信，群发给朋友们。一人一个唾沫星子都有10k+ stars
+
+    - [ ] 软广
+      有没有家人们做个“说人话” bench?
+      最近Claudish逼疯了 哈哈
+      衡量LLM说人话程度: or 看看全网9000个 benchmark/eval/dataset消息
+      仓库在 github.com/ktwu01/benchmark-radar，有空可以看看
+
+    - [ ] Benchmark Radar：为 Agent 提供第一手消息
+      在做 agent benchmark，找 related works 的时候，我发现信息太多很难找全，做出来之后容易跟别人重合了。所以手搓了一个小工具，每天从37个来源收集数据，获得 benchmark 的第一手消息，目前已经9000条records。可以看网站的每天日报，也可以安装 CLI，让 agent 查找。仓库在 github.com/ktwu01/benchmark-radar 已经 140+ stars 
+
+    - [ ] B站：每天整理 Agent benchmark
+
+      Agent benchmark 每天都能出好几篇。最近看得比较多，我就做了
+      Daily Agent Benchmarks：每天整理 GitHub arXiv 等等37个来源的新发布的 Agent 评测，
+      已经有 9000+ 条数据，150+ stars 了，欢迎大家去看看，最近大家都在关注什么～
+
+    - [ ] Agent benchmark 还在测“能不能把事做完”
+
+      一个反常识的发现：Agent benchmarks 看起来已经在评测智能体前沿，
+      实际上大多还在测“能不能按要求把事情做完”。
+
+      按 Hejia Geng 的 L0–L5 分级，当前主体仍是 L2 执行和 L3 复现；
+      L4 再发现刚开始出现。L5 要求 Agent 产出 benchmark 创建时未知的知识
+      或方法，本周仍未发现新案例。
+
+      源码和分析：https://github.com/ktwu01/benchmark-radar/issues/150
+
+    - [ ] 免费一键导出全网 benchmark 数据
+
+      免费开放，一键导出 `<最新条目数>` 条 benchmark、eval 和 dataset 数据。
+      Benchmark Radar 每天从 `<最新来源数>` 个来源更新。如果你在找 related work、
+      给自己的 Agent 选 eval，或者想跟进最新评测，可以直接搜，也可以订阅 RSS。
+
+      项目：https://github.com/ktwu01/benchmark-radar
+
+    - [ ] Free, open-source benchmark export
+
+      Free to use and open source: export `<latest record count>` benchmark,
+      evaluation, and dataset records in one step. Benchmark Radar updates daily
+      from `<latest source count>` public sources and includes search, RSS, and an
+      offline CLI.
+
+      Use it to find related work, shortlist an eval for your agent, or follow new
+      evaluation releases: https://github.com/ktwu01/benchmark-radar
+
+    - [ ] 做 benchmark 前先查 related work
+
+      做 Agent benchmark、找 related work 时，信息散在论文、仓库和榜单里，
+      很容易漏掉，做完才发现和别人撞了。Benchmark Radar 每天收集一手来源，
+      网页和 CLI 都能搜。先查相近工作，再决定自己的 benchmark 该补哪块空白。
+
+      CLI 和数据：https://github.com/ktwu01/benchmark-radar
+
+    - [ ] Frontier labs 到底在报哪些 benchmarks
+
+      I checked 30 frontier model and system cards from 10 organizations and found
+      79 distinct benchmarks. GPQA Diamond appeared in 23 of 30 documents,
+      SWE-bench Verified in 18, and LiveCodeBench in 15.
+
+      The count is document-level, not score-row-level. I excluded cross-vendor
+      score comparisons because prompting, scaffolding, pass@k, tools, and
+      evaluator settings often differ. The dataset and method are open for review:
+      https://github.com/ktwu01/benchmark-radar
+
+      Historical launch example from August 2026; re-check every number before reuse.
+
+    - [ ] Agent 做了有害操作，不等于它在隐藏操作
+
+      最近有前沿 AI 实验室公开 Agent 自主越界的证据，相关工作很快被做成了
+      benchmark。评测同时记录系统真正看到的 action，以及模型自述的 action，
+      再比较两份日志。
+
+      结果里有模型没有输出 action log，有模型卡在 reasoning loop，也有模型执行了
+      harmful action，但如实记录了行为。“是否有害”和“是否隐藏”是两个不同的
+      安全问题。
+
+      今日来源和原始证据：<当天 Benchmark Radar 深链接>
+
+    - [ ] 只分享一个具体榜单，例如 AIME
+
+      想看 AIME 在不同模型报告里的采用情况和可比成绩，不用先看项目介绍，
+      直接打开这个榜单：
+      https://benchmark-radar.org/leaderboard/?lfrontier=llm-stats-aime-2025
+
+    - [ ] 小红书：新 benchmark 的热度该怎么看
+
+      Benchmark Radar 的热度主要看三类公开数据：Hugging Face Paper 点赞、
+      GitHub Stars 和 Hugging Face 数据集下载量。
+
+      刚发布时，stars 和下载量通常还没积累起来，所以短期更看 HF Paper 点赞。
+      时间拉长到 30 天或 90 天后，stars 和下载量更能说明社区是否持续关注、
+      是否真的在使用。页面也会说明缺失数据和不同时间窗口的处理方法。
+
+      #HOWTO #benchmark
+
+    - [ ] KOL 软推广：先问一个真问题
+
+      有没有人做过“说人话” benchmark？最近有些模型的表达越来越像模板，
+      我很想看一个专门衡量自然表达的评测。
+
+      如果你也在设计新 benchmark，或者正在找 related work，可以用
+      Benchmark Radar 搜公开论文、仓库、数据集和榜单：
+      https://github.com/ktwu01/benchmark-radar
+
+    - [ ] Cold email：你的 benchmark 进入了今日 Top 10
+
+      Subject: Your new benchmark is in today's Benchmark Radar Top 10
+
+      Hey! We found `<benchmark name>` in today's Benchmark Radar Top 10.
+      Interested in using our CLI to find related works from 9000+ sources?
+
+      CLI: https://benchmark-radar.org/cli
+      Code and data: https://github.com/ktwu01/benchmark-radar
+
+    - [ ] 可视化：网上在热议什么，最后沉淀成了什么
+
+      上半张图看每年研究社区在讨论什么，下半张图看哪些 benchmark 最后进入了
+      前沿模型报告。两组数据要分开：研究热度来自 discovery corpus，采用情况来自
+      model-card reporting。这样才能看出一个话题从讨论走向评测基础设施的过程。
+
+    - [ ] 我们给全网 9000+ AI benchmarks做了个CLI
+
+      中文版
+
+      做了个 Benchmark Radar。
+
+      它每天收集新发布和新更新的 benchmark、评测、数据集与数据质量工作，
+      帮你快速判断今天最值得先看什么。Today 页会优先展示真正的新发布，
+      再看新鲜度和优先级分数。
+
+      当前的优先级分数由四部分组成：相关性占 35%，社区采用信号占 25%，
+      证据强度占 20%，新鲜度占 20%。相关性看标题和来源描述是否确实在讲
+      benchmark 或评测；证据强度看有没有论文、代码、数据、作者和交叉链接；
+      新鲜度则结合发布时间，以及这是首次发布还是普通更新。
+
+      社区采用信号包括 GitHub Stars、论文引用、下载量和点赞数，但不会直接把这些数字相加。
+      系统会按不同指标分别做对数归一化，再采用其中最强的一项。下载和点赞容易受到
+      自动流量影响，因此分数设有上限，不能仅靠很高的下载量压过获得大量 Stars 或引用的项目。
+
+      这个分数只用于信息筛选，回答“接下来值得点开哪个”，不代表 benchmark 的科学质量。
+      Hacker News 等注意力信号会单独展示，不参与证据排名。LLM 只负责根据当天已采集、
+      可引用的证据生成每日简报，不参与打分，也不会预测一个项目未来能有多火。
+
+      English
+
+      I built Benchmark Radar.
+
+      It tracks newly released and updated benchmarks, evaluations, datasets,
+      and data-quality work, helping you decide what is worth opening first.
+      The Today page prioritizes new releases, followed by recency and priority
+      score.
+
+      The priority score has four components: relevance (35%), adoption signals
+      (25%), evidence strength (20%), and recency (20%). Relevance checks whether
+      the title and source description are genuinely about benchmarks or
+      evaluations. Evidence strength considers papers, code, data, authors, and
+      cross-links. Recency accounts for both timing and event type, distinguishing
+      new releases from routine updates.
+
+      Adoption signals include GitHub stars, citations, downloads, and likes.
+      These raw counts are not added together. Each metric is normalized on its
+      own logarithmic scale, and the strongest available signal is used. Downloads
+      and likes are capped because they can accumulate through automated activity;
+      high download counts alone should not outrank projects with substantial stars
+      or citations.
+
+      This score is for triage—answering “What should I open next?”—not judging
+      scientific quality. Attention signals such as Hacker News activity are
+      displayed separately and do not affect the evidence ranking. The LLM only
+      produces a daily briefing from cited, collected evidence. It does not score
+      records or predict future popularity.
 
   channels:
+    # Special method requested for every issue. It stays above the ranked list.
+    - name: "众筹-social：请 benchmark 群友转发到自己的社群"
+      daily: true
+
+    # Ranked by completed checks in the historical issues. Counts are comments,
+    # not part of the rendered label, so the checklist stays short.
+    # 20 completed posts.
     - name: "X / Twitter"
       daily: true
-    - name: "LinkedIn"
-      monthly: true
+    # 10 completed posts.
+    - name: "Benchmark Radar 讨论群"
+      daily: true
+    # 8 completed posts.
+    - name: "GitHub Blog https://ktwu01.github.io/"
+      daily: true
+    # 6 completed posts.
+    - name: "WeChat Moment"
+      daily: true
+    # 3 completed posts.
+    - name: "Science Intelligence 实名讨论群"
+      daily: true
+    # 2 completed posts.
+    - name: "Hacker News https://news.ycombinator.com/submit"
+      daily: true
+    - name: "灵台AI"
+      daily: true
+    # 1 completed post each.
+    - name: "小红书"
+      daily: true
+    - name: "知乎"
+      daily: true
+    - name: "即刻"
+      daily: true
+    - name: "Agent Infra交流群 （Substrate）"
+      daily: true
+    - name: "HLE V2 | Core"
+      daily: true
+    - name: "Cold email：arXiv / OpenReview benchmark 作者"
+      daily: true
+    - name: "新微信群或 Discord 群"
+      daily: true
+    - name: "KOL：逛逛 GitHub 等相关账号"
+      daily: true
+
+    # Requested priority: Bilibili has an active AI audience.
+    - name: "Bilibili / B站"
+      daily: true
+
+    # Other public publishing platforms. These appear in every issue.
+    - name: "微信公众号"
+      daily: true
+    - name: "V2EX"
+      daily: true
+    - name: "YouTube"
+      daily: true
+    - name: "抖音 / Douyin"
+      daily: true
+    - name: "TikTok"
+      daily: true
+    - name: "Instagram"
+      daily: true
+    - name: "Threads"
+      daily: true
+    - name: "Facebook"
+      daily: true
+    - name: "Bluesky"
+      daily: true
+    - name: "Mastodon"
+      daily: true
+    - name: "Telegram"
+      daily: true
+    - name: "Medium"
+      daily: true
+    - name: "DEV Community"
+      daily: true
+    - name: "Hashnode"
+      daily: true
+    - name: "Substack Notes"
+      daily: true
+    - name: "Indie Hackers"
+      daily: true
+    - name: "Product Hunt"
+      daily: true
+    - name: "DevHunt"
+      daily: true
+    - name: "AgentHunter"
+      daily: true
+    - name: "BetaList"
+      daily: true
+    - name: "Peerlist"
+      daily: true
+    - name: "AppSumo"
+      daily: true
+    - name: "Lobsters"
+      daily: true
+    - name: "GitHub Discussions"
+      daily: true
+    - name: "GitHub Awesome lists / resource-list PRs"
+      daily: true
+    - name: "Papers with Code discussions"
+      daily: true
+
+    # Additional US-facing platforms. Keep them visible without making them
+    # daily posting targets.
+    - name: "WhatsApp Communities"
+      daily: false
+    - name: "Pinterest"
+      daily: false
+    - name: "Snapchat"
+      daily: false
+    - name: "Quora"
+      daily: false
+
+    # Communities are ranked by historical checks, then by the existing backlog.
+    - name: "COLM 2026 开会群"
+      daily: false
+    - name: "ACL 2026线下开会社交群"
+      daily: false
+    - name: "Math AI"
+      daily: false
+    - name: "博杰老师Agent实战营01"
+      daily: false
     - name: "https://www.reddit.com/r/MachineLearning"
+      daily: false
+    - name: "HKUDS-开源交流群2"
+      daily: false
+    - name: "OpenViking 技术交流2群"
+      daily: false
+    - name: "AI Agent研发|落地"
+      daily: false
+    - name: "AionUi benchmark 讨论"
+      daily: false
+    - name: "EMNLP 交流群"
       daily: false
     - name: "https://www.reddit.com/r/LocalLLaMA"
       daily: false
@@ -80,69 +369,62 @@ social:
       daily: false
     - name: "https://www.reddit.com/r/RagAI/"
       daily: false
-    - name: "Hacker News https://news.ycombinator.com/submit"
-      daily: true
     - name: "Hugging Face Forums"
       daily: false
     - name: "EleutherAI Discord"
       daily: false
     - name: "ML Collective Discord"
       daily: false
+    - name: "LAION Discord"
+      daily: false
     - name: "Hugging Face Discord"
       daily: false
     - name: "MLOps Community Slack"
       daily: false
-    - name: "小红书"
-      daily: true
-    - name: "知乎"
-      daily: true
     - name: "知乎 GithubDaily"
       daily: false
-    - name: "微信公众号"
-      daily: true
-    - name: "V2EX"
-      daily: true
-    - name: "WeChat Moment"
-      daily: true
-    - name: "Science Intelligence 实名讨论群"
-      daily: true
-    - name: "Benchmark Radar 讨论群"
-      daily: true
-    - name: "Agent Infra交流群 （Substrate）"
-      daily: true
-    - name: "灵台AI"
-      daily: true
-    - name: "Math AI"
+    - name: "EZ大模型造🚀群"
       daily: false
-    - name: "博杰老师Agent实战营01"
+
+    # Additional groups named in the launch plan. Group posts stay weekly to
+    # avoid turning a complete checklist into a request to spam every group.
+    - name: "上海2025人工智能USTC科大校友峰会"
       daily: false
-    - name: "Phys Bench"
+    - name: "斯坦福CS336课时讨论群1"
       daily: false
-    - name: "ACL 2026线下开会社交群"
+    - name: "临川一中人工智能AI交流群"
       daily: false
-    - name: "COLM 2026 开会群"
+    - name: "科大三百六十6️⃣行"
       daily: false
-    - name: "HKUDS-开源交流群2"
+    - name: "XLeRobot讨论群"
       daily: false
-    - name: "HLE V2 | Core"
-      daily: true
-    - name: "Sichen Tao"
+    - name: "2025科大北美校友硅谷峰会群"
       daily: false
-    - name: "Junwei Zhou"
+    - name: "less is more 上海黑客松"
+      daily: false
+    - name: "妮可【AI】交流"
+      daily: false
+    - name: "人工智能学术|研发[2]『运筹OR帷幄』"
+      daily: false
+    - name: "1015启元实验室|清华专场宣讲"
+      daily: false
+
+    # Targeted outreach is useful, but should not become bulk unsolicited mail.
+    - name: "AI eval newsletter 投稿"
+      daily: false
+
+    # Low-frequency professional posting and paid experiments.
+    - name: "LinkedIn"
       monthly: true
-    - name: "LHTB 造题"
-      daily: false
-    - name: "Ziyan Chen"
-      daily: false
     - name: "TB"
       monthly: true
     - name: "TB Sci"
       monthly: true
-    - name: "DEV Community"
-      daily: false
-    - name: "Hashnode"
-      daily: false
-    - name: "Substack Notes"
-      daily: false
-    - name: "GitHub Blog https://ktwu01.github.io/"
-      daily: true
+    - name: "X Ads"
+      monthly: true
+    - name: "Google Ads"
+      monthly: true
+    - name: "Meta / Facebook Ads"
+      monthly: true
+    - name: "Bing Ads"
+      monthly: true

@@ -13,10 +13,8 @@ exists because the SPA machinery it referenced is absent:
 * the Today control is a view-switching button in the SPA and becomes the
   plain link to ``/`` it already is for crawlers;
 * view-only attributes (``data-view``, ``aria-controls``, ``aria-expanded``)
-  are dropped from the section nav, and the blog's own link is marked
-  active. Element ids stay: styles.css keys the dialog-trigger treatment of
-  Rubric and CLI (the inactive blue and the "ⓘ" marker) off #rubric-nav and
-  #cli-nav, so a brief's tabs must carry the same ids to look the same;
+  are dropped from the section nav, and the blog's own link is marked active.
+  The CLI id stays because styles.css uses it for the dialog-trigger treatment;
 * the Contact button opens a sheet that only exists inside the SPA, so it
   becomes a link to ``/#contact`` — the dashboard deep link that opens the
   same sheet on load;
@@ -119,8 +117,8 @@ def _strip_comments(fragment: str) -> str:
 
 
 def _drop_spa_attributes(fragment: str) -> str:
-    # Ids stay on purpose: styles.css styles #rubric-nav and #cli-nav by id,
-    # so stripping them would silently turn those tabs into plain links.
+    # The CLI id stays on purpose: styles.css uses it to distinguish the dialog
+    # trigger from dashboard view links.
     return re.sub(r'\s(?:data-view|aria-controls|aria-expanded)="[^"]*"', "", fragment)
 
 
@@ -192,9 +190,8 @@ def _adapt_header(header: str) -> str:
     attrs, inner = contact.group(1), contact.group(2)
     title = re.search(r'title="([^"]*)"', attrs)
     i18n_title = re.search(r'data-i18n-title="([^"]*)"', attrs)
-    # The chat-bubble svg carries the outline-icon class from index.html (same
-    # mechanism fork and issues use on link badges). Ensure it is present so
-    # the bubble renders as an outline when transformed into an anchor badge.
+    # The chat-bubble svg carries the outline-icon class from index.html. Ensure
+    # it is present when the button is transformed into an anchor badge.
     inner = _ensure_outline_icon(inner)
     header = header.replace(
         contact.group(0),

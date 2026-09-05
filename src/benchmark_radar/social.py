@@ -56,20 +56,6 @@ _NOISE_SUBJECT_PREFIXES = (
     "Merge ",
 )
 
-# Issue #206: channels marked ``daily: false`` are weekly, not daily. They are
-# triggered on the day they enter rotation and then every seven days after it,
-# so a personal contact or low-volume subreddit is left alone between trigger
-# days instead of receiving a daily ping. ``_WEEKLY_ANCHOR`` is the reference
-# trigger day; a weekly channel appears in the checklist only on days at a
-# multiple-of-seven offset from it.
-_WEEKLY_ANCHOR = date(2026, 8, 15)
-
-# Channels marked ``monthly: true`` appear once a month, on the anchor's
-# day-of-month (the 1st), for contacts and targets too low-volume to ping even
-# on the weekly cycle. Like ``_WEEKLY_ANCHOR``, ``_MONTHLY_ANCHOR`` keeps the
-# whole cadence one tunable value.
-_MONTHLY_ANCHOR = date(2026, 9, 1)
-
 
 @dataclass(frozen=True)
 class GitChange:
@@ -248,16 +234,6 @@ def merge_checked(section: str, existing_body: str) -> str:
     return "\n".join(lines)
 
 
-def _is_weekly_trigger_day(day: date) -> bool:
-    """True only on days that are a multiple-of-seven offset from the anchor."""
-    return (day - _WEEKLY_ANCHOR).days % 7 == 0
-
-
-def _is_monthly_trigger_day(day: date) -> bool:
-    """True only on the anchor's day-of-month, i.e. once per calendar month."""
-    return day.day == _MONTHLY_ANCHOR.day
-
-
 def render_social_section(
     insight: str,
     repo_sentence: str,
@@ -267,7 +243,6 @@ def render_social_section(
     today: date | None = None,
 ) -> str:
     """Render the "Daily social post" section for today's radar run."""
-    today = today or date.today()
     lines = [
         SECTION_HEADING,
         "",
@@ -300,21 +275,14 @@ def render_social_section(
             "",
         ]
     )
-    # ``monthly: true`` opts a channel into the monthly cadence (once a month);
-    # ``daily: false`` opts a channel into the weekly cadence. A missing flag
-    # keeps the legacy daily behaviour so partially migrated configs and
-    # unmarked channels never vanish from the checklist for six days a week.
-    monthly_channels = [
-        channel
-        for channel in channels
-        if channel.get("monthly") is True and _is_monthly_trigger_day(today)
-    ]
+    # Every cadence remains visible in every issue so the issue is a complete
+    # checklist. The headings tell the maintainer how often to use a destination;
+    # they no longer hide options on dates that do not match the cadence.
+    monthly_channels = [channel for channel in channels if channel.get("monthly") is True]
     weekly_channels = [
         channel
         for channel in channels
-        if channel.get("monthly") is not True
-        and channel.get("daily") is False
-        and _is_weekly_trigger_day(today)
+        if channel.get("monthly") is not True and channel.get("daily") is False
     ]
     daily_channels = [
         channel

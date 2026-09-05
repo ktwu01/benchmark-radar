@@ -113,6 +113,12 @@ def test_citation_metadata_prefers_the_technical_report():
     assert f'url: "{TECHNICAL_REPORT}"' in text
 
 
+def test_public_bibtex_names_both_report_authors():
+    author = "author       = {Wu, Koutian and Zhou, Junjie}"
+    for readme in (README, README_ZH):
+        assert author in readme.read_text(encoding="utf-8")
+
+
 def test_readmes_offer_a_short_agent_setup_prompt():
     # Regression: local-query setup should be one copy-paste command, not a second
     # maintainer manual (issue #436).

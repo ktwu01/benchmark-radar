@@ -115,6 +115,9 @@ watchlist:
   - name: Long-Horizon Bench
     aliases: ["long horizon bench", "long horizon benchmark", longhorizonbench]
     note: Evaluations targeting extended multi-step agent execution.
+  - name: RSI-Exam
+    aliases: [rsi-exam, "rsi exam"]
+    note: Executable long-horizon research benchmark for recursive self-improvement.
 
 sources:
   arxiv:
@@ -204,6 +207,10 @@ sources:
       - '"data contamination" in:name,description,readme'
       - '"agent benchmark" in:name,description,readme'
       - '"agentic benchmark" in:name,description,readme'
+      # This named suite does not use the adjacent phrase "agent benchmark".
+      # Keep discovery suite-specific: the broader capability phrase also
+      # matches trading platforms, automation harnesses, and safety frameworks.
+      - '"RSI-Exam" in:name,description,readme'
 
   # Reviewed public organizations are an additional discovery surface for new
   # repositories whose names may not match generic GitHub search phrases. The
@@ -264,6 +271,22 @@ sources:
       - synthetic data evaluation
     page_size: 20
     max_requests: 6
+    attempts: 3
+    timeout_seconds: 30
+
+  # Crossref adds publisher-deposited DOI metadata as an independent discovery
+  # path for benchmark papers. Its public API needs no credential; title-focused
+  # queries and the shared taxonomy keep generic papers out of the published feed.
+  crossref:
+    enabled: true
+    required: false
+    searches:
+      - large language model benchmark
+      - artificial intelligence evaluation dataset
+      - data contamination benchmark
+      - agentic benchmark evaluation
+    page_size: 50
+    max_requests: 4
     attempts: 3
     timeout_seconds: 30
 

@@ -231,18 +231,11 @@ th {
 
 .masthead-end {
   display: grid;
-  /* RSS, language, contact, then the star/fork/issues group. */
-  grid-template-columns: repeat(6, 2.6rem);
+  /* RSS, language, contact, and GitHub stars. */
+  grid-template-columns: repeat(4, 2.6rem);
   gap: 0.7rem;
   align-items: center;
   justify-content: flex-end;
-}
-
-.repo-badges {
-  display: flex;
-  grid-column: span 3;
-  gap: 0.7rem;
-  align-items: center;
 }
 
 .repo-badge {
@@ -313,14 +306,14 @@ th {
    every viewport above the 760px breakpoint and the page slid left and right
    with nothing to show for it (issue #333). Anchored to the badge's right edge
    the label stays on the page whether it is showing or not. */
-.repo-badges > .repo-badge:last-child::after {
+.masthead-end > .repo-badge:last-child::after {
   right: 0;
   left: auto;
   transform: translate(0, -0.2rem);
 }
 
-.repo-badges > .repo-badge:last-child:hover::after,
-.repo-badges > .repo-badge:last-child:focus-visible::after {
+.masthead-end > .repo-badge:last-child:hover::after,
+.masthead-end > .repo-badge:last-child:focus-visible::after {
   transform: translate(0, 0);
 }
 
@@ -362,8 +355,8 @@ button.repo-badge svg {
   stroke: none;
 }
 
-/* Outline icons (globe, fork, issues) use stroke rather than fill, matching
-   the button badge icons. Applies to link and button badges alike so every
+/* Outline icons use stroke rather than fill, matching the button badge icons.
+   Applies to link and button badges alike so every
    top-right icon renders at the same size (issue #213). */
 .repo-badge svg.outline-icon {
   fill: none;
@@ -446,20 +439,16 @@ button.repo-badge svg {
   color: white;
 }
 
-/* Rubric and CLI have real page paths, but still open the familiar dialog
-   panels. Their inactive blue distinguishes that interaction from a dashboard
-   view switch. */
-#rubric-nav:not(.nav-active),
+/* CLI has a real page path, but still opens the familiar dialog panel. Its
+   inactive blue distinguishes that interaction from a dashboard view switch. */
 #cli-nav:not(.nav-active) {
   color: var(--blue-deep);
 }
 
-#rubric-nav::after,
 #cli-nav::after {
   content: " ⓘ";
 }
 
-#rubric-nav:not(.nav-active):hover,
 #cli-nav:not(.nav-active):hover {
   background: var(--panel);
 }
@@ -631,9 +620,6 @@ input {
   /* Right-aligned when it shares the heading's line, and pushed to the right
      edge rather than left-aligned when `.section-title` wraps it onto its own. */
   margin-left: auto;
-}
-
-.results-meta span {
 }
 
 #today-sort {
@@ -4185,7 +4171,7 @@ footer {
   }
 
   .content-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .benchmark-workbench {
@@ -4224,20 +4210,14 @@ footer {
 
   .masthead {
     min-height: 64px;
-    /* Brand plus the seven-square grid exceed 320px-class viewports, so the
+    /* Brand plus the four-square grid exceed 320px-class viewports, so the
        controls drop to a second row instead of overflowing off-screen. */
     flex-wrap: wrap;
     row-gap: 0.5rem;
   }
 
   .masthead-end {
-    /* 6 * 2.1rem + 5 * 0.5rem gaps = 241px, so the full row still fits a
-       320px-wide phone once it wraps below the brand (issue #213 squares). */
-    grid-template-columns: repeat(6, 2.1rem);
-    gap: 0.5rem;
-  }
-
-  .repo-badges {
+    grid-template-columns: repeat(4, 2.1rem);
     gap: 0.5rem;
   }
 
@@ -4266,6 +4246,15 @@ footer {
 
   .view {
     padding-top: 2rem;
+  }
+
+  .results-meta {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  #today-sort {
+    white-space: normal;
   }
 
   .view-heading {

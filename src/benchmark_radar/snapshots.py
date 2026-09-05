@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from collections import Counter
 from copy import deepcopy
@@ -25,6 +26,13 @@ from .kw_bench_tracks import classification_layer, derive_tracks
 from .model_cards import DEFAULT_REGISTRY_PATH, adoption_rank, load_registry
 from .models import RadarRun
 from .pipeline import match_phrase, match_proximity_rule
+from .release_leaderboard import (
+    SIGNAL_SOURCES,
+    SIGNAL_VALUE_KINDS,
+    build_latest_releases_leaderboard,
+    canonical_metric_key,
+    is_exact_attention_source_url,
+)
 from .rubric import (
     SCORING_VERSION,
     legacy_rubric_reference,
@@ -389,6 +397,146 @@ def _validate_attention(attention: Any, *, source: str) -> None:
             )
 
 
+def _validate_benchmark_attention(benchmark_attention: Any, *, source: str) -> None:
+    if not isinstance(benchmark_attention, dict):
+        raise SnapshotError(f"{source}: benchmark_attention must be an object")
+    if benchmark_attention.get("schema_version") != 1:
+        raise SnapshotError(
+            f"{source}: benchmark_attention schema_version must be 1, got "
+            f"{benchmark_attention.get('schema_version')!r}"
+        )
+    _validate_time(
+        benchmark_attention.get("observed_at"),
+        source=source,
+        field="benchmark_attention observed_at",
+    )
+    if not isinstance(benchmark_attention.get("observations"), list):
+        raise SnapshotError(f"{source}: benchmark_attention.observations must be an array")
+    _validate_health(
+        benchmark_attention.get("health"),
+        source=source,
+        field="benchmark_attention.health",
+    )
+
+    allowed_block_fields = {"schema_version", "observed_at", "observations", "health"}
+    extra_block_fields = sorted(benchmark_attention.keys() - allowed_block_fields)
+    if extra_block_fields:
+        raise SnapshotError(
+            f"{source}: benchmark_attention has unexpected fields: {', '.join(extra_block_fields)}"
+        )
+
+    allowed_health_fields = {"source", "ok", "item_count", "error", "metric"}
+    for index, health in enumerate(benchmark_attention["health"]):
+        extra = sorted(health.keys() - allowed_health_fields)
+        if extra:
+            raise SnapshotError(
+                f"{source}: benchmark_attention.health {index} has unexpected fields: "
+                f"{', '.join(extra)}"
+            )
+        if health["source"] not in set(SIGNAL_SOURCES.values()):
+            raise SnapshotError(f"{source}: benchmark_attention.health {index} source is invalid")
+        if not isinstance(health["ok"], bool):
+            raise SnapshotError(f"{source}: benchmark_attention.health {index} ok must be boolean")
+        if (
+            isinstance(health["item_count"], bool)
+            or not isinstance(health["item_count"], int)
+            or health["item_count"] < 0
+        ):
+            raise SnapshotError(
+                f"{source}: benchmark_attention.health {index} item_count must be non-negative"
+            )
+        health_metric = health.get("metric")
+        if health_metric is not None:
+            signal = canonical_metric_key(health_metric)
+            if signal is None or SIGNAL_SOURCES[signal] != health["source"]:
+                raise SnapshotError(
+                    f"{source}: benchmark_attention.health {index} metric/source mismatch"
+                )
+
+    required = {
+        "canonical_artifact_id",
+        "source",
+        "metric",
+        "value",
+        "value_kind",
+        "source_url",
+        "status",
+    }
+    allowed_observation_fields = required | {"observed_at", "last_successful_date"}
+    for index, observation in enumerate(benchmark_attention["observations"]):
+        if not isinstance(observation, dict):
+            raise SnapshotError(
+                f"{source}: benchmark_attention observation {index} must be an object"
+            )
+        missing = sorted(required - observation.keys())
+        if missing:
+            raise SnapshotError(
+                f"{source}: benchmark_attention observation {index} "
+                f"missing fields: {', '.join(missing)}"
+            )
+        extra = sorted(observation.keys() - allowed_observation_fields)
+        if extra:
+            raise SnapshotError(
+                f"{source}: benchmark_attention observation {index} "
+                f"has unexpected fields: {', '.join(extra)}"
+            )
+        if not str(observation["canonical_artifact_id"]).strip():
+            raise SnapshotError(
+                f"{source}: benchmark_attention observation {index} "
+                "canonical_artifact_id must be non-empty"
+            )
+        val = observation["value"]
+        if val is not None and (
+            isinstance(val, bool)
+            or not isinstance(val, (int, float))
+            or not math.isfinite(val)
+            or val < 0
+        ):
+            raise SnapshotError(
+                f"{source}: benchmark_attention observation {index} "
+                "value must be a non-negative number or null"
+            )
+        signal = canonical_metric_key(observation["metric"])
+        if signal is None:
+            raise SnapshotError(
+                f"{source}: benchmark_attention observation {index} metric is invalid"
+            )
+        if observation["source"] != SIGNAL_SOURCES[signal]:
+            raise SnapshotError(
+                f"{source}: benchmark_attention observation {index} metric/source mismatch"
+            )
+        if observation["value_kind"] != SIGNAL_VALUE_KINDS[signal]:
+            raise SnapshotError(
+                f"{source}: benchmark_attention observation {index} value_kind is invalid"
+            )
+        url = str(observation["source_url"] or "")
+        if not is_exact_attention_source_url(signal, url):
+            raise SnapshotError(
+                f"{source}: benchmark_attention observation {index} source_url must be "
+                "HTTP(S) and name the exact metric resource"
+            )
+        status = observation["status"]
+        if status not in {"fresh", "stale", "unknown", "unavailable"}:
+            raise SnapshotError(
+                f"{source}: benchmark_attention observation {index} status is invalid: {status!r}"
+            )
+        if status in {"fresh", "stale"} and val is None:
+            raise SnapshotError(
+                f"{source}: benchmark_attention observation {index} {status} value must not be null"
+            )
+        if status in {"unknown", "unavailable"} and val is not None:
+            raise SnapshotError(
+                f"{source}: benchmark_attention observation {index} {status} value must be null"
+            )
+        for field in ("observed_at", "last_successful_date"):
+            if observation.get(field):
+                _validate_time(
+                    observation[field],
+                    source=source,
+                    field=f"benchmark_attention observation {index} {field}",
+                )
+
+
 def validate_snapshot(snapshot: dict[str, Any], *, source: str = "snapshot") -> None:
     version = snapshot.get("schema_version")
     if version not in SUPPORTED_SCHEMA_VERSIONS:
@@ -442,6 +590,8 @@ def validate_snapshot(snapshot: dict[str, Any], *, source: str = "snapshot") -> 
     # Optional: snapshots written before the daily Q&A was persisted stay valid.
     if "questions" in snapshot:
         _validate_questions(snapshot["questions"], source=source, date=snapshot["date"])
+    if "benchmark_attention" in snapshot:
+        _validate_benchmark_attention(snapshot["benchmark_attention"], source=source)
 
 
 def normalize_snapshot(snapshot: dict[str, Any], *, source: str = "snapshot") -> dict[str, Any]:
@@ -1004,6 +1154,10 @@ def dashboard_data(
             kw_bench_store_path,
             tracks=derive_tracks(snapshots),
         ),
+        "latest_releases_leaderboard": build_latest_releases_leaderboard(
+            snapshots,
+            registry_path=registry_path,
+        ),
         # Curated and versioned in the repository rather than collected daily:
         # they answer "which benchmarks do vendors report", "how have the
         # readable scores moved", and "what do those two together say", which
@@ -1090,12 +1244,25 @@ def dashboard_bootstrap(dashboard: dict[str, Any]) -> dict[str, Any]:
     way to that panel, so dropping it left the panel permanently empty.
     """
     corpus = dashboard.get("corpus") or {}
-    return {
+    bootstrap: dict[str, Any] = {
         **dashboard,
         "bootstrap": True,
         "days": (dashboard.get("days") or [])[-1:],
         "corpus": {"aggregates": corpus.get("aggregates") or {}},
     }
+    if "latest_releases_leaderboard" in dashboard:
+        lrl = dashboard["latest_releases_leaderboard"]
+        def_win = lrl.get("default_window", "30d")
+        bootstrap["latest_releases_leaderboard"] = {
+            "schema_version": lrl.get("schema_version", 1),
+            "method_version": lrl.get("method_version"),
+            "generated_at": lrl.get("generated_at"),
+            "default_window": def_win,
+            "windows": {
+                def_win: lrl.get("windows", {}).get(def_win, {}),
+            },
+        }
+    return bootstrap
 
 
 _TREND_DAY_KEYS = (

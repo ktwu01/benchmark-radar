@@ -128,53 +128,32 @@ if (langToggle) {
 }
 showLanguage(savedLanguage());
 
-// Repository badge counts. Mirrors app.js's renderRepoBadges: same endpoints,
-// same rule that counts are decoration, so a rate-limited API must never
-// surface as an error state — the badges link out and stay usable blank.
+// Repository star count. Mirrors app.js's renderStarCount: a rate-limited API
+// must never surface as an error because the GitHub link still works blank.
 const REPO_SLUG = "ktwu01/benchmark-radar";
 
-const BADGE_ACTIONS = {
-  "badge-stars": "Star this repository on GitHub. {count} stars",
-  "badge-forks": "Fork this repository on GitHub. {count} forks",
-  "badge-issues": "Open a new issue on GitHub. {count} issues open",
-};
-
-function setBadgeCount(id, value) {
-  const badge = document.getElementById(id);
+function setStarCount(value) {
+  const badge = document.getElementById("badge-stars");
   const node = badge?.querySelector("[data-count]");
   if (!node) return;
   const count = Number(value || 0).toLocaleString();
   node.textContent = count;
-  badge.setAttribute("aria-label", t(BADGE_ACTIONS[id], { count }));
+  badge.setAttribute("aria-label", t("Star this repository on GitHub. {count} stars", { count }));
 }
 
-async function renderRepoBadges() {
+async function renderStarCount() {
   try {
     const response = await fetch(`https://api.github.com/repos/${REPO_SLUG}`, {
       headers: { Accept: "application/vnd.github+json" },
     });
     if (!response.ok) return;
     const repo = await response.json();
-    setBadgeCount("badge-stars", repo.stargazers_count);
-    setBadgeCount("badge-forks", repo.forks_count);
-    // open_issues_count includes pull requests, so building the count from it
-    // overstates how many issues are actually open. Ask search for issues only,
-    // and leave the badge blank if that fails rather than showing the inflated
-    // number.
-    const issues = await fetch(
-      `https://api.github.com/search/issues?q=${encodeURIComponent(
-        `repo:${REPO_SLUG} is:issue is:open`,
-      )}&per_page=1`,
-      { headers: { Accept: "application/vnd.github+json" } },
-    );
-    if (issues.ok) {
-      setBadgeCount("badge-issues", (await issues.json()).total_count);
-    }
+    setStarCount(repo.stargazers_count);
   } catch (error) {
-    console.debug("Repository badge counts unavailable", error);
+    console.debug("Repository star count unavailable", error);
   }
 }
-renderRepoBadges();
+renderStarCount();
 
 // The footer's share control, same behavior as the dashboard's.
 const shareButton = document.getElementById("share-radar");

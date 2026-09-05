@@ -27,6 +27,7 @@ PRIMARY_SOURCE_RANK = {
     "Zenodo": 1,
     "Semantic Scholar": 2,
     "OpenAlex": 2,
+    "Crossref": 2,
     "Brave Search": 3,
 }
 # Derived from the rubric rather than restated, which had let the two lists

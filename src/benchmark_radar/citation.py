@@ -13,7 +13,7 @@ from __future__ import annotations
 from . import __version__
 
 PUBLICATION_YEAR = "2026"
-AUTHORS_APA = "Wu, K., Zhou, J., et al."
+AUTHORS_APA = "Wu, K., & Zhou, J."
 DOI = "10.5281/zenodo.22167102"
 CITE_URL = "https://benchmark-radar.org/#cite"
 

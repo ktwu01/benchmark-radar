@@ -260,9 +260,10 @@ jobs:
             "${existing_body_args[@]}" \
             --social-output generated/out/body.md
           if [[ -n "${existing}" ]]; then
-            gh issue edit "${existing}" --body-file generated/out/body.md
+            gh issue edit "${existing}" --body-file generated/out/body.md \
+              --add-label automated --add-label traction --remove-label daily-radar
             echo "Updated issue #${existing}"
           else
             gh issue create --title "${title}" --body-file generated/out/body.md \
-              --label daily-radar --label automated
+              --label automated --label traction
           fi

@@ -116,7 +116,7 @@ def test_priority_score_is_reachably_explained():
     # number does not have to hunt elsewhere for its definition.
     assert 'id="rubric-dialog"' in html
     assert 'id="rubric-content"' in html
-    assert 'id="rubric-nav"' in html
+    assert 'id="rubric-nav"' not in html
     assert "score-explain" in script
     assert "openRubric" in script
     assert "How is this scored?" in script
@@ -164,6 +164,11 @@ def test_citation_formats_are_one_click_away_behind_a_short_link():
     for fragment in ("10.5281/zenodo.22167102", "Benchmark Radar v0.9.0: Technical Report"):
         assert fragment in cff
         assert fragment in script
+    assert "given-names: Junjie" in cff
+    assert '"Wu, K., & Zhou, J. (2026)' in script
+    assert '"author = {Wu, Koutian and Zhou, Junjie},"' in script
+    assert html.count('name="citation_author"') == 2
+    assert '<meta name="citation_author" content="Zhou, Junjie">' in html
 
 
 def test_offline_cli_route_is_in_the_view_bar_behind_a_short_link():
@@ -242,23 +247,22 @@ def test_only_one_sheet_is_open_at_a_time():
     assert guard.index("cliOwnsHistoryEntry = false;") < guard.index("other.close();")
 
 
-def test_every_navigation_item_uses_the_same_active_state():
+def test_visible_navigation_items_use_the_same_active_state():
     html = Path("site/index.html").read_text(encoding="utf-8")
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
     styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
 
-    # Today is a button, the three routed views are anchors, and Rubric opens a
-    # dialog. Their element types and ARIA semantics must not change the visual
-    # selected state.
-    assert 'aria-controls="rubric-dialog"' in html
-    assert 'aria-expanded="false"' in html
+    # Explore and Rubric keep direct routes without claiming a global tab.
+    nav = html.split('<nav class="view-nav"', 1)[1].split("</nav>", 1)[0]
+    assert 'href="/explore/"' not in nav
+    assert 'href="/rubric/"' not in nav
+    assert 'aria-expanded="false"' in nav
     today = re.search(r'<button\b(?=[^>]*data-view="today")[^>]*>', html)
     assert today and "nav-active" in today.group(0)
     assert 'aria-current="page"' in today.group(0)
     assert "function syncNavState()" in script
     assert 'item.classList.toggle("nav-active", active);' in script
-    assert 'rubricNav.classList.toggle("nav-active", rubricActive);' in script
-    assert 'rubricNav.setAttribute("aria-expanded", String(rubricActive));' in script
+    assert 'rubricNav.classList.toggle("nav-active", rubricActive);' not in script
     assert script.count("syncNavState();") >= 3
     assert ".view-nav .nav-active {" in styles
     assert '.view-nav button[aria-current="page"]' not in styles
@@ -421,13 +425,13 @@ def test_top_right_utilities_use_shared_icon_geometry_and_contact_control():
     assert 'id="badge-discord"' not in html
     assert 'id="lang-toggle"' in html
     assert 'class="repo-badge"' in html
-    assert "grid-template-columns: repeat(6, 2.6rem)" in styles
+    assert "grid-template-columns: repeat(4, 2.6rem)" in styles
     assert "width: 2.6rem" in styles
     assert "height: 2.6rem" in styles
-    assert "grid-column: span 3" in styles
+    assert ".repo-badges" not in styles
     assert 'class="repo-badge-glyph" id="lang-toggle-label">中<' in html
     assert 'class="brand-icon github-icon"' in html
-    assert "grid-template-columns: repeat(6, 2.1rem)" in styles
+    assert "grid-template-columns: repeat(4, 2.1rem)" in styles
     assert "flex: 0 0 1.5rem" in styles
     assert ".repo-badge svg," in styles
 
@@ -644,7 +648,7 @@ def test_utility_routes_have_distinct_metadata_and_accessible_active_state():
         assert "description:" in entry
         assert f'canonical: "{path}"' in entry
     assert "applySeo(utility ? UTILITY_SEO[utility]" in script
-    assert 'rubricNav.setAttribute("aria-current", "page")' in script
+    assert 'rubricNav.setAttribute("aria-current", "page")' not in script
     assert 'cliNav.setAttribute("aria-current", "page")' in script
     assert 'citeOpen?.setAttribute("aria-expanded", String(utility === "cite"))' in script
     assert 'citeOpen?.setAttribute("aria-current", "page")' in script
@@ -713,15 +717,14 @@ def test_newer_successful_data_requests_cannot_be_overwritten_by_late_responses(
     assert "Trends data request was superseded by a bootstrap response" in fetch_payload
 
 
-def test_failed_data_rubric_navigation_keeps_its_background_route():
+def test_rubric_remains_a_direct_route_without_a_navigation_control():
+    html = Path("site/index.html").read_text(encoding="utf-8")
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
-    handler = script.split('byId("rubric-nav").addEventListener', 1)[1].split(
-        'byId("badge-contact")', 1
-    )[0]
 
-    assert 'state.rubric = "current";' in handler
-    assert 'writeUrl("push");' in handler
-    assert "window.location.reload();" in handler
+    assert 'id="rubric-nav"' not in html
+    assert 'canonical: "/rubric/"' in script
+    assert 'state.rubric = pathUtility === "rubric"' in script
+    assert 'openRubric(null, state.rubric === "current" ? null : state.rubric, false)' in script
 
 
 def test_hydrated_expansion_controls_announce_the_action_they_will_take():
@@ -1030,7 +1033,8 @@ def test_trend_map_is_keyboard_accessible_and_coordinates_today_filters():
     html = Path("site/index.html").read_text(encoding="utf-8")
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
 
-    assert 'data-view="map"' in html
+    assert 'id="map-view"' in html
+    assert 'canonical: "/explore/"' in script
     assert 'id="map-canvas"' in html
     assert "state.data.corpus" in script
     assert "HAS_TOPIC" in script
@@ -1072,8 +1076,8 @@ def test_corpus_view_progressively_discloses_the_complete_relationship_map():
     html = Path("site/index.html").read_text(encoding="utf-8")
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
 
-    assert 'data-view="map"' in html
-    assert 'data-i18n="Explore">Explore</a>' in html
+    nav = html.split('<nav class="view-nav"', 1)[1].split("</nav>", 1)[0]
+    assert 'href="/explore/"' not in nav
     assert 'id="map-insights"' in html
     assert '<details class="relationship-explorer" id="relationship-explorer">' in html
     assert "renderMapInsights(corpus)" in script
@@ -1135,6 +1139,7 @@ def test_static_html_references_existing_local_assets():
     generated_assets = {
         "feed.xml",
         "data/radar.json",
+        "blog/",
         "leaderboard/",
         "trends/",
         "explore/",
@@ -1172,19 +1177,18 @@ def test_supporting_attention_provider_is_not_hard_coded():
     assert "Hacker News #${record.source_id}" not in script
 
 
-def test_repo_badges_invite_an_action_rather_than_listing_a_roster():
+def test_header_keeps_one_github_action_and_issues_remain_reachable():
     html = Path("site/index.html").read_text(encoding="utf-8")
 
-    # Each badge sends the reader somewhere they can act. Linking to
-    # /stargazers, /forks, or the issue list showed them a roster instead.
-    assert 'href="https://github.com/ktwu01/benchmark-radar/fork"' in html
-    assert 'href="https://github.com/ktwu01/benchmark-radar/issues/new"' in html
+    # The header keeps one GitHub destination. Issue links remain in context.
     assert 'href="https://github.com/ktwu01/benchmark-radar"' in html
+    assert "https://github.com/ktwu01/benchmark-radar/issues" in html
+    assert 'id="badge-forks"' not in html
+    assert 'id="badge-issues"' not in html
     assert "/stargazers" not in html
     assert "benchmark-radar/forks" not in html
 
-    for label in (">Star<", ">Fork<", ">Issues<"):
-        assert label in html
+    assert ">Star<" in html
 
     # Starring has no GET endpoint, so the star badge opens the repository and
     # the reader clicks Star there. Asserting the absence of a fabricated
@@ -1214,13 +1218,10 @@ def test_today_view_shows_total_corpus_counts_by_category():
 def test_badge_accessible_names_state_the_action():
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
 
-    assert "BADGE_ACTIONS" in script
-    for fragment in (
-        "Star this repository on GitHub",
-        "Fork this repository on GitHub",
-        "Open a new issue on GitHub",
-    ):
-        assert fragment in script
+    assert "function setStarCount" in script
+    assert "Star this repository on GitHub" in script
+    assert "Fork this repository on GitHub" not in script
+    assert "Open a new issue on GitHub" not in script
     assert 'badge.setAttribute("aria-label"' in script
 
 
@@ -2799,9 +2800,19 @@ def test_issue_333_the_page_never_scrolls_sideways():
     # 1. A hover label centred under the last masthead badge. `visibility:
     #    hidden` does not take a box out of layout, so it widened the document
     #    even while it was invisible.
-    anchored = _css_rule(styles, ".repo-badges > .repo-badge:last-child::after {")
+    anchored = _css_rule(styles, ".masthead-end > .repo-badge:last-child::after {")
     assert "right: 0;" in anchored
     assert "left: auto;" in anchored
+
+    # The responsive one-column grid must be allowed to shrink below a long
+    # record's intrinsic width. A bare 1fr track let real benchmark names widen
+    # a 390px page to 455px.
+    responsive = styles.split("@media (max-width: 1050px)", 1)[1].split(
+        "@media (max-width: 760px)", 1
+    )[0]
+    assert "grid-template-columns: minmax(0, 1fr);" in responsive
+    mobile = styles.split("@media (max-width: 760px)", 1)[1]
+    assert "#today-sort" in mobile and "white-space: normal;" in mobile
 
     # 2. Crawled README banners made of box-drawing characters are a single
     #    unbreakable run, and one of them pushed a 720px column to 1349px.

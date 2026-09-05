@@ -572,7 +572,7 @@ def test_cli_ends_human_output_with_citation_reminder(tmp_path: Path, capsys) ->
     assert exit_code == 0
     assert "please cite it" in output
     assert (
-        f"Wu, K., Zhou, J., et al. (2026). Benchmark Radar v{__version__}: Technical Report "
+        f"Wu, K., & Zhou, J. (2026). Benchmark Radar v{__version__}: Technical Report "
         f"(Version {__version__}). https://doi.org/10.5281/zenodo.22167102"
     ) in output
     assert "https://benchmark-radar.org/#cite" in output

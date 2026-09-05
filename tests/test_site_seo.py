@@ -105,14 +105,15 @@ def test_published_head_and_robots_match_the_generated_sitemap():
     for _, path in INDEXABLE_VIEWS:
         assert f'canonical: "{path}"' in script
 
-    # Root-relative in the dashboard: the same document is served at each of
-    # these paths, so the links must resolve identically from all of them.
+    # Global navigation and contextual utilities use root-relative links. The
+    # generated Explore and Rubric routes remain indexable without global tabs.
     assert 'href="/leaderboard/"' in html
     assert 'href="/trends/"' in html
-    assert 'href="/explore/"' in html
     assert 'href="/cli/"' in html
-    assert 'href="/rubric/"' in html
     assert 'href="/cite/"' in html
+    nav = html.split('<nav class="view-nav"', 1)[1].split("</nav>", 1)[0]
+    assert 'href="/explore/"' not in nav
+    assert 'href="/rubric/"' not in nav
 
     # robots.txt points at the sitemap URL the build actually writes.
     sitemap_url = f"{SITE_URL}/sitemap.xml"

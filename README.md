@@ -71,6 +71,7 @@ written in the
 
 ## More
 
+- [Design principles](design.md)
 - [Scoring rubric](https://benchmark-radar.org/rubric/)
 - [Model-card adoption data](data/model_cards.yml)
 - [Public corpus schema](docs/cumulative-corpus.schema.json)
@@ -111,7 +112,7 @@ technical report:
 
 ```bibtex
 @misc{wu_2026_22167102,
-  author       = {Wu, Koutian},
+  author       = {Wu, Koutian and Zhou, Junjie},
   title        = {Benchmark Radar v0.9.0: Technical Report},
   month        = aug,
   year         = {2026},
@@ -139,7 +140,7 @@ The daily evidence feed is built on public data from [arXiv](https://arxiv.org),
 [GitHub Search](https://github.com/search), [GitHub organizations](https://github.com),
 [GitHub Releases](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases),
 [Hugging Face datasets and Spaces](https://huggingface.co), [Hugging Face Papers](https://huggingface.co/papers),
-[OpenAlex](https://openalex.org), [OpenReview](https://openreview.net),
+[Crossref](https://www.crossref.org), [OpenAlex](https://openalex.org), [OpenReview](https://openreview.net),
 [Kaggle datasets](https://www.kaggle.com/datasets), [Zenodo](https://zenodo.org),
 [Semantic Scholar](https://www.semanticscholar.org), [Brave Search](https://search.brave.com),
 and [Hacker News](https://news.ycombinator.com), plus first-party lab feeds from

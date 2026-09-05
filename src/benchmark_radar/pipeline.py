@@ -649,7 +649,14 @@ def _score_and_select(
 # not what they were on the simulated date, which is a known limitation of
 # every connector below too -- recorded on the resulting run rather than
 # presented as if it were measured at the time.
-BACKFILL_SOURCES = {"huggingface", "github", "github_releases", "openreview", "semantic_scholar"}
+BACKFILL_SOURCES = {
+    "huggingface",
+    "github",
+    "github_releases",
+    "openreview",
+    "semantic_scholar",
+    "crossref",
+}
 
 
 def simulate_backfill(

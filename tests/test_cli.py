@@ -565,6 +565,9 @@ def test_daily_radar_yml_renders_social_material_instead_of_an_issue():
     )
     assert "--social-output generated/out/body.md" in step["run"]
     assert "gh issue create --title" in step["run"]
+    assert "--label automated --label traction" in step["run"]
+    assert "--add-label automated --add-label traction --remove-label daily-radar" in step["run"]
+    assert "--label daily-radar" not in step["run"]
     social_step = next(
         step
         for step in workflow["jobs"]["build-report"]["steps"]

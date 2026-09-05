@@ -481,29 +481,34 @@ def test_blog_nav_lists_the_same_sections_in_the_same_order_as_the_dashboard(tmp
     assert 'class="nav-active" aria-current="page" href="/blog/"' in page
 
 
-def test_blog_nav_preserves_main_visibility_and_priority(tmp_path):
+def test_dashboard_and_blog_share_the_reduced_chrome_contract(tmp_path):
     write_blog_with_chrome([_briefed()], tmp_path)
     page = (tmp_path / "blog" / "2026-08-30" / "index.html").read_text(encoding="utf-8")
-    nav = re.search(r'<nav class="view-nav".*?</nav>', page, re.S).group(0)
-    assert _nav_targets(nav) == [
+    expected = [
         "/",
+        "/cli/",
         "/leaderboard/",
         "/trends/",
-        "/explore/",
         "/blog/",
-        "/rubric/",
-        "/cli/",
     ]
-    for identity in ('href="/explore/"', 'id="rubric-nav"'):
-        opening = re.search(rf"<a\b(?=[^>]*{re.escape(identity)})[^>]*>", nav).group(0)
-        assert " hidden" not in opening
+    for document in (DASHBOARD_HTML, page):
+        assert _nav_targets(document) == expected
+        header = re.search(r'<header class="masthead".*?</header>', document, re.S).group(0)
+        numbered = []
+        for anchor in re.finditer(r"<a\b([^>]*)>(.*?)</a>", header, re.S):
+            if "data-count" not in anchor.group(2):
+                continue
+            badge_id = re.search(r'id="([^"]+)"', anchor.group(1))
+            assert badge_id
+            numbered.append(badge_id.group(1))
+        assert numbered == ["badge-stars"]
 
 
-def test_blog_fetches_repo_badges_like_the_dashboard():
+def test_blog_fetches_only_the_star_count_like_the_dashboard():
     script = (SITE_DIR / "assets" / "blog.js").read_text(encoding="utf-8")
     assert "repo.stargazers_count" in script
-    assert "repo.forks_count" in script
-    assert "api.github.com/search/issues" in script
+    assert "repo.forks_count" not in script
+    assert "api.github.com/search/issues" not in script
 
 
 def test_the_contact_button_becomes_the_dashboard_deep_link(tmp_path):

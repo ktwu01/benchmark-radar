@@ -243,10 +243,8 @@ def test_each_generated_page_marks_its_navigation_entry_current(tmp_path):
     ids = {
         "leaderboard": 'data-view="leaderboard"',
         "trends": 'data-view="trends"',
-        "explore": 'data-view="map"',
         "cli": 'id="cli-nav"',
         "cite": 'id="cite-open"',
-        "rubric": 'id="rubric-nav"',
     }
     for path, identifying_attribute in ids.items():
         page = (tmp_path / path / "index.html").read_text(encoding="utf-8")
@@ -258,6 +256,18 @@ def test_each_generated_page_marks_its_navigation_entry_current(tmp_path):
         assert 'aria-current="page"' in opening.group(0)
         if path in {"cli", "cite", "rubric"}:
             assert 'aria-expanded="true"' in opening.group(0)
+
+
+def test_unlisted_explore_and_rubric_routes_have_no_false_current_tab(tmp_path):
+    _write(tmp_path, _dashboard())
+    for path in ("explore", "rubric"):
+        page = (tmp_path / path / "index.html").read_text(encoding="utf-8")
+        nav = re.search(r'<nav class="view-nav".*?</nav>', page, re.S).group(0)
+        assert 'aria-current="page"' not in nav
+    explore = (tmp_path / "explore" / "index.html").read_text(encoding="utf-8")
+    rubric = (tmp_path / "rubric" / "index.html").read_text(encoding="utf-8")
+    assert '<section class="view" id="map-view"' in explore
+    assert '<dialog id="rubric-dialog"' in rubric and " open" in rubric
 
 
 def test_exactly_one_heading_is_visible_per_page(tmp_path):

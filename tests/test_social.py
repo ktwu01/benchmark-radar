@@ -1,16 +1,14 @@
 import json
-from datetime import timedelta
 from pathlib import Path
 
 from benchmark_radar import cli
 from benchmark_radar.social import (
-    _MONTHLY_ANCHOR,
-    _WEEKLY_ANCHOR,
     SECTION_HEADING,
     GitChange,
     build_insight_sentence,
     extract_checked,
     load_channels,
+    load_post_sample,
     merge_checked,
     parse_git_log,
     render_social_section,
@@ -191,10 +189,8 @@ def test_render_section_lists_every_channel_unchecked(tmp_path: Path):
 
 
 def test_render_section_groups_daily_and_weekly_channels():
-    # The checklist must show every configured channel that is active for the
-    # day, grouped by cadence: daily targets plus weekly channels on their
-    # trigger day (issue #206), so low-volume subreddits and personal contacts
-    # stay visible and tickable on their 7-day cycle without pinging daily.
+    # The complete checklist stays visible every day. Cadence headings tell the
+    # maintainer how often to use a destination without hiding the checkbox.
     section = render_social_section(
         "insight",
         "repo change",
@@ -203,7 +199,6 @@ def test_render_section_groups_daily_and_weekly_channels():
             {"name": "X / Twitter", "daily": True},
             {"name": "https://www.reddit.com/r/agi/", "daily": False},
         ],
-        today=_WEEKLY_ANCHOR,
     )
     assert "**Daily targets:**" in section
     assert "**Weekly (every 7 days):**" in section
@@ -211,10 +206,7 @@ def test_render_section_groups_daily_and_weekly_channels():
     assert "- [ ] https://www.reddit.com/r/agi/" in section
 
 
-def test_weekly_channels_are_omitted_between_trigger_days():
-    # A day after the weekly trigger must not list the weekly channels, or the
-    # 7-day cadence would be meaningless; only daily targets remain so the
-    # checklist does not nag a low-volume channel every day (issue #206).
+def test_weekly_channels_remain_visible_between_posting_days():
     section = render_social_section(
         "insight",
         "repo change",
@@ -223,53 +215,46 @@ def test_weekly_channels_are_omitted_between_trigger_days():
             {"name": "X / Twitter", "daily": True},
             {"name": "https://www.reddit.com/r/agi/", "daily": False},
         ],
-        today=_WEEKLY_ANCHOR + timedelta(days=1),
     )
     assert "**Daily targets:**" in section
     assert "- [ ] X / Twitter" in section
-    assert "**Weekly" not in section
-    assert "reddit.com" not in section
+    assert "**Weekly (every 7 days):**" in section
+    assert "- [ ] https://www.reddit.com/r/agi/" in section
 
 
-def test_render_section_groups_monthly_channels_on_the_monthly_trigger_day():
-    # ``monthly: true`` opts a channel into the once-a-month cadence, shown on
-    # the anchor's day-of-month like the weekly channels are shown on their
-    # 7-day cycle. A monthly contact must not appear in the daily or weekly
-    # groups.
+def test_render_section_groups_monthly_channels():
+    # Monthly channels remain visible but stay separate from daily and weekly
+    # targets, so checking one does not change its intended cadence.
     section = render_social_section(
         "insight",
         "repo change",
         [],
         [
             {"name": "X / Twitter", "daily": True},
-            {"name": "Junwei Zhou", "monthly": True},
+            {"name": "Monthly outreach", "monthly": True},
         ],
-        today=_MONTHLY_ANCHOR,
     )
     assert "**Daily targets:**" in section
     assert "**Monthly:**" in section
     assert "- [ ] X / Twitter" in section
-    assert "- [ ] Junwei Zhou" in section
+    assert "- [ ] Monthly outreach" in section
     assert "**Weekly" not in section
 
 
-def test_monthly_channels_are_omitted_between_trigger_days():
-    # A day that is not the anchor's day-of-month must not list monthly
-    # channels, or the once-a-month cadence would be meaningless.
+def test_monthly_channels_remain_visible_between_posting_days():
     section = render_social_section(
         "insight",
         "repo change",
         [],
         [
             {"name": "X / Twitter", "daily": True},
-            {"name": "Junwei Zhou", "monthly": True},
+            {"name": "Monthly outreach", "monthly": True},
         ],
-        today=_MONTHLY_ANCHOR + timedelta(days=1),
     )
     assert "**Daily targets:**" in section
     assert "- [ ] X / Twitter" in section
-    assert "**Monthly" not in section
-    assert "Junwei Zhou" not in section
+    assert "**Monthly:**" in section
+    assert "- [ ] Monthly outreach" in section
 
 
 def test_load_channels_daily_only_excludes_monthly_channels(tmp_path: Path):
@@ -279,12 +264,15 @@ def test_load_channels_daily_only_excludes_monthly_channels(tmp_path: Path):
         "  channels:\n"
         "    - name: X / Twitter\n"
         "      daily: true\n"
-        "    - name: Junwei Zhou\n"
+        "    - name: Monthly outreach\n"
         "      monthly: true\n",
         encoding="utf-8",
     )
     assert [c["name"] for c in load_channels(path, daily_only=True)] == ["X / Twitter"]
-    assert [c["name"] for c in load_channels(path)] == ["X / Twitter", "Junwei Zhou"]
+    assert [c["name"] for c in load_channels(path)] == [
+        "X / Twitter",
+        "Monthly outreach",
+    ]
 
 
 def test_render_section_includes_the_copy_paste_post_sample():
@@ -301,6 +289,62 @@ def test_render_section_includes_the_copy_paste_post_sample():
     assert "**发布文案示例** (copy-paste for today's post):" in section
     assert "一个反常识的发现：样本。" in section
     assert "issues/150" in section
+
+
+def test_repository_social_config_leads_with_crowdsourcing_then_ranked_channels():
+    path = Path("config/social.yml")
+    channels = load_channels(path)
+    names = [channel["name"] for channel in channels]
+
+    assert names[:7] == [
+        "众筹-social：请 benchmark 群友转发到自己的社群",
+        "X / Twitter",
+        "Benchmark Radar 讨论群",
+        "GitHub Blog https://ktwu01.github.io/",
+        "WeChat Moment",
+        "Science Intelligence 实名讨论群",
+        "Hacker News https://news.ycombinator.com/submit",
+    ]
+    assert {
+        "Bilibili / B站",
+        "YouTube",
+        "Product Hunt",
+        "DevHunt",
+        "AgentHunter",
+        "BetaList",
+        "Peerlist",
+        "AppSumo",
+        "Indie Hackers",
+        "GitHub Discussions",
+        "Papers with Code discussions",
+        "LAION Discord",
+        "Cold email：arXiv / OpenReview benchmark 作者",
+        "新微信群或 Discord 群",
+        "KOL：逛逛 GitHub 等相关账号",
+        "WhatsApp Communities",
+        "Pinterest",
+        "Snapchat",
+        "Quora",
+    } <= set(names)
+    assert {
+        "Sichen Tao",
+        "Junwei Zhou",
+        "Ziyan Chen",
+        "Phys Bench",
+        "LHTB 造题",
+    }.isdisjoint(names)
+    by_name = {channel["name"]: channel for channel in channels}
+    assert by_name["Cold email：arXiv / OpenReview benchmark 作者"]["daily"] is True
+
+    sample = load_post_sample(path)
+    assert sample is not None
+    assert sample.count("- [ ]") >= 11
+    assert "KOL 软推广：先问一个真问题" in sample
+    assert "Benchmark Radar Top 10" in sample
+    assert "https://benchmark-radar.org/cli" in sample
+    assert "网上在热议什么，最后沉淀成了什么" in sample
+    assert "B站：每天整理 Agent benchmark" in sample
+    assert "Daily Agent Benchmarks" in sample
 
 
 def test_render_section_omits_post_sample_when_none_configured():

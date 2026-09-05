@@ -2,12 +2,12 @@
 
 Benchmark Radar now has one reliable public address:
 `https://benchmark-radar.org/`. HTTPS, redirects, crawler files, and canonical
-metadata passed the August 29 checks below, so search-engine setup can proceed
+metadata passed the September 3 checks below, so search-engine setup can proceed
 without sending conflicting domain signals.
 
 ## Live status
 
-Last checked: **August 29, 2026**.
+Last checked: **September 3, 2026**.
 
 | Check | Live result | What to do |
 | --- | --- | --- |
@@ -17,7 +17,7 @@ Last checked: **August 29, 2026**.
 | HTTP redirect | **Passing:** apex HTTP redirects to the HTTPS apex | Keep it |
 | `www` redirect | **Passing:** HTTPS `www` redirects to the HTTPS apex | Keep it |
 | `robots.txt` | **Current:** sitemap uses `benchmark-radar.org` | Keep it |
-| `sitemap.xml` | **Current:** all four URLs use `benchmark-radar.org` | Keep it |
+| `sitemap.xml` | **Current:** all 1,225 URLs use `benchmark-radar.org` | Keep it |
 | Page metadata | **Current:** canonical and `og:url` use the HTTPS apex | Keep it |
 
 Re-run the checks below after any DNS or Pages change. The table is a dated
@@ -176,14 +176,14 @@ is a quick spot check, not a complete or authoritative index count.
 
 ## Launch checklist
 
-- [ ] Valid TLS certificate for the apex and `www`
-- [ ] **Enforce HTTPS** enabled in GitHub Pages
-- [ ] HTTP and legacy URLs permanently redirect to the HTTPS custom domain
-- [ ] Live `robots.txt`, sitemap, feed, canonicals, and internal links use only
+- [x] Valid TLS certificate for the apex and `www`
+- [x] **Enforce HTTPS** enabled in GitHub Pages
+- [x] HTTP and legacy URLs permanently redirect to the HTTPS custom domain
+- [x] Live `robots.txt`, sitemap, feed, canonicals, and internal links use only
       `https://benchmark-radar.org`
-- [ ] Google Search Console Domain property verified
-- [ ] Sitemap submitted successfully in Google and Bing
-- [ ] Homepage passes live URL inspection and structured-data validation
-- [ ] Dashboard view pages, utility pages, and one benchmark page return useful
+- [x] Google Search Console Domain property verified
+- [x] Sitemap submitted successfully in Google and Bing
+- [x] Homepage passes live URL inspection and structured-data validation
+- [x] Dashboard view pages, utility pages, and one benchmark page return useful
       HTML with JavaScript disabled
 - [ ] Indexing and performance reviewed after Google recrawls the site

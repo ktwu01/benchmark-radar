@@ -1,13 +1,12 @@
 """Static per-benchmark pages: one crawlable URL per benchmark (issue #424).
 
-The dashboard is one HTML document whose four views share a single path, so a
-catalog of 1,100+ benchmarks exposes four indexable URLs to a search engine.
-Each per-benchmark shard already answers the reader's questions about one
-benchmark, but only as JSON consumed by JavaScript. This module renders that
-same evidence as plain HTML, one page per slug, readable with JavaScript
-disabled. It turns the catalog's data advantage into a search advantage: every
-benchmark gets its own title, description, canonical URL, and structured data,
-and the sitemap publishes all of them.
+The dashboard provides collection-level views, while each catalog benchmark
+still needs its own crawlable URL. Each per-benchmark shard already answers the
+reader's questions about one benchmark, but only as JSON consumed by
+JavaScript. This module renders that same evidence as plain HTML, one page per
+slug, readable with JavaScript disabled. Every benchmark gets its own title,
+description, canonical URL, and structured data, and the sitemap publishes all
+of them.
 
 The pages derive from the shards exactly as the shards derive from the crawl
 CSVs, so they are generated and gitignored, never committed. The build calls

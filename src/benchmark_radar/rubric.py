@@ -47,6 +47,7 @@ EVIDENCE_PRIMARY_SOURCES = (
     "OpenAlex",
     "OpenReview",
     "Semantic Scholar",
+    "Crossref",
 )
 EVIDENCE_PRIMARY_CREDIT = 40.0
 EVIDENCE_ARTIFACT_SOURCES = (

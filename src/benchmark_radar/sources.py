@@ -906,6 +906,113 @@ def fetch_zenodo_records(
     )[:limit]
 
 
+def _crossref_date(value: Any) -> datetime | None:
+    """Parse a day-precision Crossref date without inventing missing parts."""
+    if not isinstance(value, dict):
+        return None
+    date_parts = value.get("date-parts")
+    if (
+        not isinstance(date_parts, list)
+        or not date_parts
+        or not isinstance(date_parts[0], list)
+        or len(date_parts[0]) < 3
+    ):
+        return None
+    try:
+        year, month, day = (int(part) for part in date_parts[0][:3])
+        return datetime(year, month, day, tzinfo=UTC)
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
+def fetch_crossref(
+    config: dict[str, Any],
+    since: datetime,
+    limit: int,
+) -> list[RadarItem]:
+    """Collect recent DOI records from Crossref's public works API."""
+    searches = [str(value).strip() for value in config.get("searches", []) if str(value).strip()]
+    budget = max(1, int(config.get("max_requests", len(searches) or 1)))
+    page_size = min(1000, max(1, int(config.get("page_size", 50))))
+    until = _latest_allowed(config).date()
+    found: dict[str, RadarItem] = {}
+    for search in searches[:budget]:
+        payload = get_json(
+            "https://api.crossref.org/works",
+            params={
+                "query.title": search,
+                "filter": (
+                    f"from-pub-date:{since.date().isoformat()},until-pub-date:{until.isoformat()}"
+                ),
+                "rows": min(page_size, limit),
+                "select": "DOI,title,abstract,author,published,URL,is-referenced-by-count",
+            },
+            **_request_options(config),
+        )
+        message = _payload_dict(payload, "Crossref").get("message")
+        if not isinstance(message, dict):
+            raise ConnectorPayloadError("Crossref response is missing message")
+        for row in _payload_rows(message, "items", "Crossref"):
+            doi = str(row.get("DOI") or "").strip().casefold()
+            titles = row.get("title") or []
+            if not isinstance(titles, list):
+                raise ConnectorPayloadError("Crossref title must be an array")
+            title = next((str(value).strip() for value in titles if str(value).strip()), "")
+            published = _crossref_date(row.get("published"))
+            if not doi or not title or published is None:
+                continue
+            if published.date() < since.date() or _reject_future(config, doi, published):
+                continue
+            authors = row.get("author") or []
+            if not isinstance(authors, list) or not all(
+                isinstance(author, dict) for author in authors
+            ):
+                raise ConnectorPayloadError("Crossref author must be an array of objects")
+            author_names = []
+            organizations = []
+            for author in authors:
+                name = " ".join(
+                    value
+                    for value in (
+                        str(author.get("given") or "").strip(),
+                        str(author.get("family") or "").strip(),
+                    )
+                    if value
+                )
+                if name:
+                    author_names.append(name)
+                affiliations = author.get("affiliation") or []
+                if not isinstance(affiliations, list) or not all(
+                    isinstance(affiliation, dict) for affiliation in affiliations
+                ):
+                    raise ConnectorPayloadError(
+                        "Crossref author affiliation must be an array of objects"
+                    )
+                organizations.extend(
+                    str(affiliation.get("name") or "").strip()
+                    for affiliation in affiliations
+                    if str(affiliation.get("name") or "").strip()
+                )
+            doi_url = f"https://doi.org/{doi}"
+            found[doi] = RadarItem(
+                source="Crossref",
+                source_id=doi,
+                title=title,
+                url=doi_url,
+                published_at=published,
+                updated_at=published,
+                summary=clean_card_text(str(row.get("abstract") or "")),
+                event_kind="released",
+                authors=author_names,
+                organizations=list(dict.fromkeys(organizations)),
+                artifact_urls=[doi_url],
+                metrics={"citations": float(row.get("is-referenced-by-count") or 0)},
+                raw=row,
+                parser_version="crossref-works/1",
+            )
+    return sorted(found.values(), key=lambda item: item.published_at, reverse=True)[:limit]
+
+
 def fetch_openreview(
     config: dict[str, Any],
     since: datetime,
@@ -1495,6 +1602,7 @@ SOURCE_FETCHERS = {
     "huggingface_papers": fetch_huggingface_papers,
     "kaggle_datasets": fetch_kaggle_datasets,
     "zenodo": fetch_zenodo_records,
+    "crossref": fetch_crossref,
     "openreview": fetch_openreview,
     "semantic_scholar": fetch_semantic_scholar,
     "github_releases": fetch_github_releases,
@@ -1516,6 +1624,7 @@ _PARSER_VERSION_METHODS = {
     "huggingface-papers": "API",
     "kaggle-datasets": "API",
     "zenodo-records": "API",
+    "crossref-works": "API",
     "openreview-api-v2": "API",
     "semantic-scholar-graph": "API",
     "github-releases": "API",
@@ -1533,6 +1642,7 @@ SOURCE_DEFAULT_METHODS = {
     "huggingface_papers": "API",
     "kaggle_datasets": "API",
     "zenodo": "API",
+    "crossref": "API",
     "openreview": "API",
     "semantic_scholar": "API",
     "github_releases": "API",

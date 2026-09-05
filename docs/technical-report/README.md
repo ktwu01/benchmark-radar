@@ -9,27 +9,34 @@ Build the PDF after installing ReportLab:
 
 ```bash
 python3 scripts/build_system_evaluation.py \
-  --doi 10.5281/zenodo.22167102
-```
-
-The builder writes
-`output/pdf/benchmark-radar-technical-report-v0.9.0.pdf`. The reserved DOI appears
-in the PDF itself. Upload that PDF to the Zenodo record described by
-`zenodo-metadata.json`, then publish the record.
-
-The published v0.9.0 PDF is frozen. Do not overwrite it when preparing a new
-manuscript or adding a contributor. Build the working next draft explicitly:
-
-```bash
-python3 scripts/build_system_evaluation.py \
   --next-draft \
   --doi 10.5281/zenodo.22167102
 ```
 
-This writes `output/pdf/benchmark-radar-technical-report-next-draft.pdf` and
-uses the draft byline and contributor affiliations. Do not change the frozen
-`zenodo-metadata.json` for draft work; prepare release metadata only when the
-next report version is approved for deposit.
+The builder writes the working
+`output/pdf/benchmark-radar-technical-report-next-draft.pdf`. The reserved DOI
+appears in the PDF itself. Review the draft before any deposit.
+
+The published v0.9.0 PDF is frozen. Do not overwrite it when preparing a new
+manuscript or adding a contributor. Replacing it requires an explicit opt-in:
+
+```bash
+python3 scripts/build_system_evaluation.py \
+  --overwrite-frozen \
+  --doi 10.5281/zenodo.22167102
+```
+
+The next-draft build uses the draft byline and contributor affiliations. Its
+section 6.2 table is reproduced from
+`docs/technical-report/saturation-audit-6.2.json`, which is generated from the
+curated score archive and model-card registry with:
+
+```bash
+python3 -m benchmark_radar.saturation_audit
+```
+
+Do not change the frozen `zenodo-metadata.json` for draft work; prepare release
+metadata only when the next report version is approved for deposit.
 
 The draft byline is provisional until the contributor has reviewed and approved
 the integrated manuscript, supplied a contribution statement, and accepted
@@ -57,3 +64,15 @@ the current README and report documentation:
 
 Regenerate and review the report when any of those inputs or the report text
 changes.
+
+## Independent section 6.2 reproduction
+
+On 2026-09-05, a Codex-assisted maintainer review regenerated the audit from the
+two canonical YAML files. It reproduced four counts: eight raw near-ceiling
+readings; no raw-best setup spanning two dates; four benchmarks with a different
+repeated setup; and one of those four within five points. The review also checked
+the HMMT sample against Table 7 of the
+[DeepSeek-V4 primary report](https://arxiv.org/html/2606.19348): HMMT 2026 Feb,
+Pass@1, Think Max is 94.8 for DeepSeek-V4-Flash and 95.2 for
+DeepSeek-V4-Pro. Those values match the `deepseek_v4_technical_report` and
+`deepseek_v4_model_card` rows in `data/benchmark_scores.yml`.

@@ -47,14 +47,10 @@ from .site_shell import breadcrumb_schema, esc, webpage_schema
 
 LATEST_POST_LIMIT = 30
 
-# The dashboard's toggle and repo badges translate these at runtime; the
+# The dashboard's toggle and star count translate these at runtime; the
 # chrome's own data-i18n keys cover everything else.
 _TOGGLE_I18N_KEYS = ("Switch to Chinese (中文)", "Switch to English")
-_BADGE_I18N_KEYS = (
-    "Star this repository on GitHub. {count} stars",
-    "Fork this repository on GitHub. {count} forks",
-    "Open a new issue on GitHub. {count} issues open",
-)
+_BADGE_I18N_KEYS = ("Star this repository on GitHub. {count} stars",)
 # The footer's build date prefix is baked in per page, after the keys were
 # collected from the raw extracted chrome, so it is listed here.
 _FOOTER_I18N_KEYS = ("Updated",)
