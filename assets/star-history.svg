@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480"
+  role="img" aria-labelledby="title description">
+  <title id="title">ktwu01/benchmark-radar star history</title>
+  <desc id="description">161 stars · 2026-07-27 – 2026-09-05</desc>
+  <rect width="800" height="480" rx="12" fill="#ffffff" />
+  <style>
+    text {
+      fill: #1f2328;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .grid line { stroke: #d8dee4; stroke-width: 1; }
+    .grid text { fill: #656d76; font-size: 12px; }
+  </style>
+  <text x="72" y="34" font-size="22" font-weight="600">ktwu01/benchmark-radar Star History</text>
+  <text x="72" y="56" font-size="13" fill="#656d76">161 stars · 2026-07-27 – 2026-09-05</text>
+  <g class="grid"><line x1="72" y1="418.0" x2="772" y2="418.0" /><text x="60" y="423.0" text-anchor="end">0</text><line x1="72" y1="329.9" x2="772" y2="329.9" /><text x="60" y="334.9" text-anchor="end">41</text><line x1="72" y1="241.8" x2="772" y2="241.8" /><text x="60" y="246.8" text-anchor="end">82</text><line x1="72" y1="153.7" x2="772" y2="153.7" /><text x="60" y="158.7" text-anchor="end">123</text><line x1="72" y1="72.0" x2="772" y2="72.0" /><text x="60" y="77.0" text-anchor="end">161</text><text x="72.0" y="452" text-anchor="start">2026-07-27</text><text x="247.0" y="452" text-anchor="middle">2026-08-06</text><text x="422.0" y="452" text-anchor="middle">2026-08-16</text><text x="597.0" y="452" text-anchor="middle">2026-08-26</text><text x="772.0" y="452" text-anchor="end">2026-09-05</text></g><path d="M 72.0 418.0 L 72.0 415.9 L 89.5 407.3 L 124.5 405.1 L 142.0 403.0 L 194.5 400.8 L 229.5 398.7 L 264.5 392.2 L 317.0 390.1 L 369.5 385.8 L 387.0 383.6 L 404.5 381.5 L 422.0 379.3 L 439.5 372.9 L 457.0 366.4 L 474.5 349.2 L 544.5 347.1 L 562.0 289.1 L 579.5 233.2 L 597.0 188.0 L 614.5 175.2 L 632.0 170.9 L 649.5 158.0 L 667.0 153.7 L 684.5 142.9 L 702.0 138.6 L 719.5 123.6 L 737.0 106.4 L 754.5 99.9 L 772.0 72.0 L 772.0 418.0 Z" fill="#54aeff" opacity="0.18" /><path d="M 72.0 415.9 L 89.5 407.3 L 124.5 405.1 L 142.0 403.0 L 194.5 400.8 L 229.5 398.7 L 264.5 392.2 L 317.0 390.1 L 369.5 385.8 L 387.0 383.6 L 404.5 381.5 L 422.0 379.3 L 439.5 372.9 L 457.0 366.4 L 474.5 349.2 L 544.5 347.1 L 562.0 289.1 L 579.5 233.2 L 597.0 188.0 L 614.5 175.2 L 632.0 170.9 L 649.5 158.0 L 667.0 153.7 L 684.5 142.9 L 702.0 138.6 L 719.5 123.6 L 737.0 106.4 L 754.5 99.9 L 772.0 72.0" fill="none" stroke="#0969da" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /><circle cx="772.0" cy="72.0" r="5" fill="#0969da" />
+</svg>
