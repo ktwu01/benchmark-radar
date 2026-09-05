@@ -53,7 +53,7 @@ def test_next_draft_records_contributor_name_and_affiliation() -> None:
 def test_next_draft_records_real_use_case_section() -> None:
     source = BUILDER.read_text(encoding="utf-8")
 
-    assert "6.5 Worked real use case: prior-art check for a new evaluation" in source
+    assert "6.6 Worked real use case: prior-art check for a new evaluation" in source
     assert "github.com/ktwu01/benchmark-radar/issues/492" in source
     assert "Contributor.</b> Jiayu Wang" in source
 

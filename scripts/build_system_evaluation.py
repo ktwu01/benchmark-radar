@@ -7,7 +7,9 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 from pathlib import Path
+from typing import Any
 
 from build_technical_report import (
     AMBER,
@@ -52,8 +54,181 @@ from reportlab.platypus import (
 GREEN = HexColor("#16794A")
 PALE_GREEN = HexColor("#EAF7F0")
 PURPLE = HexColor("#6D4AFF")
-FROZEN_OUTPUT = Path("output/pdf/benchmark-radar-technical-report-v0.9.0.pdf")
 NEXT_DRAFT_OUTPUT = Path("output/pdf/benchmark-radar-technical-report-next-draft.pdf")
+AGENT_WEAKNESS_STUDY_PATH = Path("data/agent_weakness_evidence.yml")
+AGENT_WEAKNESS_ISSUE_NUMBER = 455
+AGENT_WEAKNESS_ISSUE_URL = "https://github.com/ktwu01/benchmark-radar/issues/455"
+AGENT_WEAKNESS_CONTRIBUTOR = "Junkai Wang / @JunkaiWang-TheoPhy"
+AGENT_WEAKNESS_SECTION_TITLE = "6.5 Selected benchmark-family signal on agent weaknesses"
+
+
+def _load_agent_weakness_analysis_module():
+    module_path = Path(__file__).with_name("analyze_agent_weaknesses.py")
+    spec = importlib.util.spec_from_file_location("analyze_agent_weaknesses", module_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Unable to load analysis module from {module_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_agent_weakness_report_data(
+    source_path: Path = AGENT_WEAKNESS_STUDY_PATH,
+) -> dict[str, Any]:
+    module = _load_agent_weakness_analysis_module()
+    study = module.load_study(source_path)
+    analysis = module.analyze_study(study)
+    references: list[dict[str, str]] = []
+    seen_families: set[str] = set()
+    for row in study["rows"]:
+        family_name = row["benchmark_family_name"]
+        if family_name in seen_families:
+            continue
+        source_url = row["source_url"]
+        if not source_url:
+            continue
+        seen_families.add(family_name)
+        references.append(
+            {
+                "family_name": family_name,
+                "source_url": source_url,
+                "evidence_location": row["evidence_location"],
+            }
+        )
+
+    agreement = analysis["agreement"]
+    disagreement_count = len(agreement["disagreements"])
+    agreement_match_count = agreement["completed_row_count"] - disagreement_count
+    return {
+        "issue_number": AGENT_WEAKNESS_ISSUE_NUMBER,
+        "issue_url": AGENT_WEAKNESS_ISSUE_URL,
+        "contributor": AGENT_WEAKNESS_CONTRIBUTOR,
+        "snapshot_date": analysis["snapshot_date"],
+        "evidence_cutoff": analysis["evidence_cutoff"],
+        "repository_commit_input": analysis["repository_commit_input"],
+        "demonstrated_family_count": analysis["demonstrated_family_count"],
+        "state_control_count": analysis["coarse_recurrence"]["state_control"]["family_count"],
+        "decision_execution_count": analysis["coarse_recurrence"]["decision_execution"][
+            "family_count"
+        ],
+        "agreement_match_count": agreement_match_count,
+        "agreement_disagreement_count": disagreement_count,
+        "completed_secondary_review_count": agreement["completed_row_count"],
+        "sampled_secondary_review_count": agreement["sampled_row_count"],
+        "pending_secondary_review_count": agreement["pending_row_count"],
+        "design_implied_count": analysis["status_counts"]["design_implied"],
+        "unmeasured_count": analysis["status_counts"]["unmeasured"],
+        "measurement_counterexample_only": analysis["measurement_counterexample_only"],
+        "primary_source_references": references,
+    }
+
+
+def _pending_sampled_rows_text(pending_reviews: int, reviewed_total: int) -> str:
+    return (
+        f"{pending_reviews} pending sampled row{'' if pending_reviews == 1 else 's'} "
+        f"out of {reviewed_total} sampled row{'' if reviewed_total == 1 else 's'}"
+    )
+
+
+def _agreement_summary_table_text(report_data: dict[str, Any]) -> str:
+    agreement_matches = report_data["agreement_match_count"]
+    reviewed = report_data["completed_secondary_review_count"]
+    reviewed_total = report_data["sampled_secondary_review_count"]
+    pending_reviews = report_data["pending_secondary_review_count"]
+    if reviewed == 0:
+        return (
+            "No completed secondary reviews yet; "
+            f"{_pending_sampled_rows_text(pending_reviews, reviewed_total)}"
+        )
+    pending_clause = (
+        f"; {pending_reviews} pending sampled row{'' if pending_reviews == 1 else 's'}"
+        if pending_reviews
+        else ""
+    )
+    return (
+        f"{agreement_matches}/{reviewed} agreement matches across {reviewed_total} "
+        f"blinded sampled rows{pending_clause}"
+    )
+
+
+def _agreement_summary_paragraph_text(report_data: dict[str, Any]) -> str:
+    agreement_matches = report_data["agreement_match_count"]
+    reviewed = report_data["completed_secondary_review_count"]
+    reviewed_total = report_data["sampled_secondary_review_count"]
+    pending_reviews = report_data["pending_secondary_review_count"]
+    if reviewed == 0:
+        return (
+            "No completed blinded sampled rows yet; "
+            f"{_pending_sampled_rows_text(pending_reviews, reviewed_total)}."
+        )
+
+    pending_clause = (
+        f" and {pending_reviews} pending sampled row{'' if pending_reviews == 1 else 's'}"
+        if pending_reviews
+        else ""
+    )
+    return (
+        f"Independent secondary coding matched on {agreement_matches}/{reviewed} completed "
+        f"blinded sampled rows{pending_clause} out of {reviewed_total} sampled rows; "
+        f"the {agreement_matches}/{reviewed} sample-local result among completed rows in the "
+        "main packet does not establish broad reliability."
+    )
+
+
+def agent_weakness_section_paragraphs(report_data: dict[str, Any]) -> list[str]:
+    demonstrated = report_data["demonstrated_family_count"]
+    state_control = report_data["state_control_count"]
+    decision_execution = report_data["decision_execution_count"]
+    design_implied = report_data["design_implied_count"]
+    unmeasured = report_data["unmeasured_count"]
+    measurement_counterexamples = ", ".join(report_data["measurement_counterexample_only"])
+    citation_range = agent_weakness_reference_citation_range(report_data)
+    return [
+        (
+            f"Across {demonstrated} demonstrated benchmark families in the issue "
+            f"#{report_data['issue_number']} selected sample, the family-deduplicated denominator "
+            f"shows a state-control-heavy pattern: {state_control}/{demonstrated} families fall in "
+            f"the coarse state-control grouping, versus {decision_execution}/{demonstrated} in "
+            "decision-execution. This bounded selected sample is not a field-wide prevalence "
+            "estimate."
+        ),
+        (
+            f"Method and limits: {report_data['contributor']} coded issue "
+            f"#{report_data['issue_number']} ({report_data['issue_url']}) from "
+            f"data/agent_weakness_evidence.yml at snapshot date {report_data['snapshot_date']}, "
+            f"evidence cutoff {report_data['evidence_cutoff']}, and commit input "
+            f"{report_data['repository_commit_input']}. The demonstrated denominator excludes "
+            f"{design_implied} design-implied row and {unmeasured} unmeasured row; each included "
+            f"family needed a primary-source anchor, a same-family counterexample, and family "
+            f"deduplication. {_agreement_summary_paragraph_text(report_data)} "
+            f"{measurement_counterexamples} remains the instrument counterexample rather than "
+            "demonstrated prevalence evidence, because its audit shows that benchmark correction can "
+            "reverse an apparent verification/completion failure signal. Primary-source benchmark "
+            f"evidence and the SciCode audit are cited in {citation_range}. The sample is benchmark-family "
+            "selected, not exhaustive, and limited by what current public benchmarks measure."
+        ),
+    ]
+
+
+def agent_weakness_reference_citation_range(report_data: dict[str, Any]) -> str:
+    start = 9
+    end = start + len(report_data["primary_source_references"]) - 1
+    if end <= start:
+        return f"[{start}]"
+    return f"[{start}-{end}]"
+
+
+def agent_weakness_reference_entries(report_data: dict[str, Any]) -> list[str]:
+    entries: list[str] = []
+    for index, reference in enumerate(report_data["primary_source_references"], start=9):
+        entries.append(
+            f"[{index}] Primary-source evidence for {reference['family_name']}. "
+            f"{reference['source_url']}. Evidence anchor: {reference['evidence_location']}"
+        )
+    return entries
+
+
+FROZEN_OUTPUT = Path("output/pdf/benchmark-radar-technical-report-v0.9.0.pdf")
 FROZEN_AUTHORS = ("Koutian Wu",)
 NEXT_DRAFT_AUTHORS = ("Koutian Wu", "Junjie Zhou", "Jiayu Wang")
 NEXT_DRAFT_BYLINE = (
@@ -332,6 +507,8 @@ def story(
 ) -> list:
     st = styles()
     tiny = ParagraphStyle("Tiny", parent=st["small"], fontSize=6.45, leading=8.0)
+    agent_weakness_data = load_agent_weakness_report_data()
+    agent_weakness_paragraphs = agent_weakness_section_paragraphs(agent_weakness_data)
     story: list = []
 
     story.extend(
@@ -589,7 +766,7 @@ def story(
                     ],
                     [
                         p("Verification", st["small_bold"]),
-                        p("Clean-worktree rebuild plus 1,028 passing tests.", st["small"]),
+                        p("Clean-worktree rebuild plus a passing full CI suite.", st["small"]),
                         p("Source coverage still depends on public endpoints.", st["small"]),
                     ],
                 ],
@@ -993,10 +1170,30 @@ def story(
                 ],
                 [0.55 * inch, 3.35 * inch, 2.70 * inch],
             ),
+            p(AGENT_WEAKNESS_SECTION_TITLE, st["subsection"]),
+            table(
+                [
+                    [
+                        p("Scope", st["table_header"]),
+                        p("Result", st["table_header"]),
+                    ],
+                    [
+                        p("Issue #455 selected sample", tiny),
+                        p(
+                            f"{agent_weakness_data['demonstrated_family_count']} demonstrated families; {agent_weakness_data['state_control_count']}/{agent_weakness_data['demonstrated_family_count']} state-control; {agent_weakness_data['decision_execution_count']}/{agent_weakness_data['demonstrated_family_count']} decision-execution; {_agreement_summary_table_text(agent_weakness_data)}",
+                            tiny,
+                        ),
+                    ],
+                ],
+                [1.55 * inch, 5.05 * inch],
+                tiny=True,
+            ),
+            p(agent_weakness_paragraphs[0], st["body"]),
+            p(agent_weakness_paragraphs[1], st["small"]),
             KeepTogether(
                 [
                     p(
-                        "6.5 Worked real use case: prior-art check for a new evaluation",
+                        "6.6 Worked real use case: prior-art check for a new evaluation",
                         st["subsection"],
                     ),
                     p(
@@ -1095,7 +1292,7 @@ def story(
             PageBreak(),
             p("7. Reproducibility, access, and citation", st["section"]),
             p(
-                "This report evaluates Benchmark Radar v0.9.0 at Git commit 98c7de3 and data cutoff 2026-08-29. The clean worktree ran the CI sequence: lint and formatting checks, external normalization, KW-Bench classification, checksummed data-release construction, and the full test suite. All 1,028 tests passed.",
+                "This report evaluates Benchmark Radar v0.9.0 at Git commit 98c7de3 and data cutoff 2026-08-29. The clean worktree ran the CI sequence: lint and formatting checks, external normalization, KW-Bench classification, checksummed data-release construction, and the full test suite. The current full CI suite passed.",
                 st["body"],
             ),
             table(
@@ -1148,7 +1345,7 @@ def story(
             ),
             p("Data statement", st["subsection"]),
             p(
-                "Counts were recomputed from site/data/radar.json, site/data/benchmark-index.json, site/data/models.json, data/model_cards.yml, data/benchmark_scores.yml, normalized files under data/external/, and config.yml. The PDF is a dated interpretation. The rolling dashboard may change after the cutoff; cite its current number with a retrieval date.",
+                "The report's core counts are a frozen v0.9.0 audit at commit 98c7de3 with cutoff 2026-08-29, sourced from the versioned release files that back that snapshot. The current issue #455 study is reported separately as a 2026-09-01 selected-sample analysis and does not recompute or replace the frozen v0.9.0 core counts.",
                 st["body"],
             ),
             p("References", st["section"]),
@@ -1184,6 +1381,10 @@ def story(
                 "[8] L. Xiaopai. BuilderPulse: AI-powered daily intelligence for indie hackers and builders. GitHub, 2026. https://github.com/BuilderPulse/BuilderPulse",
                 st["reference"],
             ),
+            *[
+                p(entry, st["reference"])
+                for entry in agent_weakness_reference_entries(agent_weakness_data)
+            ],
             Spacer(1, 9),
             Table(
                 [
@@ -1216,12 +1417,12 @@ def story(
     return story
 
 
-def main() -> None:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--output",
         type=Path,
-        default=None,
+        default=NEXT_DRAFT_OUTPUT,
     )
     parser.add_argument("--doi", default="10.5281/zenodo.22167102")
     parser.add_argument(
@@ -1229,15 +1430,21 @@ def main() -> None:
         action="store_true",
         help="build the working next-draft artifact with the current contributor byline",
     )
+    return parser
+
+
+def main() -> None:
+    parser = build_parser()
     args = parser.parse_args()
-    output = args.output or (NEXT_DRAFT_OUTPUT if args.next_draft else FROZEN_OUTPUT)
+    output = args.output
     if args.next_draft and output.resolve() == FROZEN_OUTPUT.resolve():
         parser.error("--next-draft cannot overwrite the frozen v0.9.0 PDF")
+    draft = args.next_draft or output.resolve() != FROZEN_OUTPUT.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
-    authors = NEXT_DRAFT_AUTHORS if args.next_draft else FROZEN_AUTHORS
-    byline = NEXT_DRAFT_BYLINE if args.next_draft else None
-    affiliations = NEXT_DRAFT_AFFILIATIONS if args.next_draft else ()
-    corresponding_author = NEXT_DRAFT_CORRESPONDING_AUTHOR if args.next_draft else None
+    authors = NEXT_DRAFT_AUTHORS if draft else FROZEN_AUTHORS
+    byline = NEXT_DRAFT_BYLINE if draft else None
+    affiliations = NEXT_DRAFT_AFFILIATIONS if draft else ()
+    corresponding_author = NEXT_DRAFT_CORRESPONDING_AUTHOR if draft else None
     EvaluationDoc(str(output), doi=args.doi, authors=authors).build(
         story(
             args.doi,
@@ -1245,7 +1452,7 @@ def main() -> None:
             byline=byline,
             affiliations=affiliations,
             corresponding_author=corresponding_author,
-            draft=args.next_draft,
+            draft=draft,
         )
     )
     print(output)
