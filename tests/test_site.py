@@ -675,10 +675,12 @@ def test_routes_degrade_to_static_pages_and_refresh_the_payload_the_route_needs(
     assert nav.count("navigationSequence !== viewNavigationSequence") == 2
 
     # A route that needs history selects radar.json before fetching, verifies
-    # again after assignment, and only then retires the visible error.
+    # again after assignment, and only then retires the visible error. Trends
+    # uses the chart payload instead of the full corpus.
     assert "state.fullDataLoaded || stateNeedsFullData()" in refresh
-    assert 'needsFullPayload ? "/data/radar.json" : "/data/radar-bootstrap.json"' in refresh
+    assert '"/data/radar-trends.json"' in refresh
     assert 'if (stateNeedsFullData()) await ensureFullData("reload");' in refresh
+    assert 'else if (stateNeedsTrendsData()) await ensureTrendsData("reload");' in refresh
     assert refresh.index(
         'if (stateNeedsFullData()) await ensureFullData("reload");'
     ) < refresh.index('byId("error-state").hidden = true;')
@@ -707,11 +709,12 @@ def test_newer_successful_data_requests_cannot_be_overwritten_by_late_responses(
     assert "if (!applyDashboardData(data, requestSequence" in refresh
     assert "const requestSequence = ++nextDashboardRequestSequence;" in initialize
     assert "if (!applyDashboardData(data, requestSequence, false)) return;" in initialize
-    ensure_full = script.split("async function ensureFullData", 1)[1].split(
-        "async function ensureDataForState", 1
+    fetch_payload = script.split("async function fetchDashboardPayload", 1)[1].split(
+        "async function ensureTrendsData", 1
     )[0]
-    assert "if (!applied && !state.fullDataLoaded)" in ensure_full
-    assert "Full data request was superseded by a bootstrap response" in ensure_full
+    assert "if (!applied && fullPayload && !state.fullDataLoaded)" in fetch_payload
+    assert "Full data request was superseded by a bootstrap response" in fetch_payload
+    assert "Trends data request was superseded by a bootstrap response" in fetch_payload
 
 
 def test_rubric_remains_a_direct_route_without_a_navigation_control():
@@ -760,9 +763,63 @@ def test_initial_page_uses_small_bootstrap_and_lazy_loads_history():
     assert 'fetch("/data/radar-bootstrap.json")' in initialize
     assert "await ensureDataForState();" in initialize
     loader = script.split("async function ensureFullData(", 1)[1].split("\nasync function ", 1)[0]
-    assert 'fetch("/data/radar.json", { cache })' in loader
-    assert '["trends", "map"].includes(state.view)' in script
+    assert 'fetchDashboardPayload("/data/radar.json", cache, requestSequence, true)' in loader
+    trends_loader = script.split("async function ensureTrendsData(", 1)[1].split(
+        "\nasync function ", 1
+    )[0]
+    assert '"/data/radar-trends.json"' in trends_loader
+    nav = script.split('document.querySelectorAll("[data-view]")', 1)[1].split(
+        "// Reads every control rather than the event target", 1
+    )[0]
+    assert nav.index("setView(view);") < nav.index("await ensureTrendsData();")
+    assert 'if (view === "map") await ensureFullData();' not in nav
+    assert "relationship-explorer" in script
+    assert (
+        "state.entity"
+        in script.split("function stateNeedsFullData", 1)[1].split(
+            "function stateNeedsTrendsData", 1
+        )[0]
+    )
+    assert "function mergeDashboardData" in script
     assert 'state.todayDate === "all"' in script
+    # A Trends day has counts but no evidence_items. Mapping those days would
+    # throw and leave Today blank; listing an unloaded historical date would
+    # replace the latest-scan rows with an empty state.
+    assert "(day.evidence_items || []).map" in script
+    today = script.split("function renderToday", 1)[1].split("function renderTrends", 1)[0]
+    assert "!Array.isArray(day.evidence_items)" in today
+    assert "state.todayDate = state.data.latest_date;" in today
+    nav_today = script.split('document.querySelectorAll("[data-view]")', 1)[1].split(
+        "// Reads every control rather than the event target", 1
+    )[0]
+    assert 'if (view === "today" && state.todayDate !== "all")' in nav_today
+
+
+def test_returning_to_explore_after_trends_supersession_reloads_full_data():
+    """Issue #528 review race: full-payload loading -> Trends -> Explore.
+
+    A trends response can supersede an in-flight /data/radar.json fetch while
+    the relationship explorer is open. The <details> element never closes, so
+    no toggle event fires again and the old code left map-canvas with zero
+    children and no new full-data request. The Explore nav click itself must
+    re-run the data gate and redraw once the full corpus lands.
+    """
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+    nav = script.split('document.querySelectorAll("[data-view]")', 1)[1].split(
+        "// Reads every control rather than the event target", 1
+    )[0]
+    assert 'if (view === "map") await ensureDataForState();' in nav
+    await_map = nav.index('if (view === "map") await ensureDataForState();')
+    # The gate runs inside the shared try/catch, so a failed retry falls back
+    # to the generated route exactly like a failed Trends upgrade does.
+    assert await_map < nav.index("window.location.assign(anchor?.href || VIEW_PATHS[view]")
+    # The redraw after the await is the second renderTrendMap() call in the
+    # handler; without it the graph stays empty even after the data arrives.
+    redraw = nav.index('if (view === "map") renderTrendMap();', await_map)
+    assert await_map < redraw
+    # The lazy gate is unchanged: entering Explore with the disclosure closed
+    # and no entity permalink still must not fetch the full corpus.
+    assert 'if (view === "map") await ensureFullData();' not in nav
 
 
 def test_rubric_is_read_from_published_data_not_restated_in_the_browser():
@@ -835,7 +892,8 @@ def test_today_toolbar_keeps_secondary_filters_in_a_popover():
     assert "function closeFiltersDrawer()" in script
     assert "function refreshData()" in script
     assert "state.fullDataLoaded || stateNeedsFullData()" in script
-    assert 'needsFullPayload ? "/data/radar.json" : "/data/radar-bootstrap.json"' in script
+    assert '"/data/radar-trends.json"' in script
+    assert '"/data/radar-bootstrap.json"' in script
     assert 'const response = await fetch(path, { cache: "reload" });' in script
     assert "drawer.hidden = true" in script
 

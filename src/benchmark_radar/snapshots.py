@@ -1265,6 +1265,51 @@ def dashboard_bootstrap(dashboard: dict[str, Any]) -> dict[str, Any]:
     return bootstrap
 
 
+_TREND_DAY_KEYS = (
+    "attention",
+    "category_counts",
+    "category_counts_released",
+    "category_trends",
+    "coverage_complete",
+    "coverage_gaps",
+    "coverage_signature",
+    "cumulative_category_counts",
+    "cumulative_evidence_count",
+    "date",
+    "event_kind_counts",
+    "evidence_count",
+    "generated_at",
+    "ingest_health",
+    "item_count",
+    "producer_health",
+    "required_coverage_complete",
+    "required_coverage_gaps",
+    "selection",
+    "since",
+    "source_counts",
+)
+
+
+def dashboard_trends(dashboard: dict[str, Any]) -> dict[str, Any]:
+    """Return the chart payload for Trends, without daily evidence items.
+
+    The Trends view plots counts, coverage, and source health across every
+    committed scan. It does not read ``evidence_items``, briefing text, or the
+    corpus graph. Those belong in ``radar.json`` for download and in the
+    historical Today path, not on the first click of the Trends tab.
+    """
+    corpus = dashboard.get("corpus") or {}
+    return {
+        **dashboard,
+        "bootstrap": False,
+        "days": [
+            {key: day[key] for key in _TREND_DAY_KEYS if key in day}
+            for day in dashboard.get("days") or []
+        ],
+        "corpus": {"aggregates": corpus.get("aggregates") or {}},
+    }
+
+
 def rebuild_dashboard(
     snapshot_dir: Path,
     output: Path,
@@ -1283,10 +1328,13 @@ def rebuild_dashboard(
         kw_bench_store_path=kw_bench_store_path,
     )
     _write_json(output, value)
-    # The browser starts here.  Historical views lazily upgrade to radar.json;
-    # the full file remains the stable, one-click public dataset.
+    # The browser starts here.  Historical views lazily upgrade: Trends reads
+    # the chart payload, Today-all-dates and Explore's canvas still use the
+    # full public dataset. radar.json remains the stable one-click export.
     bootstrap_path = output.with_name(f"{output.stem}-bootstrap{output.suffix}")
     _write_json(bootstrap_path, dashboard_bootstrap(value))
+    trends_path = output.with_name(f"{output.stem}-trends{output.suffix}")
+    _write_json(trends_path, dashboard_trends(value))
     # The record-count badge lives beside radar.json so it deploys with the same
     # dashboard build and can never report a corpus newer than the page it sits
     # on. It is the single self-describing "how much have we collected" signal
