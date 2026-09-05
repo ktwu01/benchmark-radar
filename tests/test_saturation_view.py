@@ -493,6 +493,17 @@ def test_the_reading_gap_ends_at_this_benchmarks_own_latest_mention():
     assert "x(endText)" not in gap, "the gap must not extend to the registry-wide end date"
 
 
+def test_all_dates_search_includes_stable_source_ids():
+    # Historical repairs are often requested by arXiv or GitHub ID. The
+    # all-dates dashboard search must inspect the same identifier as the CLI
+    # QueryService so a repaired record is discoverable by its canonical ID.
+    script = source("site/assets/app.js")
+    filtered = script.split("function filteredObservations()", 1)[1].split(
+        "\n}\n\n// Generated utility pages", 1
+    )[0]
+    assert "${item.source_id}" in filtered
+
+
 def test_the_adoption_marks_are_gone_from_the_chart():
     # The staircase, its orange advance diamonds, the release marker and the card
     # rug all answered "who reported this, and when" rather than "what did it

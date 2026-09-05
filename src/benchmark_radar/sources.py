@@ -426,6 +426,73 @@ def fetch_arxiv(config: dict[str, Any], since: datetime, limit: int) -> list[Rad
     )[:limit]
 
 
+def fetch_arxiv_exact(source_id: str, config: dict[str, Any]) -> RadarItem:
+    """Fetch one arXiv record by stable identifier for historical repair."""
+    normalized = source_id.rsplit("/", 1)[-1].removesuffix(".pdf")
+    normalized = re.sub(r"v\d+$", "", normalized, flags=re.IGNORECASE)
+    try:
+        xml = get_text(
+            "https://export.arxiv.org/api/query",
+            params={"search_query": f"id:{normalized}", "start": 0, "max_results": 1},
+            attempts=1,
+            timeout=float(config.get("timeout_seconds", 30)),
+        )
+    except Exception as error:
+        # The API is occasionally rate-limited while the canonical abs page
+        # remains available. Both are first-party arXiv evidence; the fallback
+        # keeps an exact repair bounded instead of silently reverting to RSS.
+        html = get_text(
+            f"https://arxiv.org/abs/{normalized}",
+            attempts=1,
+            timeout=float(config.get("timeout_seconds", 30)),
+        )
+        title_match = re.search(r'<meta name="citation_title" content="([^"]+)"', html)
+        date_match = re.search(r'<meta name="citation_date" content="([^"]+)"', html)
+        abstract_match = re.search(r'<meta name="citation_abstract" content="([^"]*)"', html)
+        authors = re.findall(r'<meta name="citation_author" content="([^"]+)"', html)
+        if not title_match or not date_match:
+            raise ConnectorPayloadError(f"arXiv record is incomplete: {source_id}") from error
+        published = datetime.strptime(date_match.group(1), "%Y/%m/%d").replace(tzinfo=UTC)
+        title = " ".join(title_match.group(1).split())
+        return RadarItem(
+            source="arXiv",
+            source_id=normalized,
+            title=title,
+            url=f"https://arxiv.org/abs/{normalized}",
+            published_at=published,
+            updated_at=published,
+            summary=" ".join((abstract_match.group(1) if abstract_match else "").split()),
+            event_kind="backfilled",
+            authors=authors,
+            raw={"html": html, "repair": True},
+            parser_version="arxiv-exact-html/1",
+        )
+    namespace = {"atom": "http://www.w3.org/2005/Atom"}
+    root = ET.fromstring(xml)
+    entry = root.find("atom:entry", namespace)
+    if entry is None:
+        raise ConnectorPayloadError(f"arXiv record not found: {source_id}")
+    url = (entry.findtext("atom:id", namespaces=namespace) or "").replace("http:", "https:")
+    title = " ".join((entry.findtext("atom:title", namespaces=namespace) or "").split())
+    published = _optional_date(entry.findtext("atom:published", namespaces=namespace))
+    updated = _optional_date(entry.findtext("atom:updated", namespaces=namespace))
+    if not url or not title or published is None or updated is None:
+        raise ConnectorPayloadError(f"arXiv record is incomplete: {source_id}")
+    return RadarItem(
+        source="arXiv",
+        source_id=normalized,
+        title=title,
+        url=url,
+        published_at=published,
+        updated_at=updated,
+        summary=" ".join((entry.findtext("atom:summary", namespaces=namespace) or "").split()),
+        event_kind="backfilled",
+        authors=[n.text or "" for n in entry.findall("atom:author/atom:name", namespace) if n.text],
+        raw={"xml": ET.tostring(entry, encoding="unicode"), "repair": True},
+        parser_version="arxiv-exact/1",
+    )
+
+
 def fetch_huggingface(config: dict[str, Any], since: datetime, limit: int) -> list[RadarItem]:
     found: dict[str, RadarItem] = {}
     for kind in config.get("kinds", ["datasets"]):
@@ -488,6 +555,92 @@ def fetch_huggingface(config: dict[str, Any], since: datetime, limit: int) -> li
     return sorted(
         found.values(), key=lambda item: item.updated_at or item.published_at, reverse=True
     )[:limit]
+
+
+def fetch_huggingface_exact(source_id: str, kind: str = "datasets") -> RadarItem:
+    """Fetch one Hub dataset or Space by stable owner/name identifier."""
+    if ":" in source_id:
+        prefix, source_id = source_id.split(":", 1)
+        kind = prefix
+    kind = kind.strip().lower()
+    if kind not in {"datasets", "spaces", "models"} or "/" not in source_id:
+        raise ConnectorPayloadError("Hugging Face repair IDs must be kind:owner/name")
+    item_id = source_id.strip().strip("/")
+    row = _payload_dict(
+        get_json(f"https://huggingface.co/api/{kind}/{item_id}", params={"full": "true"}),
+        "Hugging Face Hub",
+    )
+    created = _optional_date(row.get("createdAt"))
+    changed = _optional_date(row.get("lastModified")) or created
+    if not row.get("id") or changed is None:
+        raise ConnectorPayloadError(f"Hugging Face record is incomplete: {kind}:{item_id}")
+    return RadarItem(
+        source="Hugging Face",
+        source_id=str(row["id"]),
+        title=str(row["id"]),
+        url=(
+            f"https://huggingface.co/{item_id}"
+            if kind == "models"
+            else f"https://huggingface.co/{kind}/{item_id}"
+        ),
+        published_at=created or changed,
+        updated_at=changed,
+        summary=huggingface_summary(row, str(row["id"])),
+        event_kind="backfilled",
+        metrics={
+            "downloads": float(row.get("downloads") or 0),
+            "likes": float(row.get("likes") or 0),
+        },
+        raw={**row, "repair": True},
+        parser_version="huggingface-exact/1",
+    )
+
+
+def fetch_doi_exact(source_id: str) -> RadarItem:
+    """Fetch one DOI's bibliographic record from Crossref."""
+    doi = source_id.removeprefix("https://doi.org/").removeprefix("http://doi.org/").strip()
+    if not doi or "/" not in doi:
+        raise ConnectorPayloadError("DOI repair IDs must contain a registrant and suffix")
+    payload = _payload_dict(
+        get_json(f"https://api.crossref.org/works/{doi}", params={}, attempts=1, timeout=30),
+        "Crossref",
+    )
+    message = _payload_dict(payload.get("message"), "Crossref message")
+    titles = message.get("title") or []
+    title = " ".join(str(titles[0]).split()) if titles else ""
+    url = str(message.get("URL") or f"https://doi.org/{doi}")
+    created = message.get("created", {}).get("date-time")
+    published_parts = (message.get("published") or {}).get("date-parts") or []
+    published = published_parts[0] if published_parts else None
+    if not title or not url or not created or not published:
+        raise ConnectorPayloadError(f"Crossref record is incomplete: {doi}")
+    created_at = _optional_date(created)
+    if created_at is None:
+        raise ConnectorPayloadError(f"Crossref record has an invalid created date: {doi}")
+    try:
+        published_at = datetime(*[int(part) for part in published], tzinfo=UTC)
+    except (TypeError, ValueError) as error:
+        raise ConnectorPayloadError(
+            f"Crossref record has an invalid publication date: {doi}"
+        ) from error
+    authors = [
+        " ".join(str(author.get("given", "") + " " + author.get("family", "")).split())
+        for author in message.get("author", [])
+        if author.get("family") or author.get("given")
+    ]
+    return RadarItem(
+        source="Crossref",
+        source_id=doi,
+        title=title,
+        url=url,
+        published_at=published_at,
+        updated_at=created_at,
+        summary=str(message.get("abstract") or "").strip(),
+        event_kind="backfilled",
+        authors=authors,
+        raw={**message, "repair": True},
+        parser_version="crossref-exact/1",
+    )
 
 
 def fetch_github(config: dict[str, Any], since: datetime, limit: int) -> list[RadarItem]:
@@ -577,6 +730,43 @@ def fetch_github(config: dict[str, Any], since: datetime, limit: int) -> list[Ra
     return sorted(
         found.values(), key=lambda item: item.updated_at or item.published_at, reverse=True
     )[:limit]
+
+
+def fetch_github_exact(source_id: str) -> RadarItem:
+    """Fetch one GitHub repository by owner/repo, ignoring daily lookback."""
+    token = os.getenv("GITHUB_TOKEN")
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    row = _payload_dict(
+        get_json(
+            f"https://api.github.com/repos/{source_id}",
+            headers=headers,
+            params={},
+            attempts=1,
+            timeout=30,
+        ),
+        "GitHub repository",
+    )
+    created = _optional_date(row.get("created_at"))
+    changed = _optional_date(row.get("pushed_at")) or _optional_date(row.get("updated_at"))
+    if not row.get("full_name") or not row.get("html_url") or created is None or changed is None:
+        raise ConnectorPayloadError(f"GitHub repository is incomplete: {source_id}")
+    return RadarItem(
+        source="GitHub",
+        source_id=str(row["full_name"]),
+        title=str(row["full_name"]),
+        url=str(row["html_url"]),
+        published_at=created,
+        updated_at=changed,
+        summary=github_summary(row),
+        event_kind="backfilled",
+        organizations=[str(row.get("owner", {}).get("login") or "")],
+        metrics={
+            "stars": float(row.get("stargazers_count") or 0),
+            "forks": float(row.get("forks_count") or 0),
+        },
+        raw={**row, "repair": True},
+        parser_version="github-exact/1",
+    )
 
 
 GITHUB_ORGANIZATIONS_PARSER_VERSION = "github-organizations/1"

@@ -3429,7 +3429,7 @@ function filteredObservations() {
   const query = state.q.trim().toLowerCase();
   const sourceLower = state.source.trim().toLowerCase();
   const matches = allObservations().filter((item) => {
-    const haystack = `${item.title} ${item.summary} ${item.source}`.toLowerCase();
+    const haystack = `${item.title} ${item.summary} ${item.source} ${item.source_id}`.toLowerCase();
     return (
       (state.todayDate === "all" || item.snapshot_date === state.todayDate) &&
       (!state.kind || item.observation_kind === state.kind) &&

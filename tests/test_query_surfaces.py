@@ -8,6 +8,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
+import yaml
 
 from benchmark_radar import __version__
 from benchmark_radar.models import RadarItem, RadarRun, SourceHealth
@@ -157,6 +158,49 @@ def test_catalog_search_is_deterministic_and_explains_matches(tmp_path: Path) ->
     assert result["results"][0]["match"]["retrieval_score"] > 0
     assert result["results"][0]["match"]["idf_coverage"] == pytest.approx(1.0)
     assert result["data"]["catalog_count"] == 3
+
+
+def test_radar_search_matches_stable_source_ids(tmp_path: Path) -> None:
+    # Historical repair is keyed by exact arXiv/GitHub identifiers. A repaired
+    # record must be recoverable by that identifier after the snapshot rebuild,
+    # not only by a human-readable title.
+    service = QueryService(_catalog(tmp_path))
+    item = RadarItem(
+        source="arXiv",
+        source_id="2608.23564",
+        title="SWE Refactor Bench",
+        url="https://arxiv.org/abs/2608.23564",
+        published_at=datetime(2026, 8, 26, tzinfo=UTC),
+        summary="Long-horizon repository migration benchmark.",
+        categories=["benchmark"],
+    )
+    write_snapshot(
+        RadarRun(
+            generated_at=datetime(2026, 9, 5, tzinfo=UTC),
+            since=datetime(2026, 9, 3, tzinfo=UTC),
+            items=[item],
+            health=[],
+        ),
+        tmp_path / "data" / "snapshots",
+    )
+
+    result = QueryService(service.paths).search("2608.23564", scope="radar")
+
+    assert [row["source_id"] for row in result["results"]] == ["2608.23564"]
+
+
+def test_reviewed_missed_benchmark_repairs_are_searchable_in_radar():
+    fixture = yaml.safe_load(
+        Path("tests/fixtures/missed_benchmark_repairs.yml").read_text(encoding="utf-8")
+    )
+    service = QueryService(QueryPaths(snapshots=Path("data/snapshots")))
+
+    for record in fixture["records"]:
+        result = service.search(record["source_id"], scope="radar", limit=20)
+        assert any(
+            row["source_id"] == record["source_id"] and row["name"] == record["expected_name"]
+            for row in result["results"]
+        )
 
 
 def test_search_returns_partial_candidates_with_evidence_for_agent_judgment(

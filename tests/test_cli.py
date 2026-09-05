@@ -109,6 +109,92 @@ def test_custom_dashboard_does_not_overwrite_the_default_feed(monkeypatch, tmp_p
     assert not (tmp_path / "site" / "feed.xml").exists()
 
 
+def test_repair_source_writes_one_idempotent_backfill_and_preserves_dates(monkeypatch, tmp_path):
+    config_path = _config_path(tmp_path)
+    source_item = RadarItem(
+        source="arXiv",
+        source_id="2608.23564",
+        title="SWE Refactor Bench",
+        url="https://arxiv.org/abs/2608.23564",
+        published_at=datetime(2026, 8, 26, tzinfo=UTC),
+        updated_at=datetime(2026, 8, 29, tzinfo=UTC),
+        summary="A benchmark evaluation suite for repository migrations.",
+        event_kind="backfilled",
+    )
+    monkeypatch.setattr(cli, "fetch_arxiv_exact", lambda source_id, config: source_item)
+    monkeypatch.setattr(
+        cli,
+        "rebuild_dashboard",
+        lambda *args, **kwargs: {
+            "snapshot_count": len(list((tmp_path / "snapshots").glob("*.json")))
+        },
+    )
+    for _ in range(2):
+        monkeypatch.setattr(
+            "sys.argv",
+            [
+                "benchmark-radar",
+                "repair-source",
+                "--config",
+                str(config_path),
+                "--source-type",
+                "arxiv",
+                "--source-id",
+                "2608.23564",
+                "--snapshot-dir",
+                str(tmp_path / "snapshots"),
+                "--dashboard-output",
+                str(tmp_path / "radar.json"),
+            ],
+        )
+        cli.main()
+
+    snapshots = list((tmp_path / "snapshots").glob("*.json"))
+    assert len(snapshots) == 1
+    stored = json.loads(snapshots[0].read_text(encoding="utf-8"))
+    assert len(stored["evidence_items"]) == 1
+    assert stored["selection"]["fetched"] == 1
+    assert stored["selection"]["published"] == 1
+    item = stored["evidence_items"][0]
+    assert item["event_kind"] == "backfilled"
+    assert item["published_at"].startswith("2026-08-26")
+    assert item["discovered_at"].startswith(datetime.now(UTC).date().isoformat())
+
+
+def test_repair_source_fails_when_scoring_rejects_the_fetched_record(monkeypatch, tmp_path):
+    config_path = _config_path(tmp_path)
+    source_item = RadarItem(
+        source="GitHub",
+        source_id="org/unrelated",
+        title="Unrelated repository",
+        url="https://github.com/org/unrelated",
+        published_at=datetime(2026, 8, 26, tzinfo=UTC),
+        summary="A general software repository with no evaluation content.",
+    )
+    monkeypatch.setattr(cli, "fetch_github_exact", lambda source_id: source_item)
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "benchmark-radar",
+            "repair-source",
+            "--config",
+            str(config_path),
+            "--source-type",
+            "github",
+            "--source-id",
+            "org/unrelated",
+            "--snapshot-dir",
+            str(tmp_path / "snapshots"),
+            "--dashboard-output",
+            str(tmp_path / "radar.json"),
+        ],
+    )
+
+    with pytest.raises(SystemExit, match="2"):
+        cli.main()
+    assert not list((tmp_path / "snapshots").glob("*.json"))
+
+
 def test_simulate_history_skips_days_with_no_reachable_records(monkeypatch, tmp_path):
     # Regression: GitHub/HF search APIs are recency-sorted with no per-day
     # cursor, so a single broad fetch thins out fast going further back. A
