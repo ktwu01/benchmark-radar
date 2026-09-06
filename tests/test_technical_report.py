@@ -51,9 +51,44 @@ def test_next_draft_records_contributor_name_and_affiliation() -> None:
     assert "WORKING DRAFT — NOT THE FROZEN v0.9.0 DEPOSIT" not in source
 
 
-def test_both_report_builders_reject_the_frozen_pdf_path() -> None:
+def test_report_builders_guard_the_frozen_pdf_path() -> None:
     source = BUILDER.read_text(encoding="utf-8")
     legacy_source = LEGACY_REPORT_BUILDER.read_text(encoding="utf-8")
 
-    assert "if output.resolve() == FROZEN_OUTPUT.resolve():" in source
+    assert "if output.resolve() == FROZEN_OUTPUT.resolve()" in source
+    assert "--overwrite-frozen" in source
     assert "if output.resolve() == FROZEN_OUTPUT.resolve():" in legacy_source
+    assert "authors=NEXT_DRAFT_AUTHORS" in legacy_source
+    assert "draft=True" in legacy_source
+
+
+def test_next_draft_records_real_use_case_section() -> None:
+    source = BUILDER.read_text(encoding="utf-8")
+
+    assert "6.5 Worked real use case: prior-art check for a new evaluation" in source
+    assert "github.com/ktwu01/benchmark-radar/issues/492" in source
+    assert "Contributor.</b> Jiayu Wang" in source
+
+
+def test_next_draft_embeds_use_case_screenshots() -> None:
+    source = BUILDER.read_text(encoding="utf-8")
+    names = (
+        "agent-session.png",
+        "artifact-status-paper.png",
+        "artifact-status-code.png",
+        "cross-validation.png",
+        "survey-table.png",
+        "aarri-bench-manual-table.png",
+    )
+
+    for name in names:
+        assert f"assets/use-case-492/{name}" in source
+        assert (ROOT / "assets" / "use-case-492" / name).is_file()
+
+
+def test_frozen_output_is_never_a_write_target() -> None:
+    source = BUILDER.read_text(encoding="utf-8")
+    assert "if output.resolve() == FROZEN_OUTPUT.resolve()" in source
+    assert "cannot overwrite the frozen v0.9.0 PDF" in source
+    assert "--overwrite-frozen" in source
+    assert '"[#457](https://github.com/ktwu01/benchmark-radar/issues/457)"' not in source

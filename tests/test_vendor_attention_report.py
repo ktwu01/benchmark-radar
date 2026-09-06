@@ -18,7 +18,8 @@ def test_report_replaces_the_unreproducible_eight_benchmark_claim():
     assert "6.1 A recurring reporting group with a definition-sensitive boundary" in source
     assert "https://github.com/ktwu01/benchmark-radar/issues/456" in source
     assert "Junkai Wang / @JunkaiWang-TheoPhy" in source
-    assert "Eight benchmarks appear in documents from at least six organizations" not in source
+    assert "vendor_attention_section = (" in source
+    assert "if draft" in source
     assert "form the rest of the top eight" not in source
     assert "audit tables [9-10]" in source
     assert '"[9] Benchmark Radar contributors.' in source
@@ -48,7 +49,7 @@ def test_report_build_instructions_regenerate_the_audit_and_next_draft():
     assert "must not overwrite" in readme
 
 
-def test_report_builder_defaults_to_the_next_draft_not_the_frozen_pdf():
+def test_report_builder_requires_an_explicit_next_draft_build():
     source = REPORT_BUILDER.read_text(encoding="utf-8")
     tree = ast.parse(source)
     path_literal = None
@@ -65,7 +66,9 @@ def test_report_builder_defaults_to_the_next_draft_not_the_frozen_pdf():
         path_literal = node.value.args[0].value
 
     assert path_literal == "output/pdf/benchmark-radar-technical-report-next-draft.pdf"
-    assert "default=NEXT_DRAFT_OUTPUT" in source
+    assert "default=None" in source
+    assert "NEXT_DRAFT_OUTPUT if args.next_draft else FROZEN_OUTPUT" in source
+    assert '"--next-draft"' in source
     assert 'default=Path("output/pdf/benchmark-radar-technical-report-v0.9.0.pdf")' not in source
 
     legacy_source = LEGACY_REPORT_BUILDER.read_text(encoding="utf-8")

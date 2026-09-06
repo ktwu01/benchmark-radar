@@ -723,10 +723,26 @@ def main() -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     # Keep the original entry point working while the expanded system audit
     # lives in its own readable source module.
-    from build_system_evaluation import EvaluationDoc, story
+    from build_system_evaluation import (
+        NEXT_DRAFT_AFFILIATIONS,
+        NEXT_DRAFT_AUTHORS,
+        NEXT_DRAFT_BYLINE,
+        NEXT_DRAFT_CORRESPONDING_AUTHOR,
+        EvaluationDoc,
+        story,
+    )
 
-    doc = EvaluationDoc(str(output), doi=args.doi)
-    doc.build(story(args.doi))
+    doc = EvaluationDoc(str(output), doi=args.doi, authors=NEXT_DRAFT_AUTHORS)
+    doc.build(
+        story(
+            args.doi,
+            authors=NEXT_DRAFT_AUTHORS,
+            byline=NEXT_DRAFT_BYLINE,
+            affiliations=NEXT_DRAFT_AFFILIATIONS,
+            corresponding_author=NEXT_DRAFT_CORRESPONDING_AUTHOR,
+            draft=True,
+        )
+    )
     print(output)
 
 

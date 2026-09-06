@@ -2,14 +2,20 @@
 """Build the comprehensive Benchmark Radar system and data evaluation."""
 
 # Keep ReportLab prose as readable source text.
-# ruff: noqa: E501
+# ruff: noqa: E501, E402, I001
 
 from __future__ import annotations
 
 import argparse
 import importlib.util
+import sys
 from pathlib import Path
 from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
 from build_technical_report import (
     AMBER,
@@ -50,6 +56,7 @@ from reportlab.platypus import (
     Table,
     TableStyle,
 )
+from benchmark_radar.saturation_audit import build_saturation_audit
 
 GREEN = HexColor("#16794A")
 PALE_GREEN = HexColor("#EAF7F0")
@@ -393,6 +400,83 @@ def source_bars() -> Drawing:
     return drawing
 
 
+def _render_headroom(value: float | None) -> str:
+    return "n/a" if value is None else f"{value:g}"
+
+
+def saturation_audit_table(st, audit: dict) -> Table:
+    rows = [
+        [
+            p("Benchmark", st["table_header"]),
+            p("Raw gap", st["table_header"]),
+            p("Same setup", st["table_header"]),
+            p("Repeat gap", st["table_header"]),
+            p("Claim decision", st["table_header"]),
+            p("Note", st["table_header"]),
+        ]
+    ]
+    for row in audit["benchmarks"]:
+        repeated = row["selected_repeated_series"]
+        if repeated is None:
+            note = "no repeated setup"
+        else:
+            note = f"{repeated['dated_points']} dates · {repeated['organization_count']} org"
+        rows.append(
+            [
+                p(row["name"], st["small_bold"]),
+                p(_render_headroom(row["raw_headroom"]), st["small"]),
+                p(f"{row['raw_best_stratum']['dated_points']} date", st["small"]),
+                p(_render_headroom(row["repeat_controlled_headroom"]), st["small"]),
+                p(row["recommendation"], st["small_bold"]),
+                p(note, st["small"]),
+            ]
+        )
+    return table(
+        rows,
+        [1.3 * inch, 0.65 * inch, 0.78 * inch, 0.78 * inch, 0.84 * inch, 2.25 * inch],
+        tiny=True,
+    )
+
+
+def saturation_threshold_table(st, audit: dict) -> Table:
+    rows = [
+        [
+            p("Threshold", st["table_header"]),
+            p("Raw readings", st["table_header"]),
+            p("Repeated setups", st["table_header"]),
+        ]
+    ]
+    raw = audit["threshold_sensitivity"]["raw"]
+    repeated = audit["threshold_sensitivity"]["repeated_protocol_series"]
+    for threshold in ("<=5", "<=3", "<=2"):
+        rows.append(
+            [
+                p(threshold, st["small_bold"]),
+                p(f"{raw['hits'][threshold]} / {raw['eligible']}", st["small"]),
+                p(
+                    f"{repeated['hits'][threshold]} / {repeated['eligible']} "
+                    f"({repeated['unknown']} unknown)",
+                    st["small"],
+                ),
+            ]
+        )
+    return table(rows, [1.25 * inch, 1.55 * inch, 3.8 * inch], tiny=True)
+
+
+def saturation_wording_table(st, audit: dict) -> Table:
+    rows = [
+        [
+            p("Benchmark", st["table_header"]),
+            p("Exact report wording", st["table_header"]),
+        ]
+    ]
+    rows.extend(
+        [p(row["name"], st["small_bold"]), p(row["recommended_wording"], st["small"])]
+        for row in audit["benchmarks"]
+    )
+    return table(rows, [1.25 * inch, 5.35 * inch], tiny=True)
+
+
 class EvaluationDoc(BaseDocTemplate):
     def __init__(self, filename: str, *, doi: str, authors: tuple[str, ...] = FROZEN_AUTHORS):
         super().__init__(
@@ -448,8 +532,70 @@ def story(
 ) -> list:
     st = styles()
     tiny = ParagraphStyle("Tiny", parent=st["small"], fontSize=6.45, leading=8.0)
-    vendor_attention_data = load_vendor_attention_report_data()
-    vendor_attention_paragraphs = vendor_attention_section_paragraphs(vendor_attention_data)
+    vendor_attention_data = load_vendor_attention_report_data() if draft else None
+    vendor_attention_paragraphs = (
+        vendor_attention_section_paragraphs(vendor_attention_data) if vendor_attention_data else []
+    )
+    vendor_attention_section = (
+        [
+            p(VENDOR_ATTENTION_SECTION_TITLE, st["subsection"]),
+            table(
+                [
+                    [
+                        p("Definition", st["table_header"]),
+                        p("Observed threshold set", st["table_header"]),
+                    ],
+                    *[
+                        [p(label, tiny), p(result, tiny)]
+                        for label, result in vendor_attention_evidence_rows(vendor_attention_data)
+                    ],
+                ],
+                [2.35 * inch, 4.25 * inch],
+                tiny=True,
+            ),
+            p(vendor_attention_paragraphs[0], st["body"]),
+            p(vendor_attention_paragraphs[1], st["body"]),
+            p(vendor_attention_paragraphs[2], st["small"]),
+        ]
+        if draft
+        else [
+            p("6.1 Vendor attention has converged on a small reporting core", st["subsection"]),
+            p(
+                "Eight benchmarks appear in documents from at least six organizations: GPQA Diamond, Humanity's Last Exam, SWE-bench Verified, Terminal-Bench, AIME, LiveCodeBench, MMLU-Pro, and BrowseComp. Teams comparing new model reports will encounter this group most often. The score archive shows where these familiar tests have little headroom left.",
+                st["body"],
+            ),
+        ]
+    )
+    audit = build_saturation_audit() if draft else None
+    saturation_section = (
+        [
+            p(
+                "6.2 All eight raw near-ceiling readings come from one-date setups",
+                st["subsection"],
+            ),
+            p(
+                "All eight raw best readings leave five points of headroom or less, and every exact raw-best instrument+protocol setup appears on only one date. Four benchmarks have a different setup repeated across dates. Only HMMT's closest repeated setup is also within five points, and all four repeated setups are two-date, single-organization pairs. The remaining four benchmarks have no repeated setup. The evidence supports protocol-specific headroom claims only.",
+                st["body"],
+            ),
+            saturation_audit_table(st, audit),
+            Spacer(1, 7),
+            saturation_threshold_table(st, audit),
+            p(
+                "Repeated-setup sensitivity is 1 of 4 assessable benchmarks at five points; using 8 as the denominator would count four unknowns as negatives. No raw-best setup qualifies as repeat-controlled. The machine-readable audit beside the report source records every protocol stratum, score ID, exclusion, counterexample, and exact decision wording.",
+                st["body"],
+            ),
+            p("Per-benchmark claim wording", st["subsection"]),
+            saturation_wording_table(st, audit),
+        ]
+        if draft
+        else [
+            p("6.2 Several bounded metrics are near their ceiling", st["subsection"]),
+            p(
+                "The curated layer records five points of headroom or less for AIME, Arena-Hard, DeepSearchQA, HMMT, MATH-500, MathVision, SWE-bench Verified, and tau2-bench. Read each value with its reasoning budget, tools, attempts, and evaluator. Those settings often explain score movement between model reports.",
+                st["body"],
+            ),
+        ]
+    )
     story: list = []
 
     story.extend(
@@ -1054,29 +1200,8 @@ def story(
                 "Benchmark Radar turns papers, repositories, datasets, and model reports into records you can search, filter, download, and query offline. Three results stand out in the current data.",
                 st["body"],
             ),
-            p(VENDOR_ATTENTION_SECTION_TITLE, st["subsection"]),
-            table(
-                [
-                    [
-                        p("Definition", st["table_header"]),
-                        p("Observed threshold set", st["table_header"]),
-                    ],
-                    *[
-                        [p(label, tiny), p(result, tiny)]
-                        for label, result in vendor_attention_evidence_rows(vendor_attention_data)
-                    ],
-                ],
-                [2.35 * inch, 4.25 * inch],
-                tiny=True,
-            ),
-            p(vendor_attention_paragraphs[0], st["body"]),
-            p(vendor_attention_paragraphs[1], st["body"]),
-            p(vendor_attention_paragraphs[2], st["small"]),
-            p("6.2 Several bounded metrics are near their ceiling", st["subsection"]),
-            p(
-                "The curated layer records five points of headroom or less for AIME, Arena-Hard, DeepSearchQA, HMMT, MATH-500, MathVision, SWE-bench Verified, and tau2-bench. Read each value with its reasoning budget, tools, attempts, and evaluator. Those settings often explain score movement between model reports.",
-                st["body"],
-            ),
+            *vendor_attention_section,
+            *saturation_section,
             p("6.3 Broad search, deeper curation", st["subsection"]),
             p(
                 "The external catalog holds 1,173 rows, more than twelve times the 94-benchmark adoption registry. Use catalog search to find candidates. The curated registry adds the model reports, organizations, instruments, and protocols needed for comparison.",
@@ -1221,6 +1346,27 @@ def story(
         ]
     )
 
+    draft_sections = (
+        [
+            p("7.1 Methods and limitations", st["subsection"]),
+            p(
+                "The 6.2 audit uses the curated score archive and model-card registry. Raw headroom is the distance from one reported value to the metric bound. Repeat-controlled evidence requires the same instrument and protocol across at least two dates. Two dates support only a paired comparison. Because each repeated setup comes from one organization, the audit cannot estimate a field-wide trend. Sensitivity tables keep unknowns out of the eligible denominator.",
+                st["body"],
+            ),
+            p("7.2 Contributor credit", st["subsection"]),
+            p(
+                "Junjie Zhou prepared the protocol audit, machine-readable table, and report revision for issue #457.",
+                st["body"],
+            ),
+            p("7.3 Issue link", st["subsection"]),
+            p(
+                '<link href="https://github.com/ktwu01/benchmark-radar/issues/457">Issue #457</link> Near-ceiling metrics under protocol controls.',
+                st["body"],
+            ),
+        ]
+        if draft
+        else []
+    )
     story.extend(
         [
             p("7. Reproducibility, access, and citation", st["section"]),
@@ -1228,6 +1374,7 @@ def story(
                 "This report evaluates Benchmark Radar v0.9.0 at Git commit 98c7de3 and data cutoff 2026-08-29. The clean worktree ran the CI sequence: lint and formatting checks, external normalization, KW-Bench classification, checksummed data-release construction, and the full test suite. The current full CI suite passed.",
                 st["body"],
             ),
+            *draft_sections,
             table(
                 [
                     [
@@ -1278,7 +1425,11 @@ def story(
             ),
             p("Data statement", st["subsection"]),
             p(
-                "The v0.9.0 core and frozen section 3 rows use commit 98c7de3 and cutoff 2026-08-29. The issue #456 addendum separately audits 37 documents, 12 organization labels, and 110 benchmark IDs from a SHA-256-pinned registry at commit 98c8cf6 and cutoff 2026-08-31. Do not combine these populations; cite rolling dashboard values with a retrieval date.",
+                (
+                    "The v0.9.0 core and frozen section 3 rows use commit 98c7de3 and cutoff 2026-08-29. The issue #456 addendum separately audits 37 documents, 12 organization labels, and 110 benchmark IDs from a SHA-256-pinned registry at commit 98c8cf6 and cutoff 2026-08-31. Do not combine these populations; cite rolling dashboard values with a retrieval date."
+                    if draft
+                    else "Counts were recomputed from site/data/radar.json, site/data/benchmark-index.json, site/data/models.json, data/model_cards.yml, data/benchmark_scores.yml, normalized files under data/external/, and config.yml. The PDF is a dated interpretation. The rolling dashboard may change after the cutoff; cite its current number with a retrieval date."
+                ),
                 st["body"],
             ),
             p("References", st["section"]),
@@ -1314,13 +1465,19 @@ def story(
                 "[8] L. Xiaopai. BuilderPulse: AI-powered daily intelligence for indie hackers and builders. GitHub, 2026. https://github.com/BuilderPulse/BuilderPulse",
                 st["reference"],
             ),
-            p(
-                "[9] Benchmark Radar contributors. Reviewed model-card benchmark registry. 2026. https://github.com/ktwu01/benchmark-radar/blob/98c8cf6fb5d1d69c66d438ea9f92242b2205c9ae/data/model_cards.yml",
-                st["reference"],
-            ),
-            p(
-                "[10] J. Wang. Vendor-attention sensitivity audit for issue #456. 2026. https://github.com/ktwu01/benchmark-radar/blob/d620afc/docs/technical-report/vendor-attention-audit/claim-audit.json",
-                st["reference"],
+            *(
+                [
+                    p(
+                        "[9] Benchmark Radar contributors. Reviewed model-card benchmark registry. 2026. https://github.com/ktwu01/benchmark-radar/blob/98c8cf6fb5d1d69c66d438ea9f92242b2205c9ae/data/model_cards.yml",
+                        st["reference"],
+                    ),
+                    p(
+                        "[10] J. Wang. Vendor-attention sensitivity audit for issue #456. 2026. https://github.com/ktwu01/benchmark-radar/blob/d620afc/docs/technical-report/vendor-attention-audit/claim-audit.json",
+                        st["reference"],
+                    ),
+                ]
+                if draft
+                else []
             ),
             Spacer(1, 0),
             Table(
@@ -1359,7 +1516,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--output",
         type=Path,
-        default=NEXT_DRAFT_OUTPUT,
+        default=None,
     )
     parser.add_argument("--doi", default="10.5281/zenodo.22167102")
     parser.add_argument(
@@ -1367,16 +1524,23 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="build the working next-draft artifact with the current contributor byline",
     )
+    parser.add_argument(
+        "--overwrite-frozen",
+        action="store_true",
+        help="explicitly allow replacing the deposited v0.9.0 PDF",
+    )
     return parser
 
 
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
-    output = args.output
-    if output.resolve() == FROZEN_OUTPUT.resolve():
-        parser.error("--next-draft cannot overwrite the frozen v0.9.0 PDF")
-    draft = args.next_draft or output.resolve() != FROZEN_OUTPUT.resolve()
+    output = args.output or (NEXT_DRAFT_OUTPUT if args.next_draft else FROZEN_OUTPUT)
+    if output.resolve() == FROZEN_OUTPUT.resolve() and not args.overwrite_frozen:
+        parser.error(
+            "cannot overwrite the frozen v0.9.0 PDF; use --next-draft or --overwrite-frozen"
+        )
+    draft = args.next_draft
     output.parent.mkdir(parents=True, exist_ok=True)
     authors = NEXT_DRAFT_AUTHORS if draft else FROZEN_AUTHORS
     byline = NEXT_DRAFT_BYLINE if draft else None
