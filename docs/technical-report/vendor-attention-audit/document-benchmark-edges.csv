@@ -1,0 +1,448 @@
+document_id,document_url,organization,model,document_type,effective_date,retrieved_at,raw_benchmark_id,raw_benchmark_name,resolved_benchmark_id,resolved_benchmark_name
+ai2_olmo_3,https://allenai.org/blog/olmo3,Ai2,Olmo 3 (7B and 32B),release_post,2025-11-20,2026-08-15,agieval,AGIEval,agieval,AGIEval
+ai2_olmo_3,https://allenai.org/blog/olmo3,Ai2,Olmo 3 (7B and 32B),release_post,2025-11-20,2026-08-15,aime,AIME,aime,AIME
+ai2_olmo_3,https://allenai.org/blog/olmo3,Ai2,Olmo 3 (7B and 32B),release_post,2025-11-20,2026-08-15,bfcl,BFCL,bfcl,BFCL
+ai2_olmo_3,https://allenai.org/blog/olmo3,Ai2,Olmo 3 (7B and 32B),release_post,2025-11-20,2026-08-15,drop,DROP,drop,DROP
+ai2_olmo_3,https://allenai.org/blog/olmo3,Ai2,Olmo 3 (7B and 32B),release_post,2025-11-20,2026-08-15,gpqa,GPQA (full),gpqa,GPQA (full)
+ai2_olmo_3,https://allenai.org/blog/olmo3,Ai2,Olmo 3 (7B and 32B),release_post,2025-11-20,2026-08-15,gsm8k,GSM8K,gsm8k,GSM8K
+ai2_olmo_3,https://allenai.org/blog/olmo3,Ai2,Olmo 3 (7B and 32B),release_post,2025-11-20,2026-08-15,humaneval,HumanEval,humaneval,HumanEval
+ai2_olmo_3,https://allenai.org/blog/olmo3,Ai2,Olmo 3 (7B and 32B),release_post,2025-11-20,2026-08-15,ifbench,IFBench,ifbench,IFBench
+ai2_olmo_3,https://allenai.org/blog/olmo3,Ai2,Olmo 3 (7B and 32B),release_post,2025-11-20,2026-08-15,ifeval,IFEval,ifeval,IFEval
+ai2_olmo_3,https://allenai.org/blog/olmo3,Ai2,Olmo 3 (7B and 32B),release_post,2025-11-20,2026-08-15,livecodebench,LiveCodeBench,livecodebench,LiveCodeBench
+ai2_olmo_3,https://allenai.org/blog/olmo3,Ai2,Olmo 3 (7B and 32B),release_post,2025-11-20,2026-08-15,mbpp,MBPP,mbpp,MBPP
+ai2_olmo_3,https://allenai.org/blog/olmo3,Ai2,Olmo 3 (7B and 32B),release_post,2025-11-20,2026-08-15,mmlu,MMLU,mmlu,MMLU
+ai2_olmo_3,https://allenai.org/blog/olmo3,Ai2,Olmo 3 (7B and 32B),release_post,2025-11-20,2026-08-15,mmlu_pro,MMLU-Pro,mmlu_pro,MMLU-Pro
+ai2_olmo_3,https://allenai.org/blog/olmo3,Ai2,Olmo 3 (7B and 32B),release_post,2025-11-20,2026-08-15,simpleqa,SimpleQA,simpleqa,SimpleQA
+anthropic_claude_3_7_sonnet,https://www.anthropic.com/news/claude-3-7-sonnet,Anthropic,Claude 3.7 Sonnet,system_card,2025-02-24,2026-08-02,aime,AIME,aime,AIME
+anthropic_claude_4_system_card,https://www.anthropic.com/news/claude-4,Anthropic,Claude Opus 4 and Sonnet 4,system_card,2025-05-22,2026-08-02,aime,AIME,aime,AIME
+anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-opus-5,Anthropic,Claude Opus 5,system_card,2026-07-24,2026-08-02,arc_agi_3,ARC-AGI-3,arc_agi_3,ARC-AGI-3
+anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,Anthropic,Claude Fable 5 and Mythos 5,release_post,2026-06-09,2026-08-02,automationbench,AutomationBench,automationbench,AutomationBench
+anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-opus-5,Anthropic,Claude Opus 5,system_card,2026-07-24,2026-08-02,automationbench,AutomationBench,automationbench,AutomationBench
+anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,Anthropic,Claude Fable 5 and Mythos 5,release_post,2026-06-09,2026-08-02,biomysterybench,BioMysteryBench,biomysterybench,BioMysteryBench
+anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,Anthropic,Claude Fable 5 and Mythos 5,release_post,2026-06-09,2026-08-02,blueprint_bench_2,Blueprint-Bench 2,blueprint_bench_2,Blueprint-Bench 2
+anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,Anthropic,Claude Fable 5 and Mythos 5,release_post,2026-06-09,2026-08-02,cursor_bench,CursorBench,cursor_bench,CursorBench
+anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-opus-5,Anthropic,Claude Opus 5,system_card,2026-07-24,2026-08-02,cursor_bench,CursorBench,cursor_bench,CursorBench
+anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-opus-5,Anthropic,Claude Opus 5,system_card,2026-07-24,2026-08-02,deepsearchqa,DeepSearchQA,deepsearchqa,DeepSearchQA
+anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,Anthropic,Claude Fable 5 and Mythos 5,release_post,2026-06-09,2026-08-02,exploitbench,ExploitBench,exploitbench,ExploitBench
+anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,Anthropic,Claude Fable 5 and Mythos 5,release_post,2026-06-09,2026-08-02,frontiercode,FrontierCode,frontiercode,FrontierCode
+anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,Anthropic,Claude Fable 5 and Mythos 5,release_post,2026-06-09,2026-08-02,gdp_pdf,GDP.pdf,gdp_pdf,GDP.pdf
+anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,Anthropic,Claude Fable 5 and Mythos 5,release_post,2026-06-09,2026-08-02,gdpval,GDPval,gdpval,GDPval
+anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-opus-5,Anthropic,Claude Opus 5,system_card,2026-07-24,2026-08-02,gdpval,GDPval,gdpval,GDPval
+anthropic_claude_3_7_sonnet,https://www.anthropic.com/news/claude-3-7-sonnet,Anthropic,Claude 3.7 Sonnet,system_card,2025-02-24,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+anthropic_claude_4_system_card,https://www.anthropic.com/news/claude-4,Anthropic,Claude Opus 4 and Sonnet 4,system_card,2025-05-22,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,Anthropic,Claude Fable 5 and Mythos 5,release_post,2026-06-09,2026-08-02,healthbench_professional,HealthBench Professional,healthbench_professional,HealthBench Professional
+anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,Anthropic,Claude Fable 5 and Mythos 5,release_post,2026-06-09,2026-08-02,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+anthropic_claude_3_7_sonnet,https://www.anthropic.com/news/claude-3-7-sonnet,Anthropic,Claude 3.7 Sonnet,system_card,2025-02-24,2026-08-02,ifeval,IFEval,ifeval,IFEval
+anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,Anthropic,Claude Fable 5 and Mythos 5,release_post,2026-06-09,2026-08-02,legal_agent_benchmark,Legal Agent Benchmark,legal_agent_benchmark,Legal Agent Benchmark
+anthropic_claude_3_7_sonnet,https://www.anthropic.com/news/claude-3-7-sonnet,Anthropic,Claude 3.7 Sonnet,system_card,2025-02-24,2026-08-02,math_500,MATH-500,math_500,MATH-500
+anthropic_claude_3_7_sonnet,https://www.anthropic.com/news/claude-3-7-sonnet,Anthropic,Claude 3.7 Sonnet,system_card,2025-02-24,2026-08-02,mmlu_pro,MMLU-Pro,mmlu_pro,MMLU-Pro
+anthropic_claude_4_system_card,https://www.anthropic.com/news/claude-4,Anthropic,Claude Opus 4 and Sonnet 4,system_card,2025-05-22,2026-08-02,mmmlu,MMMLU,mmmlu,MMMLU
+anthropic_claude_3_7_sonnet,https://www.anthropic.com/news/claude-3-7-sonnet,Anthropic,Claude 3.7 Sonnet,system_card,2025-02-24,2026-08-02,mmmu,MMMU,mmmu,MMMU
+anthropic_claude_4_system_card,https://www.anthropic.com/news/claude-4,Anthropic,Claude Opus 4 and Sonnet 4,system_card,2025-05-22,2026-08-02,mmmu,MMMU,mmmu,MMMU
+anthropic_claude_4_system_card,https://www.anthropic.com/news/claude-4,Anthropic,Claude Opus 4 and Sonnet 4,system_card,2025-05-22,2026-08-02,mrcr,MRCR,mrcr,MRCR
+anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,Anthropic,Claude Fable 5 and Mythos 5,release_post,2026-06-09,2026-08-02,osworld,OSWorld,osworld,OSWorld
+anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-opus-5,Anthropic,Claude Opus 5,system_card,2026-07-24,2026-08-02,osworld,OSWorld,osworld,OSWorld
+anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,Anthropic,Claude Fable 5 and Mythos 5,release_post,2026-06-09,2026-08-02,swe_bench_pro,SWE-bench Pro,swe_bench_pro,SWE-bench Pro
+anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-opus-5,Anthropic,Claude Opus 5,system_card,2026-07-24,2026-08-02,swe_bench_pro,SWE-bench Pro,swe_bench_pro,SWE-bench Pro
+anthropic_claude_3_7_sonnet,https://www.anthropic.com/news/claude-3-7-sonnet,Anthropic,Claude 3.7 Sonnet,system_card,2025-02-24,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+anthropic_claude_4_system_card,https://www.anthropic.com/news/claude-4,Anthropic,Claude Opus 4 and Sonnet 4,system_card,2025-05-22,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-opus-5,Anthropic,Claude Opus 5,system_card,2026-07-24,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+anthropic_claude_3_7_sonnet,https://www.anthropic.com/news/claude-3-7-sonnet,Anthropic,Claude 3.7 Sonnet,system_card,2025-02-24,2026-08-02,tau_bench,tau-bench,tau_bench,tau-bench
+anthropic_claude_4_system_card,https://www.anthropic.com/news/claude-4,Anthropic,Claude Opus 4 and Sonnet 4,system_card,2025-05-22,2026-08-02,tau_bench,tau-bench,tau_bench,tau-bench
+anthropic_claude_4_system_card,https://www.anthropic.com/news/claude-4,Anthropic,Claude Opus 4 and Sonnet 4,system_card,2025-05-22,2026-08-02,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,Anthropic,Claude Fable 5 and Mythos 5,release_post,2026-06-09,2026-08-02,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-opus-5,Anthropic,Claude Opus 5,system_card,2026-07-24,2026-08-02,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,Anthropic,Claude Fable 5 and Mythos 5,release_post,2026-06-09,2026-08-02,vibench,ViBench,vibench,ViBench
+deepseek_v3_report,https://arxiv.org/abs/2412.19437,DeepSeek,DeepSeek-V3,technical_report,2024-12-27,2026-08-02,agieval,AGIEval,agieval,AGIEval
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,agieval,AGIEval,agieval,AGIEval
+deepseek_r1_report,https://arxiv.org/abs/2501.12948,DeepSeek,DeepSeek-R1,technical_report,2025-01-22,2026-08-02,aider_polyglot,Aider Polyglot,aider_polyglot,Aider Polyglot
+deepseek_r1_report,https://arxiv.org/abs/2501.12948,DeepSeek,DeepSeek-R1,technical_report,2025-01-22,2026-08-02,aime,AIME,aime,AIME
+deepseek_v3_report,https://arxiv.org/abs/2412.19437,DeepSeek,DeepSeek-V3,technical_report,2024-12-27,2026-08-02,aime,AIME,aime,AIME
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,apex_agents,APEX-Agents,apex_agents,APEX-Agents
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,apex_agents,APEX-Agents,apex_agents,APEX-Agents
+deepseek_r1_report,https://arxiv.org/abs/2501.12948,DeepSeek,DeepSeek-R1,technical_report,2025-01-22,2026-08-02,arena_hard,Arena-Hard,arena_hard,Arena-Hard
+deepseek_v3_report,https://arxiv.org/abs/2412.19437,DeepSeek,DeepSeek-V3,technical_report,2024-12-27,2026-08-02,arena_hard,Arena-Hard,arena_hard,Arena-Hard
+deepseek_v4_pro_0813_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813,DeepSeek,DeepSeek-V4-Pro-0813,model_card,2026-08-13,2026-08-15,automationbench,AutomationBench,automationbench,AutomationBench
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,browsecomp,BrowseComp,browsecomp,BrowseComp
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,browsecomp,BrowseComp,browsecomp,BrowseComp
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,codeforces,Codeforces,codeforces,Codeforces
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,codeforces,Codeforces,codeforces,Codeforces
+deepseek_r1_report,https://arxiv.org/abs/2501.12948,DeepSeek,DeepSeek-R1,technical_report,2025-01-22,2026-08-02,drop,DROP,drop,DROP
+deepseek_v3_report,https://arxiv.org/abs/2412.19437,DeepSeek,DeepSeek-V3,technical_report,2024-12-27,2026-08-02,drop,DROP,drop,DROP
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,drop,DROP,drop,DROP
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,gdpval,GDPval,gdpval,GDPval
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,gdpval,GDPval,gdpval,GDPval
+deepseek_r1_report,https://arxiv.org/abs/2501.12948,DeepSeek,DeepSeek-R1,technical_report,2025-01-22,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+deepseek_v3_report,https://arxiv.org/abs/2412.19437,DeepSeek,DeepSeek-V3,technical_report,2024-12-27,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+deepseek_v3_report,https://arxiv.org/abs/2412.19437,DeepSeek,DeepSeek-V3,technical_report,2024-12-27,2026-08-02,gsm8k,GSM8K,gsm8k,GSM8K
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,gsm8k,GSM8K,gsm8k,GSM8K
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+deepseek_v4_pro_0813_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813,DeepSeek,DeepSeek-V4-Pro-0813,model_card,2026-08-13,2026-08-15,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,hmmt,HMMT,hmmt,HMMT
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,hmmt,HMMT,hmmt,HMMT
+deepseek_v3_report,https://arxiv.org/abs/2412.19437,DeepSeek,DeepSeek-V3,technical_report,2024-12-27,2026-08-02,humaneval,HumanEval,humaneval,HumanEval
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,humaneval,HumanEval,humaneval,HumanEval
+deepseek_r1_report,https://arxiv.org/abs/2501.12948,DeepSeek,DeepSeek-R1,technical_report,2025-01-22,2026-08-02,ifeval,IFEval,ifeval,IFEval
+deepseek_v3_report,https://arxiv.org/abs/2412.19437,DeepSeek,DeepSeek-V3,technical_report,2024-12-27,2026-08-02,ifeval,IFEval,ifeval,IFEval
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,imo_answer_bench,IMOAnswerBench,imo_answer_bench,IMOAnswerBench
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,imo_answer_bench,IMOAnswerBench,imo_answer_bench,IMOAnswerBench
+deepseek_r1_report,https://arxiv.org/abs/2501.12948,DeepSeek,DeepSeek-R1,technical_report,2025-01-22,2026-08-02,livecodebench,LiveCodeBench,livecodebench,LiveCodeBench
+deepseek_v3_report,https://arxiv.org/abs/2412.19437,DeepSeek,DeepSeek-V3,technical_report,2024-12-27,2026-08-02,livecodebench,LiveCodeBench,livecodebench,LiveCodeBench
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,livecodebench,LiveCodeBench,livecodebench,LiveCodeBench
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,livecodebench,LiveCodeBench,livecodebench,LiveCodeBench
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,longbench,LongBench,longbench,LongBench
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,longbench,LongBench,longbench,LongBench
+deepseek_r1_report,https://arxiv.org/abs/2501.12948,DeepSeek,DeepSeek-R1,technical_report,2025-01-22,2026-08-02,math_500,MATH-500,math_500,MATH-500
+deepseek_v3_report,https://arxiv.org/abs/2412.19437,DeepSeek,DeepSeek-V3,technical_report,2024-12-27,2026-08-02,math_500,MATH-500,math_500,MATH-500
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,math_500,MATH-500,math_500,MATH-500
+deepseek_v3_report,https://arxiv.org/abs/2412.19437,DeepSeek,DeepSeek-V3,technical_report,2024-12-27,2026-08-02,mbpp,MBPP,mbpp,MBPP
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,mcp_atlas,MCP Atlas,mcp_atlas,MCP Atlas
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,mcp_atlas,MCP Atlas,mcp_atlas,MCP Atlas
+deepseek_r1_report,https://arxiv.org/abs/2501.12948,DeepSeek,DeepSeek-R1,technical_report,2025-01-22,2026-08-02,mmlu,MMLU,mmlu,MMLU
+deepseek_v3_report,https://arxiv.org/abs/2412.19437,DeepSeek,DeepSeek-V3,technical_report,2024-12-27,2026-08-02,mmlu,MMLU,mmlu,MMLU
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,mmlu,MMLU,mmlu,MMLU
+deepseek_r1_report,https://arxiv.org/abs/2501.12948,DeepSeek,DeepSeek-R1,technical_report,2025-01-22,2026-08-02,mmlu_pro,MMLU-Pro,mmlu_pro,MMLU-Pro
+deepseek_v3_report,https://arxiv.org/abs/2412.19437,DeepSeek,DeepSeek-V3,technical_report,2024-12-27,2026-08-02,mmlu_pro,MMLU-Pro,mmlu_pro,MMLU-Pro
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,mmlu_pro,MMLU-Pro,mmlu_pro,MMLU-Pro
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,mmlu_pro,MMLU-Pro,mmlu_pro,MMLU-Pro
+deepseek_r1_report,https://arxiv.org/abs/2501.12948,DeepSeek,DeepSeek-R1,technical_report,2025-01-22,2026-08-02,mmlu_redux,MMLU-Redux,mmlu_redux,MMLU-Redux
+deepseek_v3_report,https://arxiv.org/abs/2412.19437,DeepSeek,DeepSeek-V3,technical_report,2024-12-27,2026-08-02,mmlu_redux,MMLU-Redux,mmlu_redux,MMLU-Redux
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,mmlu_redux,MMLU-Redux,mmlu_redux,MMLU-Redux
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,mmmlu,MMMLU,mmmlu,MMMLU
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,mrcr,MRCR,mrcr,MRCR
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,mrcr,MRCR,mrcr,MRCR
+deepseek_r1_report,https://arxiv.org/abs/2501.12948,DeepSeek,DeepSeek-R1,technical_report,2025-01-22,2026-08-02,simpleqa,SimpleQA,simpleqa,SimpleQA
+deepseek_v3_report,https://arxiv.org/abs/2412.19437,DeepSeek,DeepSeek-V3,technical_report,2024-12-27,2026-08-02,simpleqa,SimpleQA,simpleqa,SimpleQA
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,simpleqa,SimpleQA,simpleqa,SimpleQA
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,simpleqa,SimpleQA,simpleqa,SimpleQA
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,super_gpqa,SuperGPQA,super_gpqa,SuperGPQA
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,swe_bench_multilingual,SWE-bench Multilingual,swe_bench_multilingual,SWE-bench Multilingual
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,swe_bench_multilingual,SWE-bench Multilingual,swe_bench_multilingual,SWE-bench Multilingual
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,swe_bench_pro,SWE-bench Pro,swe_bench_pro,SWE-bench Pro
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,swe_bench_pro,SWE-bench Pro,swe_bench_pro,SWE-bench Pro
+deepseek_r1_report,https://arxiv.org/abs/2501.12948,DeepSeek,DeepSeek-R1,technical_report,2025-01-22,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+deepseek_v3_report,https://arxiv.org/abs/2412.19437,DeepSeek,DeepSeek-V3,technical_report,2024-12-27,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+deepseek_v4_pro_0813_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813,DeepSeek,DeepSeek-V4-Pro-0813,model_card,2026-08-13,2026-08-15,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,DeepSeek,DeepSeek-V4-Pro,model_card,2026-04-22,2026-08-02,tool_decathlon,Tool Decathlon,tool_decathlon,Tool Decathlon
+deepseek_v4_pro_0813_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813,DeepSeek,DeepSeek-V4-Pro-0813,model_card,2026-08-13,2026-08-15,tool_decathlon,Tool Decathlon,tool_decathlon,Tool Decathlon
+deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348,DeepSeek,DeepSeek-V4,technical_report,2026-06-25,2026-08-02,tool_decathlon,Tool Decathlon,tool_decathlon,Tool Decathlon
+google_gemini_2_5_report,https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,Google,Gemini 2.5 Pro,technical_report,2025-06-17,2026-08-02,aider_polyglot,Aider Polyglot,aider_polyglot,Aider Polyglot
+google_gemini_2_5_report,https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,Google,Gemini 2.5 Pro,technical_report,2025-06-17,2026-08-02,aime,AIME,aime,AIME
+google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,Google,Gemma 4 (31B),model_card,2026-03-11,2026-08-02,aime,AIME,aime,AIME
+google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,Google,Gemini 3.1 Pro,model_card,2026-02-19,2026-08-02,apex_agents,APEX-Agents,apex_agents,APEX-Agents
+google_gemini_2_5_report,https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,Google,Gemini 2.5 Pro,technical_report,2025-06-17,2026-08-02,arc_agi,ARC-AGI,arc_agi,ARC-AGI
+google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,Google,Gemini 3.1 Pro,model_card,2026-02-19,2026-08-02,arc_agi_2,ARC-AGI-2,arc_agi_2,ARC-AGI-2
+google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,Google,Gemma 4 (31B),model_card,2026-03-11,2026-08-02,bigbench_extra_hard,BIG-Bench Extra Hard,bigbench_extra_hard,BIG-Bench Extra Hard
+google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,Google,Gemini 3.1 Pro,model_card,2026-02-19,2026-08-02,browsecomp,BrowseComp,browsecomp,BrowseComp
+google_gemini_1_5_report,https://arxiv.org/abs/2403.05530,Google,Gemini 1.5,technical_report,2024-03-08,2026-08-02,chartqa,ChartQA,chartqa,ChartQA
+google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,Google,Gemma 4 (31B),model_card,2026-03-11,2026-08-02,codeforces,Codeforces,codeforces,Codeforces
+google_gemini_1_5_report,https://arxiv.org/abs/2403.05530,Google,Gemini 1.5,technical_report,2024-03-08,2026-08-02,docvqa,DocVQA,docvqa,DocVQA
+google_gemini_1_5_report,https://arxiv.org/abs/2403.05530,Google,Gemini 1.5,technical_report,2024-03-08,2026-08-02,drop,DROP,drop,DROP
+google_gemini_2_5_report,https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,Google,Gemini 2.5 Pro,technical_report,2025-06-17,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,Google,Gemini 3.1 Pro,model_card,2026-02-19,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,Google,Gemma 4 (31B),model_card,2026-03-11,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+google_gemini_1_5_report,https://arxiv.org/abs/2403.05530,Google,Gemini 1.5,technical_report,2024-03-08,2026-08-02,gsm8k,GSM8K,gsm8k,GSM8K
+google_gemini_2_5_report,https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,Google,Gemini 2.5 Pro,technical_report,2025-06-17,2026-08-02,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,Google,Gemini 3.1 Pro,model_card,2026-02-19,2026-08-02,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,Google,Gemma 4 (31B),model_card,2026-03-11,2026-08-02,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+google_gemini_1_5_report,https://arxiv.org/abs/2403.05530,Google,Gemini 1.5,technical_report,2024-03-08,2026-08-02,humaneval,HumanEval,humaneval,HumanEval
+google_gemini_2_5_report,https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,Google,Gemini 2.5 Pro,technical_report,2025-06-17,2026-08-02,livecodebench,LiveCodeBench,livecodebench,LiveCodeBench
+google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,Google,Gemma 4 (31B),model_card,2026-03-11,2026-08-02,livecodebench,LiveCodeBench,livecodebench,LiveCodeBench
+google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,Google,Gemini 3.1 Pro,model_card,2026-02-19,2026-08-02,livecodebench_pro,LiveCodeBench Pro,livecodebench_pro,LiveCodeBench Pro
+google_gemini_1_5_report,https://arxiv.org/abs/2403.05530,Google,Gemini 1.5,technical_report,2024-03-08,2026-08-02,math_500,MATH-500,math_500,MATH-500
+google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,Google,Gemma 4 (31B),model_card,2026-03-11,2026-08-02,mathvision,MathVision,mathvision,MathVision
+google_gemini_1_5_report,https://arxiv.org/abs/2403.05530,Google,Gemini 1.5,technical_report,2024-03-08,2026-08-02,mathvista,MathVista,mathvista,MathVista
+google_gemini_2_5_report,https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,Google,Gemini 2.5 Pro,technical_report,2025-06-17,2026-08-02,mathvista,MathVista,mathvista,MathVista
+google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,Google,Gemini 3.1 Pro,model_card,2026-02-19,2026-08-02,mcp_atlas,MCP Atlas,mcp_atlas,MCP Atlas
+google_gemini_1_5_report,https://arxiv.org/abs/2403.05530,Google,Gemini 1.5,technical_report,2024-03-08,2026-08-02,mmlu,MMLU,mmlu,MMLU
+google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,Google,Gemma 4 (31B),model_card,2026-03-11,2026-08-02,mmlu_pro,MMLU-Pro,mmlu_pro,MMLU-Pro
+google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,Google,Gemini 3.1 Pro,model_card,2026-02-19,2026-08-02,mmmlu,MMMLU,mmmlu,MMMLU
+google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,Google,Gemma 4 (31B),model_card,2026-03-11,2026-08-02,mmmlu,MMMLU,mmmlu,MMMLU
+google_gemini_1_5_report,https://arxiv.org/abs/2403.05530,Google,Gemini 1.5,technical_report,2024-03-08,2026-08-02,mmmu,MMMU,mmmu,MMMU
+google_gemini_2_5_report,https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,Google,Gemini 2.5 Pro,technical_report,2025-06-17,2026-08-02,mmmu,MMMU,mmmu,MMMU
+google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,Google,Gemini 3.1 Pro,model_card,2026-02-19,2026-08-02,mmmu_pro,MMMU-Pro,mmmu_pro,MMMU-Pro
+google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,Google,Gemma 4 (31B),model_card,2026-03-11,2026-08-02,mmmu_pro,MMMU-Pro,mmmu_pro,MMMU-Pro
+google_gemini_2_5_report,https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,Google,Gemini 2.5 Pro,technical_report,2025-06-17,2026-08-02,mrcr,MRCR,mrcr,MRCR
+google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,Google,Gemini 3.1 Pro,model_card,2026-02-19,2026-08-02,mrcr,MRCR,mrcr,MRCR
+google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,Google,Gemma 4 (31B),model_card,2026-03-11,2026-08-02,mrcr,MRCR,mrcr,MRCR
+google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,Google,Gemma 4 (31B),model_card,2026-03-11,2026-08-02,omnidocbench,OmniDocBench,omnidocbench,OmniDocBench
+google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,Google,Gemini 3.1 Pro,model_card,2026-02-19,2026-08-02,scicode,SciCode,scicode,SciCode
+google_gemini_2_5_report,https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,Google,Gemini 2.5 Pro,technical_report,2025-06-17,2026-08-02,simpleqa,SimpleQA,simpleqa,SimpleQA
+google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,Google,Gemini 3.1 Pro,model_card,2026-02-19,2026-08-02,swe_bench_pro,SWE-bench Pro,swe_bench_pro,SWE-bench Pro
+google_gemini_2_5_report,https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,Google,Gemini 2.5 Pro,technical_report,2025-06-17,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,Google,Gemini 3.1 Pro,model_card,2026-02-19,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,Google,Gemini 3.1 Pro,model_card,2026-02-19,2026-08-02,tau2_bench,tau2-bench,tau2_bench,tau2-bench
+google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,Google,Gemma 4 (31B),model_card,2026-03-11,2026-08-02,tau2_bench,tau2-bench,tau2_bench,tau2-bench
+google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,Google,Gemini 3.1 Pro,model_card,2026-02-19,2026-08-02,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+google_gemini_2_5_report,https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,Google,Gemini 2.5 Pro,technical_report,2025-06-17,2026-08-02,video_mme,Video-MME,video_mme,Video-MME
+meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,Meta,Llama 3.1 405B,model_card,2024-07-23,2026-08-02,agieval,AGIEval,agieval,AGIEval
+meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,Meta,Llama 3.1 405B,model_card,2024-07-23,2026-08-02,arena_hard,Arena-Hard,arena_hard,Arena-Hard
+meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,Meta,Llama 3.1 405B,model_card,2024-07-23,2026-08-02,bfcl,BFCL,bfcl,BFCL
+meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,Meta,Llama 4,model_card,2025-04-05,2026-08-02,chartqa,ChartQA,chartqa,ChartQA
+meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,Meta,Llama 4,model_card,2025-04-05,2026-08-02,chatbot_arena,Chatbot Arena,chatbot_arena,Chatbot Arena
+meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,Meta,Llama 4,model_card,2025-04-05,2026-08-02,docvqa,DocVQA,docvqa,DocVQA
+meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,Meta,Llama 3.1 405B,model_card,2024-07-23,2026-08-02,drop,DROP,drop,DROP
+meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,Meta,Llama 3.1 405B,model_card,2024-07-23,2026-08-02,gpqa,GPQA (full),gpqa,GPQA (full)
+meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,Meta,Llama 4,model_card,2025-04-05,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,Meta,Llama 3.1 405B,model_card,2024-07-23,2026-08-02,gsm8k,GSM8K,gsm8k,GSM8K
+meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,Meta,Llama 3.1 405B,model_card,2024-07-23,2026-08-02,humaneval,HumanEval,humaneval,HumanEval
+meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,Meta,Llama 3.1 405B,model_card,2024-07-23,2026-08-02,ifeval,IFEval,ifeval,IFEval
+meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,Meta,Llama 4,model_card,2025-04-05,2026-08-02,livecodebench,LiveCodeBench,livecodebench,LiveCodeBench
+meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,Meta,Llama 3.1 405B,model_card,2024-07-23,2026-08-02,math_500,MATH-500,math_500,MATH-500
+meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,Meta,Llama 4,model_card,2025-04-05,2026-08-02,mathvista,MathVista,mathvista,MathVista
+meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,Meta,Llama 3.1 405B,model_card,2024-07-23,2026-08-02,mbpp,MBPP,mbpp,MBPP
+meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,Meta,Llama 3.1 405B,model_card,2024-07-23,2026-08-02,mmlu,MMLU,mmlu,MMLU
+meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,Meta,Llama 3.1 405B,model_card,2024-07-23,2026-08-02,mmlu_pro,MMLU-Pro,mmlu_pro,MMLU-Pro
+meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,Meta,Llama 4,model_card,2025-04-05,2026-08-02,mmlu_pro,MMLU-Pro,mmlu_pro,MMLU-Pro
+meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,Meta,Llama 4,model_card,2025-04-05,2026-08-02,mmmlu,MMMLU,mmmlu,MMMLU
+meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,Meta,Llama 4,model_card,2025-04-05,2026-08-02,mmmu,MMMU,mmmu,MMMU
+meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,Meta,Llama 4,model_card,2025-04-05,2026-08-02,mtob,MTOB,mtob,MTOB
+mistral_medium_3,https://mistral.ai/news/mistral-medium-3,Mistral,Mistral Medium 3,release_post,2025-05-07,2026-08-02,aider_polyglot,Aider Polyglot,aider_polyglot,Aider Polyglot
+mistral_large_3,https://huggingface.co/mistralai/Mistral-Large-3-675B-Instruct-2512,Mistral,Mistral Large 3 (675B),model_card,2025-11-28,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+mistral_medium_3,https://mistral.ai/news/mistral-medium-3,Mistral,Mistral Medium 3,release_post,2025-05-07,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+mistral_large_2,https://mistral.ai/news/mistral-large-2407/,Mistral,Mistral Large 2,release_post,2024-07-24,2026-08-02,gsm8k,GSM8K,gsm8k,GSM8K
+mistral_large_2,https://mistral.ai/news/mistral-large-2407/,Mistral,Mistral Large 2,release_post,2024-07-24,2026-08-02,humaneval,HumanEval,humaneval,HumanEval
+mistral_medium_3,https://mistral.ai/news/mistral-medium-3,Mistral,Mistral Medium 3,release_post,2025-05-07,2026-08-02,humaneval,HumanEval,humaneval,HumanEval
+mistral_medium_3,https://mistral.ai/news/mistral-medium-3,Mistral,Mistral Medium 3,release_post,2025-05-07,2026-08-02,ifeval,IFEval,ifeval,IFEval
+mistral_large_3,https://huggingface.co/mistralai/Mistral-Large-3-675B-Instruct-2512,Mistral,Mistral Large 3 (675B),model_card,2025-11-28,2026-08-02,livecodebench,LiveCodeBench,livecodebench,LiveCodeBench
+mistral_medium_3,https://mistral.ai/news/mistral-medium-3,Mistral,Mistral Medium 3,release_post,2025-05-07,2026-08-02,livecodebench,LiveCodeBench,livecodebench,LiveCodeBench
+mistral_large_2,https://mistral.ai/news/mistral-large-2407/,Mistral,Mistral Large 2,release_post,2024-07-24,2026-08-02,math_500,MATH-500,math_500,MATH-500
+mistral_medium_3,https://mistral.ai/news/mistral-medium-3,Mistral,Mistral Medium 3,release_post,2025-05-07,2026-08-02,math_500,MATH-500,math_500,MATH-500
+mistral_large_2,https://mistral.ai/news/mistral-large-2407/,Mistral,Mistral Large 2,release_post,2024-07-24,2026-08-02,mbpp,MBPP,mbpp,MBPP
+mistral_large_2,https://mistral.ai/news/mistral-large-2407/,Mistral,Mistral Large 2,release_post,2024-07-24,2026-08-02,mmlu,MMLU,mmlu,MMLU
+mistral_medium_3,https://mistral.ai/news/mistral-medium-3,Mistral,Mistral Medium 3,release_post,2025-05-07,2026-08-02,mmlu_pro,MMLU-Pro,mmlu_pro,MMLU-Pro
+mistral_large_3,https://huggingface.co/mistralai/Mistral-Large-3-675B-Instruct-2512,Mistral,Mistral Large 3 (675B),model_card,2025-11-28,2026-08-02,mmmlu,MMMLU,mmmlu,MMMLU
+mistral_large_3,https://huggingface.co/mistralai/Mistral-Large-3-675B-Instruct-2512,Mistral,Mistral Large 3 (675B),model_card,2025-11-28,2026-08-02,simpleqa,SimpleQA,simpleqa,SimpleQA
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,aa_lcr,AA-LCR,aa_lcr,AA-LCR
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,apex_agents,APEX-Agents,apex_agents,APEX-Agents
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,automationbench,AutomationBench,automationbench,AutomationBench
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,browsecomp,BrowseComp,browsecomp,BrowseComp
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,critpt,CritPt,critpt,CritPt
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,deepsearchqa,DeepSearchQA,deepsearchqa,DeepSearchQA
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,gdpval,GDPval,gdpval,GDPval
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,mathvision,MathVision,mathvision,MathVision
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,mcp_atlas,MCP Atlas,mcp_atlas,MCP Atlas
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,mcp_mark,MCPMark,mcp_mark,MCPMark
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,mmmu_pro,MMMU-Pro,mmmu_pro,MMMU-Pro
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,omnidocbench,OmniDocBench,omnidocbench,OmniDocBench
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,osworld,OSWorld,osworld,OSWorld
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,posttrainbench,PostTrainBench,posttrainbench,PostTrainBench
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,scicode,SciCode,scicode,SciCode
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,tool_decathlon,Tool Decathlon,tool_decathlon,Tool Decathlon
+moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,Moonshot AI,Kimi K3,model_card,2026-06-13,2026-08-02,video_mme,Video-MME,video_mme,Video-MME
+openai_gpt_4_1,https://openai.com/index/gpt-4-1/,OpenAI,GPT-4.1,release_post,2025-04-14,2026-08-02,aider_polyglot,Aider Polyglot,aider_polyglot,Aider Polyglot
+openai_gpt_4_1,https://openai.com/index/gpt-4-1/,OpenAI,GPT-4.1,release_post,2025-04-14,2026-08-02,aime,AIME,aime,AIME
+openai_gpt_5_system_card,https://openai.com/index/gpt-5-system-card/,OpenAI,GPT-5,system_card,2025-08-07,2026-08-02,aime,AIME,aime,AIME
+openai_o3_o4_mini_system_card,https://openai.com/index/o3-o4-mini-system-card/,OpenAI,o3 and o4-mini,system_card,2025-04-16,2026-08-02,aime,AIME,aime,AIME
+openai_o3_o4_mini_system_card,https://openai.com/index/o3-o4-mini-system-card/,OpenAI,o3 and o4-mini,system_card,2025-04-16,2026-08-02,arc_agi,ARC-AGI,arc_agi,ARC-AGI
+openai_gpt_5_6_release,https://openai.com/index/gpt-5-6/,OpenAI,GPT-5.6,release_post,2026-06-26,2026-08-02,browsecomp,BrowseComp,browsecomp,BrowseComp
+openai_gpt_5_6_system_card,https://deploymentsafety.openai.com/gpt-5-6-preview,OpenAI,"GPT-5.6 (Sol, Terra, Luna)",system_card,2026-07-09,2026-08-02,browsecomp,BrowseComp,browsecomp,BrowseComp
+openai_gpt_5_system_card,https://openai.com/index/gpt-5-system-card/,OpenAI,GPT-5,system_card,2025-08-07,2026-08-02,browsecomp,BrowseComp,browsecomp,BrowseComp
+openai_o3_o4_mini_system_card,https://openai.com/index/o3-o4-mini-system-card/,OpenAI,o3 and o4-mini,system_card,2025-04-16,2026-08-02,browsecomp,BrowseComp,browsecomp,BrowseComp
+openai_gpt_5_6_system_card,https://deploymentsafety.openai.com/gpt-5-6-preview,OpenAI,"GPT-5.6 (Sol, Terra, Luna)",system_card,2026-07-09,2026-08-02,cvebench,CVE-Bench,cvebench,CVE-Bench
+openai_gpt_5_6_system_card,https://deploymentsafety.openai.com/gpt-5-6-preview,OpenAI,"GPT-5.6 (Sol, Terra, Luna)",system_card,2026-07-09,2026-08-02,exploitbench,ExploitBench,exploitbench,ExploitBench
+openai_gpt_4_1,https://openai.com/index/gpt-4-1/,OpenAI,GPT-4.1,release_post,2025-04-14,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+openai_gpt_5_6_release,https://openai.com/index/gpt-5-6/,OpenAI,GPT-5.6,release_post,2026-06-26,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+openai_gpt_5_system_card,https://openai.com/index/gpt-5-system-card/,OpenAI,GPT-5,system_card,2025-08-07,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+openai_o3_o4_mini_system_card,https://openai.com/index/o3-o4-mini-system-card/,OpenAI,o3 and o4-mini,system_card,2025-04-16,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+openai_gpt_5_6_system_card,https://deploymentsafety.openai.com/gpt-5-6-preview,OpenAI,"GPT-5.6 (Sol, Terra, Luna)",system_card,2026-07-09,2026-08-02,healthbench,HealthBench,healthbench,HealthBench
+openai_gpt_5_system_card,https://openai.com/index/gpt-5-system-card/,OpenAI,GPT-5,system_card,2025-08-07,2026-08-02,healthbench,HealthBench,healthbench,HealthBench
+openai_gpt_5_6_release,https://openai.com/index/gpt-5-6/,OpenAI,GPT-5.6,release_post,2026-06-26,2026-08-02,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+openai_gpt_5_system_card,https://openai.com/index/gpt-5-system-card/,OpenAI,GPT-5,system_card,2025-08-07,2026-08-02,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+openai_gpt_4_1,https://openai.com/index/gpt-4-1/,OpenAI,GPT-4.1,release_post,2025-04-14,2026-08-02,ifeval,IFEval,ifeval,IFEval
+openai_gpt_5_system_card,https://openai.com/index/gpt-5-system-card/,OpenAI,GPT-5,system_card,2025-08-07,2026-08-02,livecodebench,LiveCodeBench,livecodebench,LiveCodeBench
+openai_o3_o4_mini_system_card,https://openai.com/index/o3-o4-mini-system-card/,OpenAI,o3 and o4-mini,system_card,2025-04-16,2026-08-02,livecodebench,LiveCodeBench,livecodebench,LiveCodeBench
+openai_gpt_5_6_system_card,https://deploymentsafety.openai.com/gpt-5-6-preview,OpenAI,"GPT-5.6 (Sol, Terra, Luna)",system_card,2026-07-09,2026-08-02,mle_bench,MLE-bench,mle_bench,MLE-bench
+openai_gpt_5_system_card,https://openai.com/index/gpt-5-system-card/,OpenAI,GPT-5,system_card,2025-08-07,2026-08-02,mle_bench,MLE-bench,mle_bench,MLE-bench
+openai_gpt_4_1,https://openai.com/index/gpt-4-1/,OpenAI,GPT-4.1,release_post,2025-04-14,2026-08-02,mmlu,MMLU,mmlu,MMLU
+openai_gpt_4_1,https://openai.com/index/gpt-4-1/,OpenAI,GPT-4.1,release_post,2025-04-14,2026-08-02,mmmu,MMMU,mmmu,MMMU
+openai_gpt_5_system_card,https://openai.com/index/gpt-5-system-card/,OpenAI,GPT-5,system_card,2025-08-07,2026-08-02,mmmu,MMMU,mmmu,MMMU
+openai_o3_o4_mini_system_card,https://openai.com/index/o3-o4-mini-system-card/,OpenAI,o3 and o4-mini,system_card,2025-04-16,2026-08-02,mmmu,MMMU,mmmu,MMMU
+openai_gpt_4_1,https://openai.com/index/gpt-4-1/,OpenAI,GPT-4.1,release_post,2025-04-14,2026-08-02,mrcr,MRCR,mrcr,MRCR
+openai_gpt_5_system_card,https://openai.com/index/gpt-5-system-card/,OpenAI,GPT-5,system_card,2025-08-07,2026-08-02,mrcr,MRCR,mrcr,MRCR
+openai_gpt_5_6_system_card,https://deploymentsafety.openai.com/gpt-5-6-preview,OpenAI,"GPT-5.6 (Sol, Terra, Luna)",system_card,2026-07-09,2026-08-02,posttrainbench,PostTrainBench,posttrainbench,PostTrainBench
+openai_gpt_5_system_card,https://openai.com/index/gpt-5-system-card/,OpenAI,GPT-5,system_card,2025-08-07,2026-08-02,simpleqa,SimpleQA,simpleqa,SimpleQA
+openai_o3_o4_mini_system_card,https://openai.com/index/o3-o4-mini-system-card/,OpenAI,o3 and o4-mini,system_card,2025-04-16,2026-08-02,simpleqa,SimpleQA,simpleqa,SimpleQA
+openai_gpt_4_1,https://openai.com/index/gpt-4-1/,OpenAI,GPT-4.1,release_post,2025-04-14,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+openai_gpt_5_6_release,https://openai.com/index/gpt-5-6/,OpenAI,GPT-5.6,release_post,2026-06-26,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+openai_gpt_5_system_card,https://openai.com/index/gpt-5-system-card/,OpenAI,GPT-5,system_card,2025-08-07,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+openai_o3_o4_mini_system_card,https://openai.com/index/o3-o4-mini-system-card/,OpenAI,o3 and o4-mini,system_card,2025-04-16,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+openai_gpt_5_system_card,https://openai.com/index/gpt-5-system-card/,OpenAI,GPT-5,system_card,2025-08-07,2026-08-02,tau_bench,tau-bench,tau_bench,tau-bench
+openai_gpt_5_6_release,https://openai.com/index/gpt-5-6/,OpenAI,GPT-5.6,release_post,2026-06-26,2026-08-02,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+openai_gpt_5_6_system_card,https://deploymentsafety.openai.com/gpt-5-6-preview,OpenAI,"GPT-5.6 (Sol, Terra, Luna)",system_card,2026-07-09,2026-08-02,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+openai_gpt_4_1,https://openai.com/index/gpt-4-1/,OpenAI,GPT-4.1,release_post,2025-04-14,2026-08-02,video_mme,Video-MME,video_mme,Video-MME
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,aa_lcr,AA-LCR,aa_lcr,AA-LCR
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,aime,AIME,aime,AIME
+qwen3_technical_report,https://arxiv.org/abs/2505.09388,Qwen,Qwen3,technical_report,2025-05-14,2026-08-02,aime,AIME,aime,AIME
+qwen3_technical_report,https://arxiv.org/abs/2505.09388,Qwen,Qwen3,technical_report,2025-05-14,2026-08-02,arena_hard,Arena-Hard,arena_hard,Arena-Hard
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,bfcl,BFCL,bfcl,BFCL
+qwen3_technical_report,https://arxiv.org/abs/2505.09388,Qwen,Qwen3,technical_report,2025-05-14,2026-08-02,bfcl,BFCL,bfcl,BFCL
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,browsecomp,BrowseComp,browsecomp,BrowseComp
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,browsecomp_zh,BrowseComp-ZH,browsecomp_zh,BrowseComp-ZH
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,gpqa,GPQA (full),gpqa,GPQA (full)
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+qwen3_8_model_card,https://ollama.com/library/qwen3.8,Qwen,Qwen3.8-27B,model_card,2026-08-05,2026-08-15,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+qwen3_technical_report,https://arxiv.org/abs/2505.09388,Qwen,Qwen3,technical_report,2025-05-14,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+qwen2_5_coder_report,https://arxiv.org/abs/2409.12186,Qwen,Qwen2.5-Coder,technical_report,2024-09-18,2026-08-02,gsm8k,GSM8K,gsm8k,GSM8K
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+qwen3_8_model_card,https://ollama.com/library/qwen3.8,Qwen,Qwen3.8-27B,model_card,2026-08-05,2026-08-15,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,hmmt,HMMT,hmmt,HMMT
+qwen2_5_coder_report,https://arxiv.org/abs/2409.12186,Qwen,Qwen2.5-Coder,technical_report,2024-09-18,2026-08-02,humaneval,HumanEval,humaneval,HumanEval
+qwen3_technical_report,https://arxiv.org/abs/2505.09388,Qwen,Qwen3,technical_report,2025-05-14,2026-08-02,humaneval,HumanEval,humaneval,HumanEval
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,ifbench,IFBench,ifbench,IFBench
+qwen3_8_model_card,https://ollama.com/library/qwen3.8,Qwen,Qwen3.8-27B,model_card,2026-08-05,2026-08-15,ifbench,IFBench,ifbench,IFBench
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,ifeval,IFEval,ifeval,IFEval
+qwen3_technical_report,https://arxiv.org/abs/2505.09388,Qwen,Qwen3,technical_report,2025-05-14,2026-08-02,ifeval,IFEval,ifeval,IFEval
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,imo_answer_bench,IMOAnswerBench,imo_answer_bench,IMOAnswerBench
+qwen3_technical_report,https://arxiv.org/abs/2505.09388,Qwen,Qwen3,technical_report,2025-05-14,2026-08-02,livebench,LiveBench,livebench,LiveBench
+qwen2_5_coder_report,https://arxiv.org/abs/2409.12186,Qwen,Qwen2.5-Coder,technical_report,2024-09-18,2026-08-02,livecodebench,LiveCodeBench,livecodebench,LiveCodeBench
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,livecodebench,LiveCodeBench,livecodebench,LiveCodeBench
+qwen3_8_model_card,https://ollama.com/library/qwen3.8,Qwen,Qwen3.8-27B,model_card,2026-08-05,2026-08-15,livecodebench,LiveCodeBench,livecodebench,LiveCodeBench
+qwen3_technical_report,https://arxiv.org/abs/2505.09388,Qwen,Qwen3,technical_report,2025-05-14,2026-08-02,livecodebench,LiveCodeBench,livecodebench,LiveCodeBench
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,longbench,LongBench,longbench,LongBench
+qwen2_5_coder_report,https://arxiv.org/abs/2409.12186,Qwen,Qwen2.5-Coder,technical_report,2024-09-18,2026-08-02,math_500,MATH-500,math_500,MATH-500
+qwen3_technical_report,https://arxiv.org/abs/2505.09388,Qwen,Qwen3,technical_report,2025-05-14,2026-08-02,math_500,MATH-500,math_500,MATH-500
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,mathvision,MathVision,mathvision,MathVision
+qwen3_8_model_card,https://ollama.com/library/qwen3.8,Qwen,Qwen3.8-27B,model_card,2026-08-05,2026-08-15,mathvision,MathVision,mathvision,MathVision
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,mathvista,MathVista,mathvista,MathVista
+qwen2_5_coder_report,https://arxiv.org/abs/2409.12186,Qwen,Qwen2.5-Coder,technical_report,2024-09-18,2026-08-02,mbpp,MBPP,mbpp,MBPP
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,mcp_mark,MCPMark,mcp_mark,MCPMark
+qwen2_5_coder_report,https://arxiv.org/abs/2409.12186,Qwen,Qwen2.5-Coder,technical_report,2024-09-18,2026-08-02,mmlu,MMLU,mmlu,MMLU
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,mmlu_pro,MMLU-Pro,mmlu_pro,MMLU-Pro
+qwen3_technical_report,https://arxiv.org/abs/2505.09388,Qwen,Qwen3,technical_report,2025-05-14,2026-08-02,mmlu_pro,MMLU-Pro,mmlu_pro,MMLU-Pro
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,mmlu_redux,MMLU-Redux,mmlu_redux,MMLU-Redux
+qwen3_technical_report,https://arxiv.org/abs/2505.09388,Qwen,Qwen3,technical_report,2025-05-14,2026-08-02,mmlu_redux,MMLU-Redux,mmlu_redux,MMLU-Redux
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,mmmlu,MMMLU,mmmlu,MMMLU
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,mmmu,MMMU,mmmu,MMMU
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,mmmu_pro,MMMU-Pro,mmmu_pro,MMMU-Pro
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,multichallenge,MultiChallenge,multichallenge,MultiChallenge
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,omnidocbench,OmniDocBench,omnidocbench,OmniDocBench
+qwen3_8_model_card,https://ollama.com/library/qwen3.8,Qwen,Qwen3.8-27B,model_card,2026-08-05,2026-08-15,omnidocbench,OmniDocBench,omnidocbench,OmniDocBench
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,osworld,OSWorld,osworld,OSWorld
+qwen3_8_model_card,https://ollama.com/library/qwen3.8,Qwen,Qwen3.8-27B,model_card,2026-08-05,2026-08-15,osworld,OSWorld,osworld,OSWorld
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,seccodebench,SecCodeBench,seccodebench,SecCodeBench
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,super_gpqa,SuperGPQA,super_gpqa,SuperGPQA
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,swe_bench_multilingual,SWE-bench Multilingual,swe_bench_multilingual,SWE-bench Multilingual
+qwen3_8_model_card,https://ollama.com/library/qwen3.8,Qwen,Qwen3.8-27B,model_card,2026-08-05,2026-08-15,swe_bench_pro,SWE-bench Pro,swe_bench_pro,SWE-bench Pro
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,tau2_bench,tau2-bench,tau2_bench,tau2-bench
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+qwen3_8_model_card,https://ollama.com/library/qwen3.8,Qwen,Qwen3.8-27B,model_card,2026-08-05,2026-08-15,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,tool_decathlon,Tool Decathlon,tool_decathlon,Tool Decathlon
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,video_mme,Video-MME,video_mme,Video-MME
+qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,Qwen,Qwen3.5-397B-A17B,model_card,2026-02-16,2026-08-02,widesearch,WideSearch,widesearch,WideSearch
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,agents_last_exam,Agents' Last Exam,agents_last_exam,Agents' Last Exam
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,apex_agents,APEX-Agents,apex_agents,APEX-Agents
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,arxivmath,ArXivMath,arxivmath,ArXivMath
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,automationbench,AutomationBench,automationbench,AutomationBench
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,bankertoolbench,BankerToolBench,bankertoolbench,BankerToolBench
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,biomysterybench,BioMysteryBench,biomysterybench,BioMysteryBench
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,brokenarxiv,BrokenArXiv,brokenarxiv,BrokenArXiv
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,critpt,CritPt,critpt,CritPt
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,cybergym,CyberGym,cybergym,CyberGym
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,deepswe,DeepSWE,deepswe,DeepSWE
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,draco,DRACO,draco,DRACO
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,gdpval,GDPval,gdpval,GDPval
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,harbor_index,Harbor-Index,harbor_index,Harbor-Index
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,horizonmath,HorizonMath,horizonmath,HorizonMath
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,jobbench,JobBench,jobbench,JobBench
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,matharena_apex_2025,MathArena Apex 2025,matharena_apex_2025,MathArena Apex 2025
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,mcp_atlas,MCP Atlas,mcp_atlas,MCP Atlas
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,nl2repo,NL2Repo,nl2repo,NL2Repo
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,office_qa_pro,OfficeQA Pro,office_qa_pro,OfficeQA Pro
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,onemillionbench,OneMillionBench,onemillionbench,OneMillionBench
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,posttrainbench,PostTrainBench,posttrainbench,PostTrainBench
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,programbench,ProgramBench,programbench,ProgramBench
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,skillsbench,SkillsBench,skillsbench,SkillsBench
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,superchem,SUPERChem,superchem,SUPERChem
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,swe_atlas,SWE Atlas,swe_atlas,SWE Atlas
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,swe_bench_multilingual,SWE-bench Multilingual,swe_bench_multilingual,SWE-bench Multilingual
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,swe_bench_pro,SWE-bench Pro,swe_bench_pro,SWE-bench Pro
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,swe_marathon,SWE-Marathon,swe_marathon,SWE-Marathon
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,toolathlon_verified,Toolathlon Verified,toolathlon_verified,Toolathlon Verified
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,widesearch,WideSearch,widesearch,WideSearch
+tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,Tencent,Hy4 preview,technical_report,2026-08-28,2026-08-31,workspacebench,WorkspaceBench,workspacebench,WorkspaceBench
+zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,Z.ai,GLM-5.3-Flash,model_card,2026-08-27,2026-08-27,agents_last_exam,Agents' Last Exam,agents_last_exam,Agents' Last Exam
+zai_glm_5_1_model_card,https://huggingface.co/zai-org/GLM-5.1,Z.ai,GLM-5.1,model_card,2026-04-03,2026-08-15,aime,AIME,aime,AIME
+zai_glm_5_2_model_card,https://huggingface.co/zai-org/GLM-5.2,Z.ai,GLM-5.2,model_card,2026-06-16,2026-08-15,aime,AIME,aime,AIME
+zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5,Z.ai,GLM-5,model_card,2026-02-11,2026-08-02,aime,AIME,aime,AIME
+zai_glm_5_paper,https://huggingface.co/papers/2602.15763,Z.ai,GLM-5,technical_report,2026-02-11,2026-08-02,aime,AIME,aime,AIME
+zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,Z.ai,GLM-5.3-Flash,model_card,2026-08-27,2026-08-27,automationbench,AutomationBench,automationbench,AutomationBench
+zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,Z.ai,GLM-5.3-Flash,model_card,2026-08-27,2026-08-27,babyvision,BabyVision,babyvision,BabyVision
+zai_glm_5_1_model_card,https://huggingface.co/zai-org/GLM-5.1,Z.ai,GLM-5.1,model_card,2026-04-03,2026-08-15,browsecomp,BrowseComp,browsecomp,BrowseComp
+zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5,Z.ai,GLM-5,model_card,2026-02-11,2026-08-02,browsecomp,BrowseComp,browsecomp,BrowseComp
+zai_glm_5_paper,https://huggingface.co/papers/2602.15763,Z.ai,GLM-5,technical_report,2026-02-11,2026-08-02,browsecomp,BrowseComp,browsecomp,BrowseComp
+zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5,Z.ai,GLM-5,model_card,2026-02-11,2026-08-02,browsecomp_zh,BrowseComp-ZH,browsecomp_zh,BrowseComp-ZH
+zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,Z.ai,GLM-5.3-Flash,model_card,2026-08-27,2026-08-27,chartography,Chartography,chartography,Chartography
+zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,Z.ai,GLM-5.3-Flash,model_card,2026-08-27,2026-08-27,charxiv_reasoning,CharXiv Reasoning,charxiv_reasoning,CharXiv Reasoning
+zai_glm_5_2_model_card,https://huggingface.co/zai-org/GLM-5.2,Z.ai,GLM-5.2,model_card,2026-06-16,2026-08-15,critpt,CritPt,critpt,CritPt
+zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,Z.ai,GLM-5.3-Flash,model_card,2026-08-27,2026-08-27,deepswe,DeepSWE,deepswe,DeepSWE
+zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,Z.ai,GLM-5.3-Flash,model_card,2026-08-27,2026-08-27,gdpval,GDPval,gdpval,GDPval
+zai_glm_5_1_model_card,https://huggingface.co/zai-org/GLM-5.1,Z.ai,GLM-5.1,model_card,2026-04-03,2026-08-15,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+zai_glm_5_2_model_card,https://huggingface.co/zai-org/GLM-5.2,Z.ai,GLM-5.2,model_card,2026-06-16,2026-08-15,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5,Z.ai,GLM-5,model_card,2026-02-11,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+zai_glm_5_paper,https://huggingface.co/papers/2602.15763,Z.ai,GLM-5,technical_report,2026-02-11,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+zai_glm_5_1_model_card,https://huggingface.co/zai-org/GLM-5.1,Z.ai,GLM-5.1,model_card,2026-04-03,2026-08-15,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+zai_glm_5_2_model_card,https://huggingface.co/zai-org/GLM-5.2,Z.ai,GLM-5.2,model_card,2026-06-16,2026-08-15,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,Z.ai,GLM-5.3-Flash,model_card,2026-08-27,2026-08-27,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5,Z.ai,GLM-5,model_card,2026-02-11,2026-08-02,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+zai_glm_5_paper,https://huggingface.co/papers/2602.15763,Z.ai,GLM-5,technical_report,2026-02-11,2026-08-02,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+zai_glm_5_1_model_card,https://huggingface.co/zai-org/GLM-5.1,Z.ai,GLM-5.1,model_card,2026-04-03,2026-08-15,hmmt,HMMT,hmmt,HMMT
+zai_glm_5_2_model_card,https://huggingface.co/zai-org/GLM-5.2,Z.ai,GLM-5.2,model_card,2026-06-16,2026-08-15,hmmt,HMMT,hmmt,HMMT
+zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5,Z.ai,GLM-5,model_card,2026-02-11,2026-08-02,hmmt,HMMT,hmmt,HMMT
+zai_glm_5_1_model_card,https://huggingface.co/zai-org/GLM-5.1,Z.ai,GLM-5.1,model_card,2026-04-03,2026-08-15,imo_answer_bench,IMOAnswerBench,imo_answer_bench,IMOAnswerBench
+zai_glm_5_2_model_card,https://huggingface.co/zai-org/GLM-5.2,Z.ai,GLM-5.2,model_card,2026-06-16,2026-08-15,imo_answer_bench,IMOAnswerBench,imo_answer_bench,IMOAnswerBench
+zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5,Z.ai,GLM-5,model_card,2026-02-11,2026-08-02,imo_answer_bench,IMOAnswerBench,imo_answer_bench,IMOAnswerBench
+zai_glm_5_1_model_card,https://huggingface.co/zai-org/GLM-5.1,Z.ai,GLM-5.1,model_card,2026-04-03,2026-08-15,mcp_atlas,MCP Atlas,mcp_atlas,MCP Atlas
+zai_glm_5_2_model_card,https://huggingface.co/zai-org/GLM-5.2,Z.ai,GLM-5.2,model_card,2026-06-16,2026-08-15,mcp_atlas,MCP Atlas,mcp_atlas,MCP Atlas
+zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5,Z.ai,GLM-5,model_card,2026-02-11,2026-08-02,mcp_atlas,MCP Atlas,mcp_atlas,MCP Atlas
+zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,Z.ai,GLM-5.3-Flash,model_card,2026-08-27,2026-08-27,mmvu,MMVU,mmvu,MMVU
+zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,Z.ai,GLM-5.3-Flash,model_card,2026-08-27,2026-08-27,mvbench,MVbench,mvbench,MVbench
+zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,Z.ai,GLM-5.3-Flash,model_card,2026-08-27,2026-08-27,nl2repo,NL2Repo,nl2repo,NL2Repo
+zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,Z.ai,GLM-5.3-Flash,model_card,2026-08-27,2026-08-27,office_qa_pro,OfficeQA Pro,office_qa_pro,OfficeQA Pro
+zai_glm_5_2_model_card,https://huggingface.co/zai-org/GLM-5.2,Z.ai,GLM-5.2,model_card,2026-06-16,2026-08-15,posttrainbench,PostTrainBench,posttrainbench,PostTrainBench
+zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5,Z.ai,GLM-5,model_card,2026-02-11,2026-08-02,swe_bench_multilingual,SWE-bench Multilingual,swe_bench_multilingual,SWE-bench Multilingual
+zai_glm_5_1_model_card,https://huggingface.co/zai-org/GLM-5.1,Z.ai,GLM-5.1,model_card,2026-04-03,2026-08-15,swe_bench_pro,SWE-bench Pro,swe_bench_pro,SWE-bench Pro
+zai_glm_5_2_model_card,https://huggingface.co/zai-org/GLM-5.2,Z.ai,GLM-5.2,model_card,2026-06-16,2026-08-15,swe_bench_pro,SWE-bench Pro,swe_bench_pro,SWE-bench Pro
+zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5,Z.ai,GLM-5,model_card,2026-02-11,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+zai_glm_5_paper,https://huggingface.co/papers/2602.15763,Z.ai,GLM-5,technical_report,2026-02-11,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+zai_glm_5_1_model_card,https://huggingface.co/zai-org/GLM-5.1,Z.ai,GLM-5.1,model_card,2026-04-03,2026-08-15,tau2_bench,tau2-bench,tau2_bench,tau2-bench
+zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5,Z.ai,GLM-5,model_card,2026-02-11,2026-08-02,tau2_bench,tau2-bench,tau2_bench,tau2-bench
+zai_glm_5_paper,https://huggingface.co/papers/2602.15763,Z.ai,GLM-5,technical_report,2026-02-11,2026-08-02,tau2_bench,tau2-bench,tau2_bench,tau2-bench
+zai_glm_5_1_model_card,https://huggingface.co/zai-org/GLM-5.1,Z.ai,GLM-5.1,model_card,2026-04-03,2026-08-15,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+zai_glm_5_2_model_card,https://huggingface.co/zai-org/GLM-5.2,Z.ai,GLM-5.2,model_card,2026-06-16,2026-08-15,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,Z.ai,GLM-5.3-Flash,model_card,2026-08-27,2026-08-27,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5,Z.ai,GLM-5,model_card,2026-02-11,2026-08-02,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+zai_glm_5_paper,https://huggingface.co/papers/2602.15763,Z.ai,GLM-5,technical_report,2026-02-11,2026-08-02,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench
+zai_glm_5_1_model_card,https://huggingface.co/zai-org/GLM-5.1,Z.ai,GLM-5.1,model_card,2026-04-03,2026-08-15,tool_decathlon,Tool Decathlon,tool_decathlon,Tool Decathlon
+zai_glm_5_2_model_card,https://huggingface.co/zai-org/GLM-5.2,Z.ai,GLM-5.2,model_card,2026-06-16,2026-08-15,tool_decathlon,Tool Decathlon,tool_decathlon,Tool Decathlon
+zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5,Z.ai,GLM-5,model_card,2026-02-11,2026-08-02,tool_decathlon,Tool Decathlon,tool_decathlon,Tool Decathlon
+zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,Z.ai,GLM-5.3-Flash,model_card,2026-08-27,2026-08-27,toolathlon_verified,Toolathlon Verified,toolathlon_verified,Toolathlon Verified
+zai_glm_5_1_model_card,https://huggingface.co/zai-org/GLM-5.1,Z.ai,GLM-5.1,model_card,2026-04-03,2026-08-15,vending_bench,Vending Bench,vending_bench,Vending Bench
+zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5,Z.ai,GLM-5,model_card,2026-02-11,2026-08-02,vending_bench,Vending Bench,vending_bench,Vending Bench
+xai_grok_4_model_card,https://x.ai/news/grok-4,xAI,Grok 4,model_card,2025-07-09,2026-08-02,aime,AIME,aime,AIME
+xai_grok_4_model_card,https://x.ai/news/grok-4,xAI,Grok 4,model_card,2025-07-09,2026-08-02,arc_agi,ARC-AGI,arc_agi,ARC-AGI
+xai_grok_4_5,https://x.ai/news/grok-4-5,xAI,Grok 4.5,release_post,2026-07-08,2026-08-02,arc_agi_2,ARC-AGI-2,arc_agi_2,ARC-AGI-2
+xai_grok_4_5,https://x.ai/news/grok-4-5,xAI,Grok 4.5,release_post,2026-07-08,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+xai_grok_4_model_card,https://x.ai/news/grok-4,xAI,Grok 4,model_card,2025-07-09,2026-08-02,gpqa_diamond,GPQA Diamond,gpqa_diamond,GPQA Diamond
+xai_grok_4_5,https://x.ai/news/grok-4-5,xAI,Grok 4.5,release_post,2026-07-08,2026-08-02,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+xai_grok_4_model_card,https://x.ai/news/grok-4,xAI,Grok 4,model_card,2025-07-09,2026-08-02,hle,Humanity's Last Exam,hle,Humanity's Last Exam
+xai_grok_4_model_card,https://x.ai/news/grok-4,xAI,Grok 4,model_card,2025-07-09,2026-08-02,livecodebench,LiveCodeBench,livecodebench,LiveCodeBench
+xai_grok_4_model_card,https://x.ai/news/grok-4,xAI,Grok 4,model_card,2025-07-09,2026-08-02,mmmu,MMMU,mmmu,MMMU
+xai_grok_4_5,https://x.ai/news/grok-4-5,xAI,Grok 4.5,release_post,2026-07-08,2026-08-02,swe_bench_pro,SWE-bench Pro,swe_bench_pro,SWE-bench Pro
+xai_grok_4_model_card,https://x.ai/news/grok-4,xAI,Grok 4,model_card,2025-07-09,2026-08-02,swe_bench_verified,SWE-bench Verified,swe_bench_verified,SWE-bench Verified
+xai_grok_4_5,https://x.ai/news/grok-4-5,xAI,Grok 4.5,release_post,2026-07-08,2026-08-02,terminal_bench,Terminal-Bench,terminal_bench,Terminal-Bench

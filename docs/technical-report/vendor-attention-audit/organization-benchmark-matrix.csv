@@ -1,0 +1,1321 @@
+organization,resolved_benchmark_id,resolved_benchmark_name,reported_status,support_document_count,supporting_document_ids,supporting_document_urls,latest_effective_date
+Ai2,aa_lcr,AA-LCR,not_observed,0,,,
+Ai2,agents_last_exam,Agents' Last Exam,not_observed,0,,,
+Ai2,agieval,AGIEval,reported,1,ai2_olmo_3,https://allenai.org/blog/olmo3,2025-11-20
+Ai2,aider_polyglot,Aider Polyglot,not_observed,0,,,
+Ai2,aime,AIME,reported,1,ai2_olmo_3,https://allenai.org/blog/olmo3,2025-11-20
+Ai2,apex_agents,APEX-Agents,not_observed,0,,,
+Ai2,arc_agi,ARC-AGI,not_observed,0,,,
+Ai2,arc_agi_2,ARC-AGI-2,not_observed,0,,,
+Ai2,arc_agi_3,ARC-AGI-3,not_observed,0,,,
+Ai2,arena_hard,Arena-Hard,not_observed,0,,,
+Ai2,arxivmath,ArXivMath,not_observed,0,,,
+Ai2,asi_bench,ASI-Bench,not_observed,0,,,
+Ai2,automationbench,AutomationBench,not_observed,0,,,
+Ai2,babyvision,BabyVision,not_observed,0,,,
+Ai2,bankertoolbench,BankerToolBench,not_observed,0,,,
+Ai2,bfcl,BFCL,reported,1,ai2_olmo_3,https://allenai.org/blog/olmo3,2025-11-20
+Ai2,bigbench_extra_hard,BIG-Bench Extra Hard,not_observed,0,,,
+Ai2,biomysterybench,BioMysteryBench,not_observed,0,,,
+Ai2,blueprint_bench_2,Blueprint-Bench 2,not_observed,0,,,
+Ai2,brokenarxiv,BrokenArXiv,not_observed,0,,,
+Ai2,browsecomp,BrowseComp,not_observed,0,,,
+Ai2,browsecomp_zh,BrowseComp-ZH,not_observed,0,,,
+Ai2,chartography,Chartography,not_observed,0,,,
+Ai2,chartqa,ChartQA,not_observed,0,,,
+Ai2,charxiv_reasoning,CharXiv Reasoning,not_observed,0,,,
+Ai2,chatbot_arena,Chatbot Arena,not_observed,0,,,
+Ai2,codeforces,Codeforces,not_observed,0,,,
+Ai2,critpt,CritPt,not_observed,0,,,
+Ai2,cursor_bench,CursorBench,not_observed,0,,,
+Ai2,cvebench,CVE-Bench,not_observed,0,,,
+Ai2,cybergym,CyberGym,not_observed,0,,,
+Ai2,deepsearchqa,DeepSearchQA,not_observed,0,,,
+Ai2,deepswe,DeepSWE,not_observed,0,,,
+Ai2,docvqa,DocVQA,not_observed,0,,,
+Ai2,draco,DRACO,not_observed,0,,,
+Ai2,drop,DROP,reported,1,ai2_olmo_3,https://allenai.org/blog/olmo3,2025-11-20
+Ai2,exploitbench,ExploitBench,not_observed,0,,,
+Ai2,frontiercode,FrontierCode,not_observed,0,,,
+Ai2,gdp_pdf,GDP.pdf,not_observed,0,,,
+Ai2,gdpval,GDPval,not_observed,0,,,
+Ai2,gpqa,GPQA (full),reported,1,ai2_olmo_3,https://allenai.org/blog/olmo3,2025-11-20
+Ai2,gpqa_diamond,GPQA Diamond,not_observed,0,,,
+Ai2,gsm8k,GSM8K,reported,1,ai2_olmo_3,https://allenai.org/blog/olmo3,2025-11-20
+Ai2,harbor_index,Harbor-Index,not_observed,0,,,
+Ai2,healthbench,HealthBench,not_observed,0,,,
+Ai2,healthbench_professional,HealthBench Professional,not_observed,0,,,
+Ai2,hle,Humanity's Last Exam,not_observed,0,,,
+Ai2,hmmt,HMMT,not_observed,0,,,
+Ai2,horizonmath,HorizonMath,not_observed,0,,,
+Ai2,humaneval,HumanEval,reported,1,ai2_olmo_3,https://allenai.org/blog/olmo3,2025-11-20
+Ai2,ifbench,IFBench,reported,1,ai2_olmo_3,https://allenai.org/blog/olmo3,2025-11-20
+Ai2,ifeval,IFEval,reported,1,ai2_olmo_3,https://allenai.org/blog/olmo3,2025-11-20
+Ai2,imo_answer_bench,IMOAnswerBench,not_observed,0,,,
+Ai2,jobbench,JobBench,not_observed,0,,,
+Ai2,jointavbench,JointAVBench,not_observed,0,,,
+Ai2,legal_agent_benchmark,Legal Agent Benchmark,not_observed,0,,,
+Ai2,livebench,LiveBench,not_observed,0,,,
+Ai2,livecodebench,LiveCodeBench,reported,1,ai2_olmo_3,https://allenai.org/blog/olmo3,2025-11-20
+Ai2,livecodebench_pro,LiveCodeBench Pro,not_observed,0,,,
+Ai2,longbench,LongBench,not_observed,0,,,
+Ai2,math_500,MATH-500,not_observed,0,,,
+Ai2,matharena_apex_2025,MathArena Apex 2025,not_observed,0,,,
+Ai2,mathvision,MathVision,not_observed,0,,,
+Ai2,mathvista,MathVista,not_observed,0,,,
+Ai2,mbpp,MBPP,reported,1,ai2_olmo_3,https://allenai.org/blog/olmo3,2025-11-20
+Ai2,mcp_atlas,MCP Atlas,not_observed,0,,,
+Ai2,mcp_mark,MCPMark,not_observed,0,,,
+Ai2,mle_bench,MLE-bench,not_observed,0,,,
+Ai2,mmlu,MMLU,reported,1,ai2_olmo_3,https://allenai.org/blog/olmo3,2025-11-20
+Ai2,mmlu_pro,MMLU-Pro,reported,1,ai2_olmo_3,https://allenai.org/blog/olmo3,2025-11-20
+Ai2,mmlu_redux,MMLU-Redux,not_observed,0,,,
+Ai2,mmmlu,MMMLU,not_observed,0,,,
+Ai2,mmmu,MMMU,not_observed,0,,,
+Ai2,mmmu_pro,MMMU-Pro,not_observed,0,,,
+Ai2,mmvu,MMVU,not_observed,0,,,
+Ai2,mrcr,MRCR,not_observed,0,,,
+Ai2,mtob,MTOB,not_observed,0,,,
+Ai2,multichallenge,MultiChallenge,not_observed,0,,,
+Ai2,mvbench,MVbench,not_observed,0,,,
+Ai2,nl2repo,NL2Repo,not_observed,0,,,
+Ai2,office_qa_pro,OfficeQA Pro,not_observed,0,,,
+Ai2,omnidocbench,OmniDocBench,not_observed,0,,,
+Ai2,omnivideobench,OmniVideoBench,not_observed,0,,,
+Ai2,onemillionbench,OneMillionBench,not_observed,0,,,
+Ai2,osworld,OSWorld,not_observed,0,,,
+Ai2,posttrainbench,PostTrainBench,not_observed,0,,,
+Ai2,programbench,ProgramBench,not_observed,0,,,
+Ai2,rsi_bench,RSI-Bench,not_observed,0,,,
+Ai2,scicode,SciCode,not_observed,0,,,
+Ai2,seccodebench,SecCodeBench,not_observed,0,,,
+Ai2,simpleqa,SimpleQA,reported,1,ai2_olmo_3,https://allenai.org/blog/olmo3,2025-11-20
+Ai2,skillsbench,SkillsBench,not_observed,0,,,
+Ai2,super_gpqa,SuperGPQA,not_observed,0,,,
+Ai2,superchem,SUPERChem,not_observed,0,,,
+Ai2,swe_atlas,SWE Atlas,not_observed,0,,,
+Ai2,swe_bench_multilingual,SWE-bench Multilingual,not_observed,0,,,
+Ai2,swe_bench_pro,SWE-bench Pro,not_observed,0,,,
+Ai2,swe_bench_science,SWE-bench Science,not_observed,0,,,
+Ai2,swe_bench_verified,SWE-bench Verified,not_observed,0,,,
+Ai2,swe_marathon,SWE-Marathon,not_observed,0,,,
+Ai2,tau2_bench,tau2-bench,not_observed,0,,,
+Ai2,tau_bench,tau-bench,not_observed,0,,,
+Ai2,terminal_bench,Terminal-Bench,not_observed,0,,,
+Ai2,tool_decathlon,Tool Decathlon,not_observed,0,,,
+Ai2,toolathlon_verified,Toolathlon Verified,not_observed,0,,,
+Ai2,vending_bench,Vending Bench,not_observed,0,,,
+Ai2,vibench,ViBench,not_observed,0,,,
+Ai2,video_mme,Video-MME,not_observed,0,,,
+Ai2,widesearch,WideSearch,not_observed,0,,,
+Ai2,workspacebench,WorkspaceBench,not_observed,0,,,
+Anthropic,aa_lcr,AA-LCR,not_observed,0,,,
+Anthropic,agents_last_exam,Agents' Last Exam,not_observed,0,,,
+Anthropic,agieval,AGIEval,not_observed,0,,,
+Anthropic,aider_polyglot,Aider Polyglot,not_observed,0,,,
+Anthropic,aime,AIME,reported,2,anthropic_claude_3_7_sonnet|anthropic_claude_4_system_card,https://www.anthropic.com/news/claude-3-7-sonnet|https://www.anthropic.com/news/claude-4,2025-05-22
+Anthropic,apex_agents,APEX-Agents,not_observed,0,,,
+Anthropic,arc_agi,ARC-AGI,not_observed,0,,,
+Anthropic,arc_agi_2,ARC-AGI-2,not_observed,0,,,
+Anthropic,arc_agi_3,ARC-AGI-3,reported,1,anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-opus-5,2026-07-24
+Anthropic,arena_hard,Arena-Hard,not_observed,0,,,
+Anthropic,arxivmath,ArXivMath,not_observed,0,,,
+Anthropic,asi_bench,ASI-Bench,not_observed,0,,,
+Anthropic,automationbench,AutomationBench,reported,2,anthropic_claude_fable_5_mythos_5|anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-fable-5-mythos-5|https://www.anthropic.com/news/claude-opus-5,2026-07-24
+Anthropic,babyvision,BabyVision,not_observed,0,,,
+Anthropic,bankertoolbench,BankerToolBench,not_observed,0,,,
+Anthropic,bfcl,BFCL,not_observed,0,,,
+Anthropic,bigbench_extra_hard,BIG-Bench Extra Hard,not_observed,0,,,
+Anthropic,biomysterybench,BioMysteryBench,reported,1,anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,2026-06-09
+Anthropic,blueprint_bench_2,Blueprint-Bench 2,reported,1,anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,2026-06-09
+Anthropic,brokenarxiv,BrokenArXiv,not_observed,0,,,
+Anthropic,browsecomp,BrowseComp,not_observed,0,,,
+Anthropic,browsecomp_zh,BrowseComp-ZH,not_observed,0,,,
+Anthropic,chartography,Chartography,not_observed,0,,,
+Anthropic,chartqa,ChartQA,not_observed,0,,,
+Anthropic,charxiv_reasoning,CharXiv Reasoning,not_observed,0,,,
+Anthropic,chatbot_arena,Chatbot Arena,not_observed,0,,,
+Anthropic,codeforces,Codeforces,not_observed,0,,,
+Anthropic,critpt,CritPt,not_observed,0,,,
+Anthropic,cursor_bench,CursorBench,reported,2,anthropic_claude_fable_5_mythos_5|anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-fable-5-mythos-5|https://www.anthropic.com/news/claude-opus-5,2026-07-24
+Anthropic,cvebench,CVE-Bench,not_observed,0,,,
+Anthropic,cybergym,CyberGym,not_observed,0,,,
+Anthropic,deepsearchqa,DeepSearchQA,reported,1,anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-opus-5,2026-07-24
+Anthropic,deepswe,DeepSWE,not_observed,0,,,
+Anthropic,docvqa,DocVQA,not_observed,0,,,
+Anthropic,draco,DRACO,not_observed,0,,,
+Anthropic,drop,DROP,not_observed,0,,,
+Anthropic,exploitbench,ExploitBench,reported,1,anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,2026-06-09
+Anthropic,frontiercode,FrontierCode,reported,1,anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,2026-06-09
+Anthropic,gdp_pdf,GDP.pdf,reported,1,anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,2026-06-09
+Anthropic,gdpval,GDPval,reported,2,anthropic_claude_fable_5_mythos_5|anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-fable-5-mythos-5|https://www.anthropic.com/news/claude-opus-5,2026-07-24
+Anthropic,gpqa,GPQA (full),not_observed,0,,,
+Anthropic,gpqa_diamond,GPQA Diamond,reported,2,anthropic_claude_3_7_sonnet|anthropic_claude_4_system_card,https://www.anthropic.com/news/claude-3-7-sonnet|https://www.anthropic.com/news/claude-4,2025-05-22
+Anthropic,gsm8k,GSM8K,not_observed,0,,,
+Anthropic,harbor_index,Harbor-Index,not_observed,0,,,
+Anthropic,healthbench,HealthBench,not_observed,0,,,
+Anthropic,healthbench_professional,HealthBench Professional,reported,1,anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,2026-06-09
+Anthropic,hle,Humanity's Last Exam,reported,1,anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,2026-06-09
+Anthropic,hmmt,HMMT,not_observed,0,,,
+Anthropic,horizonmath,HorizonMath,not_observed,0,,,
+Anthropic,humaneval,HumanEval,not_observed,0,,,
+Anthropic,ifbench,IFBench,not_observed,0,,,
+Anthropic,ifeval,IFEval,reported,1,anthropic_claude_3_7_sonnet,https://www.anthropic.com/news/claude-3-7-sonnet,2025-02-24
+Anthropic,imo_answer_bench,IMOAnswerBench,not_observed,0,,,
+Anthropic,jobbench,JobBench,not_observed,0,,,
+Anthropic,jointavbench,JointAVBench,not_observed,0,,,
+Anthropic,legal_agent_benchmark,Legal Agent Benchmark,reported,1,anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,2026-06-09
+Anthropic,livebench,LiveBench,not_observed,0,,,
+Anthropic,livecodebench,LiveCodeBench,not_observed,0,,,
+Anthropic,livecodebench_pro,LiveCodeBench Pro,not_observed,0,,,
+Anthropic,longbench,LongBench,not_observed,0,,,
+Anthropic,math_500,MATH-500,reported,1,anthropic_claude_3_7_sonnet,https://www.anthropic.com/news/claude-3-7-sonnet,2025-02-24
+Anthropic,matharena_apex_2025,MathArena Apex 2025,not_observed,0,,,
+Anthropic,mathvision,MathVision,not_observed,0,,,
+Anthropic,mathvista,MathVista,not_observed,0,,,
+Anthropic,mbpp,MBPP,not_observed,0,,,
+Anthropic,mcp_atlas,MCP Atlas,not_observed,0,,,
+Anthropic,mcp_mark,MCPMark,not_observed,0,,,
+Anthropic,mle_bench,MLE-bench,not_observed,0,,,
+Anthropic,mmlu,MMLU,not_observed,0,,,
+Anthropic,mmlu_pro,MMLU-Pro,reported,1,anthropic_claude_3_7_sonnet,https://www.anthropic.com/news/claude-3-7-sonnet,2025-02-24
+Anthropic,mmlu_redux,MMLU-Redux,not_observed,0,,,
+Anthropic,mmmlu,MMMLU,reported,1,anthropic_claude_4_system_card,https://www.anthropic.com/news/claude-4,2025-05-22
+Anthropic,mmmu,MMMU,reported,2,anthropic_claude_3_7_sonnet|anthropic_claude_4_system_card,https://www.anthropic.com/news/claude-3-7-sonnet|https://www.anthropic.com/news/claude-4,2025-05-22
+Anthropic,mmmu_pro,MMMU-Pro,not_observed,0,,,
+Anthropic,mmvu,MMVU,not_observed,0,,,
+Anthropic,mrcr,MRCR,reported,1,anthropic_claude_4_system_card,https://www.anthropic.com/news/claude-4,2025-05-22
+Anthropic,mtob,MTOB,not_observed,0,,,
+Anthropic,multichallenge,MultiChallenge,not_observed,0,,,
+Anthropic,mvbench,MVbench,not_observed,0,,,
+Anthropic,nl2repo,NL2Repo,not_observed,0,,,
+Anthropic,office_qa_pro,OfficeQA Pro,not_observed,0,,,
+Anthropic,omnidocbench,OmniDocBench,not_observed,0,,,
+Anthropic,omnivideobench,OmniVideoBench,not_observed,0,,,
+Anthropic,onemillionbench,OneMillionBench,not_observed,0,,,
+Anthropic,osworld,OSWorld,reported,2,anthropic_claude_fable_5_mythos_5|anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-fable-5-mythos-5|https://www.anthropic.com/news/claude-opus-5,2026-07-24
+Anthropic,posttrainbench,PostTrainBench,not_observed,0,,,
+Anthropic,programbench,ProgramBench,not_observed,0,,,
+Anthropic,rsi_bench,RSI-Bench,not_observed,0,,,
+Anthropic,scicode,SciCode,not_observed,0,,,
+Anthropic,seccodebench,SecCodeBench,not_observed,0,,,
+Anthropic,simpleqa,SimpleQA,not_observed,0,,,
+Anthropic,skillsbench,SkillsBench,not_observed,0,,,
+Anthropic,super_gpqa,SuperGPQA,not_observed,0,,,
+Anthropic,superchem,SUPERChem,not_observed,0,,,
+Anthropic,swe_atlas,SWE Atlas,not_observed,0,,,
+Anthropic,swe_bench_multilingual,SWE-bench Multilingual,not_observed,0,,,
+Anthropic,swe_bench_pro,SWE-bench Pro,reported,2,anthropic_claude_fable_5_mythos_5|anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-fable-5-mythos-5|https://www.anthropic.com/news/claude-opus-5,2026-07-24
+Anthropic,swe_bench_science,SWE-bench Science,not_observed,0,,,
+Anthropic,swe_bench_verified,SWE-bench Verified,reported,3,anthropic_claude_3_7_sonnet|anthropic_claude_4_system_card|anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-3-7-sonnet|https://www.anthropic.com/news/claude-4|https://www.anthropic.com/news/claude-opus-5,2026-07-24
+Anthropic,swe_marathon,SWE-Marathon,not_observed,0,,,
+Anthropic,tau2_bench,tau2-bench,not_observed,0,,,
+Anthropic,tau_bench,tau-bench,reported,2,anthropic_claude_3_7_sonnet|anthropic_claude_4_system_card,https://www.anthropic.com/news/claude-3-7-sonnet|https://www.anthropic.com/news/claude-4,2025-05-22
+Anthropic,terminal_bench,Terminal-Bench,reported,3,anthropic_claude_4_system_card|anthropic_claude_fable_5_mythos_5|anthropic_claude_opus_5_system_card,https://www.anthropic.com/news/claude-4|https://www.anthropic.com/news/claude-fable-5-mythos-5|https://www.anthropic.com/news/claude-opus-5,2026-07-24
+Anthropic,tool_decathlon,Tool Decathlon,not_observed,0,,,
+Anthropic,toolathlon_verified,Toolathlon Verified,not_observed,0,,,
+Anthropic,vending_bench,Vending Bench,not_observed,0,,,
+Anthropic,vibench,ViBench,reported,1,anthropic_claude_fable_5_mythos_5,https://www.anthropic.com/news/claude-fable-5-mythos-5,2026-06-09
+Anthropic,video_mme,Video-MME,not_observed,0,,,
+Anthropic,widesearch,WideSearch,not_observed,0,,,
+Anthropic,workspacebench,WorkspaceBench,not_observed,0,,,
+DeepSeek,aa_lcr,AA-LCR,not_observed,0,,,
+DeepSeek,agents_last_exam,Agents' Last Exam,not_observed,0,,,
+DeepSeek,agieval,AGIEval,reported,2,deepseek_v3_report|deepseek_v4_model_card,https://arxiv.org/abs/2412.19437|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-04-22
+DeepSeek,aider_polyglot,Aider Polyglot,reported,1,deepseek_r1_report,https://arxiv.org/abs/2501.12948,2025-01-22
+DeepSeek,aime,AIME,reported,2,deepseek_r1_report|deepseek_v3_report,https://arxiv.org/abs/2412.19437|https://arxiv.org/abs/2501.12948,2025-01-22
+DeepSeek,apex_agents,APEX-Agents,reported,2,deepseek_v4_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-06-25
+DeepSeek,arc_agi,ARC-AGI,not_observed,0,,,
+DeepSeek,arc_agi_2,ARC-AGI-2,not_observed,0,,,
+DeepSeek,arc_agi_3,ARC-AGI-3,not_observed,0,,,
+DeepSeek,arena_hard,Arena-Hard,reported,2,deepseek_r1_report|deepseek_v3_report,https://arxiv.org/abs/2412.19437|https://arxiv.org/abs/2501.12948,2025-01-22
+DeepSeek,arxivmath,ArXivMath,not_observed,0,,,
+DeepSeek,asi_bench,ASI-Bench,not_observed,0,,,
+DeepSeek,automationbench,AutomationBench,reported,1,deepseek_v4_pro_0813_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813,2026-08-13
+DeepSeek,babyvision,BabyVision,not_observed,0,,,
+DeepSeek,bankertoolbench,BankerToolBench,not_observed,0,,,
+DeepSeek,bfcl,BFCL,not_observed,0,,,
+DeepSeek,bigbench_extra_hard,BIG-Bench Extra Hard,not_observed,0,,,
+DeepSeek,biomysterybench,BioMysteryBench,not_observed,0,,,
+DeepSeek,blueprint_bench_2,Blueprint-Bench 2,not_observed,0,,,
+DeepSeek,brokenarxiv,BrokenArXiv,not_observed,0,,,
+DeepSeek,browsecomp,BrowseComp,reported,2,deepseek_v4_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-06-25
+DeepSeek,browsecomp_zh,BrowseComp-ZH,not_observed,0,,,
+DeepSeek,chartography,Chartography,not_observed,0,,,
+DeepSeek,chartqa,ChartQA,not_observed,0,,,
+DeepSeek,charxiv_reasoning,CharXiv Reasoning,not_observed,0,,,
+DeepSeek,chatbot_arena,Chatbot Arena,not_observed,0,,,
+DeepSeek,codeforces,Codeforces,reported,2,deepseek_v4_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-06-25
+DeepSeek,critpt,CritPt,not_observed,0,,,
+DeepSeek,cursor_bench,CursorBench,not_observed,0,,,
+DeepSeek,cvebench,CVE-Bench,not_observed,0,,,
+DeepSeek,cybergym,CyberGym,not_observed,0,,,
+DeepSeek,deepsearchqa,DeepSearchQA,not_observed,0,,,
+DeepSeek,deepswe,DeepSWE,not_observed,0,,,
+DeepSeek,docvqa,DocVQA,not_observed,0,,,
+DeepSeek,draco,DRACO,not_observed,0,,,
+DeepSeek,drop,DROP,reported,3,deepseek_r1_report|deepseek_v3_report|deepseek_v4_model_card,https://arxiv.org/abs/2412.19437|https://arxiv.org/abs/2501.12948|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-04-22
+DeepSeek,exploitbench,ExploitBench,not_observed,0,,,
+DeepSeek,frontiercode,FrontierCode,not_observed,0,,,
+DeepSeek,gdp_pdf,GDP.pdf,not_observed,0,,,
+DeepSeek,gdpval,GDPval,reported,2,deepseek_v4_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-06-25
+DeepSeek,gpqa,GPQA (full),not_observed,0,,,
+DeepSeek,gpqa_diamond,GPQA Diamond,reported,4,deepseek_r1_report|deepseek_v3_report|deepseek_v4_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2412.19437|https://arxiv.org/abs/2501.12948|https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-06-25
+DeepSeek,gsm8k,GSM8K,reported,2,deepseek_v3_report|deepseek_v4_model_card,https://arxiv.org/abs/2412.19437|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-04-22
+DeepSeek,harbor_index,Harbor-Index,not_observed,0,,,
+DeepSeek,healthbench,HealthBench,not_observed,0,,,
+DeepSeek,healthbench_professional,HealthBench Professional,not_observed,0,,,
+DeepSeek,hle,Humanity's Last Exam,reported,3,deepseek_v4_model_card|deepseek_v4_pro_0813_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813,2026-08-13
+DeepSeek,hmmt,HMMT,reported,2,deepseek_v4_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-06-25
+DeepSeek,horizonmath,HorizonMath,not_observed,0,,,
+DeepSeek,humaneval,HumanEval,reported,2,deepseek_v3_report|deepseek_v4_model_card,https://arxiv.org/abs/2412.19437|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-04-22
+DeepSeek,ifbench,IFBench,not_observed,0,,,
+DeepSeek,ifeval,IFEval,reported,2,deepseek_r1_report|deepseek_v3_report,https://arxiv.org/abs/2412.19437|https://arxiv.org/abs/2501.12948,2025-01-22
+DeepSeek,imo_answer_bench,IMOAnswerBench,reported,2,deepseek_v4_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-06-25
+DeepSeek,jobbench,JobBench,not_observed,0,,,
+DeepSeek,jointavbench,JointAVBench,not_observed,0,,,
+DeepSeek,legal_agent_benchmark,Legal Agent Benchmark,not_observed,0,,,
+DeepSeek,livebench,LiveBench,not_observed,0,,,
+DeepSeek,livecodebench,LiveCodeBench,reported,4,deepseek_r1_report|deepseek_v3_report|deepseek_v4_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2412.19437|https://arxiv.org/abs/2501.12948|https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-06-25
+DeepSeek,livecodebench_pro,LiveCodeBench Pro,not_observed,0,,,
+DeepSeek,longbench,LongBench,reported,2,deepseek_v4_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-06-25
+DeepSeek,math_500,MATH-500,reported,3,deepseek_r1_report|deepseek_v3_report|deepseek_v4_model_card,https://arxiv.org/abs/2412.19437|https://arxiv.org/abs/2501.12948|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-04-22
+DeepSeek,matharena_apex_2025,MathArena Apex 2025,not_observed,0,,,
+DeepSeek,mathvision,MathVision,not_observed,0,,,
+DeepSeek,mathvista,MathVista,not_observed,0,,,
+DeepSeek,mbpp,MBPP,reported,1,deepseek_v3_report,https://arxiv.org/abs/2412.19437,2024-12-27
+DeepSeek,mcp_atlas,MCP Atlas,reported,2,deepseek_v4_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-06-25
+DeepSeek,mcp_mark,MCPMark,not_observed,0,,,
+DeepSeek,mle_bench,MLE-bench,not_observed,0,,,
+DeepSeek,mmlu,MMLU,reported,3,deepseek_r1_report|deepseek_v3_report|deepseek_v4_model_card,https://arxiv.org/abs/2412.19437|https://arxiv.org/abs/2501.12948|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-04-22
+DeepSeek,mmlu_pro,MMLU-Pro,reported,4,deepseek_r1_report|deepseek_v3_report|deepseek_v4_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2412.19437|https://arxiv.org/abs/2501.12948|https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-06-25
+DeepSeek,mmlu_redux,MMLU-Redux,reported,3,deepseek_r1_report|deepseek_v3_report|deepseek_v4_model_card,https://arxiv.org/abs/2412.19437|https://arxiv.org/abs/2501.12948|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-04-22
+DeepSeek,mmmlu,MMMLU,reported,1,deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-04-22
+DeepSeek,mmmu,MMMU,not_observed,0,,,
+DeepSeek,mmmu_pro,MMMU-Pro,not_observed,0,,,
+DeepSeek,mmvu,MMVU,not_observed,0,,,
+DeepSeek,mrcr,MRCR,reported,2,deepseek_v4_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-06-25
+DeepSeek,mtob,MTOB,not_observed,0,,,
+DeepSeek,multichallenge,MultiChallenge,not_observed,0,,,
+DeepSeek,mvbench,MVbench,not_observed,0,,,
+DeepSeek,nl2repo,NL2Repo,not_observed,0,,,
+DeepSeek,office_qa_pro,OfficeQA Pro,not_observed,0,,,
+DeepSeek,omnidocbench,OmniDocBench,not_observed,0,,,
+DeepSeek,omnivideobench,OmniVideoBench,not_observed,0,,,
+DeepSeek,onemillionbench,OneMillionBench,not_observed,0,,,
+DeepSeek,osworld,OSWorld,not_observed,0,,,
+DeepSeek,posttrainbench,PostTrainBench,not_observed,0,,,
+DeepSeek,programbench,ProgramBench,not_observed,0,,,
+DeepSeek,rsi_bench,RSI-Bench,not_observed,0,,,
+DeepSeek,scicode,SciCode,not_observed,0,,,
+DeepSeek,seccodebench,SecCodeBench,not_observed,0,,,
+DeepSeek,simpleqa,SimpleQA,reported,4,deepseek_r1_report|deepseek_v3_report|deepseek_v4_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2412.19437|https://arxiv.org/abs/2501.12948|https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-06-25
+DeepSeek,skillsbench,SkillsBench,not_observed,0,,,
+DeepSeek,super_gpqa,SuperGPQA,reported,1,deepseek_v4_model_card,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-04-22
+DeepSeek,superchem,SUPERChem,not_observed,0,,,
+DeepSeek,swe_atlas,SWE Atlas,not_observed,0,,,
+DeepSeek,swe_bench_multilingual,SWE-bench Multilingual,reported,2,deepseek_v4_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-06-25
+DeepSeek,swe_bench_pro,SWE-bench Pro,reported,2,deepseek_v4_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-06-25
+DeepSeek,swe_bench_science,SWE-bench Science,not_observed,0,,,
+DeepSeek,swe_bench_verified,SWE-bench Verified,reported,4,deepseek_r1_report|deepseek_v3_report|deepseek_v4_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2412.19437|https://arxiv.org/abs/2501.12948|https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,2026-06-25
+DeepSeek,swe_marathon,SWE-Marathon,not_observed,0,,,
+DeepSeek,tau2_bench,tau2-bench,not_observed,0,,,
+DeepSeek,tau_bench,tau-bench,not_observed,0,,,
+DeepSeek,terminal_bench,Terminal-Bench,reported,3,deepseek_v4_model_card|deepseek_v4_pro_0813_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813,2026-08-13
+DeepSeek,tool_decathlon,Tool Decathlon,reported,3,deepseek_v4_model_card|deepseek_v4_pro_0813_model_card|deepseek_v4_technical_report,https://arxiv.org/abs/2606.19348|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro|https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813,2026-08-13
+DeepSeek,toolathlon_verified,Toolathlon Verified,not_observed,0,,,
+DeepSeek,vending_bench,Vending Bench,not_observed,0,,,
+DeepSeek,vibench,ViBench,not_observed,0,,,
+DeepSeek,video_mme,Video-MME,not_observed,0,,,
+DeepSeek,widesearch,WideSearch,not_observed,0,,,
+DeepSeek,workspacebench,WorkspaceBench,not_observed,0,,,
+Google,aa_lcr,AA-LCR,not_observed,0,,,
+Google,agents_last_exam,Agents' Last Exam,not_observed,0,,,
+Google,agieval,AGIEval,not_observed,0,,,
+Google,aider_polyglot,Aider Polyglot,reported,1,google_gemini_2_5_report,https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,2025-06-17
+Google,aime,AIME,reported,2,google_gemini_2_5_report|google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it|https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,2026-03-11
+Google,apex_agents,APEX-Agents,reported,1,google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,2026-02-19
+Google,arc_agi,ARC-AGI,reported,1,google_gemini_2_5_report,https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,2025-06-17
+Google,arc_agi_2,ARC-AGI-2,reported,1,google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,2026-02-19
+Google,arc_agi_3,ARC-AGI-3,not_observed,0,,,
+Google,arena_hard,Arena-Hard,not_observed,0,,,
+Google,arxivmath,ArXivMath,not_observed,0,,,
+Google,asi_bench,ASI-Bench,not_observed,0,,,
+Google,automationbench,AutomationBench,not_observed,0,,,
+Google,babyvision,BabyVision,not_observed,0,,,
+Google,bankertoolbench,BankerToolBench,not_observed,0,,,
+Google,bfcl,BFCL,not_observed,0,,,
+Google,bigbench_extra_hard,BIG-Bench Extra Hard,reported,1,google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,2026-03-11
+Google,biomysterybench,BioMysteryBench,not_observed,0,,,
+Google,blueprint_bench_2,Blueprint-Bench 2,not_observed,0,,,
+Google,brokenarxiv,BrokenArXiv,not_observed,0,,,
+Google,browsecomp,BrowseComp,reported,1,google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,2026-02-19
+Google,browsecomp_zh,BrowseComp-ZH,not_observed,0,,,
+Google,chartography,Chartography,not_observed,0,,,
+Google,chartqa,ChartQA,reported,1,google_gemini_1_5_report,https://arxiv.org/abs/2403.05530,2024-03-08
+Google,charxiv_reasoning,CharXiv Reasoning,not_observed,0,,,
+Google,chatbot_arena,Chatbot Arena,not_observed,0,,,
+Google,codeforces,Codeforces,reported,1,google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,2026-03-11
+Google,critpt,CritPt,not_observed,0,,,
+Google,cursor_bench,CursorBench,not_observed,0,,,
+Google,cvebench,CVE-Bench,not_observed,0,,,
+Google,cybergym,CyberGym,not_observed,0,,,
+Google,deepsearchqa,DeepSearchQA,not_observed,0,,,
+Google,deepswe,DeepSWE,not_observed,0,,,
+Google,docvqa,DocVQA,reported,1,google_gemini_1_5_report,https://arxiv.org/abs/2403.05530,2024-03-08
+Google,draco,DRACO,not_observed,0,,,
+Google,drop,DROP,reported,1,google_gemini_1_5_report,https://arxiv.org/abs/2403.05530,2024-03-08
+Google,exploitbench,ExploitBench,not_observed,0,,,
+Google,frontiercode,FrontierCode,not_observed,0,,,
+Google,gdp_pdf,GDP.pdf,not_observed,0,,,
+Google,gdpval,GDPval,not_observed,0,,,
+Google,gpqa,GPQA (full),not_observed,0,,,
+Google,gpqa_diamond,GPQA Diamond,reported,3,google_gemini_2_5_report|google_gemini_3_1_pro_model_card|google_gemma_4_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/|https://huggingface.co/google/gemma-4-31B-it|https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,2026-03-11
+Google,gsm8k,GSM8K,reported,1,google_gemini_1_5_report,https://arxiv.org/abs/2403.05530,2024-03-08
+Google,harbor_index,Harbor-Index,not_observed,0,,,
+Google,healthbench,HealthBench,not_observed,0,,,
+Google,healthbench_professional,HealthBench Professional,not_observed,0,,,
+Google,hle,Humanity's Last Exam,reported,3,google_gemini_2_5_report|google_gemini_3_1_pro_model_card|google_gemma_4_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/|https://huggingface.co/google/gemma-4-31B-it|https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,2026-03-11
+Google,hmmt,HMMT,not_observed,0,,,
+Google,horizonmath,HorizonMath,not_observed,0,,,
+Google,humaneval,HumanEval,reported,1,google_gemini_1_5_report,https://arxiv.org/abs/2403.05530,2024-03-08
+Google,ifbench,IFBench,not_observed,0,,,
+Google,ifeval,IFEval,not_observed,0,,,
+Google,imo_answer_bench,IMOAnswerBench,not_observed,0,,,
+Google,jobbench,JobBench,not_observed,0,,,
+Google,jointavbench,JointAVBench,not_observed,0,,,
+Google,legal_agent_benchmark,Legal Agent Benchmark,not_observed,0,,,
+Google,livebench,LiveBench,not_observed,0,,,
+Google,livecodebench,LiveCodeBench,reported,2,google_gemini_2_5_report|google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it|https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,2026-03-11
+Google,livecodebench_pro,LiveCodeBench Pro,reported,1,google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,2026-02-19
+Google,longbench,LongBench,not_observed,0,,,
+Google,math_500,MATH-500,reported,1,google_gemini_1_5_report,https://arxiv.org/abs/2403.05530,2024-03-08
+Google,matharena_apex_2025,MathArena Apex 2025,not_observed,0,,,
+Google,mathvision,MathVision,reported,1,google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,2026-03-11
+Google,mathvista,MathVista,reported,2,google_gemini_1_5_report|google_gemini_2_5_report,https://arxiv.org/abs/2403.05530|https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,2025-06-17
+Google,mbpp,MBPP,not_observed,0,,,
+Google,mcp_atlas,MCP Atlas,reported,1,google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,2026-02-19
+Google,mcp_mark,MCPMark,not_observed,0,,,
+Google,mle_bench,MLE-bench,not_observed,0,,,
+Google,mmlu,MMLU,reported,1,google_gemini_1_5_report,https://arxiv.org/abs/2403.05530,2024-03-08
+Google,mmlu_pro,MMLU-Pro,reported,1,google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,2026-03-11
+Google,mmlu_redux,MMLU-Redux,not_observed,0,,,
+Google,mmmlu,MMMLU,reported,2,google_gemini_3_1_pro_model_card|google_gemma_4_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/|https://huggingface.co/google/gemma-4-31B-it,2026-03-11
+Google,mmmu,MMMU,reported,2,google_gemini_1_5_report|google_gemini_2_5_report,https://arxiv.org/abs/2403.05530|https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,2025-06-17
+Google,mmmu_pro,MMMU-Pro,reported,2,google_gemini_3_1_pro_model_card|google_gemma_4_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/|https://huggingface.co/google/gemma-4-31B-it,2026-03-11
+Google,mmvu,MMVU,not_observed,0,,,
+Google,mrcr,MRCR,reported,3,google_gemini_2_5_report|google_gemini_3_1_pro_model_card|google_gemma_4_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/|https://huggingface.co/google/gemma-4-31B-it|https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,2026-03-11
+Google,mtob,MTOB,not_observed,0,,,
+Google,multichallenge,MultiChallenge,not_observed,0,,,
+Google,mvbench,MVbench,not_observed,0,,,
+Google,nl2repo,NL2Repo,not_observed,0,,,
+Google,office_qa_pro,OfficeQA Pro,not_observed,0,,,
+Google,omnidocbench,OmniDocBench,reported,1,google_gemma_4_model_card,https://huggingface.co/google/gemma-4-31B-it,2026-03-11
+Google,omnivideobench,OmniVideoBench,not_observed,0,,,
+Google,onemillionbench,OneMillionBench,not_observed,0,,,
+Google,osworld,OSWorld,not_observed,0,,,
+Google,posttrainbench,PostTrainBench,not_observed,0,,,
+Google,programbench,ProgramBench,not_observed,0,,,
+Google,rsi_bench,RSI-Bench,not_observed,0,,,
+Google,scicode,SciCode,reported,1,google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,2026-02-19
+Google,seccodebench,SecCodeBench,not_observed,0,,,
+Google,simpleqa,SimpleQA,reported,1,google_gemini_2_5_report,https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,2025-06-17
+Google,skillsbench,SkillsBench,not_observed,0,,,
+Google,super_gpqa,SuperGPQA,not_observed,0,,,
+Google,superchem,SUPERChem,not_observed,0,,,
+Google,swe_atlas,SWE Atlas,not_observed,0,,,
+Google,swe_bench_multilingual,SWE-bench Multilingual,not_observed,0,,,
+Google,swe_bench_pro,SWE-bench Pro,reported,1,google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,2026-02-19
+Google,swe_bench_science,SWE-bench Science,not_observed,0,,,
+Google,swe_bench_verified,SWE-bench Verified,reported,2,google_gemini_2_5_report|google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/|https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,2026-02-19
+Google,swe_marathon,SWE-Marathon,not_observed,0,,,
+Google,tau2_bench,tau2-bench,reported,2,google_gemini_3_1_pro_model_card|google_gemma_4_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/|https://huggingface.co/google/gemma-4-31B-it,2026-03-11
+Google,tau_bench,tau-bench,not_observed,0,,,
+Google,terminal_bench,Terminal-Bench,reported,1,google_gemini_3_1_pro_model_card,https://deepmind.google/models/model-cards/gemini-3-1-pro/,2026-02-19
+Google,tool_decathlon,Tool Decathlon,not_observed,0,,,
+Google,toolathlon_verified,Toolathlon Verified,not_observed,0,,,
+Google,vending_bench,Vending Bench,not_observed,0,,,
+Google,vibench,ViBench,not_observed,0,,,
+Google,video_mme,Video-MME,reported,1,google_gemini_2_5_report,https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf,2025-06-17
+Google,widesearch,WideSearch,not_observed,0,,,
+Google,workspacebench,WorkspaceBench,not_observed,0,,,
+Meta,aa_lcr,AA-LCR,not_observed,0,,,
+Meta,agents_last_exam,Agents' Last Exam,not_observed,0,,,
+Meta,agieval,AGIEval,reported,1,meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,2024-07-23
+Meta,aider_polyglot,Aider Polyglot,not_observed,0,,,
+Meta,aime,AIME,not_observed,0,,,
+Meta,apex_agents,APEX-Agents,not_observed,0,,,
+Meta,arc_agi,ARC-AGI,not_observed,0,,,
+Meta,arc_agi_2,ARC-AGI-2,not_observed,0,,,
+Meta,arc_agi_3,ARC-AGI-3,not_observed,0,,,
+Meta,arena_hard,Arena-Hard,reported,1,meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,2024-07-23
+Meta,arxivmath,ArXivMath,not_observed,0,,,
+Meta,asi_bench,ASI-Bench,not_observed,0,,,
+Meta,automationbench,AutomationBench,not_observed,0,,,
+Meta,babyvision,BabyVision,not_observed,0,,,
+Meta,bankertoolbench,BankerToolBench,not_observed,0,,,
+Meta,bfcl,BFCL,reported,1,meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,2024-07-23
+Meta,bigbench_extra_hard,BIG-Bench Extra Hard,not_observed,0,,,
+Meta,biomysterybench,BioMysteryBench,not_observed,0,,,
+Meta,blueprint_bench_2,Blueprint-Bench 2,not_observed,0,,,
+Meta,brokenarxiv,BrokenArXiv,not_observed,0,,,
+Meta,browsecomp,BrowseComp,not_observed,0,,,
+Meta,browsecomp_zh,BrowseComp-ZH,not_observed,0,,,
+Meta,chartography,Chartography,not_observed,0,,,
+Meta,chartqa,ChartQA,reported,1,meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,2025-04-05
+Meta,charxiv_reasoning,CharXiv Reasoning,not_observed,0,,,
+Meta,chatbot_arena,Chatbot Arena,reported,1,meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,2025-04-05
+Meta,codeforces,Codeforces,not_observed,0,,,
+Meta,critpt,CritPt,not_observed,0,,,
+Meta,cursor_bench,CursorBench,not_observed,0,,,
+Meta,cvebench,CVE-Bench,not_observed,0,,,
+Meta,cybergym,CyberGym,not_observed,0,,,
+Meta,deepsearchqa,DeepSearchQA,not_observed,0,,,
+Meta,deepswe,DeepSWE,not_observed,0,,,
+Meta,docvqa,DocVQA,reported,1,meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,2025-04-05
+Meta,draco,DRACO,not_observed,0,,,
+Meta,drop,DROP,reported,1,meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,2024-07-23
+Meta,exploitbench,ExploitBench,not_observed,0,,,
+Meta,frontiercode,FrontierCode,not_observed,0,,,
+Meta,gdp_pdf,GDP.pdf,not_observed,0,,,
+Meta,gdpval,GDPval,not_observed,0,,,
+Meta,gpqa,GPQA (full),reported,1,meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,2024-07-23
+Meta,gpqa_diamond,GPQA Diamond,reported,1,meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,2025-04-05
+Meta,gsm8k,GSM8K,reported,1,meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,2024-07-23
+Meta,harbor_index,Harbor-Index,not_observed,0,,,
+Meta,healthbench,HealthBench,not_observed,0,,,
+Meta,healthbench_professional,HealthBench Professional,not_observed,0,,,
+Meta,hle,Humanity's Last Exam,not_observed,0,,,
+Meta,hmmt,HMMT,not_observed,0,,,
+Meta,horizonmath,HorizonMath,not_observed,0,,,
+Meta,humaneval,HumanEval,reported,1,meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,2024-07-23
+Meta,ifbench,IFBench,not_observed,0,,,
+Meta,ifeval,IFEval,reported,1,meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,2024-07-23
+Meta,imo_answer_bench,IMOAnswerBench,not_observed,0,,,
+Meta,jobbench,JobBench,not_observed,0,,,
+Meta,jointavbench,JointAVBench,not_observed,0,,,
+Meta,legal_agent_benchmark,Legal Agent Benchmark,not_observed,0,,,
+Meta,livebench,LiveBench,not_observed,0,,,
+Meta,livecodebench,LiveCodeBench,reported,1,meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,2025-04-05
+Meta,livecodebench_pro,LiveCodeBench Pro,not_observed,0,,,
+Meta,longbench,LongBench,not_observed,0,,,
+Meta,math_500,MATH-500,reported,1,meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,2024-07-23
+Meta,matharena_apex_2025,MathArena Apex 2025,not_observed,0,,,
+Meta,mathvision,MathVision,not_observed,0,,,
+Meta,mathvista,MathVista,reported,1,meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,2025-04-05
+Meta,mbpp,MBPP,reported,1,meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,2024-07-23
+Meta,mcp_atlas,MCP Atlas,not_observed,0,,,
+Meta,mcp_mark,MCPMark,not_observed,0,,,
+Meta,mle_bench,MLE-bench,not_observed,0,,,
+Meta,mmlu,MMLU,reported,1,meta_llama_3_1,https://ai.meta.com/blog/meta-llama-3-1/,2024-07-23
+Meta,mmlu_pro,MMLU-Pro,reported,2,meta_llama_3_1|meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/|https://ai.meta.com/blog/meta-llama-3-1/,2025-04-05
+Meta,mmlu_redux,MMLU-Redux,not_observed,0,,,
+Meta,mmmlu,MMMLU,reported,1,meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,2025-04-05
+Meta,mmmu,MMMU,reported,1,meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,2025-04-05
+Meta,mmmu_pro,MMMU-Pro,not_observed,0,,,
+Meta,mmvu,MMVU,not_observed,0,,,
+Meta,mrcr,MRCR,not_observed,0,,,
+Meta,mtob,MTOB,reported,1,meta_llama_4,https://ai.meta.com/blog/llama-4-multimodal-intelligence/,2025-04-05
+Meta,multichallenge,MultiChallenge,not_observed,0,,,
+Meta,mvbench,MVbench,not_observed,0,,,
+Meta,nl2repo,NL2Repo,not_observed,0,,,
+Meta,office_qa_pro,OfficeQA Pro,not_observed,0,,,
+Meta,omnidocbench,OmniDocBench,not_observed,0,,,
+Meta,omnivideobench,OmniVideoBench,not_observed,0,,,
+Meta,onemillionbench,OneMillionBench,not_observed,0,,,
+Meta,osworld,OSWorld,not_observed,0,,,
+Meta,posttrainbench,PostTrainBench,not_observed,0,,,
+Meta,programbench,ProgramBench,not_observed,0,,,
+Meta,rsi_bench,RSI-Bench,not_observed,0,,,
+Meta,scicode,SciCode,not_observed,0,,,
+Meta,seccodebench,SecCodeBench,not_observed,0,,,
+Meta,simpleqa,SimpleQA,not_observed,0,,,
+Meta,skillsbench,SkillsBench,not_observed,0,,,
+Meta,super_gpqa,SuperGPQA,not_observed,0,,,
+Meta,superchem,SUPERChem,not_observed,0,,,
+Meta,swe_atlas,SWE Atlas,not_observed,0,,,
+Meta,swe_bench_multilingual,SWE-bench Multilingual,not_observed,0,,,
+Meta,swe_bench_pro,SWE-bench Pro,not_observed,0,,,
+Meta,swe_bench_science,SWE-bench Science,not_observed,0,,,
+Meta,swe_bench_verified,SWE-bench Verified,not_observed,0,,,
+Meta,swe_marathon,SWE-Marathon,not_observed,0,,,
+Meta,tau2_bench,tau2-bench,not_observed,0,,,
+Meta,tau_bench,tau-bench,not_observed,0,,,
+Meta,terminal_bench,Terminal-Bench,not_observed,0,,,
+Meta,tool_decathlon,Tool Decathlon,not_observed,0,,,
+Meta,toolathlon_verified,Toolathlon Verified,not_observed,0,,,
+Meta,vending_bench,Vending Bench,not_observed,0,,,
+Meta,vibench,ViBench,not_observed,0,,,
+Meta,video_mme,Video-MME,not_observed,0,,,
+Meta,widesearch,WideSearch,not_observed,0,,,
+Meta,workspacebench,WorkspaceBench,not_observed,0,,,
+Mistral,aa_lcr,AA-LCR,not_observed,0,,,
+Mistral,agents_last_exam,Agents' Last Exam,not_observed,0,,,
+Mistral,agieval,AGIEval,not_observed,0,,,
+Mistral,aider_polyglot,Aider Polyglot,reported,1,mistral_medium_3,https://mistral.ai/news/mistral-medium-3,2025-05-07
+Mistral,aime,AIME,not_observed,0,,,
+Mistral,apex_agents,APEX-Agents,not_observed,0,,,
+Mistral,arc_agi,ARC-AGI,not_observed,0,,,
+Mistral,arc_agi_2,ARC-AGI-2,not_observed,0,,,
+Mistral,arc_agi_3,ARC-AGI-3,not_observed,0,,,
+Mistral,arena_hard,Arena-Hard,not_observed,0,,,
+Mistral,arxivmath,ArXivMath,not_observed,0,,,
+Mistral,asi_bench,ASI-Bench,not_observed,0,,,
+Mistral,automationbench,AutomationBench,not_observed,0,,,
+Mistral,babyvision,BabyVision,not_observed,0,,,
+Mistral,bankertoolbench,BankerToolBench,not_observed,0,,,
+Mistral,bfcl,BFCL,not_observed,0,,,
+Mistral,bigbench_extra_hard,BIG-Bench Extra Hard,not_observed,0,,,
+Mistral,biomysterybench,BioMysteryBench,not_observed,0,,,
+Mistral,blueprint_bench_2,Blueprint-Bench 2,not_observed,0,,,
+Mistral,brokenarxiv,BrokenArXiv,not_observed,0,,,
+Mistral,browsecomp,BrowseComp,not_observed,0,,,
+Mistral,browsecomp_zh,BrowseComp-ZH,not_observed,0,,,
+Mistral,chartography,Chartography,not_observed,0,,,
+Mistral,chartqa,ChartQA,not_observed,0,,,
+Mistral,charxiv_reasoning,CharXiv Reasoning,not_observed,0,,,
+Mistral,chatbot_arena,Chatbot Arena,not_observed,0,,,
+Mistral,codeforces,Codeforces,not_observed,0,,,
+Mistral,critpt,CritPt,not_observed,0,,,
+Mistral,cursor_bench,CursorBench,not_observed,0,,,
+Mistral,cvebench,CVE-Bench,not_observed,0,,,
+Mistral,cybergym,CyberGym,not_observed,0,,,
+Mistral,deepsearchqa,DeepSearchQA,not_observed,0,,,
+Mistral,deepswe,DeepSWE,not_observed,0,,,
+Mistral,docvqa,DocVQA,not_observed,0,,,
+Mistral,draco,DRACO,not_observed,0,,,
+Mistral,drop,DROP,not_observed,0,,,
+Mistral,exploitbench,ExploitBench,not_observed,0,,,
+Mistral,frontiercode,FrontierCode,not_observed,0,,,
+Mistral,gdp_pdf,GDP.pdf,not_observed,0,,,
+Mistral,gdpval,GDPval,not_observed,0,,,
+Mistral,gpqa,GPQA (full),not_observed,0,,,
+Mistral,gpqa_diamond,GPQA Diamond,reported,2,mistral_large_3|mistral_medium_3,https://huggingface.co/mistralai/Mistral-Large-3-675B-Instruct-2512|https://mistral.ai/news/mistral-medium-3,2025-11-28
+Mistral,gsm8k,GSM8K,reported,1,mistral_large_2,https://mistral.ai/news/mistral-large-2407/,2024-07-24
+Mistral,harbor_index,Harbor-Index,not_observed,0,,,
+Mistral,healthbench,HealthBench,not_observed,0,,,
+Mistral,healthbench_professional,HealthBench Professional,not_observed,0,,,
+Mistral,hle,Humanity's Last Exam,not_observed,0,,,
+Mistral,hmmt,HMMT,not_observed,0,,,
+Mistral,horizonmath,HorizonMath,not_observed,0,,,
+Mistral,humaneval,HumanEval,reported,2,mistral_large_2|mistral_medium_3,https://mistral.ai/news/mistral-large-2407/|https://mistral.ai/news/mistral-medium-3,2025-05-07
+Mistral,ifbench,IFBench,not_observed,0,,,
+Mistral,ifeval,IFEval,reported,1,mistral_medium_3,https://mistral.ai/news/mistral-medium-3,2025-05-07
+Mistral,imo_answer_bench,IMOAnswerBench,not_observed,0,,,
+Mistral,jobbench,JobBench,not_observed,0,,,
+Mistral,jointavbench,JointAVBench,not_observed,0,,,
+Mistral,legal_agent_benchmark,Legal Agent Benchmark,not_observed,0,,,
+Mistral,livebench,LiveBench,not_observed,0,,,
+Mistral,livecodebench,LiveCodeBench,reported,2,mistral_large_3|mistral_medium_3,https://huggingface.co/mistralai/Mistral-Large-3-675B-Instruct-2512|https://mistral.ai/news/mistral-medium-3,2025-11-28
+Mistral,livecodebench_pro,LiveCodeBench Pro,not_observed,0,,,
+Mistral,longbench,LongBench,not_observed,0,,,
+Mistral,math_500,MATH-500,reported,2,mistral_large_2|mistral_medium_3,https://mistral.ai/news/mistral-large-2407/|https://mistral.ai/news/mistral-medium-3,2025-05-07
+Mistral,matharena_apex_2025,MathArena Apex 2025,not_observed,0,,,
+Mistral,mathvision,MathVision,not_observed,0,,,
+Mistral,mathvista,MathVista,not_observed,0,,,
+Mistral,mbpp,MBPP,reported,1,mistral_large_2,https://mistral.ai/news/mistral-large-2407/,2024-07-24
+Mistral,mcp_atlas,MCP Atlas,not_observed,0,,,
+Mistral,mcp_mark,MCPMark,not_observed,0,,,
+Mistral,mle_bench,MLE-bench,not_observed,0,,,
+Mistral,mmlu,MMLU,reported,1,mistral_large_2,https://mistral.ai/news/mistral-large-2407/,2024-07-24
+Mistral,mmlu_pro,MMLU-Pro,reported,1,mistral_medium_3,https://mistral.ai/news/mistral-medium-3,2025-05-07
+Mistral,mmlu_redux,MMLU-Redux,not_observed,0,,,
+Mistral,mmmlu,MMMLU,reported,1,mistral_large_3,https://huggingface.co/mistralai/Mistral-Large-3-675B-Instruct-2512,2025-11-28
+Mistral,mmmu,MMMU,not_observed,0,,,
+Mistral,mmmu_pro,MMMU-Pro,not_observed,0,,,
+Mistral,mmvu,MMVU,not_observed,0,,,
+Mistral,mrcr,MRCR,not_observed,0,,,
+Mistral,mtob,MTOB,not_observed,0,,,
+Mistral,multichallenge,MultiChallenge,not_observed,0,,,
+Mistral,mvbench,MVbench,not_observed,0,,,
+Mistral,nl2repo,NL2Repo,not_observed,0,,,
+Mistral,office_qa_pro,OfficeQA Pro,not_observed,0,,,
+Mistral,omnidocbench,OmniDocBench,not_observed,0,,,
+Mistral,omnivideobench,OmniVideoBench,not_observed,0,,,
+Mistral,onemillionbench,OneMillionBench,not_observed,0,,,
+Mistral,osworld,OSWorld,not_observed,0,,,
+Mistral,posttrainbench,PostTrainBench,not_observed,0,,,
+Mistral,programbench,ProgramBench,not_observed,0,,,
+Mistral,rsi_bench,RSI-Bench,not_observed,0,,,
+Mistral,scicode,SciCode,not_observed,0,,,
+Mistral,seccodebench,SecCodeBench,not_observed,0,,,
+Mistral,simpleqa,SimpleQA,reported,1,mistral_large_3,https://huggingface.co/mistralai/Mistral-Large-3-675B-Instruct-2512,2025-11-28
+Mistral,skillsbench,SkillsBench,not_observed,0,,,
+Mistral,super_gpqa,SuperGPQA,not_observed,0,,,
+Mistral,superchem,SUPERChem,not_observed,0,,,
+Mistral,swe_atlas,SWE Atlas,not_observed,0,,,
+Mistral,swe_bench_multilingual,SWE-bench Multilingual,not_observed,0,,,
+Mistral,swe_bench_pro,SWE-bench Pro,not_observed,0,,,
+Mistral,swe_bench_science,SWE-bench Science,not_observed,0,,,
+Mistral,swe_bench_verified,SWE-bench Verified,not_observed,0,,,
+Mistral,swe_marathon,SWE-Marathon,not_observed,0,,,
+Mistral,tau2_bench,tau2-bench,not_observed,0,,,
+Mistral,tau_bench,tau-bench,not_observed,0,,,
+Mistral,terminal_bench,Terminal-Bench,not_observed,0,,,
+Mistral,tool_decathlon,Tool Decathlon,not_observed,0,,,
+Mistral,toolathlon_verified,Toolathlon Verified,not_observed,0,,,
+Mistral,vending_bench,Vending Bench,not_observed,0,,,
+Mistral,vibench,ViBench,not_observed,0,,,
+Mistral,video_mme,Video-MME,not_observed,0,,,
+Mistral,widesearch,WideSearch,not_observed,0,,,
+Mistral,workspacebench,WorkspaceBench,not_observed,0,,,
+Moonshot AI,aa_lcr,AA-LCR,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,agents_last_exam,Agents' Last Exam,not_observed,0,,,
+Moonshot AI,agieval,AGIEval,not_observed,0,,,
+Moonshot AI,aider_polyglot,Aider Polyglot,not_observed,0,,,
+Moonshot AI,aime,AIME,not_observed,0,,,
+Moonshot AI,apex_agents,APEX-Agents,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,arc_agi,ARC-AGI,not_observed,0,,,
+Moonshot AI,arc_agi_2,ARC-AGI-2,not_observed,0,,,
+Moonshot AI,arc_agi_3,ARC-AGI-3,not_observed,0,,,
+Moonshot AI,arena_hard,Arena-Hard,not_observed,0,,,
+Moonshot AI,arxivmath,ArXivMath,not_observed,0,,,
+Moonshot AI,asi_bench,ASI-Bench,not_observed,0,,,
+Moonshot AI,automationbench,AutomationBench,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,babyvision,BabyVision,not_observed,0,,,
+Moonshot AI,bankertoolbench,BankerToolBench,not_observed,0,,,
+Moonshot AI,bfcl,BFCL,not_observed,0,,,
+Moonshot AI,bigbench_extra_hard,BIG-Bench Extra Hard,not_observed,0,,,
+Moonshot AI,biomysterybench,BioMysteryBench,not_observed,0,,,
+Moonshot AI,blueprint_bench_2,Blueprint-Bench 2,not_observed,0,,,
+Moonshot AI,brokenarxiv,BrokenArXiv,not_observed,0,,,
+Moonshot AI,browsecomp,BrowseComp,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,browsecomp_zh,BrowseComp-ZH,not_observed,0,,,
+Moonshot AI,chartography,Chartography,not_observed,0,,,
+Moonshot AI,chartqa,ChartQA,not_observed,0,,,
+Moonshot AI,charxiv_reasoning,CharXiv Reasoning,not_observed,0,,,
+Moonshot AI,chatbot_arena,Chatbot Arena,not_observed,0,,,
+Moonshot AI,codeforces,Codeforces,not_observed,0,,,
+Moonshot AI,critpt,CritPt,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,cursor_bench,CursorBench,not_observed,0,,,
+Moonshot AI,cvebench,CVE-Bench,not_observed,0,,,
+Moonshot AI,cybergym,CyberGym,not_observed,0,,,
+Moonshot AI,deepsearchqa,DeepSearchQA,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,deepswe,DeepSWE,not_observed,0,,,
+Moonshot AI,docvqa,DocVQA,not_observed,0,,,
+Moonshot AI,draco,DRACO,not_observed,0,,,
+Moonshot AI,drop,DROP,not_observed,0,,,
+Moonshot AI,exploitbench,ExploitBench,not_observed,0,,,
+Moonshot AI,frontiercode,FrontierCode,not_observed,0,,,
+Moonshot AI,gdp_pdf,GDP.pdf,not_observed,0,,,
+Moonshot AI,gdpval,GDPval,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,gpqa,GPQA (full),not_observed,0,,,
+Moonshot AI,gpqa_diamond,GPQA Diamond,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,gsm8k,GSM8K,not_observed,0,,,
+Moonshot AI,harbor_index,Harbor-Index,not_observed,0,,,
+Moonshot AI,healthbench,HealthBench,not_observed,0,,,
+Moonshot AI,healthbench_professional,HealthBench Professional,not_observed,0,,,
+Moonshot AI,hle,Humanity's Last Exam,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,hmmt,HMMT,not_observed,0,,,
+Moonshot AI,horizonmath,HorizonMath,not_observed,0,,,
+Moonshot AI,humaneval,HumanEval,not_observed,0,,,
+Moonshot AI,ifbench,IFBench,not_observed,0,,,
+Moonshot AI,ifeval,IFEval,not_observed,0,,,
+Moonshot AI,imo_answer_bench,IMOAnswerBench,not_observed,0,,,
+Moonshot AI,jobbench,JobBench,not_observed,0,,,
+Moonshot AI,jointavbench,JointAVBench,not_observed,0,,,
+Moonshot AI,legal_agent_benchmark,Legal Agent Benchmark,not_observed,0,,,
+Moonshot AI,livebench,LiveBench,not_observed,0,,,
+Moonshot AI,livecodebench,LiveCodeBench,not_observed,0,,,
+Moonshot AI,livecodebench_pro,LiveCodeBench Pro,not_observed,0,,,
+Moonshot AI,longbench,LongBench,not_observed,0,,,
+Moonshot AI,math_500,MATH-500,not_observed,0,,,
+Moonshot AI,matharena_apex_2025,MathArena Apex 2025,not_observed,0,,,
+Moonshot AI,mathvision,MathVision,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,mathvista,MathVista,not_observed,0,,,
+Moonshot AI,mbpp,MBPP,not_observed,0,,,
+Moonshot AI,mcp_atlas,MCP Atlas,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,mcp_mark,MCPMark,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,mle_bench,MLE-bench,not_observed,0,,,
+Moonshot AI,mmlu,MMLU,not_observed,0,,,
+Moonshot AI,mmlu_pro,MMLU-Pro,not_observed,0,,,
+Moonshot AI,mmlu_redux,MMLU-Redux,not_observed,0,,,
+Moonshot AI,mmmlu,MMMLU,not_observed,0,,,
+Moonshot AI,mmmu,MMMU,not_observed,0,,,
+Moonshot AI,mmmu_pro,MMMU-Pro,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,mmvu,MMVU,not_observed,0,,,
+Moonshot AI,mrcr,MRCR,not_observed,0,,,
+Moonshot AI,mtob,MTOB,not_observed,0,,,
+Moonshot AI,multichallenge,MultiChallenge,not_observed,0,,,
+Moonshot AI,mvbench,MVbench,not_observed,0,,,
+Moonshot AI,nl2repo,NL2Repo,not_observed,0,,,
+Moonshot AI,office_qa_pro,OfficeQA Pro,not_observed,0,,,
+Moonshot AI,omnidocbench,OmniDocBench,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,omnivideobench,OmniVideoBench,not_observed,0,,,
+Moonshot AI,onemillionbench,OneMillionBench,not_observed,0,,,
+Moonshot AI,osworld,OSWorld,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,posttrainbench,PostTrainBench,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,programbench,ProgramBench,not_observed,0,,,
+Moonshot AI,rsi_bench,RSI-Bench,not_observed,0,,,
+Moonshot AI,scicode,SciCode,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,seccodebench,SecCodeBench,not_observed,0,,,
+Moonshot AI,simpleqa,SimpleQA,not_observed,0,,,
+Moonshot AI,skillsbench,SkillsBench,not_observed,0,,,
+Moonshot AI,super_gpqa,SuperGPQA,not_observed,0,,,
+Moonshot AI,superchem,SUPERChem,not_observed,0,,,
+Moonshot AI,swe_atlas,SWE Atlas,not_observed,0,,,
+Moonshot AI,swe_bench_multilingual,SWE-bench Multilingual,not_observed,0,,,
+Moonshot AI,swe_bench_pro,SWE-bench Pro,not_observed,0,,,
+Moonshot AI,swe_bench_science,SWE-bench Science,not_observed,0,,,
+Moonshot AI,swe_bench_verified,SWE-bench Verified,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,swe_marathon,SWE-Marathon,not_observed,0,,,
+Moonshot AI,tau2_bench,tau2-bench,not_observed,0,,,
+Moonshot AI,tau_bench,tau-bench,not_observed,0,,,
+Moonshot AI,terminal_bench,Terminal-Bench,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,tool_decathlon,Tool Decathlon,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,toolathlon_verified,Toolathlon Verified,not_observed,0,,,
+Moonshot AI,vending_bench,Vending Bench,not_observed,0,,,
+Moonshot AI,vibench,ViBench,not_observed,0,,,
+Moonshot AI,video_mme,Video-MME,reported,1,moonshot_kimi_k3_model_card,https://huggingface.co/moonshotai/Kimi-K3,2026-06-13
+Moonshot AI,widesearch,WideSearch,not_observed,0,,,
+Moonshot AI,workspacebench,WorkspaceBench,not_observed,0,,,
+OpenAI,aa_lcr,AA-LCR,not_observed,0,,,
+OpenAI,agents_last_exam,Agents' Last Exam,not_observed,0,,,
+OpenAI,agieval,AGIEval,not_observed,0,,,
+OpenAI,aider_polyglot,Aider Polyglot,reported,1,openai_gpt_4_1,https://openai.com/index/gpt-4-1/,2025-04-14
+OpenAI,aime,AIME,reported,3,openai_gpt_4_1|openai_gpt_5_system_card|openai_o3_o4_mini_system_card,https://openai.com/index/gpt-4-1/|https://openai.com/index/gpt-5-system-card/|https://openai.com/index/o3-o4-mini-system-card/,2025-08-07
+OpenAI,apex_agents,APEX-Agents,not_observed,0,,,
+OpenAI,arc_agi,ARC-AGI,reported,1,openai_o3_o4_mini_system_card,https://openai.com/index/o3-o4-mini-system-card/,2025-04-16
+OpenAI,arc_agi_2,ARC-AGI-2,not_observed,0,,,
+OpenAI,arc_agi_3,ARC-AGI-3,not_observed,0,,,
+OpenAI,arena_hard,Arena-Hard,not_observed,0,,,
+OpenAI,arxivmath,ArXivMath,not_observed,0,,,
+OpenAI,asi_bench,ASI-Bench,not_observed,0,,,
+OpenAI,automationbench,AutomationBench,not_observed,0,,,
+OpenAI,babyvision,BabyVision,not_observed,0,,,
+OpenAI,bankertoolbench,BankerToolBench,not_observed,0,,,
+OpenAI,bfcl,BFCL,not_observed,0,,,
+OpenAI,bigbench_extra_hard,BIG-Bench Extra Hard,not_observed,0,,,
+OpenAI,biomysterybench,BioMysteryBench,not_observed,0,,,
+OpenAI,blueprint_bench_2,Blueprint-Bench 2,not_observed,0,,,
+OpenAI,brokenarxiv,BrokenArXiv,not_observed,0,,,
+OpenAI,browsecomp,BrowseComp,reported,4,openai_gpt_5_6_release|openai_gpt_5_6_system_card|openai_gpt_5_system_card|openai_o3_o4_mini_system_card,https://deploymentsafety.openai.com/gpt-5-6-preview|https://openai.com/index/gpt-5-6/|https://openai.com/index/gpt-5-system-card/|https://openai.com/index/o3-o4-mini-system-card/,2026-07-09
+OpenAI,browsecomp_zh,BrowseComp-ZH,not_observed,0,,,
+OpenAI,chartography,Chartography,not_observed,0,,,
+OpenAI,chartqa,ChartQA,not_observed,0,,,
+OpenAI,charxiv_reasoning,CharXiv Reasoning,not_observed,0,,,
+OpenAI,chatbot_arena,Chatbot Arena,not_observed,0,,,
+OpenAI,codeforces,Codeforces,not_observed,0,,,
+OpenAI,critpt,CritPt,not_observed,0,,,
+OpenAI,cursor_bench,CursorBench,not_observed,0,,,
+OpenAI,cvebench,CVE-Bench,reported,1,openai_gpt_5_6_system_card,https://deploymentsafety.openai.com/gpt-5-6-preview,2026-07-09
+OpenAI,cybergym,CyberGym,not_observed,0,,,
+OpenAI,deepsearchqa,DeepSearchQA,not_observed,0,,,
+OpenAI,deepswe,DeepSWE,not_observed,0,,,
+OpenAI,docvqa,DocVQA,not_observed,0,,,
+OpenAI,draco,DRACO,not_observed,0,,,
+OpenAI,drop,DROP,not_observed,0,,,
+OpenAI,exploitbench,ExploitBench,reported,1,openai_gpt_5_6_system_card,https://deploymentsafety.openai.com/gpt-5-6-preview,2026-07-09
+OpenAI,frontiercode,FrontierCode,not_observed,0,,,
+OpenAI,gdp_pdf,GDP.pdf,not_observed,0,,,
+OpenAI,gdpval,GDPval,not_observed,0,,,
+OpenAI,gpqa,GPQA (full),not_observed,0,,,
+OpenAI,gpqa_diamond,GPQA Diamond,reported,4,openai_gpt_4_1|openai_gpt_5_6_release|openai_gpt_5_system_card|openai_o3_o4_mini_system_card,https://openai.com/index/gpt-4-1/|https://openai.com/index/gpt-5-6/|https://openai.com/index/gpt-5-system-card/|https://openai.com/index/o3-o4-mini-system-card/,2026-06-26
+OpenAI,gsm8k,GSM8K,not_observed,0,,,
+OpenAI,harbor_index,Harbor-Index,not_observed,0,,,
+OpenAI,healthbench,HealthBench,reported,2,openai_gpt_5_6_system_card|openai_gpt_5_system_card,https://deploymentsafety.openai.com/gpt-5-6-preview|https://openai.com/index/gpt-5-system-card/,2026-07-09
+OpenAI,healthbench_professional,HealthBench Professional,not_observed,0,,,
+OpenAI,hle,Humanity's Last Exam,reported,2,openai_gpt_5_6_release|openai_gpt_5_system_card,https://openai.com/index/gpt-5-6/|https://openai.com/index/gpt-5-system-card/,2026-06-26
+OpenAI,hmmt,HMMT,not_observed,0,,,
+OpenAI,horizonmath,HorizonMath,not_observed,0,,,
+OpenAI,humaneval,HumanEval,not_observed,0,,,
+OpenAI,ifbench,IFBench,not_observed,0,,,
+OpenAI,ifeval,IFEval,reported,1,openai_gpt_4_1,https://openai.com/index/gpt-4-1/,2025-04-14
+OpenAI,imo_answer_bench,IMOAnswerBench,not_observed,0,,,
+OpenAI,jobbench,JobBench,not_observed,0,,,
+OpenAI,jointavbench,JointAVBench,not_observed,0,,,
+OpenAI,legal_agent_benchmark,Legal Agent Benchmark,not_observed,0,,,
+OpenAI,livebench,LiveBench,not_observed,0,,,
+OpenAI,livecodebench,LiveCodeBench,reported,2,openai_gpt_5_system_card|openai_o3_o4_mini_system_card,https://openai.com/index/gpt-5-system-card/|https://openai.com/index/o3-o4-mini-system-card/,2025-08-07
+OpenAI,livecodebench_pro,LiveCodeBench Pro,not_observed,0,,,
+OpenAI,longbench,LongBench,not_observed,0,,,
+OpenAI,math_500,MATH-500,not_observed,0,,,
+OpenAI,matharena_apex_2025,MathArena Apex 2025,not_observed,0,,,
+OpenAI,mathvision,MathVision,not_observed,0,,,
+OpenAI,mathvista,MathVista,not_observed,0,,,
+OpenAI,mbpp,MBPP,not_observed,0,,,
+OpenAI,mcp_atlas,MCP Atlas,not_observed,0,,,
+OpenAI,mcp_mark,MCPMark,not_observed,0,,,
+OpenAI,mle_bench,MLE-bench,reported,2,openai_gpt_5_6_system_card|openai_gpt_5_system_card,https://deploymentsafety.openai.com/gpt-5-6-preview|https://openai.com/index/gpt-5-system-card/,2026-07-09
+OpenAI,mmlu,MMLU,reported,1,openai_gpt_4_1,https://openai.com/index/gpt-4-1/,2025-04-14
+OpenAI,mmlu_pro,MMLU-Pro,not_observed,0,,,
+OpenAI,mmlu_redux,MMLU-Redux,not_observed,0,,,
+OpenAI,mmmlu,MMMLU,not_observed,0,,,
+OpenAI,mmmu,MMMU,reported,3,openai_gpt_4_1|openai_gpt_5_system_card|openai_o3_o4_mini_system_card,https://openai.com/index/gpt-4-1/|https://openai.com/index/gpt-5-system-card/|https://openai.com/index/o3-o4-mini-system-card/,2025-08-07
+OpenAI,mmmu_pro,MMMU-Pro,not_observed,0,,,
+OpenAI,mmvu,MMVU,not_observed,0,,,
+OpenAI,mrcr,MRCR,reported,2,openai_gpt_4_1|openai_gpt_5_system_card,https://openai.com/index/gpt-4-1/|https://openai.com/index/gpt-5-system-card/,2025-08-07
+OpenAI,mtob,MTOB,not_observed,0,,,
+OpenAI,multichallenge,MultiChallenge,not_observed,0,,,
+OpenAI,mvbench,MVbench,not_observed,0,,,
+OpenAI,nl2repo,NL2Repo,not_observed,0,,,
+OpenAI,office_qa_pro,OfficeQA Pro,not_observed,0,,,
+OpenAI,omnidocbench,OmniDocBench,not_observed,0,,,
+OpenAI,omnivideobench,OmniVideoBench,not_observed,0,,,
+OpenAI,onemillionbench,OneMillionBench,not_observed,0,,,
+OpenAI,osworld,OSWorld,not_observed,0,,,
+OpenAI,posttrainbench,PostTrainBench,reported,1,openai_gpt_5_6_system_card,https://deploymentsafety.openai.com/gpt-5-6-preview,2026-07-09
+OpenAI,programbench,ProgramBench,not_observed,0,,,
+OpenAI,rsi_bench,RSI-Bench,not_observed,0,,,
+OpenAI,scicode,SciCode,not_observed,0,,,
+OpenAI,seccodebench,SecCodeBench,not_observed,0,,,
+OpenAI,simpleqa,SimpleQA,reported,2,openai_gpt_5_system_card|openai_o3_o4_mini_system_card,https://openai.com/index/gpt-5-system-card/|https://openai.com/index/o3-o4-mini-system-card/,2025-08-07
+OpenAI,skillsbench,SkillsBench,not_observed,0,,,
+OpenAI,super_gpqa,SuperGPQA,not_observed,0,,,
+OpenAI,superchem,SUPERChem,not_observed,0,,,
+OpenAI,swe_atlas,SWE Atlas,not_observed,0,,,
+OpenAI,swe_bench_multilingual,SWE-bench Multilingual,not_observed,0,,,
+OpenAI,swe_bench_pro,SWE-bench Pro,not_observed,0,,,
+OpenAI,swe_bench_science,SWE-bench Science,not_observed,0,,,
+OpenAI,swe_bench_verified,SWE-bench Verified,reported,4,openai_gpt_4_1|openai_gpt_5_6_release|openai_gpt_5_system_card|openai_o3_o4_mini_system_card,https://openai.com/index/gpt-4-1/|https://openai.com/index/gpt-5-6/|https://openai.com/index/gpt-5-system-card/|https://openai.com/index/o3-o4-mini-system-card/,2026-06-26
+OpenAI,swe_marathon,SWE-Marathon,not_observed,0,,,
+OpenAI,tau2_bench,tau2-bench,not_observed,0,,,
+OpenAI,tau_bench,tau-bench,reported,1,openai_gpt_5_system_card,https://openai.com/index/gpt-5-system-card/,2025-08-07
+OpenAI,terminal_bench,Terminal-Bench,reported,2,openai_gpt_5_6_release|openai_gpt_5_6_system_card,https://deploymentsafety.openai.com/gpt-5-6-preview|https://openai.com/index/gpt-5-6/,2026-07-09
+OpenAI,tool_decathlon,Tool Decathlon,not_observed,0,,,
+OpenAI,toolathlon_verified,Toolathlon Verified,not_observed,0,,,
+OpenAI,vending_bench,Vending Bench,not_observed,0,,,
+OpenAI,vibench,ViBench,not_observed,0,,,
+OpenAI,video_mme,Video-MME,reported,1,openai_gpt_4_1,https://openai.com/index/gpt-4-1/,2025-04-14
+OpenAI,widesearch,WideSearch,not_observed,0,,,
+OpenAI,workspacebench,WorkspaceBench,not_observed,0,,,
+Qwen,aa_lcr,AA-LCR,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,agents_last_exam,Agents' Last Exam,not_observed,0,,,
+Qwen,agieval,AGIEval,not_observed,0,,,
+Qwen,aider_polyglot,Aider Polyglot,not_observed,0,,,
+Qwen,aime,AIME,reported,2,qwen3_5_model_card|qwen3_technical_report,https://arxiv.org/abs/2505.09388|https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,apex_agents,APEX-Agents,not_observed,0,,,
+Qwen,arc_agi,ARC-AGI,not_observed,0,,,
+Qwen,arc_agi_2,ARC-AGI-2,not_observed,0,,,
+Qwen,arc_agi_3,ARC-AGI-3,not_observed,0,,,
+Qwen,arena_hard,Arena-Hard,reported,1,qwen3_technical_report,https://arxiv.org/abs/2505.09388,2025-05-14
+Qwen,arxivmath,ArXivMath,not_observed,0,,,
+Qwen,asi_bench,ASI-Bench,not_observed,0,,,
+Qwen,automationbench,AutomationBench,not_observed,0,,,
+Qwen,babyvision,BabyVision,not_observed,0,,,
+Qwen,bankertoolbench,BankerToolBench,not_observed,0,,,
+Qwen,bfcl,BFCL,reported,2,qwen3_5_model_card|qwen3_technical_report,https://arxiv.org/abs/2505.09388|https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,bigbench_extra_hard,BIG-Bench Extra Hard,not_observed,0,,,
+Qwen,biomysterybench,BioMysteryBench,not_observed,0,,,
+Qwen,blueprint_bench_2,Blueprint-Bench 2,not_observed,0,,,
+Qwen,brokenarxiv,BrokenArXiv,not_observed,0,,,
+Qwen,browsecomp,BrowseComp,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,browsecomp_zh,BrowseComp-ZH,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,chartography,Chartography,not_observed,0,,,
+Qwen,chartqa,ChartQA,not_observed,0,,,
+Qwen,charxiv_reasoning,CharXiv Reasoning,not_observed,0,,,
+Qwen,chatbot_arena,Chatbot Arena,not_observed,0,,,
+Qwen,codeforces,Codeforces,not_observed,0,,,
+Qwen,critpt,CritPt,not_observed,0,,,
+Qwen,cursor_bench,CursorBench,not_observed,0,,,
+Qwen,cvebench,CVE-Bench,not_observed,0,,,
+Qwen,cybergym,CyberGym,not_observed,0,,,
+Qwen,deepsearchqa,DeepSearchQA,not_observed,0,,,
+Qwen,deepswe,DeepSWE,not_observed,0,,,
+Qwen,docvqa,DocVQA,not_observed,0,,,
+Qwen,draco,DRACO,not_observed,0,,,
+Qwen,drop,DROP,not_observed,0,,,
+Qwen,exploitbench,ExploitBench,not_observed,0,,,
+Qwen,frontiercode,FrontierCode,not_observed,0,,,
+Qwen,gdp_pdf,GDP.pdf,not_observed,0,,,
+Qwen,gdpval,GDPval,not_observed,0,,,
+Qwen,gpqa,GPQA (full),reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,gpqa_diamond,GPQA Diamond,reported,3,qwen3_5_model_card|qwen3_8_model_card|qwen3_technical_report,https://arxiv.org/abs/2505.09388|https://huggingface.co/Qwen/Qwen3.5-397B-A17B|https://ollama.com/library/qwen3.8,2026-08-05
+Qwen,gsm8k,GSM8K,reported,1,qwen2_5_coder_report,https://arxiv.org/abs/2409.12186,2024-09-18
+Qwen,harbor_index,Harbor-Index,not_observed,0,,,
+Qwen,healthbench,HealthBench,not_observed,0,,,
+Qwen,healthbench_professional,HealthBench Professional,not_observed,0,,,
+Qwen,hle,Humanity's Last Exam,reported,2,qwen3_5_model_card|qwen3_8_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B|https://ollama.com/library/qwen3.8,2026-08-05
+Qwen,hmmt,HMMT,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,horizonmath,HorizonMath,not_observed,0,,,
+Qwen,humaneval,HumanEval,reported,2,qwen2_5_coder_report|qwen3_technical_report,https://arxiv.org/abs/2409.12186|https://arxiv.org/abs/2505.09388,2025-05-14
+Qwen,ifbench,IFBench,reported,2,qwen3_5_model_card|qwen3_8_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B|https://ollama.com/library/qwen3.8,2026-08-05
+Qwen,ifeval,IFEval,reported,2,qwen3_5_model_card|qwen3_technical_report,https://arxiv.org/abs/2505.09388|https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,imo_answer_bench,IMOAnswerBench,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,jobbench,JobBench,not_observed,0,,,
+Qwen,jointavbench,JointAVBench,not_observed,0,,,
+Qwen,legal_agent_benchmark,Legal Agent Benchmark,not_observed,0,,,
+Qwen,livebench,LiveBench,reported,1,qwen3_technical_report,https://arxiv.org/abs/2505.09388,2025-05-14
+Qwen,livecodebench,LiveCodeBench,reported,4,qwen2_5_coder_report|qwen3_5_model_card|qwen3_8_model_card|qwen3_technical_report,https://arxiv.org/abs/2409.12186|https://arxiv.org/abs/2505.09388|https://huggingface.co/Qwen/Qwen3.5-397B-A17B|https://ollama.com/library/qwen3.8,2026-08-05
+Qwen,livecodebench_pro,LiveCodeBench Pro,not_observed,0,,,
+Qwen,longbench,LongBench,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,math_500,MATH-500,reported,2,qwen2_5_coder_report|qwen3_technical_report,https://arxiv.org/abs/2409.12186|https://arxiv.org/abs/2505.09388,2025-05-14
+Qwen,matharena_apex_2025,MathArena Apex 2025,not_observed,0,,,
+Qwen,mathvision,MathVision,reported,2,qwen3_5_model_card|qwen3_8_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B|https://ollama.com/library/qwen3.8,2026-08-05
+Qwen,mathvista,MathVista,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,mbpp,MBPP,reported,1,qwen2_5_coder_report,https://arxiv.org/abs/2409.12186,2024-09-18
+Qwen,mcp_atlas,MCP Atlas,not_observed,0,,,
+Qwen,mcp_mark,MCPMark,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,mle_bench,MLE-bench,not_observed,0,,,
+Qwen,mmlu,MMLU,reported,1,qwen2_5_coder_report,https://arxiv.org/abs/2409.12186,2024-09-18
+Qwen,mmlu_pro,MMLU-Pro,reported,2,qwen3_5_model_card|qwen3_technical_report,https://arxiv.org/abs/2505.09388|https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,mmlu_redux,MMLU-Redux,reported,2,qwen3_5_model_card|qwen3_technical_report,https://arxiv.org/abs/2505.09388|https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,mmmlu,MMMLU,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,mmmu,MMMU,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,mmmu_pro,MMMU-Pro,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,mmvu,MMVU,not_observed,0,,,
+Qwen,mrcr,MRCR,not_observed,0,,,
+Qwen,mtob,MTOB,not_observed,0,,,
+Qwen,multichallenge,MultiChallenge,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,mvbench,MVbench,not_observed,0,,,
+Qwen,nl2repo,NL2Repo,not_observed,0,,,
+Qwen,office_qa_pro,OfficeQA Pro,not_observed,0,,,
+Qwen,omnidocbench,OmniDocBench,reported,2,qwen3_5_model_card|qwen3_8_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B|https://ollama.com/library/qwen3.8,2026-08-05
+Qwen,omnivideobench,OmniVideoBench,not_observed,0,,,
+Qwen,onemillionbench,OneMillionBench,not_observed,0,,,
+Qwen,osworld,OSWorld,reported,2,qwen3_5_model_card|qwen3_8_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B|https://ollama.com/library/qwen3.8,2026-08-05
+Qwen,posttrainbench,PostTrainBench,not_observed,0,,,
+Qwen,programbench,ProgramBench,not_observed,0,,,
+Qwen,rsi_bench,RSI-Bench,not_observed,0,,,
+Qwen,scicode,SciCode,not_observed,0,,,
+Qwen,seccodebench,SecCodeBench,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,simpleqa,SimpleQA,not_observed,0,,,
+Qwen,skillsbench,SkillsBench,not_observed,0,,,
+Qwen,super_gpqa,SuperGPQA,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,superchem,SUPERChem,not_observed,0,,,
+Qwen,swe_atlas,SWE Atlas,not_observed,0,,,
+Qwen,swe_bench_multilingual,SWE-bench Multilingual,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,swe_bench_pro,SWE-bench Pro,reported,1,qwen3_8_model_card,https://ollama.com/library/qwen3.8,2026-08-05
+Qwen,swe_bench_science,SWE-bench Science,not_observed,0,,,
+Qwen,swe_bench_verified,SWE-bench Verified,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,swe_marathon,SWE-Marathon,not_observed,0,,,
+Qwen,tau2_bench,tau2-bench,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,tau_bench,tau-bench,not_observed,0,,,
+Qwen,terminal_bench,Terminal-Bench,reported,2,qwen3_5_model_card|qwen3_8_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B|https://ollama.com/library/qwen3.8,2026-08-05
+Qwen,tool_decathlon,Tool Decathlon,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,toolathlon_verified,Toolathlon Verified,not_observed,0,,,
+Qwen,vending_bench,Vending Bench,not_observed,0,,,
+Qwen,vibench,ViBench,not_observed,0,,,
+Qwen,video_mme,Video-MME,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,widesearch,WideSearch,reported,1,qwen3_5_model_card,https://huggingface.co/Qwen/Qwen3.5-397B-A17B,2026-02-16
+Qwen,workspacebench,WorkspaceBench,not_observed,0,,,
+Tencent,aa_lcr,AA-LCR,not_observed,0,,,
+Tencent,agents_last_exam,Agents' Last Exam,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,agieval,AGIEval,not_observed,0,,,
+Tencent,aider_polyglot,Aider Polyglot,not_observed,0,,,
+Tencent,aime,AIME,not_observed,0,,,
+Tencent,apex_agents,APEX-Agents,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,arc_agi,ARC-AGI,not_observed,0,,,
+Tencent,arc_agi_2,ARC-AGI-2,not_observed,0,,,
+Tencent,arc_agi_3,ARC-AGI-3,not_observed,0,,,
+Tencent,arena_hard,Arena-Hard,not_observed,0,,,
+Tencent,arxivmath,ArXivMath,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,asi_bench,ASI-Bench,not_observed,0,,,
+Tencent,automationbench,AutomationBench,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,babyvision,BabyVision,not_observed,0,,,
+Tencent,bankertoolbench,BankerToolBench,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,bfcl,BFCL,not_observed,0,,,
+Tencent,bigbench_extra_hard,BIG-Bench Extra Hard,not_observed,0,,,
+Tencent,biomysterybench,BioMysteryBench,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,blueprint_bench_2,Blueprint-Bench 2,not_observed,0,,,
+Tencent,brokenarxiv,BrokenArXiv,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,browsecomp,BrowseComp,not_observed,0,,,
+Tencent,browsecomp_zh,BrowseComp-ZH,not_observed,0,,,
+Tencent,chartography,Chartography,not_observed,0,,,
+Tencent,chartqa,ChartQA,not_observed,0,,,
+Tencent,charxiv_reasoning,CharXiv Reasoning,not_observed,0,,,
+Tencent,chatbot_arena,Chatbot Arena,not_observed,0,,,
+Tencent,codeforces,Codeforces,not_observed,0,,,
+Tencent,critpt,CritPt,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,cursor_bench,CursorBench,not_observed,0,,,
+Tencent,cvebench,CVE-Bench,not_observed,0,,,
+Tencent,cybergym,CyberGym,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,deepsearchqa,DeepSearchQA,not_observed,0,,,
+Tencent,deepswe,DeepSWE,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,docvqa,DocVQA,not_observed,0,,,
+Tencent,draco,DRACO,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,drop,DROP,not_observed,0,,,
+Tencent,exploitbench,ExploitBench,not_observed,0,,,
+Tencent,frontiercode,FrontierCode,not_observed,0,,,
+Tencent,gdp_pdf,GDP.pdf,not_observed,0,,,
+Tencent,gdpval,GDPval,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,gpqa,GPQA (full),not_observed,0,,,
+Tencent,gpqa_diamond,GPQA Diamond,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,gsm8k,GSM8K,not_observed,0,,,
+Tencent,harbor_index,Harbor-Index,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,healthbench,HealthBench,not_observed,0,,,
+Tencent,healthbench_professional,HealthBench Professional,not_observed,0,,,
+Tencent,hle,Humanity's Last Exam,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,hmmt,HMMT,not_observed,0,,,
+Tencent,horizonmath,HorizonMath,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,humaneval,HumanEval,not_observed,0,,,
+Tencent,ifbench,IFBench,not_observed,0,,,
+Tencent,ifeval,IFEval,not_observed,0,,,
+Tencent,imo_answer_bench,IMOAnswerBench,not_observed,0,,,
+Tencent,jobbench,JobBench,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,jointavbench,JointAVBench,not_observed,0,,,
+Tencent,legal_agent_benchmark,Legal Agent Benchmark,not_observed,0,,,
+Tencent,livebench,LiveBench,not_observed,0,,,
+Tencent,livecodebench,LiveCodeBench,not_observed,0,,,
+Tencent,livecodebench_pro,LiveCodeBench Pro,not_observed,0,,,
+Tencent,longbench,LongBench,not_observed,0,,,
+Tencent,math_500,MATH-500,not_observed,0,,,
+Tencent,matharena_apex_2025,MathArena Apex 2025,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,mathvision,MathVision,not_observed,0,,,
+Tencent,mathvista,MathVista,not_observed,0,,,
+Tencent,mbpp,MBPP,not_observed,0,,,
+Tencent,mcp_atlas,MCP Atlas,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,mcp_mark,MCPMark,not_observed,0,,,
+Tencent,mle_bench,MLE-bench,not_observed,0,,,
+Tencent,mmlu,MMLU,not_observed,0,,,
+Tencent,mmlu_pro,MMLU-Pro,not_observed,0,,,
+Tencent,mmlu_redux,MMLU-Redux,not_observed,0,,,
+Tencent,mmmlu,MMMLU,not_observed,0,,,
+Tencent,mmmu,MMMU,not_observed,0,,,
+Tencent,mmmu_pro,MMMU-Pro,not_observed,0,,,
+Tencent,mmvu,MMVU,not_observed,0,,,
+Tencent,mrcr,MRCR,not_observed,0,,,
+Tencent,mtob,MTOB,not_observed,0,,,
+Tencent,multichallenge,MultiChallenge,not_observed,0,,,
+Tencent,mvbench,MVbench,not_observed,0,,,
+Tencent,nl2repo,NL2Repo,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,office_qa_pro,OfficeQA Pro,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,omnidocbench,OmniDocBench,not_observed,0,,,
+Tencent,omnivideobench,OmniVideoBench,not_observed,0,,,
+Tencent,onemillionbench,OneMillionBench,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,osworld,OSWorld,not_observed,0,,,
+Tencent,posttrainbench,PostTrainBench,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,programbench,ProgramBench,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,rsi_bench,RSI-Bench,not_observed,0,,,
+Tencent,scicode,SciCode,not_observed,0,,,
+Tencent,seccodebench,SecCodeBench,not_observed,0,,,
+Tencent,simpleqa,SimpleQA,not_observed,0,,,
+Tencent,skillsbench,SkillsBench,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,super_gpqa,SuperGPQA,not_observed,0,,,
+Tencent,superchem,SUPERChem,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,swe_atlas,SWE Atlas,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,swe_bench_multilingual,SWE-bench Multilingual,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,swe_bench_pro,SWE-bench Pro,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,swe_bench_science,SWE-bench Science,not_observed,0,,,
+Tencent,swe_bench_verified,SWE-bench Verified,not_observed,0,,,
+Tencent,swe_marathon,SWE-Marathon,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,tau2_bench,tau2-bench,not_observed,0,,,
+Tencent,tau_bench,tau-bench,not_observed,0,,,
+Tencent,terminal_bench,Terminal-Bench,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,tool_decathlon,Tool Decathlon,not_observed,0,,,
+Tencent,toolathlon_verified,Toolathlon Verified,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,vending_bench,Vending Bench,not_observed,0,,,
+Tencent,vibench,ViBench,not_observed,0,,,
+Tencent,video_mme,Video-MME,not_observed,0,,,
+Tencent,widesearch,WideSearch,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Tencent,workspacebench,WorkspaceBench,reported,1,tencent_hy4_preview,https://hy.tencent.ai/research/hy4-preview,2026-08-28
+Z.ai,aa_lcr,AA-LCR,not_observed,0,,,
+Z.ai,agents_last_exam,Agents' Last Exam,reported,1,zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,2026-08-27
+Z.ai,agieval,AGIEval,not_observed,0,,,
+Z.ai,aider_polyglot,Aider Polyglot,not_observed,0,,,
+Z.ai,aime,AIME,reported,4,zai_glm_5_1_model_card|zai_glm_5_2_model_card|zai_glm_5_model_card|zai_glm_5_paper,https://huggingface.co/papers/2602.15763|https://huggingface.co/zai-org/GLM-5|https://huggingface.co/zai-org/GLM-5.1|https://huggingface.co/zai-org/GLM-5.2,2026-06-16
+Z.ai,apex_agents,APEX-Agents,not_observed,0,,,
+Z.ai,arc_agi,ARC-AGI,not_observed,0,,,
+Z.ai,arc_agi_2,ARC-AGI-2,not_observed,0,,,
+Z.ai,arc_agi_3,ARC-AGI-3,not_observed,0,,,
+Z.ai,arena_hard,Arena-Hard,not_observed,0,,,
+Z.ai,arxivmath,ArXivMath,not_observed,0,,,
+Z.ai,asi_bench,ASI-Bench,not_observed,0,,,
+Z.ai,automationbench,AutomationBench,reported,1,zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,2026-08-27
+Z.ai,babyvision,BabyVision,reported,1,zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,2026-08-27
+Z.ai,bankertoolbench,BankerToolBench,not_observed,0,,,
+Z.ai,bfcl,BFCL,not_observed,0,,,
+Z.ai,bigbench_extra_hard,BIG-Bench Extra Hard,not_observed,0,,,
+Z.ai,biomysterybench,BioMysteryBench,not_observed,0,,,
+Z.ai,blueprint_bench_2,Blueprint-Bench 2,not_observed,0,,,
+Z.ai,brokenarxiv,BrokenArXiv,not_observed,0,,,
+Z.ai,browsecomp,BrowseComp,reported,3,zai_glm_5_1_model_card|zai_glm_5_model_card|zai_glm_5_paper,https://huggingface.co/papers/2602.15763|https://huggingface.co/zai-org/GLM-5|https://huggingface.co/zai-org/GLM-5.1,2026-04-03
+Z.ai,browsecomp_zh,BrowseComp-ZH,reported,1,zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5,2026-02-11
+Z.ai,chartography,Chartography,reported,1,zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,2026-08-27
+Z.ai,chartqa,ChartQA,not_observed,0,,,
+Z.ai,charxiv_reasoning,CharXiv Reasoning,reported,1,zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,2026-08-27
+Z.ai,chatbot_arena,Chatbot Arena,not_observed,0,,,
+Z.ai,codeforces,Codeforces,not_observed,0,,,
+Z.ai,critpt,CritPt,reported,1,zai_glm_5_2_model_card,https://huggingface.co/zai-org/GLM-5.2,2026-06-16
+Z.ai,cursor_bench,CursorBench,not_observed,0,,,
+Z.ai,cvebench,CVE-Bench,not_observed,0,,,
+Z.ai,cybergym,CyberGym,not_observed,0,,,
+Z.ai,deepsearchqa,DeepSearchQA,not_observed,0,,,
+Z.ai,deepswe,DeepSWE,reported,1,zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,2026-08-27
+Z.ai,docvqa,DocVQA,not_observed,0,,,
+Z.ai,draco,DRACO,not_observed,0,,,
+Z.ai,drop,DROP,not_observed,0,,,
+Z.ai,exploitbench,ExploitBench,not_observed,0,,,
+Z.ai,frontiercode,FrontierCode,not_observed,0,,,
+Z.ai,gdp_pdf,GDP.pdf,not_observed,0,,,
+Z.ai,gdpval,GDPval,reported,1,zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,2026-08-27
+Z.ai,gpqa,GPQA (full),not_observed,0,,,
+Z.ai,gpqa_diamond,GPQA Diamond,reported,4,zai_glm_5_1_model_card|zai_glm_5_2_model_card|zai_glm_5_model_card|zai_glm_5_paper,https://huggingface.co/papers/2602.15763|https://huggingface.co/zai-org/GLM-5|https://huggingface.co/zai-org/GLM-5.1|https://huggingface.co/zai-org/GLM-5.2,2026-06-16
+Z.ai,gsm8k,GSM8K,not_observed,0,,,
+Z.ai,harbor_index,Harbor-Index,not_observed,0,,,
+Z.ai,healthbench,HealthBench,not_observed,0,,,
+Z.ai,healthbench_professional,HealthBench Professional,not_observed,0,,,
+Z.ai,hle,Humanity's Last Exam,reported,5,zai_glm_5_1_model_card|zai_glm_5_2_model_card|zai_glm_5_3_flash_model_card|zai_glm_5_model_card|zai_glm_5_paper,https://huggingface.co/papers/2602.15763|https://huggingface.co/zai-org/GLM-5|https://huggingface.co/zai-org/GLM-5.1|https://huggingface.co/zai-org/GLM-5.2|https://z.ai/blog/glm-5.3-flash,2026-08-27
+Z.ai,hmmt,HMMT,reported,3,zai_glm_5_1_model_card|zai_glm_5_2_model_card|zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5|https://huggingface.co/zai-org/GLM-5.1|https://huggingface.co/zai-org/GLM-5.2,2026-06-16
+Z.ai,horizonmath,HorizonMath,not_observed,0,,,
+Z.ai,humaneval,HumanEval,not_observed,0,,,
+Z.ai,ifbench,IFBench,not_observed,0,,,
+Z.ai,ifeval,IFEval,not_observed,0,,,
+Z.ai,imo_answer_bench,IMOAnswerBench,reported,3,zai_glm_5_1_model_card|zai_glm_5_2_model_card|zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5|https://huggingface.co/zai-org/GLM-5.1|https://huggingface.co/zai-org/GLM-5.2,2026-06-16
+Z.ai,jobbench,JobBench,not_observed,0,,,
+Z.ai,jointavbench,JointAVBench,not_observed,0,,,
+Z.ai,legal_agent_benchmark,Legal Agent Benchmark,not_observed,0,,,
+Z.ai,livebench,LiveBench,not_observed,0,,,
+Z.ai,livecodebench,LiveCodeBench,not_observed,0,,,
+Z.ai,livecodebench_pro,LiveCodeBench Pro,not_observed,0,,,
+Z.ai,longbench,LongBench,not_observed,0,,,
+Z.ai,math_500,MATH-500,not_observed,0,,,
+Z.ai,matharena_apex_2025,MathArena Apex 2025,not_observed,0,,,
+Z.ai,mathvision,MathVision,not_observed,0,,,
+Z.ai,mathvista,MathVista,not_observed,0,,,
+Z.ai,mbpp,MBPP,not_observed,0,,,
+Z.ai,mcp_atlas,MCP Atlas,reported,3,zai_glm_5_1_model_card|zai_glm_5_2_model_card|zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5|https://huggingface.co/zai-org/GLM-5.1|https://huggingface.co/zai-org/GLM-5.2,2026-06-16
+Z.ai,mcp_mark,MCPMark,not_observed,0,,,
+Z.ai,mle_bench,MLE-bench,not_observed,0,,,
+Z.ai,mmlu,MMLU,not_observed,0,,,
+Z.ai,mmlu_pro,MMLU-Pro,not_observed,0,,,
+Z.ai,mmlu_redux,MMLU-Redux,not_observed,0,,,
+Z.ai,mmmlu,MMMLU,not_observed,0,,,
+Z.ai,mmmu,MMMU,not_observed,0,,,
+Z.ai,mmmu_pro,MMMU-Pro,not_observed,0,,,
+Z.ai,mmvu,MMVU,reported,1,zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,2026-08-27
+Z.ai,mrcr,MRCR,not_observed,0,,,
+Z.ai,mtob,MTOB,not_observed,0,,,
+Z.ai,multichallenge,MultiChallenge,not_observed,0,,,
+Z.ai,mvbench,MVbench,reported,1,zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,2026-08-27
+Z.ai,nl2repo,NL2Repo,reported,1,zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,2026-08-27
+Z.ai,office_qa_pro,OfficeQA Pro,reported,1,zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,2026-08-27
+Z.ai,omnidocbench,OmniDocBench,not_observed,0,,,
+Z.ai,omnivideobench,OmniVideoBench,not_observed,0,,,
+Z.ai,onemillionbench,OneMillionBench,not_observed,0,,,
+Z.ai,osworld,OSWorld,not_observed,0,,,
+Z.ai,posttrainbench,PostTrainBench,reported,1,zai_glm_5_2_model_card,https://huggingface.co/zai-org/GLM-5.2,2026-06-16
+Z.ai,programbench,ProgramBench,not_observed,0,,,
+Z.ai,rsi_bench,RSI-Bench,not_observed,0,,,
+Z.ai,scicode,SciCode,not_observed,0,,,
+Z.ai,seccodebench,SecCodeBench,not_observed,0,,,
+Z.ai,simpleqa,SimpleQA,not_observed,0,,,
+Z.ai,skillsbench,SkillsBench,not_observed,0,,,
+Z.ai,super_gpqa,SuperGPQA,not_observed,0,,,
+Z.ai,superchem,SUPERChem,not_observed,0,,,
+Z.ai,swe_atlas,SWE Atlas,not_observed,0,,,
+Z.ai,swe_bench_multilingual,SWE-bench Multilingual,reported,1,zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5,2026-02-11
+Z.ai,swe_bench_pro,SWE-bench Pro,reported,2,zai_glm_5_1_model_card|zai_glm_5_2_model_card,https://huggingface.co/zai-org/GLM-5.1|https://huggingface.co/zai-org/GLM-5.2,2026-06-16
+Z.ai,swe_bench_science,SWE-bench Science,not_observed,0,,,
+Z.ai,swe_bench_verified,SWE-bench Verified,reported,2,zai_glm_5_model_card|zai_glm_5_paper,https://huggingface.co/papers/2602.15763|https://huggingface.co/zai-org/GLM-5,2026-02-11
+Z.ai,swe_marathon,SWE-Marathon,not_observed,0,,,
+Z.ai,tau2_bench,tau2-bench,reported,3,zai_glm_5_1_model_card|zai_glm_5_model_card|zai_glm_5_paper,https://huggingface.co/papers/2602.15763|https://huggingface.co/zai-org/GLM-5|https://huggingface.co/zai-org/GLM-5.1,2026-04-03
+Z.ai,tau_bench,tau-bench,not_observed,0,,,
+Z.ai,terminal_bench,Terminal-Bench,reported,5,zai_glm_5_1_model_card|zai_glm_5_2_model_card|zai_glm_5_3_flash_model_card|zai_glm_5_model_card|zai_glm_5_paper,https://huggingface.co/papers/2602.15763|https://huggingface.co/zai-org/GLM-5|https://huggingface.co/zai-org/GLM-5.1|https://huggingface.co/zai-org/GLM-5.2|https://z.ai/blog/glm-5.3-flash,2026-08-27
+Z.ai,tool_decathlon,Tool Decathlon,reported,3,zai_glm_5_1_model_card|zai_glm_5_2_model_card|zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5|https://huggingface.co/zai-org/GLM-5.1|https://huggingface.co/zai-org/GLM-5.2,2026-06-16
+Z.ai,toolathlon_verified,Toolathlon Verified,reported,1,zai_glm_5_3_flash_model_card,https://z.ai/blog/glm-5.3-flash,2026-08-27
+Z.ai,vending_bench,Vending Bench,reported,2,zai_glm_5_1_model_card|zai_glm_5_model_card,https://huggingface.co/zai-org/GLM-5|https://huggingface.co/zai-org/GLM-5.1,2026-04-03
+Z.ai,vibench,ViBench,not_observed,0,,,
+Z.ai,video_mme,Video-MME,not_observed,0,,,
+Z.ai,widesearch,WideSearch,not_observed,0,,,
+Z.ai,workspacebench,WorkspaceBench,not_observed,0,,,
+xAI,aa_lcr,AA-LCR,not_observed,0,,,
+xAI,agents_last_exam,Agents' Last Exam,not_observed,0,,,
+xAI,agieval,AGIEval,not_observed,0,,,
+xAI,aider_polyglot,Aider Polyglot,not_observed,0,,,
+xAI,aime,AIME,reported,1,xai_grok_4_model_card,https://x.ai/news/grok-4,2025-07-09
+xAI,apex_agents,APEX-Agents,not_observed,0,,,
+xAI,arc_agi,ARC-AGI,reported,1,xai_grok_4_model_card,https://x.ai/news/grok-4,2025-07-09
+xAI,arc_agi_2,ARC-AGI-2,reported,1,xai_grok_4_5,https://x.ai/news/grok-4-5,2026-07-08
+xAI,arc_agi_3,ARC-AGI-3,not_observed,0,,,
+xAI,arena_hard,Arena-Hard,not_observed,0,,,
+xAI,arxivmath,ArXivMath,not_observed,0,,,
+xAI,asi_bench,ASI-Bench,not_observed,0,,,
+xAI,automationbench,AutomationBench,not_observed,0,,,
+xAI,babyvision,BabyVision,not_observed,0,,,
+xAI,bankertoolbench,BankerToolBench,not_observed,0,,,
+xAI,bfcl,BFCL,not_observed,0,,,
+xAI,bigbench_extra_hard,BIG-Bench Extra Hard,not_observed,0,,,
+xAI,biomysterybench,BioMysteryBench,not_observed,0,,,
+xAI,blueprint_bench_2,Blueprint-Bench 2,not_observed,0,,,
+xAI,brokenarxiv,BrokenArXiv,not_observed,0,,,
+xAI,browsecomp,BrowseComp,not_observed,0,,,
+xAI,browsecomp_zh,BrowseComp-ZH,not_observed,0,,,
+xAI,chartography,Chartography,not_observed,0,,,
+xAI,chartqa,ChartQA,not_observed,0,,,
+xAI,charxiv_reasoning,CharXiv Reasoning,not_observed,0,,,
+xAI,chatbot_arena,Chatbot Arena,not_observed,0,,,
+xAI,codeforces,Codeforces,not_observed,0,,,
+xAI,critpt,CritPt,not_observed,0,,,
+xAI,cursor_bench,CursorBench,not_observed,0,,,
+xAI,cvebench,CVE-Bench,not_observed,0,,,
+xAI,cybergym,CyberGym,not_observed,0,,,
+xAI,deepsearchqa,DeepSearchQA,not_observed,0,,,
+xAI,deepswe,DeepSWE,not_observed,0,,,
+xAI,docvqa,DocVQA,not_observed,0,,,
+xAI,draco,DRACO,not_observed,0,,,
+xAI,drop,DROP,not_observed,0,,,
+xAI,exploitbench,ExploitBench,not_observed,0,,,
+xAI,frontiercode,FrontierCode,not_observed,0,,,
+xAI,gdp_pdf,GDP.pdf,not_observed,0,,,
+xAI,gdpval,GDPval,not_observed,0,,,
+xAI,gpqa,GPQA (full),not_observed,0,,,
+xAI,gpqa_diamond,GPQA Diamond,reported,2,xai_grok_4_5|xai_grok_4_model_card,https://x.ai/news/grok-4|https://x.ai/news/grok-4-5,2026-07-08
+xAI,gsm8k,GSM8K,not_observed,0,,,
+xAI,harbor_index,Harbor-Index,not_observed,0,,,
+xAI,healthbench,HealthBench,not_observed,0,,,
+xAI,healthbench_professional,HealthBench Professional,not_observed,0,,,
+xAI,hle,Humanity's Last Exam,reported,2,xai_grok_4_5|xai_grok_4_model_card,https://x.ai/news/grok-4|https://x.ai/news/grok-4-5,2026-07-08
+xAI,hmmt,HMMT,not_observed,0,,,
+xAI,horizonmath,HorizonMath,not_observed,0,,,
+xAI,humaneval,HumanEval,not_observed,0,,,
+xAI,ifbench,IFBench,not_observed,0,,,
+xAI,ifeval,IFEval,not_observed,0,,,
+xAI,imo_answer_bench,IMOAnswerBench,not_observed,0,,,
+xAI,jobbench,JobBench,not_observed,0,,,
+xAI,jointavbench,JointAVBench,not_observed,0,,,
+xAI,legal_agent_benchmark,Legal Agent Benchmark,not_observed,0,,,
+xAI,livebench,LiveBench,not_observed,0,,,
+xAI,livecodebench,LiveCodeBench,reported,1,xai_grok_4_model_card,https://x.ai/news/grok-4,2025-07-09
+xAI,livecodebench_pro,LiveCodeBench Pro,not_observed,0,,,
+xAI,longbench,LongBench,not_observed,0,,,
+xAI,math_500,MATH-500,not_observed,0,,,
+xAI,matharena_apex_2025,MathArena Apex 2025,not_observed,0,,,
+xAI,mathvision,MathVision,not_observed,0,,,
+xAI,mathvista,MathVista,not_observed,0,,,
+xAI,mbpp,MBPP,not_observed,0,,,
+xAI,mcp_atlas,MCP Atlas,not_observed,0,,,
+xAI,mcp_mark,MCPMark,not_observed,0,,,
+xAI,mle_bench,MLE-bench,not_observed,0,,,
+xAI,mmlu,MMLU,not_observed,0,,,
+xAI,mmlu_pro,MMLU-Pro,not_observed,0,,,
+xAI,mmlu_redux,MMLU-Redux,not_observed,0,,,
+xAI,mmmlu,MMMLU,not_observed,0,,,
+xAI,mmmu,MMMU,reported,1,xai_grok_4_model_card,https://x.ai/news/grok-4,2025-07-09
+xAI,mmmu_pro,MMMU-Pro,not_observed,0,,,
+xAI,mmvu,MMVU,not_observed,0,,,
+xAI,mrcr,MRCR,not_observed,0,,,
+xAI,mtob,MTOB,not_observed,0,,,
+xAI,multichallenge,MultiChallenge,not_observed,0,,,
+xAI,mvbench,MVbench,not_observed,0,,,
+xAI,nl2repo,NL2Repo,not_observed,0,,,
+xAI,office_qa_pro,OfficeQA Pro,not_observed,0,,,
+xAI,omnidocbench,OmniDocBench,not_observed,0,,,
+xAI,omnivideobench,OmniVideoBench,not_observed,0,,,
+xAI,onemillionbench,OneMillionBench,not_observed,0,,,
+xAI,osworld,OSWorld,not_observed,0,,,
+xAI,posttrainbench,PostTrainBench,not_observed,0,,,
+xAI,programbench,ProgramBench,not_observed,0,,,
+xAI,rsi_bench,RSI-Bench,not_observed,0,,,
+xAI,scicode,SciCode,not_observed,0,,,
+xAI,seccodebench,SecCodeBench,not_observed,0,,,
+xAI,simpleqa,SimpleQA,not_observed,0,,,
+xAI,skillsbench,SkillsBench,not_observed,0,,,
+xAI,super_gpqa,SuperGPQA,not_observed,0,,,
+xAI,superchem,SUPERChem,not_observed,0,,,
+xAI,swe_atlas,SWE Atlas,not_observed,0,,,
+xAI,swe_bench_multilingual,SWE-bench Multilingual,not_observed,0,,,
+xAI,swe_bench_pro,SWE-bench Pro,reported,1,xai_grok_4_5,https://x.ai/news/grok-4-5,2026-07-08
+xAI,swe_bench_science,SWE-bench Science,not_observed,0,,,
+xAI,swe_bench_verified,SWE-bench Verified,reported,1,xai_grok_4_model_card,https://x.ai/news/grok-4,2025-07-09
+xAI,swe_marathon,SWE-Marathon,not_observed,0,,,
+xAI,tau2_bench,tau2-bench,not_observed,0,,,
+xAI,tau_bench,tau-bench,not_observed,0,,,
+xAI,terminal_bench,Terminal-Bench,reported,1,xai_grok_4_5,https://x.ai/news/grok-4-5,2026-07-08
+xAI,tool_decathlon,Tool Decathlon,not_observed,0,,,
+xAI,toolathlon_verified,Toolathlon Verified,not_observed,0,,,
+xAI,vending_bench,Vending Bench,not_observed,0,,,
+xAI,vibench,ViBench,not_observed,0,,,
+xAI,video_mme,Video-MME,not_observed,0,,,
+xAI,widesearch,WideSearch,not_observed,0,,,
+xAI,workspacebench,WorkspaceBench,not_observed,0,,,

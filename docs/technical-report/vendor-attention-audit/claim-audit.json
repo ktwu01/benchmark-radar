@@ -1,0 +1,700 @@
+{
+  "alias_collisions": {
+    "arcagi2": [
+      "arc_agi",
+      "arc_agi_2"
+    ],
+    "mmmupro": [
+      "mmmu",
+      "mmmu_pro"
+    ],
+    "tau2bench": [
+      "tau2_bench",
+      "tau_bench"
+    ],
+    "toolathlon": [
+      "tool_decathlon",
+      "toolathlon_verified"
+    ],
+    "toolathlonverified": [
+      "tool_decathlon",
+      "toolathlon_verified"
+    ]
+  },
+  "analysis_end": "2026-08-31",
+  "baseline_core": {
+    "active_orgs_threshold_ok": true,
+    "benchmark_count": 110,
+    "core_count": 16,
+    "core_member_names": [
+      "GPQA Diamond",
+      "Humanity's Last Exam",
+      "Terminal-Bench",
+      "SWE-bench Verified",
+      "AIME",
+      "LiveCodeBench",
+      "MMLU-Pro",
+      "SWE-bench Pro",
+      "IFEval",
+      "MMLU",
+      "BrowseComp",
+      "MATH-500",
+      "MMMU",
+      "HumanEval",
+      "GSM8K",
+      "MMMLU"
+    ],
+    "core_members": [
+      "gpqa_diamond",
+      "hle",
+      "terminal_bench",
+      "swe_bench_verified",
+      "aime",
+      "livecodebench",
+      "mmlu_pro",
+      "swe_bench_pro",
+      "ifeval",
+      "mmlu",
+      "browsecomp",
+      "math_500",
+      "mmmu",
+      "humaneval",
+      "gsm8k",
+      "mmmlu"
+    ],
+    "document_benchmark_edge_count": 447,
+    "document_count": 37,
+    "document_types": "",
+    "drop_newest_per_organization": false,
+    "identity": "canonical",
+    "jaccard_vs_baseline": 1.0,
+    "label": "All reviewed documents, canonical IDs, threshold 6",
+    "latest_per_organization": false,
+    "model_count": 36,
+    "organization_benchmark_edge_count": 300,
+    "organization_count": 12,
+    "scenario_id": "canonical_all_t6",
+    "threshold": 6,
+    "trailing_days": ""
+  },
+  "contributor": "Junkai Wang / @JunkaiWang-TheoPhy",
+  "issue_number": 456,
+  "issue_url": "https://github.com/ktwu01/benchmark-radar/issues/456",
+  "limitations": [
+    "The reviewed registry is a convenience sample, not a census of all vendor reports.",
+    "A not-observed matrix cell may reflect a missing or unread report and is not evidence of absence.",
+    "Organization labels are publisher strings rather than audited corporate-parent identities.",
+    "Living documents may change after retrieval; revised dates are used only when explicitly recorded.",
+    "Family sensitivity concerns mention edges only; score instruments and protocols remain separate."
+  ],
+  "original_claim": {
+    "listed_benchmark_ids": [
+      "gpqa_diamond",
+      "hle",
+      "swe_bench_verified",
+      "terminal_bench",
+      "aime",
+      "livecodebench",
+      "mmlu_pro",
+      "browsecomp"
+    ],
+    "selection_text": "Eight benchmarks appear in documents from at least six organizations.",
+    "text": "Vendor attention has converged on a small reporting core."
+  },
+  "original_list_equals_threshold_set": false,
+  "original_list_is_subset_of_threshold_set": true,
+  "preregistration_url": "https://github.com/ktwu01/benchmark-radar/issues/456#issuecomment-5496051366",
+  "primary_definition": {
+    "benchmark_identity": "canonical benchmark_id",
+    "counted_document_identity": "model_card.id with validated unique URL",
+    "minimum_organizations": 6,
+    "score_tracks_used": false,
+    "support_unit": "distinct organization strings in the reviewed registry"
+  },
+  "reasoning": [
+    "The eight named benchmarks are a strict subset of the 16 IDs satisfying the stated six-organization rule.",
+    "Core size changes under predeclared time-window and document-selection rules.",
+    "Several baseline boundary members fail at least one leave-one-out stress test.",
+    "Family grouping changes mention identity but never merges score tracks or protocols."
+  ],
+  "recommendation": "narrow",
+  "registry_counts": {
+    "benchmarks": 110,
+    "documents": 37,
+    "organizations": 12
+  },
+  "replacement_claim": "In the reviewed sample through 2026-08-31, 16 canonical benchmark IDs were reported by at least 6 organizations across the full history; the trailing 365-day window contained 6, and retaining only each organization's latest document contained 3. A recurring reporting group is visible, but its boundary depends on the time window, document selection, identity grouping, and support threshold.",
+  "reviewed_families": [
+    {
+      "benchmark_ids": [
+        "swe_bench_multilingual",
+        "swe_bench_pro",
+        "swe_bench_science",
+        "swe_bench_verified"
+      ],
+      "evidence": [
+        "https://openai.com/index/introducing-swe-bench-verified/",
+        "https://www.swebench.com/multilingual.html",
+        "https://github.com/scaleapi/SWE-bench_Pro-os",
+        "https://arxiv.org/abs/2608.19799"
+      ],
+      "family_id": "swe_bench_family",
+      "family_name": "SWE-bench family",
+      "note": "Explicit SWE-bench variants; protocols remain distinct."
+    },
+    {
+      "benchmark_ids": [
+        "mmlu",
+        "mmlu_pro",
+        "mmlu_redux",
+        "mmmlu"
+      ],
+      "evidence": [
+        "https://github.com/hendrycks/test",
+        "https://github.com/TIGER-AI-Lab/MMLU-Pro",
+        "https://github.com/aryopg/mmlu-redux",
+        "https://huggingface.co/datasets/openai/MMMLU"
+      ],
+      "family_id": "mmlu_family",
+      "family_name": "MMLU family",
+      "note": "MMLU-derived strict, corrected, and multilingual variants."
+    },
+    {
+      "benchmark_ids": [
+        "mmmu",
+        "mmmu_pro"
+      ],
+      "evidence": [
+        "https://mmmu-benchmark.github.io/",
+        "https://arxiv.org/abs/2409.02813"
+      ],
+      "family_id": "mmmu_family",
+      "family_name": "MMMU family",
+      "note": "MMMU-Pro explicitly derives a harder protocol from MMMU."
+    },
+    {
+      "benchmark_ids": [
+        "browsecomp",
+        "browsecomp_zh"
+      ],
+      "evidence": [
+        "https://openai.com/index/browsecomp/",
+        "https://arxiv.org/abs/2504.19314"
+      ],
+      "family_id": "browsecomp_family",
+      "family_name": "BrowseComp family",
+      "note": "BrowseComp-ZH adapts the construct to the Chinese web."
+    },
+    {
+      "benchmark_ids": [
+        "arc_agi",
+        "arc_agi_2",
+        "arc_agi_3"
+      ],
+      "evidence": [
+        "https://arcprize.org/",
+        "https://arcprize.org/arc-agi/2/",
+        "https://arcprize.org/arc-agi/3/"
+      ],
+      "family_id": "arc_agi_family",
+      "family_name": "ARC-AGI family",
+      "note": "Official successive ARC-AGI benchmark versions."
+    },
+    {
+      "benchmark_ids": [
+        "tau2_bench",
+        "tau_bench"
+      ],
+      "evidence": [
+        "https://github.com/sierra-research/tau-bench",
+        "https://arxiv.org/abs/2506.07982"
+      ],
+      "family_id": "tau_bench_family",
+      "family_name": "tau-bench family",
+      "note": "tau2-bench changes the interaction model to dual control."
+    },
+    {
+      "benchmark_ids": [
+        "tool_decathlon",
+        "toolathlon_verified"
+      ],
+      "evidence": [
+        "https://toolathlon.xyz/introduction",
+        "https://github.com/toolathlon/toolathlon"
+      ],
+      "family_id": "toolathlon_family",
+      "family_name": "Toolathlon family",
+      "note": "The official project calls Tool Decathlon \"Toolathlon\"; both strict IDs remain distinct outside this sensitivity grouping."
+    },
+    {
+      "benchmark_ids": [
+        "gpqa",
+        "gpqa_diamond"
+      ],
+      "evidence": [
+        "https://arxiv.org/abs/2311.12022"
+      ],
+      "family_id": "gpqa_family",
+      "family_name": "GPQA family",
+      "note": "Full and Diamond splits of the same source benchmark."
+    }
+  ],
+  "robustness": {
+    "baseline_self_comparison_included": true,
+    "every_baseline_member_survives_single_document_omission": false,
+    "exact_membership_is_robust": false,
+    "high_support_group_persists": true,
+    "median_jaccard": 0.4688,
+    "median_jaccard_excluding_baseline": 0.375,
+    "required_median_jaccard": 0.8,
+    "scenario_ids": [
+      "canonical_all_t5",
+      "canonical_all_t6",
+      "canonical_all_t7",
+      "model_cards_only_t6",
+      "latest_per_organization_t6",
+      "trailing_365d_t6",
+      "trailing_180d_t6",
+      "trailing_90d_t6",
+      "reviewed_families_t6",
+      "drop_newest_per_organization_t6"
+    ]
+  },
+  "scenarios": [
+    {
+      "active_orgs_threshold_ok": true,
+      "benchmark_count": 110,
+      "core_count": 21,
+      "core_explicit_family_count": "",
+      "core_member_names": [
+        "GPQA Diamond",
+        "Humanity's Last Exam",
+        "Terminal-Bench",
+        "SWE-bench Verified",
+        "AIME",
+        "LiveCodeBench",
+        "MMLU-Pro",
+        "SWE-bench Pro",
+        "IFEval",
+        "MMLU",
+        "BrowseComp",
+        "MATH-500",
+        "MMMU",
+        "HumanEval",
+        "GSM8K",
+        "MMMLU",
+        "SimpleQA",
+        "MCP Atlas",
+        "GDPval",
+        "AutomationBench",
+        "MBPP"
+      ],
+      "core_members": [
+        "gpqa_diamond",
+        "hle",
+        "terminal_bench",
+        "swe_bench_verified",
+        "aime",
+        "livecodebench",
+        "mmlu_pro",
+        "swe_bench_pro",
+        "ifeval",
+        "mmlu",
+        "browsecomp",
+        "math_500",
+        "mmmu",
+        "humaneval",
+        "gsm8k",
+        "mmmlu",
+        "simpleqa",
+        "mcp_atlas",
+        "gdpval",
+        "automationbench",
+        "mbpp"
+      ],
+      "core_singleton_count": "",
+      "document_benchmark_edge_count": 447,
+      "document_count": 37,
+      "document_types": "",
+      "drop_newest_per_organization": false,
+      "identity": "canonical",
+      "jaccard_vs_baseline": 0.7619,
+      "label": "All reviewed documents, canonical IDs, threshold 5",
+      "latest_per_organization": false,
+      "model_count": 36,
+      "organization_benchmark_edge_count": 300,
+      "organization_count": 12,
+      "scenario_id": "canonical_all_t5",
+      "threshold": 5,
+      "trailing_days": ""
+    },
+    {
+      "active_orgs_threshold_ok": true,
+      "benchmark_count": 110,
+      "core_count": 16,
+      "core_explicit_family_count": "",
+      "core_member_names": [
+        "GPQA Diamond",
+        "Humanity's Last Exam",
+        "Terminal-Bench",
+        "SWE-bench Verified",
+        "AIME",
+        "LiveCodeBench",
+        "MMLU-Pro",
+        "SWE-bench Pro",
+        "IFEval",
+        "MMLU",
+        "BrowseComp",
+        "MATH-500",
+        "MMMU",
+        "HumanEval",
+        "GSM8K",
+        "MMMLU"
+      ],
+      "core_members": [
+        "gpqa_diamond",
+        "hle",
+        "terminal_bench",
+        "swe_bench_verified",
+        "aime",
+        "livecodebench",
+        "mmlu_pro",
+        "swe_bench_pro",
+        "ifeval",
+        "mmlu",
+        "browsecomp",
+        "math_500",
+        "mmmu",
+        "humaneval",
+        "gsm8k",
+        "mmmlu"
+      ],
+      "core_singleton_count": "",
+      "document_benchmark_edge_count": 447,
+      "document_count": 37,
+      "document_types": "",
+      "drop_newest_per_organization": false,
+      "identity": "canonical",
+      "jaccard_vs_baseline": 1.0,
+      "label": "All reviewed documents, canonical IDs, threshold 6",
+      "latest_per_organization": false,
+      "model_count": 36,
+      "organization_benchmark_edge_count": 300,
+      "organization_count": 12,
+      "scenario_id": "canonical_all_t6",
+      "threshold": 6,
+      "trailing_days": ""
+    },
+    {
+      "active_orgs_threshold_ok": true,
+      "benchmark_count": 110,
+      "core_count": 10,
+      "core_explicit_family_count": "",
+      "core_member_names": [
+        "GPQA Diamond",
+        "Humanity's Last Exam",
+        "Terminal-Bench",
+        "SWE-bench Verified",
+        "AIME",
+        "LiveCodeBench",
+        "MMLU-Pro",
+        "SWE-bench Pro",
+        "IFEval",
+        "MMLU"
+      ],
+      "core_members": [
+        "gpqa_diamond",
+        "hle",
+        "terminal_bench",
+        "swe_bench_verified",
+        "aime",
+        "livecodebench",
+        "mmlu_pro",
+        "swe_bench_pro",
+        "ifeval",
+        "mmlu"
+      ],
+      "core_singleton_count": "",
+      "document_benchmark_edge_count": 447,
+      "document_count": 37,
+      "document_types": "",
+      "drop_newest_per_organization": false,
+      "identity": "canonical",
+      "jaccard_vs_baseline": 0.625,
+      "label": "All reviewed documents, canonical IDs, threshold 7",
+      "latest_per_organization": false,
+      "model_count": 36,
+      "organization_benchmark_edge_count": 300,
+      "organization_count": 12,
+      "scenario_id": "canonical_all_t7",
+      "threshold": 7,
+      "trailing_days": ""
+    },
+    {
+      "active_orgs_threshold_ok": true,
+      "benchmark_count": 110,
+      "core_count": 4,
+      "core_explicit_family_count": "",
+      "core_member_names": [
+        "GPQA Diamond",
+        "Humanity's Last Exam",
+        "LiveCodeBench",
+        "SWE-bench Verified"
+      ],
+      "core_members": [
+        "gpqa_diamond",
+        "hle",
+        "livecodebench",
+        "swe_bench_verified"
+      ],
+      "core_singleton_count": "",
+      "document_benchmark_edge_count": 208,
+      "document_count": 15,
+      "document_types": "model_card",
+      "drop_newest_per_organization": false,
+      "identity": "canonical",
+      "jaccard_vs_baseline": 0.25,
+      "label": "Model-card documents only, canonical IDs, threshold 6",
+      "latest_per_organization": false,
+      "model_count": 15,
+      "organization_benchmark_edge_count": 168,
+      "organization_count": 8,
+      "scenario_id": "model_cards_only_t6",
+      "threshold": 6,
+      "trailing_days": ""
+    },
+    {
+      "active_orgs_threshold_ok": true,
+      "benchmark_count": 110,
+      "core_count": 3,
+      "core_explicit_family_count": "",
+      "core_member_names": [
+        "Terminal-Bench",
+        "GPQA Diamond",
+        "Humanity's Last Exam"
+      ],
+      "core_members": [
+        "terminal_bench",
+        "gpqa_diamond",
+        "hle"
+      ],
+      "core_singleton_count": "",
+      "document_benchmark_edge_count": 144,
+      "document_count": 12,
+      "document_types": "",
+      "drop_newest_per_organization": false,
+      "identity": "canonical",
+      "jaccard_vs_baseline": 0.1875,
+      "label": "Latest reviewed document per organization, canonical IDs, threshold 6",
+      "latest_per_organization": true,
+      "model_count": 12,
+      "organization_benchmark_edge_count": 144,
+      "organization_count": 12,
+      "scenario_id": "latest_per_organization_t6",
+      "threshold": 6,
+      "trailing_days": ""
+    },
+    {
+      "active_orgs_threshold_ok": true,
+      "benchmark_count": 110,
+      "core_count": 6,
+      "core_explicit_family_count": "",
+      "core_member_names": [
+        "Terminal-Bench",
+        "Humanity's Last Exam",
+        "GPQA Diamond",
+        "SWE-bench Pro",
+        "SWE-bench Verified",
+        "BrowseComp"
+      ],
+      "core_members": [
+        "terminal_bench",
+        "hle",
+        "gpqa_diamond",
+        "swe_bench_pro",
+        "swe_bench_verified",
+        "browsecomp"
+      ],
+      "core_singleton_count": "",
+      "document_benchmark_edge_count": 294,
+      "document_count": 21,
+      "document_types": "",
+      "drop_newest_per_organization": false,
+      "identity": "canonical",
+      "jaccard_vs_baseline": 0.375,
+      "label": "Trailing 365 days, canonical IDs, threshold 6",
+      "latest_per_organization": false,
+      "model_count": 20,
+      "organization_benchmark_edge_count": 221,
+      "organization_count": 11,
+      "scenario_id": "trailing_365d_t6",
+      "threshold": 6,
+      "trailing_days": 365
+    },
+    {
+      "active_orgs_threshold_ok": true,
+      "benchmark_count": 110,
+      "core_count": 4,
+      "core_explicit_family_count": "",
+      "core_member_names": [
+        "Humanity's Last Exam",
+        "Terminal-Bench",
+        "GPQA Diamond",
+        "SWE-bench Pro"
+      ],
+      "core_members": [
+        "hle",
+        "terminal_bench",
+        "gpqa_diamond",
+        "swe_bench_pro"
+      ],
+      "core_singleton_count": "",
+      "document_benchmark_edge_count": 206,
+      "document_count": 15,
+      "document_types": "",
+      "drop_newest_per_organization": false,
+      "identity": "canonical",
+      "jaccard_vs_baseline": 0.25,
+      "label": "Trailing 180 days, canonical IDs, threshold 6",
+      "latest_per_organization": false,
+      "model_count": 15,
+      "organization_benchmark_edge_count": 165,
+      "organization_count": 9,
+      "scenario_id": "trailing_180d_t6",
+      "threshold": 6,
+      "trailing_days": 180
+    },
+    {
+      "active_orgs_threshold_ok": true,
+      "benchmark_count": 110,
+      "core_count": 4,
+      "core_explicit_family_count": "",
+      "core_member_names": [
+        "Terminal-Bench",
+        "Humanity's Last Exam",
+        "GPQA Diamond",
+        "SWE-bench Pro"
+      ],
+      "core_members": [
+        "terminal_bench",
+        "hle",
+        "gpqa_diamond",
+        "swe_bench_pro"
+      ],
+      "core_singleton_count": "",
+      "document_benchmark_edge_count": 153,
+      "document_count": 12,
+      "document_types": "",
+      "drop_newest_per_organization": false,
+      "identity": "canonical",
+      "jaccard_vs_baseline": 0.25,
+      "label": "Trailing 90 days, canonical IDs, threshold 6",
+      "latest_per_organization": false,
+      "model_count": 12,
+      "organization_benchmark_edge_count": 140,
+      "organization_count": 8,
+      "scenario_id": "trailing_90d_t6",
+      "threshold": 6,
+      "trailing_days": 90
+    },
+    {
+      "active_orgs_threshold_ok": true,
+      "benchmark_count": 97,
+      "core_count": 13,
+      "core_explicit_family_count": 5,
+      "core_member_names": [
+        "GPQA family",
+        "SWE-bench family",
+        "Humanity's Last Exam",
+        "Terminal-Bench",
+        "MMLU family",
+        "AIME",
+        "LiveCodeBench",
+        "MMMU family",
+        "IFEval",
+        "BrowseComp family",
+        "MATH-500",
+        "HumanEval",
+        "GSM8K"
+      ],
+      "core_members": [
+        "gpqa_family",
+        "swe_bench_family",
+        "hle",
+        "terminal_bench",
+        "mmlu_family",
+        "aime",
+        "livecodebench",
+        "mmmu_family",
+        "ifeval",
+        "browsecomp_family",
+        "math_500",
+        "humaneval",
+        "gsm8k"
+      ],
+      "core_singleton_count": 8,
+      "document_benchmark_edge_count": 447,
+      "document_count": 37,
+      "document_types": "",
+      "drop_newest_per_organization": false,
+      "identity": "family",
+      "jaccard_vs_baseline": 1.0,
+      "label": "All reviewed documents, reviewed benchmark families, threshold 6",
+      "latest_per_organization": false,
+      "model_count": 36,
+      "organization_benchmark_edge_count": 267,
+      "organization_count": 12,
+      "scenario_id": "reviewed_families_t6",
+      "threshold": 6,
+      "trailing_days": ""
+    },
+    {
+      "active_orgs_threshold_ok": true,
+      "benchmark_count": 110,
+      "core_count": 9,
+      "core_explicit_family_count": "",
+      "core_member_names": [
+        "GPQA Diamond",
+        "SWE-bench Verified",
+        "AIME",
+        "Humanity's Last Exam",
+        "LiveCodeBench",
+        "Terminal-Bench",
+        "MATH-500",
+        "IFEval",
+        "MMLU"
+      ],
+      "core_members": [
+        "gpqa_diamond",
+        "swe_bench_verified",
+        "aime",
+        "hle",
+        "livecodebench",
+        "terminal_bench",
+        "math_500",
+        "ifeval",
+        "mmlu"
+      ],
+      "core_singleton_count": "",
+      "document_benchmark_edge_count": 303,
+      "document_count": 25,
+      "document_types": "",
+      "drop_newest_per_organization": true,
+      "identity": "canonical",
+      "jaccard_vs_baseline": 0.5625,
+      "label": "Remove each organization's newest reviewed document, canonical IDs, threshold 6",
+      "latest_per_organization": false,
+      "model_count": 24,
+      "organization_benchmark_edge_count": 193,
+      "organization_count": 9,
+      "scenario_id": "drop_newest_per_organization_t6",
+      "threshold": 6,
+      "trailing_days": ""
+    }
+  ],
+  "schema_version": 1,
+  "source_commit": "98c8cf6fb5d1d69c66d438ea9f92242b2205c9ae",
+  "source_commit_verified": true,
+  "source_path": "data/model_cards.yml",
+  "source_sha256": "8b3c59a0d4c236c06e106fca474e27df665ecc33b339bca57799258805fd6e6d"
+}

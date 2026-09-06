@@ -1,0 +1,146 @@
+schema_version: 1
+audit:
+  issue_number: 456
+  issue_url: https://github.com/ktwu01/benchmark-radar/issues/456
+  preregistration_url: https://github.com/ktwu01/benchmark-radar/issues/456#issuecomment-5496051366
+  source_path: data/model_cards.yml
+  source_commit: 98c8cf6fb5d1d69c66d438ea9f92242b2205c9ae
+  source_sha256: 8b3c59a0d4c236c06e106fca474e27df665ecc33b339bca57799258805fd6e6d
+  as_of: 2026-08-31
+  contributor: Junkai Wang / @JunkaiWang-TheoPhy
+  primary_scenario: canonical_all_t6
+  original_claim:
+    text: Vendor attention has converged on a small reporting core.
+    selection_text: Eight benchmarks appear in documents from at least six organizations.
+    listed_benchmark_ids:
+      - gpqa_diamond
+      - hle
+      - swe_bench_verified
+      - terminal_bench
+      - aime
+      - livecodebench
+      - mmlu_pro
+      - browsecomp
+  decision_rule:
+    exact_membership_median_jaccard: 0.80
+    retain_requires_every_single_document_omission: true
+    narrow_when_group_persists_but_membership_changes: true
+
+scenarios:
+  - id: canonical_all_t5
+    label: All reviewed documents, canonical IDs, threshold 5
+    identity: canonical
+    min_organizations: 5
+  - id: canonical_all_t6
+    label: All reviewed documents, canonical IDs, threshold 6
+    identity: canonical
+    min_organizations: 6
+  - id: canonical_all_t7
+    label: All reviewed documents, canonical IDs, threshold 7
+    identity: canonical
+    min_organizations: 7
+  - id: model_cards_only_t6
+    label: Model-card documents only, canonical IDs, threshold 6
+    identity: canonical
+    document_types: [model_card]
+    min_organizations: 6
+  - id: latest_per_organization_t6
+    label: Latest reviewed document per organization, canonical IDs, threshold 6
+    identity: canonical
+    latest_per_organization: true
+    min_organizations: 6
+  - id: trailing_365d_t6
+    label: Trailing 365 days, canonical IDs, threshold 6
+    identity: canonical
+    trailing_days: 365
+    min_organizations: 6
+  - id: trailing_180d_t6
+    label: Trailing 180 days, canonical IDs, threshold 6
+    identity: canonical
+    trailing_days: 180
+    min_organizations: 6
+  - id: trailing_90d_t6
+    label: Trailing 90 days, canonical IDs, threshold 6
+    identity: canonical
+    trailing_days: 90
+    min_organizations: 6
+  - id: reviewed_families_t6
+    label: All reviewed documents, reviewed benchmark families, threshold 6
+    identity: family
+    min_organizations: 6
+  - id: drop_newest_per_organization_t6
+    label: Remove each organization's newest reviewed document, canonical IDs, threshold 6
+    identity: canonical
+    drop_newest_per_organization: true
+    min_organizations: 6
+
+# Family grouping is a sensitivity analysis over mentions only. It never merges
+# score tracks, instruments, or protocols. Every non-listed benchmark remains a
+# singleton. The mapping is explicit because aliases are not globally unique.
+families:
+  - id: swe_bench_family
+    name: SWE-bench family
+    benchmark_ids: [swe_bench_verified, swe_bench_pro, swe_bench_multilingual, swe_bench_science]
+    evidence:
+      - https://openai.com/index/introducing-swe-bench-verified/
+      - https://www.swebench.com/multilingual.html
+      - https://github.com/scaleapi/SWE-bench_Pro-os
+      - https://arxiv.org/abs/2608.19799
+    note: Explicit SWE-bench variants; protocols remain distinct.
+  - id: mmlu_family
+    name: MMLU family
+    benchmark_ids: [mmlu, mmlu_pro, mmlu_redux, mmmlu]
+    evidence:
+      - https://github.com/hendrycks/test
+      - https://github.com/TIGER-AI-Lab/MMLU-Pro
+      - https://github.com/aryopg/mmlu-redux
+      - https://huggingface.co/datasets/openai/MMMLU
+    note: MMLU-derived strict, corrected, and multilingual variants.
+  - id: mmmu_family
+    name: MMMU family
+    benchmark_ids: [mmmu, mmmu_pro]
+    evidence:
+      - https://mmmu-benchmark.github.io/
+      - https://arxiv.org/abs/2409.02813
+    note: MMMU-Pro explicitly derives a harder protocol from MMMU.
+  - id: browsecomp_family
+    name: BrowseComp family
+    benchmark_ids: [browsecomp, browsecomp_zh]
+    evidence:
+      - https://openai.com/index/browsecomp/
+      - https://arxiv.org/abs/2504.19314
+    note: BrowseComp-ZH adapts the construct to the Chinese web.
+  - id: arc_agi_family
+    name: ARC-AGI family
+    benchmark_ids: [arc_agi, arc_agi_2, arc_agi_3]
+    evidence:
+      - https://arcprize.org/
+      - https://arcprize.org/arc-agi/2/
+      - https://arcprize.org/arc-agi/3/
+    note: Official successive ARC-AGI benchmark versions.
+  - id: tau_bench_family
+    name: tau-bench family
+    benchmark_ids: [tau_bench, tau2_bench]
+    evidence:
+      - https://github.com/sierra-research/tau-bench
+      - https://arxiv.org/abs/2506.07982
+    note: tau2-bench changes the interaction model to dual control.
+  - id: toolathlon_family
+    name: Toolathlon family
+    benchmark_ids: [tool_decathlon, toolathlon_verified]
+    evidence:
+      - https://toolathlon.xyz/introduction
+      - https://github.com/toolathlon/toolathlon
+    note: The official project calls Tool Decathlon "Toolathlon"; both strict IDs remain distinct outside this sensitivity grouping.
+  - id: gpqa_family
+    name: GPQA family
+    benchmark_ids: [gpqa, gpqa_diamond]
+    evidence:
+      - https://arxiv.org/abs/2311.12022
+    note: Full and Diamond splits of the same source benchmark.
+  - id: math_family
+    name: MATH family
+    benchmark_ids: [math_500]
+    evidence:
+      - https://github.com/openai/prm800k
+    note: AIME years and MATH spellings are already collapsed inside canonical IDs; no extra ID is merged here.
