@@ -1,0 +1,250 @@
+schema_version: 1
+study:
+  issue: 455
+  snapshot_date: "2026-09-01"
+  repository_commit_input: "98c8cf6fb5d1d69c66d438ea9f92242b2205c9ae"
+  evidence_cutoff: "2026-09-01"
+  preregistration_url: "https://github.com/ktwu01/benchmark-radar/issues/455#issuecomment-5492496440"
+  statuses:
+    - demonstrated
+    - design_implied
+    - unmeasured
+  fine_taxonomy:
+    - goal_plan_drift
+    - tool_selection_execution
+    - environment_grounding_state_tracking
+    - loop_stagnation_recovery
+    - verification_completion
+  coarse_grouping:
+    decision_execution:
+      - goal_plan_drift
+      - tool_selection_execution
+    state_control:
+      - environment_grounding_state_tracking
+      - loop_stagnation_recovery
+      - verification_completion
+  demonstrated_family_scope:
+    - OSWorld 2.0
+    - WebArena
+    - Mind2Web
+    - GAIA2
+    - SWE-bench Verified
+    - SWE-bench Science
+    - ResearchClawBench
+    - PRBench
+  excluded_families:
+    - General AgentBench
+    - ToolFailBench
+  measurement_counterexample_only:
+    - SciCode
+rows:
+  - id: osworld2_hidden_state
+    benchmark_family_id: osworld_2_0
+    benchmark_family_name: OSWorld 2.0
+    radar_query: OSWorld 2.0
+    radar_record_id: llm-stats:osworld-2.0
+    task_or_protocol: Long-horizon computer-use workflows under 500-step binary completion
+    status: demonstrated
+    primary_code: environment_grounding_state_tracking
+    authoritative_source_kind: paper
+    source_url: https://arxiv.org/html/2606.29537v1
+    evidence_location: HTML abstract paragraph id abstract1.1, final two sentences on 20.6% binary completion, 54.8% partial score, and hidden-state recovery; Figure 8 caption at figure id S3.F8
+    published_date: "2026-06-28"
+    observed_evidence: Claude Opus 4.8 completes only 20.6% of tasks at a 54.8% partial score, and the paper explicitly says agents lose track of constraints, miss information arriving mid-task, and struggle when workflows hinge on hidden state recovery.
+    limitations: OSWorld 2.0 is a deliberately hard long-horizon benchmark with a strict binary-completion metric, so its headline failure rates are not interchangeable with shorter browser or desktop benchmarks.
+    plausible_counter_reading: Some of the failure burden may come from the intentionally long task horizon and binary end-state scoring rather than a pure hidden-state weakness rate in ordinary deployments.
+    counterexample: The same paper reports capability asymmetries rather than uniform failure, with different frontier models stronger on different challenge phenomena such as visual-spatial precision or proactive interaction.
+    counterexample_location: Abstract lines 135-136; Section 4.4 model-profile comparison
+    review:
+      sampled_for_secondary_review: true
+      secondary_code: environment_grounding_state_tracking
+      secondary_note: "The evidence explicitly says agents lose track of constraints, miss information that arrives mid-task, and struggle with hidden-state recovery. That points most directly to failures to stay grounded in evolving environment state rather than a purely local execution mistake."
+  - id: webarena_early_stop
+    benchmark_family_id: webarena
+    benchmark_family_name: WebArena
+    radar_query: WebArena
+    radar_record_id: llm-stats:webarena-verified
+    task_or_protocol: Realistic web tasks with achievable and unachievable cases
+    status: demonstrated
+    primary_code: verification_completion
+    authoritative_source_kind: paper
+    source_url: https://arxiv.org/html/2307.13854v4
+    evidence_location: HTML paragraph id S5.p1.1 on 11.70% success; HTML paragraph id S5.SS1.SSS0.Px1.p1.1 on 54.9%, 14.41%, and 44.44%; Table 2 caption at S5.T2
+    published_date: "2024-06-24"
+    observed_evidence: GPT-4 reaches 11.70% success with the unachievable-task hint and 14.41% without it, while the paper reports that the hinted agent incorrectly labels 54.9% of feasible tasks as impossible and stops early instead of verifying achievability.
+    limitations: WebArena emphasizes browser interaction and achievability judgments under one prompting scaffold, so it does not directly measure long-horizon desktop workflows or offline artifact consistency.
+    plausible_counter_reading: Some of the early stopping reflects prompt framing around impossible tasks rather than a stable model-intrinsic failure mode across every web-agent setup.
+    counterexample: Removing the unachievable-task hint improves achievable-task success, and GPT-4 still recognizes 44.44% of unachievable tasks without explicit prompting to stop.
+    counterexample_location: Table 2 rows for GPT-4 with and without the hint
+    review:
+      sampled_for_secondary_review: false
+      secondary_code: null
+      secondary_note: null
+  - id: mind2web_unseen_environment_transfer
+    benchmark_family_id: mind2web
+    benchmark_family_name: Mind2Web
+    radar_query: Mind2Web
+    radar_record_id: opencompass:1125
+    task_or_protocol: Step-level action prediction across cross-task, cross-website, and cross-domain splits
+    status: demonstrated
+    primary_code: environment_grounding_state_tracking
+    authoritative_source_kind: paper
+    source_url: https://arxiv.org/html/2306.06070v3
+    evidence_location: HTML paragraph id S4.SS3.p3.1 on the cross-task versus cross-website/domain gap and unseen-environment challenge; Figure 6 reference in the same paragraph
+    published_date: "2024-03-16"
+    observed_evidence: All reported models perform best on the cross-task split, with more than a 10-point absolute step-success gap versus cross-website and cross-domain settings, and the paper says generalizing to unseen environments remains a major challenge.
+    limitations: Mind2Web measures step-level action grounding rather than end-to-end live-browser completion, so it is strongest as evidence about transfer and interface grounding rather than final-task delivery.
+    plausible_counter_reading: The gap may partly reflect dataset shift across websites and domains instead of a pure memory or state-tracking deficit inside one fixed environment.
+    counterexample: The paper also reports that MindAct significantly improves over earlier modeling strategies and achieves non-trivial generalization in the harder splits.
+    counterexample_location: Section 3.3 benchmark comparison discussion
+    review:
+      sampled_for_secondary_review: false
+      secondary_code: null
+      secondary_note: null
+  - id: gaia2_time_sensitivity
+    benchmark_family_id: gaia2
+    benchmark_family_name: GAIA2
+    radar_query: GAIA2
+    radar_record_id: llm-stats:gaia2
+    task_or_protocol: Dynamic and asynchronous agent tasks with capability splits
+    status: demonstrated
+    primary_code: loop_stagnation_recovery
+    authoritative_source_kind: paper
+    source_url: https://arxiv.org/html/2602.11964v1
+    evidence_location: HTML abstract paragraph id abstract1.1 on 42% pass@1 and time-sensitive failures; HTML paragraph id S5.SS2.p1.1 and Figure 8 caption id S5.F8 on default-versus-instant Time behavior
+    published_date: "2026-02-18"
+    observed_evidence: The abstract reports GPT-5 at 42.1% pass@1 overall but failing on time-sensitive tasks, and the paper links weaker Time performance to longer thinking and stale action timing in dynamic environments.
+    limitations: GAIA2 is organized around capability splits inside a ReAct-style scaffold, so the failure evidence is split-specific rather than a direct claim about every task type in the benchmark.
+    plausible_counter_reading: Some of the weakness may be infrastructure or latency sensitivity rather than recovery failure in the agent policy alone.
+    counterexample: The same paper reports that no model dominates across capabilities and that some stronger models perform well on instruction-following and search-oriented slices.
+    counterexample_location: Abstract; capability-split discussion around Figure 5 and Figure 8
+    review:
+      sampled_for_secondary_review: false
+      secondary_code: null
+      secondary_note: null
+  - id: swe_verified_cognitive_deadlock
+    benchmark_family_id: swe_bench_verified
+    benchmark_family_name: SWE-bench Verified
+    radar_query: SWE-bench Verified
+    radar_record_id: llm-stats:swe-bench-verified
+    task_or_protocol: Automated issue solving failure analysis over failed benchmark instances
+    status: demonstrated
+    primary_code: loop_stagnation_recovery
+    authoritative_source_kind: paper
+    source_url: https://arxiv.org/abs/2509.13941
+    evidence_location: arXiv abs abstract paragraph on 150 failed instances, majority agentic failures from flawed reasoning and cognitive deadlocks, and 22.2% recovery
+    published_date: "2025-09-17"
+    observed_evidence: The failure study manually analyzes 150 failed SWE-bench-Verified instances and reports that agentic failures are dominated by flawed reasoning and cognitive deadlocks, with long unproductive loops that especially hurt multi-file tasks.
+    limitations: This is a targeted failure study over selected tools and failed instances, not a complete census over every scaffold or every issue in SWE-bench Verified.
+    plausible_counter_reading: The taxonomy emphasizes failed cases, so it intentionally over-samples where agents broke rather than estimating unconditional failure-mode prevalence across all runs.
+    counterexample: The same study reports that a collaborative Expert-Executor design recovers 22.2% of previously intractable issues for a leading single-agent setup.
+    counterexample_location: Abstract line 20
+    review:
+      sampled_for_secondary_review: false
+      secondary_code: null
+      secondary_note: null
+  - id: swe_science_misguided_exploration
+    benchmark_family_id: swe_bench_science
+    benchmark_family_name: SWE-bench Science
+    radar_query: SWE-bench
+    radar_record_id: null
+    task_or_protocol: Repository-level scientific software engineering tasks across issue, exploratory, and integration paradigms
+    status: demonstrated
+    primary_code: tool_selection_execution
+    authoritative_source_kind: paper
+    source_url: https://arxiv.org/abs/2608.19799
+    evidence_location: arXiv abs abstract paragraph on pass@1 below 50%, the four recurring failure mechanisms, and the paired scientific-guidance ablation
+    published_date: "2026-08-20"
+    observed_evidence: The paper reports that the best-performing agent stays below 50% pass@1 and identifies misguided exploration or surface-level repair, along with incomplete repair coverage, as recurring scientific-engineering failure mechanisms.
+    limitations: The release spans 119 tasks across many scientific domains with hidden verifier tests, so the public paper supports family-level failure coding but not fine-grained per-domain prevalence estimates.
+    plausible_counter_reading: Some apparent execution failures may partly reflect missing domain knowledge or abstraction deficits rather than pure exploration or tool-choice mistakes.
+    counterexample: The paired guidance ablation shows that well-grounded scientific guidance can improve average performance and token efficiency when the extra context actually aligns with the repair.
+    counterexample_location: Abstract line 19
+    review:
+      sampled_for_secondary_review: true
+      secondary_code: tool_selection_execution
+      secondary_note: "The excerpt names misguided exploration and surface-level repair as recurring failure mechanisms. That fits agents choosing unproductive actions or incomplete repair operations rather than executing the needed scientific software fix cleanly."
+  - id: researchclawbench_protocol_drift
+    benchmark_family_id: researchclawbench
+    benchmark_family_name: ResearchClawBench
+    radar_query: ResearchClawBench
+    radar_record_id: llm-stats:researchclawbench
+    task_or_protocol: End-to-end scientific rediscovery from raw data with hidden target papers
+    status: demonstrated
+    primary_code: goal_plan_drift
+    authoritative_source_kind: paper
+    source_url: https://arxiv.org/html/2606.07591v5
+    evidence_location: HTML abstract paragraph on 21.5, 20.7, and protocol/evidence/scientific-core mismatch; HTML paragraph ids S4.SS2.p1.1 and S4.SS5.p1.1 under subsection 4.5 Error Analysis
+    published_date: "2026-07-03"
+    observed_evidence: The strongest autonomous agent averages 21.5, the strongest ResearchHarness LLM averages 20.7, and the error analysis says failures concentrate in experimental protocol mismatch, evidence mismatch, and missing scientific core rather than mere execution trouble.
+    limitations: ResearchClawBench uses expert-curated rubrics over 40 tasks from 10 scientific domains, so its errors are informative about rediscovery workflows but not a generic estimate for all scientific coding tasks.
+    plausible_counter_reading: Some low scores may reflect benchmark novelty and the hidden-target-paper setup instead of a stable tendency to drift from objectives in more scaffolded scientific tasks.
+    counterexample: The benchmark intentionally allows valid novel rediscovery rather than literal replication, so not every deviation from the original paper is counted as failure when the scientific evidence still satisfies the rubric.
+    counterexample_location: Abstract lines 50-52; metric description in Section 3.4
+    review:
+      sampled_for_secondary_review: true
+      secondary_code: goal_plan_drift
+      secondary_note: "The error analysis centers on protocol mismatch, evidence mismatch, and missing the scientific core. Those are strongest as departures from the target scientific objective and intended methodology, not just isolated tool-use errors."
+  - id: prbench_end_to_end_gap
+    benchmark_family_id: prbench
+    benchmark_family_name: PRBench
+    radar_query: PRBench
+    radar_record_id: null
+    task_or_protocol: End-to-end physics paper reproduction with callback success threshold
+    status: demonstrated
+    primary_code: verification_completion
+    authoritative_source_kind: paper
+    source_url: https://arxiv.org/html/2603.27646v1
+    evidence_location: HTML paragraph ids S4.SS2.p2.1 and S4.SS2.p4.1 on 34% overall score and 0% End-to-End Callback Rate; Table 2 caption at S4.T2
+    published_date: "2026-03-30"
+    observed_evidence: The best agent reaches only a 34% mean overall score and all evaluated agents remain at 0% end-to-end callback success, despite much higher methodology-understanding and instruction-following scores.
+    limitations: PRBench is a physics-specific reproduction benchmark with strict end-to-end success thresholds, so the result is strongest as evidence that partial competence does not guarantee complete scientific delivery.
+    plausible_counter_reading: Some of the callback failure could come from the benchmark's strict numerical-reproduction threshold and domain specificity rather than a general inability to complete every scientific workflow.
+    counterexample: Agents still reach 78% on methodology understanding and 92% on instruction following, showing that local comprehension can be strong even when full callback success is absent.
+    counterexample_location: Table 2
+    review:
+      sampled_for_secondary_review: false
+      secondary_code: null
+      secondary_note: null
+  - id: mind2web_action_selection_signal
+    benchmark_family_id: mind2web
+    benchmark_family_name: Mind2Web
+    radar_query: Mind2Web
+    radar_record_id: opencompass:1125
+    task_or_protocol: Generalization gap as a possible action-selection signal
+    status: design_implied
+    primary_code: tool_selection_execution
+    authoritative_source_kind: paper
+    source_url: https://arxiv.org/html/2306.06070v3
+    evidence_location: HTML paragraph id S4.SS3.p3.1 on the cross-task versus cross-website/domain gap; Figure 6 reference in the same paragraph
+    published_date: "2024-03-16"
+    observed_evidence: Because the benchmark is a step-level web-action task, the large transfer gap on unseen websites and domains makes wrong action choice a plausible mechanism, but the paper does not directly publish a prevalence estimate for tool-selection failure as a separate category.
+    limitations: This row is a design signal only. The benchmark directly measures step success under distribution shift, not a manually audited failure taxonomy over agent traces.
+    plausible_counter_reading: The same transfer gap can also be read primarily as interface grounding or representation shift rather than an execution-choice failure.
+    counterexample: MindAct still materially improves over earlier strategies, so the harder splits do not imply uniformly poor action selection on every unseen site.
+    counterexample_location: Section 3.3 benchmark comparison discussion
+    review:
+      sampled_for_secondary_review: false
+      secondary_code: null
+      secondary_note: null
+  - id: scicode_instrument_gap
+    benchmark_family_id: scicode
+    benchmark_family_name: SciCode
+    radar_query: SciCode
+    radar_record_id: llm-stats:scicode
+    task_or_protocol: Benchmark-defect audit of scientific coding evaluation
+    status: unmeasured
+    primary_code: verification_completion
+    authoritative_source_kind: paper
+    source_url: https://arxiv.org/abs/2608.04975
+    evidence_location: arXiv abs abstract paragraph on 263 defects, 192 score-suppressing defects across 91% of main problems, and recovery to 84-98% / 69-92%
+    published_date: "2026-08-07"
+    observed_evidence: The audit finds 263 benchmark defects, with 192 defects across 91% of main problems causing correct instruction-following solutions to be rejected, so the original benchmark cannot be used as a clean prevalence estimate for agent failure on scientific coding.
+    limitations: This row is an instrument caution, not evidence that verification failures are absent. It shows that the measurement channel was contaminated enough to distort failure rates.
+    plausible_counter_reading: Even after correcting benchmark defects, some scientific-coding tasks remain difficult, so the audit does not prove that all prior failure signals were artifacts.
+    counterexample: After correction, subproblem accuracy rises from 45-60% to 84-98% and main-problem accuracy from 9-27% to 69-92%, showing that the dominant bottleneck in the original release was often the benchmark instrument rather than the model.
+    counterexample_location: Abstract lines 16-19
+    review:
+      sampled_for_secondary_review: true
+      secondary_code: verification_completion
+      secondary_note: "The audit shows the evaluation instrument rejected correct instruction-following solutions because benchmark defects contaminated the completion check. This makes the apparent failure signal unusable as a clean estimate because the required end state was not being verified reliably."

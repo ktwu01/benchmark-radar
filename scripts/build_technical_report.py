@@ -45,6 +45,8 @@ PAGE_W, PAGE_H = letter
 MARGIN_X = 0.68 * inch
 TOP = 0.62 * inch
 BOTTOM = 0.62 * inch
+NEXT_DRAFT_OUTPUT = Path("output/pdf/benchmark-radar-technical-report-next-draft.pdf")
+FROZEN_RELEASE_OUTPUT = Path("output/pdf/benchmark-radar-technical-report-v0.9.0.pdf")
 
 
 def register_fonts() -> tuple[str, str, str]:
@@ -697,27 +699,16 @@ def report_story(doi: str) -> list:
     return story
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--output",
-        type=Path,
-        default=Path("output/pdf/benchmark-radar-technical-report-v0.9.0.pdf"),
-    )
-    parser.add_argument(
-        "--doi",
-        default="10.5281/zenodo.22167102",
-        help="Reserved DOI without the https://doi.org/ prefix.",
-    )
-    args = parser.parse_args()
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    # Keep the original entry point working while the expanded system audit
-    # lives in its own readable source module.
-    from build_system_evaluation import EvaluationDoc, story
+def build_parser() -> argparse.ArgumentParser:
+    from build_system_evaluation import build_parser as canonical_build_parser
 
-    doc = EvaluationDoc(str(args.output), doi=args.doi)
-    doc.build(story(args.doi))
-    print(args.output)
+    return canonical_build_parser()
+
+
+def main() -> None:
+    from build_system_evaluation import main as canonical_main
+
+    canonical_main()
 
 
 if __name__ == "__main__":
