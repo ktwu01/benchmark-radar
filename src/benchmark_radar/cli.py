@@ -19,7 +19,7 @@ from .http import RequestError
 from .kw_bench_store import STORE_FILENAME as KW_BENCH_STORE_FILENAME
 from .kw_bench_tracks import DEFAULT_BATCH_SIZE
 from .kw_bench_tracks import backfill as backfill_classifications
-from .models import ProducerHealth, RadarRun, SourceHealth
+from .models import RadarRun, SourceHealth
 from .pipeline import (
     _drop_future_dated_items,
     _failure_streak_key,
@@ -702,36 +702,10 @@ def main() -> None:
         ):
             print(f"Already repaired {item.source}:{item.source_id}; no snapshot written")
             return
-        target = existing[-1] if existing else None
-        generated_at = (
-            datetime.fromisoformat(target["generated_at"].replace("Z", "+00:00")) if target else now
+        same_day = next(
+            (snapshot for snapshot in existing if snapshot["date"] == now.date().isoformat()), None
         )
-        since = (
-            datetime.fromisoformat(target["since"].replace("Z", "+00:00"))
-            if target
-            else item.published_at
-        )
-        health = [
-            SourceHealth(
-                source=str(entry["source"]),
-                ok=bool(entry.get("ok")),
-                item_count=int(entry.get("item_count") or 0),
-                error=entry.get("error"),
-                kind=str(entry.get("kind") or "evidence"),
-                method=str(entry.get("method") or ""),
-            )
-            for entry in (target or {}).get("ingest_health", [])
-        ]
-        producer_health = [
-            ProducerHealth(
-                producer=str(entry["producer"]),
-                source=str(entry["source"]),
-                ok=bool(entry.get("ok")),
-                item_count=int(entry.get("item_count") or 0),
-                error=entry.get("error"),
-            )
-            for entry in (target or {}).get("producer_health", [])
-        ]
+        prior_repair_ids = set((same_day or {}).get("selection", {}).get("repair_source_ids") or [])
         published, selection = _score_and_select(
             [item], config, now=now, fetched_count=1, suppressed_count=0
         )
@@ -741,19 +715,18 @@ def main() -> None:
                 "rejected it; add a matching taxonomy category or watchlist entry before retrying"
             )
         run = RadarRun(
-            generated_at=generated_at,
-            since=since,
+            generated_at=now,
+            since=min(item.published_at, now - timedelta(hours=48)),
             items=published,
-            health=health
-            or [SourceHealth(source=item.source, ok=True, item_count=1, method="exact API")],
-            producer_health=producer_health,
+            health=[SourceHealth(source=item.source, ok=True, item_count=1, method="exact API")],
+            producer_health=[],
             selection={
                 **selection,
                 "backfilled": True,
-                "repair_source_id": item.source_id,
+                "repair_source_ids": sorted({*prior_repair_ids, item.source_id}),
                 "repair_retrieved_at": now.isoformat(),
             },
-            discovery_state=(target or {}).get("discovery_state") or {},
+            discovery_state={},
         )
         path = write_snapshot(run, args.snapshot_dir)
         dashboard = rebuild_dashboard(

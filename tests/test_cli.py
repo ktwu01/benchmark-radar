@@ -152,6 +152,8 @@ def test_repair_source_writes_one_idempotent_backfill_and_preserves_dates(monkey
     snapshots = list((tmp_path / "snapshots").glob("*.json"))
     assert len(snapshots) == 1
     stored = json.loads(snapshots[0].read_text(encoding="utf-8"))
+    assert stored["date"] == datetime.now(UTC).date().isoformat()
+    assert stored["selection"]["repair_source_ids"] == ["2608.23564"]
     assert len(stored["evidence_items"]) == 1
     assert stored["selection"]["fetched"] == 1
     assert stored["selection"]["published"] == 1
