@@ -14,10 +14,10 @@ This public ledger is rebuilt from GitHub once per day. Do not edit the totals b
 
 | Contributor | Points | Collaborator seat |
 |---|---:|:---:|
+| @JunkaiWang-TheoPhy | 20 | yes |
 | @junjiezhou1122 | 19 | yes |
-| @JunkaiWang-TheoPhy | 8 | no |
+| @JiayuuWang | 12 | yes |
 | @app/dependabot | 6 | no |
-| @JiayuuWang | 6 | no |
 | @hzx-coder0 | 5 | no |
 | @Lareina1024 | 2 | no |
 | @yzliu03 | 1 | no |
@@ -27,9 +27,7 @@ This public ledger is rebuilt from GitHub once per day. Do not edit the totals b
 | Issue | Contributor | Deadline | Points |
 |---|---|---|---:|
 | [#533](https://github.com/ktwu01/benchmark-radar/issues/533) | @JunkaiWang-TheoPhy | 2026-09-11T01:53:54+00:00 | 8 |
-| [#492](https://github.com/ktwu01/benchmark-radar/issues/492) | @JiayuuWang | 2026-09-11T05:39:10+00:00 | 6 |
 | [#487](https://github.com/ktwu01/benchmark-radar/issues/487) | @JunkaiWang-TheoPhy | 2026-09-08T19:44:32+00:00 | 2 |
-| [#457](https://github.com/ktwu01/benchmark-radar/issues/457) | @JunkaiWang-TheoPhy | 2026-09-09T04:43:24+00:00 | 12 |
 | [#456](https://github.com/ktwu01/benchmark-radar/issues/456) | @JunkaiWang-TheoPhy | 2026-09-08T15:04:16+00:00 | 8 |
 | [#455](https://github.com/ktwu01/benchmark-radar/issues/455) | @JunkaiWang-TheoPhy | 2026-09-08T10:11:38+00:00 | 12 |
 | [#410](https://github.com/ktwu01/benchmark-radar/issues/410) | @JunkaiWang-TheoPhy | 2026-09-08T10:12:57+00:00 | 2 |
@@ -39,7 +37,9 @@ This public ledger is rebuilt from GitHub once per day. Do not edit the totals b
 
 | Work | Contributor | Points |
 |---|---|---:|
+| [Issue #492](https://github.com/ktwu01/benchmark-radar/issues/492) | @JiayuuWang | 6 |
 | [Issue #467](https://github.com/ktwu01/benchmark-radar/issues/467) | @JunkaiWang-TheoPhy | 6 |
+| [Issue #457](https://github.com/ktwu01/benchmark-radar/issues/457) | @JunkaiWang-TheoPhy | 12 |
 | [Issue #408](https://github.com/ktwu01/benchmark-radar/issues/408) | @JunkaiWang-TheoPhy | 2 |
 | [PR #472](https://github.com/ktwu01/benchmark-radar/pull/472) | @JiayuuWang | 3 |
 | [PR #463](https://github.com/ktwu01/benchmark-radar/pull/463) | @JiayuuWang | 3 |

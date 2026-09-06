@@ -40,13 +40,17 @@ social:
       仓库在 github.com/ktwu01/benchmark-radar，有空可以看看
 
     - [ ] Benchmark Radar：为 Agent 提供第一手消息
-      在做 agent benchmark，找 related works 的时候，我发现信息太多很难找全，做出来之后容易跟别人重合了。所以手搓了一个小工具，每天从37个来源收集数据，获得 benchmark 的第一手消息，目前已经9000条records。可以看网站的每天日报，也可以安装 CLI，让 agent 查找。仓库在 github.com/ktwu01/benchmark-radar 已经 140+ stars 
+      做agent benchmark 的时候，找 related work 渠道太多，很难找全，找不全的话，做了研究又容易被人截胡。
+      所以我们做了个一键生成 LaTeX 版本 related work 的 skill
+      最近从github / huggingface 等37个来源，收集到了10k+ benchmarks/eval records
+      欢迎试用和提意见 https://benchmark-radar.org/cli
+      P.S. repo 在 https://github.com/ktwu01/benchmark-radar，已经 160+ stars
 
     - [ ] B站：每天整理 Agent benchmark
 
       Agent benchmark 每天都能出好几篇。最近看得比较多，我就做了
       Daily Agent Benchmarks：每天整理 GitHub arXiv 等等37个来源的新发布的 Agent 评测，
-      已经有 9000+ 条数据，150+ stars 了，欢迎大家去看看，最近大家都在关注什么～
+      已经有 9000+ 条数据，160+ stars 了，欢迎大家去看看，最近大家都在关注什么～
 
     - [ ] Agent benchmark 还在测“能不能把事做完”
 
@@ -80,7 +84,7 @@ social:
     - [ ] 做 benchmark 前先查 related work
 
       做 Agent benchmark、找 related work 时，信息散在论文、仓库和榜单里，
-      很容易漏掉，做完才发现和别人撞了。Benchmark Radar 每天收集一手来源，
+      很容易漏掉，做完才发现被人截胡了。Benchmark Radar 每天收集一手来源，
       网页和 CLI 都能搜。先查相近工作，再决定自己的 benchmark 该补哪块空白。
 
       CLI 和数据：https://github.com/ktwu01/benchmark-radar
@@ -125,7 +129,7 @@ social:
       时间拉长到 30 天或 90 天后，stars 和下载量更能说明社区是否持续关注、
       是否真的在使用。页面也会说明缺失数据和不同时间窗口的处理方法。
 
-      #HOWTO #benchmark
+      #ai #benchmark
 
     - [ ] KOL 软推广：先问一个真问题
 

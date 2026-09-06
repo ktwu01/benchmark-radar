@@ -288,13 +288,13 @@ def _agent_section_flowables(story) -> list[object]:
     return story[start:end]
 
 
-def test_default_output_targets_next_draft():
+def test_next_draft_output_requires_the_explicit_flag():
     module = _load_module()
 
     args = module.build_parser().parse_args([])
 
-    assert args.output == Path("output/pdf/benchmark-radar-technical-report-next-draft.pdf")
-    assert args.output.name != "benchmark-radar-technical-report-v0.9.0.pdf"
+    assert args.output is None
+    assert args.next_draft is False
 
 
 def test_agent_weakness_reference_citation_range_tracks_generated_references(tmp_path, monkeypatch):
@@ -566,7 +566,7 @@ def test_partial_review_fixture_reports_pending_rows_in_summary_table(tmp_path, 
     monkeypatch.setattr(
         module, "load_agent_weakness_report_data", lambda source_path=study_path: report_data
     )
-    story = module.story("10.5281/zenodo.22167102")
+    story = module.story("10.5281/zenodo.22167102", draft=True)
     table_text = "\n".join(_collect_text(_agent_section_flowables(story)[0]))
 
     assert "2/2 agreement matches across 4 blinded sampled rows" in table_text
@@ -606,7 +606,7 @@ def test_pending_only_review_fixture_reports_no_completed_secondary_reviews(tmp_
     monkeypatch.setattr(
         module, "load_agent_weakness_report_data", lambda source_path=study_path: report_data
     )
-    story = module.story("10.5281/zenodo.22167102")
+    story = module.story("10.5281/zenodo.22167102", draft=True)
     table_text = "\n".join(_collect_text(_agent_section_flowables(story)[0]))
 
     assert "0/0" not in table_text
@@ -645,7 +645,7 @@ def test_no_sampled_review_fixture_reports_zero_pending_without_zero_fraction(
     monkeypatch.setattr(
         module, "load_agent_weakness_report_data", lambda source_path=study_path: report_data
     )
-    story = module.story("10.5281/zenodo.22167102")
+    story = module.story("10.5281/zenodo.22167102", draft=True)
     table_text = "\n".join(_collect_text(_agent_section_flowables(story)[0]))
 
     assert "0/0" not in table_text
@@ -658,7 +658,7 @@ def test_no_sampled_review_fixture_reports_zero_pending_without_zero_fraction(
 def test_story_places_agent_weakness_subsection_before_use_it_and_adds_primary_sources():
     module = _load_module()
 
-    story = module.story("10.5281/zenodo.22167102")
+    story = module.story("10.5281/zenodo.22167102", draft=True)
     texts = _collect_text(story)
 
     subsection_index = texts.index("6.5 Selected benchmark-family signal on agent weaknesses")
@@ -718,7 +718,7 @@ def test_agent_weakness_reference_entries_include_exact_evidence_anchors():
 def test_story_uses_frozen_core_data_statement_and_separates_current_issue_455_study():
     module = _load_module()
 
-    story = module.story("10.5281/zenodo.22167102")
+    story = module.story("10.5281/zenodo.22167102", draft=True)
     report_text = "\n".join(_collect_text(story))
 
     assert "frozen v0.9.0 audit" in report_text
@@ -732,7 +732,7 @@ def test_story_uses_frozen_core_data_statement_and_separates_current_issue_455_s
 def test_story_uses_stable_ci_wording_without_hardcoded_test_counts():
     module = _load_module()
 
-    story = module.story("10.5281/zenodo.22167102")
+    story = module.story("10.5281/zenodo.22167102", draft=True)
     report_text = "\n".join(_collect_text(story))
 
     assert "The current full CI suite passed." in report_text
