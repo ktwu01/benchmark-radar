@@ -28,6 +28,7 @@ _FIELD_ORDER = (
     "modality",
     "languages",
     "source",
+    "source_id",
 )
 _FIELD_WEIGHTS = {
     "name": 5.0,
@@ -37,6 +38,7 @@ _FIELD_WEIGHTS = {
     "modality": 1.2,
     "languages": 0.3,
     "source": 0.2,
+    "source_id": 1.0,
 }
 _BM25_K1 = 1.2
 _BM25_B = 0.75

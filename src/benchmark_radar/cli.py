@@ -19,7 +19,14 @@ from .http import RequestError
 from .kw_bench_store import STORE_FILENAME as KW_BENCH_STORE_FILENAME
 from .kw_bench_tracks import DEFAULT_BATCH_SIZE
 from .kw_bench_tracks import backfill as backfill_classifications
-from .pipeline import _failure_streak_key, run_pipeline, simulate_backfill
+from .models import RadarRun, SourceHealth
+from .pipeline import (
+    _drop_future_dated_items,
+    _failure_streak_key,
+    _score_and_select,
+    run_pipeline,
+    simulate_backfill,
+)
 from .query_cli import QUERY_COMMANDS, run_query_cli
 from .questions import QA_SCHEMA_VERSION, generate_daily_questions
 from .report import render_markdown
@@ -39,6 +46,7 @@ from .social import (
     render_social_section,
     summarize_repo_changes,
 )
+from .sources import fetch_arxiv_exact, fetch_doi_exact, fetch_github_exact, fetch_huggingface_exact
 
 DEFAULT_DASHBOARD_OUTPUT = Path("site/data/radar.json")
 DEFAULT_FEED_OUTPUT = Path("site/feed.xml")
@@ -103,6 +111,7 @@ def main() -> None:
             "migrate",
             "rescore",
             "simulate-history",
+            "repair-source",
             "export",
             "classify",
             "authors",
@@ -300,6 +309,8 @@ def main() -> None:
             "means fetching the source; this is how those are picked up."
         ),
     )
+    parser.add_argument("--source-type", choices=("arxiv", "github", "huggingface", "doi"))
+    parser.add_argument("--source-id", help="Exact stable source identifier for repair-source")
     args = parser.parse_args()
     feed_output = args.feed_output
     if feed_output is None and args.dashboard_output == DEFAULT_DASHBOARD_OUTPUT:
@@ -660,6 +671,75 @@ def main() -> None:
             f"({skipped} of {len(runs)} candidate days had no reachable records and were "
             "skipped rather than published empty; arXiv excluded from simulation, see issue "
             f"#35 known limitations); {dashboard['snapshot_count']} total daily snapshots"
+        )
+        return
+    if args.command == "repair-source":
+        if not args.source_type or not args.source_id:
+            parser.error("repair-source requires --source-type and --source-id")
+        if args.source_type == "arxiv":
+            item = fetch_arxiv_exact(args.source_id, config["sources"]["arxiv"])
+        elif args.source_type == "github":
+            item = fetch_github_exact(args.source_id)
+        elif args.source_type == "huggingface":
+            item = fetch_huggingface_exact(args.source_id)
+        else:
+            item = fetch_doi_exact(args.source_id)
+        now = datetime.now(UTC)
+        valid_items, rejected_future = _drop_future_dated_items([item], now=now)
+        if rejected_future:
+            parser.error(
+                f"repair-source rejected {item.source}:{item.source_id} because its source "
+                "published/updated date is in the future"
+            )
+        item = valid_items[0]
+        item.discovered_at = now
+        item.retrieved_at = now
+        existing = load_snapshots(args.snapshot_dir)
+        if any(
+            evidence.get("source") == item.source and evidence.get("source_id") == item.source_id
+            for snapshot in existing
+            for evidence in snapshot.get("evidence_items", [])
+        ):
+            print(f"Already repaired {item.source}:{item.source_id}; no snapshot written")
+            return
+        same_day = next(
+            (snapshot for snapshot in existing if snapshot["date"] == now.date().isoformat()), None
+        )
+        prior_repair_ids = set((same_day or {}).get("selection", {}).get("repair_source_ids") or [])
+        published, selection = _score_and_select(
+            [item], config, now=now, fetched_count=1, suppressed_count=0
+        )
+        if not published:
+            parser.error(
+                f"repair-source fetched {item.source}:{item.source_id}, but scoring "
+                "rejected it; add a matching taxonomy category or watchlist entry before retrying"
+            )
+        run = RadarRun(
+            generated_at=now,
+            since=min(item.published_at, now - timedelta(hours=48)),
+            items=published,
+            health=[SourceHealth(source=item.source, ok=True, item_count=1, method="exact API")],
+            producer_health=[],
+            selection={
+                **selection,
+                "backfilled": True,
+                "repair_source_ids": sorted({*prior_repair_ids, item.source_id}),
+                "repair_retrieved_at": now.isoformat(),
+            },
+            discovery_state={},
+        )
+        path = write_snapshot(run, args.snapshot_dir)
+        dashboard = rebuild_dashboard(
+            args.snapshot_dir,
+            args.dashboard_output,
+            feed_output=feed_output,
+            registry_path=args.model_cards,
+            scores_path=args.benchmark_scores,
+            kw_bench_store_path=args.kw_bench_store,
+        )
+        print(
+            f"Repaired {item.source}:{item.source_id} into {path}; "
+            f"rebuilt {dashboard['snapshot_count']} snapshots"
         )
         return
     if args.command == "rescore":

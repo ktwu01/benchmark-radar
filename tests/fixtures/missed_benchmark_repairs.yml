@@ -1,0 +1,19 @@
+schema_version: 1
+trust_layer: radar
+records:
+  - source: arXiv
+    source_id: "2608.23564"
+    expected_name: "SWE Refactor Bench: Can Coding Agents Complete a Long-Horizon, Whole-Repository Stack Migration?"
+    inclusion: included
+  - source: GitHub
+    source_id: aiming-lab/RSI-Exam
+    expected_name: aiming-lab/RSI-Exam
+    inclusion: included
+  - source: arXiv
+    source_id: "2506.18795"
+    expected_name: "FORGE: An LLM-driven Framework for Large-Scale Smart Contract Vulnerability Dataset Construction"
+    inclusion: included
+  - source: GitHub
+    source_id: shenyimings/FORGE-Artifacts
+    expected_name: shenyimings/FORGE-Artifacts
+    inclusion: included
