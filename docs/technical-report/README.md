@@ -117,31 +117,24 @@ integrated manuscript, supplied a contribution statement, and accepted
 accountability for the work, as described in
 `docs/designs/technical-report-collaboration-scoring.md` and issue #447.
 
-## Section 6.2 saturation audit
+## Historical score audit
 
-The appendix tables come from `saturation-audit-6.2.json`, generated from the
-curated score archive and the model-report registry with:
+`saturation-audit-6.2.json` records an analysis used by an earlier manuscript.
+Its arithmetic can be reproduced from the score archive and model-report
+registry with:
 
 ```bash
 python3 -m benchmark_radar.saturation_audit
 ```
 
-Regenerate that file and update the appendix tables together.
-
-### Independent reproduction
-
-On 2026-09-05, a Codex-assisted maintainer review regenerated the audit from the
-two canonical YAML files. It reproduced four counts: eight raw near-ceiling
-readings; no raw-best setup spanning two dates; four benchmarks with a different
-repeated setup; and one of those four within five points. The review also checked
-the HMMT sample against Table 7 of the
-[DeepSeek-V4 primary report](https://arxiv.org/html/2606.19348): HMMT 2026 Feb,
-Pass@1, Think Max is 94.8 for DeepSeek-V4-Flash and 95.2 for
-DeepSeek-V4-Pro. Those values match the `deepseek_v4_technical_report` and
-`deepseek_v4_model_card` rows in `data/benchmark_scores.yml`.
-
-The audit was regenerated again at v0.10.0 and the output was byte-identical, so
-the finding still holds at the current cutoff.
+The current paper removes the saturation appendix. Matching instrument/protocol
+labels and report dates does not establish identical experimental conditions or
+independent repeated evaluations. For example, the HMMT group combines Flash
+and Pro scores shown together in the
+[DeepSeek-V4 report](https://arxiv.org/html/2606.19348); that report also specifies
+a different math prompt for Pro-Max. The historical helper and artifact remain
+available for inspection, but reproducing their numbers does not validate a
+protocol-controlled saturation claim. They no longer supply tables to the paper.
 
 ## Audited inputs
 
