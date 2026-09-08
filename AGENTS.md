@@ -74,8 +74,11 @@ Applies to `README*`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `site/**`,
   signal. Avoid jargon-heavy summaries that only say what changed; explain why
   the change matters to someone reading, reviewing, or sharing the project.
 
-## Pull request merges
+## Branches and pull requests
 
+- Keep work on the task branch. Update local or remote `main`, or merge a pull
+  request, only when the user explicitly requests it. Creating or updating a PR
+  does not authorize a merge.
 - Do not squash-merge pull requests.
 - Merge pull requests with a merge commit so Git preserves branch ancestry and recognizes the branch as merged.
 
@@ -178,9 +181,12 @@ inputs retain their source spelling.
 
 The paper lives in `ktwu01/benchmark-radar-paper`, mounted as a Git submodule at
 `docs/technical-report/latex`. Initialize it with
-`git submodule update --init --recursive`, including in clean worktrees. Commit
-and push paper edits in that repository first, then commit the reviewed submodule
-pointer here. Overleaf sync changes the paper repository, not this pinned pointer.
+`git submodule update --init --recursive`, including in clean worktrees. Keep
+paper-only edits and PRs in the paper repository by default. Update the parent
+Benchmark Radar repository, including its submodule pointer, only when the user
+explicitly requests it. For a requested pointer update, push the reviewed paper
+commit first, then commit the pointer here. Overleaf sync changes the paper
+repository, not this pinned pointer.
 
 - Report source: `docs/technical-report/latex/main.tex`. This is the single
   source of truth for the report. Edit it directly. Nothing generates it from

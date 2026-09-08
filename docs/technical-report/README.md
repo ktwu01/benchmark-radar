@@ -47,5 +47,7 @@ CSV and JSON provide all records and their available measurements.
 Verify the exported hashes against the paper README and preserve the release
 cutoff. For manuscript edits, rebuild and inspect the figures and manuscript using the
 [paper's build instructions](https://github.com/ktwu01/benchmark-radar-paper#build-locally).
-Commit and push the reviewed changes in the paper repository first, then commit
-the updated `docs/technical-report/latex` submodule pointer in Benchmark Radar.
+Commit and push the reviewed changes in the paper repository. Keep paper-only
+work there by default. Update Benchmark Radar's `docs/technical-report/latex`
+submodule pointer only when the user explicitly requests it, after pushing the
+reviewed paper commit.
