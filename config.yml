@@ -290,6 +290,53 @@ sources:
     attempts: 3
     timeout_seconds: 30
 
+  # OpenAIRE aggregates research products from repositories across Europe and
+  # beyond, including institutional repositories this project reaches through
+  # no other source (issue #545). This is the Graph API v3, the version that
+  # superseded v1 and v2 in July 2026; the older `/search/*` API was announced
+  # for phase-out on 2026-05-31.
+  #
+  # Authentication: none required. An anonymous caller is limited to 60
+  # requests per hour on a sliding window, against 7,200 for a registered
+  # token; one request per search phrase keeps a daily run inside the
+  # anonymous budget with room to spare. Wiring a token is a maintainer
+  # decision and needs no code change here beyond a header.
+  #
+  # Product types: one query returns all four kinds of research product
+  # (publication, dataset, software, other); each record carries its own
+  # `type`, and none are filtered out here.
+  #
+  # Date semantics: the window is `publicationDate`, used to bound the query
+  # and to date the record, so a simulated backfill places a product on the
+  # day a live run would have found it. `dateOfCollection` records when
+  # OpenAIRE indexed a product rather than when it appeared, and the endpoint
+  # offers no range filter for it. Pagination is `page`/`pageSize` with
+  # `pageSize` capped at 100 and rejected above it, plus a `cursor` for pulls
+  # deeper than the 10,000-result page-mode ceiling. This connector reads one
+  # page per search phrase to keep the request budget fixed, so a phrase whose
+  # window holds more than `page_size` titles is truncated to the newest of
+  # them; widen `page_size` toward 100 before adding phrases.
+  #
+  # A value holding spaces, parentheses or a logical operator must reach the
+  # API double-quoted or v3 answers 400, so a multi-word phrase below is sent
+  # as a quoted phrase and matches titles containing it. Records duplicate the
+  # Crossref and arXiv copies of the same artifact on purpose: the DOI travels
+  # with the record, so dedupe merges them rather than counting the artifact twice.
+  openaire:
+    enabled: true
+    required: false
+    searches:
+      - LLM benchmark
+      - language model evaluation
+      - agent benchmark
+      - evaluation dataset
+      - benchmark dataset
+      - data contamination
+    page_size: 50
+    max_requests: 6
+    attempts: 3
+    timeout_seconds: 30
+
   openreview:
     enabled: true
     venues:

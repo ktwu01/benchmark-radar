@@ -17,7 +17,7 @@
   <a href="https://scholar.google.com/citations?user=s9w1k-cAAAAJ&amp;hl=en"><img alt="Google Scholar" src="https://img.shields.io/badge/Google%20Scholar-4285F4?style=for-the-badge&amp;logo=googlescholar&amp;logoColor=white"></a>
 </p>
 
-做 benchmark 研究的时候发现新东西太多了，所以我搞了这个持续爬虫，每天自动从全网抓新的 benchmark 相关信息。它目前每天从 37 个公开来源采集，并持续更新。你如果需要寻找 related work 或找到适合eval自己的agent 的 bench 或者关注最新的 eval 进展，可以看这里哈哈哈：
+做 benchmark 研究的时候发现新东西太多了，所以我搞了这个持续爬虫，每天自动从全网抓新的 benchmark 相关信息。它目前每天从 38 个公开来源采集，并持续更新。你如果需要寻找 related work 或找到适合eval自己的agent 的 bench 或者关注最新的 eval 进展，可以看这里哈哈哈：
 github.com/ktwu01/benchmark-radar，每天更新，并支持一键导出数据
 
 **几秒找到一个 benchmark，再看模型成绩如何随时间变化。点击下面的动图，查看
@@ -127,7 +127,7 @@ benchmark 论文、代码仓库、数据集和 release 的每日发现，和一�
 目录、模型卡与技术报告中的引用、以及分数变化历史放在一起。每条记录都保留自己的
 来源标识和引用，方便你核对一个 benchmark 和它背后的评测证据。
 
-每日发现覆盖 37 个来源：13 个直接 connector 和 24 个机构自有的研究与工程 feed。
+每日发现覆盖 38 个来源：14 个直接 connector 和 24 个机构自有的研究与工程 feed。
 目录汇集了来自 4 个 benchmark 目录的记录，并为其中有分数的记录保留数值观测。项目
 提供 web dashboard，包含 benchmark 排行榜、分数与实际使用量的 Pareto 前沿视图、
 saturation 和趋势视图、每日 feed、可下载的证据数据，以及一个可离线查询的命令行
@@ -151,7 +151,7 @@ saturation 和趋势视图、每日 feed、可下载的证据数据，以及一�
 
 每日信息流基于以下公开来源：[arXiv](https://arxiv.org)、[GitHub Search](https://github.com/search)、[GitHub organizations](https://github.com)、[GitHub Releases](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases)、[Hugging Face datasets and Spaces](https://huggingface.co)、[Hugging Face Papers](https://huggingface.co/papers)、[OpenAlex](https://openalex.org)、[OpenReview](https://openreview.net)、[Kaggle datasets](https://www.kaggle.com/datasets)、[Zenodo](https://zenodo.org)、[Semantic Scholar](https://www.semanticscholar.org)、[Brave Search](https://search.brave.com)、[Hacker News](https://news.ycombinator.com)，以及各家 first-party lab feed：[OpenAI](https://openai.com/news)、[Google AI](https://blog.google/technology/ai/)、[Google DeepMind](https://deepmind.google/blog/)、[Google Research](https://research.google/blog/)、[Meta Research](https://research.facebook.com)、[Microsoft Research](https://www.microsoft.com/en-us/research/)、[AWS Machine Learning](https://aws.amazon.com/blogs/machine-learning/)、[Apple Machine Learning Research](https://machinelearning.apple.com)、[NVIDIA AI Blog](https://blogs.nvidia.com)、[NVIDIA Developer](https://developer.nvidia.com/blog/)、[Hugging Face Blog](https://huggingface.co/blog)、[Ai2](https://allenai.org)、[Mistral AI](https://mistral.ai/news)、[Together AI](https://www.together.ai/blog)、[Sakana AI](https://sakana.ai)、[Qwen](https://qwenlm.github.io/blog/)、[Ollama](https://ollama.com/blog)、[Stability AI](https://stability.ai)、[Nomic AI](https://www.nomic.ai)、[Replicate](https://replicate.com/blog)、[IBM Research](https://research.ibm.com)、[Databricks](https://www.databricks.com)、[LangChain](https://www.langchain.com/blog)、[Meituan Engineering](https://tech.meituan.com)。
 
-每日信息流也接入了 [Crossref](https://www.crossref.org) 的公开 DOI 元数据。
+每日信息流也接入了 [Crossref](https://www.crossref.org) 的公开 DOI 元数据，以及 [OpenAIRE](https://www.openaire.eu) 汇聚的公开研究成果记录。
 
 前沿模型分数综合了三类来源。上方的 SWE-bench Verified 时间线来自各家实验室的模型报告和 system card；其余的模型分数几乎都来自 [Artificial Analysis](https://artificialanalysis.ai) 和 [LLM Stats](https://llm-stats.com)，每条分数都保留了原始来源引用。感谢两家把数据公开出来。更大范围的 benchmark 目录还有第四类来源 [OpenCompass Hub](https://hub.opencompass.org.cn)。
 
