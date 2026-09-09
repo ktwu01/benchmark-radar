@@ -243,5 +243,18 @@ def test_readmes_state_the_live_ingest_source_count() -> None:
     connectors, feeds = count_ingest_sources(Path.cwd())
     total = connectors + feeds
 
-    assert f"from {total} public sources every day" in README.read_text(encoding="utf-8")
-    assert f"每天从 {total} 个公开来源采集" in README_ZH.read_text(encoding="utf-8")
+    english = README.read_text(encoding="utf-8")
+    chinese = README_ZH.read_text(encoding="utf-8")
+
+    assert f"from {total} public sources every day" in english
+    assert f"每天从 {total} 个公开来源采集" in chinese
+    # Each README states the figure twice: once in the opening line and again
+    # in the Abstract, which also splits it into connectors and feeds. Holding
+    # only the first one let a connector PR update the headline and leave the
+    # Abstract saying 37, so both READMEs contradicted themselves in the same
+    # file while this test stayed green.
+    assert (
+        f"draws on {total} sources: {connectors} direct connectors and {feeds} first-party"
+        in english
+    )
+    assert f"覆盖 {total} 个来源：{connectors} 个直接 connector 和 {feeds} 个机构自有的" in chinese

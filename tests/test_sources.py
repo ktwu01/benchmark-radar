@@ -15,6 +15,7 @@ from benchmark_radar.sources import (
     fetch_arxiv,
     fetch_brave,
     fetch_crossref,
+    fetch_datacite,
     fetch_first_party_feeds,
     fetch_github,
     fetch_github_organizations,
@@ -934,6 +935,516 @@ def test_crossref_skips_dates_without_day_precision(monkeypatch):
     )
 
 
+def _datacite_row(doi="10.5281/ZENODO.99001", **attributes):
+    """One findable DataCite DOI in the JSON:API shape `/dois` returns."""
+    row = {
+        "id": doi.casefold(),
+        "type": "dois",
+        "attributes": {
+            "doi": doi,
+            "titles": [
+                {"title": "Radar Subtitle", "titleType": "Subtitle"},
+                {"title": "A Deposited Benchmark Dataset"},
+            ],
+            "descriptions": [
+                {"description": "Files are CSV.", "descriptionType": "TechnicalInfo"},
+                {"description": "<p>The upstream abstract.</p>", "descriptionType": "Abstract"},
+            ],
+            "creators": [
+                {
+                    "name": "Evidence, Grace",
+                    "nameType": "Personal",
+                    "givenName": "Grace",
+                    "familyName": "Evidence",
+                    "affiliation": ["Radar Lab"],
+                },
+                {"name": "Radar Lab, Inc.", "nameType": "Organizational", "affiliation": []},
+            ],
+            "publisher": "Zenodo",
+            "publicationYear": 2026,
+            "types": {"resourceTypeGeneral": "Dataset"},
+            "url": "https://zenodo.org/records/99001",
+            "state": "findable",
+            "citationCount": 3,
+            "viewCount": 21,
+            "downloadCount": 13,
+            "created": "2026-07-27T08:00:00.000Z",
+            "registered": "2026-07-27T09:00:00.000Z",
+            "published": "2026",
+            "updated": "2026-07-27T09:00:05.000Z",
+        },
+    }
+    row["attributes"].update(attributes)
+    return row
+
+
+def _datacite_payload(**attributes):
+    return _datacite_rows_payload(_datacite_row(**attributes))
+
+
+def _datacite_rows_payload(*rows):
+    return {
+        "data": list(rows),
+        "meta": {"total": len(rows)},
+        "links": {"self": "https://api.datacite.org/dois"},
+    }
+
+
+def test_datacite_preserves_doi_metadata_and_bounds_the_query(monkeypatch):
+    calls = []
+
+    def fake_get_json(url, **kwargs):
+        calls.append((url, kwargs))
+        return _datacite_payload()
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+    items = fetch_datacite(
+        {
+            "searches": ["agent benchmark"],
+            "max_requests": 1,
+            "_collection_now": datetime(2026, 7, 28, tzinfo=UTC),
+        },
+        datetime(2026, 7, 26, 12, tzinfo=UTC),
+        10,
+    )
+
+    assert [item.source_id for item in items] == ["10.5281/zenodo.99001"]
+    item = items[0]
+    assert item.source == "DataCite"
+    assert item.url == "https://doi.org/10.5281/zenodo.99001"
+    # The untyped title wins over the subtitle listed before it, and the typed
+    # abstract wins over the technical note.
+    assert item.title == "A Deposited Benchmark Dataset"
+    assert item.summary == "The upstream abstract."
+    assert item.authors == ["Grace Evidence", "Radar Lab, Inc."]
+    assert item.organizations == ["Radar Lab"]
+    assert item.artifact_urls == [
+        "https://doi.org/10.5281/zenodo.99001",
+        "https://zenodo.org/records/99001",
+    ]
+    assert item.metrics == {"citations": 3.0, "downloads": 13.0, "views": 21.0}
+    assert item.published_at == datetime(2026, 7, 27, 9, tzinfo=UTC)
+    # Both timestamps are the registration instant even though the row carries
+    # a later `updated`. Recency scoring and simulated backfill read
+    # `updated_at`, so a metadata edit keyed there would restate when the DOI
+    # was released. The deposited value is still readable in `raw`.
+    assert item.updated_at == datetime(2026, 7, 27, 9, tzinfo=UTC)
+    assert item.raw["attributes"]["updated"] == "2026-07-27T09:00:05.000Z"
+    assert item.event_kind == "released"
+    assert item.parser_version == "datacite-dois/1"
+    assert calls[0][0] == "https://api.datacite.org/dois"
+    params = calls[0][1]["params"]
+    # Both ends of the window travel with the query, second-precise and in UTC.
+    assert params["query"] == (
+        "titles.title:(agent AND benchmark) AND "
+        "registered:[2026-07-26T12:00:00Z TO 2026-07-28T00:05:00Z]"
+    )
+    assert params["sort"] == "-created"
+    assert params["page[size]"] == 10
+
+
+def test_datacite_skips_records_without_a_registered_timestamp(monkeypatch):
+    # `published` is often a bare year and `created` can predate registration
+    # by a long draft period, so neither stands in for a missing `registered`.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _datacite_payload(registered=None),
+    )
+
+    assert fetch_datacite({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10) == []
+
+
+def test_datacite_enforces_the_window_on_the_parsed_record(monkeypatch):
+    # The server-side range is a request, not a guarantee. A row registered
+    # before `since` that the API returns anyway must not enter the feed.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _datacite_payload(registered="2026-07-25T09:00:00.000Z"),
+    )
+
+    assert fetch_datacite({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10) == []
+
+
+def test_datacite_rejects_future_dated_records_and_counts_them(monkeypatch):
+    # A `registered` past the collection instant means an upstream clock the
+    # record cannot be dated against. Counting the rejection matters as much as
+    # dropping it: run_pipeline adds `_future_rejections` back into the fetched
+    # total, so a silent drop makes the day's funnel stop adding up.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _datacite_payload(
+            registered="2026-07-29T09:00:00.000Z", updated="2026-07-29T09:00:05.000Z"
+        ),
+    )
+    config = {"searches": ["benchmark"], "_collection_now": datetime(2026, 7, 28, tzinfo=UTC)}
+
+    assert fetch_datacite(config, datetime(2026, 7, 26, tzinfo=UTC), 10) == []
+    assert config["_future_rejections"] == 1
+
+
+def test_datacite_keeps_a_doi_edited_after_the_collection_instant(monkeypatch):
+    # `updated` moves on every metadata edit and never dates the record, so a
+    # DOI registered inside the requested window and edited afterwards belongs
+    # on its registration day. This is the simulated-backfill case: the fetch is
+    # bounded to the end of the span being rebuilt, and checking the mutable
+    # timestamp against that bound would silently drop every DOI whose metadata
+    # has been touched since.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _datacite_payload(
+            registered="2026-07-27T09:00:00.000Z", updated="2026-07-29T09:00:00.000Z"
+        ),
+    )
+    config = {"searches": ["benchmark"], "_collection_now": datetime(2026, 7, 28, tzinfo=UTC)}
+
+    items = fetch_datacite(config, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert [item.updated_at for item in items] == [datetime(2026, 7, 27, 9, tzinfo=UTC)]
+    assert "_future_rejections" not in config
+
+
+def test_datacite_skips_dois_that_do_not_resolve_yet(monkeypatch):
+    # Anonymous reads only return findable DOIs; a credentialed run would also
+    # see drafts, which have no resolvable DOI to publish.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _datacite_payload(state="draft"),
+    )
+
+    assert fetch_datacite({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10) == []
+
+
+def test_datacite_reads_names_and_affiliations_in_every_upstream_shape(monkeypatch):
+    # Only an explicitly personal name is reordered out of "Family, Given".
+    # `nameType` is optional in the DataCite schema and absent from older
+    # deposits, so treating a missing one as personal would publish
+    # "Berkeley University of California" as an author. Affiliations arrive as
+    # strings by default and as objects when `affiliation=true` is requested.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _datacite_payload(
+            creators=[
+                {
+                    "name": "Evidence, Grace",
+                    "nameType": "Personal",
+                    "affiliation": [{"name": "Radar Lab"}],
+                },
+                {"name": "University of California, Berkeley"},
+                {"name": "Radar Lab, Inc.", "nameType": "Organizational"},
+                {"name": "Mononym", "affiliation": ["Radar Lab", "  "]},
+            ],
+            updated="2026-07-27T08:59:00.000Z",
+        ),
+    )
+
+    items = fetch_datacite({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert items[0].authors == [
+        "Grace Evidence",
+        "University of California, Berkeley",
+        "Radar Lab, Inc.",
+        "Mononym",
+    ]
+    assert items[0].organizations == ["Radar Lab"]
+    # Activity is the registration instant whichever side `updated` falls on.
+    assert items[0].updated_at == datetime(2026, 7, 27, 9, tzinfo=UTC)
+
+
+def test_datacite_skips_rows_that_carry_no_title(monkeypatch):
+    # A connector that let an untitled row through once aborted an entire
+    # daily collection, losing every other source's evidence with it. DataCite
+    # returns `titles` as a plain array, so an incomplete deposit can send an
+    # empty list or a blank string where the record's name should be.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _datacite_rows_payload(
+            _datacite_row(doi="10.5281/ZENODO.1", titles=[]),
+            _datacite_row(doi="10.5281/ZENODO.2", titles=[{"title": "   "}]),
+            _datacite_row(doi="10.5281/ZENODO.3", titles=[{"title": None}]),
+            _datacite_row(doi="10.5281/ZENODO.4"),
+        ),
+    )
+
+    items = fetch_datacite({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert [item.source_id for item in items] == ["10.5281/zenodo.4"]
+
+
+def test_datacite_uses_a_typed_title_when_no_untyped_one_is_deposited(monkeypatch):
+    # Preferring an untyped entry must not discard the only name a record has.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _datacite_payload(
+            titles=[{"title": "Only A Subtitle", "titleType": "Subtitle"}]
+        ),
+    )
+
+    items = fetch_datacite({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert [item.title for item in items] == ["Only A Subtitle"]
+
+
+@pytest.mark.parametrize(
+    ("attributes", "message"),
+    [
+        ({"titles": "wrong"}, "titles"),
+        ({"titles": ["a bare string"]}, "titles"),
+        ({"descriptions": {"description": "not an array"}}, "descriptions"),
+        ({"creators": [7]}, "creators"),
+        ({"creators": [{"name": "Evidence, Grace", "affiliation": "Radar Lab"}]}, "affiliation"),
+        ({"creators": [{"name": "Evidence, Grace", "affiliation": [7]}]}, "affiliation"),
+    ],
+)
+def test_datacite_rejects_a_malformed_row_shape(monkeypatch, attributes, message):
+    # These raise rather than skip, so one malformed row marks the whole source
+    # failed for the day. That is deliberate: a shape this connector cannot
+    # read is a parsing gap the dashboard must show, not a quietly thinner
+    # author list that reads exactly like a deposit with no authors.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _datacite_payload(**attributes),
+    )
+
+    with pytest.raises(ConnectorPayloadError, match=message):
+        fetch_datacite({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+
+def test_datacite_rejects_a_row_whose_attributes_are_not_an_object(monkeypatch):
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: {"data": [{"id": "10.5281/zenodo.1", "attributes": "wrong"}]},
+    )
+
+    with pytest.raises(ConnectorPayloadError, match="attributes"):
+        fetch_datacite({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+
+def test_datacite_merges_one_doi_across_searches_and_returns_the_newest(monkeypatch):
+    # The shipped searches overlap, so the same DOI arrives from several of
+    # them, in either case, and each search is billed the full page. Keying on
+    # the casefolded DOI is what keeps one deposit from being published twice
+    # under two spellings, and the limit is applied after that merge rather
+    # than per request.
+    responses = {
+        "first": _datacite_rows_payload(
+            _datacite_row(doi="10.5281/ZENODO.1", registered="2026-07-27T09:00:00.000Z"),
+            _datacite_row(doi="10.5281/ZENODO.2", registered="2026-07-27T11:00:00.000Z"),
+        ),
+        "second": _datacite_rows_payload(
+            _datacite_row(doi="10.5281/zenodo.1", registered="2026-07-27T09:00:00.000Z"),
+        ),
+    }
+    calls = []
+
+    def fake_get_json(url, **kwargs):
+        calls.append(kwargs["params"])
+        return responses["first" if len(calls) == 1 else "second"]
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+    items = fetch_datacite(
+        {"searches": ["first search", "second search"], "max_requests": 2},
+        datetime(2026, 7, 26, tzinfo=UTC),
+        2,
+    )
+
+    # Two searches, three rows, two distinct DOIs, newest registration first.
+    assert [item.source_id for item in items] == ["10.5281/zenodo.2", "10.5281/zenodo.1"]
+    assert len(calls) == 2
+    assert [params["page[size]"] for params in calls] == [2, 2]
+
+
+def test_datacite_truncates_to_the_per_source_limit(monkeypatch):
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _datacite_rows_payload(
+            _datacite_row(doi="10.5281/ZENODO.1", registered="2026-07-27T09:00:00.000Z"),
+            _datacite_row(doi="10.5281/ZENODO.2", registered="2026-07-27T11:00:00.000Z"),
+        ),
+    )
+
+    items = fetch_datacite({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 1)
+
+    assert [item.source_id for item in items] == ["10.5281/zenodo.2"]
+
+
+def test_datacite_preserves_a_deposit_that_carries_almost_nothing(monkeypatch):
+    # A DOI, a title and a registration date are all DataCite requires. An
+    # absent public counter is a real zero rather than a missing metric, and a
+    # deposit whose landing page is its own DOI must not list that URL twice.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _datacite_rows_payload(
+            {
+                "id": "10.5281/zenodo.1",
+                "attributes": {
+                    "doi": "10.5281/ZENODO.1",
+                    "titles": [{"title": "A Sparse Deposit"}],
+                    "registered": "2026-07-27T09:00:00.000Z",
+                    "url": "https://doi.org/10.5281/zenodo.1",
+                },
+            }
+        ),
+    )
+
+    items = fetch_datacite({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    item = items[0]
+    assert item.artifact_urls == ["https://doi.org/10.5281/zenodo.1"]
+    assert item.metrics == {"citations": 0.0, "downloads": 0.0, "views": 0.0}
+    assert item.authors == []
+    assert item.organizations == []
+    assert item.summary == ""
+
+
+def test_datacite_search_phrase_cannot_restructure_the_query(monkeypatch):
+    # The phrase is interpolated into a query_string clause. An unescaped colon
+    # would read as a field lookup, and DataCite's mapping is not dynamic, so
+    # the request would return zero rows while source health still called the
+    # source healthy -- an empty day indistinguishable from a real one.
+    calls = []
+
+    def fake_get_json(url, **kwargs):
+        calls.append(kwargs["params"])
+        return {"data": []}
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+    fetch_datacite(
+        {
+            "searches": ["Benchmark: agents (2026)"],
+            "_collection_now": datetime(2026, 7, 28, tzinfo=UTC),
+        },
+        datetime(2026, 7, 26, 12, tzinfo=UTC),
+        10,
+    )
+
+    assert calls[0]["query"] == (
+        "titles.title:(Benchmark\\: AND agents AND \\(2026\\)) AND "
+        "registered:[2026-07-26T12:00:00Z TO 2026-07-28T00:05:00Z]"
+    )
+
+
+def test_datacite_requires_every_term_of_a_search_phrase(monkeypatch):
+    # DataCite hands `query` to a query_string parser whose default operator is
+    # OR, so a bare "LLM benchmark" matched a title carrying only "benchmark"
+    # and admitted geodesy and toxicology deposits that this project's broad
+    # benchmark taxonomy then published. The config block documents an
+    # all-terms rule; the query has to state it.
+    calls: list[dict] = []
+
+    def fake_get_json(url, **kwargs):
+        calls.append(kwargs["params"])
+        return {"data": []}
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+    fetch_datacite(
+        {
+            "searches": ["LLM benchmark"],
+            "_collection_now": datetime(2026, 7, 28, tzinfo=UTC),
+        },
+        datetime(2026, 7, 26, 12, tzinfo=UTC),
+        10,
+    )
+
+    assert calls[0]["query"].startswith("titles.title:(LLM AND benchmark) AND ")
+    assert " OR " not in calls[0]["query"]
+
+
+@pytest.mark.parametrize("field", ["titles", "creators", "descriptions"])
+@pytest.mark.parametrize("malformed", [{}, "", 0])
+def test_datacite_falsey_malformed_arrays_are_reported_not_swallowed(monkeypatch, field, malformed):
+    # `attributes.get(field) or []` looked like a missing-key default and was
+    # not: a present but unreadable `{}`, `""` or `0` passed as an empty list,
+    # so the row was silently dropped or published without its authors while
+    # source health still called the source healthy.
+    attributes = {
+        "doi": "10.5281/zenodo.1",
+        "state": "findable",
+        "registered": "2026-07-27T09:00:00.000Z",
+        "titles": [{"title": "Agent benchmark"}],
+        "creators": [{"name": "Lovelace, Ada", "nameType": "Personal"}],
+        "descriptions": [{"description": "An abstract.", "descriptionType": "Abstract"}],
+    }
+    attributes[field] = malformed
+
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: {"data": [{"id": "10.5281/zenodo.1", "attributes": attributes}]},
+    )
+    with pytest.raises(ConnectorPayloadError):
+        fetch_datacite(
+            {
+                "searches": ["agent benchmark"],
+                "_collection_now": datetime(2026, 7, 28, tzinfo=UTC),
+            },
+            datetime(2026, 7, 26, 12, tzinfo=UTC),
+            10,
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "row"),
+    [
+        ("titles", {"title": {"nested": "object"}}),
+        ("titles", {"title": ["a", "list"]}),
+        ("descriptions", {"description": {"nested": "object"}}),
+    ],
+)
+def test_datacite_non_string_text_is_reported_not_published_as_a_repr(monkeypatch, field, row):
+    # A malformed title or description used to be stringified, so a reader saw
+    # a Python repr as upstream text with no way back to the deposit.
+    attributes = {
+        "doi": "10.5281/zenodo.1",
+        "state": "findable",
+        "registered": "2026-07-27T09:00:00.000Z",
+        "titles": [{"title": "Agent benchmark"}],
+        "descriptions": [{"description": "An abstract.", "descriptionType": "Abstract"}],
+    }
+    attributes[field] = [row]
+
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: {"data": [{"id": "10.5281/zenodo.1", "attributes": attributes}]},
+    )
+    with pytest.raises(ConnectorPayloadError):
+        fetch_datacite(
+            {
+                "searches": ["agent benchmark"],
+                "_collection_now": datetime(2026, 7, 28, tzinfo=UTC),
+            },
+            datetime(2026, 7, 26, 12, tzinfo=UTC),
+            10,
+        )
+
+
+def test_datacite_absent_and_null_arrays_are_an_ordinary_empty_result(monkeypatch):
+    # Absent and null are the two ways DataCite says "nothing here", and a
+    # deposit with no creators is ordinary rather than broken.
+    attributes = {
+        "doi": "10.5281/zenodo.1",
+        "state": "findable",
+        "registered": "2026-07-27T09:00:00.000Z",
+        "titles": [{"title": "Agent benchmark"}],
+        "creators": None,
+    }
+
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: {"data": [{"id": "10.5281/zenodo.1", "attributes": attributes}]},
+    )
+    items = fetch_datacite(
+        {
+            "searches": ["agent benchmark"],
+            "_collection_now": datetime(2026, 7, 28, tzinfo=UTC),
+        },
+        datetime(2026, 7, 26, 12, tzinfo=UTC),
+        10,
+    )
+
+    assert len(items) == 1
+    assert items[0].authors == []
+    assert items[0].summary == ""
+
+
 def test_openreview_success_uses_only_upstream_abstract(monkeypatch):
     timestamp = int(datetime(2026, 7, 27, 12, tzinfo=UTC).timestamp() * 1000)
 
@@ -1366,6 +1877,7 @@ def test_release_replacement_budget_preserves_later_repository_coverage(monkeypa
         (fetch_semantic_scholar, {"searches": ["benchmark"]}, {"data": []}),
         (fetch_github_releases, {"repositories": ["example/benchmark"]}, []),
         (fetch_crossref, {"searches": ["benchmark"]}, {"message": {"items": []}}),
+        (fetch_datacite, {"searches": ["benchmark"]}, {"data": []}),
     ],
 )
 def test_new_connectors_accept_empty_upstream_results(monkeypatch, fetcher, config, empty_payload):
@@ -1395,6 +1907,7 @@ def test_new_connectors_accept_empty_upstream_results(monkeypatch, fetcher, conf
         (fetch_semantic_scholar, {"searches": ["benchmark"]}, {"data": "wrong"}),
         (fetch_github_releases, {"repositories": ["example/benchmark"]}, {}),
         (fetch_crossref, {"searches": ["benchmark"]}, {"message": {}}),
+        (fetch_datacite, {"searches": ["benchmark"]}, {"data": "wrong"}),
     ],
 )
 def test_new_connectors_reject_malformed_payloads(monkeypatch, fetcher, config, malformed_payload):
@@ -1429,6 +1942,7 @@ def test_new_connectors_reject_malformed_payloads(monkeypatch, fetcher, config, 
         (fetch_semantic_scholar, {"searches": ["benchmark"]}),
         (fetch_github_releases, {"repositories": ["example/benchmark"]}),
         (fetch_crossref, {"searches": ["benchmark"]}),
+        (fetch_datacite, {"searches": ["benchmark"]}),
     ],
 )
 def test_new_connectors_surface_http_failures(monkeypatch, fetcher, config):
@@ -1511,6 +2025,22 @@ def test_new_connectors_surface_http_failures(monkeypatch, fetcher, config):
                         }
                     ]
                 }
+            },
+        ),
+        (
+            fetch_datacite,
+            {"searches": ["benchmark"]},
+            {
+                "data": [
+                    {
+                        "id": "10.1000/no-abstract",
+                        "attributes": {
+                            "doi": "10.1000/no-abstract",
+                            "titles": [{"title": "No abstract"}],
+                            "registered": "2026-07-27T12:00:00Z",
+                        },
+                    }
+                ]
             },
         ),
     ],
@@ -1928,3 +2458,4 @@ def test_collection_method_falls_back_to_a_static_default_without_items():
     # leaves nothing to inspect; fall back to the connector's usual method.
     assert collection_method("arxiv", []) == "RSS"
     assert collection_method("brave", []) == "API"
+    assert collection_method("datacite", []) == "API"
