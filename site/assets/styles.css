@@ -3947,6 +3947,23 @@ dialog::backdrop {
   margin: 1.5rem 0;
 }
 
+/* The source credit closes the citation card, so it is deliberately quiet: a
+   footnote under the formats a reader came for, not a section competing with
+   them. LLM Stats asks for credit visible to readers with a link back, and a
+   line nobody can find would not honor that, so it stays legible while staying
+   small. */
+.cite-credit {
+  margin: 1.6rem 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.cite-credit a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 .copy-label {
   margin: 0 0 0.5rem;
   color: var(--muted);

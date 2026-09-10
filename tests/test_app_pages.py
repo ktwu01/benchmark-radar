@@ -22,6 +22,7 @@ from benchmark_radar.app_pages import (
     render_app_page,
     write_app_pages,
 )
+from benchmark_radar.app_seeds import SCORE_SOURCE_LINKS
 from benchmark_radar.feed import SITE_URL
 from benchmark_radar.site_shell import esc
 
@@ -376,6 +377,42 @@ def test_seeded_copy_controls_have_names_values_and_fallback_hints(tmp_path):
             assert 'aria-label="' in attributes
             assert '<code class="copy-text">' in content
             assert '<span class="copy-status">' in content
+
+
+def test_cite_page_credits_its_score_sources_with_links(tmp_path):
+    """LLM Stats grants reuse on one condition: credit visible to readers with
+    a link back. The README is not where readers are; the citation card is. If
+    this assertion ever fails, the site is out of compliance, not just untidy.
+    """
+    _write(tmp_path, _dashboard())
+    page = (tmp_path / "cite" / "index.html").read_text(encoding="utf-8")
+    for name, url in SCORE_SOURCE_LINKS:
+        assert f'href="{url}"' in page, f"{name} lost its link back"
+        assert f">{name}</a>" in page
+    # Lab model reports are publications, not a site, so they are named without
+    # a link -- but they must still be named, because they supply scores too.
+    assert "lab model reports" in page
+
+
+def test_cite_credit_is_the_same_sentence_in_both_renderers():
+    """The seed is what a crawler and a script-disabled reader get; app.js
+    overwrites it on first paint. A credit in only one of them is a credit that
+    half the readers never see, so the source list has to match exactly.
+    """
+    script = (SITE / "assets" / "app.js").read_text(encoding="utf-8")
+    for name, url in SCORE_SOURCE_LINKS:
+        assert f'["{name}", "{url}"]' in script, f"app.js and the seed disagree on {name}"
+    assert "citeCredit()" in script
+    assert 'className: "cite-credit"' in script
+
+
+def test_cite_credit_strings_are_translated():
+    """Nothing else catches an untranslated t() key: it falls back to English
+    silently, so the zh reader sees a stray English sentence.
+    """
+    script = (SITE / "assets" / "app.js").read_text(encoding="utf-8")
+    assert '"Benchmark score data comes from lab model reports and from":' in script
+    assert "benchmark 分数数据来自各家实验室的模型报告，以及" in script
 
 
 def test_no_page_ships_a_second_url_for_itself(tmp_path):

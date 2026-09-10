@@ -983,6 +983,8 @@ const I18N = {
     "Copy it with your keyboard": "请用键盘复制",
     "Citation file (.cff)": "引用文件 (.cff)",
     "View the citation file": "查看引用文件",
+    "Benchmark score data comes from lab model reports and from":
+      "benchmark 分数数据来自各家实验室的模型报告，以及",
     CLI: "命令行",
     "This search covers all dates.": "此处搜索全部日期的结果。",
     "Still want today's results?": "仍要搜索今天的，请",
@@ -8504,6 +8506,44 @@ function finishUtilityClose(utility, ownsHistoryEntry) {
   writeUrl("replace");
 }
 
+// The catalogs the score layer reads. LLM Stats asks for credit visible to
+// readers with a link back; this is the mirror of SCORE_SOURCE_LINKS in
+// app_seeds.py, and the two must render the same sentence or the seed and the
+// hydrated card disagree.
+const SCORE_SOURCE_LINKS = [
+  ["LLM Stats", "https://llm-stats.com"],
+  ["Artificial Analysis", "https://artificialanalysis.ai"],
+  ["OpenCompass Hub", "https://hub.opencompass.org.cn"],
+];
+
+// Deliberately quiet: it closes the card as a footnote under the formats the
+// reader came for, so it carries no button styling and no heading.
+function citeCredit() {
+  const node = element("p", { className: "cite-credit" });
+  node.append(
+    document.createTextNode(
+      `${t("Benchmark score data comes from lab model reports and from")} `,
+    ),
+  );
+  SCORE_SOURCE_LINKS.forEach(([name, url], index) => {
+    if (index > 0) {
+      node.append(
+        document.createTextNode(
+          index === SCORE_SOURCE_LINKS.length - 1 ? ` ${t("and")} ` : ", ",
+        ),
+      );
+    }
+    node.append(
+      element("a", {
+        text: name,
+        attrs: { href: url, target: "_blank", rel: "noopener noreferrer" },
+      }),
+    );
+  });
+  node.append(document.createTextNode("."));
+  return node;
+}
+
 // Reachable at /cite/, so the card has a short link that can be pasted into a
 // paper, a README or a message instead of a reader hunting the footer for it.
 function openCite(updateUrl = true) {
@@ -8539,6 +8579,7 @@ function openCite(updateUrl = true) {
       text: t("View the citation file"),
       attrs: { href: CITE_CFF_URL, target: "_blank", rel: "noopener noreferrer" },
     }),
+    citeCredit(),
   ]);
   showModalDialog(dialog);
 }

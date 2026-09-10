@@ -586,6 +586,17 @@ url = {https://zenodo.org/records/22167102},
 year = {2026}
 }"""
 
+# The catalogs the score layer reads. LLM Stats asks for credit visible to
+# readers with a link back, and the citation card is where a reader goes to ask
+# where this data came from, so the credit lives there rather than in a file
+# only contributors open.
+SCORE_SOURCE_LINKS: tuple[tuple[str, str], ...] = (
+    ("LLM Stats", "https://llm-stats.com"),
+    ("Artificial Analysis", "https://artificialanalysis.ai"),
+    ("OpenCompass Hub", "https://hub.opencompass.org.cn"),
+)
+CITE_CREDIT_LEAD = "Benchmark score data comes from lab model reports and from"
+
 CLI_SKILL_URL = (
     "https://github.com/ktwu01/benchmark-radar/blob/main/skills/benchmark-radar/SKILL.md"
 )
@@ -612,6 +623,16 @@ def _copy_block(label: str, value: str, hint: str, hide_label: bool = False) -> 
     )
 
 
+def _cite_credit() -> str:
+    """The sentence both renderers draw, so the seed and app.js cannot drift."""
+    links = [
+        f'<a href="{esc(url)}" target="_blank" rel="noopener noreferrer">{esc(name)}</a>'
+        for name, url in SCORE_SOURCE_LINKS
+    ]
+    joined = f"{', '.join(links[:-1])} and {links[-1]}"
+    return f"{esc(CITE_CREDIT_LEAD)} {joined}."
+
+
 def _cite_seed() -> dict[str, str]:
     blocks = "".join(
         (
@@ -630,6 +651,7 @@ def _cite_seed() -> dict[str, str]:
         '<a class="secondary-link dialog-link" '
         f'href="{esc(CITE_CFF_URL)}" target="_blank" rel="noopener noreferrer">'
         "View the citation file</a>"
+        f'<p class="cite-credit">{_cite_credit()}</p>'
     )
     return {'<div id="cite-content"></div>': (f'<div id="cite-content" data-seed>{content}</div>')}
 
