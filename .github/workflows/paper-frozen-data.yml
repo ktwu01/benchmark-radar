@@ -1,0 +1,112 @@
+name: Paper frozen data
+
+# The manuscript is frozen at the v0.11.0 release while `data/` keeps advancing
+# daily, so the paper's numbers and the repository drift apart silently. Nothing
+# in `ci.yml` reads the manuscript, and the reproducibility appendix promises
+# these checks. This job runs them.
+#
+# The two halves need different checkouts and cannot be merged into one:
+#   * The census audits require a tree whose tracked snapshots match the cutoff,
+#     which only the pinned commit satisfies. Extracting the archive over a
+#     newer tree cannot remove the snapshots committed since.
+#   * The figure export reads connector definitions from code, not from the
+#     archive, so it must run against the branch under test.
+
+on:
+  pull_request:
+    paths:
+      - "docs/technical-report/**"
+      - "scripts/export_report_figure_data.py"
+      - ".github/workflows/paper-frozen-data.yml"
+  push:
+    branches: [main]
+    paths:
+      - "docs/technical-report/**"
+      - "scripts/export_report_figure_data.py"
+      - ".github/workflows/paper-frozen-data.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RELEASE_TAG: v0.11.0
+
+jobs:
+  frozen-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the branch under test with the paper submodule
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          path: current
+
+      - name: Check out the frozen software commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: 8f46bbfa91f5d9900c8b08a5d552c3df5c9597b0
+          fetch-depth: 0
+          path: frozen
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      # The audit scripts are standard library only; the figure exporter reads
+      # YAML config.
+      - run: python -m pip install pyyaml
+
+      - name: Download the checksummed input archive
+        run: |
+          set -euo pipefail
+          python - current/docs/technical-report/latex/scripts >> "${GITHUB_ENV}" <<'PY'
+          import sys
+
+          sys.path.insert(0, sys.argv[1])
+          import verify_frozen_findings as frozen
+
+          print(f"ARCHIVE={frozen.ARCHIVE}")
+          print(f"ARCHIVE_SHA256={frozen.ARCHIVE_SHA256}")
+          PY
+
+      - name: Verify the archive checksum
+        run: |
+          set -euo pipefail
+          curl -fsSL -o "${ARCHIVE}" \
+            "https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/${ARCHIVE}"
+          echo "${ARCHIVE_SHA256}  ${ARCHIVE}" | sha256sum -c -
+
+      - name: Reproduce the frozen census and findings
+        run: |
+          set -euo pipefail
+          unzip -oq "${ARCHIVE}" -d frozen
+          scripts=current/docs/technical-report/latex/scripts
+          python "${scripts}/audit_catalog.py" frozen --check
+          python "${scripts}/audit_findings.py" frozen --check
+
+      - name: Check the figure export against the frozen inputs
+        run: |
+          set -euo pipefail
+          unzip -oq "${ARCHIVE}" -d current
+          python - <<'PY'
+          import importlib.util
+          import sys
+          from pathlib import Path
+
+          root = Path("current")
+          spec = importlib.util.spec_from_file_location(
+              "frozen_figure_export", root / "scripts/export_report_figure_data.py"
+          )
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          committed = (root / "docs/technical-report/latex/figure-data.tex").read_text(
+              encoding="utf-8"
+          )
+          if module.render_data(root) != committed:
+              sys.exit(
+                  "figure-data.tex does not match the frozen inputs; "
+                  "rerun scripts/export_report_figure_data.py"
+              )
+          print("figure-data.tex matches the frozen inputs")
+          PY
