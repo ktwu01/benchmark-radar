@@ -12,6 +12,7 @@ from typing import Any
 from . import kw_bench
 from .app_pages import write_app_pages
 from .attention import fetch_attention_feeds
+from .benchmark_attention import merge_benchmark_attention
 from .benchmark_scores import DEFAULT_SCORES_PATH, load_scores, score_progression
 from .blog import write_blog
 from .corpus import (
@@ -106,6 +107,9 @@ def snapshot_for_run(run: RadarRun) -> dict[str, Any]:
         "producer_health": [health.to_dict() for health in run.producer_health],
         "selection": run.selection,
         "discovery_state": run.discovery_state,
+        # Present only when the collector ran, so the ranking can tell "no
+        # signals observed" from "collection disabled" (issue #530).
+        **({"benchmark_attention": run.benchmark_attention} if run.benchmark_attention else {}),
     }
 
 
@@ -738,6 +742,12 @@ def merge_snapshots(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[
     else:
         day_questions = incoming_questions or existing_questions
 
+    # Ranking signals follow the same union rule: a second pass that ran out
+    # of request budget must not erase the counters the first pass observed.
+    merged_benchmark_attention = merge_benchmark_attention(
+        existing.get("benchmark_attention"), incoming.get("benchmark_attention")
+    )
+
     merged = {
         **incoming,
         "evidence_items": evidence_items,
@@ -750,6 +760,10 @@ def merge_snapshots(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[
         merged["briefing"] = briefing
     else:
         merged.pop("briefing", None)
+    if merged_benchmark_attention:
+        merged["benchmark_attention"] = merged_benchmark_attention
+    else:
+        merged.pop("benchmark_attention", None)
     if day_questions:
         merged["questions"] = day_questions
     else:
