@@ -115,7 +115,7 @@ Wu, K., Zhou, J., Shang, E., Wang, J., Han, P., Wang, J., & Xu, W. (2026). Bench
 }
 ```
 
-可复制的引用文本见 [`CITATION.md`](CITATION.md)。AI agent 可读取
+可复制的引用文本见 [https://benchmark-radar.org/cite/](https://benchmark-radar.org/cite/)。AI agent 可读取
 [`CITATION.cff`](CITATION.cff) 获取机器可读的引用元数据。
 
 ## 摘要

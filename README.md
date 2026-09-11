@@ -131,7 +131,7 @@ Wu, K., Zhou, J., Shang, E., Wang, J., Han, P., Wang, J., & Xu, W. (2026). Bench
 }
 ```
 
-See [`CITATION.md`](CITATION.md) for the copy-paste citation. AI agents can
+See [https://benchmark-radar.org/cite/](https://benchmark-radar.org/cite/) for the copy-paste citation. AI agents can
 read [`CITATION.cff`](CITATION.cff) for machine-readable citation metadata.
 
 ## Abstract
