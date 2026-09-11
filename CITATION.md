@@ -1,8 +1,7 @@
 # How to cite Benchmark Radar
 
 If Benchmark Radar helped your research or evaluation work, please cite the
-technical report. This is the only thing you need to cite. There is nothing
-else to cite.
+technical report. You only need to cite this.
 
 ## APA
 
