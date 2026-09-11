@@ -67,7 +67,7 @@ def _q(tag: str) -> str:
 
 def sitemap_tree(
     snapshots: list[dict[str, Any]],
-    benchmark_slugs: Sequence[str] = (),
+    benchmark_entries: Sequence[tuple[str, str | None]] = (),
     *,
     view_paths: Sequence[str] | None = None,
     blog_entries: Sequence[tuple[str, str | None]] = (),
@@ -77,11 +77,12 @@ def sitemap_tree(
     ``view_paths`` is what the build actually wrote. Passing None lists every
     view, which is what a caller that does not write pages at all wants.
 
-    ``blog_entries`` is what the blog build reported, each with its own lastmod
-    rather than the site-wide one: a brief for a day three weeks ago did not
-    change when today's snapshot landed, and telling a crawler otherwise asks
-    it to refetch the whole archive on every deploy. A build that writes no
-    blog passes nothing and lists nothing, the same rule the views follow.
+    ``benchmark_entries`` and ``blog_entries`` each carry their own lastmod
+    rather than the site-wide one: a benchmark whose newest score is two years
+    old, and a brief for a day three weeks ago, did not change when today's
+    snapshot landed, and telling a crawler otherwise asks it to refetch the
+    whole catalog on every deploy. A build that writes no blog passes nothing
+    and lists nothing, the same rule the views follow.
     """
     root = ET.Element(_q("urlset"))
     lastmod = _lastmod_date(snapshots)
@@ -90,7 +91,7 @@ def sitemap_tree(
         (path, lastmod) for _, path in INDEXABLE_VIEWS if published is None or path in published
     ]
     entries.append((BENCHMARK_DIRECTORY_PATH, lastmod))
-    entries.extend((f"/benchmarks/{slug}/", lastmod) for slug in benchmark_slugs)
+    entries.extend(benchmark_entries)
     entries.extend(blog_entries)
     seen: set[str] = set()
     for path, entry_lastmod in entries:
@@ -107,7 +108,7 @@ def sitemap_tree(
 def write_sitemap(
     snapshots: list[dict[str, Any]],
     output: Path,
-    benchmark_slugs: Sequence[str] = (),
+    benchmark_entries: Sequence[tuple[str, str | None]] = (),
     *,
     view_paths: Sequence[str] | None = None,
     blog_entries: Sequence[tuple[str, str | None]] = (),
@@ -115,7 +116,7 @@ def write_sitemap(
     """Write a deterministic UTF-8 sitemap beside the published data."""
     output.parent.mkdir(parents=True, exist_ok=True)
     tree = sitemap_tree(
-        snapshots, benchmark_slugs, view_paths=view_paths, blog_entries=blog_entries
+        snapshots, benchmark_entries, view_paths=view_paths, blog_entries=blog_entries
     )
     ET.indent(tree, space="  ")
     tree.write(output, encoding="utf-8", xml_declaration=True)

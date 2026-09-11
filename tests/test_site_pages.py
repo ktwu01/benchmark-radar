@@ -14,6 +14,7 @@ import pytest
 from benchmark_radar.feed import SITE_URL
 from benchmark_radar.site_pages import (
     benchmark_page_urls,
+    benchmark_sitemap_entries,
     write_benchmark_pages,
 )
 from benchmark_radar.site_seo import sitemap_tree
@@ -254,10 +255,10 @@ def test_benchmark_page_urls_are_sorted_canonicals(tmp_path):
     assert benchmark_page_urls(tmp_path / "missing") == []
 
 
-def test_sitemap_includes_benchmark_pages_when_slugs_passed(tmp_path):
+def test_sitemap_includes_benchmark_pages_when_entries_are_passed(tmp_path):
     tree = sitemap_tree(
         [{"generated_at": "2026-08-21T02:17:00+00:00"}],
-        benchmark_slugs=["alpha-bench", "zeta-bench"],
+        [("/benchmarks/alpha-bench/", "2025-05-22"), ("/benchmarks/zeta-bench/", None)],
     )
     urls = [
         node.text
@@ -284,7 +285,34 @@ def test_sitemap_includes_benchmark_pages_when_slugs_passed(tmp_path):
             "sm:url/sm:lastmod", {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
         )
     ]
-    assert lastmods == ["2026-08-21"] * 11
+    # Nine site-wide dates, then the benchmark's own; the undated page gets none.
+    assert lastmods == ["2026-08-21"] * 9 + ["2025-05-22"]
+
+
+def test_benchmark_lastmod_comes_from_the_pages_own_evidence(tmp_path):
+    """A page is not modified by another benchmark's snapshot landing."""
+    shard_dir = _write_shards(
+        tmp_path,
+        _shard("alpha-bench", "Alpha Bench", released="2024-02-01"),
+        _shard("zeta-bench", "Zeta Bench", released=None),
+    )
+    alpha = json.loads((shard_dir / "alpha-bench.json").read_text(encoding="utf-8"))
+    alpha["scores_by_source"] = {
+        "model_reports": {
+            "rows": [
+                {"reported_date": "2025-05-22"},
+                {"reported_date": "2026-01-09"},
+                {"reported_date": "not a date"},
+            ]
+        }
+    }
+    (shard_dir / "alpha-bench.json").write_text(json.dumps(alpha), encoding="utf-8")
+
+    assert benchmark_sitemap_entries(shard_dir) == [
+        ("/benchmarks/alpha-bench/", "2026-01-09"),
+        ("/benchmarks/zeta-bench/", None),
+    ]
+    assert benchmark_sitemap_entries(tmp_path / "missing") == []
 
 
 def test_write_benchmark_pages_fails_loudly_without_shards(tmp_path):

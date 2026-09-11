@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import html
 import json
+import re
 import shutil
 from pathlib import Path
 from typing import Any
@@ -32,6 +33,8 @@ DEFAULT_SHARD_DIR = Path("site/data/benchmarks")
 DEFAULT_PAGES_DIR = Path("site/benchmarks")
 
 _DESCRIPTION_LIMIT = 155
+
+_ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 _DIR_DESCRIPTION = (
     "Every benchmark in the Benchmark Radar catalog, each with its own page "
@@ -374,6 +377,35 @@ def benchmark_slugs(shard_dir: Path) -> list[str]:
     if not shard_dir.is_dir():
         return []
     return sorted(path.stem for path in shard_dir.glob("*.json"))
+
+
+def _shard_lastmod(shard: dict[str, Any]) -> str | None:
+    """Newest date the page's own evidence carries, or None when it carries none.
+
+    A page changes when a score lands on it or when the record itself is dated,
+    not when some other benchmark's snapshot arrives. Both fields are stored as
+    plain `YYYY-MM-DD`, so the newest one sorts lexically; anything else is
+    ignored rather than guessed at.
+    """
+    dates = {
+        row.get("reported_date")
+        for source in (shard.get("scores_by_source") or {}).values()
+        for row in (source or {}).get("rows") or ()
+    }
+    dates.add((shard.get("record") or {}).get("released"))
+    dated = {value for value in dates if isinstance(value, str) and _ISO_DATE.fullmatch(value)}
+    return max(dated) if dated else None
+
+
+def benchmark_sitemap_entries(shard_dir: Path) -> list[tuple[str, str | None]]:
+    """Benchmark page paths in stable slug order, each with its own lastmod."""
+    if not shard_dir.is_dir():
+        return []
+    entries = []
+    for path in sorted(shard_dir.glob("*.json")):
+        shard = json.loads(path.read_text(encoding="utf-8"))
+        entries.append((f"/benchmarks/{path.stem}/", _shard_lastmod(shard)))
+    return entries
 
 
 def benchmark_page_urls(shard_dir: Path) -> list[str]:

@@ -42,7 +42,7 @@ from .rubric import (
     v3_rubric_reference,
     v4_rubric_reference,
 )
-from .site_pages import DEFAULT_SHARD_DIR, benchmark_slugs
+from .site_pages import DEFAULT_SHARD_DIR, benchmark_sitemap_entries
 from .site_seo import write_sitemap
 from .sources import GITHUB_RELEASE_PARSER_VERSION, github_release_title
 
@@ -1351,7 +1351,7 @@ def rebuild_dashboard(
         if feed_output is not None
         else output.parent / "sitemap.xml"
     )
-    slugs = benchmark_slugs(benchmark_shard_dir)
+    benchmark_entries = benchmark_sitemap_entries(benchmark_shard_dir)
     # A data-only build writes no view pages, so it has no list of published
     # ones, and None asks for every view. That is right rather than empty: this
     # sitemap describes the deployed site, not this build's output directory,
@@ -1371,7 +1371,7 @@ def rebuild_dashboard(
     write_sitemap(
         snapshots,
         sitemap_output,
-        slugs,
+        benchmark_entries,
         view_paths=view_paths,
         blog_entries=blog_entries,
     )

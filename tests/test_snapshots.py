@@ -386,7 +386,9 @@ def test_rebuild_writes_the_sitemap_at_the_site_root(tmp_path, site_shell):
         f"{SITE_URL}/blog/2026-07-27/",
     ]
     lastmods = [node.text for node in root.findall("sm:url/sm:lastmod", ns)]
-    assert lastmods == ["2026-07-27"] * len(urls)
+    # The two shards carry no dated evidence, so their pages claim no lastmod
+    # rather than borrowing today's snapshot date.
+    assert lastmods == ["2026-07-27"] * (len(urls) - 2)
 
 
 def test_rescore_applies_a_new_category_to_older_snapshots(tmp_path):
