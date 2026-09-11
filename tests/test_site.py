@@ -171,8 +171,8 @@ def test_citation_formats_are_one_click_away_behind_a_short_link():
     assert "given-names: Junjie" in cff
     assert '"Wu, K., Zhou, J., Shang, E., Wang, J., Han, P., Wang, J., & Xu, W. (2026). "' in script
     assert (
-        '"author = {Wu, Koutian and Zhou, Junjie and Shang, Ergan and '
-        'Wang, Jiayu and Han, Pengqian and Wang, Junkai and Xu, Wanghan},"'
+        '"      author={Koutian Wu and Junjie Zhou and Ergan Shang and Jiayu Wang and '
+        'Pengqian Han and Junkai Wang and Wanghan Xu},"'
     ) in script
     assert html.count('name="citation_author"') == 7
     assert '<meta name="citation_author" content="Zhou, Junjie">' in html

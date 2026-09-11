@@ -577,15 +577,15 @@ CITE_CFF_URL = "https://github.com/ktwu01/benchmark-radar/blob/main/CITATION.cff
 # The site dialog and the CLI reminder share citation.py's title and author
 # list, so the APA a reader copies is the APA an agent is asked for.
 CITE_APA = apa_citation()
-CITE_BIBTEX = """@misc{wu2026benchmarkradar,
-author = {Wu, Koutian and Zhou, Junjie and Shang, Ergan and Wang, Jiayu and
-          Han, Pengqian and Wang, Junkai and Xu, Wanghan},
-title = {{Benchmark Radar: A Living Database and Search Engine for AI Benchmarks and Evaluation}},
-year = {2026},
-eprint = {2609.11115},
-archivePrefix = {arXiv},
-primaryClass = {cs.AI},
-url = {https://arxiv.org/abs/2609.11115}
+CITE_BIBTEX = """@misc{wu2026benchmarkradarlivingdatabase,
+      title={Benchmark Radar: A Living Database and Search Engine for AI Benchmarks and Evaluation},
+      author={Koutian Wu and Junjie Zhou and Ergan Shang and Jiayu Wang and
+              Pengqian Han and Junkai Wang and Wanghan Xu},
+      year={2026},
+      eprint={2609.11115},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2609.11115},
 }"""
 
 # The catalogs the score layer reads. LLM Stats asks for credit visible to
