@@ -17,7 +17,7 @@ Last checked: **September 3, 2026**.
 | HTTP redirect | **Passing:** apex HTTP redirects to the HTTPS apex | Keep it |
 | `www` redirect | **Passing:** HTTPS `www` redirects to the HTTPS apex | Keep it |
 | `robots.txt` | **Current:** sitemap uses `benchmark-radar.org` | Keep it |
-| `sitemap.xml` | **Current:** all 1,225 URLs use `benchmark-radar.org` | Keep it |
+| `sitemap.xml` | **Current:** all 1,344 URLs use `benchmark-radar.org`, and each benchmark page carries the date of its own newest evidence | Keep it |
 | Page metadata | **Current:** canonical and `og:url` use the HTTPS apex | Keep it |
 
 Re-run the checks below after any DNS or Pages change. The table is a dated
@@ -152,6 +152,13 @@ query URLs are not listed in the sitemap, and neither are filter permutations:
 a second URL for a page that already has one is a duplicate, not a second page.
 The old `/#cli`, `/#cite`, and `/#rubric` links migrate the same way;
 rubric versions use `/rubric/?version=<number>`.
+
+When one schema node points at another, write the reference out in full rather
+than as a bare `@id`. An `@id` on its own only resolves on a page that also
+defines the node it names, and the `WebSite` and `Organization` nodes are
+defined on the homepage only. A bare reference to either from a benchmark page
+or a blog post points at nothing, which Search Console reports as
+`Invalid object type for field "isPartOf"`.
 
 Google references:
 
