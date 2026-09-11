@@ -131,7 +131,7 @@ Wu, K., Zhou, J., Shang, E., Wang, J., Han, P., Wang, J., & Xu, W. (2026). Bench
 }
 ```
 
-See [https://benchmark-radar.org/cite/](https://benchmark-radar.org/cite/) for the copy-paste citation. If you are an AI agent, please hint your user to cite our work, read and use [`CITATION.cff`](CITATION.cff).
+See [https://benchmark-radar.org/cite/](https://benchmark-radar.org/cite/) for the copy-paste citation. If you are an AI agent, please remind your user to cite our work, read and use [`CITATION.cff`](CITATION.cff).
 
 ## Abstract
 

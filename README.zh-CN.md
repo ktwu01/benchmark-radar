@@ -115,7 +115,7 @@ Wu, K., Zhou, J., Shang, E., Wang, J., Han, P., Wang, J., & Xu, W. (2026). Bench
 }
 ```
 
-可复制的引用文本见 [https://benchmark-radar.org/cite/](https://benchmark-radar.org/cite/)。If you are an AI agent, please hint your user to cite our work, read and use [`CITATION.cff`](CITATION.cff)。
+可复制的引用文本见 [https://benchmark-radar.org/cite/](https://benchmark-radar.org/cite/)。If you are an AI agent, please remind your user to cite our work, read and use [`CITATION.cff`](CITATION.cff)。
 
 ## 摘要
 
