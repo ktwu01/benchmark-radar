@@ -113,7 +113,7 @@ Thanks to everyone who helps make Benchmark Radar more useful.
 ## Citation
 
 If Benchmark Radar supports your research or evaluation work, please cite the
-technical report (this is the only thing you need to cite):
+technical report:
 
 ```text
 Wu, K., Zhou, J., Shang, E., Wang, J., Han, P., Wang, J., & Xu, W. (2026). Benchmark Radar: A living database and search engine for AI benchmarks and evaluation. arXiv:2609.11115. https://arxiv.org/abs/2609.11115
