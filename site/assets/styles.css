@@ -5408,3 +5408,175 @@ dialog {
     grid-template-columns: 2rem minmax(0, 26rem) minmax(0, 1fr) 7rem;
   }
 }
+
+/* --- Leaderboard modes and latest releases (issue #530) --------------------
+   Three ways to rank one catalog on one page. The mode strip reads as a
+   choice, not a filter; the pressed mode inverts so the reader can see which
+   ranking the rows below describe without reading the heading. */
+.leaderboard-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+}
+
+.leaderboard-mode,
+.latest-releases-window-button {
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--ink);
+  font-family: var(--utility);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.leaderboard-mode[aria-pressed="true"],
+.latest-releases-window-button[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--panel);
+}
+
+.leaderboard-mode:hover,
+.leaderboard-mode:focus-visible,
+.latest-releases-window-button:hover,
+.latest-releases-window-button:focus-visible {
+  border-color: var(--blue);
+}
+
+.latest-releases-window {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.latest-releases-windows {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.4rem 0 0.7rem;
+}
+
+.latest-releases-window-button {
+  padding: 0.25rem 0.65rem;
+  font-size: 0.66rem;
+}
+
+/* Each release is a disclosure: the summary is the ranked row, the body is
+   every input behind the rank. The row keeps the top-list grid, so the four
+   columns line up with the column headings above. */
+.latest-release {
+  border-bottom: 1px solid var(--line);
+}
+
+.latest-release:last-child {
+  border-bottom: none;
+}
+
+.latest-release-summary {
+  list-style: none;
+  cursor: pointer;
+  border-bottom: none;
+}
+
+.latest-release-summary::-webkit-details-marker {
+  display: none;
+}
+
+.latest-release-date {
+  display: block;
+  color: var(--muted);
+  font-family: var(--utility);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+}
+
+/* A release the engine could not rank keeps its bar, muted: the score it has
+   is real, the rank it lacks is the point. */
+.latest-release-bar-limited {
+  background: var(--muted);
+  opacity: 0.45;
+}
+
+.leaderboard-top-count .pill-confidence {
+  margin-left: 0.35rem;
+}
+
+.latest-release-body {
+  padding: 0.1rem 0.85rem 0.85rem 3.6rem;
+  font-size: 0.85rem;
+}
+
+.latest-release-purpose {
+  margin: 0 0 0.4rem;
+}
+
+.latest-release-signals {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0.3rem 0;
+}
+
+.latest-release-signal {
+  display: grid;
+  grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.latest-release-signal dt {
+  color: var(--muted);
+  font-family: var(--utility);
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+}
+
+.latest-release-signal dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: baseline;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.latest-release-source {
+  color: var(--blue-deep);
+}
+
+.latest-release-weight,
+.latest-release-meta {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.latest-release-meta {
+  margin: 0.3rem 0 0;
+}
+
+.latest-releases-empty-action {
+  margin-left: 0.35rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--blue-deep);
+  font-family: var(--body);
+  font-size: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .latest-release-body {
+    padding-left: 0.85rem;
+  }
+
+  .latest-release-signal {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+}

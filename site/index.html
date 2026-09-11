@@ -508,6 +508,42 @@
           <h1 id="leaderboard-heading" data-i18n="Leaderboard">Leaderboard</h1>
         </div>
 
+        <!-- Three modes, one page (issue #530). Latest releases opens by
+             default: which newly released benchmarks are gaining attention
+             now. The cumulative model-card adoption view and the reported
+             score workbench keep their content, labels and permalinks. -->
+        <nav class="leaderboard-modes" aria-label="Leaderboard views" data-i18n-aria="Leaderboard views">
+          <button type="button" class="leaderboard-mode" data-lmode="latest" aria-pressed="true" data-i18n="Latest releases">Latest releases</button>
+          <button type="button" class="leaderboard-mode" data-lmode="adoption" aria-pressed="false" data-i18n="Model-card adoption">Model-card adoption</button>
+          <a class="leaderboard-mode" href="/saturation/" data-i18n="Saturation">Saturation</a>
+        </nav>
+
+        <section class="leaderboard-top latest-releases" id="latest-releases" aria-labelledby="latest-releases-heading">
+          <div class="leaderboard-top-heading">
+            <h2 id="latest-releases-heading"><span data-i18n="Latest releases">Latest releases</span> <span class="latest-releases-window" id="latest-releases-window">· 30 days</span></h2>
+            <span id="latest-releases-info"></span>
+          </div>
+          <p class="section-note latest-releases-deck" data-i18n="latest.deck">Recently released benchmarks, ranked by the attention they are receiving now: GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days.</p>
+          <div class="latest-releases-windows" role="group" aria-label="Release window" data-i18n-aria="Release window">
+            <button type="button" class="latest-releases-window-button" data-lwindow="7d" aria-pressed="false" data-i18n="7 days">7 days</button>
+            <button type="button" class="latest-releases-window-button" data-lwindow="30d" aria-pressed="true" data-i18n="30 days">30 days</button>
+            <button type="button" class="latest-releases-window-button" data-lwindow="90d" aria-pressed="false" data-i18n="90 days">90 days</button>
+          </div>
+          <div class="leaderboard-top-columns" aria-hidden="true">
+            <span class="leaderboard-top-columns-rank" data-i18n="Rank">Rank</span>
+            <span class="leaderboard-top-columns-name" data-i18n="Benchmark">Benchmark</span>
+            <span class="leaderboard-top-columns-count" data-i18n="Attention score">Attention score</span>
+          </div>
+          <ol class="leaderboard-top-list latest-releases-list" id="latest-releases-list"></ol>
+          <p class="empty-state latest-releases-empty" id="latest-releases-empty" aria-live="polite" hidden></p>
+          <p class="section-note" id="latest-releases-note" aria-live="polite"></p>
+        </section>
+
+        <!-- The adoption view, shown when the reader picks it or follows a
+             permalink that carries its filters. Hidden, not removed: its
+             seeded rows stay in the document for crawlers and readers
+             without scripts. -->
+        <div id="leaderboard-adoption" hidden>
         <section class="benchmark-skyline" id="benchmark-skyline" aria-labelledby="benchmark-skyline-heading">
           <div class="skyline-heading">
             <div>
@@ -673,6 +709,7 @@
             <div class="leaderboard-list" id="leaderboard-cards"></div>
           </div>
         </details>
+        </div>
       </section>
 
       <section class="view" id="map-view" aria-labelledby="map-heading" hidden>
