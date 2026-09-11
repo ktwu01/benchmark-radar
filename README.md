@@ -116,15 +116,14 @@ If Benchmark Radar supports your research or evaluation work, please cite the
 technical report:
 
 ```bibtex
-@misc{wu_2026_22167102,
-  author       = {Wu, Koutian and Zhou, Junjie},
-  title        = {Benchmark Radar v0.9.0: Technical Report},
-  month        = aug,
-  year         = {2026},
-  publisher    = {Zenodo},
-  version      = {0.9.0},
-  doi          = {10.5281/zenodo.22167102},
-  url          = {https://doi.org/10.5281/zenodo.22167102}
+@misc{wu2026benchmarkradar,
+  author        = {Wu, Koutian and Zhou, Junjie and Shang, Ergan and Wang, Jiayu and Han, Pengqian and Wang, Junkai and Xu, Wanghan},
+  title         = {{Benchmark Radar: A Living Database and Search Engine for AI Benchmarks and Evaluation}},
+  year          = {2026},
+  eprint        = {2609.11115},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI},
+  url           = {https://arxiv.org/abs/2609.11115}
 }
 ```
 

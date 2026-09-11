@@ -9,7 +9,6 @@ from pathlib import Path
 
 import pytest
 
-from benchmark_radar import __version__
 from benchmark_radar.models import RadarItem, RadarRun, SourceHealth
 from benchmark_radar.query import QueryError, QueryPaths, QueryService
 from benchmark_radar.query_cli import run_query_cli
@@ -584,8 +583,9 @@ def test_cli_ends_human_output_with_citation_reminder(tmp_path: Path, capsys) ->
     assert exit_code == 0
     assert "please cite it" in output
     assert (
-        f"Wu, K., & Zhou, J. (2026). Benchmark Radar v{__version__}: Technical Report "
-        f"(Version {__version__}). https://doi.org/10.5281/zenodo.22167102"
+        "Wu, K., Zhou, J., Shang, E., Wang, J., Han, P., Wang, J., & Xu, W. (2026). "
+        "Benchmark Radar: A living database and search engine for AI benchmarks and evaluation. "
+        "arXiv:2609.11115. https://arxiv.org/abs/2609.11115"
     ) in output
     assert "https://benchmark-radar.org/#cite" in output
 
