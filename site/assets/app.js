@@ -981,8 +981,8 @@ const I18N = {
     "Click to copy": "点击复制",
     "Click to copy link": "点击复制链接",
     "Copy it with your keyboard": "请用键盘复制",
-    "Citation file (.cff)": "引用文件 (.cff)",
-    "View the citation file": "查看引用文件",
+    "For AI agents (CITATION.cff)": "给 AI agent 用的引用文件 (CITATION.cff)",
+    "AI agents: read CITATION.cff": "AI agent 请读 CITATION.cff",
     "Benchmark score data comes from lab model reports and from":
       "benchmark 分数数据来自各家实验室的模型报告，以及",
     CLI: "命令行",
@@ -8590,11 +8590,11 @@ function openCite(updateUrl = true) {
     element("div", { className: "copy-blocks" }, [
       copyBlock("APA", CITE_APA, "Click to copy", false, true),
       copyBlock("BibTeX", CITE_BIBTEX, "Click to copy", false, true),
-      copyBlock("Citation file (.cff)", CITE_CFF_URL, "Click to copy link"),
+      copyBlock("For AI agents (CITATION.cff)", CITE_CFF_URL, "Click to copy link"),
     ]),
     element("a", {
       className: "secondary-link dialog-link",
-      text: t("View the citation file"),
+      text: t("AI agents: read CITATION.cff"),
       attrs: { href: CITE_CFF_URL, target: "_blank", rel: "noopener noreferrer" },
     }),
     citeCredit(),

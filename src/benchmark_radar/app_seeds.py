@@ -640,7 +640,7 @@ def _cite_seed() -> dict[str, str]:
         (
             _copy_block("APA", CITE_APA, "Click to copy"),
             _copy_block("BibTeX", CITE_BIBTEX, "Click to copy"),
-            _copy_block("Citation file (.cff)", CITE_CFF_URL, "Click to copy link"),
+            _copy_block("For AI agents (CITATION.cff)", CITE_CFF_URL, "Click to copy link"),
         )
     )
     content = (
@@ -652,7 +652,7 @@ def _cite_seed() -> dict[str, str]:
         f'<div class="copy-blocks">{blocks}</div>'
         '<a class="secondary-link dialog-link" '
         f'href="{esc(CITE_CFF_URL)}" target="_blank" rel="noopener noreferrer">'
-        "View the citation file</a>"
+        "AI agents: read CITATION.cff</a>"
         f'<p class="cite-credit">{_cite_credit()}</p>'
     )
     return {'<div id="cite-content"></div>': (f'<div id="cite-content" data-seed>{content}</div>')}

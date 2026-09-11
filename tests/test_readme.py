@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from export_report_figure_data import count_ingest_sources
 
+from benchmark_radar.citation import apa_citation
 from benchmark_radar.export import write_exports
 from benchmark_radar.models import RadarItem, RadarRun
 from benchmark_radar.snapshots import rebuild_dashboard, records_badge, write_snapshot
@@ -131,6 +132,18 @@ def test_public_bibtex_names_all_report_authors():
     )
     for readme in (README, README_ZH):
         assert author in readme.read_text(encoding="utf-8")
+
+
+def test_citation_page_offers_apa_and_routes_agents_to_the_cff():
+    # Issue #464: the friendly citation page leads with copy-paste APA for
+    # readers and reserves CITATION.cff for AI agents, instead of sending
+    # everyone to the raw .cff file.
+    page = Path("CITATION.md").read_text(encoding="utf-8")
+    assert apa_citation() in page
+    assert "wu2026benchmarkradarlivingdatabase" in page
+    assert TECHNICAL_REPORT in page
+    assert "CITATION.cff" in page
+    assert "AI agent" in page
 
 
 def test_readmes_offer_a_short_agent_setup_prompt():
