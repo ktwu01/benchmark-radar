@@ -8409,18 +8409,25 @@ const CITE_BIBTEX = [
 // sheet. The block itself is the button: a reader who came for a citation or a
 // setup prompt wants it on the clipboard, so clicking the text copies it rather
 // than making them select eight wrapped lines by hand.
-function copyBlock(label, value, hint, hideLabel = false) {
+//
+// `collapsed` starts the block showing only its hint ("Click to copy") with the
+// raw text hidden, for formats long enough that seeing every one at once turns
+// the sheet into a wall of text. The first click both copies and reveals, so
+// the reader who did not need to read it first still gets it on the clipboard
+// in one click, and the reader who wants to check it can see what they copied.
+function copyBlock(label, value, hint, hideLabel = false, collapsed = false) {
   const status = element("span", { className: "copy-status", text: t(hint) });
   const text = element("code", { className: "copy-text", text: value });
   const copy = element(
     "button",
     {
-      className: "copy-target",
+      className: collapsed ? "copy-target is-collapsed" : "copy-target",
       attrs: { type: "button", "aria-label": `${t(hint)}: ${t(label)}` },
     },
     [text, status],
   );
   copy.addEventListener("click", async () => {
+    copy.classList.remove("is-collapsed");
     try {
       await navigator.clipboard.writeText(value);
       copy.classList.add("is-copied");
@@ -8577,8 +8584,8 @@ function openCite(updateUrl = true) {
       text: t("Pick the format your paper or repository needs, then click it to copy."),
     }),
     element("div", { className: "copy-blocks" }, [
-      copyBlock("APA", CITE_APA, "Click to copy"),
-      copyBlock("BibTeX", CITE_BIBTEX, "Click to copy"),
+      copyBlock("APA", CITE_APA, "Click to copy", false, true),
+      copyBlock("BibTeX", CITE_BIBTEX, "Click to copy", false, true),
       copyBlock("Citation file (.cff)", CITE_CFF_URL, "Click to copy link"),
     ]),
     element("a", {

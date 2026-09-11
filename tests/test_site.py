@@ -140,8 +140,8 @@ def test_citation_formats_are_one_click_away_behind_a_short_link():
     assert "function openCite(" in script
 
     # Three formats, each copied by clicking the citation itself.
-    assert 'copyBlock("APA", CITE_APA, "Click to copy")' in script
-    assert 'copyBlock("BibTeX", CITE_BIBTEX, "Click to copy")' in script
+    assert 'copyBlock("APA", CITE_APA, "Click to copy", false, true)' in script
+    assert 'copyBlock("BibTeX", CITE_BIBTEX, "Click to copy", false, true)' in script
     assert 'copyBlock("Citation file (.cff)", CITE_CFF_URL, "Click to copy link")' in script
     assert "navigator.clipboard.writeText(value)" in script
     assert ".copy-target {" in styles

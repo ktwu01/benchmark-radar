@@ -4010,6 +4010,17 @@ dialog::backdrop {
   border-color: var(--sea);
 }
 
+/* APA and BibTeX start collapsed: a reader who just wants the citation on
+   their clipboard should not have to scroll past both formats spelled out in
+   full first. The first click reveals the text at the same time it copies. */
+.copy-target.is-collapsed .copy-text {
+  display: none;
+}
+
+.copy-target.is-collapsed .copy-status {
+  margin-top: 0;
+}
+
 /* BibTeX and the agent prompt are written line by line and stay that way; APA
    and the bare URLs are single runs with no break opportunity, so they need
    `anywhere` to keep the dialog from growing wider than the viewport. */
