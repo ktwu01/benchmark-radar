@@ -100,15 +100,14 @@ npx skills add ktwu01/benchmark-radar
 如果 Benchmark Radar 对你的研究或评测工作有帮助，欢迎引用这份技术报告：
 
 ```bibtex
-@misc{wu_2026_22167102,
-  author       = {Wu, Koutian and Zhou, Junjie},
-  title        = {Benchmark Radar v0.9.0: Technical Report},
-  month        = aug,
-  year         = {2026},
-  publisher    = {Zenodo},
-  version      = {0.9.0},
-  doi          = {10.5281/zenodo.22167102},
-  url          = {https://doi.org/10.5281/zenodo.22167102}
+@misc{wu2026benchmarkradarlivingdatabase,
+      title={Benchmark Radar: A Living Database and Search Engine for AI Benchmarks and Evaluation},
+      author={Koutian Wu and Junjie Zhou and Ergan Shang and Jiayu Wang and Pengqian Han and Junkai Wang and Wanghan Xu},
+      year={2026},
+      eprint={2609.11115},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2609.11115},
 }
 ```
 

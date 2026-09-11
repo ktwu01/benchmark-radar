@@ -572,18 +572,20 @@ def view_seeds(
 # These are the verbatim public values used by openCite and openCli in app.js.
 # Tests compare both renderers so a change to either copy fails instead of
 # quietly giving a crawler a different setup prompt or citation than a reader.
-CITE_DOI_URL = "https://doi.org/10.5281/zenodo.22167102"
+CITE_DOI_URL = "https://arxiv.org/abs/2609.11115"
 CITE_CFF_URL = "https://github.com/ktwu01/benchmark-radar/blob/main/CITATION.cff"
-# The site dialog and the CLI reminder share citation.py's author list and
-# version, so the APA a reader copies is the APA an agent is asked for.
+# The site dialog and the CLI reminder share citation.py's title and author
+# list, so the APA a reader copies is the APA an agent is asked for.
 CITE_APA = apa_citation()
-CITE_BIBTEX = """@techreport{Wu_Benchmark_Radar_v0_9_0_2026,
-author = {Wu, Koutian and Zhou, Junjie},
-doi = {10.5281/zenodo.22167102},
-month = aug,
-title = {{Benchmark Radar v0.9.0: Technical Report}},
-url = {https://zenodo.org/records/22167102},
-year = {2026}
+CITE_BIBTEX = """@misc{wu2026benchmarkradarlivingdatabase,
+      title={Benchmark Radar: A Living Database and Search Engine for AI Benchmarks and Evaluation},
+      author={Koutian Wu and Junjie Zhou and Ergan Shang and Jiayu Wang and
+              Pengqian Han and Junkai Wang and Wanghan Xu},
+      year={2026},
+      eprint={2609.11115},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2609.11115},
 }"""
 
 # The catalogs the score layer reads. LLM Stats asks for credit visible to

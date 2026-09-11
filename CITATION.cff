@@ -7,6 +7,16 @@ authors:
     given-names: Koutian
   - family-names: Zhou
     given-names: Junjie
+  - family-names: Shang
+    given-names: Ergan
+  - family-names: Wang
+    given-names: Jiayu
+  - family-names: Han
+    given-names: Pengqian
+  - family-names: Wang
+    given-names: Junkai
+  - family-names: Xu
+    given-names: Wanghan
 repository-code: "https://github.com/ktwu01/benchmark-radar"
 url: "https://benchmark-radar.org/"
 license: MIT
@@ -16,17 +26,24 @@ abstract: >-
   A daily evidence-first radar and machine-readable corpus for AI benchmarks,
   evaluations, datasets, model-card reporting, and data quality.
 preferred-citation:
-  type: report
-  title: "Benchmark Radar v0.9.0: Technical Report"
+  type: article
+  title: "Benchmark Radar: A Living Database and Search Engine for AI Benchmarks and Evaluation"
   authors:
     - family-names: Wu
       given-names: Koutian
     - family-names: Zhou
       given-names: Junjie
-  doi: "10.5281/zenodo.22167102"
-  month: 8
+    - family-names: Shang
+      given-names: Ergan
+    - family-names: Wang
+      given-names: Jiayu
+    - family-names: Han
+      given-names: Pengqian
+    - family-names: Wang
+      given-names: Junkai
+    - family-names: Xu
+      given-names: Wanghan
+  doi: "10.48550/arXiv.2609.11115"
+  month: 9
   year: 2026
-  publisher:
-    name: Zenodo
-  url: "https://zenodo.org/records/22167102"
-  version: 0.9.0
+  url: "https://arxiv.org/abs/2609.11115"

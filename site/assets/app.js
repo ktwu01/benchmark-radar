@@ -8390,18 +8390,22 @@ function openContact(updateUrl = true) {
 
 // The published technical report. Contract tests keep these copyable strings
 // aligned with CITATION.cff and the server-rendered citation route.
-const CITE_DOI_URL = "https://doi.org/10.5281/zenodo.22167102";
+const CITE_DOI_URL = "https://arxiv.org/abs/2609.11115";
 const CITE_CFF_URL = "https://github.com/ktwu01/benchmark-radar/blob/main/CITATION.cff";
 const CITE_APA =
-  "Wu, K., & Zhou, J. (2026). Benchmark Radar v0.9.0: Technical Report (Version 0.9.0). " + CITE_DOI_URL;
+  "Wu, K., Zhou, J., Shang, E., Wang, J., Han, P., Wang, J., & Xu, W. (2026). " +
+  "Benchmark Radar: A living database and search engine for AI benchmarks and evaluation. " +
+  "arXiv:2609.11115. " +
+  CITE_DOI_URL;
 const CITE_BIBTEX = [
-  "@techreport{Wu_Benchmark_Radar_v0_9_0_2026,",
-  "author = {Wu, Koutian and Zhou, Junjie},",
-  "doi = {10.5281/zenodo.22167102},",
-  "month = aug,",
-  "title = {{Benchmark Radar v0.9.0: Technical Report}},",
-  "url = {https://zenodo.org/records/22167102},",
-  "year = {2026}",
+  "@misc{wu2026benchmarkradarlivingdatabase,",
+  "      title={Benchmark Radar: A Living Database and Search Engine for AI Benchmarks and Evaluation},",
+  "      author={Koutian Wu and Junjie Zhou and Ergan Shang and Jiayu Wang and Pengqian Han and Junkai Wang and Wanghan Xu},",
+  "      year={2026},",
+  "      eprint={2609.11115},",
+  "      archivePrefix={arXiv},",
+  "      primaryClass={cs.AI},",
+  "      url={https://arxiv.org/abs/2609.11115},",
   "}",
 ].join("\n");
 

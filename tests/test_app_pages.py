@@ -350,7 +350,7 @@ def test_utility_pages_ship_the_existing_dialog_open_with_content(tmp_path):
     _write(tmp_path, _dashboard())
     expected = {
         "cli": ("Query it locally (CLI version)", "npx skills add ktwu01/benchmark-radar"),
-        "cite": ("Cite this work", "@techreport{Wu_Benchmark_Radar"),
+        "cite": ("Cite this work", "@misc{wu2026benchmarkradarlivingdatabase"),
         "rubric": ("How priority is scored", "Priority is not benchmark quality."),
     }
     for utility, phrases in expected.items():

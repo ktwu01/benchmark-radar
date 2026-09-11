@@ -16,7 +16,7 @@ from benchmark_radar.snapshots import rebuild_dashboard, records_badge, write_sn
 README = Path("README.md")
 README_ZH = Path("README.zh-CN.md")
 SKILL = Path("skills/benchmark-radar/SKILL.md")
-TECHNICAL_REPORT = "https://zenodo.org/records/22167102"
+TECHNICAL_REPORT = "https://arxiv.org/abs/2609.11115"
 REPORT_PDF = "https://github.com/ktwu01/benchmark-radar-paper/blob/main/main.pdf"
 
 
@@ -107,25 +107,28 @@ def test_chinese_readme_mirrors_the_english_one():
 
 def test_readmes_link_the_current_technical_report():
     # The badge and the resource list point at the tracked LaTeX build, which is
-    # the current report and reads directly on GitHub. The Zenodo DOI stays in
-    # the citation block, where it names the frozen deposit.
+    # the current report and reads directly on GitHub. The arXiv link stays in
+    # the citation block, where it names the preferred citation.
     for readme in (README, README_ZH):
         text = readme.read_text(encoding="utf-8")
         assert f'<a href="{REPORT_PDF}">' in text
         assert "TECH%20REPORT" in text
         assert f"({REPORT_PDF})" in text
-        assert TECHNICAL_REPORT in text or "10.5281/zenodo.22167102" in text
+        assert TECHNICAL_REPORT in text
 
 
 def test_citation_metadata_prefers_the_technical_report():
     text = Path("CITATION.cff").read_text(encoding="utf-8")
     assert "preferred-citation:" in text
-    assert 'doi: "10.5281/zenodo.22167102"' in text
+    assert 'doi: "10.48550/arXiv.2609.11115"' in text
     assert f'url: "{TECHNICAL_REPORT}"' in text
 
 
-def test_public_bibtex_names_both_report_authors():
-    author = "author       = {Wu, Koutian and Zhou, Junjie}"
+def test_public_bibtex_names_all_report_authors():
+    author = (
+        "author={Koutian Wu and Junjie Zhou and Ergan Shang and Jiayu Wang and "
+        "Pengqian Han and Junkai Wang and Wanghan Xu}"
+    )
     for readme in (README, README_ZH):
         assert author in readme.read_text(encoding="utf-8")
 

@@ -27,7 +27,6 @@ This public ledger is rebuilt from GitHub once per day. Do not edit the totals b
 | Issue | Contributor | Deadline | Points |
 |---|---|---|---:|
 | [#541](https://github.com/ktwu01/benchmark-radar/issues/541) | @ergan-shang | 2026-09-15T02:16:37+00:00 | 18 |
-| [#533](https://github.com/ktwu01/benchmark-radar/issues/533) | @JunkaiWang-TheoPhy | 2026-09-11T01:53:54+00:00 | 8 |
 
 ## Earned points / 得分记录
 
