@@ -43,7 +43,7 @@ from .blog_shell import (
     render_page,
 )
 from .feed import ATOM_NAMESPACE, SITE_URL
-from .site_shell import breadcrumb_schema, esc, webpage_schema
+from .site_shell import breadcrumb_schema, esc, organization_reference, webpage_schema
 
 LATEST_POST_LIMIT = 30
 
@@ -104,8 +104,13 @@ def _post_page(post: BlogPost, chrome: SiteChrome, chrome_i18n: dict[str, str]) 
         "dateModified": post.updated,
         "inLanguage": ["en", "zh-Hans"] if post.translated else "en",
         "author": {"@type": "Organization", "name": "Benchmark Radar"},
-        "publisher": {"@id": f"{SITE_URL}/#organization"},
-        "isPartOf": {"@id": SITE_URL + BLOG_PATH},
+        "publisher": organization_reference(),
+        "isPartOf": {
+            "@type": "Blog",
+            "@id": f"{SITE_URL}{BLOG_PATH}#blog",
+            "name": "Benchmark Radar blog",
+            "url": SITE_URL + BLOG_PATH,
+        },
         "citation": [url for _, _, url in post.sources],
         "keywords": list(post.tags),
     }

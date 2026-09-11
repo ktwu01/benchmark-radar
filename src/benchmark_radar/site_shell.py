@@ -18,6 +18,32 @@ def json_ld(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, sort_keys=True).replace("</", "<\\/")
 
 
+def website_reference() -> dict[str, Any]:
+    """Self-describing `WebSite` node for `isPartOf`.
+
+    A bare `{"@id": ...}` only resolves where that node is defined. Only the
+    homepage and its route copies define `#website`, so Search Console reports
+    `Invalid object type for field "isPartOf"` on every generated page that
+    links to it. Carrying the type inline makes the reference valid anywhere.
+    """
+    return {
+        "@type": "WebSite",
+        "@id": f"{SITE_URL}/#website",
+        "name": "Benchmark Radar",
+        "url": f"{SITE_URL}/",
+    }
+
+
+def organization_reference() -> dict[str, Any]:
+    """Self-describing `Organization` node, for the same reason as above."""
+    return {
+        "@type": "Organization",
+        "@id": f"{SITE_URL}/#organization",
+        "name": "Benchmark Radar",
+        "url": f"{SITE_URL}/",
+    }
+
+
 def breadcrumb_schema(*items: tuple[str, str], canonical: str) -> dict[str, Any]:
     return {
         "@context": "https://schema.org",
@@ -46,5 +72,5 @@ def webpage_schema(
         "url": canonical,
         "description": description,
         "inLanguage": list(languages),
-        "isPartOf": {"@id": f"{SITE_URL}/#website"},
+        "isPartOf": website_reference(),
     }

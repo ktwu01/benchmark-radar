@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any
 
 from .feed import SITE_URL
+from .site_shell import website_reference
 
 DEFAULT_SHARD_DIR = Path("site/data/benchmarks")
 DEFAULT_PAGES_DIR = Path("site/benchmarks")
@@ -160,7 +161,7 @@ def _webpage_jsonld(slug: str, name: str, description: str) -> str:
         "url": _canonical(slug),
         "description": description,
         "inLanguage": ["en", "zh-Hans"],
-        "isPartOf": {"@id": f"{SITE_URL}/#website"},
+        "isPartOf": website_reference(),
         "about": {"@type": "Thing", "name": name, "description": description},
     }
     return _json_ld(payload)
@@ -304,7 +305,7 @@ def _directory_html(entries: list[tuple[str, str]]) -> str:
         "url": canonical,
         "description": _DIR_DESCRIPTION,
         "inLanguage": ["en", "zh-Hans"],
-        "isPartOf": {"@id": f"{SITE_URL}/#website"},
+        "isPartOf": website_reference(),
     }
     breadcrumb = {
         "@context": "https://schema.org",

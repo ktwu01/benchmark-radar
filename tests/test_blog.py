@@ -321,6 +321,17 @@ def _schemas(page: str) -> list[dict]:
     ]
 
 
+def test_posting_references_name_their_type_so_they_resolve_off_the_homepage(tmp_path):
+    """A bare `@id` resolves nowhere but the page defining it, which Search Console rejects."""
+    write_blog_with_chrome([_briefed()], tmp_path)
+    page = (tmp_path / "blog" / "2026-08-30" / "index.html").read_text(encoding="utf-8")
+    posting = next(p for p in _schemas(page) if p.get("@type") == "BlogPosting")
+    assert posting["isPartOf"]["@type"] == "Blog"
+    assert posting["isPartOf"]["url"] == f"{SITE_URL}{BLOG_PATH}"
+    assert posting["publisher"]["@type"] == "Organization"
+    assert posting["publisher"]["@id"] == f"{SITE_URL}/#organization"
+
+
 def test_each_page_carries_a_breadcrumb_back_to_the_blog(tmp_path):
     write_blog_with_chrome([_briefed()], tmp_path)
     page = (tmp_path / "blog" / "2026-08-30" / "index.html").read_text(encoding="utf-8")

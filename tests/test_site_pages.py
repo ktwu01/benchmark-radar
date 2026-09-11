@@ -156,6 +156,17 @@ def test_jsonld_blocks_are_single_objects_with_expected_types(tmp_path):
     assert crumbs == ["Benchmark Radar", "Benchmark directory", "Alpha Bench"]
 
 
+def test_node_references_carry_their_own_type_so_they_resolve_off_the_homepage(tmp_path):
+    """A bare `@id` resolves nowhere but the homepage, which Search Console rejects."""
+    output = _generated_pages(tmp_path, _shard("alpha-bench", "Alpha Bench"))
+    directory = (output / "index.html").read_text(encoding="utf-8")
+    for text in (_page_text(output, "alpha-bench"), directory):
+        part_of = _jsonld_blocks(text)[0]["isPartOf"]
+        assert part_of["@type"] == "WebSite"
+        assert part_of["@id"] == "https://benchmark-radar.org/#website"
+        assert part_of["url"] == "https://benchmark-radar.org/"
+
+
 def test_values_are_escaped_and_cannot_inject_markup(tmp_path):
     output = _generated_pages(
         tmp_path,
