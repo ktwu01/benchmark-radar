@@ -1344,6 +1344,7 @@ def test_static_html_references_existing_local_assets():
         "rubric/",
         "cli/",
         "cite/",
+        "about/",
     }
     missing = []
     for reference in parser.local_refs:

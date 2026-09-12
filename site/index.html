@@ -247,15 +247,22 @@
                carries no data-view: app.js only intercepts clicks on elements that
                have one, and a brief has to arrive as a full page load. -->
           <a href="/blog/" data-i18n="Blog">Blog</a>
+          <!-- Same rule as the blog link: /about/ is a standalone document, so
+               it carries no data-view and arrives as a full page load. -->
+          <a href="/about/" data-i18n="About">About</a>
+          <!-- The label reads Publications because that is the word a reader
+               looks for; the path stays /cite/, which is already indexed and
+               linked from the paper. /publications/ and /publication/ redirect
+               here so a typed URL still lands. -->
           <a
             href="/cite/"
             id="cite-nav"
             aria-haspopup="dialog"
             aria-controls="cite-dialog"
             aria-expanded="false"
-            data-i18n="Cite"
+            data-i18n="Publications"
           >
-            Cite
+            Publications
           </a>
         </nav>
       </div>

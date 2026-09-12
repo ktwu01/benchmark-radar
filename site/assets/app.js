@@ -975,6 +975,8 @@ const I18N = {
     "If this saved you research time, cite the work, star the repo and help other eval builders find it.":
       "如果它帮你节省了研究时间，请引用这项工作、给仓库点 Star，让更多评测开发者找到它。",
     Cite: "引用",
+    About: "关于",
+    Publications: "论文与引用",
     "Cite this work": "引用这项工作",
     "Pick the format your paper or repository needs, then click it to copy.":
       "选择你的论文或仓库需要的格式，点击即可复制。",
@@ -1695,9 +1697,9 @@ const UTILITY_SEO = {
     canonical: "/cli/",
   },
   cite: {
-    title: "Cite Benchmark Radar | DOI, APA, and BibTeX",
+    title: "Benchmark Radar publications and citation | Paper, APA, BibTeX",
     description:
-      "Copy the Benchmark Radar technical report citation in APA or BibTeX format, or open the repository's citation file and permanent DOI.",
+      "Read the Benchmark Radar technical report and copy its citation in APA or BibTeX format, or open the repository's citation file and permanent DOI.",
     canonical: "/cite/",
   },
   rubric: {

@@ -34,7 +34,7 @@ INDEXABLE_VIEWS: tuple[tuple[str, str], ...] = (
     ("Trends", "/trends/"),
     ("Explore", "/explore/"),
     ("CLI", "/cli/"),
-    ("Cite", "/cite/"),
+    ("Publications", "/cite/"),
     ("Scoring rubric", "/rubric/"),
 )
 
@@ -43,7 +43,7 @@ BENCHMARK_DIRECTORY_PATH = "/benchmarks/"
 ET.register_namespace("sm", SITEMAP_NAMESPACE)
 
 
-def _lastmod_date(snapshots: list[dict[str, Any]]) -> str | None:
+def site_lastmod(snapshots: list[dict[str, Any]]) -> str | None:
     """Date of the newest snapshot, or None when there is no history yet.
 
     Derived from the snapshots rather than the clock so two rebuilds over the
@@ -71,11 +71,17 @@ def sitemap_tree(
     *,
     view_paths: Sequence[str] | None = None,
     blog_entries: Sequence[tuple[str, str | None]] = (),
+    page_entries: Sequence[tuple[str, str | None]] = (),
 ) -> ET.ElementTree:
     """Build one stable urlset covering views, benchmark pages and daily briefs.
 
     ``view_paths`` is what the build actually wrote. Passing None lists every
     view, which is what a caller that does not write pages at all wants.
+
+    ``page_entries`` is for standalone documents that are neither a dashboard
+    view nor a brief, such as /about/. They are listed separately because
+    ``INDEXABLE_VIEWS`` is the set of pages app.js owns the metadata for, and a
+    hand-written page has no entry in its SEO tables.
 
     ``benchmark_entries`` and ``blog_entries`` each carry their own lastmod
     rather than the site-wide one: a benchmark whose newest score is two years
@@ -85,7 +91,7 @@ def sitemap_tree(
     and lists nothing, the same rule the views follow.
     """
     root = ET.Element(_q("urlset"))
-    lastmod = _lastmod_date(snapshots)
+    lastmod = site_lastmod(snapshots)
     published = None if view_paths is None else {"/", *view_paths}
     entries = [
         (path, lastmod) for _, path in INDEXABLE_VIEWS if published is None or path in published
@@ -93,6 +99,7 @@ def sitemap_tree(
     entries.append((BENCHMARK_DIRECTORY_PATH, lastmod))
     entries.extend(benchmark_entries)
     entries.extend(blog_entries)
+    entries.extend(page_entries)
     seen: set[str] = set()
     for path, entry_lastmod in entries:
         if path in seen:
@@ -112,11 +119,16 @@ def write_sitemap(
     *,
     view_paths: Sequence[str] | None = None,
     blog_entries: Sequence[tuple[str, str | None]] = (),
+    page_entries: Sequence[tuple[str, str | None]] = (),
 ) -> Path:
     """Write a deterministic UTF-8 sitemap beside the published data."""
     output.parent.mkdir(parents=True, exist_ok=True)
     tree = sitemap_tree(
-        snapshots, benchmark_entries, view_paths=view_paths, blog_entries=blog_entries
+        snapshots,
+        benchmark_entries,
+        view_paths=view_paths,
+        blog_entries=blog_entries,
+        page_entries=page_entries,
     )
     ET.indent(tree, space="  ")
     tree.write(output, encoding="utf-8", xml_declaration=True)
