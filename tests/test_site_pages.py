@@ -303,6 +303,8 @@ def test_benchmark_lastmod_comes_from_the_pages_own_evidence(tmp_path):
                 {"reported_date": "2025-05-22"},
                 {"reported_date": "2026-01-09"},
                 {"reported_date": "not a date"},
+                # Right shape, no such day. It must not reach the sitemap.
+                {"reported_date": "2026-02-30"},
             ]
         }
     }

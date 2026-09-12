@@ -21,8 +21,8 @@ from __future__ import annotations
 
 import html
 import json
-import re
 import shutil
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -33,8 +33,6 @@ DEFAULT_SHARD_DIR = Path("site/data/benchmarks")
 DEFAULT_PAGES_DIR = Path("site/benchmarks")
 
 _DESCRIPTION_LIMIT = 155
-
-_ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 _DIR_DESCRIPTION = (
     "Every benchmark in the Benchmark Radar catalog, each with its own page "
@@ -379,13 +377,27 @@ def benchmark_slugs(shard_dir: Path) -> list[str]:
     return sorted(path.stem for path in shard_dir.glob("*.json"))
 
 
+def _is_calendar_date(value: str) -> bool:
+    """True only for a real `YYYY-MM-DD` day.
+
+    Shape alone is not enough: `2023-02-29` matches the pattern and would reach
+    the sitemap as an invalid `lastmod`. The round trip also rejects the forms
+    `date.fromisoformat` accepts but the sitemap spec does not, such as
+    `20230101`.
+    """
+    try:
+        return date.fromisoformat(value).isoformat() == value
+    except ValueError:
+        return False
+
+
 def _shard_lastmod(shard: dict[str, Any]) -> str | None:
     """Newest date the page's own evidence carries, or None when it carries none.
 
     A page changes when a score lands on it or when the record itself is dated,
     not when some other benchmark's snapshot arrives. Both fields are stored as
-    plain `YYYY-MM-DD`, so the newest one sorts lexically; anything else is
-    ignored rather than guessed at.
+    plain `YYYY-MM-DD`, so the newest one sorts lexically; anything a calendar
+    rejects is dropped rather than passed through to the sitemap.
     """
     dates = {
         row.get("reported_date")
@@ -393,7 +405,7 @@ def _shard_lastmod(shard: dict[str, Any]) -> str | None:
         for row in (source or {}).get("rows") or ()
     }
     dates.add((shard.get("record") or {}).get("released"))
-    dated = {value for value in dates if isinstance(value, str) and _ISO_DATE.fullmatch(value)}
+    dated = {value for value in dates if isinstance(value, str) and _is_calendar_date(value)}
     return max(dated) if dated else None
 
 
