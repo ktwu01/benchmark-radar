@@ -9,6 +9,14 @@ from pathlib import Path
 
 import pytest
 
+from benchmark_radar.citation import (
+    ARXIV_ID,
+    ARXIV_URL,
+    apa_citation,
+    bibtex_citation,
+    citation_block,
+    latex_citation,
+)
 from benchmark_radar.models import RadarItem, RadarRun, SourceHealth
 from benchmark_radar.query import QueryError, QueryPaths, QueryService
 from benchmark_radar.query_cli import run_query_cli
@@ -314,7 +322,7 @@ def test_recent_and_status_report_snapshot_health(tmp_path: Path) -> None:
     assert recent["results"][0]["source_id"] == "example/new-agent-bench"
     assert status["catalog"]["count"] == 3
     assert status["retrieval_mode"] == "health_check"
-    assert status["data"] == {"source": "local"}
+    assert status["data"] == {"source": "local", "citation": citation_block()}
     assert status["catalog"]["complete"] is True
     assert status["catalog"]["shard_count"] == 3
     assert status["catalog"]["validated_shard_count"] == 3
@@ -474,7 +482,7 @@ def test_healthz_identifies_local_health_check_contract(tmp_path: Path) -> None:
     assert payload == {
         "schema_version": 6,
         "retrieval_mode": "health_check",
-        "data": {"source": "local"},
+        "data": {"source": "local", "citation": citation_block()},
         "status": "ok",
         "data_status": "ok",
     }
@@ -588,6 +596,24 @@ def test_cli_ends_human_output_with_citation_reminder(tmp_path: Path, capsys) ->
         "arXiv:2609.11115. https://arxiv.org/abs/2609.11115"
     ) in output
     assert "https://benchmark-radar.org/#cite" in output
+
+
+def test_search_payload_carries_the_paper_for_stdout_only_agents(tmp_path: Path) -> None:
+    # Issue #483 follow-up: the reminder rides stderr, so an agent that reads
+    # stdout alone (a `jq` pipe, a framework that captures one stream) never
+    # sees the paper. The same citation has to travel in the payload, in a form
+    # that goes straight into a related-work table.
+    service = QueryService(_catalog(tmp_path))
+
+    result = service.search("agent workbench", scope="catalog")
+
+    citation = result["data"]["citation"]
+    assert citation["arxiv_id"] == ARXIV_ID
+    assert citation["url"] == ARXIV_URL
+    assert citation["apa"] == apa_citation()
+    assert citation["bibtex"] == bibtex_citation()
+    assert citation["latex"] == latex_citation()
+    assert citation["latex"] == "\\cite{wu2026benchmarkradarlivingdatabase}"
 
 
 def test_cli_json_mode_keeps_stdout_parseable_and_cites_on_stderr(tmp_path: Path, capsys) -> None:

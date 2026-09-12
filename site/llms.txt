@@ -10,19 +10,23 @@ single cross-source ranking, because the sources measure different things and
 say so. Where a value is missing, the site says it is missing rather than
 showing a zero.
 
-The interactive dashboard has four views. Each heavy view also arrives with a
-server-delivered first screen in the same visual language. The benchmark
-directory and the daily brief are plain pages that need no JavaScript to read.
+The interactive dashboard has five views. Each heavy view also arrives with a
+server-delivered first screen in the same visual language. The project
+overview, the benchmark directory, and the daily brief are plain pages that
+need no JavaScript to read.
 
 ## Start here
 
 - [Benchmark Radar home](https://benchmark-radar.org/): today's newly collected benchmarks, evaluations, and datasets, with the evidence behind each one.
+- [About Benchmark Radar](https://benchmark-radar.org/about/): what the project collects, where the records come from, and every place it publishes. Plain prose, no JavaScript needed.
+- [Technical report](https://arxiv.org/abs/2609.11115): *Benchmark Radar: A Living Database and Search Engine for AI Benchmarks and Evaluation* (arXiv:2609.11115), the paper describing how the collection, catalog, and retrieval work. This is the preferred citation for the project.
 - [Benchmark directory](https://benchmark-radar.org/benchmarks/): every benchmark in the catalog, each with its own page covering what it tests, who published it, and which scores are on record.
 - [Model card adoption leaderboard](https://benchmark-radar.org/leaderboard/): which benchmarks frontier labs report in their own model and system cards, plus reported scores over time.
+- [Benchmark saturation](https://benchmark-radar.org/saturation/): benchmarks ranked by their highest reported score, and each score's history over time with the source, date, and test conditions it was read from.
 - [Discovery trends](https://benchmark-radar.org/trends/): how many new benchmarks arrive by category, source, and day.
 - [Explore the connections](https://benchmark-radar.org/explore/): how benchmarks, datasets, organizations, and sources link to each other.
 - [Command-line access](https://benchmark-radar.org/cli/): how to install and use the offline benchmark search CLI.
-- [Citation information](https://benchmark-radar.org/cite/): the preferred project citation and machine-readable citation metadata.
+- [Citation information](https://benchmark-radar.org/cite/): copy-paste APA and BibTeX for that paper, plus machine-readable citation metadata.
 - [Scoring rubric](https://benchmark-radar.org/rubric/): how evidence is collected and scored.
 - [Daily brief](https://benchmark-radar.org/blog/): one page per collection day covering what appeared, how strong the evidence was, and what the record does not support. The [archive](https://benchmark-radar.org/blog/archive/) lists every day.
 

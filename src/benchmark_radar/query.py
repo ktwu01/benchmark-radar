@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .citation import citation_block
 from .snapshots import REQUIRED_SOURCES, load_snapshots
 
 QUERY_SCHEMA_VERSION = 6
@@ -452,8 +453,13 @@ class QueryService:
         return list(latest_by_identity.values())
 
     def _provenance(self) -> dict[str, Any]:
+        # `citation` rides here rather than in a separate top-level key so every
+        # payload command reports it through the one provenance path (issue
+        # #483 follow-up): an agent that reads stdout only still receives the
+        # paper, in a form it can put into a related-work table.
         return {
             "source": "local",
+            "citation": citation_block(),
             **({"data_version": self.paths.data_version} if self.paths.data_version else {}),
             **({"generated_at": self.paths.generated_at} if self.paths.generated_at else {}),
             **({"synced_at": self.paths.synced_at} if self.paths.synced_at else {}),

@@ -9,7 +9,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from export_report_figure_data import count_ingest_sources
 
-from benchmark_radar.citation import apa_citation
+from benchmark_radar.citation import (
+    ARXIV_ID,
+    ARXIV_URL,
+    AUTHORS_BIBTEX,
+    BIBTEX_KEY,
+    TITLE_ARXIV,
+    apa_citation,
+)
 from benchmark_radar.export import write_exports
 from benchmark_radar.models import RadarItem, RadarRun
 from benchmark_radar.snapshots import rebuild_dashboard, records_badge, write_snapshot
@@ -132,6 +139,35 @@ def test_public_bibtex_names_all_report_authors():
     )
     for readme in (README, README_ZH):
         assert author in readme.read_text(encoding="utf-8")
+
+
+def test_every_hand_copied_bibtex_entry_matches_citation_py():
+    """The BibTeX entry is hand-copied into five surfaces, so compare them.
+
+    #601 shipped the arXiv entry to all five in one commit and left nothing
+    checking that they agree. The next edit can update one and silently leave
+    the rest stale, so each field is compared against citation.py. Whitespace
+    is normalized first because the Python and JavaScript copies wrap the
+    author line.
+    """
+    surfaces = (
+        README,
+        README_ZH,
+        Path("CITATION.md"),
+        Path("src/benchmark_radar/app_seeds.py"),
+        Path("site/assets/app.js"),
+    )
+    fields = (
+        f"@misc{{{BIBTEX_KEY},",
+        f"title={{{TITLE_ARXIV}}};",
+        f"author={{{AUTHORS_BIBTEX}}};",
+        f"eprint={{{ARXIV_ID}}};",
+        f"url={{{ARXIV_URL}}};",
+    )
+    for surface in surfaces:
+        text = " ".join(surface.read_text(encoding="utf-8").split())
+        for field in fields:
+            assert field.replace(";", ",") in text, f"{surface} is missing {field}"
 
 
 def test_citation_page_offers_apa_and_routes_agents_to_the_cff():

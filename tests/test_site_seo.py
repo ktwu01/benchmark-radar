@@ -3,8 +3,16 @@ import re
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
+from benchmark_radar.blog_shell import BLOG_ARCHIVE_PATH, BLOG_PATH
+from benchmark_radar.citation import ARXIV_ID, ARXIV_URL, TITLE
 from benchmark_radar.feed import SITE_URL
-from benchmark_radar.site_seo import INDEXABLE_VIEWS, sitemap_tree, write_sitemap
+from benchmark_radar.site_about import ABOUT_PATH, ALIAS_PATHS
+from benchmark_radar.site_seo import (
+    BENCHMARK_DIRECTORY_PATH,
+    INDEXABLE_VIEWS,
+    sitemap_tree,
+    write_sitemap,
+)
 
 NS = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 
@@ -172,3 +180,79 @@ def test_sitemap_lists_the_blog_with_a_per_brief_lastmod():
 def test_a_build_that_writes_no_blog_lists_no_blog_urls():
     root = sitemap_tree([{"generated_at": "2026-09-01T02:17:00+00:00"}]).getroot()
     assert not [node.text for node in root.findall("sm:url/sm:loc", NS) if "/blog/" in node.text]
+
+
+def test_sitemap_dates_a_standalone_page_with_the_site_date():
+    """/about/ is prose, so it has no view entry and no brief of its own.
+
+    It travels as a page entry instead, and its date is the site's rather than
+    a per-record one: the page is rewritten from the shared chrome on every
+    build that writes pages at all.
+    """
+    root = sitemap_tree(
+        [{"generated_at": "2026-09-01T02:17:00+00:00"}],
+        view_paths=[],
+        page_entries=[(ABOUT_PATH, "2026-09-01")],
+    ).getroot()
+    entries = {
+        node.find("sm:loc", NS).text: getattr(node.find("sm:lastmod", NS), "text", None)
+        for node in root.findall("sm:url", NS)
+    }
+    assert entries[f"{SITE_URL}{ABOUT_PATH}"] == "2026-09-01"
+
+
+def test_a_data_only_build_lists_no_standalone_pages():
+    # Same rule the views and the blog follow: a build that writes no pages
+    # passes nothing and lists nothing, rather than promising a crawler a URL
+    # this deploy did not publish.
+    root = sitemap_tree([{"generated_at": "2026-09-01T02:17:00+00:00"}]).getroot()
+    urls = [node.text for node in root.findall("sm:url/sm:loc", NS)]
+    assert f"{SITE_URL}{ABOUT_PATH}" not in urls
+
+
+def test_llms_txt_lists_every_page_the_sitemap_publishes():
+    """llms.txt is the hand-written index; the sitemap is generated.
+
+    Nothing tied the two together, so /saturation/ and /about/ reached the
+    sitemap and were never added here. An agent reading llms.txt alone could
+    not find them. The expected paths are derived from the same constants the
+    sitemap builds from, so adding a page to the site fails this test until
+    llms.txt describes it.
+    """
+    llms = Path("site/llms.txt").read_text(encoding="utf-8")
+    published = [
+        *(path for _, path in INDEXABLE_VIEWS),
+        BENCHMARK_DIRECTORY_PATH,
+        BLOG_PATH,
+        BLOG_ARCHIVE_PATH,
+        ABOUT_PATH,
+    ]
+
+    for path in published:
+        assert f"{SITE_URL}{path})" in llms, f"llms.txt does not link {path}"
+
+
+def test_llms_txt_sends_agents_to_canonicals_not_redirects():
+    # The alias paths exist for a reader who types "publications"; each one is
+    # a redirect into /cite/. Naming one here would spend an agent's request on
+    # a hop and hand it a non-canonical URL to quote.
+    llms = Path("site/llms.txt").read_text(encoding="utf-8")
+
+    for alias, _ in ALIAS_PATHS:
+        assert f"{SITE_URL}{alias}" not in llms
+
+
+def test_llms_txt_names_the_paper_it_asks_agents_to_cite():
+    """llms.txt is the first file an agent or answer engine reads.
+
+    The preferred citation is the arXiv report, so the paper has to be named
+    there rather than one request deeper behind /cite/. The identifiers come
+    from citation.py, so this surface cannot drift from the citation contract.
+    """
+    llms = Path("site/llms.txt").read_text(encoding="utf-8")
+
+    assert ARXIV_ID in llms
+    assert ARXIV_URL in llms
+    # Written in arXiv's title case, so compare against citation.py's APA
+    # sentence case without pinning the exact casing in two places.
+    assert TITLE.lower() in llms.lower()
