@@ -160,13 +160,6 @@ def _description(snapshot: dict[str, Any]) -> str:
     )
 
 
-def _description_zh(snapshot: dict[str, Any]) -> str | None:
-    bullets = _briefing_of(snapshot).get("bullets_zh") or []
-    if not bullets:
-        return None
-    return _clip(str(bullets[0]), trailing="，。；：")
-
-
 def _citations(
     snapshot: dict[str, Any], *, allow_fallback: bool
 ) -> tuple[tuple[str, str, str], ...]:
@@ -444,5 +437,4 @@ def build_post(snapshot: dict[str, Any]) -> BlogPost:
         body_en=body("en"),
         body_zh=body("zh") if translated else None,
         title_zh=title_zh if translated else None,
-        description_zh=_description_zh(snapshot),
     )

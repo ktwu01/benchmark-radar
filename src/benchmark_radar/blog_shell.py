@@ -77,7 +77,6 @@ class BlogPost:
     body_en: str
     body_zh: str | None
     title_zh: str | None
-    description_zh: str | None
 
     @property
     def path(self) -> str:
