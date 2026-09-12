@@ -2867,7 +2867,12 @@ def test_heading_outline_and_scale_stay_quiet():
     visible = [name for name, attrs, _ in sections if " hidden" not in attrs]
     assert visible == ["today"], visible
 
-    assert '<h1 id="today-heading" class="today-heading" data-i18n="Today\'s radar">' in html
+    # Today's h1 names the site, not the slice of it currently listed: app.js
+    # rewrites the results caption to "All dates" or "Past 7 days" as the reader
+    # changes the range, and an h1 that changes with a filter is not a page
+    # title. The caption stays an h2 directly above the rows it counts.
+    assert '<h1 data-i18n="Search AI, LLM, agent, and multimodal benchmarks">' in html
+    assert '<h2 id="today-heading" class="today-heading" data-i18n="Today\'s radar">' in html
     for heading_id in (
         "leaderboard-heading",
         "saturation-heading",
@@ -2876,7 +2881,7 @@ def test_heading_outline_and_scale_stay_quiet():
     ):
         assert f'<h1 id="{heading_id}"' in html
 
-    # The today h1 renders exactly like the counts caption beside it: the shared
+    # The today results caption renders exactly like the counts beside it: the shared
     # small-caps utility group supplies face/size/case, and this rule only
     # mutes color and weight. No font-size override may reappear here.
     marker = "#today-view .section-title h1,"

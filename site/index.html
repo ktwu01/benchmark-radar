@@ -18,25 +18,25 @@
     <!-- br:head-seo -->
     <meta
       name="description"
-      content="Track new AI benchmarks, compare model-card adoption and reported scores, explore trends, and download an open, evidence-linked dataset updated daily."
+      content="Search an open database of AI and LLM benchmarks. Every benchmark gets its own page carrying the paper, code, dataset, leaderboard and scores it has."
     >
     <!-- No data-i18n here. applyViewSeo in app.js owns the title, so a
          translation key on this element fought it: switching language
          replaced the leaderboard's title with the homepage's. -->
-    <title>Benchmark Radar: AI Benchmark Tracker &amp; Dataset</title>
+    <title>AI Benchmark Search Engine &amp; Database | Benchmark Radar</title>
     <meta
       property="og:title"
-      content="Benchmark Radar: AI Benchmark Tracker &amp; Dataset"
+      content="AI Benchmark Search Engine &amp; Database | Benchmark Radar"
     >
     <meta
       property="og:description"
-      content="Track new AI benchmarks, compare model-card adoption and reported scores, explore trends, and download an open, evidence-linked dataset updated daily."
+      content="Search an open database of AI and LLM benchmarks. Every benchmark gets its own page carrying the paper, code, dataset, leaderboard and scores it has."
     >
     <meta property="og:url" content="https://benchmark-radar.org/">
-    <meta name="twitter:title" content="Benchmark Radar: AI Benchmark Tracker &amp; Dataset">
+    <meta name="twitter:title" content="AI Benchmark Search Engine &amp; Database | Benchmark Radar">
     <meta
       name="twitter:description"
-      content="Track new AI benchmarks, model-card adoption, reported scores, and trends in one open dataset updated daily."
+      content="Search an open database of AI, LLM, agent and multimodal benchmarks, each with its paper, code, dataset and reported scores."
     >
     <link rel="canonical" href="https://benchmark-radar.org/">
     <!-- /br:head-seo -->
@@ -344,6 +344,19 @@
 
     <main id="main-content" tabindex="-1">
       <section class="view" id="today-view" aria-label="Today">
+        <!-- The page's one H1. It names what the whole site is rather than
+             what the list below currently shows, because the heading over the
+             results is rewritten as the reader changes the date range and a
+             heading that says "Past 7 days" is not what this page is. -->
+        <div class="view-intro">
+          <h1 data-i18n="Search AI, LLM, agent, and multimodal benchmarks">
+            Search AI, LLM, agent, and multimodal benchmarks
+          </h1>
+          <p data-i18n="An open database of AI benchmarks. Every benchmark gets its own page carrying the paper, code, dataset and reported scores it has, rebuilt every day.">
+            An open database of AI benchmarks. Every benchmark gets its own page carrying
+            the paper, code, dataset and reported scores it has, rebuilt every day.
+          </p>
+        </div>
         <!-- The toolbar stays one compact row so the results below stay
              above the fold: search, the scan date, a trigger that opens the
              secondary filters, and a refresh control. The badge on the
@@ -423,7 +436,7 @@
         <div class="content-grid">
           <div>
             <div class="section-title">
-              <h1 id="today-heading" class="today-heading" data-i18n="Today's radar">Today's radar</h1>
+              <h2 id="today-heading" class="today-heading" data-i18n="Today's radar">Today's radar</h2>
               <div class="results-meta" aria-live="polite">
                 <span id="today-breakdown"></span>
                 <span id="today-sort"></span>

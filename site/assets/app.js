@@ -977,6 +977,8 @@ const I18N = {
     Cite: "引用",
     About: "关于",
     Publications: "论文与引用",
+    "Search AI, LLM, agent, and multimodal benchmarks": "搜索 AI、大模型、智能体与多模态 benchmark",
+    "An open database of AI benchmarks. Every benchmark gets its own page carrying the paper, code, dataset and reported scores it has, rebuilt every day.": "一个开放的 AI benchmark 数据库。每条 benchmark 都有独立页面，收录论文、代码、数据集与已公布分数，每天重建。",
     "Cite this work": "引用这项工作",
     "Pick the format your paper or repository needs, then click it to copy.":
       "选择你的论文或仓库需要的格式，点击即可复制。",
@@ -1655,9 +1657,9 @@ async function onPopState() {
 // translates through data-i18n.
 const VIEW_SEO = {
   today: {
-    title: "Benchmark Radar: AI Benchmark Tracker & Dataset",
+    title: "AI Benchmark Search Engine & Database | Benchmark Radar",
     description:
-      "A daily evidence-first map of new AI benchmarks, evaluations, and datasets, collected every day from arXiv, GitHub, Hugging Face, OpenReview, Semantic Scholar, Hacker News, and first-party lab feeds.",
+      "Search an open database of AI and LLM benchmarks. Every benchmark gets its own page carrying the paper, code, dataset, leaderboard and scores it has.",
     canonical: "/",
   },
   leaderboard: {
