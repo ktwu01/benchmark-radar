@@ -182,6 +182,34 @@ def test_a_build_that_writes_no_blog_lists_no_blog_urls():
     assert not [node.text for node in root.findall("sm:url/sm:loc", NS) if "/blog/" in node.text]
 
 
+def test_sitemap_dates_a_standalone_page_with_the_site_date():
+    """/about/ is prose, so it has no view entry and no brief of its own.
+
+    It travels as a page entry instead, and its date is the site's rather than
+    a per-record one: the page is rewritten from the shared chrome on every
+    build that writes pages at all.
+    """
+    root = sitemap_tree(
+        [{"generated_at": "2026-09-01T02:17:00+00:00"}],
+        view_paths=[],
+        page_entries=[(ABOUT_PATH, "2026-09-01")],
+    ).getroot()
+    entries = {
+        node.find("sm:loc", NS).text: getattr(node.find("sm:lastmod", NS), "text", None)
+        for node in root.findall("sm:url", NS)
+    }
+    assert entries[f"{SITE_URL}{ABOUT_PATH}"] == "2026-09-01"
+
+
+def test_a_data_only_build_lists_no_standalone_pages():
+    # Same rule the views and the blog follow: a build that writes no pages
+    # passes nothing and lists nothing, rather than promising a crawler a URL
+    # this deploy did not publish.
+    root = sitemap_tree([{"generated_at": "2026-09-01T02:17:00+00:00"}]).getroot()
+    urls = [node.text for node in root.findall("sm:url/sm:loc", NS)]
+    assert f"{SITE_URL}{ABOUT_PATH}" not in urls
+
+
 def test_llms_txt_lists_every_page_the_sitemap_publishes():
     """llms.txt is the hand-written index; the sitemap is generated.
 
