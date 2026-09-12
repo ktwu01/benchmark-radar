@@ -133,6 +133,7 @@ Each dashboard view and public utility is a real page at its own path:
 
 ```text
 /leaderboard/
+/saturation/
 /trends/
 /explore/
 /cli/
