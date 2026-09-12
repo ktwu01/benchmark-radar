@@ -601,7 +601,20 @@ def test_new_benchmarks_do_not_reuse_an_existing_benchmarks_alias():
         for spelling in spellings:
             claimed.setdefault(spelling.strip().lower(), set()).add(str(benchmark["id"]))
 
-    for spelling in ("healthbench professional", "frontiercode", "vibench"):
+    # "vbench" is the one that matters here: the registry already carries
+    # MVbench, LVBench and JointAVBench, and a lowercased substring match
+    # would have made the video-generation suite indistinguishable from the
+    # video-understanding benchmarks it is unrelated to.
+    for spelling in (
+        "healthbench professional",
+        "frontiercode",
+        "vibench",
+        "vbench",
+        "vbench++",
+        "vbench-2.0",
+        "evaluation agent",
+        "uni-mmmu",
+    ):
         assert len(claimed.get(spelling, set())) == 1, (
             f"{spelling!r} resolves to more than one benchmark id"
         )
@@ -855,3 +868,28 @@ def test_shipped_registry_tracks_frontierchallenge_without_claiming_adoption():
         "Codex",
         "Frontier Agent (Agent Team)",
     }
+
+
+def test_the_registrys_vbench_is_linked_to_the_crawl_record_of_the_same_benchmark():
+    # The committed OpenCompass crawl already holds VBench (opencompass:1375,
+    # the same Vchitect/VBench repository and the same introducing paper), with
+    # a release date and publisher the registry entry has none of. Without a
+    # reviewed group the catalog publishes two VBench rows that do not name each
+    # other and the registry row stays undated, which hides it from every dated
+    # leaderboard era. The group names the crawl as the donor so the date and
+    # publisher arrive by inheritance rather than being copied in unsourced.
+    identity = yaml.safe_load(
+        (Path("data/catalog/identity.yml")).read_text(encoding="utf-8"),
+    )
+    groups = [
+        group
+        for group in identity["equivalent"]
+        if "model-reports:vbench" in (group.get("members") or [])
+    ]
+
+    assert len(groups) == 1, "the registry's VBench belongs to exactly one equivalence group"
+    group = groups[0]
+    assert set(group["members"]) == {"model-reports:vbench", "opencompass:1375"}
+    assert group["inherit_from"] == "opencompass:1375"
+    # VBench++ and VBench-2.0 are separate instruments, never members here.
+    assert not {member for member in group["members"] if member.startswith("model-reports:vbench_")}
