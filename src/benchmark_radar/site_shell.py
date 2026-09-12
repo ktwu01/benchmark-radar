@@ -9,6 +9,17 @@ from typing import Any
 
 from .feed import SITE_URL
 
+# The reader-facing name of every score source. Shared because the dashboard
+# seeds and the static benchmark pages both label the same partitions, and a
+# page that calls a source `opencompass_hub` while the dashboard calls it
+# OpenCompass Hub reads as two different catalogs.
+SOURCE_LABELS = {
+    "model_reports": "Model reports",
+    "llm_stats": "LLM Stats",
+    "artificial_analysis": "Artificial Analysis",
+    "opencompass_hub": "OpenCompass Hub",
+}
+
 
 def esc(value: Any) -> str:
     return html.escape(str(value), quote=True)

@@ -975,6 +975,11 @@ const I18N = {
     "If this saved you research time, cite the work, star the repo and help other eval builders find it.":
       "如果它帮你节省了研究时间，请引用这项工作、给仓库点 Star，让更多评测开发者找到它。",
     Cite: "引用",
+    About: "关于",
+    "About this site": "关于本站",
+    Publications: "论文与引用",
+    "Search AI, LLM, agent, multimodal, and AI-for-science benchmarks":
+      "搜索 AI、大模型、智能体、多模态与科学智能 benchmark",
     "Cite this work": "引用这项工作",
     "Pick the format your paper or repository needs, then click it to copy.":
       "选择你的论文或仓库需要的格式，点击即可复制。",
@@ -1653,9 +1658,9 @@ async function onPopState() {
 // translates through data-i18n.
 const VIEW_SEO = {
   today: {
-    title: "Benchmark Radar: AI Benchmark Tracker & Dataset",
+    title: "AI Benchmark Search Engine & Database | Benchmark Radar",
     description:
-      "A daily evidence-first map of new AI benchmarks, evaluations, and datasets, collected every day from arXiv, GitHub, Hugging Face, OpenReview, Semantic Scholar, Hacker News, and first-party lab feeds.",
+      "Search an open database of AI, LLM, agent, multimodal and AI-for-science benchmarks, each with its own page carrying the paper, code, dataset and scores.",
     canonical: "/",
   },
   leaderboard: {
@@ -1695,9 +1700,9 @@ const UTILITY_SEO = {
     canonical: "/cli/",
   },
   cite: {
-    title: "Cite Benchmark Radar | DOI, APA, and BibTeX",
+    title: "Benchmark Radar publications and citation | Paper, APA, BibTeX",
     description:
-      "Copy the Benchmark Radar technical report citation in APA or BibTeX format, or open the repository's citation file and permanent DOI.",
+      "Read the Benchmark Radar technical report and copy its citation in APA or BibTeX format, or open the repository's citation file and permanent DOI.",
     canonical: "/cite/",
   },
   rubric: {
@@ -1862,17 +1867,20 @@ function scoreBlock(item) {
   const trackFill = element("span", {});
   const track = element("div", { className: "score-track" }, [trackFill]);
   trackFill.style.width = `${width}%`;
-  // The label doubles as the way into the rubric. A number presented without
+  // The mark doubles as the way into the rubric. A number presented without
   // a reachable definition of how it was produced asks the reader to trust it
-  // on faith, which is the opposite of what an evidence log is for.
+  // on faith, which is the opposite of what an evidence log is for. It carries
+  // no visible caption: the number, the bar and the mark already say "score
+  // out of something, explained here", and spelling it out on every row cost a
+  // third line in a card that has four of them (issue #593). The full sentence
+  // stays in the label, so nothing is lost to a screen reader.
   const explain = element("button", {
-    className: "score-label score-explain",
+    className: "score-explain",
     attrs: {
       type: "button",
       "aria-label": `${t("Priority score")} ${score} ${t("of")} ${maxDisplay}. ${t("How is this scored?")}`,
     },
   }, [
-    element("span", { text: t("Priority score") }),
     element("span", { className: "info-mark", text: "i", attrs: { "aria-hidden": "true" } }),
   ]);
   explain.addEventListener("click", (event) => {
@@ -1885,10 +1893,9 @@ function scoreBlock(item) {
   return element("div", { className: "score" }, [
     element("div", { className: "score-value" }, [
       element("strong", { text: score }),
-      element("span", { text: `/ ${maxDisplay}` }),
+      explain,
     ]),
     track,
-    explain,
   ]);
 }
 

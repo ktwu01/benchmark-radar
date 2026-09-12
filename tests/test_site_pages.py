@@ -110,8 +110,8 @@ def test_page_has_unique_title_and_canonical(tmp_path):
     )
     alpha = _page_text(output, "alpha-bench")
     beta = _page_text(output, "beta-bench")
-    assert "<title>Alpha Bench · Benchmark Radar</title>" in alpha
-    assert "<title>Beta Bench · Benchmark Radar</title>" in beta
+    assert "<title>Alpha Bench: What It Tests | Benchmark Radar</title>" in alpha
+    assert "<title>Beta Bench: What It Tests | Benchmark Radar</title>" in beta
     assert alpha.split("<title>")[1] != beta.split("<title>")[1]
     assert (
         '<link rel="canonical" href="https://benchmark-radar.org/benchmarks/alpha-bench/">' in alpha
@@ -222,7 +222,8 @@ def test_scores_are_partitioned_by_source(tmp_path):
         ),
     )
     page = _page_text(output, "alpha-bench")
-    assert "llm_stats" in page
+    assert "LLM Stats" in page
+    assert "llm_stats" not in page
     assert "never merged into a single cross-source ranking" in page
     assert "<dt>Reported scores</dt><dd>2</dd>" in page
 
@@ -333,3 +334,112 @@ def test_path_traversal_slug_is_rejected(tmp_path):
     )
     with pytest.raises(ValueError):
         write_benchmark_pages(shard_dir, tmp_path / "out")
+
+
+def test_slug_outside_the_slug_alphabet_is_rejected(tmp_path):
+    """A slug reaches URLs and attributes unescaped, so the guard is the alphabet."""
+    shard_dir = _write_shards(tmp_path, _shard("alpha-bench", "Alpha Bench"))
+    (shard_dir / "quoted.json").write_text(
+        json.dumps(_shard('alpha" onload="x', "Quoted")), encoding="utf-8"
+    )
+    with pytest.raises(ValueError):
+        write_benchmark_pages(shard_dir, tmp_path / "out")
+
+
+def _artifact_shard(slug: str, name: str, kinds: list[str], **kwargs) -> dict:
+    shard = _shard(slug, name, **kwargs)
+    shard["record"]["artifacts"] = [
+        {"kind": kind, "url": f"https://example.org/{slug}/{kind}"} for kind in kinds
+    ]
+    return shard
+
+
+def test_title_lists_only_the_search_intents_the_page_can_answer(tmp_path):
+    """A title promising a dataset link on a page without one is a rewritten title."""
+    output = _generated_pages(
+        tmp_path,
+        _artifact_shard("alpha-bench", "Alpha Bench", ["paper", "repo"]),
+        _artifact_shard(
+            "gpqa",
+            "GPQA",
+            ["dataset"],
+            scores=[{"model_name": "A", "raw_value": "0.6", "value": 0.6}],
+        ),
+    )
+    alpha = _page_text(output, "alpha-bench")
+    gpqa = _page_text(output, "gpqa")
+    assert "<title>Alpha Bench: Paper &amp; Code | Benchmark Radar</title>" in alpha
+    # "GPQA" carries no "bench", so the word a reader types is added to it.
+    assert "<title>GPQA Benchmark: Dataset &amp; Results | Benchmark Radar</title>" in gpqa
+
+
+def test_a_name_used_by_two_sources_gets_two_distinct_titles(tmp_path):
+    output = _generated_pages(
+        tmp_path,
+        _shard("mvbench-llm-stats", "MVBench", source="llm_stats"),
+        _shard("mvbench-opencompass", "MVBench", source="opencompass_hub"),
+    )
+    first = _page_text(output, "mvbench-llm-stats")
+    second = _page_text(output, "mvbench-opencompass")
+    assert "MVBench (LLM Stats)" in first
+    assert "MVBench (OpenCompass Hub)" in second
+    assert first.split("<title>")[1] != second.split("<title>")[1]
+
+
+def test_artifact_links_are_published_instead_of_staying_in_the_shard(tmp_path):
+    output = _generated_pages(
+        tmp_path, _artifact_shard("alpha-bench", "Alpha Bench", ["paper", "repo", "dataset"])
+    )
+    page = _page_text(output, "alpha-bench")
+    assert "<h2>Alpha Bench paper, code and dataset</h2>" in page
+    for kind in ("paper", "repo", "dataset"):
+        assert f'href="https://example.org/alpha-bench/{kind}"' in page
+
+
+def test_related_benchmarks_link_siblings_in_the_same_category(tmp_path):
+    output = _generated_pages(
+        tmp_path,
+        _shard("alpha-bench", "Alpha Bench", categories=["coding_agent"]),
+        _shard("beta-bench", "Beta Bench", categories=["coding_agent"]),
+        _shard("gamma-bench", "Gamma Bench", categories=["safety"]),
+    )
+    alpha = _page_text(output, "alpha-bench")
+    assert "<h2>Related coding agent benchmarks</h2>" in alpha
+    assert f'href="{SITE_URL}/benchmarks/beta-bench/"' in alpha
+    assert "gamma-bench" not in alpha
+    # A page never lists itself as its own neighbour: the only self-reference
+    # left is the canonical URL in the head.
+    assert alpha.count(f'href="{SITE_URL}/benchmarks/alpha-bench/"') == 1
+
+
+def test_citing_documents_are_listed_with_their_sources(tmp_path):
+    shard = _shard("alpha-bench", "Alpha Bench")
+    shard["record"]["documents"] = [
+        {
+            "title": "Claude Opus 5",
+            "organization": "Anthropic",
+            "published": "2026-07-24",
+            "source_url": "https://example.org/opus-5",
+        }
+    ]
+    output = _generated_pages(tmp_path, shard)
+    page = _page_text(output, "alpha-bench")
+    assert "<h2>Which sources cite Alpha Bench?</h2>" in page
+    assert 'href="https://example.org/opus-5"' in page
+
+
+def test_a_two_word_category_description_is_padded_with_real_evidence(tmp_path):
+    """`Coding` describes nothing and reads identically on forty other pages."""
+    output = _generated_pages(
+        tmp_path,
+        _shard(
+            "alpha-bench",
+            "Alpha Bench",
+            description="Coding",
+            scores=[{"model_name": "A", "raw_value": "0.6", "value": 0.6}],
+        ),
+    )
+    description = _page_text(output, "alpha-bench").split('name="description" content="')[1]
+    description = description.split('"')[0]
+    assert description.startswith("Coding.")
+    assert "1 reported scores" in description

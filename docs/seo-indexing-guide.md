@@ -133,6 +133,7 @@ Each dashboard view and public utility is a real page at its own path:
 
 ```text
 /leaderboard/
+/saturation/
 /trends/
 /explore/
 /cli/
@@ -152,6 +153,86 @@ query URLs are not listed in the sitemap, and neither are filter permutations:
 a second URL for a page that already has one is a duplicate, not a second page.
 The old `/#cli`, `/#cite`, and `/#rubric` links migrate the same way;
 rubric versions use `/rubric/?version=<number>`.
+
+### Pages that are documents, not views
+
+Two more paths carry the same masthead and footer but hold prose rather than a
+control over the corpus:
+
+```text
+/about/
+/blog/
+/publications/  (alias, resolves to /cite/)
+/publication/   (alias, resolves to /cite/)
+```
+
+The first two are pages in their own right and are described next. The two
+aliases are redirects rather than documents, and they carry their own rules:
+see [The Publications aliases](#the-publications-aliases) below.
+
+`/about/` explains what the catalog is, who collects it, and where the work is
+published, so a reader arriving from a search result can find out what the site
+is before deciding whether to trust a number on it. `/blog/` is the daily-brief
+index: one page per collection day at `/blog/<date>/`. The index shows the
+latest 30 days and `/blog/archive/` lists every one, so the archive is what a
+crawler follows to reach a brief older than a month. A day with no snapshot gets
+no page, because an empty brief would be an invented day.
+
+Every one of these pages is indexable and canonical to itself. The sitemap
+carries `/about/`, `/blog/`, `/blog/archive/`, and each dated brief. It does not
+carry `/blog/feed.xml`: a feed is for subscribers, and a sitemap lists pages.
+
+They reach the sitemap through their own argument rather than the view list.
+`INDEXABLE_VIEWS` in `src/benchmark_radar/site_seo.py` is the set of paths that
+`site/assets/app.js` owns a title and description for, so a hand-written page
+has no entry in those tables and must not be added to that list. `/about/` is
+passed as `page_entries` and the briefs as `blog_entries` instead.
+
+### The Publications aliases
+
+The citation sheet lives at `/cite/`. That is not the word a researcher types,
+so the menu labels it **Publications**, and two alias paths catch that word when
+it arrives as a URL instead of a click:
+
+```text
+/publications/  →  /cite/
+/publication/   →  /cite/
+```
+
+GitHub Pages serves static files and has no rewrite layer, so these are not HTTP
+301s. Each alias is a small HTML document that answers `200`, then refreshes to
+`/cite/` and repeats the move in a one-line script for a reader whose refresh
+stalls. Both spellings ship because a reader types either one, and a 404 on the
+second is a lost citation.
+
+An alias is crawlable and sets its canonical to the live `/cite/` URL. It sets
+no `noindex`. The two directives pull against each other: Google's
+canonicalization guidance is that `noindex` "will completely block the page from
+Search" rather than folding it into its canonical, so an alias carrying both
+would discard the ranking signal it exists to forward to `/cite/`. The canonical
+alone is what
+[Google recommends](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls)
+for a duplicate inside one site.
+
+Crawlable is not the same as listed. The aliases stay out of the sitemap because
+a sitemap should carry canonical URLs, and `/cite/` is the canonical one here.
+Check both after a deploy:
+
+```bash
+for alias in publications publication; do
+  curl -fsS "https://benchmark-radar.org/$alias/" | grep -E 'canonical|robots'
+done
+curl -fsS https://benchmark-radar.org/sitemap.xml | grep -c 'org/publication'
+```
+
+Pass condition: each alias prints a canonical of
+`https://benchmark-radar.org/cite/` and prints no `robots` line at all, and the
+count prints `0`. `grep -c` exits non-zero when it prints `0`, so read the
+number, not the exit status.
+
+After Google has recrawled, confirm in Search Console's URL Inspection that
+`/publications/` reports `/cite/` as the Google-selected canonical. That is the
+outcome the aliases are built for: one page ranking, reachable by either name.
 
 When one schema node points at another, write the reference out in full rather
 than as a bare `@id`. An `@id` on its own only resolves on a page that also
@@ -193,4 +274,7 @@ is a quick spot check, not a complete or authoritative index count.
 - [x] Homepage passes live URL inspection and structured-data validation
 - [x] Dashboard view pages, utility pages, and one benchmark page return useful
       HTML with JavaScript disabled
+- [ ] `/about/`, `/blog/`, and both Publications aliases resolve on the live
+      domain (all four return 404 as of September 12, 2026; they ship with the
+      branch that adds them)
 - [ ] Indexing and performance reviewed after Google recrawls the site

@@ -18,25 +18,25 @@
     <!-- br:head-seo -->
     <meta
       name="description"
-      content="Track new AI benchmarks, compare model-card adoption and reported scores, explore trends, and download an open, evidence-linked dataset updated daily."
+      content="Search an open database of AI, LLM, agent, multimodal and AI-for-science benchmarks, each with its own page carrying the paper, code, dataset and scores."
     >
     <!-- No data-i18n here. applyViewSeo in app.js owns the title, so a
          translation key on this element fought it: switching language
          replaced the leaderboard's title with the homepage's. -->
-    <title>Benchmark Radar: AI Benchmark Tracker &amp; Dataset</title>
+    <title>AI Benchmark Search Engine &amp; Database | Benchmark Radar</title>
     <meta
       property="og:title"
-      content="Benchmark Radar: AI Benchmark Tracker &amp; Dataset"
+      content="AI Benchmark Search Engine &amp; Database | Benchmark Radar"
     >
     <meta
       property="og:description"
-      content="Track new AI benchmarks, compare model-card adoption and reported scores, explore trends, and download an open, evidence-linked dataset updated daily."
+      content="Search an open database of AI, LLM, agent, multimodal and AI-for-science benchmarks, each with its own page carrying the paper, code, dataset and scores."
     >
     <meta property="og:url" content="https://benchmark-radar.org/">
-    <meta name="twitter:title" content="Benchmark Radar: AI Benchmark Tracker &amp; Dataset">
+    <meta name="twitter:title" content="AI Benchmark Search Engine &amp; Database | Benchmark Radar">
     <meta
       name="twitter:description"
-      content="Track new AI benchmarks, model-card adoption, reported scores, and trends in one open dataset updated daily."
+      content="Search an open database of AI, LLM, agent, multimodal and AI-for-science benchmarks, each with its paper, code, dataset and reported scores."
     >
     <link rel="canonical" href="https://benchmark-radar.org/">
     <!-- /br:head-seo -->
@@ -243,19 +243,23 @@
           </a>
           <a href="/saturation/" data-view="saturation" aria-controls="saturation-view" data-i18n="Saturation">Saturation</a>
           <a href="/trends/" data-view="trends" aria-controls="trends-view" data-i18n="Trends">Trends</a>
-          <!-- The blog is a set of documents, not a dashboard view, so this link
-               carries no data-view: app.js only intercepts clicks on elements that
-               have one, and a brief has to arrive as a full page load. -->
-          <a href="/blog/" data-i18n="Blog">Blog</a>
+          <!-- Blog and About are documents, not dashboard views, and they live
+               in the footer nav instead: this row is for the tools a reader
+               came to use, and every entry it carries competes with them for a
+               glance. -->
+          <!-- The label reads Publications because that is the word a reader
+               looks for; the path stays /cite/, which is already indexed and
+               linked from the paper. /publications/ and /publication/ redirect
+               here so a typed URL still lands. -->
           <a
             href="/cite/"
             id="cite-nav"
             aria-haspopup="dialog"
             aria-controls="cite-dialog"
             aria-expanded="false"
-            data-i18n="Cite"
+            data-i18n="Publications"
           >
-            Cite
+            Publications
           </a>
         </nav>
       </div>
@@ -337,6 +341,19 @@
 
     <main id="main-content" tabindex="-1">
       <section class="view" id="today-view" aria-label="Today">
+        <!-- The page's one H1. It names what the whole site is rather than
+             what the list below currently shows, because the heading over the
+             results is rewritten as the reader changes the date range and a
+             heading that says "Past 7 days" is not what this page is.
+
+             It is read, not seen. A reader who has arrived at the dashboard
+             already knows what the search box is for, and a banner saying so
+             pushed the first result a screenful down. Screen readers and
+             search engines still get the page's subject; the longer version
+             of it lives on /about/. -->
+        <h1 class="visually-hidden" data-i18n="Search AI, LLM, agent, multimodal, and AI-for-science benchmarks">
+          Search AI, LLM, agent, multimodal, and AI-for-science benchmarks
+        </h1>
         <!-- The toolbar stays one compact row so the results below stay
              above the fold: search, the scan date, a trigger that opens the
              secondary filters, and a refresh control. The badge on the
@@ -416,7 +433,7 @@
         <div class="content-grid">
           <div>
             <div class="section-title">
-              <h1 id="today-heading" class="today-heading" data-i18n="Today's radar">Today's radar</h1>
+              <h2 id="today-heading" class="today-heading" data-i18n="Today's radar">Today's radar</h2>
               <div class="results-meta" aria-live="polite">
                 <span id="today-breakdown"></span>
                 <span id="today-sort"></span>
@@ -932,6 +949,13 @@
     </dialog>
 
     <footer>
+      <!-- The site's documents, kept out of the view row above so that row
+           stays a list of tools. These are real links with real paths, so the
+           pages are reachable by a reader and a crawler alike. -->
+      <nav class="footer-nav" aria-label="About this site" data-i18n-aria="About this site">
+        <a href="/about/" data-i18n="About">About</a>
+        <a href="/blog/" data-i18n="Blog">Blog</a>
+      </nav>
       <p id="build-meta">Updated —</p>
       <aside class="adoption-cta" aria-label="Support Benchmark Radar">
         <p data-i18n="If this saved you research time, cite the work, star the repo and help other eval builders find it.">

@@ -217,7 +217,16 @@ def test_offline_cli_route_is_in_the_view_bar_behind_a_short_link():
     assert "!utility && item.dataset.view === state.view" in script
     styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
     assert "#cli-nav:not(.nav-active) {" in styles
-    assert "#cli-nav::after {" in styles
+    # The colour carries that distinction on its own. No nav entry appends an
+    # information mark: the row is read at a glance, and a mark on a label as
+    # long as Publications costs more width than it explains (issue #593).
+    assert (
+        "::after"
+        not in styles.split("/* CLI has a real page path", 1)[1].split(
+            "/* Cite is the same kind", 1
+        )[0]
+    )
+    assert "#cite-nav::after" not in styles
 
     # The card is the README's setup route, not a second one written for the
     # site: the prompt it hands out has to be the prompt the README publishes.
@@ -1344,6 +1353,7 @@ def test_static_html_references_existing_local_assets():
         "rubric/",
         "cli/",
         "cite/",
+        "about/",
     }
     missing = []
     for reference in parser.local_refs:
@@ -2866,7 +2876,18 @@ def test_heading_outline_and_scale_stay_quiet():
     visible = [name for name, attrs, _ in sections if " hidden" not in attrs]
     assert visible == ["today"], visible
 
-    assert '<h1 id="today-heading" class="today-heading" data-i18n="Today\'s radar">' in html
+    # Today's h1 names the site, not the slice of it currently listed: app.js
+    # rewrites the results caption to "All dates" or "Past 7 days" as the reader
+    # changes the range, and an h1 that changes with a filter is not a page
+    # title. The caption stays an h2 directly above the rows it counts.
+    # It is read, not seen: a banner repeating what the search box below it
+    # already says pushed the first result most of a screen down, so the
+    # heading keeps its words and gives up its pixels (issue #593).
+    assert (
+        '<h1 class="visually-hidden" '
+        'data-i18n="Search AI, LLM, agent, multimodal, and AI-for-science benchmarks">' in html
+    )
+    assert '<h2 id="today-heading" class="today-heading" data-i18n="Today\'s radar">' in html
     for heading_id in (
         "leaderboard-heading",
         "saturation-heading",
@@ -2875,7 +2896,7 @@ def test_heading_outline_and_scale_stay_quiet():
     ):
         assert f'<h1 id="{heading_id}"' in html
 
-    # The today h1 renders exactly like the counts caption beside it: the shared
+    # The today results caption renders exactly like the counts beside it: the shared
     # small-caps utility group supplies face/size/case, and this rule only
     # mutes color and weight. No font-size override may reappear here.
     marker = "#today-view .section-title h1,"
@@ -3135,19 +3156,26 @@ def test_issue_332_the_freshest_releases_reach_page_one():
 
 # --- the blog's one and only footprint in the dashboard -------------------
 #
-# The blog is a separate set of documents. The dashboard gains exactly one
-# menubar link to it and nothing else: no view, no route, no seed, no dialog.
-# These pin that boundary, because the cheapest way to break the dashboard
-# while adding pages beside it is to let the new thing leak into its router.
+# The blog is a separate set of documents. The dashboard links to it exactly
+# once and gains nothing else: no view, no route, no seed, no dialog. These
+# pin that boundary, because the cheapest way to break the dashboard while
+# adding pages beside it is to let the new thing leak into its router.
 
 
-def test_the_dashboard_menubar_gains_exactly_one_blog_link():
-    nav = re.search(
-        r'<nav class="view-nav".*?</nav>', Path("site/index.html").read_text(encoding="utf-8"), re.S
-    ).group(0)
-    blog_links = re.findall(r"<a\b[^>]*href=\"/blog/\"[^>]*>", nav)
-    assert len(blog_links) == 1
-    assert "data-view" not in blog_links[0]
+def test_the_documents_are_linked_from_the_footer_not_the_view_row():
+    """The view row lists tools. Blog and About are reading, and sit below it.
+
+    Both are real anchors either way, so a reader and a crawler reach the same
+    pages; what moved is which of them competes for the reader's first glance.
+    """
+    html = Path("site/index.html").read_text(encoding="utf-8")
+    view_nav = re.search(r'<nav class="view-nav".*?</nav>', html, re.S).group(0)
+    footer_nav = re.search(r'<nav class="footer-nav".*?</nav>', html, re.S).group(0)
+    for path in ("/blog/", "/about/"):
+        assert f'href="{path}"' not in view_nav, path
+        links = re.findall(rf'<a\b[^>]*href="{path}"[^>]*>', footer_nav)
+        assert len(links) == 1, path
+        assert "data-view" not in links[0], path
 
 
 def test_the_blog_link_is_not_a_client_route():
