@@ -729,6 +729,7 @@ def main() -> None:
     run = run_pipeline(
         config,
         previous_snapshot=snapshots[-1] if snapshots else None,
+        snapshots=snapshots,
     )
     _emit_persistent_source_warnings(run, config)
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -864,6 +865,11 @@ def main() -> None:
                 ],
                 "producer_health": [health.to_dict() for health in run.producer_health],
                 "selection": report_run.selection,
+                **(
+                    {"benchmark_attention": report_run.benchmark_attention}
+                    if report_run.benchmark_attention
+                    else {}
+                ),
                 # Day-scoped like the evidence above: the briefing describes the
                 # whole UTC day and is shared by every pass over it. Omitted
                 # when the day has none.

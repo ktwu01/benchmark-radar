@@ -133,6 +133,7 @@ def daily_report_run(snapshot: dict[str, Any], latest_run: RadarRun) -> RadarRun
             for item in (snapshot.get("attention") or {}).get("observations") or []
         ],
         selection=dict(snapshot.get("selection") or {}),
+        benchmark_attention=snapshot.get("benchmark_attention"),
     )
 
 

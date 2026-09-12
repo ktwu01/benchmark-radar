@@ -589,6 +589,54 @@ attention:
       dataset: [dataset, corpus, training data, synthetic data]
       data_quality: [data quality, contamination, deduplication, provenance, leakage]
 
+# Dated, attributable counters for recently released benchmarks. The Latest
+# Releases leaderboard (issue #530) ranks a release by GitHub stars (55%),
+# Hugging Face paper upvotes (30%) and Hugging Face dataset downloads over the
+# last 30 days (15%), and reads them from the `benchmark_attention` block this
+# collector writes into each daily snapshot. Without the block every window
+# collapses to hand-reviewed registry entries with unknown signals, which is
+# what issue #589 saw as "stars 0, forks 0".
+#
+# Only exact resources are read: a dedicated GitHub repository, a Hugging
+# Face paper page, a Hugging Face dataset page. A resource the API reports as
+# gone is recorded as unavailable with no value, never as zero, and a request
+# that fails for a reason about the request writes nothing, so the ranking
+# keeps the last reading and marks it stale. Both APIs are anonymous; the
+# workflow's GITHUB_TOKEN only raises the GitHub budget.
+benchmark_attention:
+  enabled: true
+  # Releases older than this are not re-observed. The ranking's widest window
+  # is 90 days, so anything beyond it cannot appear.
+  window_days: 90
+  # Requests are spent newest release first, so the 7- and 30-day windows the
+  # leaderboard shows by default are refreshed before the 90-day tail. A
+  # resource the budget does not reach keeps its last reading, written again
+  # as stale. On the September 2026 history the 90-day cohort names about
+  # 470 dedicated repositories and 830 Hugging Face resources; the
+  # budgets leave headroom above both.
+  github:
+    # One request per dedicated repository. Authenticated calls have a
+    # 5,000-per-hour allowance; anonymous ones 60.
+    max_requests: 800
+    request_delay_seconds: 0.0
+  huggingface:
+    # One request per paper page or dataset, anonymous.
+    max_requests: 1200
+    request_delay_seconds: 0.1
+  # A source that fails this many times in a row is not asked again this run.
+  # Its unread resources keep their stale readings; a rate limit or outage
+  # answers every request alike, and waiting out the timeout for each of a
+  # thousand resources would outlive the daily workflow.
+  max_consecutive_failures: 5
+  # One attempt, so a budget above is a request count rather than a ceiling of
+  # `attempts` times that. A retry here buys little and costs a lot: a failed
+  # read already degrades to the previous reading carried forward as stale,
+  # while the retry backoff honours `Retry-After` for up to a minute and is not
+  # the injectable sleep the budget loop uses, so intermittent failures short of
+  # the consecutive-failure pause could add hours to a daily run.
+  attempts: 1
+  timeout_seconds: 15
+
 publish:
   dashboard_url: "https://benchmark-radar.org/"
   issue_title_prefix: "📡 AI Benchmark & Data Radar"
