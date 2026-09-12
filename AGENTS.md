@@ -81,6 +81,11 @@ Applies to `README*`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `site/**`,
   does not authorize a merge.
 - Do not squash-merge pull requests.
 - Merge pull requests with a merge commit so Git preserves branch ancestry and recognizes the branch as merged.
+- If you are an agent, say so on every pull request you open. Post a comment on
+  the PR containing the marker `330226` and your model series (`GPT`, `Claude`,
+  `Kimi`, and so on) as an annotation. The marker makes agent-authored PRs
+  searchable in one query, and the model series tells a reviewer what produced
+  the diff before they start reading it. A human opening a PR adds neither.
 
 ## Pipeline and data map
 
@@ -111,6 +116,46 @@ sources below, run the generators in order, and measure the rebuilt outputs.
    Normalize these records, scores and citations into the same catalog contract
    as every other source. Document type and protocol describe the evidence;
    they do not establish a preferred corpus or a source ranking.
+
+### Adding a model card: scores are part of the change
+
+A pull request that adds a model card is not complete with the card alone. The
+mention belongs in `data/model_cards.yml`, and the numbers that card reports
+belong in `data/benchmark_scores.yml` in the same PR. A card landing without its
+scores leaves a model in the registry that the score progression and paired
+comparison readout cannot see, and nothing flags the gap later.
+
+Both blocks of the score file usually need an edit:
+
+- `benchmarks:` is metric identity, one entry per `benchmark_id` with `metric`,
+  `direction` and `unit`. A new benchmark id has no entry, so its score rows have
+  nothing to render against. Set `direction` from what the benchmark reports;
+  not every metric improves upward.
+- `results:` is one row per reported number: `benchmark_id`, `instrument`,
+  `protocol`, `model`, `organization`, `source_id`, `reported_at`, `value`,
+  `read_from`. Copy the shape of an existing block rather than inventing fields.
+
+Three fields carry the comparability contract and must not be shortcut:
+
+- `instrument` is version identity, separate from `benchmark_id`, so a task-set
+  change such as Terminal-Bench 2.0 to 2.1 never reads as model progress.
+- `protocol` is the comparability class. Record what the source said moves the
+  number (thinking budget, tool access, pass@1 against consensus@k). Silence is
+  not agreement, so do not leave it generic to make rows look joinable.
+- `source_id` must name a document registered in `data/model_cards.yml`, and
+  `read_from` must say how the value was read (`pdf_text`, `html_text`,
+  `table_image`).
+
+Score rows are per model, not per document. A card covering several variants,
+such as a Pro, Lite and Mini release, gets one row per variant instead of three
+systems collapsed into one label.
+
+Read every number out of the cited document and record it exactly as printed. If
+a table ships as an image and a value is not certain, add nothing: an absent row
+is honest, a guessed row is not. The same standard applies to any new benchmark
+entry's `url` and `caveat`. Verify the link resolves before committing, drop
+`url` when no real homepage or paper exists, and describe what the benchmark
+measures from its source rather than inferring a gloss from its name.
 
 ### Generator order and outputs
 
@@ -262,6 +307,9 @@ exact file. A deposit copies the reviewed PDF to a versioned name under
 
 - Run the full CI sequence locally and get it passing before opening a PR. Do
   not open one against a red local run.
+- A PR that adds a model card must also add that card's scores to
+  `data/benchmark_scores.yml`. See "Adding a model card: scores are part of the
+  change" above for the required fields.
 - Run it against a clean checkout (`git worktree add --detach <tmp> <branch>`),
   not your working copy. Run `git submodule update --init --recursive` in that
   worktree before checks. Generated files such as `site/data/radar.json`,
