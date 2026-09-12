@@ -656,6 +656,7 @@ BACKFILL_SOURCES = {
     "openreview",
     "semantic_scholar",
     "crossref",
+    "openaire",
 }
 
 
@@ -697,7 +698,16 @@ def simulate_backfill(
             continue
         fetcher = SOURCE_FETCHERS[source_name]
         try:
-            fetched = fetcher(source_config, earliest_since, limit)
+            # Bound the fetch to the span being simulated, not to real now.
+            # A connector's upper bound comes from `_collection_now`, and with
+            # it absent every one of them queried "up to today" and then took
+            # its single newest page: for a historical span those rows are all
+            # recent, the per-date filter below discards every one of them, and
+            # the rows actually published inside the requested windows are
+            # never returned. A simulated day came out silently empty rather
+            # than visibly wrong.
+            fetch_config = {**source_config, "_collection_now": max(dates)}
+            fetched = fetcher(fetch_config, earliest_since, limit)
             fetch_health.append(
                 SourceHealth(
                     source=source_name,

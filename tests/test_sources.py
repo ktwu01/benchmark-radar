@@ -22,6 +22,7 @@ from benchmark_radar.sources import (
     fetch_huggingface,
     fetch_huggingface_papers,
     fetch_kaggle_datasets,
+    fetch_openaire,
     fetch_openalex,
     fetch_openreview,
     fetch_semantic_scholar,
@@ -934,6 +935,564 @@ def test_crossref_skips_dates_without_day_precision(monkeypatch):
     )
 
 
+def _openaire_row(product_id="openaire____::radar99001", **fields):
+    """One OpenAIRE Graph v3 research product as `/research-products` returns it."""
+    row = {
+        "id": product_id,
+        "type": "dataset",
+        "mainTitle": "A Federated Benchmark Dataset",
+        "description": "<p>The upstream abstract.</p>",
+        "publicationDate": "2026-07-27",
+        "publisher": "Radar Repository",
+        "dateOfCollection": "2026-08-30T00:00:00Z",
+        "authors": [
+            {"fullName": "Grace Evidence", "rank": 1},
+            {"name": "Ada", "surname": "Radar", "rank": 2},
+        ],
+        "pids": [
+            {"scheme": "handle", "value": "11245/1.99001"},
+            {"scheme": "doi", "value": "10.5281/ZENODO.99001"},
+        ],
+        "instances": [{"type": "fulltext", "urls": ["https://repository.example/records/99001"]}],
+        "codeRepositoryUrl": "https://github.com/example/benchmark",
+        "organizations": [{"legalName": "Radar Lab", "acronym": "RL"}],
+        "indicators": {
+            "citationImpact": {"citationCount": 3},
+            "usageCounts": {"downloads": 13, "views": 21},
+        },
+    }
+    row.update(fields)
+    return row
+
+
+def _openaire_rows_payload(*rows):
+    return {
+        "header": {"numFound": len(rows), "pageSize": 50, "nextCursor": None},
+        "results": list(rows),
+    }
+
+
+def _openaire_payload(**fields):
+    return _openaire_rows_payload(_openaire_row(**fields))
+
+
+def test_openaire_preserves_upstream_metadata_and_bounds_the_query(monkeypatch):
+    calls = []
+
+    def fake_get_json(url, **kwargs):
+        calls.append((url, kwargs))
+        return _openaire_payload()
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+    items = fetch_openaire(
+        {
+            "searches": ["agent benchmark"],
+            "max_requests": 1,
+            "_collection_now": datetime(2026, 7, 28, tzinfo=UTC),
+        },
+        datetime(2026, 7, 26, 12, tzinfo=UTC),
+        10,
+    )
+
+    assert [item.source_id for item in items] == ["openaire____::radar99001"]
+    item = items[0]
+    assert item.source == "OpenAIRE"
+    # The DOI is the record's address, so the same artifact collected from
+    # Crossref or Zenodo merges with it instead of being published a second
+    # time.
+    assert item.url == "https://doi.org/10.5281/zenodo.99001"
+    assert item.title == "A Federated Benchmark Dataset"
+    assert item.summary == "The upstream abstract."
+    assert item.authors == ["Grace Evidence", "Ada Radar"]
+    assert item.organizations == ["Radar Lab"]
+    assert item.artifact_urls == [
+        "https://doi.org/10.5281/zenodo.99001",
+        "https://repository.example/records/99001",
+        "https://github.com/example/benchmark",
+    ]
+    assert item.metrics == {"citations": 3.0, "downloads": 13.0, "views": 21.0}
+    assert item.published_at == datetime(2026, 7, 27, tzinfo=UTC)
+    # The window key and the activity key are the same field. `dateOfCollection`
+    # sits in the row a month later and must not become the record's date, or a
+    # simulated backfill would place the product on a day the window rejects.
+    assert item.updated_at == datetime(2026, 7, 27, tzinfo=UTC)
+    assert item.raw["dateOfCollection"] == "2026-08-30T00:00:00Z"
+    assert item.event_kind == "released"
+    assert item.parser_version == "openaire-graph-v3/1"
+    assert calls[0][0] == "https://api.openaire.eu/graph/v3/research-products"
+    assert calls[0][1]["params"] == {
+        "mainTitle": '"agent benchmark"',
+        "fromPublicationDate": "2026-07-26",
+        "toPublicationDate": "2026-07-28",
+        "sortBy": "publicationDate DESC",
+        "pageSize": 10,
+    }
+
+
+def test_openaire_skips_products_without_a_publication_date(monkeypatch):
+    # `dateOfCollection` says when OpenAIRE indexed the product, not when it
+    # appeared, so it cannot stand in for a missing publication date.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_payload(publicationDate=None),
+    )
+
+    assert fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10) == []
+
+
+def test_openaire_enforces_the_window_on_the_parsed_record(monkeypatch):
+    # The server-side range is a request, not a guarantee: a row published
+    # before `since` that the API returns anyway must not enter the feed.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_payload(publicationDate="2026-07-25"),
+    )
+
+    assert fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10) == []
+
+
+def test_openaire_rejects_future_dated_products_and_counts_them(monkeypatch):
+    # Counting the rejection matters as much as dropping it: run_pipeline adds
+    # `_future_rejections` back into the fetched total, so a silent drop makes
+    # the day's selection funnel stop adding up.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_payload(publicationDate="2026-07-30"),
+    )
+    config = {"searches": ["benchmark"], "_collection_now": datetime(2026, 7, 28, tzinfo=UTC)}
+
+    assert fetch_openaire(config, datetime(2026, 7, 26, tzinfo=UTC), 10) == []
+    assert config["_future_rejections"] == 1
+
+
+def test_openaire_skips_a_product_that_names_no_openable_location(monkeypatch):
+    # An OpenAIRE id does not resolve anywhere a reader can check the claim, so
+    # a product with neither a DOI nor an instance URL has no citable address
+    # and is dropped rather than published pointing at nothing.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_rows_payload(
+            _openaire_row(
+                product_id="openaire____::unlocatable",
+                pids=[{"scheme": "handle", "value": "11245/1.1"}],
+                instances=[],
+                codeRepositoryUrl=None,
+            ),
+            _openaire_row(product_id="openaire____::locatable"),
+        ),
+    )
+
+    items = fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert [item.source_id for item in items] == ["openaire____::locatable"]
+
+
+def test_openaire_falls_back_to_an_instance_url_when_no_doi_is_recorded(monkeypatch):
+    # Institutional-repository deposits are the products this source exists to
+    # reach and many carry no DOI, so requiring one would drop exactly the
+    # records the other DOI connectors already cover.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_payload(
+            pids=[{"scheme": "handle", "value": "11245/1.99001"}]
+        ),
+    )
+
+    items = fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert items[0].url == "https://repository.example/records/99001"
+    assert items[0].artifact_urls == [
+        "https://repository.example/records/99001",
+        "https://github.com/example/benchmark",
+    ]
+
+
+def test_openaire_reads_author_names_without_reordering_them(monkeypatch):
+    # OpenAIRE aggregates sources that disagree about whether `fullName` reads
+    # "Family, Given" or "Given Family", so a rule that reordered it would
+    # rewrite one of them into a name that appears in no source document.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_payload(
+            authors=[
+                {"fullName": "Evidence, Grace"},
+                {"name": "Ada", "surname": "Radar"},
+                {"surname": "Mononym"},
+                {"rank": 4},
+            ]
+        ),
+    )
+
+    items = fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert items[0].authors == ["Evidence, Grace", "Ada Radar", "Mononym"]
+
+
+def test_openaire_reads_organizations_only_where_one_is_named(monkeypatch):
+    # A v3 relation is a flat object carrying `legalName` and `acronym`; the
+    # short name is not `legalShortName`, which belongs to the organizations
+    # entity. An entry naming neither field contributes nothing rather than a
+    # name assembled out of whatever other keys it carries.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_payload(
+            organizations=[
+                {
+                    "legalName": "Radar Lab",
+                    "acronym": "RL",
+                    "id": "openorgs____::radar",
+                    "pids": [{"scheme": "ROR", "value": "https://ror.org/example"}],
+                },
+                {"acronym": "OnlyAcronym"},
+                {"id": "openorgs____::unnamed", "relationType": "hasAuthorInstitution"},
+            ]
+        ),
+    )
+
+    items = fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert items[0].organizations == ["Radar Lab", "OnlyAcronym"]
+
+
+def test_openaire_keeps_a_product_that_carries_no_organization_relation(monkeypatch):
+    # The relation is absent from most products. Reading it as a hard field
+    # would fail the whole source on the ordinary case.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_payload(organizations=None),
+    )
+
+    items = fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert items[0].organizations == []
+
+
+def test_openaire_skips_rows_that_carry_no_id_or_no_title(monkeypatch):
+    # A connector that let an untitled row through once aborted an entire daily
+    # collection, losing every other source's evidence with it. A row with no
+    # id has nothing stable to dedupe or cite it by.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_rows_payload(
+            _openaire_row(product_id="", pids=[{"scheme": "doi", "value": "10.1000/no-id"}]),
+            _openaire_row(product_id="openaire____::untitled", mainTitle=None, title=None),
+            _openaire_row(product_id="openaire____::blank", mainTitle="   ", title=None),
+            _openaire_row(product_id="openaire____::kept"),
+        ),
+    )
+
+    items = fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert [item.source_id for item in items] == ["openaire____::kept"]
+
+
+@pytest.mark.parametrize(
+    ("fields", "message"),
+    [
+        ({"authors": "wrong"}, "authors"),
+        ({"description": ["not", "text"]}, "description"),
+        ({"mainTitle": ["not", "text"]}, "mainTitle"),
+        ({"mainTitle": None, "title": {"value": "not text"}}, "mainTitle"),
+        ({"authors": ["a bare string"]}, "authors"),
+        ({"pids": {"scheme": "doi"}}, "pids"),
+        ({"instances": "wrong"}, "instances"),
+        ({"instances": [{"urls": "not-an-array"}]}, "instance urls"),
+        ({"organizations": "wrong"}, "organizations"),
+        ({"indicators": "wrong"}, "indicators"),
+        ({"indicators": {"citationImpact": "wrong"}}, "indicator groups"),
+    ],
+)
+def test_openaire_rejects_a_malformed_row_shape(monkeypatch, fields, message):
+    # These raise rather than skip, so one malformed row marks the whole source
+    # failed for the day. That is deliberate: a shape this connector cannot
+    # read is a parsing gap the dashboard must show, not a quietly thinner
+    # record that reads exactly like a product with no authors.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_payload(**fields),
+    )
+
+    with pytest.raises(ConnectorPayloadError, match=message):
+        fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+
+def test_openaire_merges_one_product_across_searches_and_returns_the_newest(monkeypatch):
+    # The shipped searches overlap, so the same product arrives from several of
+    # them. Keying on the OpenAIRE id is what keeps one product from being
+    # published twice, and the limit applies after that merge rather than per
+    # request.
+    calls = []
+
+    def fake_get_json(url, **kwargs):
+        calls.append(kwargs["params"])
+        if len(calls) == 1:
+            return _openaire_rows_payload(
+                _openaire_row(product_id="openaire____::older", publicationDate="2026-07-26"),
+                _openaire_row(product_id="openaire____::newer", publicationDate="2026-07-27"),
+            )
+        return _openaire_rows_payload(
+            _openaire_row(product_id="openaire____::older", publicationDate="2026-07-26")
+        )
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+    items = fetch_openaire(
+        {"searches": ["first search", "second search"], "max_requests": 2},
+        datetime(2026, 7, 26, tzinfo=UTC),
+        3,
+    )
+
+    # Three rows arrive naming two products. The limit is deliberately larger
+    # than the answer: at two, a connector that never merged would truncate to
+    # the same list and this assertion would hold without checking anything.
+    assert [item.source_id for item in items] == [
+        "openaire____::newer",
+        "openaire____::older",
+    ]
+    assert [params["mainTitle"] for params in calls] == ['"first search"', '"second search"']
+
+
+def test_openaire_truncates_to_the_per_source_limit(monkeypatch):
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_rows_payload(
+            _openaire_row(product_id="openaire____::older", publicationDate="2026-07-26"),
+            _openaire_row(product_id="openaire____::newer", publicationDate="2026-07-27"),
+        ),
+    )
+
+    items = fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 1)
+
+    assert [item.source_id for item in items] == ["openaire____::newer"]
+
+
+def test_openaire_never_asks_for_a_page_the_api_would_reject(monkeypatch):
+    # Graph v3 rejects a pageSize above 100 outright rather than truncating it,
+    # so a generous per-source limit must not turn every request into a 400.
+    calls = []
+
+    def fake_get_json(url, **kwargs):
+        calls.append(kwargs["params"])
+        return _openaire_rows_payload()
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+    fetch_openaire(
+        {"searches": ["benchmark"], "page_size": 500}, datetime(2026, 7, 26, tzinfo=UTC), 300
+    )
+    # A zero per-source limit must not ask for a page of zero, which v3 also
+    # rejects as out of range.
+    fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 0)
+
+    assert [params["pageSize"] for params in calls] == [100, 1]
+
+
+@pytest.mark.parametrize(
+    ("search", "expected"),
+    [
+        ("LLM benchmark", '"LLM benchmark"'),
+        ("benchmark", "benchmark"),
+        ("evaluation (agents)", '"evaluation (agents)"'),
+        ('"a" OR "b"', '"a" OR "b"'),
+        ("(x OR y)", "(x OR y)"),
+        ('bench "gold" set', '"bench \\"gold\\" set"'),
+    ],
+)
+def test_openaire_quotes_a_filter_value_the_api_would_otherwise_reject(
+    monkeypatch, search, expected
+):
+    # Graph v3 answers a filter value holding a space, parentheses or a bare
+    # logical operator with HTTP 400 unless it is double-quoted. Every phrase
+    # this project ships contains a space, so an unquoted value would fail the
+    # source on every request rather than search for anything. A value that is
+    # already quoted or parenthesised is left alone so an inline expression
+    # survives intact.
+    calls = []
+
+    def fake_get_json(url, **kwargs):
+        calls.append(kwargs["params"])
+        return _openaire_rows_payload()
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+    fetch_openaire({"searches": [search]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert calls[0]["mainTitle"] == expected
+    # The sort is a field expression, not a filter value; quoting it is itself
+    # rejected, so it must stay bare even though it contains a space.
+    assert calls[0]["sortBy"] == "publicationDate DESC"
+
+
+def test_openaire_treats_a_null_result_page_as_empty(monkeypatch):
+    # v3 sends `results: null` for a page that matched nothing. Failing the
+    # payload would report the source as broken for the day on the strength of
+    # an ordinary empty result, which is the one thing source health must be
+    # able to tell apart from a real outage.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: {"header": {"numFound": 0}, "results": None},
+    )
+
+    assert fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10) == []
+
+
+def test_openaire_rejects_a_results_page_that_is_not_a_list_of_objects(monkeypatch):
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: {"header": {}, "results": ["a bare string"]},
+    )
+
+    with pytest.raises(ConnectorPayloadError, match="results"):
+        fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+
+@pytest.mark.parametrize(
+    "deposited",
+    [
+        "10.5281/zenodo.99001",
+        "https://doi.org/10.5281/zenodo.99001",
+        "http://dx.doi.org/10.5281/zenodo.99001",
+        "doi:10.5281/zenodo.99001",
+        "10.5281/ZENODO.99001",
+    ],
+)
+def test_openaire_reduces_a_deposited_doi_to_its_bare_name(monkeypatch, deposited):
+    # Repositories deposit the identifier bare, as a link and as a `doi:` URI.
+    # Passing a link through would build `https://doi.org/https://doi.org/...`,
+    # which resolves nowhere and shares no identity with the Crossref or Zenodo
+    # copy of the same artifact, so the record would be counted twice.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_payload(pids=[{"scheme": "doi", "value": deposited}]),
+    )
+
+    items = fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert items[0].url == "https://doi.org/10.5281/zenodo.99001"
+
+
+def test_openaire_ignores_an_identifier_that_does_not_name_a_doi(monkeypatch):
+    # Every DOI begins `10.`. Building doi.org/<anything else> would invent an
+    # address for a record rather than report the one it was given.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_payload(pids=[{"scheme": "doi", "value": "not-a-doi"}]),
+    )
+
+    items = fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert items[0].url == "https://repository.example/records/99001"
+
+
+def test_openaire_keeps_a_product_whose_only_location_is_its_repository(monkeypatch):
+    # Software is one of the four product types this source exists to reach and
+    # a repository link is something a reader can open, so requiring a DOI or a
+    # repository-hosted instance would drop exactly those records.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_payload(type="software", pids=[], instances=[]),
+    )
+
+    items = fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert items[0].url == "https://github.com/example/benchmark"
+    assert items[0].artifact_urls == ["https://github.com/example/benchmark"]
+
+
+@pytest.mark.parametrize("deposited", ["N/A", "git@github.com:example/benchmark.git", "  "])
+def test_openaire_drops_a_repository_value_that_is_not_an_openable_link(monkeypatch, deposited):
+    # The daily digest renders every entry in `artifact_urls` as a link, so a
+    # placeholder or an ssh remote would ship a link that goes nowhere.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_payload(codeRepositoryUrl=deposited),
+    )
+
+    items = fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert items[0].artifact_urls == [
+        "https://doi.org/10.5281/zenodo.99001",
+        "https://repository.example/records/99001",
+    ]
+
+
+def test_openaire_skips_an_instance_location_that_cannot_be_opened(monkeypatch):
+    # A handle or ftp locator is not something a reader can follow, and taking
+    # one as the record's URL would also cost the record its DOI identity in
+    # dedupe, so the artifact would be counted twice.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_payload(
+            pids=[],
+            instances=[{"urls": ["hdl:11245/1.99001", "ftp://repository.example/99001"]}],
+            codeRepositoryUrl=None,
+        ),
+    )
+
+    assert fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10) == []
+
+
+def test_openaire_names_each_organization_once(monkeypatch):
+    # A product commonly carries one relation per author, so a lab with three
+    # authors on the paper would otherwise be attributed three times.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_payload(
+            organizations=[
+                {"legalName": "Radar Lab"},
+                {"legalName": "Radar Lab"},
+                {"acronym": "RL"},
+            ]
+        ),
+    )
+
+    items = fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert items[0].organizations == ["Radar Lab", "RL"]
+
+
+def test_openaire_stops_at_the_configured_request_budget(monkeypatch):
+    # An anonymous caller gets 60 requests an hour. Without this bound, adding
+    # search phrases silently multiplies the daily run's request count until
+    # the source starts being rate-limited part-way through a run.
+    calls = []
+
+    def fake_get_json(url, **kwargs):
+        calls.append(kwargs["params"]["mainTitle"])
+        return _openaire_rows_payload()
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+    fetch_openaire(
+        {"searches": ["one", "two", "three", "four"], "max_requests": 2},
+        datetime(2026, 7, 26, tzinfo=UTC),
+        10,
+    )
+
+    assert calls == ["one", "two"]
+
+
+def test_openaire_preserves_a_product_that_carries_almost_nothing(monkeypatch):
+    # An absent public counter is a real zero rather than a missing metric.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_rows_payload(
+            {
+                "id": "openaire____::sparse",
+                "mainTitle": "A Sparse Research Product",
+                "publicationDate": "2026-07-27",
+                "pids": [{"scheme": "doi", "value": "10.1000/sparse"}],
+            }
+        ),
+    )
+
+    items = fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    item = items[0]
+    assert item.url == "https://doi.org/10.1000/sparse"
+    assert item.artifact_urls == ["https://doi.org/10.1000/sparse"]
+    assert item.metrics == {"citations": 0.0, "downloads": 0.0, "views": 0.0}
+    assert item.authors == []
+    assert item.organizations == []
+    assert item.summary == ""
+
+
 def test_openreview_success_uses_only_upstream_abstract(monkeypatch):
     timestamp = int(datetime(2026, 7, 27, 12, tzinfo=UTC).timestamp() * 1000)
 
@@ -1366,6 +1925,7 @@ def test_release_replacement_budget_preserves_later_repository_coverage(monkeypa
         (fetch_semantic_scholar, {"searches": ["benchmark"]}, {"data": []}),
         (fetch_github_releases, {"repositories": ["example/benchmark"]}, []),
         (fetch_crossref, {"searches": ["benchmark"]}, {"message": {"items": []}}),
+        (fetch_openaire, {"searches": ["benchmark"]}, {"header": {}, "results": []}),
     ],
 )
 def test_new_connectors_accept_empty_upstream_results(monkeypatch, fetcher, config, empty_payload):
@@ -1395,6 +1955,7 @@ def test_new_connectors_accept_empty_upstream_results(monkeypatch, fetcher, conf
         (fetch_semantic_scholar, {"searches": ["benchmark"]}, {"data": "wrong"}),
         (fetch_github_releases, {"repositories": ["example/benchmark"]}, {}),
         (fetch_crossref, {"searches": ["benchmark"]}, {"message": {}}),
+        (fetch_openaire, {"searches": ["benchmark"]}, {"header": {}, "results": "wrong"}),
     ],
 )
 def test_new_connectors_reject_malformed_payloads(monkeypatch, fetcher, config, malformed_payload):
@@ -1429,6 +1990,7 @@ def test_new_connectors_reject_malformed_payloads(monkeypatch, fetcher, config, 
         (fetch_semantic_scholar, {"searches": ["benchmark"]}),
         (fetch_github_releases, {"repositories": ["example/benchmark"]}),
         (fetch_crossref, {"searches": ["benchmark"]}),
+        (fetch_openaire, {"searches": ["benchmark"]}),
     ],
 )
 def test_new_connectors_surface_http_failures(monkeypatch, fetcher, config):
@@ -1511,6 +2073,21 @@ def test_new_connectors_surface_http_failures(monkeypatch, fetcher, config):
                         }
                     ]
                 }
+            },
+        ),
+        (
+            fetch_openaire,
+            {"searches": ["benchmark"]},
+            {
+                "header": {"numFound": 1},
+                "results": [
+                    {
+                        "id": "openaire____::no-abstract",
+                        "mainTitle": "No abstract",
+                        "publicationDate": "2026-07-27",
+                        "pids": [{"scheme": "doi", "value": "10.1000/no-abstract"}],
+                    }
+                ],
             },
         ),
     ],
@@ -1928,3 +2505,4 @@ def test_collection_method_falls_back_to_a_static_default_without_items():
     # leaves nothing to inspect; fall back to the connector's usual method.
     assert collection_method("arxiv", []) == "RSS"
     assert collection_method("brave", []) == "API"
+    assert collection_method("openaire", []) == "API"

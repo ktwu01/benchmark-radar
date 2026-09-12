@@ -23,7 +23,7 @@ connector, a first-party feed, or the Hacker News attention source. -->
 
 I kept running into new benchmarks while doing benchmark research, so I built a
 crawler that continuously collects benchmark-related signals from across the
-web. It pulls evidence from 37 public sources every day, and keeps updating.
+web. It pulls evidence from 38 public sources every day, and keeps updating.
 
 **Find a benchmark in seconds, then see how model scores change over time. Click
 the GIF below to watch SWE-bench Verified move toward saturation.**
@@ -146,7 +146,7 @@ benchmark catalog, mentions in model cards and technical reports, and score
 histories. It retains source identities and citations so readers can inspect
 candidate benchmarks and their evaluation evidence.
 
-Daily discovery draws on 37 sources: 13 direct connectors and 24 first-party
+Daily discovery draws on 38 sources: 14 direct connectors and 24 first-party
 research and engineering feeds. The catalog collects source records from four
 benchmark catalogs, with numeric score observations on the records that carry
 them. The project publishes the web dashboard with a benchmark leaderboard, a
@@ -174,7 +174,8 @@ The daily evidence feed is built on public data from [arXiv](https://arxiv.org),
 [GitHub Search](https://github.com/search), [GitHub organizations](https://github.com),
 [GitHub Releases](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases),
 [Hugging Face datasets and Spaces](https://huggingface.co), [Hugging Face Papers](https://huggingface.co/papers),
-[Crossref](https://www.crossref.org), [OpenAlex](https://openalex.org), [OpenReview](https://openreview.net),
+[Crossref](https://www.crossref.org), [OpenAIRE](https://www.openaire.eu),
+[OpenAlex](https://openalex.org), [OpenReview](https://openreview.net),
 [Kaggle datasets](https://www.kaggle.com/datasets), [Zenodo](https://zenodo.org),
 [Semantic Scholar](https://www.semanticscholar.org), [Brave Search](https://search.brave.com),
 and [Hacker News](https://news.ycombinator.com), plus first-party lab feeds from
