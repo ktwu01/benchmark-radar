@@ -162,7 +162,13 @@ control over the corpus:
 ```text
 /about/
 /blog/
+/publications/  (alias, resolves to /cite/)
+/publication/   (alias, resolves to /cite/)
 ```
+
+The first two are pages in their own right and are described next. The two
+aliases are redirects rather than documents, and they carry their own rules:
+see [The Publications aliases](#the-publications-aliases) below.
 
 `/about/` explains what the catalog is, who collects it, and where the work is
 published, so a reader arriving from a search result can find out what the site
@@ -196,14 +202,21 @@ it arrives as a URL instead of a click:
 GitHub Pages serves static files and has no rewrite layer, so these are not HTTP
 301s. Each alias is a small HTML document that answers `200`, then refreshes to
 `/cite/` and repeats the move in a one-line script for a reader whose refresh
-stalls. It sets its canonical to the live `/cite/` URL and carries
-`noindex,follow`, and it is the only page described here that does. Both
-spellings ship because a reader types either one, and a 404 on the second is a
-lost citation.
+stalls. Both spellings ship because a reader types either one, and a 404 on the
+second is a lost citation.
 
-The aliases are deliberately absent from the sitemap. `/cite/` is the page that
-should rank, and an alias listed beside it would split the signal the alias
-exists to concentrate. Check them after a deploy:
+An alias is crawlable and sets its canonical to the live `/cite/` URL. It sets
+no `noindex`. The two directives pull against each other: Google's
+canonicalization guidance is that `noindex` "will completely block the page from
+Search" rather than folding it into its canonical, so an alias carrying both
+would discard the ranking signal it exists to forward to `/cite/`. The canonical
+alone is what
+[Google recommends](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls)
+for a duplicate inside one site.
+
+Crawlable is not the same as listed. The aliases stay out of the sitemap because
+a sitemap should carry canonical URLs, and `/cite/` is the canonical one here.
+Check both after a deploy:
 
 ```bash
 for alias in publications publication; do
@@ -212,10 +225,14 @@ done
 curl -fsS https://benchmark-radar.org/sitemap.xml | grep -c 'org/publication'
 ```
 
-Pass condition: each alias shows a canonical of
-`https://benchmark-radar.org/cite/` and `noindex,follow`, and the count prints
-`0`. `grep -c` exits non-zero when it prints `0`, so read the number, not the
-exit status.
+Pass condition: each alias prints a canonical of
+`https://benchmark-radar.org/cite/` and prints no `robots` line at all, and the
+count prints `0`. `grep -c` exits non-zero when it prints `0`, so read the
+number, not the exit status.
+
+After Google has recrawled, confirm in Search Console's URL Inspection that
+`/publications/` reports `/cite/` as the Google-selected canonical. That is the
+outcome the aliases are built for: one page ranking, reachable by either name.
 
 When one schema node points at another, write the reference out in full rather
 than as a bare `@id`. An `@id` on its own only resolves on a page that also

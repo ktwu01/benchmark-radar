@@ -92,7 +92,10 @@ def test_publication_aliases_point_at_cite_without_competing_with_it(tmp_path: P
         page = (site / alias.strip("/") / "index.html").read_text(encoding="utf-8")
         assert f'content="0; url={target}"' in page
         assert f'<link rel="canonical" href="{SITE_URL}{target}">' in page
-        assert '<meta name="robots" content="noindex,follow">' in page
+        # No noindex beside that canonical. Google's canonicalization guidance
+        # is that noindex drops a page from Search rather than folding it into
+        # its canonical, which would discard the signal the alias forwards.
+        assert "noindex" not in page
         # A reader with no JavaScript and a stalled refresh still has a link.
         assert f'<a href="{target}">' in page
 

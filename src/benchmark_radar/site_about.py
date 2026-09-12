@@ -13,9 +13,10 @@ so the masthead, nav, and footer stay the single copy that lives in
 
 The aliases are HTML redirects, not server rules. GitHub Pages serves static
 files and has no rewrite layer, so ``/publications/`` ships a document that
-refreshes to ``/cite/``, points its canonical there, and carries
-``noindex``: the redirect target is the page that should rank, and an alias that
-competed with it would split the signal it was added to concentrate.
+refreshes to ``/cite/`` and points its canonical there. The canonical does the
+consolidating on its own: Google's canonicalization guidance is that ``noindex``
+blocks a page from Search entirely rather than folding it into its canonical, so
+an alias that carried both would throw away the signal it exists to pass on.
 """
 
 from __future__ import annotations
@@ -216,13 +217,12 @@ def about_page(chrome: SiteChrome, chrome_i18n: dict[str, str], updated: str | N
 
 
 def alias_page(target: str) -> str:
-    """A crawlable, indexless redirect stub for one alias path."""
+    """A crawlable redirect stub that consolidates onto its target."""
     destination = SITE_URL + target
     return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="robots" content="noindex,follow">
 <meta http-equiv="refresh" content="0; url={esc(target)}">
 <link rel="canonical" href="{esc(destination)}">
 <title>Publications · Benchmark Radar</title>
