@@ -62,21 +62,24 @@ _ARCHIVE_DESCRIPTION = (
 
 
 def _post_page(post: BlogPost, chrome: SiteChrome, chrome_i18n: dict[str, str]) -> str:
-    tags = "".join(f'<span class="blog-chip">{esc(tag)}</span>' for tag in post.tags)
+    """One brief, with the day's facts stated once each.
+
+    The heading is the whole hero. What used to sit around it said the same
+    things over again: an eyebrow reading "Daily brief" above a title beginning
+    "Daily AI benchmark brief", the date under a title that ends with the date,
+    a tag row hardcoded to the same three words on every post, and a lede that
+    was the first briefing paragraph clipped mid-sentence, printed a screen
+    above the full version of itself. The description still goes out as the
+    meta description and to the feed, which is where a clipped summary belongs:
+    a reader who is here does not need a preview of the text in front of them.
+    """
 
     def language_body(language: str, content: str, *, hidden: bool) -> str:
         title = post.title_zh if language == "zh" and post.title_zh else post.title
-        description = (
-            post.description_zh if language == "zh" and post.description_zh else post.description
-        )
         hidden_attr = " hidden" if hidden else ""
         return f"""<div data-lang-content="{language}"{hidden_attr}>
 <header class="blog-hero">
-  <p class="eyebrow">{esc(post.kind)}</p>
   <h1>{esc(title)}</h1>
-  <p class="blog-lede">{esc(description)}</p>
-  <p class="blog-meta"><time datetime="{esc(post.published)}">{esc(post.published)}</time></p>
-  <div class="blog-tags">{tags}</div>
 </header>
 <div class="blog-prose">{content}</div>
 </div>"""

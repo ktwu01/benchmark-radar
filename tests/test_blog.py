@@ -25,6 +25,7 @@ from benchmark_radar.blog_shell import (
     extract_site_chrome,
 )
 from benchmark_radar.feed import SITE_URL
+from benchmark_radar.site_shell import esc
 
 # The blog chrome is extracted from the committed dashboard source, so the
 # tests exercise the real site/index.html rather than a hand-written fixture
@@ -500,6 +501,36 @@ def test_blog_index_leads_with_one_title_without_repeating_its_metadata(tmp_path
     assert "Daily brief" not in hero
     assert "One page per collection day" not in hero
     assert "collection days" not in hero
+
+
+def test_a_brief_states_the_day_once_and_opens_on_its_own_text(tmp_path):
+    """The heading is the hero. Everything that echoed it is gone.
+
+    The kind, the date and the opening paragraph were each printed twice: an
+    eyebrow above a title that begins with the same words, a date line under a
+    title that ends with the same date, a fixed tag row repeating the kind a
+    third time, and a lede that was the first briefing paragraph clipped
+    mid-sentence a screen above the full version of itself.
+    """
+    write_blog_with_chrome([_briefed()], tmp_path)
+    page = (tmp_path / "blog" / "2026-08-30" / "index.html").read_text(encoding="utf-8")
+    hero = re.search(r'<header class="blog-hero">.*?</header>', page, re.S).group(0)
+    assert hero.count("<h1>") == 1
+    for echo in ('class="eyebrow"', 'class="blog-lede"', 'class="blog-meta"', "<time"):
+        assert echo not in hero, echo
+
+    post = build_post(_briefed())
+    # The summary is still written, for the search result and the feed. It is
+    # the page it summarizes that does not need a preview of itself, so its
+    # opening words are now read once, in the paragraph they were clipped from.
+    assert f'<meta name="description" content="{esc(post.description)}"' in page
+    opening = post.description.split("…")[0].strip()
+    assert len(opening) > 40
+    read = _text(re.sub(r"<script.*?</script>", " ", page, flags=re.S))
+    assert read.count(opening) == 1
+    # The date survives for machines, which is the reader the date line served.
+    posting = next(payload for payload in _schemas(page) if payload.get("@type") == "BlogPosting")
+    assert posting["datePublished"] == post.published
 
 
 def test_dashboard_and_blog_share_the_reduced_chrome_contract(tmp_path):
