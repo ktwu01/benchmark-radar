@@ -2871,7 +2871,13 @@ def test_heading_outline_and_scale_stay_quiet():
     # rewrites the results caption to "All dates" or "Past 7 days" as the reader
     # changes the range, and an h1 that changes with a filter is not a page
     # title. The caption stays an h2 directly above the rows it counts.
-    assert '<h1 data-i18n="Search AI, LLM, agent, and multimodal benchmarks">' in html
+    # It is read, not seen: a banner repeating what the search box below it
+    # already says pushed the first result most of a screen down, so the
+    # heading keeps its words and gives up its pixels (issue #593).
+    assert (
+        '<h1 class="visually-hidden" data-i18n="Search AI, LLM, agent, and multimodal benchmarks">'
+        in html
+    )
     assert '<h2 id="today-heading" class="today-heading" data-i18n="Today\'s radar">' in html
     for heading_id in (
         "leaderboard-heading",

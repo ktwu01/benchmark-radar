@@ -347,16 +347,16 @@
         <!-- The page's one H1. It names what the whole site is rather than
              what the list below currently shows, because the heading over the
              results is rewritten as the reader changes the date range and a
-             heading that says "Past 7 days" is not what this page is. -->
-        <div class="view-intro">
-          <h1 data-i18n="Search AI, LLM, agent, and multimodal benchmarks">
-            Search AI, LLM, agent, and multimodal benchmarks
-          </h1>
-          <p data-i18n="An open database of AI benchmarks. Every benchmark gets its own page carrying the paper, code, dataset and reported scores it has, rebuilt every day.">
-            An open database of AI benchmarks. Every benchmark gets its own page carrying
-            the paper, code, dataset and reported scores it has, rebuilt every day.
-          </p>
-        </div>
+             heading that says "Past 7 days" is not what this page is.
+
+             It is read, not seen. A reader who has arrived at the dashboard
+             already knows what the search box is for, and a banner saying so
+             pushed the first result a screenful down. Screen readers and
+             search engines still get the page's subject; the longer version
+             of it lives on /about/. -->
+        <h1 class="visually-hidden" data-i18n="Search AI, LLM, agent, and multimodal benchmarks">
+          Search AI, LLM, agent, and multimodal benchmarks
+        </h1>
         <!-- The toolbar stays one compact row so the results below stay
              above the fold: search, the scan date, a trigger that opens the
              secondary filters, and a refresh control. The badge on the

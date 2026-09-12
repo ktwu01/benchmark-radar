@@ -561,27 +561,6 @@ h1 {
   padding-top: clamp(0.75rem, 1vw, 1.25rem);
 }
 
-/* The page title and one line saying what the site is. Deliberately small for
-   an h1: the search box under it is what a reader came to use, so the intro
-   introduces without taking the first screen away from the results. */
-.view-intro {
-  max-width: 60ch;
-  margin-bottom: clamp(1rem, 2vw, 1.5rem);
-}
-
-.view-intro h1 {
-  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
-  line-height: 1.15;
-}
-
-.view-intro p {
-  margin-top: 0.5rem;
-  margin-bottom: 0;
-  color: var(--muted);
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
 .today-toolbar {
   display: flex;
   justify-content: flex-end;
