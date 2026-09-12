@@ -154,6 +154,69 @@ a second URL for a page that already has one is a duplicate, not a second page.
 The old `/#cli`, `/#cite`, and `/#rubric` links migrate the same way;
 rubric versions use `/rubric/?version=<number>`.
 
+### Pages that are documents, not views
+
+Two more paths carry the same masthead and footer but hold prose rather than a
+control over the corpus:
+
+```text
+/about/
+/blog/
+```
+
+`/about/` explains what the catalog is, who collects it, and where the work is
+published, so a reader arriving from a search result can find out what the site
+is before deciding whether to trust a number on it. `/blog/` is the daily-brief
+index: one page per collection day at `/blog/<date>/`. The index shows the
+latest 30 days and `/blog/archive/` lists every one, so the archive is what a
+crawler follows to reach a brief older than a month. A day with no snapshot gets
+no page, because an empty brief would be an invented day.
+
+Every one of these pages is indexable and canonical to itself. The sitemap
+carries `/about/`, `/blog/`, `/blog/archive/`, and each dated brief. It does not
+carry `/blog/feed.xml`: a feed is for subscribers, and a sitemap lists pages.
+
+They reach the sitemap through their own argument rather than the view list.
+`INDEXABLE_VIEWS` in `src/benchmark_radar/site_seo.py` is the set of paths that
+`site/assets/app.js` owns a title and description for, so a hand-written page
+has no entry in those tables and must not be added to that list. `/about/` is
+passed as `page_entries` and the briefs as `blog_entries` instead.
+
+### The Publications aliases
+
+The citation sheet lives at `/cite/`. That is not the word a researcher types,
+so the menu labels it **Publications**, and two alias paths catch that word when
+it arrives as a URL instead of a click:
+
+```text
+/publications/  →  /cite/
+/publication/   →  /cite/
+```
+
+GitHub Pages serves static files and has no rewrite layer, so these are not HTTP
+301s. Each alias is a small HTML document that answers `200`, then refreshes to
+`/cite/` and repeats the move in a one-line script for a reader whose refresh
+stalls. It sets its canonical to the live `/cite/` URL and carries
+`noindex,follow`, and it is the only page described here that does. Both
+spellings ship because a reader types either one, and a 404 on the second is a
+lost citation.
+
+The aliases are deliberately absent from the sitemap. `/cite/` is the page that
+should rank, and an alias listed beside it would split the signal the alias
+exists to concentrate. Check them after a deploy:
+
+```bash
+for alias in publications publication; do
+  curl -fsS "https://benchmark-radar.org/$alias/" | grep -E 'canonical|robots'
+done
+curl -fsS https://benchmark-radar.org/sitemap.xml | grep -c 'org/publication'
+```
+
+Pass condition: each alias shows a canonical of
+`https://benchmark-radar.org/cite/` and `noindex,follow`, and the count prints
+`0`. `grep -c` exits non-zero when it prints `0`, so read the number, not the
+exit status.
+
 When one schema node points at another, write the reference out in full rather
 than as a bare `@id`. An `@id` on its own only resolves on a page that also
 defines the node it names, and the `WebSite` and `Organization` nodes are
@@ -194,4 +257,7 @@ is a quick spot check, not a complete or authoritative index count.
 - [x] Homepage passes live URL inspection and structured-data validation
 - [x] Dashboard view pages, utility pages, and one benchmark page return useful
       HTML with JavaScript disabled
+- [ ] `/about/`, `/blog/`, and both Publications aliases resolve on the live
+      domain (all four return 404 as of September 12, 2026; they ship with the
+      branch that adds them)
 - [ ] Indexing and performance reviewed after Google recrawls the site
