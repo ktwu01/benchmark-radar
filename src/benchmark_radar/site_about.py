@@ -38,11 +38,25 @@ ALIAS_PATHS: tuple[tuple[str, str], ...] = (
     ("/publication/", CITE_PATH),
 )
 
-ABOUT_TITLE = "About Benchmark Radar: an open AI benchmark database | Benchmark Radar"
-ABOUT_HEADING = "An open database of AI benchmarks, rebuilt every day"
+# The project's published name, from the technical report. The title tag takes
+# no "| Benchmark Radar" suffix because the brand is already its first word,
+# and the h1 is the same sentence so a reader lands on the heading they clicked.
+ABOUT_TITLE = (
+    "Benchmark Radar: A Living Database and Search Engine for AI Benchmarks and Evaluation"
+)
+ABOUT_HEADING = ABOUT_TITLE
+# The description is written for the search result and names the kinds of
+# evaluation someone might be looking for. The lede is written for the reader
+# who already clicked, so it says what the page hands them rather than saying
+# the heading directly above it a second time.
 ABOUT_DESCRIPTION = (
     "An open, daily-updated database and search engine for AI benchmarks: LLM, agent, "
     "multimodal, coding and safety evaluations, each with the paper, code and scores it has."
+)
+ABOUT_LEDE = (
+    "Every benchmark the catalog has found, with the paper, code, dataset and scores on "
+    "record for it. Collected from public sources and rebuilt every day, so a number here "
+    "is never older than the last run."
 )
 
 # Every place this project publishes. External links are part of the point:
@@ -57,8 +71,7 @@ _ELSEWHERE: tuple[tuple[str, str, str], ...] = (
     (
         "Technical report",
         "https://arxiv.org/abs/2609.11115",
-        "Benchmark Radar: A Living Database and Search Engine for AI Benchmarks "
-        "and Evaluation, on arXiv.",
+        "How the catalog is collected, scored, and kept current, written up on arXiv.",
     ),
     (
         "Download the full dataset",
@@ -161,7 +174,7 @@ def about_body() -> str:
     story = "".join(_section(heading, body) for heading, body in _STORY)
     return f"""<header class="blog-hero">
   <h1>{esc(ABOUT_HEADING)}</h1>
-  <p class="blog-lede">{esc(ABOUT_DESCRIPTION)}</p>
+  <p class="blog-lede">{esc(ABOUT_LEDE)}</p>
 </header>
 <div class="blog-prose">{story}
 <section><h2>Where to start</h2>{_inside_list()}</section>

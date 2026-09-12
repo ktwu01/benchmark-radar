@@ -32,7 +32,10 @@ def about(tmp_path: Path) -> str:
 
 
 def test_about_carries_its_own_head_metadata(about: str):
-    assert "<title>About Benchmark Radar" in about
+    assert (
+        "<title>Benchmark Radar: A Living Database and Search Engine for AI Benchmarks "
+        "and Evaluation</title>" in about
+    )
     assert f'<link rel="canonical" href="{SITE_URL}/about/">' in about
     description = re.search(r'<meta name="description" content="([^"]+)">', about)
     assert description and 70 <= len(description.group(1)) <= 200
