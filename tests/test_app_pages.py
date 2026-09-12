@@ -331,7 +331,7 @@ def test_pages_carry_breadcrumb_and_webpage_schema(tmp_path):
 
 def test_utility_schema_names_the_clean_route(tmp_path):
     _write(tmp_path, _dashboard())
-    for utility, label in (("cli", "CLI"), ("cite", "Cite"), ("rubric", "Scoring rubric")):
+    for utility, label in (("cli", "CLI"), ("cite", "Publications"), ("rubric", "Scoring rubric")):
         page = (tmp_path / utility / "index.html").read_text(encoding="utf-8")
         blocks = [
             json.loads(block)

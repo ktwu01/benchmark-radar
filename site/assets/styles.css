@@ -472,10 +472,6 @@ button.repo-badge svg {
   color: var(--blue-deep);
 }
 
-#cli-nav::after {
-  content: " ⓘ";
-}
-
 #cli-nav:not(.nav-active):hover {
   background: var(--panel);
 }
@@ -484,10 +480,6 @@ button.repo-badge svg {
    opens the familiar panel, so it gets the same inactive-blue treatment. */
 #cite-nav:not(.nav-active) {
   color: var(--blue-deep);
-}
-
-#cite-nav::after {
-  content: " ⓘ";
 }
 
 #cite-nav:not(.nav-active):hover {
@@ -648,9 +640,8 @@ select:focus-visible {
 
 /* The results heading reads as a caption for the list beneath it, so it
    carries the regular weight rather than the display h2 weight (issue #248).
-   The heading is semantically an h1, but it renders exactly like the counts
-   caption beside it: same utility face, same 0.72rem size, inherited from
-   the shared small-caps group above. */
+   It renders exactly like the counts caption beside it: same utility face,
+   same 0.72rem size, inherited from the shared small-caps group above. */
 #today-view .section-title h1,
 #today-view .section-title h2 {
   color: var(--muted);
@@ -1330,11 +1321,8 @@ a.briefing-chip-sources:focus-visible {
   line-height: 1;
 }
 
-.score-value span {
+.score-value .score-explain {
   justify-self: end;
-  color: var(--muted);
-  font-family: var(--utility);
-  font-size: 0.65rem;
 }
 
 .score-track {
@@ -1352,22 +1340,11 @@ a.briefing-chip-sources:focus-visible {
   background: var(--blue);
 }
 
-.score-label {
-  margin-top: 0.3rem;
-  color: var(--muted);
-  /* The score's caption is a UI label, not a machine value: body face,
-     normal case. */
-  font-family: var(--body);
-  font-size: 0.7rem;
-  letter-spacing: normal;
-}
-
-/* The label is a button, but it keeps the label's typography: the affordance
-   is the info mark and the underline on hover, not a boxed control competing
-   with the score it annotates. */
+/* The mark is the whole control: no box, no caption, nothing competing with
+   the score it annotates. Hovering it fills the circle, which is the only
+   affordance it needs. */
 .score-explain {
   display: inline-flex;
-  gap: 0.35rem;
   align-items: center;
   padding: 0;
   border: 0;
@@ -1375,7 +1352,6 @@ a.briefing-chip-sources:focus-visible {
   cursor: pointer;
 }
 
-.score-explain:hover span:first-child,
 .rubric-link:hover span:first-child {
   text-decoration: underline;
   text-underline-offset: 0.2em;
@@ -4263,7 +4239,7 @@ button.stale-banner-action {
 }
 
 footer {
-  /* One left-aligned column: updated stamp, view links, then the dataset
+  /* One left-aligned column: document links, updated stamp, then the dataset
      card underneath them. */
   display: flex;
   flex-direction: column;
@@ -4272,6 +4248,26 @@ footer {
   padding: 1.5rem 0 3rem;
   border-top: 1px solid var(--edge);
   color: var(--muted);
+}
+
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.25rem;
+  font-family: var(--utility);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+}
+
+.footer-nav a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.footer-nav a:hover,
+.footer-nav .nav-active {
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
 }
 
 @media (max-width: 1050px) {

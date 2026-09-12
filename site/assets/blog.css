@@ -172,18 +172,6 @@
   list-style: none;
 }
 
-.blog-page .blog-index .blog-card {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.5rem 1.5rem;
-  align-items: start;
-}
-
-.blog-page .blog-index .blog-card p {
-  grid-column: 1 / -1;
-  margin: 0;
-}
-
 .blog-page .blog-chip {
   display: inline-flex;
   width: fit-content;
@@ -276,14 +264,6 @@
   .blog-page .blog-stats,
   .blog-page .blog-grid {
     grid-template-columns: 1fr;
-  }
-
-  .blog-page .blog-index .blog-card {
-    grid-template-columns: 1fr;
-  }
-
-  .blog-page .blog-index .blog-card p {
-    grid-column: 1;
   }
 
   .blog-page .blog-facts {

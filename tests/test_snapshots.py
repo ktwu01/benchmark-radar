@@ -366,8 +366,13 @@ def test_rebuild_writes_the_sitemap_at_the_site_root(tmp_path, site_shell):
     sitemap_output = tmp_path / "site" / "sitemap.xml"
     assert sitemap_output.exists()
     assert not (data_output.parent / "sitemap.xml").exists()
-    for slug in ("leaderboard", "trends", "explore", "cli", "cite", "rubric"):
+    for slug in ("leaderboard", "trends", "explore", "cli", "cite", "rubric", "about"):
         assert (tmp_path / "site" / slug / "index.html").exists()
+    # The alias paths ship beside /about/ but stay out of the sitemap: they
+    # immediately become /cite/, and a crawler asked to index both gets two
+    # URLs for one page.
+    for alias in ("publications", "publication"):
+        assert (tmp_path / "site" / alias / "index.html").exists()
     root = ET.parse(sitemap_output).getroot()
     urls = [node.text for node in root.findall("sm:url/sm:loc", ns)]
     assert urls == [
@@ -384,6 +389,7 @@ def test_rebuild_writes_the_sitemap_at_the_site_root(tmp_path, site_shell):
         f"{SITE_URL}/blog/",
         f"{SITE_URL}/blog/archive/",
         f"{SITE_URL}/blog/2026-07-27/",
+        f"{SITE_URL}/about/",
     ]
     lastmods = [node.text for node in root.findall("sm:url/sm:lastmod", ns)]
     # The two shards carry no dated evidence, so their pages claim no lastmod

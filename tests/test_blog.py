@@ -25,6 +25,7 @@ from benchmark_radar.blog_shell import (
     extract_site_chrome,
 )
 from benchmark_radar.feed import SITE_URL
+from benchmark_radar.site_shell import esc
 
 # The blog chrome is extracted from the committed dashboard source, so the
 # tests exercise the real site/index.html rather than a hand-written fixture
@@ -502,6 +503,49 @@ def test_blog_index_leads_with_one_title_without_repeating_its_metadata(tmp_path
     assert "collection days" not in hero
 
 
+def test_a_brief_states_the_day_once_and_opens_on_its_own_text(tmp_path):
+    """The heading is the hero. Everything that echoed it is gone.
+
+    The kind, the date and the opening paragraph were each printed twice: an
+    eyebrow above a title that begins with the same words, a date line under a
+    title that ends with the same date, a fixed tag row repeating the kind a
+    third time, and a lede that was the first briefing paragraph clipped
+    mid-sentence a screen above the full version of itself.
+    """
+    write_blog_with_chrome([_briefed()], tmp_path)
+    page = (tmp_path / "blog" / "2026-08-30" / "index.html").read_text(encoding="utf-8")
+    hero = re.search(r'<header class="blog-hero">.*?</header>', page, re.S).group(0)
+    assert hero.count("<h1>") == 1
+    for echo in ('class="eyebrow"', 'class="blog-lede"', 'class="blog-meta"', "<time"):
+        assert echo not in hero, echo
+
+    post = build_post(_briefed())
+    # The summary is still written, for the search result and the feed. It is
+    # the page it summarizes that does not need a preview of itself, so its
+    # opening words are now read once, in the paragraph they were clipped from.
+    assert f'<meta name="description" content="{esc(post.description)}"' in page
+    opening = post.description.split("…")[0].strip()
+    assert len(opening) > 40
+    read = _text(re.sub(r"<script.*?</script>", " ", page, flags=re.S))
+    assert read.count(opening) == 1
+    # The date survives for machines, which is the reader the date line served.
+    posting = next(payload for payload in _schemas(page) if payload.get("@type") == "BlogPosting")
+    assert posting["datePublished"] == post.published
+
+
+def test_a_blog_card_is_a_title_and_what_the_day_found(tmp_path):
+    """Two elements per card, and only one of them repeats across the list."""
+    write_blog_with_chrome([_briefed(), _legacy()], tmp_path)
+    page = (tmp_path / "blog" / "index.html").read_text(encoding="utf-8")
+    card = re.search(r'<article class="blog-card">.*?</article>', page, re.S).group(0)
+    post = build_post(_briefed())
+    assert f'<h2><a href="{post.path}">{esc(post.title)}</a></h2>' in card
+    assert f"<p>{esc(post.description)}</p>" in card
+    # The title already carries both, so neither is printed beside it.
+    assert "<time" not in card
+    assert "blog-chip" not in card
+
+
 def test_dashboard_and_blog_share_the_reduced_chrome_contract(tmp_path):
     write_blog_with_chrome([_briefed()], tmp_path)
     page = (tmp_path / "blog" / "2026-08-30" / "index.html").read_text(encoding="utf-8")
@@ -511,7 +555,6 @@ def test_dashboard_and_blog_share_the_reduced_chrome_contract(tmp_path):
         "/leaderboard/",
         "/saturation/",
         "/trends/",
-        "/blog/",
         "/cite/",
     ]
     for document in (DASHBOARD_HTML, page):
@@ -562,6 +605,23 @@ def test_a_missing_dashboard_source_fails_visibly(tmp_path):
 def test_the_extractor_fails_loudly_when_the_dashboard_changes_shape():
     with pytest.raises(ValueError, match="masthead"):
         extract_site_chrome("<html><body><p>no header here</p></body></html>")
+
+
+def test_a_page_cannot_claim_a_section_the_dashboard_does_not_link_to():
+    """The active entry is marked from the real nav, so it has to be in one.
+
+    Both rows count: views are in the masthead, documents are in the footer.
+    A path in neither would leave the page with no current entry at all, which
+    is the shape a silent miss takes, so it stops the build instead.
+    """
+    dashboard = Path("site/index.html").read_text(encoding="utf-8")
+    marker = 'class="nav-active" aria-current="page"'
+    for path in ("/trends/", "/cite/"):
+        assert marker in extract_site_chrome(dashboard, active_path=path).header, path
+    for path in ("/about/", "/blog/"):
+        assert marker in extract_site_chrome(dashboard, active_path=path).footer, path
+    with pytest.raises(ValueError, match="no longer links to"):
+        extract_site_chrome(dashboard, active_path="/nowhere/")
 
 
 def test_the_chrome_i18n_table_is_baked_from_app_js_for_chinese_readers(tmp_path):

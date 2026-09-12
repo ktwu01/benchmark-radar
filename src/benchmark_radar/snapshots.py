@@ -42,8 +42,9 @@ from .rubric import (
     v3_rubric_reference,
     v4_rubric_reference,
 )
+from .site_about import write_about
 from .site_pages import DEFAULT_SHARD_DIR, benchmark_sitemap_entries
-from .site_seo import write_sitemap
+from .site_seo import site_lastmod, write_sitemap
 from .sources import GITHUB_RELEASE_PARSER_VERSION, github_release_title
 
 SCHEMA_VERSION = 2
@@ -1359,9 +1360,18 @@ def rebuild_dashboard(
     # The Pages build, which does write the pages, passes what it wrote.
     view_paths: list[str] | None = None
     blog_entries: list[tuple[str, str | None]] = []
+    page_entries: list[tuple[str, str | None]] = []
     if feed_output is not None:
         app_pages = write_app_pages(value, sitemap_output.parent)
         view_paths = app_pages["paths"]
+        # /about/ is prose, not a view over the corpus, so it is written from
+        # the shared chrome rather than from the dashboard document. The nav
+        # links to it from every page this build writes, so it is written
+        # unconditionally; only its sitemap date depends on there being a
+        # corpus history to date it by.
+        site_updated = site_lastmod(snapshots)
+        about = write_about(sitemap_output.parent, updated=site_updated)
+        page_entries = [(path, site_updated) for path in about["paths"]]
         write_feed(snapshots, feed_output)
         # One page per collection day, plus the blog's own feed. Built from the
         # same validated snapshots the dashboard is, in the same run, so a
@@ -1374,6 +1384,7 @@ def rebuild_dashboard(
         benchmark_entries,
         view_paths=view_paths,
         blog_entries=blog_entries,
+        page_entries=page_entries,
     )
     return value
 

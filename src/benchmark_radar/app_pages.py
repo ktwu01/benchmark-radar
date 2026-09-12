@@ -70,7 +70,7 @@ VIEW_LABELS = {
 }
 UTILITY_LABELS = {
     "cli": "CLI",
-    "cite": "Cite",
+    "cite": "Publications",
     "rubric": "Scoring rubric",
 }
 

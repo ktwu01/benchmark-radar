@@ -23,7 +23,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 from .citation import apa_citation
-from .site_shell import esc
+from .site_shell import SOURCE_LABELS, esc
 
 
 def _num(value: Any) -> str:
@@ -249,14 +249,6 @@ def _has_reported_score(row: dict[str, Any]) -> bool:
     )
 
 
-_SCORE_SOURCE_NAMES = {
-    "model_reports": "Model reports",
-    "llm_stats": "LLM Stats",
-    "artificial_analysis": "Artificial Analysis",
-    "opencompass_hub": "OpenCompass Hub",
-}
-
-
 def _score_browser_seed(
     dashboard: dict[str, Any], catalog_index: list[dict[str, Any]]
 ) -> dict[str, str]:
@@ -271,7 +263,7 @@ def _score_browser_seed(
     shown = rows[:50]
     content = ""
     for index, row in enumerate(shown):
-        label = _SCORE_SOURCE_NAMES.get(row["source"], row["source"])
+        label = SOURCE_LABELS.get(row["source"], row["source"])
         dated, basis = row["date"]
         date_label = f"{basis} {_medium_date(dated)}" if dated else "Date unknown"
         facts = f"{label} · {date_label}"
@@ -326,7 +318,7 @@ def _score_ranking_seed(
         value = _display_value(summary["display_max"])
         unit = summary.get("unit")
         suffix = "%" if unit == "percent" else f" {unit}" if unit else ""
-        label = _SCORE_SOURCE_NAMES.get(row["source"], row["source"])
+        label = SOURCE_LABELS.get(row["source"], row["source"])
         count = _metric_label(summary["numeric_count"], "data point")
         width = summary["numeric_count"] / maximum * 100
         ranking += (
