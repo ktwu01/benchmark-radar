@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import html
 import json
+import re
 import shutil
 from datetime import date
 from pathlib import Path
@@ -31,6 +32,10 @@ from .site_shell import website_reference
 
 DEFAULT_SHARD_DIR = Path("site/data/benchmarks")
 DEFAULT_PAGES_DIR = Path("site/benchmarks")
+
+# Lowercase, digits, and the two separators the shard writers use. Nothing
+# else has ever appeared in a slug, and nothing else is safe in a URL.
+_SAFE_SLUG = re.compile(r"[a-z0-9][a-z0-9_-]*")
 
 _DESCRIPTION_LIMIT = 155
 
@@ -360,12 +365,12 @@ def _load_shard(path: Path) -> tuple[str, dict[str, Any]]:
     shard = json.loads(path.read_text(encoding="utf-8"))
     record = shard.get("record") or {}
     slug = record.get("slug")
-    if (
-        not isinstance(slug, str)
-        or not slug
-        or slug in {".", ".."}
-        or any(ch in slug for ch in "/\\")
-    ):
+    # The slug becomes a directory name, a canonical URL, and a query argument
+    # on the dashboard link, so it is held to the slug alphabet rather than
+    # only to the characters that would escape the output directory. Anything
+    # else means the shard was not written by this project, and a page built
+    # from it could carry markup straight into an attribute.
+    if not isinstance(slug, str) or not _SAFE_SLUG.fullmatch(slug):
         raise ValueError(f"unsafe slug in {path.name}")
     return slug, shard
 

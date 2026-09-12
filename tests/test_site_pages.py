@@ -333,3 +333,13 @@ def test_path_traversal_slug_is_rejected(tmp_path):
     )
     with pytest.raises(ValueError):
         write_benchmark_pages(shard_dir, tmp_path / "out")
+
+
+def test_slug_outside_the_slug_alphabet_is_rejected(tmp_path):
+    """A slug reaches URLs and attributes unescaped, so the guard is the alphabet."""
+    shard_dir = _write_shards(tmp_path, _shard("alpha-bench", "Alpha Bench"))
+    (shard_dir / "quoted.json").write_text(
+        json.dumps(_shard('alpha" onload="x', "Quoted")), encoding="utf-8"
+    )
+    with pytest.raises(ValueError):
+        write_benchmark_pages(shard_dir, tmp_path / "out")
