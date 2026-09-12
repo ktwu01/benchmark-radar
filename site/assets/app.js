@@ -1865,17 +1865,20 @@ function scoreBlock(item) {
   const trackFill = element("span", {});
   const track = element("div", { className: "score-track" }, [trackFill]);
   trackFill.style.width = `${width}%`;
-  // The label doubles as the way into the rubric. A number presented without
+  // The mark doubles as the way into the rubric. A number presented without
   // a reachable definition of how it was produced asks the reader to trust it
-  // on faith, which is the opposite of what an evidence log is for.
+  // on faith, which is the opposite of what an evidence log is for. It carries
+  // no visible caption: the number, the bar and the mark already say "score
+  // out of something, explained here", and spelling it out on every row cost a
+  // third line in a card that has four of them (issue #593). The full sentence
+  // stays in the label, so nothing is lost to a screen reader.
   const explain = element("button", {
-    className: "score-label score-explain",
+    className: "score-explain",
     attrs: {
       type: "button",
       "aria-label": `${t("Priority score")} ${score} ${t("of")} ${maxDisplay}. ${t("How is this scored?")}`,
     },
   }, [
-    element("span", { text: t("Priority score") }),
     element("span", { className: "info-mark", text: "i", attrs: { "aria-hidden": "true" } }),
   ]);
   explain.addEventListener("click", (event) => {
@@ -1888,10 +1891,9 @@ function scoreBlock(item) {
   return element("div", { className: "score" }, [
     element("div", { className: "score-value" }, [
       element("strong", { text: score }),
-      element("span", { text: `/ ${maxDisplay}` }),
+      explain,
     ]),
     track,
-    explain,
   ]);
 }
 

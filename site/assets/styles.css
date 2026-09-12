@@ -1321,11 +1321,8 @@ a.briefing-chip-sources:focus-visible {
   line-height: 1;
 }
 
-.score-value span {
+.score-value .score-explain {
   justify-self: end;
-  color: var(--muted);
-  font-family: var(--utility);
-  font-size: 0.65rem;
 }
 
 .score-track {
@@ -1343,22 +1340,11 @@ a.briefing-chip-sources:focus-visible {
   background: var(--blue);
 }
 
-.score-label {
-  margin-top: 0.3rem;
-  color: var(--muted);
-  /* The score's caption is a UI label, not a machine value: body face,
-     normal case. */
-  font-family: var(--body);
-  font-size: 0.7rem;
-  letter-spacing: normal;
-}
-
-/* The label is a button, but it keeps the label's typography: the affordance
-   is the info mark and the underline on hover, not a boxed control competing
-   with the score it annotates. */
+/* The mark is the whole control: no box, no caption, nothing competing with
+   the score it annotates. Hovering it fills the circle, which is the only
+   affordance it needs. */
 .score-explain {
   display: inline-flex;
-  gap: 0.35rem;
   align-items: center;
   padding: 0;
   border: 0;
@@ -1366,7 +1352,6 @@ a.briefing-chip-sources:focus-visible {
   cursor: pointer;
 }
 
-.score-explain:hover span:first-child,
 .rubric-link:hover span:first-child {
   text-decoration: underline;
   text-underline-offset: 0.2em;
