@@ -131,10 +131,15 @@ def _post_page(post: BlogPost, chrome: SiteChrome, chrome_i18n: dict[str, str]) 
 
 
 def _post_card(post: BlogPost) -> str:
+    """One day in the list: what it was, and what it found.
+
+    The title already carries the kind and the date, so the chip that repeated
+    the kind and the column that repeated the date are gone. The summary is the
+    only line that differs from one card to the next, and it now sits second
+    rather than fourth.
+    """
     return f"""<li><article class="blog-card">
-  <div><span class="blog-chip">{esc(post.kind)}</span>
-  <h2><a href="{esc(post.path)}">{esc(post.title)}</a></h2></div>
-  <time class="blog-meta" datetime="{esc(post.published)}">{esc(post.published)}</time>
+  <h2><a href="{esc(post.path)}">{esc(post.title)}</a></h2>
   <p>{esc(post.description)}</p>
 </article></li>"""
 

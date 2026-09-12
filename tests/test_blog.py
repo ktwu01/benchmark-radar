@@ -533,6 +533,19 @@ def test_a_brief_states_the_day_once_and_opens_on_its_own_text(tmp_path):
     assert posting["datePublished"] == post.published
 
 
+def test_a_blog_card_is_a_title_and_what_the_day_found(tmp_path):
+    """Two elements per card, and only one of them repeats across the list."""
+    write_blog_with_chrome([_briefed(), _legacy()], tmp_path)
+    page = (tmp_path / "blog" / "index.html").read_text(encoding="utf-8")
+    card = re.search(r'<article class="blog-card">.*?</article>', page, re.S).group(0)
+    post = build_post(_briefed())
+    assert f'<h2><a href="{post.path}">{esc(post.title)}</a></h2>' in card
+    assert f"<p>{esc(post.description)}</p>" in card
+    # The title already carries both, so neither is printed beside it.
+    assert "<time" not in card
+    assert "blog-chip" not in card
+
+
 def test_dashboard_and_blog_share_the_reduced_chrome_contract(tmp_path):
     write_blog_with_chrome([_briefed()], tmp_path)
     page = (tmp_path / "blog" / "2026-08-30" / "index.html").read_text(encoding="utf-8")
