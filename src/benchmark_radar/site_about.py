@@ -51,7 +51,8 @@ ABOUT_HEADING = ABOUT_TITLE
 # the heading directly above it a second time.
 ABOUT_DESCRIPTION = (
     "An open, daily-updated database and search engine for AI benchmarks: LLM, agent, "
-    "multimodal, coding and safety evaluations, each with the paper, code and scores it has."
+    "multimodal, coding, safety and AI-for-science evaluations, each with the paper, "
+    "code and scores it has."
 )
 ABOUT_LEDE = (
     "Every benchmark the catalog has found, with the paper, code, dataset and scores on "

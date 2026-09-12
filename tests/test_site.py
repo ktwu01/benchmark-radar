@@ -2884,8 +2884,8 @@ def test_heading_outline_and_scale_stay_quiet():
     # already says pushed the first result most of a screen down, so the
     # heading keeps its words and gives up its pixels (issue #593).
     assert (
-        '<h1 class="visually-hidden" data-i18n="Search AI, LLM, agent, and multimodal benchmarks">'
-        in html
+        '<h1 class="visually-hidden" '
+        'data-i18n="Search AI, LLM, agent, multimodal, and AI-for-science benchmarks">' in html
     )
     assert '<h2 id="today-heading" class="today-heading" data-i18n="Today\'s radar">' in html
     for heading_id in (

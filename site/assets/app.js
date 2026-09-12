@@ -978,7 +978,8 @@ const I18N = {
     About: "关于",
     "About this site": "关于本站",
     Publications: "论文与引用",
-    "Search AI, LLM, agent, and multimodal benchmarks": "搜索 AI、大模型、智能体与多模态 benchmark",
+    "Search AI, LLM, agent, multimodal, and AI-for-science benchmarks":
+      "搜索 AI、大模型、智能体、多模态与科学智能 benchmark",
     "Cite this work": "引用这项工作",
     "Pick the format your paper or repository needs, then click it to copy.":
       "选择你的论文或仓库需要的格式，点击即可复制。",
@@ -1659,7 +1660,7 @@ const VIEW_SEO = {
   today: {
     title: "AI Benchmark Search Engine & Database | Benchmark Radar",
     description:
-      "Search an open database of AI and LLM benchmarks. Every benchmark gets its own page carrying the paper, code, dataset, leaderboard and scores it has.",
+      "Search an open database of AI, LLM, agent, multimodal and AI-for-science benchmarks, each with its own page carrying the paper, code, dataset and scores.",
     canonical: "/",
   },
   leaderboard: {
