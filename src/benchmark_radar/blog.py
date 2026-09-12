@@ -24,7 +24,6 @@ collect that day.
 
 from __future__ import annotations
 
-import re
 import shutil
 from datetime import UTC, date, datetime, time
 from email.utils import format_datetime
@@ -39,6 +38,7 @@ from .blog_shell import (
     BLOG_PATH,
     BlogPost,
     SiteChrome,
+    chrome_i18n_table,
     extract_site_chrome,
     render_page,
 )
@@ -46,14 +46,6 @@ from .feed import ATOM_NAMESPACE, SITE_URL
 from .site_shell import breadcrumb_schema, esc, organization_reference, webpage_schema
 
 LATEST_POST_LIMIT = 30
-
-# The dashboard's toggle and star count translate these at runtime; the
-# chrome's own data-i18n keys cover everything else.
-_TOGGLE_I18N_KEYS = ("Switch to Chinese (中文)", "Switch to English")
-_BADGE_I18N_KEYS = ("Star this repository on GitHub. {count} stars",)
-# The footer's build date prefix is baked in per page, after the keys were
-# collected from the raw extracted chrome, so it is listed here.
-_FOOTER_I18N_KEYS = ("Updated",)
 
 _INDEX_TITLE = "AI benchmark daily brief | Benchmark Radar"
 _INDEX_HEADING = "What changed in AI evaluation, and why it matters"
@@ -250,56 +242,6 @@ def build_posts(snapshots: list[dict[str, Any]]) -> list[BlogPost]:
     return posts
 
 
-def _parse_zh_table(app_js: str) -> dict[str, str]:
-    """The reviewed English→Chinese strings from app.js's ``I18N.zh`` table."""
-    start = app_js.find("const I18N = {")
-    if start == -1:
-        raise ValueError(
-            "app.js no longer defines `const I18N`; the blog chrome cannot bake its translations"
-        )
-    open_brace = app_js.find("{", start)
-    depth = 0
-    end = -1
-    for index in range(open_brace, len(app_js)):
-        if app_js[index] == "{":
-            depth += 1
-        elif app_js[index] == "}":
-            depth -= 1
-            if depth == 0:
-                end = index
-                break
-    if end == -1:
-        raise ValueError(
-            "app.js's I18N table is unbalanced; the blog chrome cannot bake its translations"
-        )
-    table: dict[str, str] = {}
-    # Object keys are quoted or bare JS identifiers (both appear in the table).
-    pair = re.compile(r'(?:"((?:[^"\\]|\\.)*)"|([A-Za-z_$][\w$]*))\s*:\s*"((?:[^"\\]|\\.)*)"')
-    for quoted, bare, value in pair.findall(app_js[open_brace:end]):
-        table[quoted or bare] = value
-    return table
-
-
-def _chrome_i18n_script(chrome: SiteChrome, app_js: str) -> dict[str, str]:
-    """Bake the reviewed zh subset the chrome needs from app.js's I18N table.
-
-    The dashboard translates its chrome in place from the same table; the blog
-    has no app.js, so the needed entries ship with the page and blog.js applies
-    them with the same contract. Keys come from the chrome itself, so a new
-    badge or nav label is covered without touching this function.
-    """
-    chrome_html = chrome.header + chrome.footer
-    keys = set(re.findall(r'data-i18n(?:-title|-aria)?="([^"]+)"', chrome_html))
-    keys.update(_TOGGLE_I18N_KEYS)
-    keys.update(_BADGE_I18N_KEYS)
-    keys.update(_FOOTER_I18N_KEYS)
-    table = _parse_zh_table(app_js)
-    # Keys the table does not carry (short nav labels like Blog and Trends)
-    # stay English on the dashboard too — t() falls back to the key itself —
-    # so the blog mirrors that instead of inventing translations.
-    return {key: table[key] for key in sorted(keys) if key in table}
-
-
 def write_blog(
     snapshots: list[dict[str, Any]],
     site_dir: Path,
@@ -333,7 +275,7 @@ def write_blog(
             )
         app_js = app_js_source.read_text(encoding="utf-8")
     chrome = extract_site_chrome(dashboard_html)
-    chrome_i18n = _chrome_i18n_script(chrome, app_js)
+    chrome_i18n = chrome_i18n_table(chrome, app_js)
     posts = build_posts(snapshots)
     output_dir = site_dir / "blog"
     staging = site_dir / "blog.staging"

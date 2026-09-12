@@ -156,28 +156,29 @@ def _today_link(button: str) -> str:
     return f'<a href="{href}" data-i18n="{esc(label)}">{esc(label)}</a>'
 
 
-def _adapt_navigation(nav: str) -> str:
+def _adapt_navigation(nav: str, active_path: str) -> str:
     nav = _strip_comments(nav)
     nav = re.sub(r"<button\b[^>]*>.*?</button>", lambda m: _today_link(m.group(0)), nav, flags=re.S)
     nav = _drop_spa_attributes(nav)
-    # The blog's own entry is the current page everywhere the blog renders.
+    # Whichever section this page belongs to is the current one everywhere it
+    # renders, so the chrome marks it rather than the page patching the nav back.
     marked = re.sub(
-        r'<a href="' + BLOG_PATH + '"',
-        f'<a class="nav-active" aria-current="page" href="{BLOG_PATH}"',
+        r'<a href="' + re.escape(active_path) + '"',
+        f'<a class="nav-active" aria-current="page" href="{active_path}"',
         nav,
     )
     if marked == nav:
         raise ValueError(
-            "the dashboard nav no longer links to the blog at "
-            f"{BLOG_PATH!r}; the blog pages cannot mark their section active"
+            "the dashboard nav no longer links to "
+            f"{active_path!r}; pages in that section cannot mark it active"
         )
     return marked
 
 
-def _adapt_header(header: str) -> str:
+def _adapt_header(header: str, active_path: str) -> str:
     header = _strip_comments(header)
     navigation = _region(header, r'<nav class="view-nav".*?</nav>', "section nav")
-    header = header.replace(navigation, _adapt_navigation(navigation), 1)
+    header = header.replace(navigation, _adapt_navigation(navigation, active_path), 1)
     # Same host-relative rule as the section nav: the badge keeps the site
     # feed, but a local preview or mirror must not eject to the canonical
     # domain on click.
@@ -205,10 +206,19 @@ def _adapt_header(header: str) -> str:
     return header
 
 
-def _page_footer(footer: str, updated: str) -> str:
+def _page_footer(footer: str, updated: str | None) -> str:
+    """Bake the build date into the dashboard footer's placeholder.
+
+    ``updated`` is None when the corpus has no history to date the build by.
+    The whole line is then dropped rather than left half-written: a footer
+    reading "Updated" with nothing after it claims a date the build lacks.
+    """
+    replacement = (
+        rf'\g<1><span data-i18n="Updated">Updated</span> {esc(updated)}\g<2>' if updated else ""
+    )
     stamped, count = re.subn(
         r'(<p id="build-meta">)Updated —(</p>)',
-        rf'\g<1><span data-i18n="Updated">Updated</span> {esc(updated)}\g<2>',
+        replacement,
         footer,
     )
     if count != 1:
@@ -219,14 +229,78 @@ def _page_footer(footer: str, updated: str) -> str:
     return stamped
 
 
-def extract_site_chrome(dashboard_html: str) -> SiteChrome:
-    """Pull the shared masthead and footer out of ``site/index.html``."""
+def extract_site_chrome(dashboard_html: str, *, active_path: str = BLOG_PATH) -> SiteChrome:
+    """Pull the shared masthead and footer out of ``site/index.html``.
+
+    ``active_path`` is the nav entry this page belongs under. It must be a link
+    the dashboard nav already carries, so a standalone page cannot claim a
+    section the site does not have.
+    """
     header = _region(dashboard_html, r'<header class="masthead">.*?</header>', "masthead")
     footer = _region(dashboard_html, r"<footer>.*?</footer>", "footer")
     return SiteChrome(
-        header=_adapt_header(header),
+        header=_adapt_header(header, active_path),
         footer=_strip_comments(footer),
     )
+
+
+# The dashboard's toggle and star count translate these at runtime; the
+# chrome's own data-i18n keys cover everything else.
+_TOGGLE_I18N_KEYS = ("Switch to Chinese (中文)", "Switch to English")
+_BADGE_I18N_KEYS = ("Star this repository on GitHub. {count} stars",)
+# The footer's build date prefix is baked in per page, after the keys were
+# collected from the raw extracted chrome, so it is listed here.
+_FOOTER_I18N_KEYS = ("Updated",)
+
+
+def parse_zh_table(app_js: str) -> dict[str, str]:
+    """The reviewed English→Chinese strings from app.js's ``I18N.zh`` table."""
+    start = app_js.find("const I18N = {")
+    if start == -1:
+        raise ValueError(
+            "app.js no longer defines `const I18N`; the blog chrome cannot bake its translations"
+        )
+    open_brace = app_js.find("{", start)
+    depth = 0
+    end = -1
+    for index in range(open_brace, len(app_js)):
+        if app_js[index] == "{":
+            depth += 1
+        elif app_js[index] == "}":
+            depth -= 1
+            if depth == 0:
+                end = index
+                break
+    if end == -1:
+        raise ValueError(
+            "app.js's I18N table is unbalanced; the blog chrome cannot bake its translations"
+        )
+    table: dict[str, str] = {}
+    # Object keys are quoted or bare JS identifiers (both appear in the table).
+    pair = re.compile(r'(?:"((?:[^"\\]|\\.)*)"|([A-Za-z_$][\w$]*))\s*:\s*"((?:[^"\\]|\\.)*)"')
+    for quoted, bare, value in pair.findall(app_js[open_brace:end]):
+        table[quoted or bare] = value
+    return table
+
+
+def chrome_i18n_table(chrome: SiteChrome, app_js: str) -> dict[str, str]:
+    """Bake the reviewed zh subset the chrome needs from app.js's I18N table.
+
+    The dashboard translates its chrome in place from the same table; the blog
+    has no app.js, so the needed entries ship with the page and blog.js applies
+    them with the same contract. Keys come from the chrome itself, so a new
+    badge or nav label is covered without touching this function.
+    """
+    chrome_html = chrome.header + chrome.footer
+    keys = set(re.findall(r'data-i18n(?:-title|-aria)?="([^"]+)"', chrome_html))
+    keys.update(_TOGGLE_I18N_KEYS)
+    keys.update(_BADGE_I18N_KEYS)
+    keys.update(_FOOTER_I18N_KEYS)
+    table = parse_zh_table(app_js)
+    # Keys the table does not carry (short nav labels like Blog and Trends)
+    # stay English on the dashboard too — t() falls back to the key itself —
+    # so the blog mirrors that instead of inventing translations.
+    return {key: table[key] for key in sorted(keys) if key in table}
 
 
 def render_page(
@@ -236,7 +310,7 @@ def render_page(
     canonical: str,
     body: str,
     chrome: SiteChrome,
-    updated: str,
+    updated: str | None,
     chrome_i18n: dict[str, str] | None = None,
     schemas: Iterable[dict[str, Any]] = (),
     og_type: str = "website",
