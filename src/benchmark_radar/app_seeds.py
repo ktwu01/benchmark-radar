@@ -18,9 +18,10 @@ one side has an obvious counterpart on the other.
 from __future__ import annotations
 
 import math
-from datetime import date
+from datetime import UTC, date, datetime
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
+from urllib.parse import urlsplit, urlunsplit
 
 from .citation import apa_citation
 from .site_shell import SOURCE_LABELS, esc
@@ -67,6 +68,8 @@ LEADERBOARD_TOP_LIMIT = 5
 # below the ranking. It is the caveat that keeps a document count from being
 # read as a quality score, so a page that ships the ranking ships it too.
 LEADERBOARD_TOP_NOTE = "Open the source-document list below to trace each count to its citations."
+# The window the leaderboard opens on (issue #530), keyed as the payload keys it.
+LATEST_WINDOW_DAYS = {"7d": 7, "30d": 30, "90d": 90}
 
 
 # The slider's default position in site/index.html. The seed must render the
@@ -97,6 +100,265 @@ def _info_disclosure(text: str) -> str:
     )
 
 
+# The signals latestReleaseRow lists, in its order and with its labels.
+_LATEST_SIGNALS = (
+    ("github_stars", "GitHub stars"),
+    ("hf_paper_upvotes", "Hugging Face paper upvotes"),
+    ("hf_dataset_downloads", "Hugging Face dataset downloads, last 30 days"),
+)
+_LATEST_EMPTY_ANCHOR = (
+    '<p class="empty-state latest-releases-empty" id="latest-releases-empty" '
+    'aria-live="polite" hidden></p>'
+)
+_LATEST_NOTE_ANCHOR = '<p class="section-note" id="latest-releases-note" aria-live="polite"></p>'
+_LATEST_RANKED_NOTE = (
+    "{ranked} of {total} releases in this window are ranked; "
+    "the rest are listed with limited signals."
+)
+_LATEST_METHOD_NOTE = (
+    "Ranking {method}: {signals}, each normalized as log1p(value) / log1p(window maximum) "
+    "and summed to a 0 to 100 score. A release is ranked only when enough of its weight "
+    "comes from fresh, durable signals; the rest are listed with limited signals. Dataset "
+    "downloads are a rolling 30-day figure, never a cumulative total. Stars come from the "
+    "benchmark's own repository, never a parent framework. Window {start} to {end}, UTC."
+)
+
+
+def _utc_medium_date(value: Any) -> str:
+    """Match formatDate(value, {dateStyle: "medium"}): the UTC calendar day."""
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return _medium_date(str(value or "")[:10])
+    if parsed.tzinfo is not None:
+        parsed = parsed.astimezone(UTC)
+    return _medium_date(parsed.date().isoformat())
+
+
+def _percent(value: Any) -> str:
+    """Match Math.round(Number(value) * 100): half rounds up, never to even."""
+    scaled = Decimal(str(float(value) * 100)).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+    return f"{int(scaled)}%"
+
+
+def _js_number(value: Any) -> str:
+    """Match String(number) for the integral and plain decimal scores the engine emits."""
+    number = float(value)
+    return str(int(number)) if number.is_integer() else str(number)
+
+
+def _safe_http_url(value: Any) -> str:
+    """Mirror safeHttpUrl in app.js: the normalized href, or "" if not http(s).
+
+    The renderer builds its link from `new URL(value).href`, which lowercases
+    the scheme and host and supplies a "/" path. Prefix-testing the raw string
+    instead looked equivalent and was not: the engine accepts `HTTPS://Host/x`
+    (release_leaderboard casefolds before comparing), and for that input the
+    seed emitted no link at all while the renderer emitted one, so a crawler
+    and a reader without scripts lost the provenance link a scripted reader
+    got. That is the one thing a seed may never do.
+    """
+    parsed = urlsplit(str(value or ""))
+    if parsed.scheme.lower() not in ("http", "https") or not parsed.netloc:
+        return ""
+    return urlunsplit(
+        (
+            parsed.scheme.lower(),
+            parsed.netloc.lower(),
+            parsed.path or "/",
+            parsed.query,
+            parsed.fragment,
+        )
+    )
+
+
+def _latest_signal_text(component: dict[str, Any]) -> str:
+    """The reading latestSignalText prints for one component."""
+    status = component.get("status") or "unknown"
+    value = component.get("value")
+    if status == "unavailable":
+        return "unavailable"
+    if value is None:
+        return "not observed"
+    number = _num(value)
+    if status == "stale":
+        since = component.get("last_successful_date")
+        return f"{number} · stale since {since}" if since else f"{number} · stale"
+    if status != "fresh":
+        since = component.get("last_successful_date")
+        return f"{number} · unverified since {since}" if since else f"{number} · unverified"
+    return number
+
+
+def _latest_method_note(payload: dict[str, Any], window: dict[str, Any]) -> str:
+    """The (i) text latestReleasesMethodNote composes from the published weights."""
+    entries = window.get("entries") or []
+    parts = []
+    for key, label in _LATEST_SIGNALS:
+        weight = next(
+            (
+                entry["components"][key].get("weight")
+                for entry in entries
+                if "weight" in ((entry.get("components") or {}).get(key) or {})
+            ),
+            None,
+        )
+        parts.append(label if weight is None else f"{_percent(weight)} {label}")
+    return _LATEST_METHOD_NOTE.format(
+        method=payload.get("method_version") or "",
+        signals=", ".join(parts),
+        start=_utc_medium_date(window.get("window_start")),
+        end=_utc_medium_date(window.get("window_end")),
+    )
+
+
+def _latest_release_row(entry: dict[str, Any], top: float) -> str:
+    """One row, as latestReleaseRow draws it: the rank line and its disclosure."""
+    ranked = entry.get("status") == "ranked" and bool(entry.get("rank"))
+    score = entry.get("score")
+    confidence = str(entry.get("confidence") or "").lower()
+    width = f"{float(score) / top * 100:.1f}" if score is not None and top else "0"
+    rank = (
+        f'<span class="leaderboard-top-rank">{int(entry["rank"]):02}</span>'
+        if ranked
+        else '<span class="leaderboard-top-rank"><span aria-hidden="true">—</span>'
+        '<span class="visually-hidden">unranked</span></span>'
+    )
+    release_date = entry.get("release_date")
+    date = (
+        f'<small class="latest-release-date">released {esc(_utc_medium_date(release_date))}</small>'
+        if release_date
+        else ""
+    )
+    bar_class = "leaderboard-top-bar-fill" + ("" if ranked else " latest-release-bar-limited")
+    score_text = esc(_js_number(score)) if score is not None else "no score"
+    pill = (
+        f'<span class="pill pill-confidence pill-confidence-{esc(confidence)}">'
+        f"{esc(confidence)}</span>"
+        if confidence
+        else ""
+    )
+    signals = []
+    for key, label in _LATEST_SIGNALS:
+        component = (entry.get("components") or {}).get(key) or {}
+        url = _safe_http_url(component.get("source_url"))
+        link = (
+            f'<a class="latest-release-source" href="{esc(url)}" target="_blank" '
+            'rel="noopener noreferrer">source ↗</a>'
+            if url
+            else ""
+        )
+        weight = component.get("weight")
+        weight_text = (
+            f'<small class="latest-release-weight">weight {_percent(weight)}</small>'
+            if weight is not None
+            else ""
+        )
+        signals.append(
+            f'<div class="latest-release-signal"><dt>{esc(label)}</dt>'
+            f"<dd><span>{esc(_latest_signal_text(component))}</span>{link}{weight_text}</dd></div>"
+        )
+    meta = " · ".join(
+        part
+        for part in (
+            f"Coverage {_decimal(entry.get('coverage') or 0)}",
+            f"confidence {confidence}" if confidence else "",
+            "" if ranked else "limited signals: not enough fresh durable signal to rank",
+        )
+        if part
+    )
+    purpose = entry.get("purpose")
+    purpose_html = f'<p class="latest-release-purpose">{esc(purpose)}</p>' if purpose else ""
+    return (
+        '<li class="latest-release"><details class="latest-release-details" '
+        f'data-artifact="{esc(entry.get("canonical_artifact_id") or "")}">'
+        '<summary class="leaderboard-top-row latest-release-summary">'
+        f"{rank}"
+        f'<span class="leaderboard-top-name"><span>{esc(entry.get("name") or "")}</span>'
+        f"{date}</span>"
+        f'<span class="leaderboard-top-bar"><span class="{bar_class}" style="width:{width}%">'
+        "</span></span>"
+        f'<span class="leaderboard-top-count"><span>{score_text}</span>{pill}</span>'
+        "</summary>"
+        f'<div class="latest-release-body">{purpose_html}'
+        f'<dl class="latest-release-signals">{"".join(signals)}</dl>'
+        f'<p class="latest-release-meta">{esc(meta)}</p></div>'
+        "</details></li>"
+    )
+
+
+def _latest_releases_seed(dashboard: dict[str, Any]) -> dict[str, str]:
+    """What renderLatestReleases draws for the payload's default window.
+
+    The page opens on this ranking (issue #530), so a crawler or a reader
+    without scripts must see the rows the script would draw, each with the
+    inputs behind its rank, the method note, and, when the window holds
+    nothing, the same empty state with its way out. A build without the
+    ranking seeds nothing here and the script says so.
+    """
+    payload = dashboard.get("latest_releases_leaderboard") or {}
+    windows = payload.get("windows") or {}
+    window_key = payload.get("default_window") or "30d"
+    window = windows.get(window_key) or {}
+    if not payload or not window:
+        return {}
+    days = LATEST_WINDOW_DAYS.get(window_key, window_key)
+    seeds = {
+        '<span class="latest-releases-window" id="latest-releases-window">· 30 days</span>': (
+            '<span class="latest-releases-window" id="latest-releases-window" data-seed>'
+            f"· {days} days</span>"
+        ),
+    }
+    if window.get("window_start"):
+        seeds['<span id="latest-releases-info"></span>'] = (
+            '<span id="latest-releases-info" data-seed>'
+            f"{_info_disclosure(_latest_method_note(payload, window))}</span>"
+        )
+    entries = window.get("entries") or []
+    if not entries:
+        # latestReleasesEmptyState: wider windows are offered unless they are
+        # known to be empty too; past the widest, the adoption view.
+        keys = list(LATEST_WINDOW_DAYS)
+        wider = [
+            key
+            for key in keys[keys.index(window_key) + 1 :]
+            if key not in windows or (windows[key] or {}).get("entries")
+        ]
+        actions = [
+            '<button class="latest-releases-empty-action" type="button" '
+            f'data-lwindow="{key}">Try {LATEST_WINDOW_DAYS[key]} days</button>'
+            for key in wider
+        ]
+        if not wider:
+            actions.append(
+                '<button class="latest-releases-empty-action" type="button" '
+                'data-lmode="adoption">See model-card adoption instead</button>'
+            )
+        seeds[_LATEST_EMPTY_ANCHOR] = (
+            '<p class="empty-state latest-releases-empty" id="latest-releases-empty" '
+            'aria-live="polite" data-seed>'
+            f"No benchmark released in the last {days} days has a measurable attention "
+            f"signal yet. {''.join(actions)}</p>"
+        )
+        return seeds
+    scores = [float(entry["score"]) for entry in entries if entry.get("score") is not None]
+    top = max(scores) if scores else 0.0
+    rows = "".join(_latest_release_row(entry, top) for entry in entries)
+    seeds[
+        '<ol class="leaderboard-top-list latest-releases-list" id="latest-releases-list"></ol>'
+    ] = (
+        '<ol class="leaderboard-top-list latest-releases-list" id="latest-releases-list" '
+        f"data-seed>{rows}</ol>"
+    )
+    ranked = _num(window.get("ranked_count") or 0)
+    total = _num(window.get("total_cohort_count") or 0)
+    seeds[_LATEST_NOTE_ANCHOR] = (
+        '<p class="section-note" id="latest-releases-note" aria-live="polite" data-seed>'
+        f"{esc(_LATEST_RANKED_NOTE.format(ranked=ranked, total=total))}</p>"
+    )
+    return seeds
+
+
 def _leaderboard_seed(
     dashboard: dict[str, Any], catalog_index: list[dict[str, Any]]
 ) -> dict[str, str]:
@@ -104,7 +366,10 @@ def _leaderboard_seed(
     board = dashboard.get("model_card_leaderboard") or {}
     ranked = [entry for entry in (board.get("entries") or []) if (entry.get("card_count") or 0) > 0]
     entries = ranked[:LEADERBOARD_TOP_LIMIT]
-    ranking_seed = _score_ranking_seed(dashboard, catalog_index)
+    ranking_seed = {
+        **_latest_releases_seed(dashboard),
+        **_score_ranking_seed(dashboard, catalog_index),
+    }
     if not entries:
         return ranking_seed
     # Scaled against the top row on screen rather than the top row overall,

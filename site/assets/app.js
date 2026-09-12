@@ -1116,6 +1116,49 @@ const I18N = {
     release: "发布",
     "release date unrecorded": "未记录发布日期",
     released: "发布于",
+    // Latest releases (issue #530)
+    "Leaderboard views": "排行榜视图",
+    "Latest releases": "最新发布",
+    "Model-card adoption": "模型卡采用情况",
+    "Reported scores": "报告分数",
+    "latest.deck":
+      "近期发布的benchmark，按当前获得的关注度排序：GitHub star、Hugging Face 论文点赞以及最近 30 天的 Hugging Face 数据集下载量。",
+    "Release window": "发布时间窗口",
+    "{days} days": "{days} 天",
+    "7 days": "7 天",
+    "30 days": "30 天",
+    "90 days": "90 天",
+    "Attention score": "关注度得分",
+    "GitHub stars": "GitHub star 数",
+    "Hugging Face paper upvotes": "Hugging Face 论文点赞数",
+    "Hugging Face dataset downloads, last 30 days": "Hugging Face 数据集下载量（最近 30 天）",
+    unavailable: "资源已不可用",
+    "not observed": "未观测到",
+    "{value} · stale since {date}": "{value} · 自 {date} 起未更新",
+    "{value} · stale": "{value} · 未更新",
+    "{value} · unverified since {date}": "{value} · 自 {date} 起未经核验",
+    "{value} · unverified": "{value} · 未经核验",
+    "source ↗": "来源 ↗",
+    "Coverage {coverage}": "覆盖率 {coverage}",
+    unranked: "未排名",
+    high: "高",
+    medium: "中",
+    low: "低",
+    "limited signals: not enough fresh durable signal to rank":
+      "信号有限：缺少足够新鲜的持久信号，未纳入排名",
+    "no score": "无得分",
+    "No benchmark released in the last {days} days has a measurable attention signal yet.":
+      "最近 {days} 天内发布的benchmark尚无可测量的关注度信号。",
+    "Try {window}": "试试 {window}",
+    "See model-card adoption instead": "改看模型卡采用情况",
+    "Loading this window…": "正在加载该时间窗口…",
+    "This window could not be loaded. Refresh to try again.": "无法加载该时间窗口，请刷新重试。",
+    "The {window} window is not in this build.": "此版本未提供 {window} 的时间窗口。",
+    "The latest releases ranking is not available in this build.": "此版本未提供最新发布排行。",
+    "{ranked} of {total} releases in this window are ranked; the rest are listed with limited signals.":
+      "该时间窗口内 {total} 个发布中有 {ranked} 个进入排名；其余因信号有限仅列出。",
+    "Ranking {method}: {signals}, each normalized as log1p(value) / log1p(window maximum) and summed to a 0 to 100 score. A release is ranked only when enough of its weight comes from fresh, durable signals; the rest are listed with limited signals. Dataset downloads are a rolling 30-day figure, never a cumulative total. Stars come from the benchmark's own repository, never a parent framework. Window {start} to {end}, UTC.":
+      "排名方法 {method}：{signals}，各信号按 log1p(值) / log1p(窗口最大值) 归一化后加权求和为 0 到 100 的得分。只有当足够权重来自新鲜且持久的信号时才纳入排名，其余因信号有限仅列出。数据集下载量为滚动 30 天数字，绝非累计总量。star 数来自该benchmark自己的仓库，绝非上级框架。时间窗口 {start} 至 {end}（UTC）。",
     "scale. Every number below is read from the same definition the pipeline applies.":
       "的标尺。下面每个数字都按流程应用的同一套定义读取。",
     to: "到",
@@ -1221,6 +1264,11 @@ const state = {
   benchmarkQuery: "",
   leaderboardShowAll: false,
   leaderboardTopExpanded: false,
+  // Issue #530: the leaderboard opens on the latest releases; the cumulative
+  // adoption view is one click, or one legacy permalink, away. An empty
+  // window means "the payload's default".
+  lmode: "latest",
+  lwindow: "",
   todayResultsKey: "",
   todayRenderedDate: "",
   todayPage: 1,
@@ -1453,6 +1501,7 @@ function readUrl() {
   state.ldomain = params.get("ldomain") || "";
   state.lorg = params.get("lorg") || "";
   state.lera = params.get("lera") || "";
+  state.lwindow = LATEST_WINDOWS.includes(params.get("lwindow")) ? params.get("lwindow") : "";
   state.lscore = scoreCutoff(params.get("lscore"));
   state.lheight = ["cards", "documents"].includes(params.get("lheight")) ? "documents" : "models";
   state.benchmarkVisibleLimit = BENCHMARK_SEARCH_LIMIT;
@@ -1461,6 +1510,9 @@ function readUrl() {
   state.lfrontierExplicit = Boolean(state.lfrontier);
   // Existing benchmark permalinks follow the score history to its new tab.
   if (state.view === "leaderboard" && state.lfrontierExplicit) state.view = "saturation";
+  // Resolved after that redirect: a legacy benchmark permalink is a Saturation
+  // address, and its cutoff must not decide which leaderboard mode opens next.
+  state.lmode = leaderboardModeFromParams(params, state.view);
   const rawHash = window.location.hash.slice(1);
   const hashParams = new URLSearchParams(rawHash);
   // A first-class utility path wins over every legacy fragment. This keeps a
@@ -1525,12 +1577,20 @@ function writeUrl(mode = "replace") {
   }
   if (!utility && state.view === "map" && state.entity) params.set("entity", state.entity);
   if (!utility && state.view === "leaderboard") {
-    params.set("lscore", state.lscore);
-    if (state.lheight === "documents") params.set("lheight", state.lheight);
-    if (state.lq) params.set("lq", state.lq);
-    if (state.ldomain) params.set("ldomain", state.ldomain);
-    if (state.lorg) params.set("lorg", state.lorg);
-    if (state.lera) params.set("lera", state.lera);
+    // The adoption filters are written only in adoption mode: any of them in
+    // a URL is what readUrl takes as the reader's choice of that mode, so a
+    // latest-releases address that carried them would flip on reload, and
+    // an adoption address needs no extra marker to survive one.
+    if (state.lmode === "adoption") {
+      params.set("lscore", state.lscore);
+      if (state.lheight === "documents") params.set("lheight", state.lheight);
+      if (state.lq) params.set("lq", state.lq);
+      if (state.ldomain) params.set("ldomain", state.ldomain);
+      if (state.lorg) params.set("lorg", state.lorg);
+      if (state.lera) params.set("lera", state.lera);
+    } else if (state.lwindow && state.lwindow !== latestReleasesDefaultWindow()) {
+      params.set("lwindow", state.lwindow);
+    }
   }
   if (!utility && state.view === "saturation") {
     params.set("lscore", state.lscore);
@@ -1664,9 +1724,9 @@ const VIEW_SEO = {
     canonical: "/",
   },
   leaderboard: {
-    title: "AI benchmark frontier and rankings | Benchmark Radar",
+    title: "Latest AI benchmark releases and rankings | Benchmark Radar",
     description:
-      "Explore Benchmark Frontier by highest reported score, and compare benchmarks by recorded scores and source documents across the catalog.",
+      "Benchmarks released in the last 7, 30 or 90 days, ranked by the attention they are receiving now: GitHub stars, Hugging Face paper upvotes and dataset downloads.",
     canonical: "/leaderboard/",
   },
   saturation: {
@@ -7725,6 +7785,372 @@ function renderLeaderboardTop(board) {
   }
 }
 
+// --- Latest releases (issue #530) -------------------------------------------
+// The page opens on recently released benchmarks ranked by the attention they
+// are receiving now, printed from the pipeline's `latest_releases_leaderboard`
+// payload (release_leaderboard.py). Nothing is scored in the browser: rank,
+// components, coverage, confidence and method version arrive as published, so
+// what a reader sees is what the snapshot recorded.
+const LATEST_WINDOWS = ["7d", "30d", "90d"];
+const LATEST_WINDOW_DAYS = { "7d": 7, "30d": 30, "90d": 90 };
+// Order and wording follow the signals issue #530 names. Each component's
+// weight is read from the payload rather than restated here, so a re-weighted
+// method version prints its own numbers.
+const LATEST_SIGNALS = [
+  { key: "github_stars", label: "GitHub stars" },
+  { key: "hf_paper_upvotes", label: "Hugging Face paper upvotes" },
+  { key: "hf_dataset_downloads", label: "Hugging Face dataset downloads, last 30 days" },
+];
+// The adoption view's own filters. A permalink carrying one was written when
+// the page had no modes, and must keep opening the view it filtered.
+const LEADERBOARD_ADOPTION_PARAMS = ["lscore", "lheight", "lq", "ldomain", "lorg", "lera"];
+
+// The cutoff is shared with Saturation, whose every address carries it, so on
+// its own it marks the adoption mode only on a leaderboard address: a reader
+// coming back from /saturation/?lscore=60 has chosen no leaderboard mode. The
+// other filters are written by the adoption mode alone, wherever the address
+// was read from.
+function leaderboardModeFromParams(params, view = "leaderboard") {
+  const requested = params.get("lmode");
+  if (requested === "adoption" || requested === "latest") return requested;
+  const markers = view === "leaderboard"
+    ? LEADERBOARD_ADOPTION_PARAMS
+    : LEADERBOARD_ADOPTION_PARAMS.filter((key) => key !== "lscore");
+  return markers.some((key) => params.has(key)) ? "adoption" : "latest";
+}
+
+function latestReleasesPayload() {
+  return state.data?.latest_releases_leaderboard || null;
+}
+
+function latestReleasesDefaultWindow(payload = latestReleasesPayload()) {
+  return LATEST_WINDOWS.includes(payload?.default_window) ? payload.default_window : "30d";
+}
+
+function latestReleasesWindowKey() {
+  return LATEST_WINDOWS.includes(state.lwindow) ? state.lwindow : latestReleasesDefaultWindow();
+}
+
+function latestWindowLabel(windowKey) {
+  return t("{days} days", { days: LATEST_WINDOW_DAYS[windowKey] || windowKey });
+}
+
+// Null is "no signal", never zero. A stale reading keeps the day it was read,
+// so a run of failed collections cannot make an old counter look current; a
+// resource its source reports as gone says so instead of going quiet.
+function latestSignalText(component) {
+  const status = component?.status || "unknown";
+  const value = component?.value;
+  if (status === "unavailable") return t("unavailable");
+  if (value === null || value === undefined) return t("not observed");
+  const number = Number(value).toLocaleString();
+  if (status === "stale") {
+    return component.last_successful_date
+      ? t("{value} · stale since {date}", { value: number, date: component.last_successful_date })
+      : t("{value} · stale", { value: number });
+  }
+  // Anything the engine did not mark fresh keeps its number but says so. A
+  // connector counter reaches the payload as `unknown` carrying a real value
+  // (release_leaderboard._extract_fallback_metric), kept visible for audit and
+  // deliberately not promoted to fresh; printed bare it read as a fresh
+  // observation, which is the imputation issue #530 rules out.
+  if (status !== "fresh") {
+    return component.last_successful_date
+      ? t("{value} · unverified since {date}", {
+          value: number,
+          date: component.last_successful_date,
+        })
+      : t("{value} · unverified", { value: number });
+  }
+  return number;
+}
+
+// A window with nothing in it is a real state, not a broken page: say so and
+// point at a wider window (issue #530). A wider window the loaded payload does
+// not carry yet is still offered, since choosing it fetches the full corpus;
+// one that is loaded and empty is not, and past the widest window the
+// cumulative adoption view is the honest suggestion.
+function latestReleasesEmptyState(windowKey, payload) {
+  const wider = LATEST_WINDOWS.slice(LATEST_WINDOWS.indexOf(windowKey) + 1).filter((key) => {
+    const loaded = payload?.windows?.[key];
+    return !loaded || (loaded.entries || []).length > 0;
+  });
+  return {
+    message: t(
+      "No benchmark released in the last {days} days has a measurable attention signal yet.",
+      { days: LATEST_WINDOW_DAYS[windowKey] || windowKey },
+    ),
+    windows: wider,
+    adoption: wider.length === 0,
+  };
+}
+
+function latestReleasesWeights(entries) {
+  const weights = {};
+  for (const { key } of LATEST_SIGNALS) {
+    const published = entries.find((entry) => entry.components?.[key]?.weight !== undefined);
+    weights[key] = published ? Number(published.components[key].weight) : null;
+  }
+  return weights;
+}
+
+function latestReleasesMethodNote(payload, windowData) {
+  const weights = latestReleasesWeights(windowData.entries || []);
+  const signals = LATEST_SIGNALS.map(({ key, label }) =>
+    weights[key] === null ? t(label) : `${Math.round(weights[key] * 100)}% ${t(label)}`,
+  ).join(", ");
+  return t(
+    "Ranking {method}: {signals}, each normalized as log1p(value) / log1p(window maximum) and summed to a 0 to 100 score. A release is ranked only when enough of its weight comes from fresh, durable signals; the rest are listed with limited signals. Dataset downloads are a rolling 30-day figure, never a cumulative total. Stars come from the benchmark's own repository, never a parent framework. Window {start} to {end}, UTC.",
+    {
+      method: payload.method_version || "",
+      signals,
+      start: formatDate(windowData.window_start, { dateStyle: "medium" }),
+      end: formatDate(windowData.window_end, { dateStyle: "medium" }),
+    },
+  );
+}
+
+// One row per release: the rank line, and behind it every input the rank was
+// computed from, each with its status and a link to the resource it was read
+// from. A release the engine could not rank keeps its place in the list, with
+// the reason, rather than disappearing.
+function latestReleaseRow(entry, maxScore, open = new Set()) {
+  const ranked = entry.status === "ranked" && Boolean(entry.rank);
+  const artifact = String(entry.canonical_artifact_id || "");
+  const score = entry.score === null || entry.score === undefined ? null : Number(entry.score);
+  const confidence = String(entry.confidence || "").toLowerCase();
+  const width = score !== null && maxScore > 0 ? ((score / maxScore) * 100).toFixed(1) : "0";
+  const summary = element("summary", { className: "leaderboard-top-row latest-release-summary" }, [
+    ranked
+      ? element("span", { className: "leaderboard-top-rank", text: String(entry.rank).padStart(2, "0") })
+      : element("span", { className: "leaderboard-top-rank" }, [
+          element("span", { text: "—", attrs: { "aria-hidden": "true" } }),
+          element("span", { className: "visually-hidden", text: t("unranked") }),
+        ]),
+    element("span", { className: "leaderboard-top-name" }, [
+      element("span", { text: entry.name }),
+      entry.release_date
+        ? element("small", {
+            className: "latest-release-date",
+            text: `${t("released")} ${formatDate(entry.release_date, { dateStyle: "medium" })}`,
+          })
+        : null,
+    ]),
+    element("span", { className: "leaderboard-top-bar" }, [
+      element("span", {
+        className: `leaderboard-top-bar-fill${ranked ? "" : " latest-release-bar-limited"}`,
+        attrs: { style: `width:${width}%` },
+      }),
+    ]),
+    element("span", { className: "leaderboard-top-count" }, [
+      element("span", { text: score === null ? t("no score") : String(score) }),
+      confidence
+        ? element("span", {
+            className: `pill pill-confidence pill-confidence-${confidence}`,
+            text: t(confidence),
+          })
+        : null,
+    ]),
+  ]);
+  const signals = element(
+    "dl",
+    { className: "latest-release-signals" },
+    LATEST_SIGNALS.map(({ key, label }) => {
+      const component = entry.components?.[key] || {};
+      const url = safeHttpUrl(component.source_url);
+      return element("div", { className: "latest-release-signal" }, [
+        element("dt", { text: t(label) }),
+        element("dd", {}, [
+          element("span", { text: latestSignalText(component) }),
+          url
+            ? element("a", {
+                className: "latest-release-source",
+                text: t("source ↗"),
+                attrs: { href: url, target: "_blank", rel: "noopener noreferrer" },
+              })
+            : null,
+          component.weight !== undefined && component.weight !== null
+            ? element("small", {
+                className: "latest-release-weight",
+                text: `${t("weight")} ${Math.round(Number(component.weight) * 100)}%`,
+              })
+            : null,
+        ]),
+      ]);
+    }),
+  );
+  const meta = [
+    t("Coverage {coverage}", { coverage: Number(entry.coverage || 0).toFixed(2) }),
+    confidence ? `${t("confidence")} ${t(confidence)}` : "",
+    ranked ? "" : t("limited signals: not enough fresh durable signal to rank"),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  return element("li", { className: "latest-release" }, [
+    element("details", {
+      className: "latest-release-details",
+      attrs: { "data-artifact": artifact, open: open.has(artifact) ? "" : null },
+    }, [
+      summary,
+      element("div", { className: "latest-release-body" }, [
+        entry.purpose ? element("p", { className: "latest-release-purpose", text: entry.purpose }) : null,
+        signals,
+        element("p", { className: "latest-release-meta", text: meta }),
+      ]),
+    ]),
+  ]);
+}
+
+function renderLatestReleases() {
+  const host = byId("latest-releases-list");
+  if (!host) return;
+  const payload = latestReleasesPayload();
+  const windowKey = latestReleasesWindowKey();
+  document.querySelectorAll("[data-lwindow]").forEach((control) => {
+    if (control.hasAttribute("aria-pressed")) {
+      control.setAttribute("aria-pressed", String(control.dataset.lwindow === windowKey));
+    }
+  });
+  const windowLabel = byId("latest-releases-window");
+  if (windowLabel) windowLabel.textContent = `· ${latestWindowLabel(windowKey)}`;
+  const empty = byId("latest-releases-empty");
+  const note = byId("latest-releases-note");
+  const info = byId("latest-releases-info");
+  const windowData = payload?.windows?.[windowKey];
+  if (!windowData) {
+    // The bootstrap payload carries the default window only (snapshots.py);
+    // a wider one arrives with the full corpus. Once that has loaded, a window
+    // still missing is not coming, and the reader is told so rather than left
+    // on a loading line; a failed fetch says the same, since the refresh
+    // control re-requests the corpus for this address.
+    replaceChildren(host, []);
+    if (info) replaceChildren(info, []);
+    if (note) note.textContent = "";
+    // Matches the stateNeedsFullData guard: the adoption view never reads a
+    // release window, so fetching the whole corpus to fill a hidden section
+    // is waste the guard exists to avoid.
+    const loading =
+      Boolean(payload) && !state.fullDataLoaded && state.lmode !== "adoption";
+    if (empty) {
+      empty.hidden = false;
+      if (!payload) {
+        empty.textContent = t("The latest releases ranking is not available in this build.");
+      } else if (loading) {
+        empty.textContent = t("Loading this window…");
+      } else {
+        replaceChildren(empty, [
+          document.createTextNode(
+            `${t("The {window} window is not in this build.", { window: latestWindowLabel(windowKey) })} `,
+          ),
+          ...LATEST_WINDOWS.filter((key) => payload.windows?.[key]).map((key) =>
+            element("button", {
+              className: "latest-releases-empty-action",
+              text: t("Try {window}", { window: latestWindowLabel(key) }),
+              attrs: { type: "button", "data-lwindow": key },
+            }),
+          ),
+        ]);
+      }
+    }
+    if (loading) {
+      ensureFullData()
+        .then(() => {
+          if (state.view === "leaderboard") renderLatestReleases();
+        })
+        .catch((error) => {
+          console.error(error);
+          if (state.view !== "leaderboard" || latestReleasesWindowKey() !== windowKey) return;
+          if (empty) empty.textContent = t("This window could not be loaded. Refresh to try again.");
+        });
+    }
+    return;
+  }
+  if (info) {
+    replaceChildren(
+      info,
+      windowData.window_start ? [infoDisclosure(latestReleasesMethodNote(payload, windowData))] : [],
+    );
+  }
+  const entries = windowData.entries || [];
+  if (!entries.length) {
+    const suggestion = latestReleasesEmptyState(windowKey, payload);
+    replaceChildren(host, []);
+    if (note) note.textContent = "";
+    if (empty) {
+      empty.hidden = false;
+      replaceChildren(empty, [
+        document.createTextNode(`${suggestion.message} `),
+        ...suggestion.windows.map((key) =>
+          element("button", {
+            className: "latest-releases-empty-action",
+            text: t("Try {window}", { window: latestWindowLabel(key) }),
+            attrs: { type: "button", "data-lwindow": key },
+          }),
+        ),
+        suggestion.adoption
+          ? element("button", {
+              className: "latest-releases-empty-action",
+              text: t("See model-card adoption instead"),
+              attrs: { type: "button", "data-lmode": "adoption" },
+            })
+          : null,
+      ]);
+    }
+    return;
+  }
+  if (empty) empty.hidden = true;
+  const scores = entries.map((entry) => Number(entry.score)).filter((score) => Number.isFinite(score));
+  const maxScore = scores.length ? Math.max(...scores) : 0;
+  // A redraw (the catalog index landing, Refresh, Back) must not fold the
+  // signals a reader has just opened.
+  const open = new Set(
+    Array.from(host.querySelectorAll("details[open]"), (details) => details.dataset.artifact),
+  );
+  replaceChildren(
+    host,
+    entries.map((entry) => latestReleaseRow(entry, maxScore, open)),
+  );
+  if (note) {
+    note.textContent = t(
+      "{ranked} of {total} releases in this window are ranked; the rest are listed with limited signals.",
+      {
+        ranked: Number(windowData.ranked_count || 0).toLocaleString(),
+        total: Number(windowData.total_cohort_count || 0).toLocaleString(),
+      },
+    );
+  }
+}
+
+// The two modes are one page: the adoption view keeps its markup, ids,
+// seeds and handlers, and is shown or hidden as a block.
+function syncLeaderboardMode() {
+  const latest = state.lmode !== "adoption";
+  const latestSection = byId("latest-releases");
+  const adoption = byId("leaderboard-adoption");
+  if (latestSection) latestSection.hidden = !latest;
+  if (adoption) adoption.hidden = latest;
+  document.querySelectorAll("[data-lmode]").forEach((control) => {
+    if (control.hasAttribute("aria-pressed")) {
+      control.setAttribute("aria-pressed", String(control.dataset.lmode === state.lmode));
+    }
+  });
+}
+
+function setLeaderboardMode(mode) {
+  const next = mode === "adoption" ? "adoption" : "latest";
+  if (next === state.lmode) return;
+  state.lmode = next;
+  renderLeaderboard();
+  writeUrl("push");
+}
+
+function setLatestWindow(windowKey) {
+  if (!LATEST_WINDOWS.includes(windowKey)) return;
+  state.lwindow = windowKey;
+  renderLatestReleases();
+  writeUrl();
+}
+
 // Keep navigation available so a catalog failure can explain itself on its own page.
 function syncLeaderboardNav() {
   const navButton = document.querySelector('[data-view="leaderboard"]');
@@ -7737,6 +8163,8 @@ function renderSaturation() {
 }
 
 function renderLeaderboard() {
+  syncLeaderboardMode();
+  renderLatestReleases();
   initBenchmarkSearch();
   syncScoreFilters();
   renderBenchmarkSkyline();
@@ -8729,6 +9157,32 @@ function bindEvents() {
   // "input"-before-"change" ordering that broke the Scan date picker (issue
   // #43) cannot write a stale value back over the reader's pick here: whichever
   // event arrives first, all three values come from the DOM as it stands now.
+  // One delegated listener for the mode and window controls: the empty state
+  // renders its own "try a wider window" buttons, which a bind-time
+  // querySelectorAll would never see.
+  byId("leaderboard-view").addEventListener("click", (event) => {
+    const windowControl = event.target.closest("[data-lwindow]");
+    if (windowControl) {
+      setLatestWindow(windowControl.dataset.lwindow);
+      return;
+    }
+    const modeControl = event.target.closest("button[data-lmode]");
+    if (modeControl) {
+      setLeaderboardMode(modeControl.dataset.lmode);
+      return;
+    }
+    const scoresLink = event.target.closest('a.leaderboard-mode[href="/saturation/"]');
+    if (
+      scoresLink
+      && event.button === 0
+      && !(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+      && compatibleDashboard(state.data)
+    ) {
+      event.preventDefault();
+      setView("saturation");
+      renderSaturation();
+    }
+  });
   byId("leaderboard-filters").addEventListener("input", () => {
     state.lq = byId("leaderboard-search").value;
     state.ldomain = byId("leaderboard-domain").value;
@@ -9146,6 +9600,16 @@ function compatibleDashboard(data) {
 function stateNeedsFullData() {
   if (state.fullDataLoaded) return false;
   if (state.view === "map" && (byId("relationship-explorer")?.open || state.entity)) return true;
+  // The bootstrap payload carries the default release window only
+  // (snapshots.py); a leaderboard address naming another one needs the corpus.
+  const latest = latestReleasesPayload();
+  if (
+    state.view === "leaderboard"
+    && state.lmode !== "adoption"
+    && latest
+    && state.lwindow
+    && !latest.windows?.[state.lwindow]
+  ) return true;
   return state.view === "today" && Boolean(
     state.todayDate === "all" ||
     (state.todayDate && state.todayDate !== state.data?.latest_date)
