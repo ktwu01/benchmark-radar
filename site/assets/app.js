@@ -976,6 +976,7 @@ const I18N = {
       "如果它帮你节省了研究时间，请引用这项工作、给仓库点 Star，让更多评测开发者找到它。",
     Cite: "引用",
     About: "关于",
+    "About this site": "关于本站",
     Publications: "论文与引用",
     "Search AI, LLM, agent, and multimodal benchmarks": "搜索 AI、大模型、智能体与多模态 benchmark",
     "Cite this work": "引用这项工作",

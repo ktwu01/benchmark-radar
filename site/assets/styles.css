@@ -4239,7 +4239,7 @@ button.stale-banner-action {
 }
 
 footer {
-  /* One left-aligned column: updated stamp, view links, then the dataset
+  /* One left-aligned column: document links, updated stamp, then the dataset
      card underneath them. */
   display: flex;
   flex-direction: column;
@@ -4248,6 +4248,26 @@ footer {
   padding: 1.5rem 0 3rem;
   border-top: 1px solid var(--edge);
   color: var(--muted);
+}
+
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.25rem;
+  font-family: var(--utility);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+}
+
+.footer-nav a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.footer-nav a:hover,
+.footer-nav .nav-active {
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
 }
 
 @media (max-width: 1050px) {

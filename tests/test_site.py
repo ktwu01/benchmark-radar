@@ -3156,19 +3156,26 @@ def test_issue_332_the_freshest_releases_reach_page_one():
 
 # --- the blog's one and only footprint in the dashboard -------------------
 #
-# The blog is a separate set of documents. The dashboard gains exactly one
-# menubar link to it and nothing else: no view, no route, no seed, no dialog.
-# These pin that boundary, because the cheapest way to break the dashboard
-# while adding pages beside it is to let the new thing leak into its router.
+# The blog is a separate set of documents. The dashboard links to it exactly
+# once and gains nothing else: no view, no route, no seed, no dialog. These
+# pin that boundary, because the cheapest way to break the dashboard while
+# adding pages beside it is to let the new thing leak into its router.
 
 
-def test_the_dashboard_menubar_gains_exactly_one_blog_link():
-    nav = re.search(
-        r'<nav class="view-nav".*?</nav>', Path("site/index.html").read_text(encoding="utf-8"), re.S
-    ).group(0)
-    blog_links = re.findall(r"<a\b[^>]*href=\"/blog/\"[^>]*>", nav)
-    assert len(blog_links) == 1
-    assert "data-view" not in blog_links[0]
+def test_the_documents_are_linked_from_the_footer_not_the_view_row():
+    """The view row lists tools. Blog and About are reading, and sit below it.
+
+    Both are real anchors either way, so a reader and a crawler reach the same
+    pages; what moved is which of them competes for the reader's first glance.
+    """
+    html = Path("site/index.html").read_text(encoding="utf-8")
+    view_nav = re.search(r'<nav class="view-nav".*?</nav>', html, re.S).group(0)
+    footer_nav = re.search(r'<nav class="footer-nav".*?</nav>', html, re.S).group(0)
+    for path in ("/blog/", "/about/"):
+        assert f'href="{path}"' not in view_nav, path
+        links = re.findall(rf'<a\b[^>]*href="{path}"[^>]*>', footer_nav)
+        assert len(links) == 1, path
+        assert "data-view" not in links[0], path
 
 
 def test_the_blog_link_is_not_a_client_route():

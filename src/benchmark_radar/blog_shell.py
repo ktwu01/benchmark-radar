@@ -156,29 +156,38 @@ def _today_link(button: str) -> str:
     return f'<a href="{href}" data-i18n="{esc(label)}">{esc(label)}</a>'
 
 
-def _adapt_navigation(nav: str, active_path: str) -> str:
+def _mark_active(html: str, active_path: str) -> tuple[str, bool]:
+    """Mark the link to ``active_path`` as the current page, if this region has it.
+
+    The dashboard writes an anchor's attributes across several lines once it
+    carries more than a couple of them, so href is matched after any run of
+    whitespace rather than after a single space.
+    """
+    marked, count = re.subn(
+        r'<a\s+href="' + re.escape(active_path) + '"',
+        f'<a class="nav-active" aria-current="page" href="{active_path}"',
+        html,
+        count=1,
+    )
+    return marked, count == 1
+
+
+def _adapt_navigation(nav: str, active_path: str) -> tuple[str, bool]:
     nav = _strip_comments(nav)
     nav = re.sub(r"<button\b[^>]*>.*?</button>", lambda m: _today_link(m.group(0)), nav, flags=re.S)
     nav = _drop_spa_attributes(nav)
     # Whichever section this page belongs to is the current one everywhere it
     # renders, so the chrome marks it rather than the page patching the nav back.
-    marked = re.sub(
-        r'<a href="' + re.escape(active_path) + '"',
-        f'<a class="nav-active" aria-current="page" href="{active_path}"',
-        nav,
-    )
-    if marked == nav:
-        raise ValueError(
-            "the dashboard nav no longer links to "
-            f"{active_path!r}; pages in that section cannot mark it active"
-        )
-    return marked
+    # A miss is not an error here: documents like /blog/ and /about/ are linked
+    # from the footer nav instead, so the caller is told and checks there too.
+    return _mark_active(nav, active_path)
 
 
-def _adapt_header(header: str, active_path: str) -> str:
+def _adapt_header(header: str, active_path: str) -> tuple[str, bool]:
     header = _strip_comments(header)
     navigation = _region(header, r'<nav class="view-nav".*?</nav>', "section nav")
-    header = header.replace(navigation, _adapt_navigation(navigation, active_path), 1)
+    marked, in_nav = _adapt_navigation(navigation, active_path)
+    header = header.replace(navigation, marked, 1)
     # Same host-relative rule as the section nav: the badge keeps the site
     # feed, but a local preview or mirror must not eject to the canonical
     # domain on click.
@@ -203,7 +212,7 @@ def _adapt_header(header: str, active_path: str) -> str:
         + f">{inner}</a>",
         1,
     )
-    return header
+    return header, in_nav
 
 
 def _page_footer(footer: str, updated: str | None) -> str:
@@ -233,15 +242,20 @@ def extract_site_chrome(dashboard_html: str, *, active_path: str = BLOG_PATH) ->
     """Pull the shared masthead and footer out of ``site/index.html``.
 
     ``active_path`` is the nav entry this page belongs under. It must be a link
-    the dashboard nav already carries, so a standalone page cannot claim a
-    section the site does not have.
+    the dashboard already carries, in the view row or in the footer's document
+    nav, so a standalone page cannot claim a section the site does not have.
     """
     header = _region(dashboard_html, r'<header class="masthead">.*?</header>', "masthead")
     footer = _region(dashboard_html, r"<footer>.*?</footer>", "footer")
-    return SiteChrome(
-        header=_adapt_header(header, active_path),
-        footer=_strip_comments(footer),
-    )
+    header, in_nav = _adapt_header(header, active_path)
+    footer, in_footer = _mark_active(_strip_comments(footer), active_path)
+    if not in_nav and not in_footer:
+        raise ValueError(
+            "the dashboard no longer links to "
+            f"{active_path!r} from its view row or its footer nav; "
+            "pages in that section cannot mark it active"
+        )
+    return SiteChrome(header=header, footer=footer)
 
 
 # The dashboard's toggle and star count translate these at runtime; the

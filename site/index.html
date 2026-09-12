@@ -243,13 +243,10 @@
           </a>
           <a href="/saturation/" data-view="saturation" aria-controls="saturation-view" data-i18n="Saturation">Saturation</a>
           <a href="/trends/" data-view="trends" aria-controls="trends-view" data-i18n="Trends">Trends</a>
-          <!-- The blog is a set of documents, not a dashboard view, so this link
-               carries no data-view: app.js only intercepts clicks on elements that
-               have one, and a brief has to arrive as a full page load. -->
-          <a href="/blog/" data-i18n="Blog">Blog</a>
-          <!-- Same rule as the blog link: /about/ is a standalone document, so
-               it carries no data-view and arrives as a full page load. -->
-          <a href="/about/" data-i18n="About">About</a>
+          <!-- Blog and About are documents, not dashboard views, and they live
+               in the footer nav instead: this row is for the tools a reader
+               came to use, and every entry it carries competes with them for a
+               glance. -->
           <!-- The label reads Publications because that is the word a reader
                looks for; the path stays /cite/, which is already indexed and
                linked from the paper. /publications/ and /publication/ redirect
@@ -952,6 +949,13 @@
     </dialog>
 
     <footer>
+      <!-- The site's documents, kept out of the view row above so that row
+           stays a list of tools. These are real links with real paths, so the
+           pages are reachable by a reader and a crawler alike. -->
+      <nav class="footer-nav" aria-label="About this site" data-i18n-aria="About this site">
+        <a href="/about/" data-i18n="About">About</a>
+        <a href="/blog/" data-i18n="Blog">Blog</a>
+      </nav>
       <p id="build-meta">Updated —</p>
       <aside class="adoption-cta" aria-label="Support Benchmark Radar">
         <p data-i18n="If this saved you research time, cite the work, star the repo and help other eval builders find it.">

@@ -511,8 +511,6 @@ def test_dashboard_and_blog_share_the_reduced_chrome_contract(tmp_path):
         "/leaderboard/",
         "/saturation/",
         "/trends/",
-        "/blog/",
-        "/about/",
         "/cite/",
     ]
     for document in (DASHBOARD_HTML, page):
@@ -563,6 +561,23 @@ def test_a_missing_dashboard_source_fails_visibly(tmp_path):
 def test_the_extractor_fails_loudly_when_the_dashboard_changes_shape():
     with pytest.raises(ValueError, match="masthead"):
         extract_site_chrome("<html><body><p>no header here</p></body></html>")
+
+
+def test_a_page_cannot_claim_a_section_the_dashboard_does_not_link_to():
+    """The active entry is marked from the real nav, so it has to be in one.
+
+    Both rows count: views are in the masthead, documents are in the footer.
+    A path in neither would leave the page with no current entry at all, which
+    is the shape a silent miss takes, so it stops the build instead.
+    """
+    dashboard = Path("site/index.html").read_text(encoding="utf-8")
+    marker = 'class="nav-active" aria-current="page"'
+    for path in ("/trends/", "/cite/"):
+        assert marker in extract_site_chrome(dashboard, active_path=path).header, path
+    for path in ("/about/", "/blog/"):
+        assert marker in extract_site_chrome(dashboard, active_path=path).footer, path
+    with pytest.raises(ValueError, match="no longer links to"):
+        extract_site_chrome(dashboard, active_path="/nowhere/")
 
 
 def test_the_chrome_i18n_table_is_baked_from_app_js_for_chinese_readers(tmp_path):
