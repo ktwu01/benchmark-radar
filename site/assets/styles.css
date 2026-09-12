@@ -472,10 +472,6 @@ button.repo-badge svg {
   color: var(--blue-deep);
 }
 
-#cli-nav::after {
-  content: " ⓘ";
-}
-
 #cli-nav:not(.nav-active):hover {
   background: var(--panel);
 }
@@ -484,10 +480,6 @@ button.repo-badge svg {
    opens the familiar panel, so it gets the same inactive-blue treatment. */
 #cite-nav:not(.nav-active) {
   color: var(--blue-deep);
-}
-
-#cite-nav::after {
-  content: " ⓘ";
 }
 
 #cite-nav:not(.nav-active):hover {

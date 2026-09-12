@@ -217,7 +217,16 @@ def test_offline_cli_route_is_in_the_view_bar_behind_a_short_link():
     assert "!utility && item.dataset.view === state.view" in script
     styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
     assert "#cli-nav:not(.nav-active) {" in styles
-    assert "#cli-nav::after {" in styles
+    # The colour carries that distinction on its own. No nav entry appends an
+    # information mark: the row is read at a glance, and a mark on a label as
+    # long as Publications costs more width than it explains (issue #593).
+    assert (
+        "::after"
+        not in styles.split("/* CLI has a real page path", 1)[1].split(
+            "/* Cite is the same kind", 1
+        )[0]
+    )
+    assert "#cite-nav::after" not in styles
 
     # The card is the README's setup route, not a second one written for the
     # site: the prompt it hands out has to be the prompt the README publishes.
