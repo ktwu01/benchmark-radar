@@ -4,7 +4,7 @@
 
 </div>
 
-# Benchmark Radar
+# Benchmark Radar™
 
 <!-- 记录数 badge 由数据驱动：每次采集都会根据语料重新生成，因此它反映的是项目实际收集到的数据量；下方开头的来源数量是手工维护的，当 `config.yml` 增删采集 connector、first-party feed 或 Hacker News attention 来源时，需要同步更新该数字 -->
 
@@ -164,3 +164,5 @@ saturation 和趋势视图、每日 feed、可下载的证据数据，以及一�
 - [Benchmark logo 图库](https://benchmark-radar.org/logos.html)
 
 </details>
+
+© 2026 Koutian Wu and contributors

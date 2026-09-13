@@ -4250,6 +4250,10 @@ footer {
   color: var(--muted);
 }
 
+.copyright {
+  font-size: 0.72rem;
+}
+
 .footer-nav {
   display: flex;
   flex-wrap: wrap;
