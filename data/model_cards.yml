@@ -1222,7 +1222,7 @@ benchmarks:
     name: BeyondAIME
     aliases: ["BeyondAIME"]
     domain: math
-    url: https://github.com/microsoft/ProMath
+    url: https://huggingface.co/datasets/ByteDance-Seed/BeyondAIME
     caveat: >-
       Beyond AIME difficulty competition math; most models score low and gaps
       are dominated by run-to-run variance.
@@ -1231,7 +1231,7 @@ benchmarks:
     name: PhyBench
     aliases: ["PhyBench"]
     domain: science
-    url: https://github.com/PhyBench/PhyBench
+    url: https://github.com/phybench-official/phybench
     caveat: >-
       Physics problem-solving benchmark; multi-step reasoning quality affects
       the final answer.
@@ -1240,81 +1240,82 @@ benchmarks:
     name: BABE
     aliases: ["BABE"]
     domain: reasoning
-    url: https://github.com/babe-eval/babe
+    url: https://arxiv.org/abs/2602.05857
     caveat: >-
-      Biological abstract benchmark; measures extraction and reasoning over
-      scientific literature.
+      Biology Arena BEnchmark; measures experimental reasoning and causal
+      inference over peer-reviewed biological research papers.
 
   - id: korbench
     name: KORBench
     aliases: ["KORBench"]
     domain: reasoning
-    url: https://github.com/korbench/korbench
+    url: https://kor-bench.github.io/
     caveat: >-
-      Knowledge-intensive reasoning; retrieval quality is part of the measurement.
+      Knowledge-Orthogonal Reasoning Benchmark; evaluates intrinsic reasoning
+      and planning abilities while minimizing interference from pretrained knowledge.
 
   - id: inverse_ifeval
     name: Inverse IFEval
     aliases: ["Inverse IFEval"]
     domain: instruction_following
-    url: https://github.com/google-research/google-research/tree/master/instruction_following_eval
+    url: https://arxiv.org/abs/2509.04292
     caveat: >-
-      Tests understanding of violated instructions rather than followed ones;
-      complementary to IFEval.
+      Tests ability to override training biases and follow counterintuitive
+      instructions; complementary to IFEval.
+    released: 2025-09-04
 
   - id: mars_bench
     name: MARS-Bench
     aliases: ["MARS-Bench"]
     domain: reasoning
-    url: https://github.com/mars-bench/mars-bench
+    url: https://syuchin.github.io/MARS-Bench/
     caveat: >-
-      Multi-agent reasoning scenarios; agent scaffolding and communication
-      protocols affect results.
+      Multi-turn dialogue benchmark built from sports commentary; evaluates
+      ultra multi-turn, cross-turn, and interactive multi-turn capabilities.
 
   - id: multi_challenge
     name: MultiChallenge
     aliases: ["MultiChallenge"]
     domain: reasoning
-    url: https://github.com/multi-challenge/multi-challenge
+    url: https://arxiv.org/abs/2501.17399
     caveat: >-
-      Multi-task challenge set; different task domains have very different
-      difficulty profiles.
+      Multi-turn instruction retention, graded by an LLM judge.
 
   - id: collie
     name: COLLIE
     aliases: ["COLLIE"]
     domain: reasoning
-    url: https://github.com/collie-bench/collie
+    url: https://collie-benchmark.github.io/
     caveat: >-
-      Collaborative reasoning benchmark; measures multi-turn coordination and
-      information synthesis.
+      Systematic construction of constrained text generation tasks; evaluates
+      rich, compositional constraints across diverse generation levels.
 
   - id: lpfqa
     name: LPFQA
     aliases: ["LPFQA"]
     domain: knowledge
-    url: https://github.com/lpfqa/lpfqa
+    url: https://huggingface.co/datasets/m-a-p/LPFQA
     caveat: >-
-      Long-form question answering; answer length and coherence are graded in
-      addition to correctness.
+      Long-tail professional forum-based benchmark; evaluates complex reasoning
+      across 20 academic and industrial fields with authentic professional scenarios.
 
   - id: swe_lancer
     name: SWE-Lancer
     aliases: ["SWE-Lancer"]
     domain: coding_agent
-    url: https://github.com/swe-lancer/swe-lancer
+    url: https://github.com/openai/frontier-evals/tree/main/project/swelancer
     caveat: >-
-      Software engineering freelancer tasks; real-world constraints and client
-      communication are part of the task.
+      Software engineering freelancer tasks from Upwork; real-world constraints
+      and client communication are part of the task.
 
   - id: multi_swe_bench
     name: Multi-SWE-Bench
     aliases: ["Multi-SWE-Bench"]
     domain: coding_agent
-    url: https://github.com/multi-swe-bench/multi-swe-bench
+    url: https://github.com/multi-swe-bench/multi-swe-bench/
     caveat: >-
-      Multi-repository SWE-bench variant; cross-repository context transfer is
-      the measured capability.
+      Multilingual SWE-bench variant spanning 7 programming languages;
+      cross-repository context transfer is the measured capability.
 
   - id: sec_bench_pro
     name: SEC-Bench Pro
@@ -1329,7 +1330,7 @@ benchmarks:
     name: ExploitGym
     aliases: ["ExploitGym"]
     domain: security
-    url: https://github.com/exploitgym/exploitgym
+    url: https://github.com/sunblaze-ucb/exploitgym
     caveat: >-
       Exploitation capability gym; different vulnerability classes have very
       different difficulty profiles.
@@ -1338,10 +1339,10 @@ benchmarks:
     name: ZeroBench
     aliases: ["ZeroBench", "ZeroBench-main"]
     domain: multimodal
-    url: https://github.com/zerobench/zerobench
+    url: https://github.com/jonathan-roberts1/zerobench
     caveat: >-
-      Zero-shot multimodal benchmark; evaluates generalization without
-      task-specific fine-tuning.
+      Challenging visual reasoning benchmark designed to be impossible for
+      frontier models at release; evaluates complex reasoning over images.
 
 # Model cards, technical reports and release posts.
 #
@@ -1349,7 +1350,7 @@ benchmarks:
 # canonical ids that document reports a result for. It is a set, not a ranking:
 # a card that reports AIME once and a card that reports it in four
 # configurations both contribute exactly one adoption.
-source_documents:
+model_cards:
   - id: frontier_challenge_leaderboard_2026_08_25
     name: FrontierChallenge leaderboard
     publisher: ApodexAI
@@ -1357,8 +1358,6 @@ source_documents:
     url: https://apodexai.github.io/FrontierAgent/benchmarks/FrontierChallenge/
     benchmarks: [frontier_challenge]
     retrieved_at: 2026-09-02
-
-model_cards:
   - id: openai_gpt_5_system_card
     organization: OpenAI
     model: GPT-5
@@ -2133,11 +2132,12 @@ model_cards:
       - multi_challenge
       - collie
       - lpfqa
-      - codeforces
-      - livecodebench
       - phybench
       - babe
       - korbench
+      - zerobench
+      - codeforces
+      - livecodebench
 
   - id: deepseek_v4_1_flash_technical_report
     organization: DeepSeek
@@ -2276,4 +2276,12 @@ model_cards:
       - arxivmath
       - horizonmath
       - matharena_apex_2025
-      - brokenarxiv
+
+# Source documents for score extraction (non-card sources)
+source_documents:
+  - id: arxiv_2509_04292
+    organization: Various
+    document_type: technical_report
+    published: 2025-09-04
+    url: https://arxiv.org/abs/2509.04292
+    retrieved_at: 2026-09-12
