@@ -61,7 +61,15 @@ benchmark from sitting near the top with no qualification. Write what would
 mislead someone comparing two reported numbers, for example a small split with
 wide variance, or a score that depends on scaffold and tool access.
 
-The full maintenance contract is documented at the top of
+If the document reports numbers you can read directly from it, add those too.
+They do not go in the adoption registry, which stores a mention and never a
+score. They go in [`data/benchmark_scores.yml`](data/benchmark_scores.yml), the
+matched score archive, where each row cites the document it was read from.
+
+The complete procedure for all of this, including the score fields and the
+checks the loader enforces, is
+[`docs/sop-add-model-cards.md`](docs/sop-add-model-cards.md). The maintenance
+contract is also documented at the top of
 [`data/model_cards.yml`](data/model_cards.yml).
 
 ## What this project will not accept
