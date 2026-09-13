@@ -4,7 +4,7 @@
 
 </div>
 
-# Benchmark Radar
+# Benchmark Radar™
 
 <!-- The record-count badge is data-driven: it is regenerated from the corpus on
 every collection, so it states what the project actually holds rather than a
@@ -218,3 +218,5 @@ daily builder brief, [BuilderPulse](https://github.com/BuilderPulse/BuilderPulse
 </details>
 
 </details>
+
+© 2026 Koutian Wu and contributors
