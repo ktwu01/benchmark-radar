@@ -51,13 +51,13 @@ Compare reported scores, release dates and the number of models tested.**
 Model reports, OpenCompass Hub, Artificial Analysis and LLM Stats feed one
 catalog. Each record keeps its scores, test conditions and citations.
 
-## Researchers use it
+## Researchers using it
 
 Researchers and evaluation engineers from these institutions use Benchmark
 Radar for benchmark discovery and score tracking:
 
-- **Industry labs:** Amazon, Google, ByteDance (Seed), Alibaba (Qwen), StepFun,
-  Tencent, Kuaishou (Kling), Zhihu, TaciteAI
+- **Industry labs:** Amazon (Nova), Google (Gemini), ByteDance (Seed), Alibaba
+  (Qwen), StepFun (Step), Tencent (Hunyuan), Kuaishou (Kling), Zhihu, TaciteAI
 - **Universities:** Carnegie Mellon, University of Auckland, Tsinghua, Shanghai
   Jiao Tong, UT Austin, Harvard, MIT, NUS
 
