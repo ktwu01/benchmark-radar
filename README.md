@@ -56,6 +56,8 @@ catalog. Each record keeps its scores, test conditions and citations.
 Researchers and evaluation engineers from these institutions use Benchmark
 Radar for benchmark discovery and score tracking:
 
+<img src="assets/researchers.svg" alt="Institutions whose researchers use Benchmark Radar: Amazon, Google, ByteDance, Alibaba, StepFun, Tencent, Kuaishou, Zhihu, TaciteAI, Carnegie Mellon, Auckland, Tsinghua, SJTU, UT Austin, Harvard, MIT, NUS" />
+
 - **Industry labs:** Amazon (Nova), Google (Gemini), ByteDance (Seed), Alibaba
   (Qwen), StepFun (Step), Tencent (Hunyuan), Kuaishou (Kling), Zhihu, TaciteAI
 - **Universities:** Carnegie Mellon, University of Auckland, Tsinghua, Shanghai
