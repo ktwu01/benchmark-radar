@@ -442,6 +442,428 @@ benchmarks:
     direction: higher_is_better
     unit: percent
 
+  - benchmark_id: beyond_aime
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+
+  - benchmark_id: phybench
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+
+  - benchmark_id: babe
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+
+  - benchmark_id: korbench
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+
+  - benchmark_id: inverse_ifeval
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+
+  - benchmark_id: mars_bench
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+
+  - benchmark_id: multi_challenge
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+
+  - benchmark_id: collie
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+
+  - benchmark_id: lpfqa
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+
+  - benchmark_id: swe_lancer
+    metric: resolved
+    direction: higher_is_better
+    unit: percent
+
+  - benchmark_id: multi_swe_bench
+    metric: resolved
+    direction: higher_is_better
+    unit: percent
+
+  - benchmark_id: sec_bench_pro
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+
+  - benchmark_id: exploitgym
+    metric: capability_percentage
+    direction: higher_is_better
+    unit: percent
+
+  - benchmark_id: zerobench
+    metric: pass@1
+    direction: higher_is_better
+    unit: percent
+
+  # Seed2.0 scores extracted from model card PDF via pdftotext
+  - benchmark_id: beyond_aime
+    instrument: beyond_aime
+    protocol: as printed in Table 3 (Large Models)
+    model: Seed2.0 Pro
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 86.5
+    read_from: pdf_text
+
+  - benchmark_id: beyond_aime
+    instrument: beyond_aime
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Mini
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 69.0
+    read_from: pdf_text
+
+  - benchmark_id: beyond_aime
+    instrument: beyond_aime
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Lite
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 76.0
+    read_from: pdf_text
+
+  - benchmark_id: phybench
+    instrument: phybench
+    protocol: as printed in Table 3 (Large Models)
+    model: Seed2.0 Pro
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 74.0
+    read_from: pdf_text
+
+  - benchmark_id: phybench
+    instrument: phybench
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Mini
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 56.0
+    read_from: pdf_text
+
+  - benchmark_id: phybench
+    instrument: phybench
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Lite
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 73.0
+    read_from: pdf_text
+
+  - benchmark_id: babe
+    instrument: babe
+    protocol: as printed in Table 3 (Large Models)
+    model: Seed2.0 Pro
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 50.0
+    read_from: pdf_text
+
+  - benchmark_id: babe
+    instrument: babe
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Mini
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 40.4
+    read_from: pdf_text
+
+  - benchmark_id: babe
+    instrument: babe
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Lite
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 50.2
+    read_from: pdf_text
+
+  - benchmark_id: korbench
+    instrument: korbench
+    protocol: as printed in Table 3 (Large Models)
+    model: Seed2.0 Pro
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 77.5
+    read_from: pdf_text
+
+  - benchmark_id: korbench
+    instrument: korbench
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Mini
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 72.8
+    read_from: pdf_text
+
+  - benchmark_id: korbench
+    instrument: korbench
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Lite
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 77.0
+    read_from: pdf_text
+
+  - benchmark_id: inverse_ifeval
+    instrument: inverse_ifeval
+    protocol: as printed in Table 3 (Large Models)
+    model: Seed2.0 Pro
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 78.9
+    read_from: pdf_text
+
+  - benchmark_id: inverse_ifeval
+    instrument: inverse_ifeval
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Mini
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 69.3
+    read_from: pdf_text
+
+  - benchmark_id: inverse_ifeval
+    instrument: inverse_ifeval
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Lite
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 77.1
+    read_from: pdf_text
+
+  - benchmark_id: mars_bench
+    instrument: mars_bench
+    protocol: as printed in Table 3 (Large Models)
+    model: Seed2.0 Pro
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 85.6
+    read_from: pdf_text
+
+  - benchmark_id: mars_bench
+    instrument: mars_bench
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Mini
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 62.4
+    read_from: pdf_text
+
+  - benchmark_id: mars_bench
+    instrument: mars_bench
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Lite
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 80.5
+    read_from: pdf_text
+
+  - benchmark_id: multi_challenge
+    instrument: multi_challenge
+    protocol: as printed in Table 3 (Large Models)
+    model: Seed2.0 Pro
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 68.3
+    read_from: pdf_text
+
+  - benchmark_id: multi_challenge
+    instrument: multi_challenge
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Mini
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 61.1
+    read_from: pdf_text
+
+  - benchmark_id: multi_challenge
+    instrument: multi_challenge
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Lite
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 63.2
+    read_from: pdf_text
+
+  - benchmark_id: collie
+    instrument: collie
+    protocol: as printed in Table 3 (Large Models)
+    model: Seed2.0 Pro
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 93.9
+    read_from: pdf_text
+
+  - benchmark_id: collie
+    instrument: collie
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Mini
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 91.2
+    read_from: pdf_text
+
+  - benchmark_id: collie
+    instrument: collie
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Lite
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 94.0
+    read_from: pdf_text
+
+  - benchmark_id: lpfqa
+    instrument: lpfqa
+    protocol: as printed in Table 3 (Large Models)
+    model: Seed2.0 Pro
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 52.6
+    read_from: pdf_text
+
+  - benchmark_id: lpfqa
+    instrument: lpfqa
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Mini
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 47.2
+    read_from: pdf_text
+
+  - benchmark_id: lpfqa
+    instrument: lpfqa
+    protocol: as printed in Table 4 (Efficient Models)
+    model: Seed2.0 Lite
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 50.9
+    read_from: pdf_text
+
+  - benchmark_id: swe_lancer
+    instrument: swe_lancer
+    protocol: as printed in Table 11 (Large Models)
+    model: Seed2.0 Pro
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 49.4
+    read_from: pdf_text
+
+  - benchmark_id: swe_lancer
+    instrument: swe_lancer
+    protocol: as printed in Table 12 (Efficient Models)
+    model: Seed2.0 Lite
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 47.1
+    read_from: pdf_text
+
+  - benchmark_id: multi_swe_bench
+    instrument: multi_swe_bench
+    protocol: as printed in Table 11 (Large Models)
+    model: Seed2.0 Pro
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 45.2
+    read_from: pdf_text
+
+  - benchmark_id: multi_swe_bench
+    instrument: multi_swe_bench
+    protocol: as printed in Table 12 (Efficient Models)
+    model: Seed2.0 Lite
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 41.1
+    read_from: pdf_text
+
+  - benchmark_id: zerobench
+    instrument: zerobench_main
+    protocol: as printed in Visual Puzzles table
+    model: Seed2.0 Pro
+    organization: ByteDance
+    source_id: bytedance_seed2_0_model_card
+    reported_at: 2026-02-14
+    value: 12.0
+    read_from: pdf_text
+
+  # DeepSeek-V4.1-Flash scores extracted from technical report PDF via pdftotext
+  - benchmark_id: sec_bench_pro
+    instrument: sec_bench_pro
+    protocol: Pass@1
+    model: DeepSeek-V4.1-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_1_flash_technical_report
+    reported_at: 2026-09-10
+    value: 62.8
+    read_from: pdf_text
+
+  - benchmark_id: exploitgym
+    instrument: exploitgym
+    protocol: Pass@1
+    model: DeepSeek-V4.1-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_1_flash_technical_report
+    reported_at: 2026-09-10
+    value: 15.3
+    read_from: pdf_text
+
+  - benchmark_id: zerobench
+    instrument: zerobench_main
+    protocol: Pass@5, with tools
+    model: DeepSeek-V4.1-Flash
+    organization: DeepSeek
+    source_id: deepseek_v4_1_flash_technical_report
+    reported_at: 2026-09-10
+    value: 49.0
+    read_from: pdf_text
+
 results:
   # FrontierChallenge's official leaderboard reports model-scaffold systems,
   # not model-only measurements. Preserve the scaffold in every protocol so

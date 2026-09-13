@@ -1218,13 +1218,139 @@ benchmarks:
       arXiv proofs with planted errors; tests whether a model catches a broken
       argument instead of reproducing it.
 
+  - id: beyond_aime
+    name: BeyondAIME
+    aliases: ["BeyondAIME"]
+    domain: math
+    url: https://huggingface.co/datasets/ByteDance-Seed/BeyondAIME
+    caveat: >-
+      Beyond AIME difficulty competition math; most models score low and gaps
+      are dominated by run-to-run variance.
+
+  - id: phybench
+    name: PhyBench
+    aliases: ["PhyBench"]
+    domain: science
+    url: https://github.com/phybench-official/phybench
+    caveat: >-
+      Physics problem-solving benchmark; multi-step reasoning quality affects
+      the final answer.
+
+  - id: babe
+    name: BABE
+    aliases: ["BABE"]
+    domain: reasoning
+    url: https://arxiv.org/abs/2602.05857
+    caveat: >-
+      Biology Arena BEnchmark; measures experimental reasoning and causal
+      inference over peer-reviewed biological research papers.
+
+  - id: korbench
+    name: KORBench
+    aliases: ["KORBench"]
+    domain: reasoning
+    url: https://kor-bench.github.io/
+    caveat: >-
+      Knowledge-Orthogonal Reasoning Benchmark; evaluates intrinsic reasoning
+      and planning abilities while minimizing interference from pretrained knowledge.
+
+  - id: inverse_ifeval
+    name: Inverse IFEval
+    aliases: ["Inverse IFEval"]
+    domain: instruction_following
+    url: https://arxiv.org/abs/2509.04292
+    caveat: >-
+      Tests ability to override training biases and follow counterintuitive
+      instructions; complementary to IFEval.
+    released: 2025-09-04
+
+  - id: mars_bench
+    name: MARS-Bench
+    aliases: ["MARS-Bench"]
+    domain: reasoning
+    url: https://syuchin.github.io/MARS-Bench/
+    caveat: >-
+      Multi-turn dialogue benchmark built from sports commentary; evaluates
+      ultra multi-turn, cross-turn, and interactive multi-turn capabilities.
+
+  - id: multi_challenge
+    name: MultiChallenge
+    aliases: ["MultiChallenge"]
+    domain: reasoning
+    url: https://arxiv.org/abs/2501.17399
+    caveat: >-
+      Multi-turn instruction retention, graded by an LLM judge.
+
+  - id: collie
+    name: COLLIE
+    aliases: ["COLLIE"]
+    domain: reasoning
+    url: https://collie-benchmark.github.io/
+    caveat: >-
+      Systematic construction of constrained text generation tasks; evaluates
+      rich, compositional constraints across diverse generation levels.
+
+  - id: lpfqa
+    name: LPFQA
+    aliases: ["LPFQA"]
+    domain: knowledge
+    url: https://huggingface.co/datasets/m-a-p/LPFQA
+    caveat: >-
+      Long-tail professional forum-based benchmark; evaluates complex reasoning
+      across 20 academic and industrial fields with authentic professional scenarios.
+
+  - id: swe_lancer
+    name: SWE-Lancer
+    aliases: ["SWE-Lancer"]
+    domain: coding_agent
+    url: https://github.com/openai/frontier-evals/tree/main/project/swelancer
+    caveat: >-
+      Software engineering freelancer tasks from Upwork; real-world constraints
+      and client communication are part of the task.
+
+  - id: multi_swe_bench
+    name: Multi-SWE-Bench
+    aliases: ["Multi-SWE-Bench"]
+    domain: coding_agent
+    url: https://github.com/multi-swe-bench/multi-swe-bench/
+    caveat: >-
+      Multilingual SWE-bench variant spanning 7 programming languages;
+      cross-repository context transfer is the measured capability.
+
+  - id: sec_bench_pro
+    name: SEC-Bench Pro
+    aliases: ["SEC-Bench Pro"]
+    domain: security
+    url: https://github.com/sec-bench/sec-bench
+    caveat: >-
+      Security engineering benchmark; evaluates both vulnerability detection and
+      secure coding practices.
+
+  - id: exploitgym
+    name: ExploitGym
+    aliases: ["ExploitGym"]
+    domain: security
+    url: https://github.com/sunblaze-ucb/exploitgym
+    caveat: >-
+      Exploitation capability gym; different vulnerability classes have very
+      different difficulty profiles.
+
+  - id: zerobench
+    name: ZeroBench
+    aliases: ["ZeroBench", "ZeroBench-main"]
+    domain: multimodal
+    url: https://github.com/jonathan-roberts1/zerobench
+    caveat: >-
+      Challenging visual reasoning benchmark designed to be impossible for
+      frontier models at release; evaluates complex reasoning over images.
+
 # Model cards, technical reports and release posts.
 #
 # `organization` is the publisher of the document. `benchmarks` is the set of
 # canonical ids that document reports a result for. It is a set, not a ranking:
 # a card that reports AIME once and a card that reports it in four
 # configurations both contribute exactly one adoption.
-source_documents:
+model_cards:
   - id: frontier_challenge_leaderboard_2026_08_25
     name: FrontierChallenge leaderboard
     publisher: ApodexAI
@@ -1232,8 +1358,6 @@ source_documents:
     url: https://apodexai.github.io/FrontierAgent/benchmarks/FrontierChallenge/
     benchmarks: [frontier_challenge]
     retrieved_at: 2026-09-02
-
-model_cards:
   - id: openai_gpt_5_system_card
     organization: OpenAI
     model: GPT-5
@@ -1978,6 +2102,71 @@ model_cards:
       - mcp_atlas
       - tool_decathlon
 
+  - id: bytedance_seed2_0_model_card
+    organization: ByteDance
+    model: Seed2.0 (Pro / Lite / Mini)
+    document_type: model_card
+    published: 2026-02-14
+    url: https://lf3-static.bytednsdoc.com/obj/eden-cn/lapzild-tss/ljhwZthlaukjlkulzlp/seed2/0214/Seed2.0%20Model%20Card.pdf
+    retrieved_at: 2026-09-11
+    # Transcribed from the model card PDF. The card reports extensive benchmarks
+    # across reasoning, math, science, coding, and agent capabilities.
+    benchmarks:
+      - aime
+      - hmmt
+      - beyond_aime
+      - imo_answer_bench
+      - gpqa_diamond
+      - mmlu_pro
+      - super_gpqa
+      - terminal_bench
+      - swe_bench_verified
+      - swe_lancer
+      - multi_swe_bench
+      - hle
+      - simpleqa
+      - healthbench
+      - arc_agi
+      - inverse_ifeval
+      - mars_bench
+      - multi_challenge
+      - collie
+      - lpfqa
+      - phybench
+      - babe
+      - korbench
+      - zerobench
+      - codeforces
+      - livecodebench
+
+  - id: deepseek_v4_1_flash_technical_report
+    organization: DeepSeek
+    model: DeepSeek-V4.1-Flash
+    document_type: technical_report
+    published: 2026-09-10
+    url: https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash/blob/main/DeepSeek_V41_Tech_Report.pdf
+    retrieved_at: 2026-09-11
+    # Transcribed from the technical report PDF and Hugging Face model card.
+    # The report focuses on KV cache compression architecture and reports
+    # comprehensive agentic and reasoning benchmarks.
+    benchmarks:
+      - gpqa_diamond
+      - hle
+      - codeforces
+      - matharena_apex_2025
+      - terminal_bench
+      - deepswe
+      - programbench
+      - nl2repo
+      - cybergym
+      - sec_bench_pro
+      - exploitgym
+      - automationbench
+      - agents_last_exam
+      - chartography
+      - babyvision
+      - zerobench
+
   - id: zai_glm_5_3_flash_model_card
     organization: Z.ai
     model: GLM-5.3-Flash
@@ -2087,4 +2276,12 @@ model_cards:
       - arxivmath
       - horizonmath
       - matharena_apex_2025
-      - brokenarxiv
+
+# Source documents for score extraction (non-card sources)
+source_documents:
+  - id: arxiv_2509_04292
+    organization: Various
+    document_type: technical_report
+    published: 2025-09-04
+    url: https://arxiv.org/abs/2509.04292
+    retrieved_at: 2026-09-12
