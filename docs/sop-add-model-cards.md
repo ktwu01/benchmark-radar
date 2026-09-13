@@ -14,9 +14,11 @@ Two files move together:
 | `data/model_cards.yml` | The document, and which benchmarks it mentions. Never a number. |
 | `data/benchmark_scores.yml` | The numbers that document reports, one row each. |
 
-A card added without its scores is not a finished change. It leaves a model in
-the registry that the score progression and paired comparison readout cannot
-see, and nothing reports the gap afterwards.
+A card that reports numbers and is added without them is not a finished change.
+It leaves a model in the registry that the score progression and paired
+comparison readout cannot see, and nothing reports the gap afterwards. A card
+whose results are only qualitative, or whose table is an image nobody can read
+with certainty, is a finished change with no score rows at all.
 
 ## Before you start
 
@@ -52,7 +54,7 @@ an entry missing any of them.
 | Field | Notes |
 | --- | --- |
 | `id` | Unique. Score rows cite it, so treat it as a stable key. |
-| `document_type` | One of `model_card`, `system_card`, `technical_report`, `release_post`, `benchmark_leaderboard`. |
+| `document_type` | One of `model_card`, `system_card`, `technical_report`, `release_post`, `benchmark_leaderboard`. Set it whenever the document is not literally a model card. The loader accepts its absence and the catalog then labels the document `model_card`, so an omitted value publishes a system card or technical report under a document type it does not have. |
 | `published` | The document's own date, not the model's release date. ISO `YYYY-MM-DD`. |
 | `retrieved_at` | When you read it. It is not refreshed automatically. |
 | `url` | Must be HTTP(S), and one URL per document. |
@@ -120,7 +122,12 @@ Required: `benchmark_id`, `metric`, `direction`, `unit`. `direction` is
 improves upward. An edit-distance metric inverts the axis, and a chart that
 assumed higher-is-better would draw the progression upside down.
 
-**One row per reported number**, in the `results:` block.
+**One row per number reported in the declared metric**, in the `results:` block.
+Rows carry no metric or unit of their own, so every row inherits the pair
+declared above. A benchmark holds exactly one metric, and a second entry for the
+same `benchmark_id` is rejected, so a card reporting the same benchmark under a
+different metric has nowhere to record it. Leave those numbers out rather than
+filing them as rows labelled with a metric they were not measured in.
 
 ```yaml
   - benchmark_id: acme_reasoning_eval
@@ -163,7 +170,13 @@ Optional:
 - `reported_by` marks a third-party citation, where the publisher repeated a
   competitor's self-reported figure. That is weaker evidence, and weaker still
   when the publisher had a stake in the comparison. The interface marks these
-  rather than mixing them in.
+  rather than mixing them in. Optional to the loader and mandatory in fact: name
+  the publishing organization whenever it differs from the one that made the
+  model being scored, which is the usual case for a number read out of a
+  comparison table. Omitting it does not fail the build. It publishes the row as
+  a self-report and credits the measurement to the scored model's own
+  organization, which gives a competitor's figure stronger provenance than it
+  has.
 
 Score rows are per model, not per document. A card covering a Pro, Lite and Mini
 release gets one row per variant. Collapsing three systems into one label makes
@@ -220,8 +233,8 @@ Each of these passes validation and is still wrong, so they are on you:
 
 - A number transcribed from the wrong row or column of a table.
 - A `protocol` string that omits a condition the document stated.
-- A `caveat` that describes what the benchmark sounds like rather than what it
-  measures.
+- A `caveat` that describes the benchmark rather than warning about what would
+  mislead someone comparing two reported numbers.
 - A `url` that resolves but points at an unrelated project with a similar name.
 - A benchmark recorded as mentioned when the document only cites it in related
   work rather than reporting a result.

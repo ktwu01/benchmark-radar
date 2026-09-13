@@ -104,10 +104,13 @@ Applies to `README*`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `site/**`,
 
 - Run the full CI sequence locally and get it passing before opening a PR. Do
   not open one against a red local run.
-- A PR that adds a model card must also add that card's scores to
-  `data/benchmark_scores.yml`. Follow
-  [`docs/sop-add-model-cards.md`](docs/sop-add-model-cards.md); a card merged
-  without its scores leaves a model the score progression cannot see.
+- A PR that adds a model card must also add every numeric score that card
+  reports and that can be read with certainty to `data/benchmark_scores.yml`.
+  Follow [`docs/sop-add-model-cards.md`](docs/sop-add-model-cards.md); a card
+  merged without its readable scores leaves a model the score progression
+  cannot see. A card whose results are only qualitative, or whose table is an
+  image nobody can read with certainty, is still a valid addition with no score
+  rows.
 - Run it against a clean checkout (`git worktree add --detach <tmp> <branch>`),
   not your working copy. Run `git submodule update --init --recursive` in that
   worktree before checks. Generated files such as `site/data/radar.json`,
