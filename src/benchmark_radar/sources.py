@@ -1031,11 +1031,12 @@ _OPENAIRE_QUOTE_TRIGGER = re.compile(r"\b(?:OR|AND|NOT)\b|[\s()]")
 
 
 def _openaire_filter_value(value: str) -> str:
-    """Quote a configured phrase the way Graph v3 requires.
+    """Quote a configured phrase so Graph v3 matches it as a phrase.
 
-    Every shipped search phrase contains a space, and v3 answers an unquoted
-    one with HTTP 400 rather than searching for it, so without this the source
-    would fail on every request instead of returning records. A value that is
+    Every shipped search phrase contains a space. v3 accepts an unquoted one,
+    but matches its words far more loosely: `LLM benchmark` reports 213 titles
+    quoted against 3,021 unquoted, so without this the source would collect
+    titles that share only one common word with the phrase. A value that is
     already quoted or parenthesised is passed through, so a maintainer can
     write an inline `"a" OR "b"` expression without it being quoted again.
     """
@@ -1227,9 +1228,20 @@ def fetch_openaire(
                 for candidate in dict.fromkeys([url, doi_url, *instance_urls, repository])
                 if candidate
             ]
-            description = row.get("description") or ""
-            if not isinstance(description, str):
-                raise ConnectorPayloadError("OpenAIRE description must be a string")
+            # v3 returns the abstract as `descriptions`, a list, and carries no
+            # singular `description` member at all. A product may hold several,
+            # none, or a null, and a deposit sometimes leads with an empty one,
+            # so the first entry that survives cleaning is the prose a reader
+            # would recognise as the abstract.
+            descriptions = row.get("descriptions")
+            if descriptions is not None and not isinstance(descriptions, list):
+                raise ConnectorPayloadError("OpenAIRE descriptions must be an array")
+            if descriptions and not all(isinstance(value, str) for value in descriptions):
+                raise ConnectorPayloadError("OpenAIRE descriptions must hold strings")
+            summary = next(
+                (cleaned for value in descriptions or [] if (cleaned := clean_card_text(value))),
+                "",
+            )
             indicators = row.get("indicators") or {}
             if not isinstance(indicators, dict):
                 raise ConnectorPayloadError("OpenAIRE indicators must be an object")
@@ -1247,7 +1259,7 @@ def fetch_openaire(
                 # field, so a simulated backfill places a product on the day a
                 # live run would have found it.
                 updated_at=published,
-                summary=clean_card_text(description),
+                summary=summary,
                 event_kind="released",
                 authors=[
                     name

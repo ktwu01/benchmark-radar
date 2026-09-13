@@ -296,11 +296,11 @@ sources:
   # superseded v1 and v2 in July 2026; the older `/search/*` API was announced
   # for phase-out on 2026-05-31.
   #
-  # Authentication: none required. An anonymous caller is limited to 60
-  # requests per hour on a sliding window, against 7,200 for a registered
-  # token; one request per search phrase keeps a daily run inside the
-  # anonymous budget with room to spare. Wiring a token is a maintainer
-  # decision and needs no code change here beyond a header.
+  # Authentication: none required. An anonymous call reports its sliding-window
+  # budget in `x-ratelimit-limit`, measured at 7,199 requests per hour, and one
+  # request per search phrase keeps a daily run far inside it. Wiring a
+  # registered token is a maintainer decision and needs no code change here
+  # beyond a header.
   #
   # Product types: one query returns all four kinds of research product
   # (publication, dataset, software, other); each record carries its own
@@ -317,9 +317,10 @@ sources:
   # window holds more than `page_size` titles is truncated to the newest of
   # them; widen `page_size` toward 100 before adding phrases.
   #
-  # A value holding spaces, parentheses or a logical operator must reach the
-  # API double-quoted or v3 answers 400, so a multi-word phrase below is sent
-  # as a quoted phrase and matches titles containing it. Records duplicate the
+  # A multi-word value is sent double-quoted so it matches as a phrase. The
+  # API accepts an unquoted value too, but matches it far more loosely: on
+  # `LLM benchmark` the quoted form reports 213 titles against 3,021 unquoted,
+  # so quoting is what keeps this a title search. Records duplicate the
   # Crossref and arXiv copies of the same artifact on purpose: the DOI travels
   # with the record, so dedupe merges them rather than counting the artifact twice.
   openaire:

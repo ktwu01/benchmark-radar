@@ -941,7 +941,7 @@ def _openaire_row(product_id="openaire____::radar99001", **fields):
         "id": product_id,
         "type": "dataset",
         "mainTitle": "A Federated Benchmark Dataset",
-        "description": "<p>The upstream abstract.</p>",
+        "descriptions": ["<p>The upstream abstract.</p>"],
         "publicationDate": "2026-07-27",
         "publisher": "Radar Repository",
         "dateOfCollection": "2026-08-30T00:00:00Z",
@@ -1190,7 +1190,8 @@ def test_openaire_skips_rows_that_carry_no_id_or_no_title(monkeypatch):
     ("fields", "message"),
     [
         ({"authors": "wrong"}, "authors"),
-        ({"description": ["not", "text"]}, "description"),
+        ({"descriptions": "wrong"}, "descriptions"),
+        ({"descriptions": [123]}, "descriptions"),
         ({"mainTitle": ["not", "text"]}, "mainTitle"),
         ({"mainTitle": None, "title": {"value": "not text"}}, "mainTitle"),
         ({"authors": ["a bare string"]}, "authors"),
@@ -1491,6 +1492,46 @@ def test_openaire_preserves_a_product_that_carries_almost_nothing(monkeypatch):
     assert item.authors == []
     assert item.organizations == []
     assert item.summary == ""
+
+
+def test_openaire_reads_the_abstract_from_the_descriptions_array(monkeypatch):
+    """v3 deposits the abstract as `descriptions`, a list, not a string.
+
+    The live `/research-products` response carries no singular `description`
+    member, so reading one left every published record with an empty summary
+    while this suite passed against a fabricated payload. `score_item` matches
+    the taxonomy over title plus summary, so the loss was silent rather than
+    visible as a failure.
+    """
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_rows_payload(
+            _openaire_row(
+                descriptions=[
+                    "   ",
+                    "<jats:title>Abstract</jats:title><jats:p>A federated suite.</jats:p>",
+                    "A second description the same record carries.",
+                ]
+            )
+        ),
+    )
+
+    items = fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert items[0].summary == "Abstract A federated suite."
+
+
+def test_openaire_treats_a_null_descriptions_member_as_an_absent_abstract(monkeypatch):
+    # A live product routinely carries `descriptions: null`. That is a product
+    # deposited without an abstract, not a payload this connector cannot read.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_rows_payload(_openaire_row(descriptions=None)),
+    )
+
+    items = fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+    assert items[0].summary == ""
 
 
 def test_openreview_success_uses_only_upstream_abstract(monkeypatch):
