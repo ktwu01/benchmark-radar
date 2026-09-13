@@ -9,6 +9,7 @@ removing, or replacing a logo there:
 
 The strip layout (row order and file names) is defined in ROWS below.
 """
+
 import base64
 import io
 import re
@@ -25,14 +26,13 @@ OUT = REPO_ROOT / "assets" / "researchers.svg"
 ROWS = [
     ["amazon.svg", "google.svg", "bytedance.svg", "alibaba.svg"],
     ["stepfun.png", "kuaishou.png", "zhihu.svg"],
-    ["cmu.svg", "auckland.svg", "tsinghua.svg", "sjtu.png",
-     "harvard.svg", "mit.svg", "nus.svg"],
+    ["cmu.svg", "auckland.svg", "tsinghua.svg", "sjtu.png", "harvard.svg", "mit.svg", "nus.svg"],
 ]
 
 FONT = "Helvetica Neue, Helvetica, Arial, sans-serif"
-H = 24          # logo target height
-GAP = 26        # gap between logos in a row
-ROW_H = 30      # row box height
+H = 24  # logo target height
+GAP = 26  # gap between logos in a row
+ROW_H = 30  # row box height
 ROW_GAP = 16
 BOTTOM_PAD = 3
 PNG_MAX_W = {"kuaishou.png": 1200, "sjtu.png": 120}
@@ -47,7 +47,7 @@ def load_svg(path):
     src = re.sub(r"\s+(sodipodi|inkscape):[a-zA-Z-]+=\"[^\"]*\"", "", src)
     m = re.search(r"<svg[^>]*>", src)
     end = src.rfind("</svg>")
-    inner = src[m.end():end]
+    inner = src[m.end() : end]
     vb = re.search(r'viewBox="([^"]+)"', src)
     if vb:
         _, _, w, h = (float(v) for v in vb.group(1).split())
@@ -59,7 +59,7 @@ def load_svg(path):
 
 def prefix_ids(xml, prefix):
     xml = re.sub(r'id="([^"]+)"', f'id="{prefix}\\1"', xml)
-    xml = re.sub(r'url\(#([^)]+)\)', f'url(#{prefix}\\1)', xml)
+    xml = re.sub(r"url\(#([^)]+)\)", f"url(#{prefix}\\1)", xml)
     xml = re.sub(r'xlink:href="#([^"]+)"', f'xlink:href="#{prefix}\\1"', xml)
     return xml
 
@@ -84,8 +84,12 @@ def logo_item(filename, idx):
         with Image.open(path) as im:
             w, h = im.size
         s = H / h
-        return (f'<image x="0" y="0" width="{w * s:.2f}" height="{H}" '
-                f'href="{uri}" preserveAspectRatio="xMidYMid meet"/>', w * s, H)
+        return (
+            f'<image x="0" y="0" width="{w * s:.2f}" height="{H}" '
+            f'href="{uri}" preserveAspectRatio="xMidYMid meet"/>',
+            w * s,
+            H,
+        )
     inner, w, h = load_svg(path)
     s = H / h
     inner = prefix_ids(inner, f"l{idx}_")
