@@ -1184,7 +1184,15 @@ def fetch_openaire(
             },
             **_request_options(config),
         )
-        rows = _payload_dict(payload, "OpenAIRE").get("results")
+        parsed = _payload_dict(payload, "OpenAIRE")
+        if "results" not in parsed:
+            # An absent key is not an empty page. An error-shaped HTTP 200 body
+            # carries no `results` at all, and reading it as "matched nothing"
+            # would report the source healthy on a day it collected nothing,
+            # which is the silent failure `_payload_rows` raises on everywhere
+            # else. Only the documented null below is an ordinary empty page.
+            raise ConnectorPayloadError("OpenAIRE response is missing results")
+        rows = parsed["results"]
         if rows is None:
             # v3 sends `results: null` for a page that matched nothing. Failing
             # the payload here would mark the whole source broken for the day

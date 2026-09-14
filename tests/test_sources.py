@@ -1334,6 +1334,20 @@ def test_openaire_treats_a_null_result_page_as_empty(monkeypatch):
     assert fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10) == []
 
 
+def test_openaire_rejects_a_payload_that_carries_no_results_key(monkeypatch):
+    # An absent key is not an empty page. An error-shaped HTTP 200 body carries
+    # no `results` at all, and reading it as "matched nothing" would report the
+    # source healthy on a day it collected nothing. Only the documented null is
+    # an ordinary empty page, which the test above holds.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: {"error": "rate limit exceeded", "code": 429},
+    )
+
+    with pytest.raises(ConnectorPayloadError):
+        fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+
+
 def test_openaire_rejects_a_results_page_that_is_not_a_list_of_objects(monkeypatch):
     monkeypatch.setattr(
         "benchmark_radar.sources.get_json",
