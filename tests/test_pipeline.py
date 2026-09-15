@@ -1240,6 +1240,75 @@ def test_simulate_backfill_excludes_items_published_after_the_simulated_date(mon
     assert titles == {"org/early"}
 
 
+def test_simulate_backfill_places_an_openaire_product_on_its_publication_day(monkeypatch):
+    """A product must land on the day a live run would have collected it.
+
+    `fetch_openaire` decides membership on `publicationDate`, while this
+    function places an item by `updated_at or published_at`. The row also
+    carries `dateOfCollection`, the day OpenAIRE indexed the product, which is
+    routinely months later; dating the record by it would hide the product on
+    its publication day and surface it on a day the connector's own window
+    guard rejects. The real connector runs here so both halves of that
+    contract are checked against each other.
+    """
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: {
+            "header": {"numFound": 1},
+            "results": [
+                {
+                    "id": "openaire____::radar99001",
+                    "mainTitle": "A Federated Benchmark Dataset",
+                    "publicationDate": "2026-07-05",
+                    "dateOfCollection": "2026-07-20T00:00:00Z",
+                    "pids": [{"scheme": "doi", "value": "10.5281/zenodo.99001"}],
+                }
+            ],
+        },
+    )
+    config = _backfill_config()
+    config["sources"]["openaire"] = {"enabled": True, "searches": ["benchmark"]}
+    dates = [datetime(2026, 7, 5, 12, tzinfo=UTC), datetime(2026, 7, 20, 12, tzinfo=UTC)]
+
+    publication_day, collection_day = simulate_backfill(config, dates)
+
+    assert [item_.source_id for item_ in publication_day.items] == ["openaire____::radar99001"]
+    assert [item_.source_id for item_ in collection_day.items] == []
+
+
+def test_simulate_backfill_asks_each_source_for_the_span_it_simulates(monkeypatch):
+    """A backfilled day must not be empty because the query ran up to today.
+
+    Every backfill connector takes its upper bound from `_collection_now` and
+    returns one page of its newest matches. Called without it, each one queried
+    up to real now, so a historical span came back full of rows published this
+    week; the per-date filter discarded all of them and the rows that actually
+    belonged in the requested windows were never fetched. The day then looked
+    like a quiet day rather than an unasked question.
+    """
+    seen: dict[str, datetime] = {}
+
+    def fake_openaire(config, since, limit):
+        seen["upper"] = config["_collection_now"]
+        seen["since"] = since
+        return []
+
+    monkeypatch.setitem(
+        __import__("benchmark_radar.pipeline", fromlist=["SOURCE_FETCHERS"]).SOURCE_FETCHERS,
+        "openaire",
+        fake_openaire,
+    )
+    config = _backfill_config()
+    config["sources"]["openaire"] = {"enabled": True, "searches": ["benchmark"]}
+    dates = [datetime(2026, 7, 5, 12, tzinfo=UTC), datetime(2026, 7, 20, 12, tzinfo=UTC)]
+
+    simulate_backfill(config, dates)
+
+    # The newest day being simulated, not whenever this happens to run.
+    assert seen["upper"] == dates[-1]
+    assert seen["since"] < dates[0]
+
+
 def test_simulate_backfill_marks_arxiv_as_a_known_limitation(monkeypatch):
     monkeypatch.setitem(
         __import__("benchmark_radar.pipeline", fromlist=["SOURCE_FETCHERS"]).SOURCE_FETCHERS,
