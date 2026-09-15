@@ -2,7 +2,7 @@
   "note": "Frozen IDs for the logo audit page (site/logos.html). An ID is assigned once and never reused, so review feedback citing it stays valid across rebuilds. Which models and organizations exist is decided by models.json, not here.",
   "high_water": {
     "O": 69,
-    "M": 1056
+    "M": 1058
   },
   "organizations": {
     "AI21 Labs": "O-01",
@@ -145,6 +145,8 @@
     "Grok 3 Beta Extended Thinking␟xAI": "M-1054",
     "Apodex 1.1␟ApodexAI": "M-1055",
     "Qwen 3.8 Max␟Qwen": "M-1056",
+    "Seed2.0 (Pro / Lite / Mini)␟ByteDance": "M-1057",
+    "DeepSeek-V4.1-Flash␟DeepSeek": "M-1058",
     "Gemini 3 Pro␟Google": "M-106",
     "Gemini 3.1 Flash-Lite␟Google": "M-107",
     "Gemini 3.5 Flash␟Google": "M-108",
