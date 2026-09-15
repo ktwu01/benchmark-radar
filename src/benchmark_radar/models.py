@@ -162,3 +162,8 @@ class RadarRun:
     # published numbers come from the registry rather than from model prose.
     # None when the Q&A did not run; it is opt-in and never blocks a snapshot.
     daily_questions: dict[str, Any] | None = None
+    # The ranking signals observed for released artifacts this pass, in the
+    # `benchmark_attention` shape `snapshots.validate_snapshot` enforces. None
+    # when the collector is disabled, so an absent block means "not collected"
+    # rather than "nothing had attention".
+    benchmark_attention: dict[str, Any] | None = None
