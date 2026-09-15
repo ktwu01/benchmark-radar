@@ -331,6 +331,47 @@ def test_recent_and_status_report_snapshot_health(tmp_path: Path) -> None:
     assert status["radar"]["required_coverage_complete"] is True
 
 
+def test_radar_results_carry_derived_science_domains(tmp_path: Path) -> None:
+    # Issue #511 review BLOCKER: stored snapshots predate the field, so the
+    # query surface must derive domains from record text -- a plain field
+    # copy would return [] for every historical record and still pass a
+    # "field exists" test. These assertions require the actual tag value.
+    paths = _catalog(tmp_path)
+    generated_at = datetime(2026, 8, 30, 8, 0, tzinfo=UTC)
+    write_snapshot(
+        RadarRun(
+            generated_at=generated_at,
+            since=generated_at - timedelta(hours=48),
+            items=[
+                RadarItem(
+                    source="arXiv",
+                    source_id="2608.17345",
+                    title="BrainBench: Benchmarking Large Language Models for "
+                    "Comprehensive EEG Understanding",
+                    url="https://arxiv.org/abs/2608.17345",
+                    published_at=generated_at - timedelta(hours=2),
+                    summary="A real corpus title replayed by the shared derivation.",
+                    categories=["benchmark", "evaluation"],
+                )
+            ],
+            health=[
+                SourceHealth(source=source, ok=True, item_count=1, method="API")
+                for source in ("arxiv", "github", "huggingface")
+            ],
+        ),
+        paths.snapshots,
+    )
+    service = QueryService(paths)
+
+    recent = service.recent(limit=5)
+    searched = service.search("brainbench", scope="radar", limit=5)
+
+    assert recent["schema_version"] == 7
+    assert recent["results"][0]["science_domains"] == ["neuroscience"]
+    radar_hits = [record for record in searched["results"] if record["kind"] == "radar"]
+    assert radar_hits and radar_hits[0]["science_domains"] == ["neuroscience"]
+
+
 def test_status_exposes_incomplete_detail_shards(tmp_path: Path) -> None:
     # Regression: counting only the index used to hide absent detail artifacts.
     paths = _catalog(tmp_path)
@@ -480,7 +521,7 @@ def test_healthz_identifies_local_health_check_contract(tmp_path: Path) -> None:
         thread.join(timeout=5)
 
     assert payload == {
-        "schema_version": 6,
+        "schema_version": 7,
         "retrieval_mode": "health_check",
         "data": {"source": "local", "citation": citation_block()},
         "status": "ok",
@@ -562,7 +603,7 @@ def test_http_errors_are_machine_readable(tmp_path: Path) -> None:
 
     assert captured.value.code == 400
     assert payload == {
-        "schema_version": 6,
+        "schema_version": 7,
         "error": {"code": "invalid_request", "message": "q is required"},
     }
 
