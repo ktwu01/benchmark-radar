@@ -415,9 +415,24 @@ def test_first_score_record_preserves_earliest_evidence_and_date_precision():
 
 @pytest.fixture(scope="module")
 def all_records(normalized: dict) -> list[dict]:
+    from benchmark_radar.benchmark_scores import DEFAULT_SCORES_PATH, load_scores
     from benchmark_radar.catalog_opencompass import normalize_opencompass
+    from benchmark_radar.catalog_reports import normalize_reports
+    from benchmark_radar.model_cards import DEFAULT_REGISTRY_PATH, load_registry
 
-    return normalized["source_records"] + normalize_opencompass()["source_records"]
+    # The model-report registry is a source record population like the two
+    # crawls, and `normalize-catalog` resolves identity across all three. A
+    # fixture holding only the crawls let a group naming a registry record pass
+    # every test here and fail the real build, which is what this file's seed
+    # test exists to prevent.
+    return (
+        normalized["source_records"]
+        + normalize_opencompass()["source_records"]
+        + normalize_reports(
+            load_registry(DEFAULT_REGISTRY_PATH),
+            load_scores(DEFAULT_SCORES_PATH),
+        )["source_records"]
+    )
 
 
 # Identity candidate generation
@@ -844,10 +859,12 @@ def _build_all_shards(shard_inputs: dict, output_dir: Path) -> dict:
 
 
 def test_one_shard_per_source_record(shard_inputs: dict, tmp_path: Path) -> None:
+    # The count tracks the `all_records` population: 1,148 across the two
+    # crawls, plus the model-report registry the fixture now also carries.
     report = _build_all_shards(shard_inputs, tmp_path / "benchmarks")
     files = list((tmp_path / "benchmarks").glob("*.json"))
-    assert report["shard_count"] == 1148
-    assert len(files) == 1148
+    assert report["shard_count"] == 1264
+    assert len(files) == 1264
 
 
 def test_scores_are_a_keyed_object_never_a_flat_array(shard_inputs: dict, tmp_path: Path) -> None:
