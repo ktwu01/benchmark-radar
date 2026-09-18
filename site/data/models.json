@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "model_count": 870,
+  "model_count": 875,
   "source_counts": {
     "artificial_analysis": 594,
     "llm_stats": 339,
-    "model_reports": 53
+    "model_reports": 58
   },
   "multiple_sources": 113,
   "organizations": [
@@ -1334,6 +1334,50 @@
       }
     },
     {
+      "key": "bytedance-seed2-0-lite",
+      "model": "Seed2.0 Lite",
+      "organization": "ByteDance",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 11
+      }
+    },
+    {
+      "key": "bytedance-seed2-0-mini",
+      "model": "Seed2.0 Mini",
+      "organization": "ByteDance",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 9
+      }
+    },
+    {
+      "key": "bytedance-seed2-0-pro",
+      "model": "Seed2.0 Pro",
+      "organization": "ByteDance",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 12
+      }
+    },
+    {
+      "key": "bytedance-seed2-0-pro-lite-mini",
+      "model": "Seed2.0 (Pro / Lite / Mini)",
+      "organization": "ByteDance",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "celeris-celeris-1",
       "model": "Celeris-1",
       "organization": "Celeris",
@@ -1855,6 +1899,17 @@
       ],
       "source_counts": {
         "model_reports": 1
+      }
+    },
+    {
+      "key": "deepseek-deepseek-v4-1-flash",
+      "model": "DeepSeek-V4.1-Flash",
+      "organization": "DeepSeek",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 11
       }
     },
     {
