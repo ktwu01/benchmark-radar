@@ -1,21 +1,23 @@
 {
   "schema_version": 2,
-  "model_count": 870,
+  "model_count": 905,
   "source_counts": {
     "artificial_analysis": 594,
     "llm_stats": 339,
-    "model_reports": 53
+    "model_reports": 101
   },
-  "multiple_sources": 113,
+  "multiple_sources": 124,
   "organizations": [
     "AI21 Labs",
     "AI9Stars",
     "Ai2",
+    "Alibaba",
     "Allen Institute for AI",
     "Amazon",
     "Anthropic",
     "ApodexAI",
     "Arcee AI",
+    "Baichuan AI",
     "Baidu",
     "ByteDance",
     "ByteDance Seed",
@@ -26,6 +28,7 @@
     "Deep Cogito",
     "DeepSeek",
     "Google",
+    "HumanOmni",
     "IBM",
     "Inception",
     "InclusionAI",
@@ -46,11 +49,14 @@
     "NVIDIA",
     "Nanbeige",
     "Naver",
+    "Nex",
     "Nex AGI",
     "Nous Research",
+    "OmniVinci",
     "OpenAI",
     "OpenBMB",
     "OpenChat",
+    "OpenGVLab",
     "Perplexity",
     "Poolside",
     "Prime Intellect",
@@ -62,6 +68,7 @@
     "Sarvam",
     "Sarvam AI",
     "ServiceNow",
+    "Shanghai Jiao Tong University",
     "StepFun",
     "Swiss AI Initiative",
     "TII UAE",
@@ -69,9 +76,12 @@
     "Thinking Machines",
     "Thinking Machines Lab",
     "Trillion Labs",
+    "University of Rochester",
     "Upstage",
+    "VITA",
     "Xiaomi",
     "Z.ai",
+    "Zhipu AI",
     "xAI"
   ],
   "models": [
@@ -187,6 +197,149 @@
       ],
       "source_counts": {
         "artificial_analysis": 10
+      }
+    },
+    {
+      "key": "alibaba-qwen2-5-omni",
+      "model": "Qwen2.5-Omni",
+      "organization": "Alibaba",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "alibaba-qwen2-5-omni-7b",
+      "model": "Qwen2.5-Omni-7B",
+      "organization": "Alibaba",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 2
+      }
+    },
+    {
+      "key": "alibaba-qwen2-5-vl",
+      "model": "Qwen2.5-VL",
+      "organization": "Alibaba",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "alibaba-qwen2-5-vl-32b",
+      "model": "Qwen2.5-VL-32B",
+      "organization": "Alibaba",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "alibaba-qwen2-5-vl-72b",
+      "model": "Qwen2.5-VL-72B",
+      "organization": "Alibaba",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "alibaba-qwen2-5-vl-7b",
+      "model": "Qwen2.5-VL-7B",
+      "organization": "Alibaba",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "alibaba-qwen2-audio",
+      "model": "Qwen2-Audio",
+      "organization": "Alibaba",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "alibaba-qwen3-5-397b",
+      "model": "Qwen3.5-397B",
+      "organization": "Alibaba",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "alibaba-qwen3-omni",
+      "model": "Qwen3-Omni",
+      "organization": "Alibaba",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "alibaba-qwen3-omni-30b-a3b",
+      "model": "Qwen3-Omni-30B-A3B",
+      "organization": "Alibaba",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "alibaba-videollama2",
+      "model": "VideoLLaMA2",
+      "organization": "Alibaba",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "alibaba-videollama2-7b",
+      "model": "VideoLLaMA2-7B",
+      "organization": "Alibaba",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "alibaba-videollama3",
+      "model": "VideoLLaMA3",
+      "organization": "Alibaba",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -960,10 +1113,12 @@
       "model": "Claude Opus 4.8",
       "organization": "Anthropic",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 26
+        "llm_stats": 26,
+        "model_reports": 1
       }
     },
     {
@@ -998,7 +1153,7 @@
       ],
       "source_counts": {
         "llm_stats": 12,
-        "model_reports": 8
+        "model_reports": 9
       }
     },
     {
@@ -1054,6 +1209,17 @@
       ],
       "source_counts": {
         "artificial_analysis": 14
+      }
+    },
+    {
+      "key": "anthropic-claude-opus-5-max",
+      "model": "Claude-Opus-5 (max)",
+      "organization": "Anthropic",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -1224,6 +1390,17 @@
       }
     },
     {
+      "key": "baichuan-ai-baichuan-omni-1-5",
+      "model": "Baichuan-Omni-1.5",
+      "organization": "Baichuan AI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "baidu-ernie-4-5",
       "model": "ERNIE 4.5",
       "organization": "Baidu",
@@ -1265,6 +1442,17 @@
       ],
       "source_counts": {
         "artificial_analysis": 13
+      }
+    },
+    {
+      "key": "bytedance-llava-video",
+      "model": "LLaVA-Video",
+      "organization": "ByteDance",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -1695,10 +1883,12 @@
       "model": "DeepSeek-V3.1",
       "organization": "DeepSeek",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 16
+        "llm_stats": 16,
+        "model_reports": 1
       }
     },
     {
@@ -1859,13 +2049,13 @@
     },
     {
       "key": "deepseek-deepseek-v4-flash",
-      "model": "DeepSeek-V4-Flash",
+      "model": "DeepSeek V4 Flash",
       "organization": "DeepSeek",
       "provenance_sources": [
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 18
+        "model_reports": 20
       }
     },
     {
@@ -1905,13 +2095,15 @@
     },
     {
       "key": "deepseek-deepseek-v4-flash-max",
-      "model": "DeepSeek-V4-Flash-Max",
+      "model": "DeepSeek-V4-flash (max)",
       "organization": "DeepSeek",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 19
+        "llm_stats": 19,
+        "model_reports": 1
       }
     },
     {
@@ -1960,13 +2152,13 @@
     },
     {
       "key": "deepseek-deepseek-v4-pro",
-      "model": "DeepSeek-V4-Pro",
+      "model": "DeepSeek V4 Pro",
       "organization": "DeepSeek",
       "provenance_sources": [
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 42
+        "model_reports": 44
       }
     },
     {
@@ -1995,13 +2187,15 @@
     },
     {
       "key": "deepseek-deepseek-v4-pro-max",
-      "model": "DeepSeek-V4-Pro-Max",
+      "model": "DeepSeek-V4-Pro (max)",
       "organization": "DeepSeek",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 22
+        "llm_stats": 22,
+        "model_reports": 1
       }
     },
     {
@@ -2193,10 +2387,12 @@
       "model": "Gemini 2.0 Flash",
       "organization": "Google",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 13
+        "llm_stats": 13,
+        "model_reports": 2
       }
     },
     {
@@ -2292,10 +2488,12 @@
       "model": "Gemini 2.5 Flash",
       "organization": "Google",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 14
+        "llm_stats": 14,
+        "model_reports": 2
       }
     },
     {
@@ -2431,7 +2629,7 @@
       "source_counts": {
         "artificial_analysis": 17,
         "llm_stats": 16,
-        "model_reports": 9
+        "model_reports": 11
       }
     },
     {
@@ -2465,6 +2663,28 @@
       ],
       "source_counts": {
         "artificial_analysis": 4
+      }
+    },
+    {
+      "key": "google-gemini-3-0-flash",
+      "model": "Gemini-3.0-Flash",
+      "organization": "Google",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "google-gemini-3-0-pro",
+      "model": "Gemini-3.0-Pro",
+      "organization": "Google",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -3124,6 +3344,17 @@
       ],
       "source_counts": {
         "llm_stats": 7
+      }
+    },
+    {
+      "key": "humanomni-humanomni-7b",
+      "model": "HumanOmni-7B",
+      "organization": "HumanOmni",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -4357,11 +4588,13 @@
       "organization": "MiniMax",
       "provenance_sources": [
         "artificial_analysis",
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
         "artificial_analysis": 21,
-        "llm_stats": 35
+        "llm_stats": 35,
+        "model_reports": 1
       }
     },
     {
@@ -5048,6 +5281,17 @@
       }
     },
     {
+      "key": "moonshot-ai-kimi-audio",
+      "model": "Kimi-Audio",
+      "organization": "Moonshot AI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "moonshot-ai-kimi-k1-5",
       "model": "Kimi-k1.5",
       "organization": "Moonshot AI",
@@ -5140,6 +5384,17 @@
       }
     },
     {
+      "key": "moonshot-ai-kimi-k2-7",
+      "model": "Kimi K2.7",
+      "organization": "Moonshot AI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 2
+      }
+    },
+    {
       "key": "moonshot-ai-kimi-k2-7-code",
       "model": "Kimi K2.7 Code",
       "organization": "Moonshot AI",
@@ -5217,7 +5472,7 @@
       ],
       "source_counts": {
         "llm_stats": 31,
-        "model_reports": 26
+        "model_reports": 28
       }
     },
     {
@@ -5236,10 +5491,12 @@
       "model": "Kimi K3 (max)",
       "organization": "Moonshot AI",
       "provenance_sources": [
-        "artificial_analysis"
+        "artificial_analysis",
+        "model_reports"
       ],
       "source_counts": {
-        "artificial_analysis": 20
+        "artificial_analysis": 20,
+        "model_reports": 1
       }
     },
     {
@@ -5328,6 +5585,17 @@
       ],
       "source_counts": {
         "artificial_analysis": 14
+      }
+    },
+    {
+      "key": "nex-nex-n2",
+      "model": "Nex N2",
+      "organization": "Nex",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -5727,6 +5995,17 @@
       }
     },
     {
+      "key": "omnivinci-omnivinci-9b",
+      "model": "OmniVinci-9B",
+      "organization": "OmniVinci",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "openai-chatgpt-4o-latest",
       "model": "ChatGPT-4o Latest",
       "organization": "OpenAI",
@@ -5833,10 +6112,12 @@
       "model": "GPT-4o",
       "organization": "OpenAI",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 46
+        "llm_stats": 46,
+        "model_reports": 1
       }
     },
     {
@@ -6402,10 +6683,12 @@
       "model": "GPT-5.5 (xhigh)",
       "organization": "OpenAI",
       "provenance_sources": [
-        "artificial_analysis"
+        "artificial_analysis",
+        "model_reports"
       ],
       "source_counts": {
-        "artificial_analysis": 23
+        "artificial_analysis": 23,
+        "model_reports": 1
       }
     },
     {
@@ -6536,10 +6819,12 @@
       "model": "GPT-5.6 Sol (max)",
       "organization": "OpenAI",
       "provenance_sources": [
-        "artificial_analysis"
+        "artificial_analysis",
+        "model_reports"
       ],
       "source_counts": {
-        "artificial_analysis": 22
+        "artificial_analysis": 22,
+        "model_reports": 1
       }
     },
     {
@@ -6576,14 +6861,27 @@
       }
     },
     {
+      "key": "openai-gpt-5-6-sol-ultra",
+      "model": "GPT-5.6 Sol (ultra)",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "openai-gpt-5-6-sol-xhigh",
       "model": "GPT-5.6 Sol (xhigh)",
       "organization": "OpenAI",
       "provenance_sources": [
-        "artificial_analysis"
+        "artificial_analysis",
+        "model_reports"
       ],
       "source_counts": {
-        "artificial_analysis": 16
+        "artificial_analysis": 16,
+        "model_reports": 1
       }
     },
     {
@@ -7047,6 +7345,17 @@
       }
     },
     {
+      "key": "openbmb-minicpm-o",
+      "model": "MiniCPM-o",
+      "organization": "OpenBMB",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "openbmb-minicpm-sala",
       "model": "MiniCPM-SALA",
       "organization": "OpenBMB",
@@ -7099,6 +7408,17 @@
       ],
       "source_counts": {
         "artificial_analysis": 3
+      }
+    },
+    {
+      "key": "opengvlab-internvl-2-5",
+      "model": "InternVL-2.5",
+      "organization": "OpenGVLab",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -8687,6 +9007,39 @@
       }
     },
     {
+      "key": "shanghai-jiao-tong-university-v-salmonn",
+      "model": "v-SALMONN",
+      "organization": "Shanghai Jiao Tong University",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "shanghai-jiao-tong-university-v-salmonn-2",
+      "model": "v-SALMONN-2+",
+      "organization": "Shanghai Jiao Tong University",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "shanghai-jiao-tong-university-v-salmonn-o1",
+      "model": "v-SALMONN-o1",
+      "organization": "Shanghai Jiao Tong University",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "sk-telecom-a-x-k2",
       "model": "A.X-K2",
       "organization": "SK Telecom",
@@ -8814,6 +9167,17 @@
       }
     },
     {
+      "key": "tencent-onellm",
+      "model": "OneLLM",
+      "organization": "Tencent",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "thinking-machines-inkling-small",
       "model": "Inkling Small",
       "organization": "Thinking Machines",
@@ -8877,6 +9241,17 @@
       ],
       "source_counts": {
         "artificial_analysis": 10
+      }
+    },
+    {
+      "key": "university-of-rochester-avicuna",
+      "model": "AVicuna",
+      "organization": "University of Rochester",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -8978,6 +9353,17 @@
       "source_counts": {
         "artificial_analysis": 11,
         "llm_stats": 9
+      }
+    },
+    {
+      "key": "vita-vita-1-5-7b",
+      "model": "VITA-1.5-7B",
+      "organization": "VITA",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -9425,15 +9811,17 @@
     },
     {
       "key": "xiaomi-mimo-v2-5-pro",
-      "model": "MiMo-V2.5-Pro",
+      "model": "MiMo V2.5 Pro",
       "organization": "Xiaomi",
       "provenance_sources": [
         "artificial_analysis",
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
         "artificial_analysis": 21,
-        "llm_stats": 31
+        "llm_stats": 31,
+        "model_reports": 2
       }
     },
     {
@@ -9875,6 +10263,39 @@
       ],
       "source_counts": {
         "artificial_analysis": 11
+      }
+    },
+    {
+      "key": "zhipu-ai-glm-5-2",
+      "model": "GLM-5.2",
+      "organization": "Zhipu AI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "zhipu-ai-glm-5-2-max",
+      "model": "GLM-5.2 (max)",
+      "organization": "Zhipu AI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "zhipu-ai-glm-5-3",
+      "model": "GLM-5.3",
+      "organization": "Zhipu AI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     }
   ]

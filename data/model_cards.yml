@@ -1233,6 +1233,42 @@ source_documents:
     benchmarks: [frontier_challenge]
     retrieved_at: 2026-09-02
 
+  # The four documents below are the benchmarks' own arXiv papers, treated as
+  # the leaderboard each benchmark's authors publish. Each reports a results
+  # table read directly out of the paper (no model card passes through it), so
+  # the rows they feed are benchmark_publisher_run measurements.
+  - id: jointavbench_v2_results_table
+    name: JointAVBench v2 results table
+    publisher: Renmin University of China
+    document_type: benchmark_leaderboard
+    url: https://arxiv.org/html/2512.12772v2
+    benchmarks: [jointavbench]
+    retrieved_at: 2026-09-18
+
+  - id: omnivideobench_v3_results_table
+    name: OmniVideoBench v3 results table
+    publisher: NJU-LINK (Nanjing University)
+    document_type: benchmark_leaderboard
+    url: https://arxiv.org/html/2510.10689v3
+    benchmarks: [omnivideobench]
+    retrieved_at: 2026-09-18
+
+  - id: asi_bench_results_table
+    name: ASI-Bench results table
+    publisher: Apexin AI
+    document_type: benchmark_leaderboard
+    url: https://arxiv.org/html/2608.17271v1
+    benchmarks: [asi_bench]
+    retrieved_at: 2026-09-18
+
+  - id: swe_bench_science_results_table
+    name: SWE-bench Science results table
+    publisher: OpenMOSS (Fudan University)
+    document_type: benchmark_leaderboard
+    url: https://arxiv.org/html/2608.19799
+    benchmarks: [swe_bench_science]
+    retrieved_at: 2026-09-18
+
 model_cards:
   - id: openai_gpt_5_system_card
     organization: OpenAI

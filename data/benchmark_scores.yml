@@ -441,6 +441,22 @@ benchmarks:
     metric: accuracy
     direction: higher_is_better
     unit: percent
+  - benchmark_id: jointavbench
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+  - benchmark_id: omnivideobench
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+  - benchmark_id: asi_bench
+    metric: scientific_score
+    direction: higher_is_better
+    unit: percent
+  - benchmark_id: swe_bench_science
+    metric: pass@1
+    direction: higher_is_better
+    unit: percent
 
 results:
   # FrontierChallenge's official leaderboard reports model-scaffold systems,
@@ -4028,3 +4044,650 @@ results:
 # carries one metric, so the edit-distance reading is omitted here rather
 # than mixed onto the accuracy axis.
 # ---------------------------------------------------------------------------
+#
+# #347: real score data points for benchmarks that previously had names but no
+# numbers. Each of the four groups below is read out of the benchmark's own
+# paper (registered as a benchmark_leaderboard source document), so every row
+# is a benchmark_publisher_run, not a vendor self-report.
+
+# JointAVBench (arXiv 2512.12772v2). Table 3's Avg column -- the accuracy
+# mean over the paper's 15 task categories on 2,853 manually verified MCQs.
+# v2 revision date is 2026-05-14.
+  - benchmark_id: jointavbench
+    instrument: jointavbench_2853_mcq_v2
+    protocol: "2,853 manually verified MCQs; accuracy mean over 15 task categories; joint audio-visual inputs; v2 results"
+    model: Gemini 2.5 Pro
+    organization: Google
+    source_id: jointavbench_v2_results_table
+    reported_at: 2026-05-14
+    value: 65.3
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: jointavbench
+    instrument: jointavbench_2853_mcq_v2
+    protocol: "2,853 manually verified MCQs; accuracy mean over 15 task categories; joint audio-visual inputs; v2 results"
+    model: Qwen3-Omni
+    organization: Alibaba
+    source_id: jointavbench_v2_results_table
+    reported_at: 2026-05-14
+    value: 63.6
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: jointavbench
+    instrument: jointavbench_2853_mcq_v2
+    protocol: "2,853 manually verified MCQs; accuracy mean over 15 task categories; joint audio-visual inputs; v2 results"
+    model: Gemini 2.5 Flash
+    organization: Google
+    source_id: jointavbench_v2_results_table
+    reported_at: 2026-05-14
+    value: 58.0
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: jointavbench
+    instrument: jointavbench_2853_mcq_v2
+    protocol: "2,853 manually verified MCQs; accuracy mean over 15 task categories; joint audio-visual inputs; v2 results"
+    model: Qwen2.5-Omni
+    organization: Alibaba
+    source_id: jointavbench_v2_results_table
+    reported_at: 2026-05-14
+    value: 56.5
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: jointavbench
+    instrument: jointavbench_2853_mcq_v2
+    protocol: "2,853 manually verified MCQs; accuracy mean over 15 task categories; joint audio-visual inputs; v2 results"
+    model: VideoLLaMA2
+    organization: Alibaba
+    source_id: jointavbench_v2_results_table
+    reported_at: 2026-05-14
+    value: 46.8
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: jointavbench
+    instrument: jointavbench_2853_mcq_v2
+    protocol: "2,853 manually verified MCQs; accuracy mean over 15 task categories; joint audio-visual inputs; v2 results"
+    model: v-SALMONN-2+
+    organization: Shanghai Jiao Tong University
+    source_id: jointavbench_v2_results_table
+    reported_at: 2026-05-14
+    value: 46.7
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: jointavbench
+    instrument: jointavbench_2853_mcq_v2
+    protocol: "2,853 manually verified MCQs; accuracy mean over 15 task categories; joint audio-visual inputs; v2 results"
+    model: OneLLM
+    organization: Tencent
+    source_id: jointavbench_v2_results_table
+    reported_at: 2026-05-14
+    value: 36.9
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: jointavbench
+    instrument: jointavbench_2853_mcq_v2
+    protocol: "2,853 manually verified MCQs; accuracy mean over 15 task categories; joint audio-visual inputs; v2 results"
+    model: v-SALMONN-o1
+    organization: Shanghai Jiao Tong University
+    source_id: jointavbench_v2_results_table
+    reported_at: 2026-05-14
+    value: 36.4
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: jointavbench
+    instrument: jointavbench_2853_mcq_v2
+    protocol: "2,853 manually verified MCQs; accuracy mean over 15 task categories; joint audio-visual inputs; v2 results"
+    model: v-SALMONN
+    organization: Shanghai Jiao Tong University
+    source_id: jointavbench_v2_results_table
+    reported_at: 2026-05-14
+    value: 35.8
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: jointavbench
+    instrument: jointavbench_2853_mcq_v2
+    protocol: "2,853 manually verified MCQs; accuracy mean over 15 task categories; joint audio-visual inputs; v2 results"
+    model: AVicuna
+    organization: University of Rochester
+    source_id: jointavbench_v2_results_table
+    reported_at: 2026-05-14
+    value: 31.0
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: jointavbench
+    instrument: jointavbench_2853_mcq_v2
+    protocol: "2,853 manually verified MCQs; accuracy mean over 15 task categories; joint audio-visual inputs; v2 results"
+    model: InternVL-2.5
+    organization: OpenGVLab
+    source_id: jointavbench_v2_results_table
+    reported_at: 2026-05-14
+    value: 51.7
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: jointavbench
+    instrument: jointavbench_2853_mcq_v2
+    protocol: "2,853 manually verified MCQs; accuracy mean over 15 task categories; joint audio-visual inputs; v2 results"
+    model: VideoLLaMA3
+    organization: Alibaba
+    source_id: jointavbench_v2_results_table
+    reported_at: 2026-05-14
+    value: 50.0
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: jointavbench
+    instrument: jointavbench_2853_mcq_v2
+    protocol: "2,853 manually verified MCQs; accuracy mean over 15 task categories; joint audio-visual inputs; v2 results"
+    model: Qwen2.5-VL
+    organization: Alibaba
+    source_id: jointavbench_v2_results_table
+    reported_at: 2026-05-14
+    value: 47.7
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: jointavbench
+    instrument: jointavbench_2853_mcq_v2
+    protocol: "2,853 manually verified MCQs; accuracy mean over 15 task categories; joint audio-visual inputs; v2 results"
+    model: LLaVA-Video
+    organization: ByteDance
+    source_id: jointavbench_v2_results_table
+    reported_at: 2026-05-14
+    value: 47.1
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: jointavbench
+    instrument: jointavbench_2853_mcq_v2
+    protocol: "2,853 manually verified MCQs; accuracy mean over 15 task categories; joint audio-visual inputs; v2 results"
+    model: GPT-4o
+    organization: OpenAI
+    source_id: jointavbench_v2_results_table
+    reported_at: 2026-05-14
+    value: 45.0
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: jointavbench
+    instrument: jointavbench_2853_mcq_v2
+    protocol: "2,853 manually verified MCQs; accuracy mean over 15 task categories; joint audio-visual inputs; v2 results"
+    model: Kimi-Audio
+    organization: Moonshot AI
+    source_id: jointavbench_v2_results_table
+    reported_at: 2026-05-14
+    value: 45.6
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: jointavbench
+    instrument: jointavbench_2853_mcq_v2
+    protocol: "2,853 manually verified MCQs; accuracy mean over 15 task categories; joint audio-visual inputs; v2 results"
+    model: Qwen2-Audio
+    organization: Alibaba
+    source_id: jointavbench_v2_results_table
+    reported_at: 2026-05-14
+    value: 39.5
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+# OmniVideoBench (arXiv 2510.10689v3). Table 3 Avg column -- MCQ accuracy
+# over the full 1,000-question set. Modality is part of the instrument, so
+# it is kept in the protocol to keep omni-modal, visual-only and text-only
+# readings comparable only within their own setting. v3 date is 2026-03-05.
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; omni-modal setting (visual + audio inputs); v3 results"
+    model: Gemini-3.0-Pro
+    organization: Google
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 61.80
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; omni-modal setting (visual + audio inputs); v3 results"
+    model: Gemini-2.5-Pro
+    organization: Google
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 58.90
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; omni-modal setting (visual + audio inputs); v3 results"
+    model: Gemini-3.0-Flash
+    organization: Google
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 55.10
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; omni-modal setting (visual + audio inputs); v3 results"
+    model: Gemini-2.5-Flash
+    organization: Google
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 52.40
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; omni-modal setting (visual + audio inputs); v3 results"
+    model: Gemini-2.0-Flash
+    organization: Google
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 41.50
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; omni-modal setting (visual + audio inputs); v3 results"
+    model: Qwen3-Omni-30B-A3B
+    organization: Alibaba
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 38.40
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; omni-modal setting (visual + audio inputs); v3 results"
+    model: OmniVinci-9B
+    organization: OmniVinci
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 32.10
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; omni-modal setting (visual + audio inputs); v3 results"
+    model: Baichuan-Omni-1.5
+    organization: Baichuan AI
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 30.70
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; omni-modal setting (visual + audio inputs); v3 results"
+    model: HumanOmni-7B
+    organization: HumanOmni
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 30.50
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; omni-modal setting (visual + audio inputs); v3 results"
+    model: VITA-1.5-7B
+    organization: VITA
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 30.50
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; omni-modal setting (visual + audio inputs); v3 results"
+    model: MiniCPM-o
+    organization: OpenBMB
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 29.70
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; omni-modal setting (visual + audio inputs); v3 results"
+    model: Qwen2.5-Omni-7B
+    organization: Alibaba
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 29.30
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; omni-modal setting (visual + audio inputs); v3 results"
+    model: VideoLLaMA2-7B
+    organization: Alibaba
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 29.20
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; visual-only setting (omni-model, audio input withheld); v3 results"
+    model: Gemini-2.0-Flash
+    organization: Google
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 31.30
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; visual-only setting (omni-model, audio input withheld); v3 results"
+    model: Qwen2.5-Omni-7B
+    organization: Alibaba
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 26.40
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; visual-only setting (VLM, no audio pathway); v3 results"
+    model: Qwen2.5-VL-32B
+    organization: Alibaba
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 31.80
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; visual-only setting (VLM, no audio pathway); v3 results"
+    model: Qwen2.5-VL-7B
+    organization: Alibaba
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 29.80
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; visual-only setting (VLM, no audio pathway); v3 results"
+    model: Qwen2.5-VL-72B
+    organization: Alibaba
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 29.50
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: omnivideobench
+    instrument: omnivideobench_1000_mcq_v3
+    protocol: "1,000 MCQ over 628 videos; text-only LLM baseline setting (no audio or video input); v3 results"
+    model: DeepSeek-V3.1
+    organization: DeepSeek
+    source_id: omnivideobench_v3_results_table
+    reported_at: 2026-03-05
+    value: 27.60
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+# ASI-Bench (arXiv 2608.17271v1, Apexin AI). Table 2 B3 columns -- the
+# scientific score at the B3 guidance level (only research goal, data,
+# constraints and required outputs; the system must pick the method on its
+# own), on the 60 official seed-42 project-level tasks. Macro-average over 3
+# independent runs; Claude-Opus-5 is the only single-run entry (marked ``dagger'
+# in the paper). The harness is part of the instrument, so it lives in the
+# protocol and each harness is its own comparison series.
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs; harness: Codex"
+    model: GPT-5.5 (xhigh)
+    organization: OpenAI
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 29.29
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs; harness: Codex"
+    model: GPT-5.6 Sol (xhigh)
+    organization: OpenAI
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 40.86
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs; harness: Codex"
+    model: GPT-5.6 Sol (ultra)
+    organization: OpenAI
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 51.60
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs except Claude-Opus-5 (single run); harness: Claude Code"
+    model: Claude Opus 5
+    organization: Anthropic
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 40.70
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs except Claude-Opus-5 (single run); harness: Claude Code"
+    model: Kimi K3
+    organization: Moonshot AI
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 27.78
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs except Claude-Opus-5 (single run); harness: Claude Code"
+    model: Claude Opus 4.8
+    organization: Anthropic
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 31.73
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs except Claude-Opus-5 (single run); harness: Claude Code"
+    model: GLM-5.3
+    organization: Zhipu AI
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 33.09
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs except Claude-Opus-5 (single run); harness: Claude Code"
+    model: GLM-5.2
+    organization: Zhipu AI
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 30.29
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs except Claude-Opus-5 (single run); harness: Claude Code"
+    model: DeepSeek V4 Flash
+    organization: DeepSeek
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 24.84
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs except Claude-Opus-5 (single run); harness: Claude Code"
+    model: Kimi K2.7
+    organization: Moonshot AI
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 19.75
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs except Claude-Opus-5 (single run); harness: Claude Code"
+    model: MiniMax M3
+    organization: MiniMax
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 20.61
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs except Claude-Opus-5 (single run); harness: Claude Code"
+    model: DeepSeek V4 Pro
+    organization: DeepSeek
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 19.20
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs except Claude-Opus-5 (single run); harness: Claude Code"
+    model: MiMo V2.5 Pro
+    organization: Xiaomi
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 16.49
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs; harness: Kimi Code"
+    model: Kimi K3
+    organization: Moonshot AI
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 28.15
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs; harness: Kimi Code"
+    model: Kimi K2.7
+    organization: Moonshot AI
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 15.65
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs; harness: MiMo Code"
+    model: MiMo V2.5 Pro
+    organization: Xiaomi
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 11.50
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs; harness: OpenHands"
+    model: DeepSeek V4 Flash
+    organization: DeepSeek
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 21.91
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: asi_bench
+    instrument: asi_bench_b3_60_tasks
+    protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs; harness: OpenHands"
+    model: DeepSeek V4 Pro
+    organization: DeepSeek
+    source_id: asi_bench_results_table
+    reported_at: 2026-08-18
+    value: 15.78
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+# SWE-bench Science (arXiv 2608.19799, OpenMOSS/Fudan, read via the ar5iv
+# HTML mirror of the v2 revision). Table 2's Overall Pass@1 column on the
+# 119-task reference set. The harness is part of the instrument and lives in
+# the protocol so changing the scaffold is never mistaken for a model update.
+  - benchmark_id: swe_bench_science
+    instrument: swe_bench_science_119_tasks
+    protocol: "119 tasks from 98 repositories across 20 scientific domains; overall pass@1 on the reference set; harness: Codex"
+    model: GPT-5.6-sol (max)
+    organization: OpenAI
+    source_id: swe_bench_science_results_table
+    reported_at: 2026-09-01
+    value: 40.34
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_bench_science
+    instrument: swe_bench_science_119_tasks
+    protocol: "119 tasks from 98 repositories across 20 scientific domains; overall pass@1 on the reference set; harness: Claude Code"
+    model: Claude-Opus-5 (max)
+    organization: Anthropic
+    source_id: swe_bench_science_results_table
+    reported_at: 2026-09-01
+    value: 47.90
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_bench_science
+    instrument: swe_bench_science_119_tasks
+    protocol: "119 tasks from 98 repositories across 20 scientific domains; overall pass@1 on the reference set; harness: Claude Code"
+    model: DeepSeek-V4-Pro (max)
+    organization: DeepSeek
+    source_id: swe_bench_science_results_table
+    reported_at: 2026-09-01
+    value: 42.02
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_bench_science
+    instrument: swe_bench_science_119_tasks
+    protocol: "119 tasks from 98 repositories across 20 scientific domains; overall pass@1 on the reference set; harness: Kimi Code"
+    model: Kimi-K3 (max)
+    organization: Moonshot AI
+    source_id: swe_bench_science_results_table
+    reported_at: 2026-09-01
+    value: 35.29
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_bench_science
+    instrument: swe_bench_science_119_tasks
+    protocol: "119 tasks from 98 repositories across 20 scientific domains; overall pass@1 on the reference set; harness: Codex"
+    model: GLM-5.2 (max)
+    organization: Zhipu AI
+    source_id: swe_bench_science_results_table
+    reported_at: 2026-09-01
+    value: 31.93
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_bench_science
+    instrument: swe_bench_science_119_tasks
+    protocol: "119 tasks from 98 repositories across 20 scientific domains; overall pass@1 on the reference set; harness: Codex"
+    model: Nex N2
+    organization: Nex
+    source_id: swe_bench_science_results_table
+    reported_at: 2026-09-01
+    value: 24.37
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_bench_science
+    instrument: swe_bench_science_119_tasks
+    protocol: "119 tasks from 98 repositories across 20 scientific domains; overall pass@1 on the reference set; harness: Claude Code"
+    model: DeepSeek-V4-flash (max)
+    organization: DeepSeek
+    source_id: swe_bench_science_results_table
+    reported_at: 2026-09-01
+    value: 23.53
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_bench_science
+    instrument: swe_bench_science_119_tasks
+    protocol: "119 tasks from 98 repositories across 20 scientific domains; overall pass@1 on the reference set; harness: Codex"
+    model: Qwen3.5-397B
+    organization: Alibaba
+    source_id: swe_bench_science_results_table
+    reported_at: 2026-09-01
+    value: 14.29
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
