@@ -209,6 +209,7 @@
     <link rel="stylesheet" href="/assets/styles.css">
     <script src="/assets/clarity.js" defer></script>
     <script src="/assets/app.js" type="module"></script>
+  <link rel="stylesheet" href="/assets/design-system.css">
   </head>
   <body>
     <a class="skip-link" href="#main-content" data-i18n="Skip to content">Skip to content</a>
@@ -223,6 +224,7 @@
         </a>
         <nav class="view-nav" aria-label="Dashboard views" data-i18n-aria="Dashboard views">
           <button type="button" class="nav-active" data-view="today" aria-controls="today-view" aria-current="page" data-i18n="Today">Today</button>
+          <a href="/research/" data-i18n="Research fields">Research fields</a>
           <a
             href="/cli/"
             id="cli-nav"
@@ -332,7 +334,7 @@
             ></path>
           </svg>
           <span class="repo-badge-label" data-i18n="Star">Star</span>
-          <span class="repo-badge-count" data-count>—</span>
+          <span class="repo-badge-count" data-count></span>
         </a>
       </div>
     </header>
@@ -356,7 +358,6 @@
           rel="noopener noreferrer"
         >
           <span data-i18n="Upvote us">Upvote us</span>
-          <span aria-hidden="true">→</span>
         </a>
       </div>
     </aside>
@@ -460,7 +461,7 @@
               <h2 id="today-heading" class="today-heading" data-i18n="Today's radar">Today's radar</h2>
               <div class="results-meta" aria-live="polite">
                 <span id="today-breakdown"></span>
-                <span id="today-sort"></span>
+                <details class="research-sort-details"><summary data-i18n="Sort order">Sort order</summary><span id="today-sort"></span></details>
               </div>
             </div>
             <p id="today-range" class="section-note" hidden></p>
@@ -532,7 +533,7 @@
           <h1 id="leaderboard-heading" data-i18n="Leaderboard">Leaderboard</h1>
         </div>
 
-        <section class="benchmark-skyline" id="benchmark-skyline" aria-labelledby="benchmark-skyline-heading">
+        <div class="research-domain-controls" data-scope-view="leaderboard"></div><section class="benchmark-skyline" id="benchmark-skyline" aria-labelledby="benchmark-skyline-heading">
           <div class="skyline-heading">
             <div>
               <h2 id="benchmark-skyline-heading" data-i18n="Benchmark Frontier">Benchmark Frontier</h2>
@@ -753,7 +754,7 @@
           </label>
         </div>
 
-        <div class="benchmark-workbench">
+        <div class="research-domain-controls" data-scope-view="saturation"></div><div class="benchmark-workbench">
           <!-- A tool region, not a content section. The examples used to be a
                titled block with two subheadings and eight cards, which outranked
                the search box it was meant to support; they are now one line of
@@ -998,7 +999,7 @@
             data-i18n="Cite"
           >Cite</a>
           <a
-            class="primary-link"
+            class="secondary-link"
             href="https://github.com/ktwu01/benchmark-radar"
             target="_blank"
             rel="noopener noreferrer"

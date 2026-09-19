@@ -110,3 +110,6 @@ graphify-out/
 # The id is meaningful only to the machine that created it, so committing one
 # would hand every clone a stale pointer to someone else's session.
 /.context/
+
+# Generated research page reuses the dashboard header.
+/site/research/

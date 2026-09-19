@@ -480,7 +480,9 @@ def _benchmark_nav(interactive: str) -> str:
     )
 
 
-def _page_html(slug: str, shard: dict[str, Any], context: CatalogContext | None = None) -> str:
+def _page_html(
+    slug: str, shard: dict[str, Any], context: CatalogContext | None = None, header: str = ""
+) -> str:
     context = context or CatalogContext()
     record = shard.get("record") or {}
     scores_by_source = shard.get("scores_by_source") or {}
@@ -514,6 +516,13 @@ def _page_html(slug: str, shard: dict[str, Any], context: CatalogContext | None 
         f"{_documents_section(name, record)}"
         f"{_related_section(slug, record, context)}"
     )
+    body = re.sub(
+        r"(<table\b.*?</table>)",
+        r'<div class="record-table-scroll" tabindex="0" role="region" aria-label="Reported scores">'
+        r"\1</div>",
+        body,
+        flags=re.S,
+    )
     interactive = f"{SITE_URL}/saturation/?lfrontier={slug}"
     nav = _benchmark_nav(interactive)
     return f"""<!doctype html>
@@ -534,9 +543,12 @@ def _page_html(slug: str, shard: dict[str, Any], context: CatalogContext | None 
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">{_webpage_jsonld(slug, name, description, title)}</script>
 <script type="application/ld+json">{_breadcrumb_jsonld(slug, name)}</script>
-<style>{_BENCH_CSS}</style>
+<style>@layer legacy {{{_BENCH_CSS}}}</style>
+<link rel="stylesheet" href="/assets/styles.css">
+<link rel="stylesheet" href="/assets/design-system.css">
 </head>
-<body>
+<body class="record-page">
+{header}
 {nav}
 <main>
   <p class="eyebrow">Benchmark</p>
@@ -549,7 +561,7 @@ def _page_html(slug: str, shard: dict[str, Any], context: CatalogContext | None 
 """
 
 
-def _directory_html(entries: list[tuple[str, str]]) -> str:
+def _directory_html(entries: list[tuple[str, str]], header: str = "") -> str:
     """Directory page: title, canonical, schema, and the full listing."""
     canonical = f"{SITE_URL}/benchmarks/"
     payload = {
@@ -590,9 +602,12 @@ def _directory_html(entries: list[tuple[str, str]]) -> str:
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">{_json_ld(payload)}</script>
 <script type="application/ld+json">{_json_ld(breadcrumb)}</script>
-<style>{_DIR_CSS}</style>
+<style>@layer legacy {{{_DIR_CSS}}}</style>
+<link rel="stylesheet" href="/assets/styles.css">
+<link rel="stylesheet" href="/assets/design-system.css">
 </head>
-<body>
+<body class="record-page">
+{header}
 <nav class="site">
   <a href="{SITE_URL}/">Benchmark Radar</a>
   <a href="{SITE_URL}/benchmarks/">Benchmark directory</a>
@@ -725,16 +740,31 @@ def write_benchmark_pages(
     loaded = [_load_shard(path) for path in shard_paths]
     context = _catalog_context(loaded)
 
+    from .blog_shell import chrome_i18n_table, extract_site_chrome
+
+    dashboard_path = Path("site/index.html")
+    chrome = extract_site_chrome(
+        dashboard_path.read_text(encoding="utf-8"), active_path="/research/"
+    )
+    translations = chrome_i18n_table(chrome, Path("site/assets/app.js").read_text(encoding="utf-8"))
+    header = (
+        chrome.header
+        + '<script id="chrome-i18n" type="application/json">'
+        + json.dumps(translations, ensure_ascii=False).replace("<", "\\u003c")
+        + '</script><script src="/assets/blog.js" defer></script>'
+    )
     entries: list[tuple[str, str]] = []
     for slug, shard in loaded:
         page_dir = staging / slug
         page_dir.mkdir(parents=True)
-        (page_dir / "index.html").write_text(_page_html(slug, shard, context), encoding="utf-8")
+        (page_dir / "index.html").write_text(
+            _page_html(slug, shard, context, header), encoding="utf-8"
+        )
         name = _text(shard.get("record") or {}, "name") or slug
         entries.append((name, _canonical(slug)))
 
     entries.sort(key=lambda item: (item[0].lower(), item[1]))
-    (staging / "index.html").write_text(_directory_html(entries), encoding="utf-8")
+    (staging / "index.html").write_text(_directory_html(entries, header), encoding="utf-8")
 
     if output_dir.exists():
         shutil.rmtree(output_dir)

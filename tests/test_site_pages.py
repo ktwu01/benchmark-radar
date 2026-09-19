@@ -183,7 +183,7 @@ def test_values_are_escaped_and_cannot_inject_markup(tmp_path):
     assert "&lt;script&gt;alert(1)&lt;/script&gt;" in page
     assert "<img src=x onerror" not in page
     assert "payload</script>" not in page
-    assert page.count("</script>") == 2  # one per JSON-LD block, no injected markup
+    assert page.count("</script>") == 4  # two JSON-LD blocks, chrome data and behavior
 
 
 def test_no_placeholder_text_for_missing_fields(tmp_path):

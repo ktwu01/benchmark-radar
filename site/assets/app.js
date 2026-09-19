@@ -1,3 +1,4 @@
+import {fields as researchFields, matchesField} from "./fields.js";
 import { SKYLINE_DOMAINS, SKYLINE_START_DATE, benchmarkDateLabel, skylineModel, skylineGeometry, skylineDateLanes, skylineScoreLanes, skylineCapPositions, skylineFrontierSteps, scorePopulation, matchesScoreCutoff, scoreBrowserSummary } from "./skyline.js";
 import {
   CATEGORY_COLORS,
@@ -365,6 +366,8 @@ function toggleLang() {
 const I18N = {
   en: {},
   zh: {
+    "Research fields": "研究领域",
+    "Sort order": "排序规则",
     "Chart notes": "图表说明",
     "Chart legend": "图例",
     "Shown / corpus": "显示数／目录总数",
@@ -1419,6 +1422,8 @@ function readUrl() {
   // history entry keeps the background URL so Forward can restore the same
   // filtered view behind the sheet instead of resetting it to an empty Today.
   const params = backgroundLocation?.searchParams || currentParams;
+  state.researchField = researchFields.some(f=>f.id===params.get("field"))?params.get("field"):"all";
+  state.researchSub = params.get("sub") || "";
   const requestedView = params.get("view");
   // Legacy Explorer permalinks resolve to the filterable Today list.
   const legacyView = ["trends", "map", "leaderboard", "saturation"].includes(requestedView)
@@ -1501,6 +1506,10 @@ function readUrl() {
 function writeUrl(mode = "replace") {
   const utility = activeUtility();
   const params = new URLSearchParams();
+  if (!utility && ["leaderboard","saturation"].includes(state.view)) {
+    if(state.researchField && state.researchField!=="all")params.set("field",state.researchField);
+    if(state.researchSub)params.set("sub",state.researchSub);
+  }
   // Every filter below belongs to exactly one view, so only that view may write
   // it. Serializing all of them unconditionally is what leaked `lfrontier` onto
   // Today/Trends/Map links and `date` onto Leaderboard links (issue #123): the
@@ -4677,8 +4686,8 @@ function matchesScoreFilter(summary) {
   return matchesScoreCutoff(summary, state.lscore);
 }
 
-function scoreBrowseRows(cutoff = state.lscore) {
-  return scorePopulation(state.benchmarkIndex || [])
+function scoreBrowseRows(cutoff = state.lscore, records = researchRecords()) {
+  return scorePopulation(records)
     .filter((row) => !matchesScoreCutoff(row.summary, 100) || matchesScoreCutoff(row.summary, cutoff))
     .sort((a, b) => (b.summary?.numeric_count || 0) - (a.summary?.numeric_count || 0)
       || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
@@ -4688,7 +4697,7 @@ function saturationRows() {
   const matches = benchmarkQueryIds();
   // Search is a lookup across the whole catalog. It temporarily bypasses the
   // browsing cutoff without changing the shared slider value.
-  const rows = scoreBrowseRows(matches ? 100 : state.lscore);
+  const rows = scoreBrowseRows(matches ? 100 : state.lscore, matches ? state.benchmarkIndex : researchRecords());
   return matches ? rows.filter((row) => matches.has(row.id)) : rows;
 }
 
@@ -4794,6 +4803,7 @@ function benchmarkQueryIds() {
 }
 
 function renderBenchmarkSearch() {
+  renderResearchControls();
   const container = byId("benchmark-search-results");
   const status = byId("benchmark-search-status");
   if (!container || !status || !state.data) return;
@@ -5207,7 +5217,8 @@ function renderBenchmarkSkyline(cutoff = state.lscore) {
   }
   // Selection in another chart survives a slider preview.
   if (host.contains(selectedFrontierPoint) || host.contains(describedFrontierPoint)) clearFrontierPointSelection();
-  const model = skylineModel(state.benchmarkIndex, cutoff, null, state.lheight);
+  renderResearchControls();
+  const model = skylineModel(researchRecords(), cutoff, null, state.lheight);
   const svg = skylineChart(model, cutoff);
   const sourceCounts = [...new Set(model.all.map((row) => row.source))].map((source) =>
     `${scoreSourceLabel(source)}: ${model.visible.filter((row) => row.source === source).length.toLocaleString()} / ${model.all.filter((row) => row.source === source).length.toLocaleString()}`);
@@ -7677,7 +7688,8 @@ function renderLeaderboardTop(board) {
       ),
     ]);
   }
-  const ranked = (board.entries || []).filter((entry) => entry.card_count > 0);
+  const researchIds = new Set(researchRecords().map(r=>r.slug));
+  const ranked = (board.entries || []).filter((entry) => entry.card_count > 0 && researchIds.has(entry.benchmark_id || entry.id));
   const entries = state.leaderboardTopExpanded ? ranked : ranked.slice(0, LEADERBOARD_TOP_LIMIT);
   const more = byId("leaderboard-top-more");
   // A registry where nothing is reported yet is a real state, not a bug, and
@@ -9372,3 +9384,29 @@ async function initialize() {
 }
 
 initialize();
+
+// Shared domain controls are filters over the complete source-record index.
+function researchRecords() {
+  return (state.benchmarkIndex || []).filter(r=>matchesField(r,state.researchField || "all",state.researchSub || ""));
+}
+function renderResearchControls() {
+  const field=state.researchField || "all", sub=state.researchSub || "";
+  for(const host of document.querySelectorAll(".research-domain-controls")) {
+    const zh=document.documentElement.lang.startsWith("zh");
+    const choose=(f,s="")=>{if(s||f==="all")host.dataset.expanded="false";state.researchField=f;state.researchSub=s;state.benchmarkVisibleLimit=BENCHMARK_SEARCH_LIMIT;writeUrl("push");if(state.view==="leaderboard")renderLeaderboard();else renderSaturation();};
+    const button=(title,f,s,active,count)=>{const b=element("button",{text:title,attrs:{type:"button","aria-pressed":String(active)}});if(count!==undefined)b.append(element("span",{text:String(count)}));b.addEventListener("click",()=>choose(f,s));return b;};
+    const rows=state.benchmarkIndex||[];
+    const primary=element("div",{className:"research-domain-tabs",attrs:{role:"group","aria-label":zh?"研究领域":"Research fields"}});
+    primary.append(button(zh?"全部领域":"All research","all","",field==="all",rows.length));
+    for(const f of researchFields)primary.append(button(zh?f.zh:f.en,f.id,"",field===f.id,rows.filter(r=>matchesField(r,f.id)).length));
+    const children=[primary], f=researchFields.find(f=>f.id===field);
+    if(f?.subs.length){const secondary=element("div",{className:"research-direction-tabs",attrs:{role:"group","aria-label":zh?"研究方向":"Research directions"}});secondary.append(button(zh?"全部方向":"All directions",field,"",!sub));for(const s of f.subs)secondary.append(button(zh?s[1]:s[0],field,s[0],sub===s[0],rows.filter(r=>matchesField(r,field,s[0])).length));children.push(secondary);}
+    const selected=researchFields.find(f=>f.id===field);
+    const current=sub || (selected?(zh?selected.zh:selected.en):(zh?"全部领域":"All research"));
+    const toggle=element("button",{className:"research-scope-toggle",text:(zh?"研究领域 · ":"Research fields · ")+current,attrs:{type:"button","aria-expanded":String(host.dataset.expanded==="true"),"aria-controls":"scope-"+host.dataset.scopeView}});
+    const panel=element("div",{className:"research-scope-panel",attrs:{id:"scope-"+host.dataset.scopeView}});
+    panel.append(...children);
+    toggle.addEventListener("click",()=>{host.dataset.expanded=String(host.dataset.expanded!=="true");toggle.setAttribute("aria-expanded",host.dataset.expanded);});
+    replaceChildren(host,[toggle,panel]);
+  }
+}
