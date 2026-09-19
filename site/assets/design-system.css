@@ -503,3 +503,36 @@
     .hf-upvote-copy { min-height: 44px; padding-inline: 12px; }
   }
 }
+
+/* Research component rhythm: one owner for each vertical gap. */
+@layer pages {
+  #radar-explorer .catalog-section { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-6); }
+  #radar-explorer .section-heading, #radar-explorer .research-direction-tabs,
+  #radar-explorer .filter-row, #radar-explorer .result-bar { margin: 0; padding: 0; }
+  #radar-explorer .view-tabs button { padding-bottom: var(--space-3); }
+  #radar-explorer .filter-row { gap: var(--space-3); }
+  #radar-explorer .result-bar { min-height: 44px; gap: var(--space-3); }
+  #radar-explorer .sort-label select { min-height: 44px; }
+  #radar-explorer table { min-width: 0; width: 100%; table-layout: fixed; }
+  #radar-explorer #rows tr { cursor: pointer; }
+  #radar-explorer #rows tr:hover, #radar-explorer #rows tr:focus-within { background: var(--selected); }
+  #radar-explorer .benchmark-name { background: transparent; width: 100%; }
+  #radar-explorer .row-arrow { display: inline-flex; align-items: center; justify-content: center; padding: 0; width: 24px; height: 24px; color: var(--muted); }
+  #radar-explorer .pagination { padding: var(--space-4) 0 0; }
+  #radar-explorer .method-note { padding: var(--space-4) 0 0; margin: 0; }
+  #radar-explorer #detail-content { padding: var(--space-6); }
+  #radar-explorer .detail-top { gap: var(--space-4); margin-bottom: var(--space-4); }
+  #radar-explorer .detail-title { margin: 0 0 var(--space-4); }
+  #radar-explorer .detail-description { margin: 0; }
+  #radar-explorer .detail-metrics { gap: var(--space-4); margin: var(--space-6) 0; padding: var(--space-4) 0; }
+  #radar-explorer .detail-section-title { margin: var(--space-6) 0 var(--space-3); }
+  #radar-explorer .chart-note { margin: var(--space-3) 0 var(--space-6); }
+  #radar-explorer .detail-links { gap: var(--space-2); margin-top: var(--space-6); }
+  #radar-explorer .detail-provenance { margin-top: var(--space-4); }
+  .dialog-close, .close-detail { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 44px; padding: 0; line-height: 1; }
+}
+@layer responsive {
+  @media (max-width: 640px) {
+    #radar-explorer .catalog-section, #radar-explorer #detail-content { padding: var(--space-4); }
+  }
+}

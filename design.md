@@ -253,3 +253,20 @@ Research fields map exact source tags and may overlap. Secondary directions
 collapse on mobile. The browser reads the shared index and loads evidence shards
 only when requested. Saturation search pauses field filters as well as its score
 cutoff. Existing public routes and raw data downloads remain available.
+
+
+### Component spacing and row actions
+
+Use 24px between page sections and 16px between adjacent control groups.
+Research catalogs own their vertical rhythm with a 16px parent gap; tabs,
+directions, filters and result bars must not add competing outer margins.
+Use 12px between controls, 8px within a compact action group, and 44px control
+heights. Panel and dialog padding is 24px on desktop and 16px on narrow screens.
+Dialog headings use 12px to their content and 24px from the preceding section.
+Close controls are centered in a 44px square and align with the panel inset.
+
+Every research record row opens its evidence details when clicked, including
+blank cell space. Keep the benchmark-name button as the single keyboard action
+(Enter/Space), with a visible row focus state. The trailing arrow is decorative,
+not a separate small target. Text selection and embedded links retain their
+normal behavior. Preserve table semantics and native dialog focus handling.

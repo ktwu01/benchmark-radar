@@ -86,7 +86,7 @@ import {fields, recordFields} from "./fields.js";
   function renderRows() {
     const maxPage=Math.max(0,Math.ceil(filtered.length/pageSize)-1);state.page=Math.min(state.page,maxPage);
     const visible=filtered.slice(state.page*pageSize,(state.page+1)*pageSize);
-    $('rows').innerHTML=visible.map(r=>`<tr data-record="${escape(r.id)}"><td><button type="button" class="benchmark-name" data-detail="${escape(r.id)}">${escape(r.name)}</button><span class="source-line">${sourceNames[r.source]}</span></td><td><span class="field-tag">${label(fieldOf(r))}</span></td><td>${r.raw==null?`<span class="na">${text('Not reported','暂无分数')}</span>`:`<span class="score-value">${scoreText(r)}</span>${r.unit?'':`<span class="score-sub">${text('source scale','原始量纲')}</span>`}`}</td><td>${r.models==null?`<span class="na">${text('Not recorded','暂无记录')}</span>`:`<span class="score-value">${number(r.models)}</span>`}</td><td>${r.date?escape(r.date):`<span class="na">${text('Unknown','未知')}</span>`}</td><td><button type="button" class="row-arrow" data-detail="${escape(r.id)}" aria-label="${escape(text('Inspect ','查看 ')+r.name)}">↗</button></td></tr>`).join('');
+    $('rows').innerHTML=visible.map(r=>`<tr data-record="${escape(r.id)}"><td><button type="button" class="benchmark-name" aria-haspopup="dialog" data-detail="${escape(r.id)}">${escape(r.name)}</button><span class="source-line">${sourceNames[r.source]}</span></td><td><span class="field-tag">${label(fieldOf(r))}</span></td><td>${r.raw==null?`<span class="na">${text('Not reported','暂无分数')}</span>`:`<span class="score-value">${scoreText(r)}</span>${r.unit?'':`<span class="score-sub">${text('source scale','原始量纲')}</span>`}`}</td><td>${r.models==null?`<span class="na">${text('Not recorded','暂无记录')}</span>`:`<span class="score-value">${number(r.models)}</span>`}</td><td>${r.date?escape(r.date):`<span class="na">${text('Unknown','未知')}</span>`}</td><td><span class="row-arrow" aria-hidden="true">↗</span></td></tr>`).join('');
     $('empty').hidden=visible.length>0;$('empty').innerHTML=text('No matching benchmarks. Try another name or clear the filters.','没有符合条件的 benchmark，可更换名称或清除筛选。');
     $('page-info').textContent=filtered.length?`${state.page*pageSize+1}–${Math.min((state.page+1)*pageSize,filtered.length)} ${text('of','/')} ${number(filtered.length)}`:'0';
     $('previous').disabled=state.page===0;$('next').disabled=state.page===maxPage;
@@ -145,6 +145,11 @@ import {fields, recordFields} from "./fields.js";
     else if(el.hasAttribute('data-sub')){const toggle=$('direction-toggle');toggle.setAttribute('aria-expanded','false');toggle.parentElement.dataset.expanded='false';change({sub:state.sub===el.dataset.sub?'':el.dataset.sub});}
     else if(el.hasAttribute('data-detail'))openDetail(el.dataset.detail);
     else if(el.hasAttribute('data-band'))change({score:el.dataset.band,view:'list'});
+  });
+  $('rows').addEventListener('click', event => {
+    if (event.target.closest('button, a') || window.getSelection()?.toString()) return;
+    const button = event.target.closest('tr[data-record]')?.querySelector('.benchmark-name');
+    if (button) { button.focus(); button.click(); }
   });
   $('direction-toggle').addEventListener('click',()=>{const toggle=$('direction-toggle');const expanded=toggle.getAttribute('aria-expanded')!=='true';toggle.setAttribute('aria-expanded',String(expanded));toggle.parentElement.dataset.expanded=String(expanded);});
   $('name-filter').addEventListener('input',e=>change({query:e.target.value}));
