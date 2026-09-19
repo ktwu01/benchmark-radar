@@ -16,6 +16,7 @@ import yaml
 
 from benchmark_radar.catalog import (
     CatalogError,
+    assign_slugs,
     normalize_snapshot,
     slugify,
     write_catalog,
@@ -143,6 +144,19 @@ def test_slugs_are_filename_safe_and_unique(normalized: dict) -> None:
         assert "/" not in slug
         assert slug == slug.lower()
         assert slug.strip("-") == slug
+
+
+def test_assign_slugs_disambiguates_without_colliding_with_a_natural_slug() -> None:
+    """A "-N" suffix must not land on a slug another key already owns.
+
+    "vending bench" and "vending:bench" both slugify to "vending-bench", so the
+    second needs a suffix -- but "vending-bench-2" is itself a real key whose
+    natural slug is already "vending-bench-2". Appending "-2" blindly would give
+    two records the same shard filename, dropping one and tripping the query
+    index's uniqueness guard.
+    """
+    slugs = assign_slugs(["vending bench", "vending-bench-2", "vending:bench"])
+    assert len(set(slugs.values())) == len(slugs)
 
 
 def test_community_uuid_keys_survive_slugging(normalized: dict) -> None:

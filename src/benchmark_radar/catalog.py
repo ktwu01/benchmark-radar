@@ -127,12 +127,20 @@ def assign_slugs(keys: list[str]) -> dict[str, str]:
     happened to arrive in.
     """
     assigned: dict[str, str] = {}
-    used: dict[str, int] = {}
+    used: set[str] = set()
     for key in sorted(keys):
         base = slugify(key)
-        count = used.get(base, 0) + 1
-        used[base] = count
-        assigned[key] = base if count == 1 else f"{base}-{count}"
+        slug = base
+        count = 1
+        # A "-N" suffix can land on another key's natural slug (two variants of
+        # "vending bench" collide onto "vending-bench-2" while a real
+        # "vending-bench-2" key already owns that slug), so keep bumping until
+        # the slug is globally free rather than trusting the per-base counter.
+        while slug in used:
+            count += 1
+            slug = f"{base}-{count}"
+        used.add(slug)
+        assigned[key] = slug
     return assigned
 
 
