@@ -230,6 +230,25 @@ equivalent:
     reviewed_at: 2026-08-22
     note: Both are WinoGrande (Sakaguchi et al., 2019).
 
+  # Issue #583's registry entry and the committed OpenCompass crawl are the
+  # same benchmark: both are named VBench, both resolve to Vchitect/VBench, and
+  # the OpenCompass card carries the introducing paper the registry entry
+  # cites. Left unlinked the catalog publishes two VBench rows whose detail
+  # shards do not name each other, and the registry row cannot show the release
+  # date, publisher or openness the crawl already recorded. VBench++ and
+  # VBench-2.0 are separate instruments with their own registry entries and are
+  # deliberately not members. The signature below is the contributor's, not the
+  # maintainer's: every other group in this file is ktwu01's, so this one is a
+  # proposal to re-sign or drop.
+  - group_id: vbench
+    basis: reviewer_asserted
+    members: [model-reports:vbench, opencompass:1375]
+    inherit_from: opencompass:1375
+    anchors: [arxiv:2311.17982, gh:Vchitect/VBench]
+    reviewed_by: lazizbekravshanov
+    reviewed_at: 2026-09-12
+    note: Both are VBench (Huang et al., 2023).
+
 # Related, cross-linked, never merged. Two kinds share this block:
 #
 # The first three are the OpenCompass-internal anchor-sharing pairs from
