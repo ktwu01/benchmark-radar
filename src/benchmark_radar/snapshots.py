@@ -42,6 +42,7 @@ from .rubric import (
     v3_rubric_reference,
     v4_rubric_reference,
 )
+from .science_domains import science_domains_for_record
 from .site_about import write_about
 from .site_pages import DEFAULT_SHARD_DIR, benchmark_sitemap_entries
 from .site_seo import site_lastmod, write_sitemap
@@ -1015,16 +1016,23 @@ def dashboard_data(
     sources: set[str] = set()
     organizations: set[str] = set()
     event_kinds: set[str] = set()
+    science_domains: set[str] = set()
     for snapshot in snapshots:
         # Snapshot schema v2 predates scoring-version metadata. Preserve those
         # historical 0-4 values explicitly so a current 0-100 label and formula
         # can never be shown beside arithmetic they did not produce.
+        # `science_domains` is the other rebuild-time derivation besides
+        # `organizations`: a routing tag replayed from stored title/summary so
+        # every historical day lights up without rewriting any snapshot. It is
+        # deliberately absent from attention observations, which are commentary
+        # about records rather than benchmark evidence.
         evidence_items = [
             {
                 **item,
                 "score_version": int(item.get("score_version") or 1),
                 "score_max": float(item.get("score_max") or 4.0),
                 "organizations": organizations_for_item(item),
+                "science_domains": science_domains_for_record(item),
             }
             for item in snapshot["evidence_items"]
         ]
@@ -1062,6 +1070,9 @@ def dashboard_data(
         )
         event_kinds.update(event_counts)
         event_kinds.update(attention_event_counts)
+        science_domains.update(
+            domain for item in evidence_items for domain in item["science_domains"]
+        )
         evidence_health = [
             entry
             for entry in snapshot["ingest_health"]
@@ -1143,6 +1154,9 @@ def dashboard_data(
             "organizations": sorted(organizations),
             "event_kinds": sorted(event_kinds),
             "kinds": ["evidence", "attention"],
+            # Routing facet for the upcoming AI-for-Science view; empty until
+            # a corpus day declares a domain. Not a quality signal.
+            "science_domains": sorted(science_domains),
         },
         "days": days,
         "corpus": corpus,

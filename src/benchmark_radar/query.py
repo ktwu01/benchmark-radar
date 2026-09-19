@@ -13,9 +13,10 @@ from pathlib import Path
 from typing import Any
 
 from .citation import citation_block
+from .science_domains import science_domains_for_record
 from .snapshots import REQUIRED_SOURCES, load_snapshots
 
-QUERY_SCHEMA_VERSION = 6
+QUERY_SCHEMA_VERSION = 7
 DEFAULT_INDEX_PATH = Path("site/data/benchmark-index.json")
 DEFAULT_SHARD_DIR = Path("site/data/benchmarks")
 DEFAULT_SNAPSHOT_DIR = Path("data/snapshots")
@@ -436,6 +437,12 @@ class QueryService:
                     "name": str(item.get("title") or ""),
                     "description": str(item.get("summary") or ""),
                     "categories": list(item.get("categories") or []),
+                    # Derived here rather than copied from the snapshot:
+                    # stored snapshots predate the field, so a plain copy
+                    # would hand every historical record an empty list on
+                    # this surface while radar.json showed tags (issue #511
+                    # review BLOCKER). Same function, same output.
+                    "science_domains": science_domains_for_record(item),
                     "publisher": " ".join(item.get("organizations") or []),
                     "modality": None,
                     "languages": [],
@@ -687,7 +694,9 @@ class QueryService:
                 continue
             if recommended and item.get("recommended") is not True:
                 continue
-            results.append(item)
+            # Same derivation the dashboard publishes, so `recent` and
+            # `search` cannot disagree about a record's domains.
+            results.append({**item, "science_domains": science_domains_for_record(item)})
         results = results[:limit]
         return {
             "schema_version": QUERY_SCHEMA_VERSION,
