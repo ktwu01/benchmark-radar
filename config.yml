@@ -290,6 +290,42 @@ sources:
     attempts: 3
     timeout_seconds: 30
 
+  # DataCite is the other DOI registration agency (issue #544): datasets,
+  # software and reports deposited with Zenodo, Figshare, Dryad and
+  # institutional repositories. Reads need no credential, and an anonymous
+  # request only ever returns DOIs in the `findable` state, so a draft or a
+  # withdrawn record cannot enter the feed. Rate limit: 3,000 requests per
+  # 5-minute window per IP, answered with HTTP 429 beyond that; one request
+  # per search keeps a run at `max_requests` calls in total.
+  #
+  # Date semantics: the window is the `registered` timestamp, the moment the
+  # DOI started to resolve, applied on both ends of the query and again on
+  # the parsed record. The metadata `published` value is often a bare year
+  # and `created` can predate registration by however long a deposit sat in
+  # draft, so neither can bound a daily window. A deposit that is registered
+  # first and made findable later is therefore collected on its registration
+  # date or not at all: `updated` moves on every metadata edit and cannot
+  # stand in for it. Search phrases are title
+  # terms joined with AND, which is what keeps "benchmark" in a geodesy or
+  # toxicology title out of the feed. `page[size]` is capped at 1,000 by the
+  # API and `page[cursor]` exists for deeper pulls; one page per search keeps
+  # the request budget fixed. Zenodo mints its DOIs through DataCite, so the
+  # same deposit can arrive from both connectors and merges on its DOI.
+  datacite:
+    enabled: true
+    required: false
+    searches:
+      - LLM benchmark
+      - language model benchmark
+      - agent benchmark
+      - evaluation dataset
+      - benchmark dataset
+      - data contamination
+    page_size: 50
+    max_requests: 6
+    attempts: 3
+    timeout_seconds: 30
+
   openreview:
     enabled: true
     venues:
