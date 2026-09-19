@@ -855,3 +855,37 @@ def test_shipped_registry_tracks_frontierchallenge_without_claiming_adoption():
         "Codex",
         "Frontier Agent (Agent Team)",
     }
+
+
+def test_shipped_registry_tracks_brain_to_text_score_evidence():
+    registry = load_registry(DEFAULT_REGISTRY_PATH)
+    benchmarks = {item["id"]: item for item in registry["benchmarks"]}
+
+    assert benchmarks["brain_to_text_24"]["name"] == "Brain-to-Text Benchmark '24"
+    assert benchmarks["brain_to_text_25"]["name"] == "Brain-to-Text '25"
+
+    progression = build_score_progression(DEFAULT_SCORES_PATH, registry)["benchmarks"]
+    btot24 = progression["brain_to_text_24"]
+    assert btot24["observation_count"] == 4
+    assert btot24["evidence"]["id"] == "same_day_comparison"
+    assert btot24["saturation"]["best_value"] == 5.81
+
+    btot25 = progression["brain_to_text_25"]
+    assert btot25["observation_count"] == 6
+    assert btot25["evidence"]["id"] == "multi_organization_trend"
+    assert btot25["first_reported_at"] == "2025-07-05"
+    assert btot25["last_reported_at"] == "2026-01-01"
+    assert btot25["saturation"]["best_value"] == 0.01537
+    assert [point["value"] for point in btot25["historical_best_frontier"]["points"]] == [
+        0.06999,
+        0.03892,
+        0.01773,
+        0.01537,
+    ]
+    assert {row["organization"] for row in btot25["observations"]} == {
+        "BIT",
+        "EPFL-INL",
+        "Infera-Neuro",
+        "Stanford NPTL",
+        "UC Davis Neuroprosthetics Lab",
+    }

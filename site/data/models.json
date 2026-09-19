@@ -16,8 +16,8 @@
     "Anthropic",
     "ApodexAI",
     "Arcee AI",
+    "BIT",
     "Baidu",
-    "BraIn-to-Text (BIT)",
     "ByteDance",
     "ByteDance Seed",
     "Celeris",
@@ -1276,9 +1276,9 @@
       }
     },
     {
-      "key": "brain-to-text-bit-bit-submission",
+      "key": "bit-bit-submission",
       "model": "BIT submission",
-      "organization": "BraIn-to-Text (BIT)",
+      "organization": "BIT",
       "provenance_sources": [
         "model_reports"
       ],

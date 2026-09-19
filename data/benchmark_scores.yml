@@ -499,8 +499,8 @@ results:
     measurement_kind: benchmark_publisher_run
 
   # Brain-to-Text '25's final Kaggle private leaderboard uses about two thirds
-  # of 1,450 held-out T15 sentences. Kaggle prints the WER as a ratio, so these
-  # values remain exactly as displayed instead of being converted to percent.
+  # of 1,450 held-out T15 sentences. Kaggle prints the WER as a ratio and gives
+  # each team's best-submission date, so both values are preserved as displayed.
   - benchmark_id: brain_to_text_25
     instrument: brain_to_text_25_t15_private_leaderboard
     protocol: approximately 67% of 1,450 held-out test sentences; aggregate word error rate
@@ -527,9 +527,9 @@ results:
     instrument: brain_to_text_25_t15_private_leaderboard
     protocol: approximately 67% of 1,450 held-out test sentences; aggregate word error rate
     model: BIT submission
-    organization: BraIn-to-Text (BIT)
+    organization: BIT
     source_id: brain_to_text_25_kaggle_leaderboard
-    reported_at: 2026-01-01
+    reported_at: 2025-12-31
     value: 0.01773
     read_from: html_text
     measurement_kind: benchmark_publisher_run
@@ -540,7 +540,7 @@ results:
     model: Stanford-NPTL causal RNN Ensemble + 5gram
     organization: Stanford NPTL
     source_id: brain_to_text_25_kaggle_leaderboard
-    reported_at: 2026-01-01
+    reported_at: 2025-07-19
     value: 0.03892
     read_from: html_text
     measurement_kind: benchmark_publisher_run
@@ -551,7 +551,7 @@ results:
     model: Stanford-NPTL causal RNN TTA-Ensemble + 5gram
     organization: Stanford NPTL
     source_id: brain_to_text_25_kaggle_leaderboard
-    reported_at: 2026-01-01
+    reported_at: 2025-07-29
     value: 0.04817
     read_from: html_text
     measurement_kind: benchmark_publisher_run
@@ -562,7 +562,7 @@ results:
     model: UCD-NPL causal RNN + 5gram
     organization: UC Davis Neuroprosthetics Lab
     source_id: brain_to_text_25_kaggle_leaderboard
-    reported_at: 2026-01-01
+    reported_at: 2025-07-05
     value: 0.06999
     read_from: html_text
     measurement_kind: benchmark_publisher_run
