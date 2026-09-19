@@ -409,6 +409,17 @@ sources:
   # admitted here. Media, social proxies, community feeds, broad arXiv feeds,
   # broken endpoints, and third-party Anthropic mirrors stay out of scored
   # evidence. Entries are filtered locally for benchmark/data relevance.
+  xbsleepy:
+    enabled: true
+    required: false
+    allow_empty: true
+    attempts: 3
+    timeout_seconds: 30
+    # Daily-agent-benchmarks digest (issue #380): a curated feed of arXiv
+    # papers that introduce agent benchmarks, tagged with capability themes.
+    # The published index is cumulative, so `since` filtering happens locally
+    # and an unchanged index legitimately yields zero new rows.
+    index_url: https://xbsleepy.github.io/daily-agent-benchmarks/data/index.json
   first_party_feeds:
     enabled: true
     required: false

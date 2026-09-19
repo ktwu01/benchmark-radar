@@ -25,6 +25,7 @@ from benchmark_radar.sources import (
     fetch_openalex,
     fetch_openreview,
     fetch_semantic_scholar,
+    fetch_xbsleepy,
     fetch_zenodo_records,
     github_release_title,
 )
@@ -1928,3 +1929,136 @@ def test_collection_method_falls_back_to_a_static_default_without_items():
     # leaves nothing to inspect; fall back to the connector's usual method.
     assert collection_method("arxiv", []) == "RSS"
     assert collection_method("brave", []) == "API"
+
+
+XBSLEEPY_INDEX_PAPERS = [
+    {
+        "id": "2609.11115",
+        "title": "Benchmark Radar: A Living Database and Search Engine for AI Benchmarks",
+        "abstract": "We present a living database of AI benchmarks.",
+        "authors": ["Koutian Wu"],
+        "categories": ["cs.AI"],
+        "primary_category": "cs.AI",
+        "published": "2026-09-09T18:00:00Z",
+        "updated": "2026-09-09T18:00:00Z",
+        "announced_date": "2026-09-10",
+        "first_seen": "2026-09-10",
+        "links": {
+            "abs": "https://arxiv.org/abs/2609.11115v1",
+            "pdf": "https://arxiv.org/pdf/2609.11115v1",
+            "html": "https://arxiv.org/html/2609.11115",
+        },
+        "citations": 2,
+        "comment": "Project site: https://benchmark-radar.org/",
+        "field": "coding",
+        "score": 13,
+        "tags": ["coding", "planning"],
+    },
+    {
+        "id": "2607.00001",
+        "title": "An Older Agent Benchmark Paper",
+        "abstract": "An older digest entry.",
+        "authors": ["A. Researcher"],
+        "published": "2026-07-01T12:00:00Z",
+        "announced_date": "2026-07-02",
+        "links": {"abs": "https://arxiv.org/abs/2607.00001v1"},
+        "tags": ["web"],
+        "field": "web",
+    },
+]
+
+
+def test_xbsleepy_maps_index_papers_and_carries_theme_categories(monkeypatch):
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, attempts=3, timeout=30: {"papers": XBSLEEPY_INDEX_PAPERS},
+    )
+
+    items = fetch_xbsleepy(
+        {"index_url": "https://digest.example/data/index.json"},
+        datetime(2026, 9, 8, tzinfo=UTC),
+        10,
+    )
+
+    assert [item.source_id for item in items] == ["xbsleepy:2609.11115"]
+    item = items[0]
+    assert item.source == "XBsleepy"
+    assert item.title.startswith("Benchmark Radar:")
+    assert item.url == "https://arxiv.org/abs/2609.11115v1"
+    assert item.published_at == datetime(2026, 9, 9, 18, tzinfo=UTC)
+    assert item.event_kind == "discovered"
+    assert item.categories == ["xbsleepy:coding", "xbsleepy:planning"]
+    assert item.artifact_urls == [
+        "https://arxiv.org/pdf/2609.11115v1",
+        "https://arxiv.org/html/2609.11115",
+    ]
+    assert item.metrics == {"citations": 2.0}
+    assert item.authors == ["Koutian Wu"]
+    assert item.parser_version == "xbsleepy-index/1"
+
+
+def test_xbsleepy_accepts_date_only_announced_dates(monkeypatch):
+    paper = {
+        "id": "2609.00002",
+        "title": "AgentBoard Revived",
+        "abstract": "A digest entry without full timestamps.",
+        "announced_date": "2026-09-10",
+        "links": {"abs": "https://arxiv.org/abs/2609.00002"},
+        "tags": [],
+        "field": "other",
+    }
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, attempts=3, timeout=30: {"papers": [paper]},
+    )
+
+    items = fetch_xbsleepy(
+        {"index_url": "https://digest.example/data/index.json"},
+        datetime(2026, 9, 8, tzinfo=UTC),
+        10,
+    )
+
+    assert items[0].published_at == datetime(2026, 9, 10, tzinfo=UTC)
+    assert items[0].categories == []
+
+
+def test_xbsleepy_drops_papers_older_than_since(monkeypatch):
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, attempts=3, timeout=30: {"papers": XBSLEEPY_INDEX_PAPERS},
+    )
+
+    items = fetch_xbsleepy(
+        {"index_url": "https://digest.example/data/index.json"},
+        datetime(2026, 9, 1, tzinfo=UTC),
+        10,
+    )
+
+    assert [item.source_id for item in items] == ["xbsleepy:2609.11115"]
+
+
+def test_xbsleepy_requires_papers_array(monkeypatch):
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, attempts=3, timeout=30: {"total": 3},
+    )
+
+    with pytest.raises(ConnectorPayloadError):
+        fetch_xbsleepy({}, datetime(2026, 9, 8, tzinfo=UTC), 10)  # 无 index_url 直接报错
+
+
+def test_xbsleepy_rejects_future_timestamps_instead_of_publishing_them(monkeypatch):
+    paper = dict(XBSLEEPY_INDEX_PAPERS[0], published="2027-01-01T00:00:00Z")
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, attempts=3, timeout=30: {"papers": [paper]},
+    )
+    config = {
+        "index_url": "https://digest.example/data/index.json",
+        "_collection_now": datetime(2026, 9, 10, tzinfo=UTC),
+    }
+
+    items = fetch_xbsleepy(config, datetime(2026, 9, 8, tzinfo=UTC), 10)
+
+    assert items == []
+    assert config["_future_rejections"] == 1

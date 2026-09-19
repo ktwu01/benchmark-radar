@@ -46,6 +46,7 @@ from .site_about import write_about
 from .site_pages import DEFAULT_SHARD_DIR, benchmark_sitemap_entries
 from .site_seo import site_lastmod, write_sitemap
 from .sources import GITHUB_RELEASE_PARSER_VERSION, github_release_title
+from .themes import write_themes
 
 SCHEMA_VERSION = 2
 SUPPORTED_SCHEMA_VERSIONS = {1, SCHEMA_VERSION}
@@ -1378,6 +1379,11 @@ def rebuild_dashboard(
         # brief can never describe a day the published corpus has moved past.
         blog = write_blog(snapshots, sitemap_output.parent)
         blog_entries = blog["sitemap_entries"]
+        # The theme browse (issue #380 part three) is built from the same
+        # validated snapshots in the same run, so its groups can never name a
+        # record the published corpus has moved past.
+        themes = write_themes(snapshots, sitemap_output.parent)
+        page_entries.extend(themes["sitemap_entries"])
     write_sitemap(
         snapshots,
         sitemap_output,
