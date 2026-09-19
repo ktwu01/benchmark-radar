@@ -536,3 +536,11 @@
     #radar-explorer .catalog-section, #radar-explorer #detail-content { padding: var(--space-4); }
   }
 }
+
+@layer components {
+  .masthead .repo-badge-count { position: static; min-width: 0; padding: 0; border: 0; border-radius: 0; background: transparent; color: inherit; font: 500 13px/20px var(--body); }
+  .masthead .repo-badge-count:empty { display: none; }
+  .masthead .repo-badge:not([data-tooltip])::after,
+  .masthead .repo-badge[data-tooltip=""]::after { display: none; }
+  .masthead .repo-badge::after { font: 500 13px/20px var(--body); padding: 6px 10px; letter-spacing: 0; }
+}
