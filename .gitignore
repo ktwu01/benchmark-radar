@@ -110,3 +110,7 @@ graphify-out/
 # The id is meaningful only to the machine that created it, so committing one
 # would hand every clone a stale pointer to someone else's session.
 /.context/
+
+# Reproducible UI review build and optional DOM test dependencies.
+ui-study/dist/
+ui-study/node_modules/

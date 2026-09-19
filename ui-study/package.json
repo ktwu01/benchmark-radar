@@ -1,0 +1,8 @@
+{
+  "name": "benchmark-radar-ui-study",
+  "private": true,
+  "devDependencies": {
+    "css-tree": "3.1.0",
+    "jsdom": "26.1.0"
+  }
+}
