@@ -343,13 +343,24 @@ def _rows_on(rows: list[dict[str, Any]], reported_at: str) -> list[dict[str, Any
 
 
 def _best_row(rows: list[dict[str, Any]], direction: str) -> dict[str, Any]:
-    """The strongest value on record, respecting the metric's direction."""
-    reverse = direction == "higher_is_better"
-    return sorted(
+    """The strongest value on record, respecting the metric's direction.
+
+    Ties are broken the way ``_historical_best_frontier`` breaks them -- the
+    earliest date the value was reached, then the smallest observation id --
+    rather than by list position. A bare ``(value, reported_at)`` sort left an
+    exact tie to YAML row order, so the saturation record-holder could name a
+    different observation than the frontier's final record (and flip on a mere
+    reorder) even though both describe the same maximum.
+    """
+    higher = direction == "higher_is_better"
+    return min(
         rows,
-        key=lambda row: (row["value"], row["reported_at"]),
-        reverse=reverse,
-    )[0]
+        key=lambda row: (
+            -row["value"] if higher else row["value"],
+            row["reported_at"],
+            row["observation_id"],
+        ),
+    )
 
 
 def _series(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:

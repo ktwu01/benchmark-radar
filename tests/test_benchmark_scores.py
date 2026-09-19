@@ -147,6 +147,29 @@ def test_a_gain_endpoint_does_not_depend_on_a_model_name(tmp_path):
     assert gain_for("Alpha") == gain_for("Zzz") == 50.0
 
 
+def test_saturation_best_holder_matches_the_frontier_on_a_tie(tmp_path):
+    # Two models tie at the record value. The saturation record-holder must name
+    # the same observation the frontier's final record does, and must not flip
+    # when the source rows are reordered. A bare (value, reported_at) sort left
+    # the tie to YAML row order, so saturation.best could credit a different
+    # model than the frontier for the identical maximum.
+    def holders(rows: list[dict]) -> tuple[str, str]:
+        record = score_progression(
+            load_scores(write_scores(tmp_path, minimal_scores(results=rows)))
+        )["benchmarks"]["alpha"]
+        return (
+            record["saturation"]["best_model"],
+            record["historical_best_frontier"]["points"][-1]["model"],
+        )
+
+    zeta_first = [result(model="Zeta", value=90.0), result(model="Alpha", value=90.0)]
+    sat_zeta, frontier_zeta = holders(zeta_first)
+    sat_alpha, frontier_alpha = holders(list(reversed(zeta_first)))
+    assert sat_zeta == frontier_zeta
+    assert sat_alpha == frontier_alpha
+    assert sat_zeta == sat_alpha
+
+
 def test_load_scores_rejects_a_date_the_browser_cannot_format(tmp_path):
     # These strings reach Intl.DateTimeFormat, which throws on an unparseable
     # value and takes every view on the page down with it.
