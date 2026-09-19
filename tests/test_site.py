@@ -612,6 +612,9 @@ def test_clean_route_model_migrates_legacy_urls_and_preserves_utility_background
             section("const VIEW_PATHS =", "function applySeo("),
             # readUrl parses the score cutoff through this helper.
             section("function scoreCutoff(", "function matchesScoreFilter("),
+            # readUrl and writeUrl resolve the leaderboard mode and window
+            # (issue #530) through these.
+            section("const LATEST_WINDOWS =", "function latestReleasesWindowKey("),
             section("function readUrl()", "// `push` adds a history entry"),
             section("function writeUrl(", "// A pushed entry changes the URL"),
         )
