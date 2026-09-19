@@ -1,23 +1,14 @@
-/* Private research explorer. Source records stay separate; unknown scores stay unknown. */
+import {fields, recordFields} from "./fields.js";
+/* Research explorer. Source records stay separate; unknown scores stay unknown. */
 (() => {
   'use strict';
   const root = document.getElementById('radar-explorer');
-  const $ = id => root.querySelector(`#${id}`);
+  const $ = id => document.getElementById(id);
   const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const safeUrl = value => { try { const u = new URL(value); return ['https:', 'http:'].includes(u.protocol) ? escape(u.href) : ''; } catch { return ''; } };
   const text = (en, zh) => state.lang === 'zh' ? zh : en;
   const number = value => value == null ? '—' : Number(value).toLocaleString('en-US', {maximumFractionDigits: 2});
   const sourceNames = {model_reports:'Model reports',llm_stats:'LLM Stats',artificial_analysis:'Artificial Analysis',opencompass_hub:'OpenCompass Hub'};
-  const fields = [
-    {id:'agents',en:'Agent systems',zh:'Agent 系统',icon:'⌘',tags:['agents','agent','agentic','coding_agent','computer_use','tool_use','tool_calling','tool-use','memory','ai_research','scientific_agent','agent evaluation','legal agent','智能体'],subs:[['Coding agents','编程 Agent',['coding_agent','code agent']],['Computer use','计算机操作',['computer_use']],['Search & research','搜索与研究',['search','deep research','ai_research','scientific_agent']],['Tool use','工具使用',['tool_use','tool_calling','tool-use']],['Memory','记忆',['memory']],['Data analysis','数据分析',['data_analysis','AI数据分析']]]},
-    {id:'coding',en:'Coding',zh:'代码与工程',icon:'⌗',tags:['code','coding','coding_agent','frontend_development','代码','代码工程','code agent','github issue resolution','competitive programming','代码生成'],subs:[['Software engineering','软件工程',['code','coding','code agent','代码工程','github issue resolution']],['Coding agents','编程 Agent',['coding_agent','code agent']],['Frontend development','前端开发',['frontend_development']],['Competitive programming','竞赛编程',['competitive programming']]]},
-    {id:'reasoning',en:'Reasoning & knowledge',zh:'推理与知识',icon:'◇',tags:['reasoning','math','knowledge','general','long_context','long context','long-context','language','comprehension','instruction_following','instruction following','structured_output','逻辑推理','知识储备','strong reasoning','深度推理'],subs:[['Reasoning','推理',['reasoning','strong reasoning','逻辑推理']],['Mathematics','数学',['math','数学','数理能力']],['Knowledge','知识',['knowledge','知识储备']],['Long context','长上下文',['long_context','long context','long-context']],['Instructions & output','指令与输出',['instruction_following','instruction following','structured_output']]]},
-    {id:'multimodal',en:'Multimodal',zh:'多模态',icon:'◫',tags:['multimodal','vision','vlm','video','video understanding','audio','audio understanding','image understanding','spatial_reasoning','spatial understanding','embodied ai','robotics','image-generation','text-to-image'],subs:[['Vision & images','视觉与图像',['vision','image understanding','image_to_text']],['Video understanding','视频理解',['video','video understanding','video-understanding']],['Audio & speech','音频与语音',['audio','audio understanding','speech_to_text']],['Spatial & embodied','空间与具身',['spatial_reasoning','spatial understanding','embodied ai','robotics']],['Image generation','图像生成',['image-generation','text-to-image','visual generation']]]},
-    {id:'science',en:'AI for science',zh:'科学智能',icon:'✳',tags:['science','ai for science','scientific reasoning','physics','biology','chemistry','scientific_agent','ai_research','engineering','科学智能'],subs:[['Scientific reasoning','科学推理',['science','scientific reasoning']],['Physics','物理',['physics']],['Biology & chemistry','生物与化学',['biology','chemistry']],['Research agents','科研 Agent',['scientific_agent','ai_research']]]},
-    {id:'applied',en:'Applied AI',zh:'行业应用',icon:'▥',tags:['healthcare','medical','health','finance','economics','legal','legal ai','business','professional','productivity','psychology','education','医学','医疗','金融','教育','法律'],subs:[['Health & medicine','医疗与健康',['healthcare','medical','health','医学','医疗']],['Finance & economics','金融与经济',['finance','economics','金融']],['Legal','法律',['legal','legal ai','legal agent']],['Work & productivity','工作与生产力',['business','professional','productivity','data_analysis']]]},
-    {id:'safety',en:'Safety & alignment',zh:'安全与对齐',icon:'◈',tags:['safety','safety alignment','security','privacy','jailbreak','factuality','factual reliability','faithfulness','hallucination','安全','安全对齐'],subs:[['Safety & security','安全',['safety','safety alignment','security']],['Factual reliability','事实可靠性',['factuality','factual reliability','faithfulness','hallucination']],['Privacy','隐私',['privacy']]]},
-    {id:'other',en:'Other research',zh:'其他研究',icon:'⋯',tags:[],subs:[]}
-  ];
   let catalog = [], filtered = [];
   const state = {field:'all', sub:'', query:'', source:'', score:'all', sort:'models', page:0, view:'list', lang:'en'};
   const pageSize = 12;
@@ -28,12 +19,19 @@
   const band = r => r.raw==null ? 'unknown' : !validPercent(r) ? 'unverified' : r.max<70 ? 'under70' : r.max<90 ? '70to90' : 'over90';
   const scoreText = r => r.raw==null ? '—' : r.unit==='percent' ? `${number(r.max)}%` : `${number(r.raw)}${r.unit==='usd'?' USD':r.unit==='elo'?' Elo':''}`;
   const fieldOf = r => fields.find(f=>f.id===state.field&&r.fields.includes(f.id)) || fields.find(f=>r.fields.includes(f.id)) || fields[fields.length-1];
+  const chromeI18n=JSON.parse(document.getElementById('chrome-i18n').textContent);
+  function translateChrome(){
+    document.querySelectorAll('[data-i18n]').forEach(el=>{const key=el.dataset.i18n;el.textContent=state.lang==='zh'?(chromeI18n[key]||key):key});
+    const toggle=$('lang-toggle');toggle.setAttribute('aria-pressed',String(state.lang==='zh'));
+    toggle.title=state.lang==='zh'?'Switch to English':'Switch to Chinese (中文)';
+    $('lang-toggle-label').textContent=state.lang==='zh'?'EN':'中';
+  }
   function readHash() {
     const p=new URLSearchParams(location.hash.slice(1));
     state.field=fields.some(f=>f.id===p.get('field'))?p.get('field'):'all';
     state.sub=p.get('sub')||'';state.query=p.get('q')||'';state.source=sourceNames[p.get('source')]?p.get('source'):'';
     state.score=['all','under70','70to90','over90','unknown','unverified'].includes(p.get('score'))?p.get('score'):'all';
-    state.sort=['models','name','date','documents'].includes(p.get('sort'))?p.get('sort'):'models';state.view=p.get('view')==='coverage'?'coverage':'list';state.lang=p.get('lang')==='zh'?'zh':'en';state.page=0;
+    state.sort=['models','name','date','documents'].includes(p.get('sort'))?p.get('sort'):'models';state.view=p.get('view')==='coverage'?'coverage':'list';state.lang=p.get('lang')==='zh'?'zh':p.has('lang')?'en':savedLanguage();state.page=0;
   }
   function saveHash() {
     const p=new URLSearchParams();
@@ -61,7 +59,9 @@
       $('field-grid').innerHTML=`<div class="domain-summary"><div><span class="summary-count">${number(scope.length)}</span><span class="summary-label">${text('Benchmark records','Benchmark 记录')}</span></div><div><span class="summary-count">${number(scored)}</span><span class="summary-label">${text('With reported scores','已有分数记录')}</span></div><div><span class="summary-count">${number(scope.length-scored)}</span><span class="summary-label">${text('No reported score','尚无分数记录')}</span></div></div>`;
     }
   }
+  function savedLanguage(){try{return localStorage.getItem("benchmark-radar:lang")==="zh"?"zh":"en"}catch{return "en"}}
   function render() {
+    translateChrome();
     root.querySelectorAll('[data-en]').forEach(el=>el.textContent=el.getAttribute(state.lang==='zh'?'data-zh':'data-en'));
     const f=fields.find(f=>f.id===state.field);const sub=f?.subs.find(s=>s[0]===state.sub);
     const fieldName=sub?(state.lang==='zh'?sub[1]:sub[0]):f?label(f):text('All research','全部领域');
@@ -102,14 +102,42 @@
     let lines='';for(let i=0;i<4;i++){const v=ymin+(ymax-ymin)*i/3;lines+=`<line x1="${l}" x2="${w-right}" y1="${y(v)}" y2="${y(v)}" stroke="#e1e6ee"/><text x="${l-7}" y="${y(v)+4}" text-anchor="end" fill="#677386" font-size="13">${number(v)}</text>`;}
     return `<svg class="history-chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="${escape(text('Reported score observations over time','各日期的已报告分数'))}"><title>${escape(r.name)} · ${text('Score observations','分数观测')}</title>${lines}<text x="${l}" y="12" fill="#677386" font-size="13">${r.unit==='percent'?'%':text('Source units','原始单位')}</text>${points.map(p=>`<circle cx="${x(p.date)}" cy="${y(p.value)}" r="3.2" fill="#657fa1" opacity=".75"><title>${escape(p.date+' · '+p.model+' · '+number(p.value))}</title></circle>`).join('')}<text x="${l}" y="${h-10}" fill="#677386" font-size="13">${points[0].date}</text><text x="${w-right}" y="${h-10}" text-anchor="end" fill="#677386" font-size="13">${points[points.length-1].date}</text></svg>`;
   }
-  function openDetail(id) {
+  function renderDetail(id) {
     const r=catalog.find(x=>x.id===id);if(!r)return;
     const history=[...r.history].sort((a,b)=>(b[0]||'').localeCompare(a[0]||''));const basis=[...new Set(history.map(h=>h[5]).filter(Boolean))];
     const modelProxy=basis.some(b=>b==='model_announcement'||b==='model_release');
     const evidence=history.map(h=>`<div class="evidence-item"><span>${escape(h[0]?.slice(0,10)||text('Undated','日期未知'))}</span><div><a href="${safeUrl(h[4])}" target="_blank" rel="noopener">${escape(h[2]||text('Unknown model','未知模型'))} ↗</a>${h[3]?`<details class="run-details"><summary>${text('Run details','运行条件')}</summary><p>${escape(h[3])}</p></details>`:''}</div><span class="evidence-score">${number(h[1])}${r.unit==='percent'?'%':''}</span></div>`).join('');
     const artifacts=r.artifacts.filter(a=>safeUrl(a.url));
-    $('detail-content').innerHTML=`<div class="detail-top"><span>${sourceNames[r.source]} · ${label(fieldOf(r))}</span><button type="button" class="close-detail" id="close-detail" aria-label="${text('Close details','关闭详情')}">×</button></div><h2 id="detail-title" class="detail-title">${escape(r.name)}</h2><p class="detail-description">${escape(r.description||text('No description recorded by this source.','这个来源尚未记录介绍。'))}</p><div class="detail-metrics"><div><strong>${scoreText(r)}</strong><span>${text('Highest reported','最高已报告分数')}</span></div><div><strong>${number(r.models)}</strong><span>${text('Scored models','有分数的模型数')}</span></div><div><strong>${number(r.docs)}</strong><span>${text('Source documents','来源文档数')}</span></div></div><h3 class="detail-section-title">${text('Reported scores over time','已报告分数随时间变化')}</h3>${chart(r)}<p class="chart-note">${text('Each dot is a reported observation. Protocols can differ; dots are not connected into a comparable trend.','每个点是一条已报告观测。测试协议可能不同，因此不连成可比趋势线。')} ${modelProxy?text('Some dates are model-release proxies, not evaluation dates.','部分日期为模型发布日期代理，不是评测日期。'):text('Dates follow source publication records.','日期按来源报告记录展示。')}</p><h3 class="detail-section-title">${text('Evidence','原始证据')} <span class="na">${number(history.length)} ${text('numeric observations','条数值观测')}</span></h3><div class="evidence-list">${evidence||r.documents.map(d=>`<div class="evidence-item"><span>${text('Document','来源文档')}</span><a href="${safeUrl(d.source_url)}" target="_blank" rel="noopener">${escape(d.title||d.document_type)} ↗</a></div>`).join('')||text('No source documents recorded.','暂无来源文档记录。')}</div><div class="detail-links">${safeUrl(r.url)?`<a href="${safeUrl(r.url)}" target="_blank" rel="noopener">${text('Open source','打开来源')} ↗</a>`:''}${artifacts.map(a=>`<a href="${safeUrl(a.url)}" target="_blank" rel="noopener">${escape(a.kind)} ↗</a>`).join('')}<a href="https://benchmark-radar.org/benchmarks/${encodeURIComponent(r.slug)}/" target="_blank" rel="noopener">${text('Original record','原站完整记录')} ↗</a></div><details class="detail-provenance"><summary>${text('Record metadata','记录信息')}</summary><p>${escape(r.id)} · ${escape(r.metric||text('Metric not recorded','未记录指标'))} · ${escape(r.direction||text('Direction unknown','方向未知'))}</p></details>`;
-    $('close-detail').addEventListener('click',()=>$('detail-dialog').close());$('detail-dialog').showModal();
+    $('detail-content').innerHTML=`<div class="detail-top"><span>${sourceNames[r.source]} · ${label(fieldOf(r))}</span><button type="button" class="close-detail" id="close-detail" aria-label="${text('Close details','关闭详情')}">×</button></div><h2 id="detail-title" class="detail-title">${escape(r.name)}</h2><p class="detail-description">${escape(r.description||text('No description recorded by this source.','这个来源尚未记录介绍。'))}</p><div class="detail-metrics"><div><strong>${scoreText(r)}</strong><span>${text('Highest reported','最高已报告分数')}</span></div><div><strong>${number(r.models)}</strong><span>${text('Scored models','有分数的模型数')}</span></div><div><strong>${number(r.docs)}</strong><span>${text('Source documents','来源文档数')}</span></div></div><h3 class="detail-section-title">${text('Reported scores over time','已报告分数随时间变化')}</h3>${chart(r)}<p class="chart-note">${text('Each dot is a reported observation. Protocols can differ; dots are not connected into a comparable trend.','每个点是一条已报告观测。测试协议可能不同，因此不连成可比趋势线。')} ${modelProxy?text('Some dates are model-release proxies, not evaluation dates.','部分日期为模型发布日期代理，不是评测日期。'):text('Dates follow source publication records.','日期按来源报告记录展示。')}</p><a class="research-detail-link" href="/saturation/?lfrontier=${encodeURIComponent(r.slug)}&field=${encodeURIComponent(state.field)}&sub=${encodeURIComponent(state.sub)}">${text('Open full score history →','查看完整分数历史 →')}</a><h3 class="detail-section-title">${text('Evidence','原始证据')} <span class="na">${number(history.length)} ${text('numeric observations','条数值观测')}</span></h3><div class="evidence-list">${evidence||r.documents.map(d=>`<div class="evidence-item"><span>${text('Document','来源文档')}</span><a href="${safeUrl(d.source_url)}" target="_blank" rel="noopener">${escape(d.title||d.document_type)} ↗</a></div>`).join('')||text('No source documents recorded.','暂无来源文档记录。')}</div><div class="detail-links">${safeUrl(r.url)?`<a href="${safeUrl(r.url)}" target="_blank" rel="noopener">${text('Open source','打开来源')} ↗</a>`:''}${artifacts.map(a=>`<a href="${safeUrl(a.url)}" target="_blank" rel="noopener">${escape(a.kind)} ↗</a>`).join('')}<a href="/benchmarks/${encodeURIComponent(r.slug)}/" target="_blank" rel="noopener">${text('Full record','完整记录')} ↗</a></div><details class="detail-provenance"><summary>${text('Record metadata','记录信息')}</summary><p>${escape(r.id)} · ${escape(r.metric||text('Metric not recorded','未记录指标'))} · ${escape(r.direction||text('Direction unknown','方向未知'))}</p></details>`;
+    $('close-detail').addEventListener('click',()=>$('detail-dialog').close());if(!$('detail-dialog').open)$('detail-dialog').showModal();
+  }
+  let detailRequest = 0;
+  async function openDetail(id) {
+    const record=catalog.find(r=>r.id===id);if(!record)return;
+    const request=++detailRequest;
+    $('detail-content').textContent=text('Loading source evidence…','正在加载来源证据…');
+    if(!$('detail-dialog').open)$('detail-dialog').showModal();
+    try {
+      if(!record.detailLoaded){
+        const response=await fetch('/data/benchmarks/'+encodeURIComponent(record.slug)+'.json');
+        if(!response.ok)throw new Error(`HTTP ${response.status}`);
+        const detail=await response.json();
+        if(detail.record?.key!==record.id)throw new Error('Record identity mismatch');
+        record.documents=detail.record.documents||[];record.artifacts=detail.record.artifacts||[];
+        record.history=Object.values(detail.scores_by_source||{}).flatMap(group=>(group.rows||[])
+          .filter(row=>Number.isFinite(row.value)).map(row=>[
+            row.reported_date,record.unit==='percent'?row.value*record.multiplier:row.value,
+            row.model_name||row.model_id,typeof row.protocol==='string'?row.protocol:row.protocol?JSON.stringify(row.protocol):null,
+            row.source_url,row.date_precision]));
+        record.detailLoaded=true;
+      }
+      if(request===detailRequest&&$('detail-dialog').open)renderDetail(id);
+    } catch(error) {
+      if(request===detailRequest){
+        $('detail-content').textContent=text('Could not load evidence. Close and retry. ','无法加载证据，请关闭后重试。 ')+error.message;
+        const close=document.createElement('button');close.textContent=text('Close','关闭');close.onclick=()=>$('detail-dialog').close();$('detail-content').append(close);
+      }
+    }
   }
   root.addEventListener('click',e=>{
     const el=e.target.closest('button');if(!el)return;
@@ -161,12 +189,22 @@
   }
   async function init() {
     try {
-      let data=JSON.parse(document.getElementById('preview-catalog').textContent);
-      if(!data){const response=await fetch('/data/explorer-preview.json');if(!response.ok)throw new Error(`HTTP ${response.status}`);data=await response.json();}
-      if(!Array.isArray(data)||!data.length)throw new Error('Invalid catalog');
-      catalog=data.map(r=>{r.tagsLower=r.tags.map(t=>t.toLowerCase());r.fields=fields.filter(f=>f.id!=='other'&&tagMatches(r,f.tags)).map(f=>f.id);if(!r.fields.length)r.fields=['other'];return r;});
+      const response=await fetch('/data/benchmark-index.json');
+      if(!response.ok)throw new Error(`HTTP ${response.status}`);
+      const payload=await response.json();
+      if(!Array.isArray(payload.benchmarks)||!payload.benchmarks.length)throw new Error('Invalid catalog');
+      catalog=payload.benchmarks.map(entry=>{
+        const score=entry.score_summary||{}, evidence=entry.evidence_summary||{};
+        const tags=entry.categories||[];
+        return {id:entry.key,slug:entry.slug,name:entry.name,aliases:entry.aliases||[],source:entry.source,
+          tags,tagsLower:tags.map(t=>t.toLowerCase()),fields:recordFields(entry),description:entry.description,
+          publisher:entry.publisher,date:entry.released,url:entry.source_url,max:score.display_max,
+          raw:score.raw_max,unit:entry.unit,direction:entry.score_direction,multiplier:score.display_multiplier||1,
+          models:evidence.model_count,docs:evidence.document_count,observations:entry.score_count,
+          history:[],documents:[],artifacts:[]};
+      });
       $('load-state').hidden=true;$('loaded-content').hidden=false;readHash();render();registerExplorerTool();
-    }catch(error){$('load-state').textContent=`Could not load the benchmark catalog. ${error.message}. Rebuild the preview data or open the bundled offline file.`;$('load-state').setAttribute('role','alert');}
+    }catch(error){$('load-state').textContent=`Could not load the benchmark catalog. ${error.message}. Please reload to retry.`;$('load-state').setAttribute('role','alert');}
   }
   init();
 })();
