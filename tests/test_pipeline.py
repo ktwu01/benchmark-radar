@@ -1240,6 +1240,76 @@ def test_simulate_backfill_excludes_items_published_after_the_simulated_date(mon
     assert titles == {"org/early"}
 
 
+def test_simulate_backfill_places_a_datacite_doi_on_its_registration_day(monkeypatch):
+    """A metadata edit must not move a DOI to a day its own window rejects.
+
+    `fetch_datacite` decides membership on `registered`, while this function
+    places an item by `updated_at or published_at`. While the connector put
+    DataCite's mutable `updated` there, a DOI registered on the 5th and edited
+    on the 20th disappeared from the 5th, the day a live run would have
+    published it, and appeared on the 20th, which the connector's own window
+    guard rejects. The real connector runs here so the two halves of that
+    contract are checked against each other rather than separately.
+    """
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: {
+            "data": [
+                {
+                    "id": "10.5281/zenodo.99001",
+                    "attributes": {
+                        "doi": "10.5281/ZENODO.99001",
+                        "titles": [{"title": "A Deposited Benchmark Dataset"}],
+                        "registered": "2026-07-05T09:00:00.000Z",
+                        "updated": "2026-07-20T10:00:00.000Z",
+                    },
+                }
+            ]
+        },
+    )
+    config = _backfill_config()
+    config["sources"]["datacite"] = {"enabled": True, "searches": ["benchmark"]}
+    dates = [datetime(2026, 7, 5, 12, tzinfo=UTC), datetime(2026, 7, 20, 12, tzinfo=UTC)]
+
+    registration_day, edit_day = simulate_backfill(config, dates)
+
+    assert [item_.source_id for item_ in registration_day.items] == ["10.5281/zenodo.99001"]
+    assert [item_.source_id for item_ in edit_day.items] == []
+
+
+def test_simulate_backfill_asks_each_source_for_the_span_it_simulates(monkeypatch):
+    """A backfilled day must not be empty because the query ran up to today.
+
+    Every backfill connector takes its upper bound from `_collection_now` and
+    returns one page of its newest matches. Called without it, each one queried
+    up to real now, so a historical span came back full of rows published this
+    week; the per-date filter discarded all of them and the rows that actually
+    belonged in the requested windows were never fetched. The day then looked
+    like a quiet day rather than an unasked question.
+    """
+    seen: dict[str, datetime] = {}
+
+    def fake_datacite(config, since, limit):
+        seen["upper"] = config["_collection_now"]
+        seen["since"] = since
+        return []
+
+    monkeypatch.setitem(
+        __import__("benchmark_radar.pipeline", fromlist=["SOURCE_FETCHERS"]).SOURCE_FETCHERS,
+        "datacite",
+        fake_datacite,
+    )
+    config = _backfill_config()
+    config["sources"]["datacite"] = {"enabled": True, "searches": ["benchmark"]}
+    dates = [datetime(2026, 7, 5, 12, tzinfo=UTC), datetime(2026, 7, 20, 12, tzinfo=UTC)]
+
+    simulate_backfill(config, dates)
+
+    # The newest day being simulated, not whenever this happens to run.
+    assert seen["upper"] == dates[-1]
+    assert seen["since"] < dates[0]
+
+
 def test_simulate_backfill_marks_arxiv_as_a_known_limitation(monkeypatch):
     monkeypatch.setitem(
         __import__("benchmark_radar.pipeline", fromlist=["SOURCE_FETCHERS"]).SOURCE_FETCHERS,
