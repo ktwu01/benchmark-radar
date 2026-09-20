@@ -198,6 +198,7 @@ def test_offline_cli_route_is_in_the_view_bar_behind_a_short_link():
     # The single command shares the citation card's copy control rather than
     # adding another clipboard handler, and its label is for screen readers only.
     assert 'copyBlock("Install", CLI_SKILL_INSTALL, "Click to copy", true)' in script
+    assert 'query && copyBlock("Agent prompt", cliAgentPrompt(query), "Click to copy")' in script
     assert 'hideLabel ? "copy-label visually-hidden" : "copy-label"' in script
 
     # The card holds no data either, so it opens before the fetch and closes on
@@ -380,7 +381,7 @@ def test_search_defaults_to_all_dates_and_explains_the_scope():
     )[0]
     assert 'state.todayDate !== "all"' in banner
     assert "totalResults > 10" in banner
-    assert 'attrs: { href: "/cli/" }' in banner
+    assert "attrs: { href: cliSearchUrl(query) }" in banner
     assert "openCli();" in banner
     assert 'text: t("Search today")' in banner
     assert "state.todayDate = state.data.latest_date;" in banner
@@ -614,6 +615,8 @@ def test_clean_route_model_migrates_legacy_urls_and_preserves_utility_background
             section("function scoreCutoff(", "function matchesScoreFilter("),
             section("function readUrl()", "// `push` adds a history entry"),
             section("function writeUrl(", "// A pushed entry changes the URL"),
+            section("function cliSearchUrl(", "function renderSearchScopeBanner("),
+            section("const CLI_SKILL_URL =", "// True only while the open card owns"),
         )
     )
     program = f"""
@@ -687,6 +690,30 @@ readUrl();
 results.forwardView = state.view;
 results.forwardQuery = state.lq;
 
+install("/?date=all&q=RSI");
+readUrl();
+results.searchLink = cliSearchUrl(state.q);
+state.cli = true;
+writeUrl("push");
+results.searchCli = {{
+  url: window.location.pathname + window.location.search,
+  background: window.history.state.benchmarkRadarUtility.backgroundUrl,
+}};
+readUrl();
+results.forwardCliSearch = {{
+  query: state.q, view: state.view, prompt: cliAgentPrompt(state.q),
+}};
+
+install("/cli/?q=RSI+%26+MMLU");
+readUrl();
+results.directCliSearch = {{ query: state.q, cli: state.cli }};
+writeUrl("replace");
+results.directCliUrl = window.location.pathname + window.location.search;
+
+install("/cli/");
+readUrl();
+results.plainCliQuery = state.q;
+
 install("/cite/");
 readUrl();
 results.directCite = {{ view: state.view, cite: state.cite }};
@@ -726,6 +753,17 @@ console.log(JSON.stringify(results));
     }
     assert routes["forwardView"] == "leaderboard"
     assert routes["forwardQuery"] == "agent"
+    assert routes["searchLink"] == "/cli/?q=RSI"
+    assert routes["searchCli"] == {
+        "url": "/cli/?q=RSI",
+        "background": "/?date=all&q=RSI",
+    }
+    assert routes["forwardCliSearch"]["query"] == "RSI"
+    assert routes["forwardCliSearch"]["view"] == "today"
+    assert 'Then search for "RSI" using this CLI and Skill.' in routes["forwardCliSearch"]["prompt"]
+    assert routes["directCliSearch"] == {"query": "RSI & MMLU", "cli": True}
+    assert routes["directCliUrl"] == "/cli/?q=RSI+%26+MMLU"
+    assert routes["plainCliQuery"] == ""
     assert routes["directCite"] == {"view": "today", "cite": True}
 
 
