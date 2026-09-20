@@ -12,6 +12,7 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from . import rubric
 from .attention import fetch_attention_feeds
+from .benchmark_attention import collect_benchmark_attention
 from .corpus import exact_artifact_keys
 from .models import RadarItem, RadarRun, SourceHealth
 from .sources import FUTURE_TIMESTAMP_TOLERANCE, SOURCE_FETCHERS, collection_method
@@ -763,6 +764,7 @@ def run_pipeline(
     now: datetime | None = None,
     *,
     previous_snapshot: dict[str, Any] | None = None,
+    snapshots: list[dict[str, Any]] | None = None,
 ) -> RadarRun:
     now = now or datetime.now(UTC)
     settings = config["radar"]
@@ -865,6 +867,23 @@ def run_pipeline(
         previous_observations=((previous_snapshot or {}).get("attention") or {}).get("observations")
         or [],
     )
+    # Ranking signals are observed for every release still inside the
+    # leaderboard's widest window, not only today's, so the counters of a
+    # three-week-old release keep moving. The history is the committed
+    # snapshots; a caller that only has the previous day's file still gets
+    # that day's releases observed.
+    history = snapshots if snapshots is not None else [previous_snapshot or {}]
+    attention_items = [
+        *(item for snapshot in history for item in snapshot.get("evidence_items") or []),
+        *(item.to_dict() for item in published),
+    ]
+    benchmark_attention, benchmark_attention_health = collect_benchmark_attention(
+        config.get("benchmark_attention") or {},
+        attention_items,
+        observed_at=now,
+        previous_block=(previous_snapshot or {}).get("benchmark_attention"),
+    )
+    attention_health = [*attention_health, *benchmark_attention_health]
     previous_streaks = ((previous_snapshot or {}).get("discovery_state") or {}).get(
         "source_failure_streaks"
     ) or {}
@@ -899,4 +918,5 @@ def run_pipeline(
             "attention": attention_state,
             "source_failure_streaks": failure_streaks,
         },
+        benchmark_attention=benchmark_attention,
     )
