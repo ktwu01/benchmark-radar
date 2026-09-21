@@ -8624,8 +8624,9 @@ function openCite(updateUrl = true) {
   showModalDialog(dialog);
 }
 
-// Keep the setup guide URL in the handoff prompt so a coding agent follows the
-// same consumer Skill the plain /cli/ page points to.
+// The consumer Skill owns setup end to end (48413f8); do not duplicate its
+// steps in page copy. This query-only prompt points to the Skill and passes on
+// the reader's current search request for issue #487.
 const CLI_SKILL_URL =
   "https://github.com/ktwu01/benchmark-radar/blob/main/skills/benchmark-radar/SKILL.md";
 const CLI_SKILL_INSTALL = "npx skills add ktwu01/benchmark-radar";
