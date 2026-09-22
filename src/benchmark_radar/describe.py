@@ -16,6 +16,9 @@ available" rather than substituting a filler sentence.
 from __future__ import annotations
 
 import re
+from collections import defaultdict
+from collections.abc import Iterable
+from datetime import datetime
 from typing import Any
 
 # Card text arrives as rendered markdown: tabs, collapsed headings, badge alt
@@ -78,6 +81,68 @@ def strip_title_echo(text: str, title: str) -> str:
     return "" if _echoes_title(trimmed, title) or not trimmed else trimmed
 
 
+# A Hub Space template ships a filled-in `short_description`, and a Space
+# started from one keeps that line until its maintainer rewrites it. The text
+# describes the template rather than the repo, so it fails the same test as a
+# generated summary even when it arrives as genuine upstream text.
+TEMPLATE_DESCRIPTIONS = frozenset(
+    {
+        # gradio-templates/leaderboard, and every leaderboard duplicated from it
+        "duplicate this leaderboard to initialize your own!",
+        # the Streamlit Space template's placeholder card
+        "streamlit template space",
+    }
+)
+
+# Two owners are enough to call a line inherited rather than authored: the same
+# sentence cannot be specific to repos that have nothing but a template parent
+# in common.
+SHARED_DESCRIPTION_OWNERS = 2
+
+
+def is_template_description(text: str | None) -> bool:
+    """True when the text is Hub template scaffolding rather than a description."""
+    return (text or "").strip().casefold() in TEMPLATE_DESCRIPTIONS
+
+
+def inherited_short_descriptions(
+    entries: Iterable[tuple[str, str, datetime | None]],
+    *,
+    min_owners: int = SHARED_DESCRIPTION_OWNERS,
+) -> frozenset[str]:
+    """Return the repo ids whose one-line card came from a parent, not its owner.
+
+    Duplicating a Space copies its `short_description`, so the parent's line
+    reappears verbatim on a child that it says nothing about. The sharing is not
+    symmetric: the owner who created the earliest repo carrying the line wrote
+    it and keeps it, while a later owner carrying it verbatim duplicated the
+    parent. Keying the author by owner rather than by repo also leaves one
+    maintainer's matched dataset and leaderboard pair intact, since one owner
+    describing two halves of their own artifact with one sentence wrote that
+    sentence.
+
+    Each text must be the line as the Hub published it, before any rendering
+    this module does: two owners whose different cards happen to render alike
+    copied nothing. A repo with no creation date cannot be placed on either
+    side of the order, so it neither claims authorship nor loses its line.
+    """
+    copies: dict[str, list[tuple[datetime, str]]] = defaultdict(list)
+    for repo_id, text, created in entries:
+        normalized = text.strip().casefold()
+        if normalized and created is not None:
+            copies[normalized].append((created, repo_id))
+    inherited: set[str] = set()
+    for group in copies.values():
+        owner = lambda repo_id: repo_id.split("/", 1)[0].casefold()  # noqa: E731
+        if len({owner(repo_id) for _, repo_id in group}) < min_owners:
+            continue
+        # The repo id breaks a timestamp tie so the choice is reproducible.
+        group.sort()
+        author = owner(group[0][1])
+        inherited.update(repo_id for _, repo_id in group if owner(repo_id) != author)
+    return frozenset(inherited)
+
+
 def huggingface_summary(row: dict[str, Any], title: str) -> str:
     """Describe a Hugging Face repo using only what its maintainer published.
 
@@ -93,7 +158,8 @@ def huggingface_summary(row: dict[str, Any], title: str) -> str:
     # text, so using it preserves the no-generated-summary rule.
     card_data = row.get("cardData") or {}
     if isinstance(card_data, dict):
-        return strip_title_echo(clean_card_text(card_data.get("short_description")), title)
+        short = strip_title_echo(clean_card_text(card_data.get("short_description")), title)
+        return "" if is_template_description(short) else short
     return ""
 
 
