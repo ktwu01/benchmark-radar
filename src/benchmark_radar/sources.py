@@ -12,7 +12,13 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin
 
-from .describe import clean_card_text, github_summary, huggingface_summary
+from .describe import (
+    clean_card_text,
+    github_summary,
+    huggingface_summary,
+    inherited_short_descriptions,
+    strip_title_echo,
+)
 from .http import get_json, get_text
 from .models import RadarItem
 from .priority_organizations import load_priority_github_organizations
@@ -491,6 +497,7 @@ def fetch_huggingface(config: dict[str, Any], since: datetime, limit: int) -> li
                     raw=row,
                     parser_version="huggingface-hub/1",
                 )
+    _clear_inherited_short_descriptions(found.values())
     # `limit` is applied per request, and this fetcher issues one per kind per
     # search, so the union could reach kinds x searches x limit. Trimming to the
     # most recently changed keeps the source's reported count comparable with
@@ -498,6 +505,48 @@ def fetch_huggingface(config: dict[str, Any], since: datetime, limit: int) -> li
     return sorted(
         found.values(), key=lambda item: item.updated_at or item.published_at, reverse=True
     )[:limit]
+
+
+def _clear_inherited_short_descriptions(items: Iterable[RadarItem]) -> None:
+    """Blank a one-line card that an earlier owner's repo published first.
+
+    Only summaries that fell back to `cardData.short_description` are eligible:
+    a repo whose card has real prose described itself, while a Space duplicated
+    from a popular parent inherits the parent's line and would otherwise publish
+    it as its own. Blanking leaves "" for "no description available", which is
+    what a repo that shipped no card of its own already reports.
+    """
+    candidates = [item for item in items if item.summary and not _has_card_prose(item)]
+    inherited = inherited_short_descriptions(
+        (item.source_id, _short_description(item), _created_at(item)) for item in candidates
+    )
+    for item in candidates:
+        if item.source_id in inherited:
+            item.summary = ""
+
+
+def _has_card_prose(item: RadarItem) -> bool:
+    """True when the card body survives the same reduction `huggingface_summary` applies.
+
+    A body that is only the repo's own name reduces to nothing there and the
+    summary falls back to the one-line card, so reading the raw field alone
+    would exempt those repos from the check they need.
+    """
+    row = item.raw or {}
+    return bool(strip_title_echo(clean_card_text(row.get("description")), item.source_id))
+
+
+def _short_description(item: RadarItem) -> str:
+    """The one-line card as the Hub published it, before any local rendering."""
+    card_data = (item.raw or {}).get("cardData")
+    if not isinstance(card_data, dict):
+        return ""
+    return str(card_data.get("short_description") or "")
+
+
+def _created_at(item: RadarItem) -> datetime | None:
+    """The row's own creation date. `published_at` falls back to the update time."""
+    return _optional_date((item.raw or {}).get("createdAt"))
 
 
 def fetch_github(config: dict[str, Any], since: datetime, limit: int) -> list[RadarItem]:

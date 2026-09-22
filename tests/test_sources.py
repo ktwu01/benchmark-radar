@@ -2045,6 +2045,141 @@ def test_huggingface_rejects_a_future_creation_date_even_when_modified_now(monke
     assert config["_future_rejections"] == 1
 
 
+def test_huggingface_drops_a_short_description_a_later_owner_inherited(monkeypatch):
+    """A duplicated Space keeps its parent's one-line card, so the same sentence
+    lands on a repo it says nothing about. The parent that published it keeps it."""
+    shared = "Build datasets using natural language"
+
+    def fake_get_json(url, params):
+        return [
+            {
+                "id": "argilla/synthetic-data-generator",
+                "createdAt": "2026-07-01T12:00:00Z",
+                "lastModified": "2026-07-27T12:00:00Z",
+                "cardData": {"short_description": shared},
+            },
+            {
+                "id": "tingao/synthetic-data-generator",
+                "createdAt": "2026-07-26T12:00:00Z",
+                "lastModified": "2026-07-27T12:00:00Z",
+                "cardData": {"short_description": shared},
+            },
+            {
+                "id": "vLAR/PhysInOne",
+                "createdAt": "2026-07-27T12:00:00Z",
+                "lastModified": "2026-07-27T12:00:00Z",
+                "cardData": {"short_description": "Physical reasoning scored on 12 tasks."},
+            },
+        ]
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+
+    items = fetch_huggingface(
+        {"kinds": ["spaces"], "searches": ["benchmark"]},
+        datetime(2026, 7, 26, tzinfo=UTC),
+        10,
+    )
+
+    summaries = {item.source_id: item.summary for item in items}
+    assert summaries["argilla/synthetic-data-generator"] == shared
+    assert summaries["tingao/synthetic-data-generator"] == ""
+    assert summaries["vLAR/PhysInOne"] == "Physical reasoning scored on 12 tasks."
+
+
+def test_huggingface_checks_a_card_body_that_only_echoes_the_repo_name(monkeypatch):
+    """A body of just the repo heading reduces to nothing, so the summary falls
+    back to the one-line card and must still face the inherited-line check."""
+    shared = "Duplicate this evaluation harness to initialize your own"
+
+    def fake_get_json(url, params):
+        return [
+            {
+                "id": "harness-templates/harness",
+                "createdAt": "2026-07-01T12:00:00Z",
+                "lastModified": "2026-07-27T12:00:00Z",
+                "description": "# harness",
+                "cardData": {"short_description": shared},
+            },
+            {
+                "id": "copycat/harness",
+                "createdAt": "2026-07-26T12:00:00Z",
+                "lastModified": "2026-07-27T12:00:00Z",
+                "description": "# harness",
+                "cardData": {"short_description": shared},
+            },
+        ]
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+
+    items = fetch_huggingface(
+        {"kinds": ["spaces"], "searches": ["benchmark"]},
+        datetime(2026, 7, 26, tzinfo=UTC),
+        10,
+    )
+
+    summaries = {item.source_id: item.summary for item in items}
+    assert summaries["harness-templates/harness"] == shared
+    assert summaries["copycat/harness"] == ""
+
+
+def test_huggingface_reads_copying_from_the_published_line_not_the_rendered_one(monkeypatch):
+    """Two cards that differ upstream and only render alike after each repo's
+    own name is stripped copied nothing from each other."""
+
+    def fake_get_json(url, params):
+        return [
+            {
+                "id": "alpha-lab/alpha",
+                "createdAt": "2026-07-01T12:00:00Z",
+                "lastModified": "2026-07-27T12:00:00Z",
+                "cardData": {"short_description": "alpha: A reasoning benchmark."},
+            },
+            {
+                "id": "beta-lab/beta",
+                "createdAt": "2026-07-26T12:00:00Z",
+                "lastModified": "2026-07-27T12:00:00Z",
+                "cardData": {"short_description": "beta: A reasoning benchmark."},
+            },
+        ]
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+
+    items = fetch_huggingface(
+        {"kinds": ["spaces"], "searches": ["benchmark"]},
+        datetime(2026, 7, 26, tzinfo=UTC),
+        10,
+    )
+
+    assert {item.summary for item in items} == {"A reasoning benchmark."}
+
+
+def test_huggingface_keeps_card_prose_two_owners_both_published(monkeypatch):
+    """The cross-owner rule reads the one-line card only. A mirrored card body is
+    upstream prose about the artifact and stays on both copies."""
+    abstract = "MUSSEL scores splice-site callers against a curated truth set."
+
+    def fake_get_json(url, params):
+        return [
+            {
+                "id": f"{owner}/sc-splicing-benchmark",
+                "createdAt": "2026-07-27T12:00:00Z",
+                "lastModified": "2026-07-27T12:00:00Z",
+                "description": abstract,
+            }
+            for owner in ("depinwang", "mirror-lab")
+        ]
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+
+    items = fetch_huggingface(
+        {"kinds": ["datasets"], "searches": ["benchmark"]},
+        datetime(2026, 7, 26, tzinfo=UTC),
+        10,
+    )
+
+    assert [item.summary for item in items] == [abstract, abstract]
+
+
 def _item(parser_version: str) -> RadarItem:
     return RadarItem(
         source="arXiv",
