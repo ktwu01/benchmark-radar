@@ -11,6 +11,7 @@ from benchmark_radar.pipeline import _score_and_select, score_item
 from benchmark_radar.sources import (
     GITHUB_RELEASE_PARSER_VERSION,
     ConnectorPayloadError,
+    collapse_batch_deposits,
     collection_method,
     fetch_arxiv,
     fetch_brave,
@@ -853,6 +854,146 @@ def test_zenodo_records_preserve_doi_and_upstream_metadata(monkeypatch):
     assert items[0].authors == ["Zenodo Author"]
     assert items[0].artifact_urls == ["https://doi.org/10.5281/zenodo.12345"]
     assert items[0].metrics == {"downloads": 13.0, "views": 21.0}
+
+
+def _deposit(recid: str, title: str, description: str, creators: list[str], day: int) -> dict:
+    return {
+        "recid": recid,
+        "doi_url": f"https://doi.org/10.5281/zenodo.{recid}",
+        "updated": f"2026-07-{day:02d}T12:00:00Z",
+        "stats": {"downloads": 1, "views": 2},
+        "links": {"self_html": f"https://zenodo.org/records/{recid}"},
+        "metadata": {
+            "title": title,
+            "publication_date": f"2026-07-{day:02d}",
+            "description": description,
+            "creators": [{"name": name} for name in creators],
+        },
+    }
+
+
+def test_zenodo_collapses_the_files_of_one_archive_into_one_record(monkeypatch):
+    """Regression: one depositor archived each file of a dataset as its own
+    record with one description between them, so 16 near-identical findings
+    reached the report and failed the run's templated-description check."""
+    shared = "This deposit archives the raw data behind the gujrolls2019 table."
+    payload = {
+        "hits": {
+            "hits": [
+                _deposit(f"228859{index:02d}", f"gujrolls2019-{index}", shared, ["R. Susewind"], 22)
+                for index in range(40, 60)
+            ]
+        }
+    }
+    monkeypatch.setattr("benchmark_radar.sources.get_json", lambda url, **kwargs: payload)
+
+    items = fetch_zenodo_records(
+        {"searches": ["benchmark dataset"], "max_requests": 1},
+        datetime(2026, 7, 20, tzinfo=UTC),
+        50,
+    )
+
+    # The earliest record id wins the same-day tie, so the survivor is stable
+    # across runs rather than tracking whichever file was uploaded last.
+    assert [item.source_id for item in items] == ["22885940"]
+    assert items[0].summary == shared
+    assert items[0].rationale == [
+        "One of 20 files this depositor archived together under one description"
+    ]
+
+
+def test_zenodo_keeps_deposits_two_depositors_described_the_same_way(monkeypatch):
+    """A description is only evidence of one archive when one depositor wrote
+    it. Two groups reaching for the same sentence published two artifacts."""
+    shared = "A benchmark dataset for evaluating retrieval."
+    payload = {
+        "hits": {
+            "hits": [
+                _deposit("111", "Alpha Benchmark", shared, ["Alpha Lab"], 21),
+                _deposit("222", "Beta Benchmark", shared, ["Beta Lab"], 22),
+            ]
+        }
+    }
+    monkeypatch.setattr("benchmark_radar.sources.get_json", lambda url, **kwargs: payload)
+
+    items = fetch_zenodo_records(
+        {"searches": ["benchmark dataset"], "max_requests": 1},
+        datetime(2026, 7, 20, tzinfo=UTC),
+        10,
+    )
+
+    assert sorted(item.source_id for item in items) == ["111", "222"]
+    assert all(item.rationale == [] for item in items)
+
+
+def test_zenodo_keeps_one_depositors_separately_described_deposits(monkeypatch):
+    """A lab that wrote a description per deposit described separate artifacts,
+    however many it uploads, so nothing collapses."""
+    payload = {
+        "hits": {
+            "hits": [
+                _deposit("333", "Reasoning Suite", "Scores reasoning.", ["One Lab"], 21),
+                _deposit("444", "Retrieval Suite", "Scores retrieval.", ["One Lab"], 22),
+            ]
+        }
+    }
+    monkeypatch.setattr("benchmark_radar.sources.get_json", lambda url, **kwargs: payload)
+
+    items = fetch_zenodo_records(
+        {"searches": ["benchmark dataset"], "max_requests": 1},
+        datetime(2026, 7, 20, tzinfo=UTC),
+        10,
+    )
+
+    assert sorted(item.source_id for item in items) == ["333", "444"]
+
+
+def test_zenodo_keeps_every_deposit_that_published_no_description(monkeypatch):
+    """An absent description says nothing about what a record contains, so it
+    cannot be the evidence that two records are the same archive."""
+    payload = {
+        "hits": {
+            "hits": [
+                _deposit("555", "Bare Deposit One", "", ["One Lab"], 21),
+                _deposit("666", "Bare Deposit Two", "", ["One Lab"], 22),
+            ]
+        }
+    }
+    monkeypatch.setattr("benchmark_radar.sources.get_json", lambda url, **kwargs: payload)
+
+    items = fetch_zenodo_records(
+        {"searches": ["benchmark dataset"], "max_requests": 1},
+        datetime(2026, 7, 20, tzinfo=UTC),
+        10,
+    )
+
+    assert sorted(item.source_id for item in items) == ["555", "666"]
+
+
+def test_collapse_batch_deposits_prefers_the_earliest_publication_date():
+    """The record id only breaks a tie. A batch spanning days keeps the first
+    deposit, not the lowest id."""
+    shared = "One description across two files."
+    late = RadarItem(
+        source="Zenodo",
+        source_id="100",
+        title="Archive part two",
+        url="https://zenodo.org/records/100",
+        published_at=datetime(2026, 7, 22, tzinfo=UTC),
+        summary=shared,
+        authors=["One Lab"],
+    )
+    early = RadarItem(
+        source="Zenodo",
+        source_id="999",
+        title="Archive part one",
+        url="https://zenodo.org/records/999",
+        published_at=datetime(2026, 7, 21, tzinfo=UTC),
+        summary=shared,
+        authors=["One Lab"],
+    )
+
+    assert [item.source_id for item in collapse_batch_deposits([late, early])] == ["999"]
 
 
 def test_crossref_preserves_doi_metadata_and_bounds_the_query(monkeypatch):

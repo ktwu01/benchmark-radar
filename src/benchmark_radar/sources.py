@@ -4,6 +4,8 @@ import os
 import re
 import time
 import xml.etree.ElementTree as ET
+from collections import defaultdict
+from collections.abc import Iterable
 from datetime import UTC, datetime, timedelta
 from email.utils import parsedate_to_datetime
 from pathlib import Path
@@ -910,8 +912,61 @@ def fetch_zenodo_records(
                 parser_version="zenodo-records/1",
             )
     return sorted(
-        found.values(), key=lambda item: item.updated_at or item.published_at, reverse=True
+        collapse_batch_deposits(found.values()),
+        key=lambda item: item.updated_at or item.published_at,
+        reverse=True,
     )[:limit]
+
+
+def collapse_batch_deposits(items: Iterable[RadarItem]) -> list[RadarItem]:
+    """Keep one record per batch of sibling deposits that share a description.
+
+    Zenodo mints a separate record, concept and DOI for every file an uploader
+    archives, so a dataset split across dozens of files arrives as dozens of
+    records carrying one description between them. Nothing in `deduplicate`
+    joins them: the titles are distinct (`gujrolls2019-58`, `gujrolls2019-59`),
+    and so are the DOIs and URLs it keys on. They reached `published` as dozens
+    of separate findings and tripped `assert_no_boilerplate_summaries`, which
+    reads a description repeated across records as templated text.
+
+    A batch is one creator list plus one description. Both halves are required:
+    the shared description alone would collapse two groups that happen to
+    describe their work in the same words, and the shared creator list alone
+    would collapse a lab's genuinely separate deposits. Together they identify
+    files of one archive, because a creator who writes one description for two
+    deposits is describing one artifact deposited in parts.
+
+    The earliest publication date wins, with the record id breaking a tie so
+    the choice is reproducible. A record with no description is never batched:
+    the fetcher already publishes those as "no description available", and
+    grouping on empty text would collapse an uploader's unrelated deposits.
+
+    The survivor keeps its own download and view counts rather than absorbing
+    its siblings'. Each record in the batch was scored on its own before this
+    collapsed them, so summing them now would report one file's adoption as the
+    whole archive's and raise the score the pre-collapse feed gave it.
+    """
+    batches: dict[tuple[str, str], list[tuple[datetime, str, RadarItem]]] = defaultdict(list)
+    kept: list[RadarItem] = []
+    for item in items:
+        description = item.summary.strip().casefold()
+        if not description:
+            kept.append(item)
+            continue
+        creators = "\x1f".join(name.casefold() for name in item.authors)
+        batches[(creators, description)].append((item.published_at, item.source_id, item))
+    for batch in batches.values():
+        batch.sort(key=lambda entry: (entry[0], entry[1]))
+        survivor = batch[0][2]
+        if len(batch) > 1:
+            # The reader sees one finding where the source published many. Say
+            # so on the record, so the count is explained where it is read
+            # rather than only in this connector.
+            survivor.rationale.append(
+                f"One of {len(batch)} files this depositor archived together under one description"
+            )
+        kept.append(survivor)
+    return kept
 
 
 def _crossref_date(value: Any) -> datetime | None:
