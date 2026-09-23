@@ -34,6 +34,7 @@ from .site_shell import SOURCE_LABELS, website_reference
 
 DEFAULT_SHARD_DIR = Path("site/data/benchmarks")
 DEFAULT_PAGES_DIR = Path("site/benchmarks")
+SITE_SOURCE_DIR = Path(__file__).resolve().parents[2] / "site"
 
 # Lowercase, digits, and the two separators the shard writers use. Nothing
 # else has ever appeared in a slug, and nothing else is safe in a URL.
@@ -742,11 +743,13 @@ def write_benchmark_pages(
 
     from .blog_shell import chrome_i18n_table, extract_site_chrome
 
-    dashboard_path = Path("site/index.html")
+    dashboard_path = SITE_SOURCE_DIR / "index.html"
     chrome = extract_site_chrome(
         dashboard_path.read_text(encoding="utf-8"), active_path="/research/"
     )
-    translations = chrome_i18n_table(chrome, Path("site/assets/app.js").read_text(encoding="utf-8"))
+    translations = chrome_i18n_table(
+        chrome, (SITE_SOURCE_DIR / "assets/app.js").read_text(encoding="utf-8")
+    )
     header = (
         chrome.header
         + '<script id="chrome-i18n" type="application/json">'

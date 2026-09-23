@@ -92,6 +92,15 @@ def test_writes_one_page_per_shard_plus_directory(tmp_path):
     assert (output / "index.html").exists()
 
 
+def test_pages_build_when_invoked_outside_repository(tmp_path, monkeypatch):
+    # Callers selecting a custom shard/output directory cannot rely on the shell's cwd.
+    shard_dir = _write_shards(tmp_path, _shard("alpha-bench", "Alpha Bench"))
+    output = tmp_path / "pages"
+    monkeypatch.chdir(tmp_path)
+    write_benchmark_pages(shard_dir, output)
+    assert "Alpha Bench" in _page_text(output, "alpha-bench")
+
+
 def test_output_is_byte_deterministic(tmp_path):
     shard_dir = _write_shards(tmp_path, _shard("alpha-bench", "Alpha Bench"))
     first = tmp_path / "first"
