@@ -214,7 +214,7 @@
   #radar-explorer #detail-dialog { width: calc(100% - 32px); max-width: 820px; padding: 0; }
   #detail-content { padding: 24px; }
   .detail-metrics strong { font: 600 24px/32px var(--body); color: var(--ink); }
-  .detail-metrics span, .detail-top, .detail-provenance { font-size: 13px; }
+  .detail-metrics span, .detail-top { font-size: 13px; }
   .detail-description { font-size: 16px; line-height: 26px; }
 
   /* Analysis views. All foregrounds change with the light panel. */
@@ -528,7 +528,6 @@
   #radar-explorer .detail-section-title { margin: var(--space-6) 0 var(--space-3); }
   #radar-explorer .chart-note { margin: var(--space-3) 0 var(--space-6); }
   #radar-explorer .detail-links { gap: var(--space-2); margin-top: var(--space-6); }
-  #radar-explorer .detail-provenance { margin-top: var(--space-4); }
   .dialog-close, .close-detail { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 44px; padding: 0; line-height: 1; }
 }
 @layer responsive {
