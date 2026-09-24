@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "method_version": "attention-ranking-v1",
+  "generated_at": "2026-09-10T09:00:00+00:00",
+  "default_window": "30d",
+  "windows": {
+    "7d": {
+      "window_start": "2026-09-03T09:00:00+00:00",
+      "window_end": "2026-09-10T09:00:00+00:00",
+      "window_days": 7,
+      "ranked_count": 0,
+      "total_cohort_count": 0,
+      "signal_coverage": 0.0,
+      "entries": []
+    },
+    "30d": {
+      "window_start": "2026-08-11T09:00:00+00:00",
+      "window_end": "2026-09-10T23:30:00-05:00",
+      "window_days": 30,
+      "ranked_count": 1,
+      "total_cohort_count": 2,
+      "signal_coverage": 0.5,
+      "entries": [
+        {
+          "canonical_artifact_id": "artifact:github:org/bench",
+          "name": "Bench <Agents> & \"Tools\"",
+          "purpose": "Evaluates tool-using agents on long-horizon tasks.",
+          "release_date": "2026-09-01T00:00:00+00:00",
+          "score": 87,
+          "coverage": 0.85,
+          "confidence": "High",
+          "status": "ranked",
+          "rank": 1,
+          "components": {
+            "github_stars": {
+              "value": 1204,
+              "normalized": 1.0,
+              "weight": 0.55,
+              "status": "fresh",
+              "source_url": "https://github.com/org/bench?tab=readme&x=1"
+            },
+            "hf_paper_upvotes": {
+              "value": 33,
+              "normalized": 0.9,
+              "weight": 0.3,
+              "status": "stale",
+              "source_url": "HTTPS://HuggingFace.co/papers/2609.01234",
+              "last_successful_date": "2026-09-08"
+            },
+            "hf_dataset_downloads": {
+              "value": null,
+              "normalized": null,
+              "weight": 0.15,
+              "status": "unavailable",
+              "source_url": "https://huggingface.co/datasets/org/bench-data"
+            }
+          }
+        },
+        {
+          "canonical_artifact_id": "artifact:arxiv:2609.02222",
+          "name": "Quiet",
+          "purpose": "",
+          "release_date": "2026-08-20T23:00:00-05:00",
+          "score": null,
+          "coverage": 0.0,
+          "confidence": "Low",
+          "status": "limited_signals",
+          "rank": null,
+          "components": {
+            "github_stars": {
+              "value": null,
+              "normalized": null,
+              "weight": 0.55,
+              "status": "unknown",
+              "source_url": null
+            },
+            "hf_paper_upvotes": {
+              "value": null,
+              "normalized": null,
+              "weight": 0.3,
+              "status": "unknown",
+              "source_url": "javascript:alert(1)"
+            },
+            "hf_dataset_downloads": {
+              "value": 420,
+              "normalized": null,
+              "weight": 0.15,
+              "status": "unknown",
+              "source_url": "https://huggingface.co/datasets/org/quiet",
+              "last_successful_date": "2026-08-30"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
