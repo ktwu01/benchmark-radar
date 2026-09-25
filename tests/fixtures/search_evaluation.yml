@@ -161,7 +161,7 @@ queries:
     intent: Detect whether the Catalog gains a full lexical match for this missing task.
     scope: catalog
     relevant_keys: []
-    expected_partial_keys: []
+    expected_partial_keys: ["claire-radar:2608.24954"]
 
   - id: gap-stock-prediction
     kind: catalog_gap

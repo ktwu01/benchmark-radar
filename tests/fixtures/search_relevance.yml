@@ -46,9 +46,9 @@ cases:
     query: weather forecasting
     scope: catalog
     kind: catalog_gap
-    expected_status: no_lexical_candidates
-    minimum_candidates: 0
-    must_include_candidates: []
+    expected_status: partial_candidates_only
+    minimum_candidates: 1
+    must_include_candidates: [AFDBench]
 
   - id: stock-prediction
     query: stock prediction

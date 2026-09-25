@@ -42,6 +42,7 @@ ARTIFICIAL_ANALYSIS_KEY_PREFIX = "artificial-analysis"
 SOURCES = {
     LLM_STATS_SNAPSHOT_ID: (LLM_STATS_SOURCE, LLM_STATS_KEY_PREFIX),
     ARTIFICIAL_ANALYSIS_SNAPSHOT_ID: (ARTIFICIAL_ANALYSIS_SOURCE, ARTIFICIAL_ANALYSIS_KEY_PREFIX),
+    "claire_radar_2026-09-25": ("claire_radar", "claire-radar"),
 }
 
 _SLUG_STRIP = re.compile(r"[^a-z0-9]+")
@@ -183,6 +184,31 @@ def _source_record(
 ) -> dict[str, Any]:
     source_id = row["benchmark_id"].strip()
     description = (row.get("description") or "").strip()
+    artifacts = []
+    for kind, column in (
+        ("paper", "paper_url"),
+        ("repo", "repo_url"),
+        ("dataset", "dataset_url"),
+        ("website", "project_url"),
+    ):
+        url = (row.get(column) or "").strip()
+        if url and {"kind": kind, "url": url} not in artifacts:
+            artifacts.append({"kind": kind, "url": url})
+    provenance = {
+        "source_url": (row.get("detail_source_url") or "").strip() or None,
+        "crawled_at": crawled_at,
+        "crawl_bundle": snapshot_id,
+    }
+    optional_provenance = {
+        "origin_source": (row.get("origin_source") or "").strip(),
+        "origin_record_id": (row.get("origin_record_id") or "").strip(),
+        "review_state": (row.get("review_state") or "").strip(),
+        "reviewed_at": (row.get("reviewed_at") or "").strip(),
+        "review_model": (row.get("review_model") or "").strip(),
+        "admission_policy_version": (row.get("admission_policy_version") or "").strip(),
+        "record_sha256": (row.get("record_sha256") or "").strip(),
+    }
+    provenance.update({key: value for key, value in optional_provenance.items() if value})
     return {
         "key": f"{key_prefix}:{source_id}",
         "slug": slug,
@@ -191,10 +217,10 @@ def _source_record(
         "source_benchmark_id": source_id,
         "name": (row.get("name") or "").strip() or source_id,
         "description": {"en": description} if description else {},
-        # Everything below is empty because the source carries no such field.
+        # Optional source fields stay optional; unknown values remain unknown.
         # See the module docstring: these are answers, not gaps.
         "publisher": None,
-        "artifacts": [],
+        "artifacts": artifacts,
         "openness": {
             "status": "unknown",
             "code_license": None,
@@ -202,14 +228,10 @@ def _source_record(
             "evidence": [],
         },
         "sizes": [],
-        "released": None,
+        "released": (row.get("released") or "").strip() or None,
         "modality": (row.get("modality") or "").strip() or None,
         "categories": json_list(row.get("categories", "")),
-        "provenance": {
-            "source_url": (row.get("detail_source_url") or "").strip() or None,
-            "crawled_at": crawled_at,
-            "crawl_bundle": snapshot_id,
-        },
+        "provenance": provenance,
     }
 
 

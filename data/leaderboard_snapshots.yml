@@ -131,3 +131,21 @@ snapshots:
       organization: organization_name
       rank: rank
       score: benchmark_score
+
+  - id: claire_radar_2026-09-25
+    source: Claire Radar
+    source_url: https://github.com/Claire1217/benchmark-radar
+    crawled_at: "2026-09-25T04:40:22Z"
+    description: >-
+      Immutable export of 477 benchmark records accepted by the Claire Radar
+      review queue. The export includes only ai-reviewed records marked display
+      eligible and two earlier source-reviewed records. Deferred records are
+      excluded. Exact source ids are retained; similar names are not merged.
+    benchmark_file: leaderboard_snapshots/claire_radar_benchmarks_2026-09-25.csv
+    benchmark_count: 477
+    benchmark_columns:
+      benchmark_id: benchmark_id
+      benchmark_name: name
+    columns:
+      benchmark_id: benchmark_id
+      benchmark_name: name
