@@ -297,6 +297,17 @@ def test_loader_rejects_a_file_whose_row_count_drifted(tmp_path: Path) -> None:
         load_snapshots(write_registry(tmp_path, rows=2))
 
 
+def test_loader_rejects_a_file_whose_declared_hash_drifted(tmp_path: Path) -> None:
+    """A same-length edit must not pass merely because its row count is stable."""
+    registry = write_registry(tmp_path, rows=3)
+    document = yaml.safe_load(registry.read_text(encoding="utf-8"))
+    document["snapshots"][0]["benchmark_sha256"] = "0" * 64
+    registry.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+
+    with pytest.raises(LeaderboardSnapshotError, match="SHA-256 mismatch"):
+        load_snapshots(registry)
+
+
 def test_opencompass_normalizes_and_cleans_licences() -> None:
     """NOASSERTION is the absence of an identification, not a licence."""
     from benchmark_radar.catalog_opencompass import normalize_opencompass

@@ -32,7 +32,9 @@ only the ingest contract remains. Records are now addressed by their own
 from __future__ import annotations
 
 import csv
+import hashlib
 import math
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -89,6 +91,22 @@ def _require_column(header: list[str], column: str, *, path: Path, label: str) -
         raise LeaderboardSnapshotError(f"{path}: {label} column {column!r} missing from header")
 
 
+def _verify_sha256(path: Path, expected: Any, *, label: str) -> None:
+    if expected is None:
+        return
+    digest = str(expected).strip().casefold()
+    if not re.fullmatch(r"[0-9a-f]{64}", digest):
+        raise LeaderboardSnapshotError(f"{label} must be a 64-character SHA-256 digest")
+    try:
+        actual = hashlib.sha256(path.read_bytes()).hexdigest()
+    except OSError as error:
+        raise LeaderboardSnapshotError(f"{path}: cannot verify {label}: {error}") from error
+    if actual != digest:
+        raise LeaderboardSnapshotError(
+            f"{path}: SHA-256 mismatch for {label}: expected {digest}, got {actual}"
+        )
+
+
 def _finite_float(value: str, *, path: Path, label: str) -> float | None:
     if not value.strip():
         return None
@@ -121,6 +139,7 @@ def _load_snapshot_files(snapshot: dict[str, Any], base: Path) -> dict[str, Any]
     publishing a snapshot whose completeness cannot be stated.
     """
     path = base / str(snapshot["benchmark_file"])
+    _verify_sha256(path, snapshot.get("benchmark_sha256"), label="benchmark_sha256")
     header, rows = _read_csv_rows(path)
     columns = snapshot["columns"]
     benchmark_columns = snapshot.get("benchmark_columns") or columns
@@ -144,6 +163,7 @@ def _load_snapshot_files(snapshot: dict[str, Any], base: Path) -> dict[str, Any]
     score_rows: list[dict[str, str]] | None = None
     if snapshot.get("scores_file"):
         scores_path = base / str(snapshot["scores_file"])
+        _verify_sha256(scores_path, snapshot.get("scores_sha256"), label="scores_sha256")
         score_header, score_rows = _read_csv_rows(scores_path)
         _require_column(
             score_header, str(columns["benchmark_id"]), path=scores_path, label="benchmark_id"

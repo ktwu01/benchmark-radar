@@ -142,6 +142,7 @@ snapshots:
       eligible and two earlier source-reviewed records. Deferred records are
       excluded. Exact source ids are retained; similar names are not merged.
     benchmark_file: leaderboard_snapshots/claire_radar_benchmarks_2026-09-25.csv
+    benchmark_sha256: bc6218c82398b894396b6271ec6848626d67dd9dbf7b81c4e0bc3fb3d8df9c02
     benchmark_count: 477
     benchmark_columns:
       benchmark_id: benchmark_id
