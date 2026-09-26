@@ -5,7 +5,7 @@
       "benchmark_id": "aime",
       "conflicts": [
         "instruments: aime, aime_2024, aime_2025, aime_2026",
-        "protocols: AIME 2026 I, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge, AIME 2026, as reported, AIME 2026, temp 1.0, top_p 0.95, max gen 163840 tokens, GPT-5.5 (medium) judge, Pass@1, extended thinking up to 64K tokens, top-p 0.95, no parallel test-time compute, no tools, thinking (temp 0.6, top_p 0.95, top_k 20), thinking mode",
+        "protocols: AIME 2025, as printed in Table 3 (Large Models), AIME 2025, as printed in Table 4 (Efficient Models), AIME 2026 I, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge, AIME 2026, as printed in Table 3 (Large Models), AIME 2026, as printed in Table 4 (Efficient Models), AIME 2026, as reported, AIME 2026, temp 1.0, top_p 0.95, max gen 163840 tokens, GPT-5.5 (medium) judge, Pass@1, extended thinking up to 64K tokens, top-p 0.95, no parallel test-time compute, no tools, thinking (temp 0.6, top_p 0.95, top_k 20), thinking mode",
         "pass@k, majority vote and Python tool access each shift this by double digits."
       ],
       "counterexamples": [
@@ -22,6 +22,17 @@
         },
         {
           "instrument": "aime",
+          "model": "Seed2.0 Pro",
+          "observation_id": "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2025, as printed in Table 3 (Large Models)\u0000Seed2.0 Pro",
+          "organization": "ByteDance",
+          "protocol": "AIME 2025, as printed in Table 3 (Large Models)",
+          "reason": "not in the selected repeated instrument+protocol series",
+          "reported_at": "2026-02-14",
+          "source_id": "bytedance_seed2_0_model_card",
+          "value": 98.3
+        },
+        {
+          "instrument": "aime",
           "model": "GLM-5.1",
           "observation_id": "curated\u0000aime\u0000zai_glm_5_1_model_card\u0000aime\u0000AIME 2026, as reported\u0000GLM-5.1",
           "organization": "Z.ai",
@@ -30,17 +41,6 @@
           "reported_at": "2026-04-03",
           "source_id": "zai_glm_5_1_model_card",
           "value": 95.3
-        },
-        {
-          "instrument": "aime",
-          "model": "GLM-5",
-          "observation_id": "curated\u0000aime\u0000zai_glm_5_model_card\u0000aime\u0000AIME 2026 I, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge\u0000GLM-5",
-          "organization": "Z.ai",
-          "protocol": "AIME 2026 I, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge",
-          "reason": "not in the selected repeated instrument+protocol series",
-          "reported_at": "2026-02-11",
-          "source_id": "zai_glm_5_model_card",
-          "value": 92.7
         }
       ],
       "direction": "higher_is_better",
@@ -59,6 +59,30 @@
         },
         {
           "observation_id": "curated\u0000aime\u0000zai_glm_5_model_card\u0000aime\u0000AIME 2026 I, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge\u0000GLM-5",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2025, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Lite",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2026, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Lite",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2025, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Mini",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2026, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Mini",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2025, as printed in Table 3 (Large Models)\u0000Seed2.0 Pro",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2026, as printed in Table 3 (Large Models)\u0000Seed2.0 Pro",
           "reason": "not in the selected repeated instrument+protocol series"
         },
         {
@@ -100,6 +124,42 @@
           "single_organization": true
         },
         {
+          "best_observation_id": "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2025, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Lite",
+          "best_value": 92.3,
+          "connectable": false,
+          "dated_points": 1,
+          "first_reported_at": "2026-02-14",
+          "headroom": 7.7,
+          "instrument": "aime",
+          "last_reported_at": "2026-02-14",
+          "organization_count": 1,
+          "point_count": 2,
+          "protocol": "AIME 2025, as printed in Table 4 (Efficient Models)",
+          "score_ids": [
+            "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2025, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Lite",
+            "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2025, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Mini"
+          ],
+          "single_organization": true
+        },
+        {
+          "best_observation_id": "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2026, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Lite",
+          "best_value": 86.5,
+          "connectable": false,
+          "dated_points": 1,
+          "first_reported_at": "2026-02-14",
+          "headroom": 13.5,
+          "instrument": "aime",
+          "last_reported_at": "2026-02-14",
+          "organization_count": 1,
+          "point_count": 2,
+          "protocol": "AIME 2026, as printed in Table 4 (Efficient Models)",
+          "score_ids": [
+            "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2026, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Lite",
+            "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2026, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Mini"
+          ],
+          "single_organization": true
+        },
+        {
           "best_observation_id": "curated\u0000aime\u0000anthropic_claude_4_system_card\u0000aime_2025\u0000extended thinking up to 64K tokens, top-p 0.95, no parallel test-time compute\u0000Claude Opus 4",
           "best_value": 75.5,
           "connectable": false,
@@ -118,6 +178,23 @@
           "single_organization": true
         },
         {
+          "best_observation_id": "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2025, as printed in Table 3 (Large Models)\u0000Seed2.0 Pro",
+          "best_value": 98.3,
+          "connectable": false,
+          "dated_points": 1,
+          "first_reported_at": "2026-02-14",
+          "headroom": 1.7,
+          "instrument": "aime",
+          "last_reported_at": "2026-02-14",
+          "organization_count": 1,
+          "point_count": 1,
+          "protocol": "AIME 2025, as printed in Table 3 (Large Models)",
+          "score_ids": [
+            "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2025, as printed in Table 3 (Large Models)\u0000Seed2.0 Pro"
+          ],
+          "single_organization": true
+        },
+        {
           "best_observation_id": "curated\u0000aime\u0000zai_glm_5_model_card\u0000aime\u0000AIME 2026 I, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge\u0000GLM-5",
           "best_value": 92.7,
           "connectable": false,
@@ -131,6 +208,23 @@
           "protocol": "AIME 2026 I, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge",
           "score_ids": [
             "curated\u0000aime\u0000zai_glm_5_model_card\u0000aime\u0000AIME 2026 I, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge\u0000GLM-5"
+          ],
+          "single_organization": true
+        },
+        {
+          "best_observation_id": "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2026, as printed in Table 3 (Large Models)\u0000Seed2.0 Pro",
+          "best_value": 94.2,
+          "connectable": false,
+          "dated_points": 1,
+          "first_reported_at": "2026-02-14",
+          "headroom": 5.8,
+          "instrument": "aime",
+          "last_reported_at": "2026-02-14",
+          "organization_count": 1,
+          "point_count": 1,
+          "protocol": "AIME 2026, as printed in Table 3 (Large Models)",
+          "score_ids": [
+            "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2026, as printed in Table 3 (Large Models)\u0000Seed2.0 Pro"
           ],
           "single_organization": true
         },
@@ -261,6 +355,12 @@
         "curated\u0000aime\u0000anthropic_claude_4_system_card\u0000aime_2025\u0000extended thinking up to 64K tokens, top-p 0.95, no parallel test-time compute\u0000Claude Opus 4",
         "curated\u0000aime\u0000anthropic_claude_4_system_card\u0000aime_2025\u0000extended thinking up to 64K tokens, top-p 0.95, no parallel test-time compute\u0000Claude Sonnet 4",
         "curated\u0000aime\u0000zai_glm_5_model_card\u0000aime\u0000AIME 2026 I, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge\u0000GLM-5",
+        "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2025, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Lite",
+        "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2026, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Lite",
+        "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2025, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Mini",
+        "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2026, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Mini",
+        "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2025, as printed in Table 3 (Large Models)\u0000Seed2.0 Pro",
+        "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2026, as printed in Table 3 (Large Models)\u0000Seed2.0 Pro",
         "curated\u0000aime\u0000qwen3_5_model_card\u0000aime_2026\u0000thinking (temp 0.6, top_p 0.95, top_k 20)\u0000Qwen3.5-397B-A17B",
         "curated\u0000aime\u0000google_gemma_4_model_card\u0000aime_2026\u0000no tools\u0000Gemma 4 (31B)",
         "curated\u0000aime\u0000zai_glm_5_1_model_card\u0000aime\u0000AIME 2026, as reported\u0000GLM-5.1",
@@ -290,6 +390,12 @@
           "id": "anthropic_claude_4_system_card",
           "name": "anthropic_claude_4_system_card",
           "url": "https://www.anthropic.com/news/claude-4"
+        },
+        {
+          "caveat": "",
+          "id": "bytedance_seed2_0_model_card",
+          "name": "bytedance_seed2_0_model_card",
+          "url": "https://lf3-static.bytednsdoc.com/obj/eden-cn/lapzild-tss/ljhwZthlaukjlkulzlp/seed2/0214/Seed2.0%20Model%20Card.pdf"
         },
         {
           "caveat": "",
@@ -596,10 +702,21 @@
       "benchmark_id": "hmmt",
       "conflicts": [
         "instruments: hmmt, hmmt_2026_feb, hmmt_feb_2025, hmmt_nov_2025",
-        "protocols: HMMT Nov. 2025, as reported, HMMT Nov. 2025, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge, HMMT Nov. 2025, temp 1.0, top_p 0.95, max gen 163840 tokens, GPT-5.5 (medium) judge, think max, pass@1, thinking (temp 0.6, top_p 0.95, top_k 20)",
+        "protocols: HMMT Nov. 2025, as reported, HMMT Nov. 2025, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge, HMMT Nov. 2025, temp 1.0, top_p 0.95, max gen 163840 tokens, GPT-5.5 (medium) judge, as printed in Table 3 (Large Models), as printed in Table 4 (Efficient Models), think max, pass@1, thinking (temp 0.6, top_p 0.95, top_k 20)",
         "A dated competition, not a fixed set: each sitting is a different instrument and contamination rises once problems are published."
       ],
       "counterexamples": [
+        {
+          "instrument": "hmmt",
+          "model": "Seed2.0 Pro",
+          "observation_id": "curated\u0000hmmt\u0000bytedance_seed2_0_model_card\u0000hmmt\u0000as printed in Table 3 (Large Models)\u0000Seed2.0 Pro",
+          "organization": "ByteDance",
+          "protocol": "as printed in Table 3 (Large Models)",
+          "reason": "not in the selected repeated instrument+protocol series",
+          "reported_at": "2026-02-14",
+          "source_id": "bytedance_seed2_0_model_card",
+          "value": 97.3
+        },
         {
           "instrument": "hmmt",
           "model": "GLM-5",
@@ -621,23 +738,24 @@
           "reported_at": "2026-02-16",
           "source_id": "qwen3_5_model_card",
           "value": 94.8
-        },
-        {
-          "instrument": "hmmt",
-          "model": "GLM-5.2",
-          "observation_id": "curated\u0000hmmt\u0000zai_glm_5_2_model_card\u0000hmmt\u0000HMMT Nov. 2025, temp 1.0, top_p 0.95, max gen 163840 tokens, GPT-5.5 (medium) judge\u0000GLM-5.2",
-          "organization": "Z.ai",
-          "protocol": "HMMT Nov. 2025, temp 1.0, top_p 0.95, max gen 163840 tokens, GPT-5.5 (medium) judge",
-          "reason": "not in the selected repeated instrument+protocol series",
-          "reported_at": "2026-06-16",
-          "source_id": "zai_glm_5_2_model_card",
-          "value": 94.4
         }
       ],
       "direction": "higher_is_better",
       "exclusions": [
         {
           "observation_id": "curated\u0000hmmt\u0000zai_glm_5_model_card\u0000hmmt\u0000HMMT Nov. 2025, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge\u0000GLM-5",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000hmmt\u0000bytedance_seed2_0_model_card\u0000hmmt\u0000as printed in Table 4 (Efficient Models)\u0000Seed2.0 Lite",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000hmmt\u0000bytedance_seed2_0_model_card\u0000hmmt\u0000as printed in Table 4 (Efficient Models)\u0000Seed2.0 Mini",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000hmmt\u0000bytedance_seed2_0_model_card\u0000hmmt\u0000as printed in Table 3 (Large Models)\u0000Seed2.0 Pro",
           "reason": "not in the selected repeated instrument+protocol series"
         },
         {
@@ -675,6 +793,24 @@
           "score_ids": [
             "curated\u0000hmmt\u0000deepseek_v4_model_card\u0000hmmt_2026_feb\u0000think max, pass@1\u0000DeepSeek-V4-Pro",
             "curated\u0000hmmt\u0000deepseek_v4_technical_report\u0000hmmt_2026_feb\u0000think max, pass@1\u0000DeepSeek-V4-Flash"
+          ],
+          "single_organization": true
+        },
+        {
+          "best_observation_id": "curated\u0000hmmt\u0000bytedance_seed2_0_model_card\u0000hmmt\u0000as printed in Table 4 (Efficient Models)\u0000Seed2.0 Lite",
+          "best_value": 86.5,
+          "connectable": false,
+          "dated_points": 1,
+          "first_reported_at": "2026-02-14",
+          "headroom": 13.5,
+          "instrument": "hmmt",
+          "last_reported_at": "2026-02-14",
+          "organization_count": 1,
+          "point_count": 2,
+          "protocol": "as printed in Table 4 (Efficient Models)",
+          "score_ids": [
+            "curated\u0000hmmt\u0000bytedance_seed2_0_model_card\u0000hmmt\u0000as printed in Table 4 (Efficient Models)\u0000Seed2.0 Lite",
+            "curated\u0000hmmt\u0000bytedance_seed2_0_model_card\u0000hmmt\u0000as printed in Table 4 (Efficient Models)\u0000Seed2.0 Mini"
           ],
           "single_organization": true
         },
@@ -730,6 +866,23 @@
           "single_organization": true
         },
         {
+          "best_observation_id": "curated\u0000hmmt\u0000bytedance_seed2_0_model_card\u0000hmmt\u0000as printed in Table 3 (Large Models)\u0000Seed2.0 Pro",
+          "best_value": 97.3,
+          "connectable": false,
+          "dated_points": 1,
+          "first_reported_at": "2026-02-14",
+          "headroom": 2.7,
+          "instrument": "hmmt",
+          "last_reported_at": "2026-02-14",
+          "organization_count": 1,
+          "point_count": 1,
+          "protocol": "as printed in Table 3 (Large Models)",
+          "score_ids": [
+            "curated\u0000hmmt\u0000bytedance_seed2_0_model_card\u0000hmmt\u0000as printed in Table 3 (Large Models)\u0000Seed2.0 Pro"
+          ],
+          "single_organization": true
+        },
+        {
           "best_observation_id": "curated\u0000hmmt\u0000qwen3_5_model_card\u0000hmmt_feb_2025\u0000thinking (temp 0.6, top_p 0.95, top_k 20)\u0000Qwen3.5-397B-A17B",
           "best_value": 94.8,
           "connectable": false,
@@ -766,40 +919,43 @@
       ],
       "raw_best": {
         "instrument": "hmmt",
-        "model": "GLM-5",
-        "observation_id": "curated\u0000hmmt\u0000zai_glm_5_model_card\u0000hmmt\u0000HMMT Nov. 2025, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge\u0000GLM-5",
-        "organization": "Z.ai",
-        "protocol": "HMMT Nov. 2025, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge",
-        "read_from": "html_text",
-        "reported_at": "2026-02-11",
+        "model": "Seed2.0 Pro",
+        "observation_id": "curated\u0000hmmt\u0000bytedance_seed2_0_model_card\u0000hmmt\u0000as printed in Table 3 (Large Models)\u0000Seed2.0 Pro",
+        "organization": "ByteDance",
+        "protocol": "as printed in Table 3 (Large Models)",
+        "read_from": "pdf_text",
+        "reported_at": "2026-02-14",
         "reported_by": null,
-        "source_id": "zai_glm_5_model_card",
-        "value": 96.9
+        "source_id": "bytedance_seed2_0_model_card",
+        "value": 97.3
       },
       "raw_best_stratum": {
-        "best_observation_id": "curated\u0000hmmt\u0000zai_glm_5_model_card\u0000hmmt\u0000HMMT Nov. 2025, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge\u0000GLM-5",
-        "best_value": 96.9,
+        "best_observation_id": "curated\u0000hmmt\u0000bytedance_seed2_0_model_card\u0000hmmt\u0000as printed in Table 3 (Large Models)\u0000Seed2.0 Pro",
+        "best_value": 97.3,
         "connectable": false,
         "dated_points": 1,
-        "first_reported_at": "2026-02-11",
-        "headroom": 3.1,
+        "first_reported_at": "2026-02-14",
+        "headroom": 2.7,
         "instrument": "hmmt",
-        "last_reported_at": "2026-02-11",
+        "last_reported_at": "2026-02-14",
         "organization_count": 1,
         "point_count": 1,
-        "protocol": "HMMT Nov. 2025, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge",
+        "protocol": "as printed in Table 3 (Large Models)",
         "score_ids": [
-          "curated\u0000hmmt\u0000zai_glm_5_model_card\u0000hmmt\u0000HMMT Nov. 2025, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge\u0000GLM-5"
+          "curated\u0000hmmt\u0000bytedance_seed2_0_model_card\u0000hmmt\u0000as printed in Table 3 (Large Models)\u0000Seed2.0 Pro"
         ],
         "single_organization": true
       },
-      "raw_headroom": 3.1,
+      "raw_headroom": 2.7,
       "recommendation": "qualify",
       "recommendation_reason": "The raw best is isolated, but a different repeated setup is also within the five-point threshold.",
-      "recommended_wording": "HMMT's raw best is an isolated 96.9 result. A separate think max, pass@1 setup spans 2 dates from 1 organization and leaves 4.8 points of headroom. This supports a protocol-specific paired comparison.",
+      "recommended_wording": "HMMT's raw best is an isolated 97.3 result. A separate think max, pass@1 setup spans 2 dates from 1 organization and leaves 4.8 points of headroom. This supports a protocol-specific paired comparison.",
       "repeat_controlled_headroom": 4.8,
       "score_ids": [
         "curated\u0000hmmt\u0000zai_glm_5_model_card\u0000hmmt\u0000HMMT Nov. 2025, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge\u0000GLM-5",
+        "curated\u0000hmmt\u0000bytedance_seed2_0_model_card\u0000hmmt\u0000as printed in Table 4 (Efficient Models)\u0000Seed2.0 Lite",
+        "curated\u0000hmmt\u0000bytedance_seed2_0_model_card\u0000hmmt\u0000as printed in Table 4 (Efficient Models)\u0000Seed2.0 Mini",
+        "curated\u0000hmmt\u0000bytedance_seed2_0_model_card\u0000hmmt\u0000as printed in Table 3 (Large Models)\u0000Seed2.0 Pro",
         "curated\u0000hmmt\u0000qwen3_5_model_card\u0000hmmt_feb_2025\u0000thinking (temp 0.6, top_p 0.95, top_k 20)\u0000Qwen3.5-397B-A17B",
         "curated\u0000hmmt\u0000qwen3_5_model_card\u0000hmmt_nov_2025\u0000thinking (temp 0.6, top_p 0.95, top_k 20)\u0000Qwen3.5-397B-A17B",
         "curated\u0000hmmt\u0000zai_glm_5_1_model_card\u0000hmmt\u0000HMMT Nov. 2025, as reported\u0000GLM-5.1",
@@ -826,6 +982,12 @@
         "single_organization": true
       },
       "source_documents": [
+        {
+          "caveat": "",
+          "id": "bytedance_seed2_0_model_card",
+          "name": "bytedance_seed2_0_model_card",
+          "url": "https://lf3-static.bytednsdoc.com/obj/eden-cn/lapzild-tss/ljhwZthlaukjlkulzlp/seed2/0214/Seed2.0%20Model%20Card.pdf"
+        },
         {
           "caveat": "",
           "id": "deepseek_v4_model_card",
@@ -1249,7 +1411,7 @@
       "benchmark_id": "swe_bench_verified",
       "conflicts": [
         "instruments: swe_bench_verified, swe_bench_verified_anthropic_489",
-        "protocols: OpenHands, tailored instruction prompt, temp 0.7, top_p 0.95, 200K context, Resolved, vendor harness, Thinking (High), Single attempt, adaptive thinking, max effort, averaged over 5 trials, multiple attempts, no extended thinking, non-think, resolved, parallel attempts plus internal ranker, 489-task infrastructure-compatible subset, single attempt, think high, resolved, think max, resolved, thinking (temp 0.6, top_p 0.95, top_k 20), vanilla pass@1, 489-task infrastructure-compatible subset",
+        "protocols: OpenHands, tailored instruction prompt, temp 0.7, top_p 0.95, 200K context, Resolved, vendor harness, Thinking (High), Single attempt, adaptive thinking, max effort, averaged over 5 trials, as printed in Table 11 (Large Models), as printed in Table 12 (Efficient Models), multiple attempts, no extended thinking, non-think, resolved, parallel attempts plus internal ranker, 489-task infrastructure-compatible subset, single attempt, think high, resolved, think max, resolved, thinking (temp 0.6, top_p 0.95, top_k 20), vanilla pass@1, 489-task infrastructure-compatible subset",
         "Scaffold, tool permissions and time limit are part of the result; vendors run their own harnesses."
       ],
       "counterexamples": [
@@ -1323,6 +1485,14 @@
         },
         {
           "observation_id": "curated\u0000swe_bench_verified\u0000zai_glm_5_model_card\u0000swe_bench_verified\u0000OpenHands, tailored instruction prompt, temp 0.7, top_p 0.95, 200K context\u0000GLM-5",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000swe_bench_verified\u0000bytedance_seed2_0_model_card\u0000swe_bench_verified\u0000as printed in Table 12 (Efficient Models)\u0000Seed2.0 Lite",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000swe_bench_verified\u0000bytedance_seed2_0_model_card\u0000swe_bench_verified\u0000as printed in Table 11 (Large Models)\u0000Seed2.0 Pro",
           "reason": "not in the selected repeated instrument+protocol series"
         },
         {
@@ -1451,6 +1621,40 @@
           "protocol": "adaptive thinking, max effort, averaged over 5 trials",
           "score_ids": [
             "curated\u0000swe_bench_verified\u0000anthropic_claude_opus_5_system_card\u0000swe_bench_verified\u0000adaptive thinking, max effort, averaged over 5 trials\u0000Claude Opus 5"
+          ],
+          "single_organization": true
+        },
+        {
+          "best_observation_id": "curated\u0000swe_bench_verified\u0000bytedance_seed2_0_model_card\u0000swe_bench_verified\u0000as printed in Table 11 (Large Models)\u0000Seed2.0 Pro",
+          "best_value": 76.5,
+          "connectable": false,
+          "dated_points": 1,
+          "first_reported_at": "2026-02-14",
+          "headroom": 23.5,
+          "instrument": "swe_bench_verified",
+          "last_reported_at": "2026-02-14",
+          "organization_count": 1,
+          "point_count": 1,
+          "protocol": "as printed in Table 11 (Large Models)",
+          "score_ids": [
+            "curated\u0000swe_bench_verified\u0000bytedance_seed2_0_model_card\u0000swe_bench_verified\u0000as printed in Table 11 (Large Models)\u0000Seed2.0 Pro"
+          ],
+          "single_organization": true
+        },
+        {
+          "best_observation_id": "curated\u0000swe_bench_verified\u0000bytedance_seed2_0_model_card\u0000swe_bench_verified\u0000as printed in Table 12 (Efficient Models)\u0000Seed2.0 Lite",
+          "best_value": 73.5,
+          "connectable": false,
+          "dated_points": 1,
+          "first_reported_at": "2026-02-14",
+          "headroom": 26.5,
+          "instrument": "swe_bench_verified",
+          "last_reported_at": "2026-02-14",
+          "organization_count": 1,
+          "point_count": 1,
+          "protocol": "as printed in Table 12 (Efficient Models)",
+          "score_ids": [
+            "curated\u0000swe_bench_verified\u0000bytedance_seed2_0_model_card\u0000swe_bench_verified\u0000as printed in Table 12 (Efficient Models)\u0000Seed2.0 Lite"
           ],
           "single_organization": true
         },
@@ -1618,6 +1822,8 @@
         "curated\u0000swe_bench_verified\u0000google_gemini_2_5_report\u0000swe_bench_verified\u0000single attempt\u0000Gemini 2.5 Pro",
         "curated\u0000swe_bench_verified\u0000google_gemini_2_5_report\u0000swe_bench_verified\u0000multiple attempts\u0000Gemini 2.5 Pro",
         "curated\u0000swe_bench_verified\u0000zai_glm_5_model_card\u0000swe_bench_verified\u0000OpenHands, tailored instruction prompt, temp 0.7, top_p 0.95, 200K context\u0000GLM-5",
+        "curated\u0000swe_bench_verified\u0000bytedance_seed2_0_model_card\u0000swe_bench_verified\u0000as printed in Table 12 (Efficient Models)\u0000Seed2.0 Lite",
+        "curated\u0000swe_bench_verified\u0000bytedance_seed2_0_model_card\u0000swe_bench_verified\u0000as printed in Table 11 (Large Models)\u0000Seed2.0 Pro",
         "curated\u0000swe_bench_verified\u0000qwen3_5_model_card\u0000swe_bench_verified\u0000thinking (temp 0.6, top_p 0.95, top_k 20)\u0000Qwen3.5-397B-A17B",
         "curated\u0000swe_bench_verified\u0000google_gemini_3_1_pro_model_card\u0000swe_bench_verified\u0000Thinking (High), Single attempt\u0000Gemini 3.1 Pro",
         "curated\u0000swe_bench_verified\u0000deepseek_v4_model_card\u0000swe_bench_verified\u0000think max, resolved\u0000DeepSeek-V4-Pro",
@@ -1662,6 +1868,12 @@
           "id": "anthropic_claude_opus_5_system_card",
           "name": "anthropic_claude_opus_5_system_card",
           "url": "https://www.anthropic.com/news/claude-opus-5"
+        },
+        {
+          "caveat": "",
+          "id": "bytedance_seed2_0_model_card",
+          "name": "bytedance_seed2_0_model_card",
+          "url": "https://lf3-static.bytednsdoc.com/obj/eden-cn/lapzild-tss/ljhwZthlaukjlkulzlp/seed2/0214/Seed2.0%20Model%20Card.pdf"
         },
         {
           "caveat": "",
@@ -1974,7 +2186,7 @@
       "eligible": 8,
       "hits": {
         "<=2": 3,
-        "<=3": 4,
+        "<=3": 5,
         "<=5": 8
       },
       "unknown": 0

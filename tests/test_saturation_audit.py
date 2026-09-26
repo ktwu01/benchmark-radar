@@ -36,7 +36,7 @@ def test_section_6_2_audit_separates_raw_and_repeated_protocol_evidence() -> Non
     assert raw == {
         "eligible": 8,
         "unknown": 0,
-        "hits": {"<=5": 8, "<=3": 4, "<=2": 3},
+        "hits": {"<=5": 8, "<=3": 5, "<=2": 3},
     }
     assert repeated == {
         "eligible": 4,

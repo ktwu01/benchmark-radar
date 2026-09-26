@@ -333,6 +333,7 @@ def test_gpqa_diamond_frontier_reaches_the_visible_94_3_record():
         71.5,
         79.6,
         86.4,
+        88.9,
         94.3,
     ]
     assert (
