@@ -1,3 +1,5 @@
+@layer legacy, tokens, base, components, pages, responsive;
+@layer legacy {
 /* Blog pages use the dashboard's stylesheet as their visual source of truth
    and only compose its existing tokens into a reading layout. Nothing here
    applies to the dashboard: every rule is scoped to .blog-page, which only the
@@ -283,4 +285,6 @@
   font-size: 0.78rem;
   color: var(--muted);
   letter-spacing: 0.04em;
+}
+
 }

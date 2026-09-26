@@ -1,3 +1,5 @@
+@layer legacy, tokens, base, components, pages, responsive;
+@layer legacy {
 :root {
   color-scheme: light;
   --panel: #f9fbfc;
@@ -5476,4 +5478,6 @@ dialog {
   .score-ranking .leaderboard-top-columns {
     grid-template-columns: 2rem minmax(0, 26rem) minmax(0, 1fr) 7rem;
   }
+}
+
 }

@@ -33,6 +33,7 @@ from .release_leaderboard import (
     canonical_metric_key,
     is_exact_attention_source_url,
 )
+from .research_page import write_research_page
 from .rubric import (
     SCORING_VERSION,
     legacy_rubric_reference,
@@ -1363,7 +1364,7 @@ def rebuild_dashboard(
     page_entries: list[tuple[str, str | None]] = []
     if feed_output is not None:
         app_pages = write_app_pages(value, sitemap_output.parent)
-        view_paths = app_pages["paths"]
+        view_paths = [*app_pages["paths"], write_research_page(sitemap_output.parent)]
         # /about/ is prose, not a view over the corpus, so it is written from
         # the shared chrome rather than from the dashboard document. The nav
         # links to it from every page this build writes, so it is written
