@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "model_count": 870,
+  "model_count": 880,
   "source_counts": {
     "artificial_analysis": 594,
     "llm_stats": 339,
-    "model_reports": 53
+    "model_reports": 63
   },
   "multiple_sources": 113,
   "organizations": [
@@ -16,6 +16,7 @@
     "Anthropic",
     "ApodexAI",
     "Arcee AI",
+    "BIT",
     "Baidu",
     "ByteDance",
     "ByteDance Seed",
@@ -25,10 +26,12 @@
     "Databricks",
     "Deep Cogito",
     "DeepSeek",
+    "EPFL-INL",
     "Google",
     "IBM",
     "Inception",
     "InclusionAI",
+    "Infera-Neuro",
     "Korea Telecom",
     "KwaiKAT",
     "LG AI Research",
@@ -48,6 +51,7 @@
     "Naver",
     "Nex AGI",
     "Nous Research",
+    "Okubo Lab at CIBR",
     "OpenAI",
     "OpenBMB",
     "OpenChat",
@@ -62,6 +66,8 @@
     "Sarvam",
     "Sarvam AI",
     "ServiceNow",
+    "Shlizerman Lab",
+    "Stanford NPTL",
     "StepFun",
     "Swiss AI Initiative",
     "TII UAE",
@@ -69,6 +75,8 @@
     "Thinking Machines",
     "Thinking Machines Lab",
     "Trillion Labs",
+    "Tyler Benster et al.",
+    "UC Davis Neuroprosthetics Lab",
     "Upstage",
     "Xiaomi",
     "Z.ai",
@@ -1268,6 +1276,17 @@
       }
     },
     {
+      "key": "bit-bit-submission",
+      "model": "BIT submission",
+      "organization": "BIT",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "bytedance-seed-2-0-lite",
       "model": "Seed 2.0 Lite",
       "organization": "ByteDance",
@@ -2068,6 +2087,17 @@
       ],
       "source_counts": {
         "llm_stats": 14
+      }
+    },
+    {
+      "key": "epfl-inl-epfl-inl-submission",
+      "model": "EPFL-INL submission",
+      "organization": "EPFL-INL",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -3390,6 +3420,17 @@
       ],
       "source_counts": {
         "artificial_analysis": 12
+      }
+    },
+    {
+      "key": "infera-neuro-infera-neuro-submission",
+      "model": "Infera-Neuro submission",
+      "organization": "Infera-Neuro",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -5724,6 +5765,17 @@
       ],
       "source_counts": {
         "artificial_analysis": 12
+      }
+    },
+    {
+      "key": "okubo-lab-at-cibr-teamcyber-submission",
+      "model": "TeamCyber submission",
+      "organization": "Okubo Lab at CIBR",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -8687,6 +8739,17 @@
       }
     },
     {
+      "key": "shlizerman-lab-dcond-lift",
+      "model": "DCoND-LIFT",
+      "organization": "Shlizerman Lab",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "sk-telecom-a-x-k2",
       "model": "A.X-K2",
       "organization": "SK Telecom",
@@ -8695,6 +8758,39 @@
       ],
       "source_counts": {
         "artificial_analysis": 11
+      }
+    },
+    {
+      "key": "stanford-nptl-pytorch-baseline",
+      "model": "PyTorch baseline",
+      "organization": "Stanford NPTL",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "stanford-nptl-stanford-nptl-causal-rnn-ensemble-5gram",
+      "model": "Stanford-NPTL causal RNN Ensemble + 5gram",
+      "organization": "Stanford NPTL",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "stanford-nptl-stanford-nptl-causal-rnn-tta-ensemble-5gram",
+      "model": "Stanford-NPTL causal RNN TTA-Ensemble + 5gram",
+      "organization": "Stanford NPTL",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -8877,6 +8973,28 @@
       ],
       "source_counts": {
         "artificial_analysis": 10
+      }
+    },
+    {
+      "key": "tyler-benster-et-al-tyler-benster-et-al-submission",
+      "model": "Tyler Benster et al. submission",
+      "organization": "Tyler Benster et al.",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "uc-davis-neuroprosthetics-lab-ucd-npl-causal-rnn-5gram",
+      "model": "UCD-NPL causal RNN + 5gram",
+      "organization": "UC Davis Neuroprosthetics Lab",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
