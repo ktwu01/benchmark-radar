@@ -129,6 +129,9 @@ def test_frozen_import_has_total_field_and_category_coverage():
     targets = {r["key"]: r for r in records}
     for decision in report["decisions"]:
         assert set(decision["categories"]) <= set(targets[decision["target_key"]]["categories"])
+    for record in records:
+        if record["provenance"]["local_only"]:
+            assert record["provenance"]["source_revision"] == "working-tree"
     index = build_benchmark_index(records)
     assert len(index) == len(records)
     assert len({r["slug"] for r in index}) == len(index)

@@ -243,7 +243,11 @@ def merge_library(records: list[dict], bundle: dict) -> tuple[list[dict], dict]:
                 },
                 "provenance": {
                     "source_url": source_url,
-                    "source_revision": bundle["public_revision"],
+                    "source_revision": (
+                        bundle["public_revision"]
+                        if any(k.startswith("public/") for k in entry["versions"])
+                        else "working-tree"
+                    ),
                     "origin_source_id": source.get("id"),
                     "local_only": not any(k.startswith("public/") for k in entry["versions"]),
                 },
