@@ -1218,6 +1218,83 @@ benchmarks:
       arXiv proofs with planted errors; tests whether a model catches a broken
       argument instead of reproducing it.
 
+  # Visual-generation evaluation, requested in issue #583: Ziqi Huang, VBench's
+  # first author, found none of this family in the registry.
+  # None of these carries a `released` date of its own. The registry treats
+  # that field as the benchmark's own publication date, and the arXiv listings
+  # that carry a day-precise one were not reachable when these were curated. A
+  # repository creation date is a different fact -- Evaluation Agent's repo
+  # predates its paper by two months -- so using one would put a date on the
+  # timeline that no source states.
+  #
+  # VBench is the exception, and it is not dated here either: the committed
+  # OpenCompass crawl already holds that record (opencompass:1375, released
+  # 2023-11-29, Nanyang Technological University), so `data/catalog/identity.yml`
+  # groups the two rows as one benchmark and names the crawl as the donor. The
+  # date and publisher arrive by inheritance, carrying a note that says where
+  # they came from, rather than being copied into this file unsourced. The
+  # other four have no such record; `data/catalog/benchmark_dates.yml` is where
+  # a reviewed paper-first-version date for them belongs once someone can check
+  # the listings (arXiv 2411.13503, 2503.21755, 2412.09645 and 2510.13759).
+
+  - id: vbench
+    name: VBench
+    aliases: ["VBench"]
+    domain: multimodal
+    url: https://github.com/Vchitect/VBench
+    caveat: >-
+      Sixteen dimensions folded into a Quality Score and a Semantic Score and
+      then into one Total Score. Every dimension is min-max normalized across
+      the models on the leaderboard at the time, so a total states a model's
+      standing within that pool rather than an absolute rate, and two totals
+      read from different leaderboard revisions are not the same measurement.
+
+  - id: vbench_plus_plus
+    name: VBench++
+    aliases: ["VBench++", "VBench-plus-plus"]
+    domain: multimodal
+    url: https://arxiv.org/abs/2411.13503
+    caveat: >-
+      Extends VBench to image-to-video generation and adds trustworthiness
+      dimensions, so its totals are computed over a different dimension set.
+      A VBench++ number is not a VBench number for the same model.
+
+  - id: vbench_2_0
+    name: VBench-2.0
+    aliases: ["VBench-2.0", "VBench 2.0", "VBench2.0"]
+    domain: multimodal
+    url: https://arxiv.org/abs/2503.21755
+    caveat: >-
+      Targets intrinsic faithfulness -- physics, commonsense and anatomy --
+      rather than the surface quality VBench 1.x measures, and is built to stay
+      unsaturated where that suite tops out. Low scores here do not contradict
+      high VBench scores; the two suites ask different questions.
+
+  - id: evaluation_agent
+    name: Evaluation Agent
+    aliases: ["Evaluation Agent", "Evaluation-Agent"]
+    domain: multimodal
+    url: https://github.com/Vchitect/Evaluation-Agent
+    caveat: >-
+      A promptable evaluation framework rather than a fixed test set: it plans
+      its own queries per model, so two runs need not ask the same questions.
+      It does report numbers -- an average score per round and the per-prompt
+      scores behind it -- but each is measured over the handful of prompts that
+      run chose for that model, so they describe the run rather than a scale
+      models can be ranked on.
+
+  - id: uni_mmmu
+    name: Uni-MMMU
+    aliases: ["Uni-MMMU", "UniMMMU"]
+    domain: multimodal
+    url: https://github.com/Vchitect/Uni-MMMU
+    caveat: >-
+      Eight tasks that couple understanding and generation, each scored on a
+      text channel and an image channel. One headline number hides which
+      channel earned it, and a model that only understands or only generates
+      is structurally capped on tasks that require both.
+
+
 # Model cards, technical reports and release posts.
 #
 # `organization` is the publisher of the document. `benchmarks` is the set of
@@ -1232,6 +1309,16 @@ source_documents:
     url: https://apodexai.github.io/FrontierAgent/benchmarks/FrontierChallenge/
     benchmarks: [frontier_challenge]
     retrieved_at: 2026-09-02
+  # The benchmark's own leaderboard, so it registers as evidence without
+  # counting as vendor adoption: nobody shipping a model chose to report
+  # VBench by publishing this page.
+  - id: vbench_leaderboard
+    name: VBench Leaderboard
+    publisher: Vchitect
+    document_type: benchmark_leaderboard
+    url: https://huggingface.co/spaces/Vchitect/VBench_Leaderboard
+    benchmarks: [vbench]
+    retrieved_at: 2026-09-09
 
 model_cards:
   - id: openai_gpt_5_system_card
