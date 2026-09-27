@@ -45,10 +45,8 @@ cases:
   - id: weather-forecasting
     query: weather forecasting
     scope: catalog
-    kind: catalog_gap
-    expected_status: partial_candidates_only
-    minimum_candidates: 1
-    must_include_candidates: [AFDBench]
+    kind: topical
+    must_include: [RealBench, RESCAST-100K]
 
   - id: stock-prediction
     query: stock prediction
@@ -61,7 +59,5 @@ cases:
   - id: robot-grasp-planning
     query: robot grasp planning
     scope: catalog
-    kind: catalog_gap
-    expected_status: partial_candidates_only
-    minimum_candidates: 1
-    must_include_candidates: []
+    kind: topical
+    must_include: [R2HandoverSim]

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export reviewed Claire Radar records as an immutable catalog snapshot."""
+"""Export the complete Claire Radar corpus as an immutable catalog snapshot."""
 
 from __future__ import annotations
 
@@ -24,13 +24,17 @@ FIELDS = (
     "project_url",
     "origin_source",
     "origin_record_id",
+    "display_eligible",
+    "data_status",
+    "confidence",
+    "recognition_confidence",
+    "relation",
     "review_state",
     "reviewed_at",
     "review_model",
     "admission_policy_version",
     "record_sha256",
 )
-ADMITTED_STATES = {"ai-reviewed", "source-reviewed"}
 
 
 def _url(value: Any) -> str:
@@ -83,11 +87,7 @@ def export_rows(document: dict[str, Any]) -> list[dict[str, str]]:
     seen_ids: set[str] = set()
     for record in records:
         curation = record.get("curation") or {}
-        state = str(curation.get("state") or "")
-        if state not in ADMITTED_STATES:
-            continue
-        if state == "ai-reviewed" and record.get("displayEligible") is not True:
-            raise ValueError(f"reviewed record {record.get('id')!r} is not display eligible")
+        state = str(curation.get("state") or "unreviewed")
 
         source = record.get("source") or {}
         source_id = str(source.get("id") or "").strip()
@@ -128,6 +128,21 @@ def export_rows(document: dict[str, Any]) -> list[dict[str, str]]:
                 "project_url": _artifact_url(links.get("project"), "project"),
                 "origin_source": str(source.get("type") or "").strip(),
                 "origin_record_id": str(record.get("id") or "").strip(),
+                "display_eligible": (
+                    "true"
+                    if record.get("displayEligible") is True
+                    else "false"
+                    if record.get("displayEligible") is False
+                    else "unknown"
+                ),
+                "data_status": str(record.get("dataStatus") or "").strip(),
+                "confidence": str(record.get("confidence") or "").strip(),
+                "recognition_confidence": str(
+                    record.get("recognitionConfidence")
+                    if record.get("recognitionConfidence") is not None
+                    else ""
+                ).strip(),
+                "relation": str(record.get("relation") or "").strip(),
                 "review_state": state,
                 "reviewed_at": str(curation.get("reviewedAt") or "").strip(),
                 "review_model": str(curation.get("model") or "").strip(),
@@ -154,7 +169,7 @@ def main() -> None:
         writer = csv.DictWriter(handle, fieldnames=FIELDS, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
-    print(f"exported {len(rows)} reviewed records to {args.output}")
+    print(f"exported {len(rows)} corpus records to {args.output}")
 
 
 if __name__ == "__main__":

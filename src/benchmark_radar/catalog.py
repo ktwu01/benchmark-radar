@@ -202,6 +202,11 @@ def _source_record(
     optional_provenance = {
         "origin_source": (row.get("origin_source") or "").strip(),
         "origin_record_id": (row.get("origin_record_id") or "").strip(),
+        "display_eligible": (row.get("display_eligible") or "").strip(),
+        "data_status": (row.get("data_status") or "").strip(),
+        "confidence": (row.get("confidence") or "").strip(),
+        "recognition_confidence": (row.get("recognition_confidence") or "").strip(),
+        "relation": (row.get("relation") or "").strip(),
         "review_state": (row.get("review_state") or "").strip(),
         "reviewed_at": (row.get("reviewed_at") or "").strip(),
         "review_model": (row.get("review_model") or "").strip(),

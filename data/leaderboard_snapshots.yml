@@ -137,13 +137,13 @@ snapshots:
     source_url: https://github.com/Claire1217/benchmark-radar
     crawled_at: "2026-09-25T04:40:22Z"
     description: >-
-      Immutable export of 477 benchmark records accepted by the Claire Radar
-      review queue. The export includes only ai-reviewed records marked display
-      eligible and two earlier source-reviewed records. Deferred records are
-      excluded. Exact source ids are retained; similar names are not merged.
+      Immutable export of the complete 1,914-record Claire Radar benchmark
+      corpus. Review and display states remain record-level provenance: accepted,
+      deferred, excluded and unreviewed records all remain inspectable. Exact
+      source ids are retained; similar names are not merged.
     benchmark_file: leaderboard_snapshots/claire_radar_benchmarks_2026-09-25.csv
-    benchmark_sha256: bc6218c82398b894396b6271ec6848626d67dd9dbf7b81c4e0bc3fb3d8df9c02
-    benchmark_count: 477
+    benchmark_sha256: 869b77a6060dc7eba3d092668ee6659317752f06de7baf2aef9527cd59ff6b27
+    benchmark_count: 1914
     benchmark_columns:
       benchmark_id: benchmark_id
       benchmark_name: name

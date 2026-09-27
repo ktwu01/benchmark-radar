@@ -155,13 +155,12 @@ queries:
     relevant_keys: []
     expected_partial_keys: ["opencompass:2082", "opencompass:1542"]
 
-  - id: gap-weather-forecasting
-    kind: catalog_gap
+  - id: topic-weather-forecasting
+    kind: topical
     query: weather forecasting
-    intent: Detect whether the Catalog gains a full lexical match for this missing task.
+    intent: Retrieve benchmarks for weather forecasting tasks.
     scope: catalog
-    relevant_keys: []
-    expected_partial_keys: ["claire-radar:2608.24954"]
+    relevant_keys: ["claire-radar:2605.24945", "claire-radar:2606.02852"]
 
   - id: gap-stock-prediction
     kind: catalog_gap
@@ -171,10 +170,9 @@ queries:
     relevant_keys: []
     expected_partial_keys: ["llm-stats:cruxeval-output-cot"]
 
-  - id: gap-robot-grasp-planning
-    kind: catalog_gap
+  - id: topic-robot-grasp-planning
+    kind: topical
     query: robot grasp planning
-    intent: Detect whether the Catalog gains a full lexical match for this missing task.
+    intent: Retrieve benchmarks for robot grasp planning tasks.
     scope: catalog
-    relevant_keys: []
-    expected_partial_keys: ["opencompass:2151", "opencompass:1251"]
+    relevant_keys: ["claire-radar:2606.21011"]
