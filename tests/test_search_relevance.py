@@ -90,3 +90,9 @@ def test_single_token_name_search_never_returns_an_empty_token_explanation() -> 
     result = QueryService().search("CASP", scope="all", limit=20)
 
     assert all(record["match"]["matched_tokens"] for record in result["results"])
+
+
+@pytest.mark.parametrize("name", ["CoWorkBench", "Legal Agent Benchmark", "AetherCode"])
+def test_previous_topical_examples_remain_discoverable_by_name(name: str) -> None:
+    result = QueryService().search(name, scope="catalog", limit=10)
+    assert name in {record["name"] for record in result["results"]}

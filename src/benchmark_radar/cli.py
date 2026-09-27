@@ -421,6 +421,20 @@ def main() -> None:
             item for result in normalized for item in result["source_records"]
         ] + opencompass["source_records"]
 
+        from .catalog_claire import load_bundle, merge_library
+
+        claire_bundle = load_bundle()
+        all_records, claire_report = merge_library(all_records, claire_bundle)
+        Path("site/data").mkdir(parents=True, exist_ok=True)
+        Path("site/data/claire-library-merge.json").write_text(
+            json.dumps(claire_report, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        print(
+            f"Claire Library: {claire_report['input_count']} input IDs, "
+            f"{claire_report['actions']} -> {claire_report['output_count']} catalog records"
+        )
+
         from .catalog_identity import (
             DEFAULT_CANDIDATES_PATH,
             apply_inherited_identity,
@@ -454,6 +468,14 @@ def main() -> None:
             index,
             Path("site/data/benchmark-index.json"),
             documents=document_registry(resolved_records),
+            import_metadata={
+                "claire_radar": {
+                    "public_revision": claire_bundle["public_revision"],
+                    "inputs": claire_bundle["inputs"],
+                    "manifests": claire_bundle["manifests"],
+                    "actions": claire_report["actions"],
+                }
+            },
         )
 
         shard_report = write_shards(

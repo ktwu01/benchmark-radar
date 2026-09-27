@@ -18,6 +18,7 @@ on:
       # identity edit must rebuild the published shards, or the site keeps
       # serving last month's catalog.
       - "data/leaderboard_snapshots/**"
+      - "data/imports/**"
       # The registry beside those CSVs, not just the CSVs. `normalize-catalog`
       # reads this file for the crawl id, the column mapping and crawled_at, so
       # a commit that only corrects one of those changes the catalog the build

@@ -606,7 +606,11 @@ def build_benchmark_index(
 
 
 def write_benchmark_index(
-    index: list[dict[str, Any]], output: Path, *, documents: dict[str, Any] | None = None
+    index: list[dict[str, Any]],
+    output: Path,
+    *,
+    documents: dict[str, Any] | None = None,
+    import_metadata: dict[str, Any] | None = None,
 ) -> Path:
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
@@ -616,6 +620,7 @@ def write_benchmark_index(
                 "count": len(index),
                 "benchmarks": index,
                 **({"document_registry": documents} if documents is not None else {}),
+                **({"import_metadata": import_metadata} if import_metadata is not None else {}),
             },
             ensure_ascii=False,
             sort_keys=True,

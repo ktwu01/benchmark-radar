@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "file": "library.json.gz",
+  "sha256": "7eeec72744dcfa41622a62312419658b64be2778b71aabf4b96988b95b44eb60",
+  "record_count": 3346,
+  "public_revision": "fd5868b3b9c983a6f25c50c274de3be1694ffa00",
+  "inputs": [
+    {
+      "input": "public/library_index.json",
+      "sha256": "db217d78a0b5c82de5afd0d6e4ba75329aac1f182d8f4b0d2794ec4be7a10185",
+      "record_count": 3186,
+      "revision": "fd5868b3b9c983a6f25c50c274de3be1694ffa00"
+    },
+    {
+      "input": "public/benchmarks.json",
+      "sha256": "2e6ddc805f3d79ced8a9abd994162de0df832faae421d7b67cfd7602e09b8612",
+      "record_count": 1999,
+      "revision": "fd5868b3b9c983a6f25c50c274de3be1694ffa00"
+    },
+    {
+      "input": "local/library_index.json",
+      "sha256": "eb2d9be631c93e3d4c27e6041f22b0da71444a31fa4ef52c9f9f5129d40e2977",
+      "record_count": 2805,
+      "revision": "working-tree"
+    },
+    {
+      "input": "local/benchmarks.json",
+      "sha256": "8bb896d204cc9ba8eb13a017a8466b7404d3ab07161068ffc08a5dc71fc309f9",
+      "record_count": 1914,
+      "revision": "working-tree"
+    }
+  ]
+}

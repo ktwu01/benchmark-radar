@@ -13,6 +13,11 @@ score tracks again double counts them.
 `data/benchmark_scores.yml` supplies numeric observations cited to those reports.
 Adapters parse these inputs into the same record contract.
 
+The frozen Claire Library union in `data/imports/claire_library/` supplies
+additional benchmark metadata and categories, with every original input field
+retained in shard extensions. See [the merge report](CLAIRE-LIBRARY-MERGE.md)
+for the input census, exact identity rules and field mapping.
+
 Reviewed identity links, source corrections and cited dates live in
 `data/catalog/identity.yml`, `llm_stats_identity_overrides.yml` and
 `benchmark_dates.yml`. Other files in that directory are generated products.

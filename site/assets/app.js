@@ -5293,6 +5293,11 @@ function loadBenchmarkShard(slug) {
 // no protocol and no evaluation date (AUDIT.md section 1); the label says so
 // where the numbers are read.
 const CATALOG_SOURCE_META = {
+  claire_radar: {
+    name: "Claire Radar Library",
+    noteKey: "Imported benchmark metadata and categories. Original source fields and review status are retained; this import does not supply numeric scores.",
+    emptyKey: "This metadata import does not include numeric scores.",
+  },
   model_reports: {
     name: "Model reports",
     noteKey: "Scores and citations from model reports. Each score keeps its document, test version, protocol and publication date.",
@@ -6055,10 +6060,43 @@ function catalogBenchmarkDetail(shard) {
     catalogScoresBlock(shard),
     catalogDocumentsBlock(detail),
     catalogIdentityBlock(detail),
+    catalogClaireFields(detail),
     catalogOpennessBlock(detail),
     catalogSizesBlock(detail),
     catalogSiblingsBlock(shard),
   ];
+}
+
+function catalogClaireFields(detail) {
+  const imported = detail.extensions?.claire_radar;
+  if (!imported) return null;
+  const versions = (imported.records || []).flatMap((entry) =>
+    Object.entries(entry.versions || {}).map(([origin, record]) => ({ origin, record })),
+  );
+  const preferred = versions.find(({ origin }) => origin === "public/library_index.json")
+    || versions[0];
+  const record = preferred?.record || {};
+  const state = record.curation?.state || "Not reviewed / 未审核";
+  return element("section", { className: "catalog-block" }, [
+    element("h3", { text: "Library categories / 分类" }),
+    element("p", { text: (detail.categories || []).join(" · ") }),
+    catalogFactList([
+      ["Source / 来源", "Claire Radar Library"],
+      ["Review status / 审核状态", state],
+      ["Original records / 原始记录", String(imported.records.length)],
+    ]),
+    record.description || record.oneLine
+      ? element("details", {}, [
+          element("summary", { text: "Claire Radar editorial description / 来源编辑简介" }),
+          element("p", { text: record.description || record.oneLine }),
+          element("p", { text: "Source editorial text; may be AI-assisted. / 来源编辑内容，可能经 AI 辅助。" }),
+        ])
+      : null,
+    element("details", {}, [
+      element("summary", { text: "Original fields and versions / 完整原始字段与版本" }),
+      element("pre", { text: JSON.stringify(imported, null, 2), attrs: { style: "max-height:24rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere" } }),
+    ]),
+  ]);
 }
 
 // The chart chrome only describes the curated score layer, so it is hidden

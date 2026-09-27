@@ -17,13 +17,15 @@ cases:
     query: long horizon agent
     scope: catalog
     kind: topical
-    must_include: [CoWorkBench, Legal Agent Benchmark]
+    # The full Claire Library changes corpus IDF and introduces genuinely
+    # relevant names. Older examples remain covered by exact-name lookup.
+    must_include: [SWE-Marathon, Long-Horizon-Terminal-Bench]
 
   - id: coding-benchmark
     query: coding benchmark
     scope: catalog
     kind: topical
-    must_include: [WildClawBench, AetherCode]
+    must_include: [WildClawBench, Aider-Polyglot, SciCode]
 
   - id: medical-vqa
     query: medical VQA
@@ -46,9 +48,11 @@ cases:
     query: weather forecasting
     scope: catalog
     kind: catalog_gap
-    expected_status: no_lexical_candidates
-    minimum_candidates: 0
-    must_include_candidates: []
+    # New financial/trajectory forecasting records match only "forecasting";
+    # they must remain partial candidates, never weather suitability claims.
+    expected_status: partial_candidates_only
+    minimum_candidates: 1
+    must_include_candidates: [ProForma-20Q]
 
   - id: stock-prediction
     query: stock prediction

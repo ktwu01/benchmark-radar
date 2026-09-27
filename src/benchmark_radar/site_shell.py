@@ -14,6 +14,7 @@ from .feed import SITE_URL
 # page that calls a source `opencompass_hub` while the dashboard calls it
 # OpenCompass Hub reads as two different catalogs.
 SOURCE_LABELS = {
+    "claire_radar": "Claire Radar Library",
     "model_reports": "Model reports",
     "llm_stats": "LLM Stats",
     "artificial_analysis": "Artificial Analysis",
