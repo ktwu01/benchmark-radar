@@ -441,8 +441,132 @@ benchmarks:
     metric: accuracy
     direction: higher_is_better
     unit: percent
+  - benchmark_id: brain_to_text_24
+    metric: word_error_rate
+    direction: lower_is_better
+    unit: percent
+  - benchmark_id: brain_to_text_25
+    metric: word_error_rate
+    direction: lower_is_better
+    unit: ratio
 
 results:
+  # Brain-to-Text '24's official challenge summary names the top three final
+  # submissions and the PyTorch baseline. The challenge used 1,200 held-out
+  # sentences from participant T12 and prints word error rate as a percentage.
+  - benchmark_id: brain_to_text_24
+    instrument: brain_to_text_24_t12_1200_holdout_sentences
+    protocol: 1,200 competitionHoldOut sentences; aggregate word error rate
+    model: DCoND-LIFT
+    organization: Shlizerman Lab
+    source_id: brain_to_text_24_evalai_leaderboard
+    reported_at: 2024-06-01
+    value: 5.81
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: brain_to_text_24
+    instrument: brain_to_text_24_t12_1200_holdout_sentences
+    protocol: 1,200 competitionHoldOut sentences; aggregate word error rate
+    model: TeamCyber submission
+    organization: Okubo Lab at CIBR
+    source_id: brain_to_text_24_evalai_leaderboard
+    reported_at: 2024-06-01
+    value: 8.26
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: brain_to_text_24
+    instrument: brain_to_text_24_t12_1200_holdout_sentences
+    protocol: 1,200 competitionHoldOut sentences; aggregate word error rate
+    model: Tyler Benster et al. submission
+    organization: Tyler Benster et al.
+    source_id: brain_to_text_24_evalai_leaderboard
+    reported_at: 2024-06-01
+    value: 8.93
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: brain_to_text_24
+    instrument: brain_to_text_24_t12_1200_holdout_sentences
+    protocol: 1,200 competitionHoldOut sentences; aggregate word error rate
+    model: PyTorch baseline
+    organization: Stanford NPTL
+    source_id: brain_to_text_24_evalai_leaderboard
+    reported_at: 2024-06-01
+    value: 9.76
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  # Brain-to-Text '25's final Kaggle private leaderboard uses about two thirds
+  # of 1,450 held-out T15 sentences. Kaggle prints the WER as a ratio and gives
+  # each team's best-submission date, so both values are preserved as displayed.
+  - benchmark_id: brain_to_text_25
+    instrument: brain_to_text_25_t15_private_leaderboard
+    protocol: approximately 67% of 1,450 held-out test sentences; aggregate word error rate
+    model: Infera-Neuro submission
+    organization: Infera-Neuro
+    source_id: brain_to_text_25_kaggle_leaderboard
+    reported_at: 2026-01-01
+    value: 0.01537
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: brain_to_text_25
+    instrument: brain_to_text_25_t15_private_leaderboard
+    protocol: approximately 67% of 1,450 held-out test sentences; aggregate word error rate
+    model: EPFL-INL submission
+    organization: EPFL-INL
+    source_id: brain_to_text_25_kaggle_leaderboard
+    reported_at: 2026-01-01
+    value: 0.01663
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: brain_to_text_25
+    instrument: brain_to_text_25_t15_private_leaderboard
+    protocol: approximately 67% of 1,450 held-out test sentences; aggregate word error rate
+    model: BIT submission
+    organization: BIT
+    source_id: brain_to_text_25_kaggle_leaderboard
+    reported_at: 2025-12-31
+    value: 0.01773
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: brain_to_text_25
+    instrument: brain_to_text_25_t15_private_leaderboard
+    protocol: approximately 67% of 1,450 held-out test sentences; aggregate word error rate
+    model: Stanford-NPTL causal RNN Ensemble + 5gram
+    organization: Stanford NPTL
+    source_id: brain_to_text_25_kaggle_leaderboard
+    reported_at: 2025-07-19
+    value: 0.03892
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: brain_to_text_25
+    instrument: brain_to_text_25_t15_private_leaderboard
+    protocol: approximately 67% of 1,450 held-out test sentences; aggregate word error rate
+    model: Stanford-NPTL causal RNN TTA-Ensemble + 5gram
+    organization: Stanford NPTL
+    source_id: brain_to_text_25_kaggle_leaderboard
+    reported_at: 2025-07-29
+    value: 0.04817
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: brain_to_text_25
+    instrument: brain_to_text_25_t15_private_leaderboard
+    protocol: approximately 67% of 1,450 held-out test sentences; aggregate word error rate
+    model: UCD-NPL causal RNN + 5gram
+    organization: UC Davis Neuroprosthetics Lab
+    source_id: brain_to_text_25_kaggle_leaderboard
+    reported_at: 2025-07-05
+    value: 0.06999
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
   # FrontierChallenge's official leaderboard reports model-scaffold systems,
   # not model-only measurements. Preserve the scaffold in every protocol so
   # changing the agent harness never looks like a comparable model update.

@@ -1,8 +1,8 @@
 {
   "note": "Frozen IDs for the logo audit page (site/logos.html). An ID is assigned once and never reused, so review feedback citing it stays valid across rebuilds. Which models and organizations exist is decided by models.json, not here.",
   "high_water": {
-    "O": 69,
-    "M": 1056
+    "O": 78,
+    "M": 1067
   },
   "organizations": {
     "AI21 Labs": "O-01",
@@ -69,7 +69,15 @@
     "TII UAE": "O-65",
     "Thinking Machines": "O-66",
     "Trillion Labs": "O-67",
-    "ApodexAI": "O-69"
+    "ApodexAI": "O-69",
+    "EPFL-INL": "O-71",
+    "Infera-Neuro": "O-72",
+    "Okubo Lab at CIBR": "O-73",
+    "Shlizerman Lab": "O-74",
+    "Stanford NPTL": "O-75",
+    "Tyler Benster et al.": "O-76",
+    "UC Davis Neuroprosthetics Lab": "O-77",
+    "BIT": "O-78"
   },
   "models": {
     "Olmo 3 (7B and 32B)␟Ai2": "M-01",
@@ -145,7 +153,17 @@
     "Grok 3 Beta Extended Thinking␟xAI": "M-1054",
     "Apodex 1.1␟ApodexAI": "M-1055",
     "Qwen 3.8 Max␟Qwen": "M-1056",
+    "EPFL-INL submission␟EPFL-INL": "M-1058",
+    "Infera-Neuro submission␟Infera-Neuro": "M-1059",
     "Gemini 3 Pro␟Google": "M-106",
+    "TeamCyber submission␟Okubo Lab at CIBR": "M-1060",
+    "DCoND-LIFT␟Shlizerman Lab": "M-1061",
+    "PyTorch baseline␟Stanford NPTL": "M-1062",
+    "Stanford-NPTL causal RNN Ensemble + 5gram␟Stanford NPTL": "M-1063",
+    "Stanford-NPTL causal RNN TTA-Ensemble + 5gram␟Stanford NPTL": "M-1064",
+    "Tyler Benster et al. submission␟Tyler Benster et al.": "M-1065",
+    "UCD-NPL causal RNN + 5gram␟UC Davis Neuroprosthetics Lab": "M-1066",
+    "BIT submission␟BIT": "M-1067",
     "Gemini 3.1 Flash-Lite␟Google": "M-107",
     "Gemini 3.5 Flash␟Google": "M-108",
     "Gemini 3.5 Flash Cyber␟Google": "M-109",

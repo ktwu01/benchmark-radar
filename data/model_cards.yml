@@ -1218,6 +1218,30 @@ benchmarks:
       arXiv proofs with planted errors; tests whether a model catches a broken
       argument instead of reproducing it.
 
+  - id: brain_to_text_24
+    name: Brain-to-Text Benchmark '24
+    aliases: ["Brain-to-Text '24", "BtoT24"]
+    domain: science
+    url: https://eval.ai/web/challenges/challenge-page/2099/overview
+    released: 2023-06-01
+    caveat: >-
+      Evaluates 1,200 held-out sentences from one participant (T12). Language
+      model post-processing is part of each system, and results do not establish
+      transfer to another participant or to the different Brain-to-Text '25
+      dataset.
+
+  - id: brain_to_text_25
+    name: Brain-to-Text '25
+    aliases: ["Brain-to-text '25", "BtoT25"]
+    domain: science
+    url: https://www.kaggle.com/competitions/brain-to-text-25
+    released: 2025-07-07
+    caveat: >-
+      Evaluates one participant (T15), with about two thirds of 1,450 held-out
+      sentences used for the private leaderboard. Speaking strategy, language
+      model and corpus mix affect word error rate, so these scores are not
+      directly comparable to Brain-to-Text '24.
+
 # Model cards, technical reports and release posts.
 #
 # `organization` is the publisher of the document. `benchmarks` is the set of
@@ -1232,6 +1256,22 @@ source_documents:
     url: https://apodexai.github.io/FrontierAgent/benchmarks/FrontierChallenge/
     benchmarks: [frontier_challenge]
     retrieved_at: 2026-09-02
+
+  - id: brain_to_text_24_evalai_leaderboard
+    name: Brain-to-Text Benchmark '24 leaderboard
+    publisher: Stanford Neural Prosthetics Translational Laboratory
+    document_type: benchmark_leaderboard
+    url: https://eval.ai/web/challenges/challenge-page/2099/overview
+    benchmarks: [brain_to_text_24]
+    retrieved_at: 2026-09-19
+
+  - id: brain_to_text_25_kaggle_leaderboard
+    name: Brain-to-Text '25 private leaderboard
+    publisher: UC Davis Neuroprosthetics Lab
+    document_type: benchmark_leaderboard
+    url: https://www.kaggle.com/competitions/brain-to-text-25/leaderboard
+    benchmarks: [brain_to_text_25]
+    retrieved_at: 2026-09-19
 
 model_cards:
   - id: openai_gpt_5_system_card
