@@ -5986,6 +5986,36 @@ function catalogSourceTable(source, payload) {
       chart ? organizationLegend(catalogPlottedRows(payload)) : null,
       infoDisclosure(notes.join(" ")),
     ]),
+    catalogScoreResults(source, rows),
+  ]);
+}
+
+// The chart is useful for trends; the same observations need a readable route
+// on a phone, including scores with no date (which cannot appear on the axis).
+function catalogScoreResults(source, rows) {
+  if (!rows.length) return null;
+  const meta = catalogSourceMeta(source);
+  const ordered = [...rows].sort((a, b) =>
+    String(b.reported_date || "").localeCompare(String(a.reported_date || "")) ||
+    String(a.model_name || "").localeCompare(String(b.model_name || "")) ||
+    String(a.obs_id || "").localeCompare(String(b.obs_id || "")));
+  return element("section", { className: "catalog-result-section" }, [
+    element("h3", { text: `${t("Reported results")} · ${meta.name} (${ordered.length.toLocaleString()})` }),
+    element("ol", { className: "catalog-result-list" }, ordered.map((row) =>
+      element("li", { className: "catalog-result" }, [
+        element("div", { className: "catalog-result-main" }, [
+          element("strong", { text: row.model_name || t("not recorded") }),
+          element("strong", { className: "catalog-result-value", text: String(row.raw_value ?? row.value ?? t("not recorded")) }),
+        ]),
+        element("p", { className: "catalog-result-meta", text: [
+          row.organization,
+          row.reported_date ? `${t(row.date_precision === "model_announcement" ? "Model release" : "Document published")} ${formatDate(row.reported_date, { dateStyle: "medium" })}` : t("Date unknown"),
+        ].filter(Boolean).join(" · ") }),
+        row.instrument || row.protocol ? element("p", { className: "catalog-result-meta", text: [row.instrument, row.protocol].filter(Boolean).join(" · ") }) : null,
+        safeHttpUrl(row.source_url) ? element("a", { className: "catalog-result-source", text: t("Source ↗"), attrs: {
+          href: safeHttpUrl(row.source_url), target: "_blank", rel: "noopener noreferrer",
+        } }) : null,
+      ]))),
   ]);
 }
 
