@@ -71,6 +71,22 @@ def test_search_index_carries_semantic_source_fields_without_inference(normalize
         assert isinstance(row["languages"], list)
 
 
+def test_index_model_filter_evidence_is_scoped_to_its_source_record(normalized: dict) -> None:
+    from benchmark_radar.catalog import build_benchmark_index
+
+    observations = normalized["score_observations"]
+    index = build_benchmark_index(normalized["source_records"], observations=observations)
+    by_key = {record["key"]: record for record in index}
+    for key, record in by_key.items():
+        source_rows = [row for row in observations if row["key"] == key]
+        assert {model["name"] for model in record["scored_models"]} == {
+            row["model_name"] for row in source_rows
+        }
+        assert all(
+            model["date_precision"] == "model_announcement" for model in record["scored_models"]
+        )
+
+
 def test_obs_id_is_unique(normalized: dict) -> None:
     """Without this a rerun silently duplicates every score row."""
     obs_ids = [row["obs_id"] for row in normalized["score_observations"]]

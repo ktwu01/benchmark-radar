@@ -768,6 +768,11 @@
                      class="benchmark-search-input"
                      data-i18n-placeholder="Search benchmarks, tasks, domains…"
                      placeholder="Search benchmarks, tasks, domains…" />
+              <label class="benchmark-model-label" for="benchmark-model-input">Model with a reported score</label>
+              <input id="benchmark-model-input" type="search" autocomplete="off"
+                     class="benchmark-search-input benchmark-model-input"
+                     placeholder="Filter by model, e.g. GPT-6 Sol"
+                     aria-controls="benchmark-search-results frontier-benchmark" />
               <p id="benchmark-search-status" class="benchmark-search-status"></p>
               <div id="benchmark-search-results"></div>
               <button id="benchmark-search-more" class="clear-button" type="button" data-i18n="Show more" hidden>Show more</button>
