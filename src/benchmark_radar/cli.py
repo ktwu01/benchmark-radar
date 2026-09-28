@@ -449,7 +449,7 @@ def main() -> None:
         # One index over every source, one row per source record. Two sources
         # describing the same benchmark stay two rows until identity.yml says
         # otherwise under human review.
-        index = build_benchmark_index(resolved_records, series_by_key)
+        index = build_benchmark_index(resolved_records, series_by_key, all_observations)
         index_path = write_benchmark_index(
             index,
             Path("site/data/benchmark-index.json"),

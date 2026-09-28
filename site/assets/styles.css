@@ -2795,6 +2795,14 @@ td a {
   font-size: 0.78rem;
 }
 
+.benchmark-model-label {
+  display: block;
+  margin: 0.85rem 0 0.4rem;
+  font-family: var(--utility);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 .benchmark-navigator p:not(.eyebrow):not(.benchmark-search-status) {
   color: var(--muted);
   font-size: 0.8rem;

@@ -529,6 +529,7 @@ def write_catalog(
 def build_benchmark_index(
     records: list[dict[str, Any]],
     series_by_key: dict[str, dict[str, Any]] | None = None,
+    observations: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     """The small search payload: one entry per source record, never per merge.
 
@@ -538,6 +539,21 @@ def build_benchmark_index(
     it is invisible. One row per record keeps a bad grouping a display bug.
     """
     series_by_key = series_by_key or {}
+    models_by_key: dict[str, dict[str, dict[str, Any]]] = {}
+    for observation in observations or []:
+        name = observation.get("model_name")
+        if not name or not isinstance(observation.get("value"), (int, float)):
+            continue
+        models = models_by_key.setdefault(observation["key"], {})
+        # One model name per source benchmark. Keep the most recent recorded
+        # date and its precision; a model release is not an evaluation update.
+        current = models.get(name)
+        if current is None or (observation.get("reported_date") or "") > (current["date"] or ""):
+            models[name] = {
+                "name": name,
+                "date": observation.get("reported_date"),
+                "date_precision": observation.get("date_precision"),
+            }
     index: list[dict[str, Any]] = []
     for record in records:
         openness = record.get("openness") or {}
@@ -589,6 +605,10 @@ def build_benchmark_index(
                 "openness": openness.get("status", "unknown"),
                 "modality": record.get("modality"),
                 "score_count": series.get("observation_count", 0),
+                "scored_models": sorted(
+                    models_by_key.get(record["key"], {}).values(),
+                    key=lambda model: model["name"].lower(),
+                ),
                 "score_summary": series.get("score_summary"),
                 "score_direction": series.get("direction"),
                 "unit": series.get("unit"),
