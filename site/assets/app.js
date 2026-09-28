@@ -5995,7 +5995,7 @@ function catalogSourceTable(source, payload) {
 function catalogScoreResults(source, rows) {
   if (!rows.length) return null;
   const meta = catalogSourceMeta(source);
-  const ordered = [...rows].sort((a, b) =>
+  const ordered = rows.slice().sort((a, b) =>
     String(b.reported_date || "").localeCompare(String(a.reported_date || "")) ||
     String(a.model_name || "").localeCompare(String(b.model_name || "")) ||
     String(a.obs_id || "").localeCompare(String(b.obs_id || "")));
