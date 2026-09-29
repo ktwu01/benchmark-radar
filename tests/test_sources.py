@@ -636,6 +636,22 @@ def test_github_preserves_creation_and_update_times(monkeypatch):
     assert items[0].event_kind == "updated"
 
 
+def test_github_keeps_missing_forks_unknown(monkeypatch):
+    row = _github_row(1)
+    row.pop("forks_count")
+    row["stargazers_count"] = 0
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, params=None, headers=None: {"items": [row]},
+    )
+    items = fetch_github(
+        {"queries": ["benchmark"], "request_delay_seconds": 0},
+        datetime(2026, 7, 26, tzinfo=UTC),
+        10,
+    )
+    assert items[0].metrics == {"stars": 0.0}
+
+
 def test_github_config_discovers_and_routes_rsi_exam(monkeypatch):
     """Issue #408: the named benchmark matched no configured GitHub query."""
     config = yaml.safe_load(Path("config.yml").read_text(encoding="utf-8"))
@@ -1116,6 +1132,33 @@ def _openaire_rows_payload(*rows):
 
 def _openaire_payload(**fields):
     return _openaire_rows_payload(_openaire_row(**fields))
+
+
+@pytest.mark.parametrize(
+    "state,counts,expected",
+    [
+        ("missing", (None, None, None), {}),
+        ("null", (None, None, None), {}),
+        ("empty", ("", "", ""), {}),
+        ("zero", (0, 0, 0), {"citations": 0.0, "downloads": 0.0, "views": 0.0}),
+        ("positive", (3, 13, 21), {"citations": 3.0, "downloads": 13.0, "views": 21.0}),
+        ("mixed", (None, 0, 7), {"downloads": 0.0, "views": 7.0}),
+    ],
+)
+def test_openaire_preserves_unknown_and_reported_counters(monkeypatch, state, counts, expected):
+    # Review #704: the new connector still converted unknown counters to zero,
+    # even though the shared rule requires omission and retains measured zero.
+    citations = {} if state == "missing" else {"citationCount": counts[0]}
+    usage = {} if state == "missing" else {"downloads": counts[1], "views": counts[2]}
+    row = _openaire_row(indicators={"citationImpact": citations, "usageCounts": usage})
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _openaire_rows_payload(row),
+    )
+    items = fetch_openaire({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+    assert len(items) == 1
+    assert items[0].metrics == expected
+    assert items[0].source_id == row["id"]
 
 
 def test_openaire_preserves_upstream_metadata_and_bounds_the_query(monkeypatch):
@@ -1644,7 +1687,7 @@ def test_openaire_preserves_a_product_that_carries_almost_nothing(monkeypatch):
     item = items[0]
     assert item.url == "https://doi.org/10.1000/sparse"
     assert item.artifact_urls == ["https://doi.org/10.1000/sparse"]
-    assert item.metrics == {"citations": 0.0, "downloads": 0.0, "views": 0.0}
+    assert item.metrics == {}
     assert item.authors == []
     assert item.organizations == []
     assert item.summary == ""
@@ -1743,6 +1786,34 @@ def _datacite_rows_payload(*rows):
         "meta": {"total": len(rows)},
         "links": {"self": "https://api.datacite.org/dois"},
     }
+
+
+@pytest.mark.parametrize(
+    "state,counts,expected",
+    [
+        ("missing", (None, None, None), {}),
+        ("null", (None, None, None), {}),
+        ("empty", ("", "", ""), {}),
+        ("zero", (0, 0, 0), {"citations": 0.0, "downloads": 0.0, "views": 0.0}),
+        ("positive", (3, 13, 21), {"citations": 3.0, "downloads": 13.0, "views": 21.0}),
+        ("mixed", (None, 0, 7), {"downloads": 0.0, "views": 7.0}),
+    ],
+)
+def test_datacite_preserves_unknown_and_reported_counters(monkeypatch, state, counts, expected):
+    row = _datacite_row()
+    for field, count in zip(("citationCount", "downloadCount", "viewCount"), counts, strict=True):
+        if state == "missing":
+            row["attributes"].pop(field)
+        else:
+            row["attributes"][field] = count
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _datacite_rows_payload(row),
+    )
+    items = fetch_datacite({"searches": ["benchmark"]}, datetime(2026, 7, 26, tzinfo=UTC), 10)
+    assert len(items) == 1
+    assert items[0].metrics == expected
+    assert items[0].source_id == row["id"]
 
 
 def test_datacite_preserves_doi_metadata_and_bounds_the_query(monkeypatch):
@@ -2045,7 +2116,7 @@ def test_datacite_preserves_a_deposit_that_carries_almost_nothing(monkeypatch):
 
     item = items[0]
     assert item.artifact_urls == ["https://doi.org/10.5281/zenodo.1"]
-    assert item.metrics == {"citations": 0.0, "downloads": 0.0, "views": 0.0}
+    assert item.metrics == {}
     assert item.authors == []
     assert item.organizations == []
     assert item.summary == ""
@@ -2443,6 +2514,26 @@ def test_github_release_popularity_comes_from_repository_metadata(monkeypatch):
         radar_item.published_at,
     )
     assert radar_item.adoption_score > 0
+
+
+def test_github_release_omits_incomplete_download_totals_and_repository_counters(monkeypatch):
+    release = {
+        "tag_name": "v2",
+        "html_url": "https://github.com/example/benchmark/releases/tag/v2",
+        "published_at": "2026-07-27T12:00:00Z",
+        "assets": [{"download_count": 4}, {"name": "missing-count.zip"}],
+    }
+
+    def fake_get_json(url, **kwargs):
+        return [release] if url.endswith("/releases") else {"stargazers_count": 0}
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+    item = fetch_github_releases(
+        {"repositories": ["example/benchmark"], "repository_metadata_requests": 1},
+        datetime(2026, 7, 26, tzinfo=UTC),
+        10,
+    )[0]
+    assert item.metrics == {"stars": 0.0}
 
 
 def test_github_release_repository_counters_are_covered_by_raw_hash(monkeypatch):
@@ -3163,6 +3254,26 @@ def test_huggingface_preserves_creation_and_update_times(monkeypatch):
     assert items[0].published_at == datetime(2026, 6, 1, tzinfo=UTC)
     assert items[0].updated_at == datetime(2026, 7, 27, 12, tzinfo=UTC)
     assert items[0].event_kind == "updated"
+
+
+def test_huggingface_does_not_publish_absent_counters_as_zero(monkeypatch):
+    # A missing API field is unknown, while a reported zero is a real measurement.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, params: [
+            {
+                "id": "org/benchmark",
+                "lastModified": "2026-07-27T12:00:00Z",
+                "likes": 0,
+            }
+        ],
+    )
+    items = fetch_huggingface(
+        {"kinds": ["datasets"], "searches": ["benchmark"]},
+        datetime(2026, 7, 26, tzinfo=UTC),
+        10,
+    )
+    assert items[0].metrics == {"likes": 0.0}
 
 
 def test_huggingface_filters_future_rows_before_the_local_cap(monkeypatch):
