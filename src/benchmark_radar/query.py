@@ -148,6 +148,17 @@ def _matches_filter(record: dict[str, Any], filters: dict[str, Any]) -> bool:
     return True
 
 
+def _collector_state(health: dict[str, Any]) -> str:
+    error = str(health.get("error") or "")
+    if health.get("ok") is True:
+        return "warning" if error else "healthy"
+    # Optional API sources are deliberately disabled when their key is absent.
+    # Do not confuse that configuration choice with an upstream outage.
+    if re.fullmatch(r"RuntimeError: [A-Z][A-Z0-9_]*_API_KEY is not configured", error):
+        return "unconfigured"
+    return "failed"
+
+
 @dataclass(frozen=True, slots=True)
 class _SearchDocument:
     record: dict[str, Any]
@@ -722,6 +733,19 @@ class QueryService:
         missing_shards = sorted(expected_shards - existing_shards)
         validated_shard_count = 0 if missing_shards else self._validate_detail_shards()
         health = {str(item.get("source")): item for item in latest.get("ingest_health") or []}
+        collector_health = [
+            {
+                "source": str(item.get("source")),
+                "state": _collector_state(item),
+                "item_count": item.get("item_count", 0),
+                "method": item.get("method") or "",
+                "error": item.get("error"),
+            }
+            for item in latest.get("ingest_health") or []
+        ]
+        degraded_collectors = [
+            item["source"] for item in collector_health if item["state"] in {"warning", "failed"}
+        ]
         gaps = sorted(
             source
             for source in REQUIRED_SOURCES
@@ -731,7 +755,9 @@ class QueryService:
             "schema_version": QUERY_SCHEMA_VERSION,
             "retrieval_mode": "health_check",
             "data": self._provenance(),
-            "status": "ok" if not gaps and not missing_shards else "degraded",
+            "status": "ok"
+            if not gaps and not missing_shards and not degraded_collectors
+            else "degraded",
             "catalog": {
                 "path": str(self.paths.index),
                 "schema_version": index["schema_version"],
@@ -750,6 +776,8 @@ class QueryService:
                 "latest_generated_at": latest["generated_at"],
                 "required_coverage_complete": not gaps,
                 "required_coverage_gaps": gaps,
+                "degraded_collectors": degraded_collectors,
+                "collector_health": collector_health,
                 "ingest_health": latest.get("ingest_health") or [],
             },
         }

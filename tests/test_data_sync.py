@@ -73,7 +73,14 @@ class _Remote:
         raise AssertionError(f"unexpected URL: {url}")
 
 
-def _source_tree(tmp_path: Path, *, name: str = "Agent Workbench", day: int = 29) -> QueryPaths:
+def _source_tree(
+    tmp_path: Path,
+    *,
+    name: str = "Agent Workbench",
+    day: int = 29,
+    extra_health: list[SourceHealth] | None = None,
+    failed_required: str | None = None,
+) -> QueryPaths:
     index = tmp_path / "source" / "benchmark-index.json"
     shards = tmp_path / "source" / "benchmarks"
     snapshots = tmp_path / "source" / "snapshots"
@@ -128,9 +135,16 @@ def _source_tree(tmp_path: Path, *, name: str = "Agent Workbench", day: int = 29
                 )
             ],
             health=[
-                SourceHealth(source=source, ok=True, item_count=1, method="API")
+                SourceHealth(
+                    source=source,
+                    ok=source != failed_required,
+                    item_count=1 if source != failed_required else 0,
+                    error="timeout" if source == failed_required else None,
+                    method="API",
+                )
                 for source in ("arxiv", "github", "huggingface")
-            ],
+            ]
+            + (extra_health or []),
         ),
         snapshots,
     )
@@ -183,6 +197,24 @@ def test_release_bundle_is_complete_deterministic_and_self_describing(tmp_path: 
             "benchmarks/agent-workbench.json",
             "snapshots/2026-08-29.json",
         ]
+
+
+def test_release_can_package_complete_data_with_optional_collector_outage(tmp_path: Path) -> None:
+    # A failed optional connector is a degraded live-health signal, not a
+    # reason to withhold complete archived catalog and snapshot data.
+    paths = _source_tree(
+        tmp_path,
+        extra_health=[SourceHealth(source="zenodo", ok=False, error="HTTP 429")],
+    )
+    assert QueryService(paths).status()["status"] == "degraded"
+    manifest = build_data_release(paths=paths, output_dir=tmp_path / "published")
+    assert manifest["benchmark_count"] == 1
+
+
+def test_release_still_rejects_missing_required_source_coverage(tmp_path: Path) -> None:
+    paths = _source_tree(tmp_path, failed_required="github")
+    with pytest.raises(ValueError, match="incomplete Benchmark Radar dataset"):
+        build_data_release(paths=paths, output_dir=tmp_path / "published")
 
 
 def test_deploy_and_ci_build_the_downloadable_release_after_its_inputs() -> None:
