@@ -151,8 +151,14 @@ def _source_tree(
     return QueryPaths(index=index, shards=shards, snapshots=snapshots)
 
 
-def _release(tmp_path: Path, *, name: str = "Agent Workbench", day: int = 29):
-    paths = _source_tree(tmp_path, name=name, day=day)
+def _release(
+    tmp_path: Path,
+    *,
+    name: str = "Agent Workbench",
+    day: int = 29,
+    extra_health: list[SourceHealth] | None = None,
+):
+    paths = _source_tree(tmp_path, name=name, day=day, extra_health=extra_health)
     output = tmp_path / "published"
     manifest = build_data_release(paths=paths, output_dir=output)
     bundle_path = output / manifest["artifact"]["filename"]
@@ -209,6 +215,19 @@ def test_release_can_package_complete_data_with_optional_collector_outage(tmp_pa
     assert QueryService(paths).status()["status"] == "degraded"
     manifest = build_data_release(paths=paths, output_dir=tmp_path / "published")
     assert manifest["benchmark_count"] == 1
+
+
+def test_optional_collector_outage_does_not_block_init_or_sync(tmp_path: Path) -> None:
+    manifest, bundle, manifest_url = _release(
+        tmp_path,
+        extra_health=[SourceHealth(source="zenodo", ok=False, error="HTTP 429")],
+    )
+    remote = _Remote(manifest_url, manifest, bundle)
+    store = DataStore(root=tmp_path / "home", manifest_url=manifest_url, urlopen=remote.urlopen)
+
+    assert store.initialize()["status"] == "initialized"
+    assert QueryService(store.query_paths()).status()["status"] == "degraded"
+    assert store.sync()["status"] == "current"
 
 
 def test_release_still_rejects_missing_required_source_coverage(tmp_path: Path) -> None:

@@ -83,6 +83,12 @@ def _read_json(path: Path, *, label: str) -> dict[str, Any]:
     return value
 
 
+def _complete_dataset(status: dict[str, Any]) -> bool:
+    # A historical optional-collector outage is visible in status but does not
+    # invalidate an otherwise complete, checksummed local archive.
+    return status["catalog"]["complete"] and status["radar"]["required_coverage_complete"]
+
+
 class DataStore:
     def __init__(
         self,
@@ -158,9 +164,9 @@ class DataStore:
                 "aside and run `benchmark-radar init` again",
                 code="invalid_local_state",
             ) from error
-        if status["status"] != "ok":
+        if not _complete_dataset(status):
             raise DataSyncError(
-                "the active local dataset is degraded; move the managed data directory "
+                "the active local dataset is incomplete; move the managed data directory "
                 "aside and run `benchmark-radar init` again",
                 code="invalid_local_state",
             )
@@ -459,8 +465,8 @@ class DataStore:
                     snapshots=staging / "snapshots",
                 )
                 staged_status = QueryService(staged_paths).status()
-                if staged_status["status"] != "ok":
-                    raise DataSyncError("downloaded dataset is degraded", code="invalid_artifact")
+                if not _complete_dataset(staged_status):
+                    raise DataSyncError("downloaded dataset is incomplete", code="invalid_artifact")
                 if staged_status["catalog"]["count"] != manifest["benchmark_count"]:
                     raise DataSyncError(
                         "downloaded benchmark count does not match manifest",
