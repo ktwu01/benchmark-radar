@@ -225,6 +225,17 @@ def _request_options(config: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _reported_metrics(payload: dict[str, Any], fields: dict[str, str]) -> dict[str, float]:
+    # An omitted or null upstream counter is unknown, not a measured zero.
+    # Keep an explicit 0 so downstream adoption and trend calculations can
+    # distinguish actual zero activity from an unreported measurement.
+    return {
+        metric: float(payload[source])
+        for metric, source in fields.items()
+        if payload.get(source) is not None and payload[source] != ""
+    }
+
+
 def _openreview_value(content: dict[str, Any], key: str, default: Any = None) -> Any:
     value = content.get(key, default)
     if isinstance(value, dict) and "value" in value:
@@ -490,10 +501,7 @@ def fetch_huggingface(config: dict[str, Any], since: datetime, limit: int) -> li
                     event_kind=(
                         "released" if created is not None and created >= since else "updated"
                     ),
-                    metrics={
-                        "downloads": float(row.get("downloads") or 0),
-                        "likes": float(row.get("likes") or 0),
-                    },
+                    metrics=_reported_metrics(row, {"downloads": "downloads", "likes": "likes"}),
                     raw=row,
                     parser_version="huggingface-hub/1",
                 )
@@ -619,10 +627,9 @@ def fetch_github(config: dict[str, Any], since: datetime, limit: int) -> list[Ra
                     event_kind=(
                         "released" if created is not None and created >= since else "updated"
                     ),
-                    metrics={
-                        "stars": float(row.get("stargazers_count") or 0),
-                        "forks": float(row.get("forks_count") or 0),
-                    },
+                    metrics=_reported_metrics(
+                        row, {"stars": "stargazers_count", "forks": "forks_count"}
+                    ),
                     raw=row,
                     parser_version="github-search/1",
                 )
@@ -739,10 +746,9 @@ def fetch_github_organizations(
                         summary=github_summary(row),
                         event_kind="released",
                         organizations=[organization["display_name"]],
-                        metrics={
-                            "stars": float(row.get("stargazers_count") or 0),
-                            "forks": float(row.get("forks_count") or 0),
-                        },
+                        metrics=_reported_metrics(
+                            row, {"stars": "stargazers_count", "forks": "forks_count"}
+                        ),
                         raw={"repository": row, "organization_tier": organization["tier"]},
                         parser_version=GITHUB_ORGANIZATIONS_PARSER_VERSION,
                     )
@@ -822,11 +828,14 @@ def fetch_kaggle_datasets(
                 authors=(
                     [str(row.get("creatorName") or "").strip()] if row.get("creatorName") else []
                 ),
-                metrics={
-                    "downloads": float(row.get("downloadCount") or 0),
-                    "votes": float(row.get("voteCount") or 0),
-                    "views": float(row.get("viewCount") or 0),
-                },
+                metrics=_reported_metrics(
+                    row,
+                    {
+                        "downloads": "downloadCount",
+                        "votes": "voteCount",
+                        "views": "viewCount",
+                    },
+                ),
                 raw=row,
                 parser_version=KAGGLE_DATASETS_PARSER_VERSION,
             )
@@ -884,7 +893,7 @@ def fetch_huggingface_papers(
             event_kind="discovered",
             authors=authors,
             artifact_urls=sorted(set(artifact_urls)),
-            metrics={"upvotes": float(paper.get("upvotes") or 0)},
+            metrics=_reported_metrics(paper, {"upvotes": "upvotes"}),
             raw=row,
             parser_version=HUGGINGFACE_PAPERS_PARSER_VERSION,
         )
@@ -953,10 +962,7 @@ def fetch_zenodo_records(
                     if isinstance(creator, dict) and str(creator.get("name") or "").strip()
                 ],
                 artifact_urls=artifact_urls,
-                metrics={
-                    "downloads": float(stats.get("downloads") or 0),
-                    "views": float(stats.get("views") or 0),
-                },
+                metrics=_reported_metrics(stats, {"downloads": "downloads", "views": "views"}),
                 raw=row,
                 parser_version="zenodo-records/1",
             )
@@ -1118,7 +1124,7 @@ def fetch_crossref(
                 authors=author_names,
                 organizations=list(dict.fromkeys(organizations)),
                 artifact_urls=[doi_url],
-                metrics={"citations": float(row.get("is-referenced-by-count") or 0)},
+                metrics=_reported_metrics(row, {"citations": "is-referenced-by-count"}),
                 raw=row,
                 parser_version="crossref-works/1",
             )
@@ -1337,10 +1343,13 @@ def fetch_semantic_scholar(
                         if isinstance(author, dict) and author.get("name")
                     ],
                     artifact_urls=sorted(set(artifact_urls)),
-                    metrics={
-                        "citations": float(row.get("citationCount") or 0),
-                        "influential_citations": float(row.get("influentialCitationCount") or 0),
-                    },
+                    metrics=_reported_metrics(
+                        row,
+                        {
+                            "citations": "citationCount",
+                            "influential_citations": "influentialCitationCount",
+                        },
+                    ),
                     raw=row,
                     parser_version="semantic-scholar-graph/1",
                 )
@@ -1468,6 +1477,14 @@ def fetch_github_releases(
                     isinstance(asset, dict) for asset in assets
                 ):
                     raise ConnectorPayloadError("GitHub release assets must be an array")
+                # A release with no assets has zero downloads; an omitted assets
+                # list or an asset without its counter has unknown downloads.
+                download_metrics = (
+                    {"downloads": float(sum(int(asset["download_count"]) for asset in assets))}
+                    if row.get("assets") is not None
+                    and all(asset.get("download_count") not in (None, "") for asset in assets)
+                    else {}
+                )
                 found[f"{repository}@{tag}"] = RadarItem(
                     source="GitHub Release",
                     source_id=f"{repository}@{tag}",
@@ -1483,15 +1500,7 @@ def fetch_github_releases(
                         else []
                     ),
                     artifact_urls=[f"https://github.com/{repository}"],
-                    metrics={
-                        "downloads": float(
-                            sum(
-                                int(asset.get("download_count") or 0)
-                                for asset in assets
-                                if isinstance(asset, dict)
-                            )
-                        )
-                    },
+                    metrics=download_metrics,
                     raw=row,
                     parser_version=GITHUB_RELEASE_PARSER_VERSION,
                 )
@@ -1529,8 +1538,9 @@ def fetch_github_releases(
             )
             if not isinstance(repository_payload, dict):
                 raise ConnectorPayloadError("GitHub repository metadata was not an object")
-            stars = float(repository_payload.get("stargazers_count") or 0)
-            forks = float(repository_payload.get("forks_count") or 0)
+            popularity = _reported_metrics(
+                repository_payload, {"stars": "stargazers_count", "forks": "forks_count"}
+            )
         except Exception as error:
             config.setdefault("_source_warnings", []).append(
                 f"{repository} metadata: {type(error).__name__}: {error}"
@@ -1539,7 +1549,7 @@ def fetch_github_releases(
         for item in found.values():
             if not item.source_id.startswith(f"{repository}@"):
                 continue
-            item.metrics.update({"stars": stars, "forks": forks})
+            item.metrics.update(popularity)
             item.raw = {"release": item.raw, "repository": repository_payload}
     return sorted(found.values(), key=lambda item: item.published_at, reverse=True)[:limit]
 
@@ -1638,7 +1648,7 @@ def fetch_openalex(
                 event_kind="released",
                 authors=[author for author in authors if author],
                 organizations=organizations,
-                metrics={"citations": float(row.get("cited_by_count") or 0)},
+                metrics=_reported_metrics(row, {"citations": "cited_by_count"}),
                 raw=row,
                 parser_version="openalex-works/1",
             )
