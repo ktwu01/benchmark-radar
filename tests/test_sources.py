@@ -28,7 +28,37 @@ from benchmark_radar.sources import (
     fetch_semantic_scholar,
     fetch_zenodo_records,
     github_release_title,
+    load_reviewed_arxiv_backfill,
 )
+
+
+def test_reviewed_arxiv_backfill_uses_cited_historical_records():
+    items = load_reviewed_arxiv_backfill(
+        Path("data/arxiv_backfill.yml"), now=datetime(2026, 9, 29, tzinfo=UTC)
+    )
+    assert {item.source_id for item in items} == {"2602.16763", "2602.11898"}
+    assert all(item.event_kind == "discovered" for item in items)
+    assert all(item.url == f"https://arxiv.org/abs/{item.source_id}" for item in items)
+
+
+def test_reviewed_arxiv_backfill_rejects_uncited_or_duplicate_identity(tmp_path):
+    path = tmp_path / "reviewed.yml"
+    row = {
+        "id": "2602.16763",
+        "url": "https://unrelated.example/paper",
+        "title": "When AI Benchmarks Plateau",
+        "published_at": "2026-02-18T16:51:37Z",
+        "updated_at": "2026-08-06T17:25:29Z",
+    }
+    path.write_text(yaml.safe_dump({"schema_version": 1, "records": [row]}), encoding="utf-8")
+    with pytest.raises(ConnectorPayloadError, match="must cite"):
+        load_reviewed_arxiv_backfill(path, now=datetime(2026, 9, 29, tzinfo=UTC))
+
+    row["url"] = "https://arxiv.org/abs/2602.16763"
+    path.write_text(yaml.safe_dump({"schema_version": 1, "records": [row, row]}), encoding="utf-8")
+    with pytest.raises(ConnectorPayloadError, match="duplicate reviewed arXiv id"):
+        load_reviewed_arxiv_backfill(path, now=datetime(2026, 9, 29, tzinfo=UTC))
+
 
 FIRST_PARTY_RSS = """\
 <rss version="2.0"><channel>

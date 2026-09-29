@@ -11,6 +11,10 @@ sources below, run the generators in order, and measure the rebuilt outputs.
    `benchmark-radar` run writes its durable evidence to
    `data/snapshots/YYYY-MM-DD.json`. Those dated snapshots are the source of
    truth for cumulative observations, artifacts, source health, and history.
+   `data/arxiv_backfill.yml` holds individually reviewed historical arXiv
+   records missed by the forward-only RSS window. The arXiv connector feeds
+   those records through the same discovery-state, scoring, and snapshot path
+   as live items; adding a row never changes a generated artifact directly.
 2. **Benchmark registry snapshots.** `data/leaderboard_snapshots.yml` registers
    immutable crawl inputs under `data/leaderboard_snapshots/`. The reviewed
    join rules are `data/catalog/identity.yml` and

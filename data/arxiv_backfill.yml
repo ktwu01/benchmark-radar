@@ -1,0 +1,17 @@
+# Reviewed arXiv records missed because category RSS only announces new papers.
+# Verify dates, title, and excerpt against each linked arXiv abstract page.
+# These records enter the daily snapshot once; they are not new releases.
+schema_version: 1
+records:
+  - id: "2602.16763"
+    url: https://arxiv.org/abs/2602.16763
+    title: "When AI Benchmarks Plateau: A Systematic Study of Benchmark Saturation"
+    published_at: "2026-02-18T16:51:37Z"
+    updated_at: "2026-08-06T17:25:29Z"
+    abstract_excerpt: "We find that nearly half of our benchmarks exhibit saturation, with rates increasing with age."
+  - id: "2602.11898"
+    url: https://arxiv.org/abs/2602.11898
+    title: "Benchmark Illusion: Disagreement among LLMs and Its Scientific Consequences"
+    published_at: "2026-02-12T12:53:39Z"
+    updated_at: "2026-02-12T12:53:39Z"
+    abstract_excerpt: "apparent convergence in benchmark accuracy can conceal deep epistemic divergence."

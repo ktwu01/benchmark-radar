@@ -7,6 +7,7 @@ import re
 from collections import Counter
 from copy import deepcopy
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
@@ -14,7 +15,12 @@ from . import rubric
 from .attention import fetch_attention_feeds
 from .corpus import exact_artifact_keys
 from .models import RadarItem, RadarRun, SourceHealth
-from .sources import FUTURE_TIMESTAMP_TOLERANCE, SOURCE_FETCHERS, collection_method
+from .sources import (
+    FUTURE_TIMESTAMP_TOLERANCE,
+    SOURCE_FETCHERS,
+    collection_method,
+    load_reviewed_arxiv_backfill,
+)
 
 TRACKING_PARAMETERS = {"ref", "source", "utm_campaign", "utm_content", "utm_medium", "utm_source"}
 
@@ -786,6 +792,14 @@ def run_pipeline(
                 fetched = fetcher(fetch_config, since, limit, now=now)
             else:
                 fetched = fetcher(fetch_config, since, limit)
+            if source_name == "arxiv" and source_config.get("reviewed_backfill"):
+                reviewed = load_reviewed_arxiv_backfill(
+                    Path(source_config["reviewed_backfill"]), now=now
+                )
+                # A live feed item is newer evidence for the same exact arXiv
+                # id. Keep it when both paths happen to surface one paper.
+                live_ids = {item.source_id for item in fetched}
+                fetched.extend(item for item in reviewed if item.source_id not in live_ids)
             connector_rejected = int(fetch_config.get("_future_rejections", 0) or 0)
             fetched_count += len(fetched) + connector_rejected
             fetched, rejected_future = _drop_future_dated_items(fetched, now=now)

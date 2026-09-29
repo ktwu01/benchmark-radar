@@ -85,7 +85,14 @@ def _emit_persistent_source_warnings(run, config: dict) -> None:
 
 def load_config(path: Path) -> dict:
     with path.open(encoding="utf-8") as handle:
-        return yaml.safe_load(handle)
+        config = yaml.safe_load(handle)
+    arxiv = (config.get("sources") or {}).get("arxiv") or {}
+    if arxiv.get("reviewed_backfill"):
+        backfill = Path(arxiv["reviewed_backfill"])
+        arxiv["reviewed_backfill"] = str(
+            backfill if backfill.is_absolute() else path.parent / backfill
+        )
+    return config
 
 
 def main() -> None:
