@@ -1642,7 +1642,13 @@ def fetch_openalex(
                 raw=row,
                 parser_version="openalex-works/1",
             )
-    return list(found.values())
+    # Every search has a separate API cap; trim their union to the source's
+    # newest records so additional queries cannot inflate the collection cap.
+    return sorted(
+        found.values(),
+        key=lambda item: (item.published_at, item.source_id),
+        reverse=True,
+    )[:limit]
 
 
 # Brave's freshness range is date-granular and inclusive. `since` plus the
