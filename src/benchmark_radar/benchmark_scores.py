@@ -198,6 +198,10 @@ def load_scores(path: Path = DEFAULT_SCORES_PATH) -> dict[str, Any]:
         benchmark_id = str(result["benchmark_id"])
         if benchmark_id not in metrics:
             raise BenchmarkScoreError(f"{label} references unknown benchmark_id {benchmark_id!r}")
+        # YAML's true/false are Python numbers, but they are not measurements.
+        # Refuse them before float() silently manufactures a score of 1 or 0.
+        if isinstance(result["value"], bool):
+            raise BenchmarkScoreError(f"{label} value must be a number")
         try:
             value = float(result["value"])
         except (TypeError, ValueError) as error:

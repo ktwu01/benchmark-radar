@@ -92,6 +92,21 @@ def test_load_scores_rejects_a_percent_outside_its_own_range(tmp_path):
         load_scores(path)
 
 
+@pytest.mark.parametrize("value", [True, False])
+def test_boolean_values_do_not_become_reported_scores(tmp_path, value):
+    # YAML booleans convert to 1.0/0.0 through float(), inventing a measured
+    # number and potentially a record-setting low for lower-is-better metrics.
+    path = write_scores(tmp_path, minimal_scores(results=[result(value=value)]))
+    with pytest.raises(BenchmarkScoreError, match="value must be a number"):
+        load_scores(path)
+
+
+@pytest.mark.parametrize("value", [0, 1, 0.0, 1.0, "0", "1"])
+def test_numeric_zero_and_one_remain_valid_scores(tmp_path, value):
+    path = write_scores(tmp_path, minimal_scores(results=[result(value=value)]))
+    assert load_scores(path)["results"][0]["value"] == float(value)
+
+
 def test_load_scores_rejects_a_non_finite_value(tmp_path):
     # Codex P2. YAML's `.nan` and `.inf` parse as floats, and NaN fails every
     # range comparison silently rather than tripping the percent check. Either
