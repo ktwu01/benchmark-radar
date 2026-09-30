@@ -50,6 +50,13 @@ DEFAULT_REGISTRY_PATH = Path("data/model_cards.yml")
 _REQUIRED_BENCHMARK_FIELDS = ("id", "name", "domain", "caveat")
 _REQUIRED_CARD_FIELDS = ("id", "organization", "model", "url", "benchmarks")
 _REQUIRED_SOURCE_DOCUMENT_FIELDS = ("id", "name", "publisher", "url", "document_type", "benchmarks")
+_DOCUMENT_TYPES = (
+    "model_card",
+    "system_card",
+    "technical_report",
+    "release_post",
+    "benchmark_leaderboard",
+)
 
 
 def _benchmark_summary(benchmark: dict[str, Any]) -> dict[str, Any]:
@@ -200,6 +207,16 @@ def load_registry(path: Path = DEFAULT_REGISTRY_PATH) -> dict[str, Any]:
         if card_id in seen_cards:
             raise ModelCardRegistryError(f"{path}: duplicate model card id {card_id!r}")
         seen_cards.add(card_id)
+        # A misspelled type must not publish an invented evidence category.
+        # Omission keeps the documented model_card default for older entries.
+        if "document_type" in card and (
+            not isinstance(card["document_type"], str)
+            or card["document_type"] not in _DOCUMENT_TYPES
+        ):
+            raise ModelCardRegistryError(
+                f"{path}: model card {card_id!r} document_type must be one of "
+                f"{', '.join(_DOCUMENT_TYPES)}"
+            )
         # The counting unit is the document, so the same document entered twice
         # under two ids would add two adoptions to every benchmark it lists and
         # reorder the ranking. A distinct id is not evidence of a distinct

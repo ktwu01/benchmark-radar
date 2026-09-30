@@ -82,6 +82,41 @@ def test_shipped_registry_loads_and_ranks():
     } <= set(board["organizations"])
 
 
+@pytest.mark.parametrize("document_type", ["system_crad", "", None, False, ["model_card"]])
+def test_provided_document_types_must_name_a_supported_evidence_kind(tmp_path, document_type):
+    # A typo used to reach every catalog document as an invented provenance
+    # category instead of failing at the curated registry boundary.
+    document = minimal_registry()
+    document["model_cards"][0]["document_type"] = document_type
+    with pytest.raises(ModelCardRegistryError, match="document_type must be one of"):
+        load_registry(write_registry(tmp_path, document))
+
+
+@pytest.mark.parametrize(
+    "document_type",
+    ["model_card", "system_card", "technical_report", "release_post", "benchmark_leaderboard"],
+)
+def test_documented_model_report_types_remain_supported(tmp_path, document_type):
+    document = minimal_registry()
+    document["model_cards"][0]["document_type"] = document_type
+    assert (
+        load_registry(write_registry(tmp_path, document))["model_cards"][0]["document_type"]
+        == document_type
+    )
+
+
+def test_omitted_document_type_keeps_the_model_card_default(tmp_path):
+    document = minimal_registry()
+    del document["model_cards"][0]["document_type"]
+    registry = load_registry(write_registry(tmp_path, document))
+    card = next(
+        card
+        for card in adoption_rank(registry)["model_cards"]
+        if card["model_card_id"] == "org_one_card"
+    )
+    assert card["document_type"] == "model_card"
+
+
 def test_rank_is_total_and_deterministic():
     board = adoption_rank(load_registry(DEFAULT_REGISTRY_PATH))
     entries = board["entries"]
