@@ -402,6 +402,84 @@ def test_search_filters_before_ranking(tmp_path: Path) -> None:
     ]
 
 
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://example.org/?repo=github.com/a/b&paper=arxiv.org/abs/2601.12345"
+        "&dataset=huggingface.co/datasets/a/b",
+        "https://example.org/github.com/arxiv.org/huggingface.co/datasets/a/b",
+        "https://github.com.evil.example/arxiv.org/huggingface.co/datasets/a/b",
+        "https://arxiv.org.evil.example/github.com/huggingface.co/datasets/a/b",
+        "https://huggingface.co.evil.example/datasets/a/b?paper=arxiv.org&repo=github.com",
+        "https://github.com@evil.example/?paper=arxiv.org&dataset=kaggle.com/datasets/a/b",
+    ],
+)
+def test_radar_artifact_filters_use_url_authority_instead_of_embedded_text(
+    tmp_path: Path, url: str
+) -> None:
+    # Regression: domain strings in unrelated URLs falsely satisfied artifact filters.
+    paths = _catalog(tmp_path)
+    path = next(paths.snapshots.glob("*.json"))
+    snapshot = json.loads(path.read_text(encoding="utf-8"))
+    snapshot["evidence_items"][0]["url"] = url
+    snapshot["evidence_items"][0]["artifact_urls"] = []
+    path.write_text(json.dumps(snapshot), encoding="utf-8")
+    service = QueryService(paths)
+    candidate = service.search("agent", scope="radar")["results"][0]
+    for flag in ("has_repo", "has_paper", "has_dataset"):
+        assert candidate[flag] is False
+        assert service.search("agent", scope="radar", **{flag: True})["count"] == 0
+        assert service.search("agent", scope="radar", **{flag: False})["count"] == 1
+
+
+@pytest.mark.parametrize(
+    ("url", "flag"),
+    [
+        ("https://GITHUB.COM/example/benchmark/tree/main", "has_repo"),
+        ("https://github.com/", "has_repo"),
+        ("https://arxiv.org/abs/2601.12345", "has_paper"),
+        ("https://www.arxiv.org/pdf/2601.12345.pdf", "has_paper"),
+        ("https://arxiv.org/format/hep-th/9901001v3", "has_paper"),
+        ("https://arxiv.org/src/hep-th/9901001v3", "has_paper"),
+        ("https://arxiv.org/ftp/hep-th/papers/9901/9901001.pdf", "has_paper"),
+        ("https://arxiv.org/html/2601.12345v2", "has_paper"),
+        ("https://HUGGINGFACE.CO/datasets/example/benchmark", "has_dataset"),
+        ("https://huggingface.co/datasets/example", "has_dataset"),
+        ("https://www.kaggle.com/datasets/example/benchmark", "has_dataset"),
+    ],
+)
+@pytest.mark.parametrize("location", ["main", "artifact"])
+def test_radar_artifact_filters_keep_first_party_artifact_links(
+    tmp_path: Path, url: str, flag: str, location: str
+) -> None:
+    paths = _catalog(tmp_path)
+    path = next(paths.snapshots.glob("*.json"))
+    snapshot = json.loads(path.read_text(encoding="utf-8"))
+    snapshot["evidence_items"][0]["url"] = (
+        url if location == "main" else "https://example.org/benchmark"
+    )
+    snapshot["evidence_items"][0]["artifact_urls"] = [url] if location == "artifact" else []
+    path.write_text(json.dumps(snapshot), encoding="utf-8")
+
+    result = QueryService(paths).search("agent", scope="radar", **{flag: True})
+    assert result["count"] == 1
+    assert result["results"][0][flag] is True
+
+
+def test_radar_non_string_artifact_urls_do_not_break_url_flags(tmp_path: Path) -> None:
+    # Regression: accepted snapshots may contain an empty artifact object; parsing
+    # it as a URL introduced an AttributeError that the old flags did not raise.
+    paths = _catalog(tmp_path)
+    path = next(paths.snapshots.glob("*.json"))
+    snapshot = json.loads(path.read_text(encoding="utf-8"))
+    snapshot["evidence_items"][0]["url"] = "https://example.org/benchmark"
+    snapshot["evidence_items"][0]["artifact_urls"] = [{}]
+    path.write_text(json.dumps(snapshot), encoding="utf-8")
+
+    candidate = QueryService(paths).search("agent", scope="radar")["results"][0]
+    assert all(candidate[flag] is False for flag in ("has_paper", "has_repo", "has_dataset"))
+
+
 def test_all_scope_keeps_catalog_and_radar_identity_separate(tmp_path: Path) -> None:
     # Regression: same-looking names from two evidence layers are not proven identities.
     service = QueryService(_catalog(tmp_path))
