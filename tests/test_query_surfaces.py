@@ -428,6 +428,37 @@ def test_show_accepts_key_or_slug_and_rejects_missing_shards(tmp_path: Path) -> 
         service.show("opencompass:agent-workbench")
 
 
+@pytest.mark.parametrize("operation", ["show", "status", "validated_catalog_index"])
+@pytest.mark.parametrize(
+    "malformation", ["unsupported_schema", "missing_schema", "wrong_slug", "missing_slug"]
+)
+def test_queries_reject_unsupported_or_mismatched_detail_shards(
+    tmp_path: Path, operation: str, malformation: str
+) -> None:
+    # Regression: matching keys alone let an unknown schema or wrong locator pass as healthy.
+    paths = _catalog(tmp_path)
+    path = paths.shards / "opencompass-agent-workbench.json"
+    shard = json.loads(path.read_text(encoding="utf-8"))
+    if malformation == "unsupported_schema":
+        shard["schema_version"] = 999
+    elif malformation == "missing_schema":
+        del shard["schema_version"]
+    elif malformation == "wrong_slug":
+        shard["record"]["slug"] = "other-benchmark"
+    else:
+        del shard["record"]["slug"]
+    path.write_text(json.dumps(shard), encoding="utf-8")
+    service = QueryService(paths)
+
+    with pytest.raises(QueryError) as captured:
+        if operation == "show":
+            service.show("opencompass-agent-workbench")
+        else:
+            getattr(service, operation)()
+    expected = "unsupported_schema" if "schema" in malformation else "invalid_data"
+    assert captured.value.code == expected
+
+
 def test_recent_and_status_report_snapshot_health(tmp_path: Path) -> None:
     # Regression: freshness without required-source coverage overstates local health.
     service = QueryService(_catalog(tmp_path))
