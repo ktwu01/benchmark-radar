@@ -119,6 +119,10 @@ def _validate_index_record(record: dict[str, Any], *, position: int) -> None:
                 f"{label} {field} must be a non-empty string",
                 code="invalid_data",
             )
+    # Slugs are filenames as well as public locators. Match the catalog page
+    # writer's alphabet so corrupt indexes cannot resolve outside the shard directory.
+    if not re.fullmatch(r"[a-z0-9][a-z0-9_-]*", record["slug"]):
+        raise QueryError(f"{label} slug must be a safe catalog slug", code="invalid_data")
     if not isinstance(record.get("description"), str):
         raise QueryError(f"{label} description must be a string", code="invalid_data")
     for field in ("categories", "languages"):

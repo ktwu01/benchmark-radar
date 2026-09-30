@@ -412,6 +412,27 @@ def test_all_scope_keeps_catalog_and_radar_identity_separate(tmp_path: Path) -> 
     assert len({item["key"] for item in result["results"]}) == len(result["results"])
 
 
+@pytest.mark.parametrize(
+    "slug", ["../outside", "/tmp/outside", "..\\outside", "unsafe/slash", ".", "UPPER"]
+)
+def test_query_rejects_unsafe_catalog_slugs_before_reading_details(
+    tmp_path: Path, slug: str
+) -> None:
+    # Regression: a catalog slug was allowed to read a detail file outside its directory.
+    paths = _catalog(tmp_path)
+    index = json.loads(paths.index.read_text(encoding="utf-8"))
+    record = index["benchmarks"][0]
+    record["slug"] = slug
+    paths.index.write_text(json.dumps(index), encoding="utf-8")
+    outside = paths.shards.parent / "outside.json"
+    outside.write_text(json.dumps({"schema_version": 1, "record": record}), encoding="utf-8")
+
+    with pytest.raises(QueryError) as captured:
+        QueryService(paths).show(record["key"])
+    assert captured.value.code == "invalid_data"
+    assert "slug" in str(captured.value)
+
+
 def test_show_accepts_key_or_slug_and_rejects_missing_shards(tmp_path: Path) -> None:
     # Regression: an index hit without its detail shard must not look complete.
     paths = _catalog(tmp_path)
