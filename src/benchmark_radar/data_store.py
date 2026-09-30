@@ -138,14 +138,6 @@ class DataStore:
         )
 
     def initialize(self) -> dict[str, Any]:
-        if self.state_path.exists():
-            state = self.state()
-            raise DataSyncError(
-                f"Benchmark Radar is already initialized with {state['data_version']}; "
-                "run `benchmark-radar sync`",
-                code="already_initialized",
-                status=409,
-            )
         return self._update(initial=True)
 
     def sync(self) -> dict[str, Any]:
@@ -399,6 +391,16 @@ class DataStore:
 
     def _update(self, *, initial: bool) -> dict[str, Any]:
         with self._lock():
+            # Another initializer can finish before this process acquires the
+            # lock. Recheck here so a stale preflight cannot replace its state.
+            if initial and self.state_path.exists():
+                state = self.state()
+                raise DataSyncError(
+                    f"Benchmark Radar is already initialized with {state['data_version']}; "
+                    "run `benchmark-radar sync`",
+                    code="already_initialized",
+                    status=409,
+                )
             previous = None if initial else self.state()
             if previous is not None:
                 self._cleanup_obsolete()

@@ -7,6 +7,7 @@ import os
 import shutil
 import urllib.error
 import zipfile
+from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -233,6 +234,34 @@ def test_init_downloads_validates_and_queries_managed_data(monkeypatch, tmp_path
     assert service.recent()["results"][0]["source_id"] == "example/agent-bench"
     assert service.status()["catalog"]["validated_shard_count"] == 1
     assert [path.name for path in (store.root / "versions").iterdir()] == [manifest["data_version"]]
+
+
+def test_init_rechecks_existing_state_after_acquiring_lock(monkeypatch, tmp_path: Path) -> None:
+    # A delayed initializer can pass the preflight check, then replace a newer
+    # dataset installed by another process before it acquires the sync lock.
+    old_manifest, old_bundle, url = _release(tmp_path / "old", day=29)
+    new_manifest, new_bundle, _ = _release(tmp_path / "new", day=30)
+    root = tmp_path / "home"
+    winner = DataStore(
+        root=root, manifest_url=url, urlopen=_Remote(url, new_manifest, new_bundle).urlopen
+    )
+    old_remote = _Remote(url, old_manifest, old_bundle)
+    delayed = DataStore(root=root, manifest_url=url, urlopen=old_remote.urlopen)
+    original_lock = delayed._lock
+
+    @contextmanager
+    def complete_competing_init_before_lock():
+        winner.initialize()
+        with original_lock():
+            yield
+
+    monkeypatch.setattr(delayed, "_lock", complete_competing_init_before_lock)
+    with pytest.raises(DataSyncError) as error:
+        delayed.initialize()
+    assert error.value.code == "already_initialized"
+    assert delayed.state()["data_version"] == new_manifest["data_version"]
+    assert old_remote.bundle_requests == 0
+    assert [path.name for path in (root / "versions").iterdir()] == [new_manifest["data_version"]]
 
 
 def test_sync_current_release_does_not_redownload_bundle(tmp_path: Path) -> None:
