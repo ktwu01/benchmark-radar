@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import http.client
 import io
 import json
 import os
@@ -273,6 +274,57 @@ def test_sync_uses_etag_to_avoid_reloading_unchanged_manifest(tmp_path: Path) ->
 
     assert result["status"] == "current"
     assert result["downloaded"] is False
+
+
+@pytest.mark.parametrize("phase", ["manifest", "artifact"])
+@pytest.mark.parametrize(
+    "failure", [http.client.IncompleteRead(b"partial"), ConnectionResetError()]
+)
+def test_sync_body_failure_is_structured_and_keeps_active_data(tmp_path, phase, failure):
+    # Headers can arrive before a transfer fails; the open-only exception
+    # handler leaked tracebacks instead of the CLI's machine-readable error.
+    first, bundle, url = _release(tmp_path / "old", day=29)
+    store = DataStore(
+        root=tmp_path / "home", manifest_url=url, urlopen=_Remote(url, first, bundle).urlopen
+    )
+    store.initialize()
+    previous = store.state_path.read_bytes()
+    next_manifest, next_bundle, _ = _release(tmp_path / "new", day=30)
+    remote = _Remote(url, next_manifest, next_bundle)
+
+    class InterruptedResponse(_Response):
+        def read(self, *args):
+            raise failure
+
+    def interrupted(request, **kwargs):
+        is_manifest = request.full_url == url
+        if is_manifest == (phase == "manifest"):
+            return InterruptedResponse(b"", url=request.full_url)
+        return remote.urlopen(request, **kwargs)
+
+    store.urlopen = interrupted
+    with pytest.raises(DataSyncError) as error:
+        store.sync()
+    assert error.value.code == "remote_unavailable"
+    assert error.value.status == 503
+    assert store.state_path.read_bytes() == previous
+    assert QueryService(store.query_paths()).status()["status"] == "ok"
+    assert not (store.root / ".download.tmp").exists()
+    assert not (store.root / "sync.lock").exists()
+
+
+def test_init_rejects_unsolicited_not_modified_as_structured_error(tmp_path):
+    # There is no local release to reuse on a first install, so an unsolicited
+    # 304 must not flow into _current_result(None).
+    def not_modified(request, **kwargs):
+        assert "If-none-match" not in request.headers
+        raise urllib.error.HTTPError(request.full_url, 304, "Not Modified", {}, None)
+
+    store = DataStore(root=tmp_path / "home", urlopen=not_modified)
+    with pytest.raises(DataSyncError) as error:
+        store.initialize()
+    assert error.value.code == "remote_unavailable"
+    assert not store.state_path.exists()
 
 
 def test_sync_does_not_call_current_when_active_data_is_corrupt(tmp_path: Path) -> None:
