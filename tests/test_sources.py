@@ -2204,3 +2204,24 @@ def test_collection_method_falls_back_to_a_static_default_without_items():
     # leaves nothing to inspect; fall back to the connector's usual method.
     assert collection_method("arxiv", []) == "RSS"
     assert collection_method("brave", []) == "API"
+
+
+def test_github_organization_failures_consume_request_budget(monkeypatch):
+    organizations = [
+        {"login": name, "display_name": name, "tier": "frontier"}
+        for name in ("first", "second", "third")
+    ]
+    calls = []
+    monkeypatch.setattr(
+        "benchmark_radar.sources.load_priority_github_organizations", lambda path: organizations
+    )
+
+    def fake_get_json(url, **kwargs):
+        calls.append(url)
+        raise RequestError("temporary outage")
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+    # Failed requests still spend quota; max_requests used to count successes only.
+    with pytest.raises(RequestError, match="temporary outage"):
+        fetch_github_organizations({"max_requests": 1}, datetime(2026, 8, 8, tzinfo=UTC), 10)
+    assert calls == ["https://api.github.com/orgs/first/repos"]

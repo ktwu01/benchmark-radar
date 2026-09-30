@@ -689,6 +689,9 @@ def fetch_github_organizations(
             for page in range(1, max_pages + 1):
                 if requests_made >= budget or len(found) + len(organization_found) >= limit:
                     break
+                # An outage still spends a request: count before calling so
+                # failed organizations cannot bypass the shared quota cap.
+                requests_made += 1
                 payload = get_json(
                     f"https://api.github.com/orgs/{login}/repos",
                     params={
@@ -701,7 +704,6 @@ def fetch_github_organizations(
                     headers=headers,
                     **_request_options(config),
                 )
-                requests_made += 1
                 if not isinstance(payload, list) or not all(
                     isinstance(row, dict) for row in payload
                 ):
