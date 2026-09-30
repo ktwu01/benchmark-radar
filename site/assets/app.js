@@ -59,6 +59,7 @@ const SOURCE_DISPLAY_NAMES = {
   first_party_feeds: "First-party feed",
   openalex: "OpenAlex",
   brave: "Brave Web",
+  xbsleepy: "XBsleepy",
 };
 
 const sourceDisplayName = (key) =>
