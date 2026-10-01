@@ -1941,6 +1941,9 @@ def fetch_github_releases(
     found: dict[str, RadarItem] = {}
     failures: list[Exception] = []
     for repository in repositories:
+        # Numbered page offsets depend on per_page. Keep it fixed within a
+        # repository so filling the global cap cannot repeat an earlier page.
+        request_page_size = min(page_size, limit - len(found))
         page = 1
         page_limit = max_pages
         while page <= page_limit:
@@ -1954,7 +1957,7 @@ def fetch_github_releases(
             try:
                 payload = get_json(
                     f"https://api.github.com/repos/{repository}/releases",
-                    params={"per_page": min(page_size, limit - len(found)), "page": page},
+                    params={"per_page": request_page_size, "page": page},
                     headers=headers,
                     **_request_options(config),
                 )
@@ -2027,9 +2030,9 @@ def fetch_github_releases(
                     raw=row,
                     parser_version=GITHUB_RELEASE_PARSER_VERSION,
                 )
-            if len(payload) < min(page_size, limit - len(found)) or (
-                oldest is not None and oldest < since
-            ):
+                if len(found) >= limit:
+                    break
+            if len(payload) < request_page_size or (oldest is not None and oldest < since):
                 break
             if rejected_on_page:
                 page_limit += 1
