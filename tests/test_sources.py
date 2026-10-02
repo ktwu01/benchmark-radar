@@ -2204,3 +2204,40 @@ def test_collection_method_falls_back_to_a_static_default_without_items():
     # leaves nothing to inspect; fall back to the connector's usual method.
     assert collection_method("arxiv", []) == "RSS"
     assert collection_method("brave", []) == "API"
+
+
+def test_openalex_caps_union_at_newest_source_records(monkeypatch):
+    monkeypatch.setenv("OPENALEX_API_KEY", "fixture-key")
+    rows = {
+        "first": [
+            {
+                "id": "https://openalex.org/W1",
+                "display_name": "First benchmark",
+                "publication_date": "2026-08-08",
+            },
+            {
+                "id": "https://openalex.org/W2",
+                "display_name": "Second benchmark",
+                "publication_date": "2026-08-09",
+            },
+        ],
+        "second": [
+            {
+                "id": "https://openalex.org/W3",
+                "display_name": "Third benchmark",
+                "publication_date": "2026-08-10",
+            }
+        ],
+    }
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: {"results": rows[kwargs["params"]["search"]]},
+    )
+    # Each query has its own API limit; their union must honor the source cap.
+    items = fetch_openalex(
+        {"searches": ["first", "second"]},
+        datetime(2026, 8, 8, tzinfo=UTC),
+        2,
+        now=datetime(2026, 8, 10, 12, tzinfo=UTC),
+    )
+    assert [item.source_id for item in items] == ["W3", "W2"]
