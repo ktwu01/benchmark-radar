@@ -480,7 +480,8 @@ def fetch_huggingface(config: dict[str, Any], since: datetime, limit: int) -> li
                     source="Hugging Face",
                     source_id=item_id,
                     title=item_id,
-                    url=f"https://huggingface.co/{kind}/{item_id}",
+                    # Hub model pages omit the API's /models kind segment.
+                    url=f"https://huggingface.co/{'' if kind == 'models' else kind + '/'}{item_id}",
                     published_at=created or changed,
                     updated_at=changed,
                     # Never synthesize prose here: `score_item` reads `summary`,

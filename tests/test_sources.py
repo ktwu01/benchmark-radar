@@ -2204,3 +2204,24 @@ def test_collection_method_falls_back_to_a_static_default_without_items():
     # leaves nothing to inspect; fall back to the connector's usual method.
     assert collection_method("arxiv", []) == "RSS"
     assert collection_method("brave", []) == "API"
+
+
+@pytest.mark.parametrize(
+    ("kind", "prefix"), [("models", ""), ("datasets", "datasets/"), ("spaces", "spaces/")]
+)
+def test_huggingface_links_follow_repository_kind_routes(monkeypatch, kind, prefix):
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda *args, **kwargs: [
+            {
+                "id": "lab/benchmark",
+                "createdAt": "2026-08-08T12:00:00Z",
+                "lastModified": "2026-08-08T12:00:00Z",
+            }
+        ],
+    )
+    # Model pages live at /owner/repo; /models/owner/repo was a broken link.
+    items = fetch_huggingface(
+        {"kinds": [kind], "searches": ["benchmark"]}, datetime(2026, 8, 8, tzinfo=UTC), 10
+    )
+    assert items[0].url == f"https://huggingface.co/{prefix}lab/benchmark"
