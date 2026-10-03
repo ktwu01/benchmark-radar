@@ -97,7 +97,7 @@ def _read_object(path: Path, *, label: str) -> dict[str, Any]:
             code="data_unavailable",
             status=503,
         ) from error
-    except (OSError, json.JSONDecodeError) as error:
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
         raise QueryError(
             f"cannot read {label} at {path}: {type(error).__name__}: {error}",
             code="invalid_data",

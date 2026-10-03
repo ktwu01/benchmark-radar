@@ -672,6 +672,68 @@ def test_cli_can_filter_for_absent_artifacts(tmp_path: Path, capsys) -> None:
     assert [item["key"] for item in payload["results"]] == ["llm-stats:agent-workbench-extended"]
 
 
+@pytest.mark.parametrize("artifact", ["index", "shard"])
+def test_invalid_utf8_catalog_artifacts_are_machine_readable_cli_errors(
+    tmp_path: Path, capsys, artifact: str
+) -> None:
+    # Regression: decoding corrupt local data escaped as a UnicodeDecodeError traceback.
+    paths = _catalog(tmp_path)
+    if artifact == "index":
+        paths.index.write_bytes(b"\xff")
+        arguments = ["search", "agent"]
+    else:
+        (paths.shards / "opencompass-agent-workbench.json").write_bytes(b"\xff")
+        arguments = ["show", "opencompass-agent-workbench"]
+
+    exit_code = run_query_cli(
+        [
+            *arguments,
+            "--json",
+            "--index",
+            str(paths.index),
+            "--shards",
+            str(paths.shards),
+            "--snapshots",
+            str(paths.snapshots),
+        ]
+    )
+    captured = capsys.readouterr()
+    assert exit_code == 1
+    assert captured.out == ""
+    error = json.loads(captured.err)["error"]
+    assert error["code"] == "invalid_data"
+    assert "UnicodeDecodeError" in error["message"]
+
+
+@pytest.mark.parametrize("artifact", ["index", "shard"])
+def test_invalid_utf8_catalog_artifacts_keep_the_http_data_error(
+    tmp_path: Path, artifact: str
+) -> None:
+    # The HTTP wrapper must preserve the service's actionable data error as well.
+    paths = _catalog(tmp_path)
+    if artifact == "index":
+        paths.index.write_bytes(b"\xff")
+        route = "/api/v1/search?q=agent"
+    else:
+        (paths.shards / "opencompass-agent-workbench.json").write_bytes(b"\xff")
+        route = "/api/v1/benchmarks/opencompass-agent-workbench"
+    server = create_query_server(QueryService(paths), host="127.0.0.1", port=0)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        with pytest.raises(urllib.error.HTTPError) as captured:
+            urllib.request.urlopen(f"http://127.0.0.1:{server.server_port}{route}", timeout=5)
+        payload = json.loads(captured.value.read())
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+    assert captured.value.code == 500
+    assert payload["error"]["code"] == "invalid_data"
+    assert "UnicodeDecodeError" in payload["error"]["message"]
+
+
 def test_malformed_index_is_a_machine_readable_cli_error(tmp_path: Path, capsys) -> None:
     # Regression: malformed rows escaped as KeyError tracebacks instead of JSON errors.
     paths = _catalog(tmp_path)
