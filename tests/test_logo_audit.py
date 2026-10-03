@@ -190,7 +190,9 @@ def test_review_ids_are_frozen_so_feedback_survives_a_rebuild():
     assert "Google DeepMind" not in organizations
 
 
-def test_every_model_that_draws_a_point_has_a_card_whichever_layer_it_came_from():
+def test_every_model_that_draws_a_point_has_a_card_whichever_layer_it_came_from(
+    rebuilt_logo_registry,
+):
     """Issue #268: Gemini had a card and MiMo did not.
 
     The registry read crawled shards for organization names and threw away the
@@ -198,7 +200,7 @@ def test_every_model_that_draws_a_point_has_a_card_whichever_layer_it_came_from(
     had no card on the page that exists to get marks reviewed. Both layers
     resolve their mark through the same `modelIcon` call, so both belong here.
     """
-    registry = json.loads(Path("site/data/logo-registry.json").read_text(encoding="utf-8"))
+    registry = rebuilt_logo_registry
     models = registry["models"]
     # Layers live in models.json, the one structure that answers which models
     # exist; the logo registry only freezes what each is called in review.

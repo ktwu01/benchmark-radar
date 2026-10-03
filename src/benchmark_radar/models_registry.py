@@ -6,6 +6,7 @@ import json
 import re
 from collections import Counter
 from dataclasses import dataclass, field
+from hashlib import sha256
 from pathlib import Path
 from typing import Any
 
@@ -14,7 +15,7 @@ DEFAULT_REGISTRY_OUTPUT = Path("site/data/models.json")
 
 
 def model_key(model: str, organization: str) -> str:
-    """Stable display identity; each evidence row retains its source model ID."""
+    """Readable base slug; collisions are resolved after exact label grouping."""
     slug = re.sub(r"[^a-z0-9]+", "-", f"{organization} {model}".lower()).strip("-")
     return slug or "unnamed"
 
@@ -58,16 +59,23 @@ def build_registry(radar: dict[str, Any], shard_dir: Path) -> dict[str, ModelRec
     Display labels choose the same deterministic spelling regardless of source or
     input order. This does not merge distinct source model IDs used by chart counts.
     """
-    registry: dict[str, ModelRecord] = {}
+    by_identity: dict[tuple[str, str], ModelRecord] = {}
     seen: set[tuple[str, str]] = set()
 
     def add(source: str, evidence_id: str, model: str, organization: str, payload: dict) -> None:
         if not model or not organization or (source, evidence_id) in seen:
             return
         seen.add((source, evidence_id))
+        # A filename-safe slug discards meaningful characters (Command A+)
+        # and organization/model boundaries. It cannot establish equivalence.
+        # Only case-only spellings of the same two labels share a record.
+        identity = (organization.lower(), model.lower())
         key = model_key(model, organization)
-        record = registry.setdefault(key, ModelRecord(key, model, organization))
+        record = by_identity.setdefault(identity, ModelRecord(key, model, organization))
         record.model = min(record.model, model, key=lambda value: (value.casefold(), value))
+        record.organization = min(
+            record.organization, organization, key=lambda value: (value.casefold(), value)
+        )
         record.sources.append(ModelSource(source, evidence_id, payload))
 
     for path in sorted(Path(shard_dir).glob("*.json")):
@@ -91,8 +99,24 @@ def build_registry(radar: dict[str, Any], shard_dir: Path) -> dict[str, ModelRec
                     row.get("organization") or "",
                     row,
                 )
-    for record in registry.values():
+    slug_counts = Counter(record.key for record in by_identity.values())
+    # Reserve natural slugs too: a generated suffix must not take a different
+    # model's ordinary key. Common non-colliding keys remain unchanged.
+    reserved = set(slug_counts)
+    registry = {}
+    for identity, record in sorted(by_identity.items()):
+        if slug_counts[record.key] > 1:
+            digest = sha256(json.dumps(identity, ensure_ascii=False).encode("utf-8")).hexdigest()
+            base = f"{record.key}-{digest}"
+            key = base
+            suffix = 1
+            while key in reserved:
+                suffix += 1
+                key = f"{base}-{suffix}"
+            record.key = key
+            reserved.add(key)
         record.sources.sort(key=lambda row: (row.source, row.evidence_id))
+        registry[record.key] = record
     return dict(sorted(registry.items()))
 
 
