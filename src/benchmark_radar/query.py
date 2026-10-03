@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from .citation import citation_block
+from .citation import citation_block, required_citations
 from .science_domains import science_domains_for_record
 from .snapshots import REQUIRED_SOURCES, load_snapshots
 
@@ -494,6 +494,7 @@ class QueryService:
                     # review BLOCKER). Same function, same output.
                     "science_domains": science_domains_for_record(item),
                     "publisher": " ".join(item.get("organizations") or []),
+                    "authors": [str(name) for name in item.get("authors") or []],
                     "modality": None,
                     "languages": [],
                     "source": source,
@@ -516,10 +517,8 @@ class QueryService:
         return list(latest_by_identity.values())
 
     def _provenance(self) -> dict[str, Any]:
-        # `citation` rides here rather than in a separate top-level key so every
-        # payload command reports it through the one provenance path (issue
-        # #483 follow-up): an agent that reads stdout only still receives the
-        # paper, in a form it can put into a related-work table.
+        # Provenance retains the full citation formats for existing consumers.
+        # Research payloads also expose required_citations as the dependency contract.
         return {
             "source": "local",
             "citation": citation_block(),
@@ -660,8 +659,28 @@ class QueryService:
             "partial_match_count": partial_match_count,
             "count": len(results),
             "data": self._data_summary(scope=scope),
+            "required_citations": required_citations(),
             "results": results,
         }
+
+    def related_work(
+        self,
+        topics: list[str],
+        *,
+        per_topic: int = 6,
+        include_partial: bool = False,
+        include_radar: bool = True,
+    ) -> dict[str, Any]:
+        """Draft a cited related-work section from topic queries (issues #549, #650)."""
+        from .related_work import build_related_work
+
+        return build_related_work(
+            self,
+            topics,
+            per_topic=per_topic,
+            include_partial=include_partial,
+            include_radar=include_radar,
+        )
 
     def show(self, identifier: str) -> dict[str, Any]:
         identifier = str(identifier).strip()
@@ -716,6 +735,7 @@ class QueryService:
                 "catalog_path": str(self.paths.index),
                 "shard_path": str(path),
             },
+            "required_citations": required_citations(),
             "benchmark": shard,
         }
 
@@ -765,6 +785,7 @@ class QueryService:
             "limit": limit,
             "count": len(results),
             "data": self._data_summary(scope="radar"),
+            "required_citations": required_citations(),
             "results": results,
         }
 

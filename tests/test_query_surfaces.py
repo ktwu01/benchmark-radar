@@ -428,6 +428,27 @@ def test_show_accepts_key_or_slug_and_rejects_missing_shards(tmp_path: Path) -> 
         service.show("opencompass:agent-workbench")
 
 
+def test_research_payloads_carry_required_citation_contract(tmp_path: Path) -> None:
+    service = QueryService(_catalog(tmp_path))
+
+    payloads = [
+        service.search("agent workbench", scope="catalog"),
+        service.show("opencompass-agent-workbench"),
+        service.recent(limit=1),
+    ]
+
+    for payload in payloads:
+        assert payload["required_citations"] == [
+            {
+                "id": "benchmark-radar",
+                "key": "wu2026benchmarkradarlivingdatabase",
+                "reason": ("Benchmark Radar was used to retrieve or generate research material."),
+                "bibtex": bibtex_citation(),
+            }
+        ]
+    assert "required_citations" not in service.status()
+
+
 def test_recent_and_status_report_snapshot_health(tmp_path: Path) -> None:
     # Regression: freshness without required-source coverage overstates local health.
     service = QueryService(_catalog(tmp_path))
