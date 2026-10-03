@@ -23,7 +23,9 @@ class RequestError(RuntimeError):
 
 def _safe_url(url: str) -> str:
     parts = urllib.parse.urlsplit(url)
-    return urllib.parse.urlunsplit((parts.scheme, parts.netloc, parts.path, "", ""))
+    return urllib.parse.urlunsplit(
+        (parts.scheme, parts.netloc.rsplit("@", 1)[-1], parts.path, "", "")
+    )
 
 
 def _safe_openai_error_detail(url: str, error: urllib.error.HTTPError) -> str:
