@@ -265,3 +265,51 @@ def test_post_json_sends_compact_json_and_headers(monkeypatch):
     assert captured["request"].data == b'{"input":"brief me"}'
     assert captured["request"].get_header("Content-type") == "application/json"
     assert captured["request"].get_header("Authorization") == "Bearer secret"
+
+
+@pytest.mark.parametrize(
+    "failure", [http.client.IncompleteRead(b"private-body"), ConnectionResetError("private-body")]
+)
+def test_http_retries_interrupted_response_reads(monkeypatch, failure):
+    calls = []
+    closed = []
+    sleeps = []
+
+    class InterruptedResponse(Response):
+        def read(self):
+            raise failure
+
+        def __exit__(self, *args):
+            closed.append(True)
+            return False
+
+    def fake_urlopen(request, **kwargs):
+        calls.append(request.full_url)
+        return InterruptedResponse(b"") if len(calls) == 1 else Response(b'{"ok": true}')
+
+    monkeypatch.setattr("benchmark_radar.http.urllib.request.urlopen", fake_urlopen)
+    monkeypatch.setattr("benchmark_radar.http.time.sleep", sleeps.append)
+    # A dropped connection after headers used to bypass retries entirely.
+    assert get_json("https://example.test/data?key=private", attempts=2) == {"ok": True}
+    assert len(calls) == 2
+    assert closed == [True]
+    assert sleeps == [1]
+
+
+@pytest.mark.parametrize(
+    "failure", [http.client.IncompleteRead(b"private-body"), ConnectionResetError("private-body")]
+)
+def test_http_interrupted_read_exhaustion_is_credential_safe(monkeypatch, failure):
+    class InterruptedResponse(Response):
+        def read(self):
+            raise failure
+
+    monkeypatch.setattr(
+        "benchmark_radar.http.urllib.request.urlopen",
+        lambda *args, **kwargs: InterruptedResponse(b""),
+    )
+    monkeypatch.setattr("benchmark_radar.http.time.sleep", lambda seconds: None)
+    with pytest.raises(RequestError) as captured:
+        get_json("https://example.test/data?key=private", attempts=2)
+    assert "private" not in str(captured.value)
+    assert "after 2 attempts" in str(captured.value)

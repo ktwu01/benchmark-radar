@@ -165,7 +165,14 @@ def _request(
                 delay = float(2**attempt)
             if attempt + 1 < attempts:
                 time.sleep(min(delay, MAX_RETRY_DELAY_SECONDS))
-        except (urllib.error.URLError, TimeoutError) as error:
+        # A connection can drop after headers arrive. Retry the body read too,
+        # and report only the exception type so partial payloads stay private.
+        except (
+            urllib.error.URLError,
+            TimeoutError,
+            ConnectionError,
+            http.client.IncompleteRead,
+        ) as error:
             last_error = error
             if attempt + 1 < attempts:
                 time.sleep(min(2**attempt, MAX_RETRY_DELAY_SECONDS))
