@@ -24,7 +24,7 @@ from benchmark_radar.query_http import create_query_server
 from benchmark_radar.snapshots import write_snapshot
 
 
-def _catalog(tmp_path: Path) -> QueryPaths:
+def _catalog(tmp_path: Path, *, extra_health: list[SourceHealth] | None = None) -> QueryPaths:
     index_path = tmp_path / "site" / "data" / "benchmark-index.json"
     shard_dir = index_path.parent / "benchmarks"
     snapshot_dir = tmp_path / "data" / "snapshots"
@@ -130,7 +130,8 @@ def _catalog(tmp_path: Path) -> QueryPaths:
             health=[
                 SourceHealth(source=source, ok=True, item_count=1, method="API")
                 for source in ("arxiv", "github", "huggingface")
-            ],
+            ]
+            + (extra_health or []),
         ),
         snapshot_dir,
     )
@@ -500,6 +501,67 @@ def test_status_exposes_incomplete_detail_shards(tmp_path: Path) -> None:
     assert status["status"] == "degraded"
     assert status["catalog"]["complete"] is False
     assert status["catalog"]["missing_shards"] == ["opencompass-agent-workbench.json"]
+
+
+def test_status_flags_optional_collector_failure(tmp_path: Path) -> None:
+    # A 429 from an optional collector used to leave overall status at "ok".
+    paths = _catalog(
+        tmp_path,
+        extra_health=[SourceHealth(source="zenodo", ok=False, error="HTTP 429 rate limit")],
+    )
+    status = QueryService(paths).status()
+    assert status["status"] == "degraded"
+    assert status["radar"]["required_coverage_complete"] is True
+    assert status["radar"]["collector_health"][-1] == {
+        "source": "zenodo",
+        "state": "failed",
+        "item_count": 0,
+        "method": "",
+        "error": "HTTP 429 rate limit",
+    }
+
+
+def test_status_distinguishes_partial_warning_from_unconfigured_source(tmp_path: Path) -> None:
+    paths = _catalog(
+        tmp_path,
+        extra_health=[
+            SourceHealth(source="zenodo", ok=True, item_count=2, error="one request timed out"),
+            SourceHealth(
+                source="brave", ok=False, error="RuntimeError: BRAVE_API_KEY is not configured"
+            ),
+        ],
+    )
+    status = QueryService(paths).status()
+    assert status["radar"]["degraded_collectors"] == ["zenodo"]
+    assert [item["state"] for item in status["radar"]["collector_health"]][-2:] == [
+        "warning",
+        "unconfigured",
+    ]
+
+
+def test_status_cli_shows_collector_error(tmp_path: Path, capsys) -> None:
+    paths = _catalog(
+        tmp_path,
+        extra_health=[SourceHealth(source="zenodo", ok=False, error="HTTP 429 rate limit")],
+    )
+    assert (
+        run_query_cli(
+            [
+                "status",
+                "--index",
+                str(paths.index),
+                "--shards",
+                str(paths.shards),
+                "--snapshots",
+                str(paths.snapshots),
+            ]
+        )
+        == 0
+    )
+    output = capsys.readouterr().out
+    assert "status: degraded" in output
+    assert "zenodo: failed" in output
+    assert "HTTP 429 rate limit" in output
 
 
 def test_status_rejects_malformed_detail_shards(tmp_path: Path) -> None:

@@ -42,8 +42,11 @@ def build_data_release(
     """Write one deterministic, complete CLI data bundle and its manifest."""
 
     status = QueryService(paths).status()
-    if status["status"] != "ok":
-        raise ValueError("refusing to publish a degraded Benchmark Radar dataset")
+    # An optional collector warning must be visible in `status`, but it does
+    # not make this checksummed archive incomplete. Gate publication on the
+    # catalog and required-source coverage rather than the broader health flag.
+    if not status["catalog"]["complete"] or not status["radar"]["required_coverage_complete"]:
+        raise ValueError("refusing to publish an incomplete Benchmark Radar dataset")
     snapshots = load_snapshots(paths.snapshots)
     generated_at = snapshots[-1]["generated_at"]
     # The timestamp gives humans a useful release ordering, while the digest
