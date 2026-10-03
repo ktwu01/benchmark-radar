@@ -12,6 +12,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin
 
+import yaml
+
 from .describe import (
     clean_card_text,
     github_summary,
@@ -267,6 +269,76 @@ def _optional_date(value: str | None) -> datetime | None:
 def _arxiv_source_id(value: str) -> str:
     identifier = value.rsplit("/", 1)[-1].replace("oai:arXiv.org:", "")
     return re.sub(r"v\d+$", "", identifier)
+
+
+def load_reviewed_arxiv_backfill(path: Path, *, now: datetime) -> list[RadarItem]:
+    """Load cited historical papers that cannot reappear in the forward-only RSS feed."""
+    try:
+        payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError) as error:
+        raise ConnectorPayloadError(
+            f"cannot read reviewed arXiv backfill at {path}: {error}"
+        ) from (error)
+    if (
+        not isinstance(payload, dict)
+        or payload.get("schema_version") != 1
+        or not isinstance(payload.get("records"), list)
+    ):
+        raise ConnectorPayloadError(
+            "reviewed arXiv backfill must have schema_version 1 and records"
+        )
+    seen: set[str] = set()
+    items: list[RadarItem] = []
+    for position, row in enumerate(payload["records"], start=1):
+        if not isinstance(row, dict):
+            raise ConnectorPayloadError(f"reviewed arXiv row {position} must be an object")
+        source_id = row.get("id")
+        if not isinstance(source_id, str) or not re.fullmatch(r"\d{4}\.\d{4,5}", source_id):
+            raise ConnectorPayloadError(f"reviewed arXiv row {position} has an invalid id")
+        if source_id in seen:
+            raise ConnectorPayloadError(f"duplicate reviewed arXiv id: {source_id}")
+        seen.add(source_id)
+        url = f"https://arxiv.org/abs/{source_id}"
+        if row.get("url") != url:
+            raise ConnectorPayloadError(f"reviewed arXiv {source_id} must cite {url}")
+        title = row.get("title")
+        excerpt = row.get("abstract_excerpt", "")
+        if not isinstance(title, str) or not title.strip() or not isinstance(excerpt, str):
+            raise ConnectorPayloadError(f"reviewed arXiv {source_id} has invalid source text")
+        dates: list[datetime] = []
+        for field in ("published_at", "updated_at"):
+            value = row.get(field)
+            try:
+                parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+            except (AttributeError, TypeError, ValueError) as error:
+                raise ConnectorPayloadError(
+                    f"reviewed arXiv {source_id} has invalid {field}"
+                ) from (error)
+            if parsed.tzinfo is None:
+                raise ConnectorPayloadError(f"reviewed arXiv {source_id} {field} needs a timezone")
+            dates.append(parsed.astimezone(UTC))
+        published, updated = dates
+        if updated < published:
+            raise ConnectorPayloadError(f"reviewed arXiv {source_id} update predates publication")
+        if updated > now + FUTURE_TIMESTAMP_TOLERANCE:
+            continue
+        items.append(
+            RadarItem(
+                source="arXiv",
+                source_id=source_id,
+                title=title.strip(),
+                url=url,
+                published_at=published,
+                updated_at=updated,
+                summary=excerpt.strip(),
+                # This is newly discovered historical evidence, not a new
+                # release on the day a reviewer added the source row.
+                event_kind="discovered",
+                raw={"reviewed_entry": row},
+                parser_version="arxiv-reviewed-backfill/1",
+            )
+        )
+    return items
 
 
 def _fetch_arxiv_rss(
@@ -1729,6 +1801,7 @@ SOURCE_FETCHERS = {
 _PARSER_VERSION_METHODS = {
     "arxiv-rss": "RSS",
     "arxiv-atom": "API",
+    "arxiv-reviewed-backfill": "Reviewed backfill",
     "first-party-rss-atom": "RSS/Atom",
     "huggingface-hub": "API",
     "github-search": "API",
@@ -1766,12 +1839,13 @@ SOURCE_DEFAULT_METHODS = {
 
 def collection_method(source_name: str, fetched: list[RadarItem]) -> str:
     """The collection method actually used this run, derived from what ran."""
+    methods: list[str] = []
     for item in fetched:
         prefix = item.parser_version.rsplit("/", 1)[0]
         method = _PARSER_VERSION_METHODS.get(prefix)
-        if method:
-            return method
-    return SOURCE_DEFAULT_METHODS.get(source_name, "")
+        if method and method not in methods:
+            methods.append(method)
+    return " + ".join(methods) if methods else SOURCE_DEFAULT_METHODS.get(source_name, "")
 
 
 def default_since(hours: int) -> datetime:

@@ -41,6 +41,15 @@ def _config_path(tmp_path: Path) -> Path:
     return path
 
 
+def test_reviewed_arxiv_backfill_is_relative_to_config_file(tmp_path: Path) -> None:
+    path = tmp_path / "config.yml"
+    path.write_text("sources:\n  arxiv:\n    reviewed_backfill: data/arxiv_backfill.yml\n")
+    config = cli.load_config(path)
+    assert config["sources"]["arxiv"]["reviewed_backfill"] == str(
+        tmp_path / "data" / "arxiv_backfill.yml"
+    )
+
+
 def _real_snapshot(tmp_path: Path, date: datetime) -> None:
     run = RadarRun(
         generated_at=date,

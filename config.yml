@@ -135,6 +135,9 @@ sources:
     # shared-IP quota. Use official category RSS feeds and filter locally.
     # Atom parsing remains available for deployments with a stable egress IP.
     atom_enabled: false
+    # Reviewed pre-collection papers enter the ordinary snapshot/discovery
+    # ledger once, without relying on a rate-limited daily Atom API call.
+    reviewed_backfill: data/arxiv_backfill.yml
     # Software-agent benchmarks can be primary cs.SE rather than cross-listed
     # into the three general AI feeds. Include that first-party category so a
     # named SWE benchmark is not dependent on a cross-list (issue #379).

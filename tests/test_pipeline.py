@@ -2,6 +2,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
+import yaml
 
 from benchmark_radar.models import ProducerHealth, RadarItem, SourceHealth
 from benchmark_radar.pipeline import (
@@ -15,6 +16,7 @@ from benchmark_radar.pipeline import (
     score_item,
     simulate_backfill,
 )
+from benchmark_radar.snapshots import load_snapshots, write_snapshot
 
 WATCHLIST = [
     {"name": "MLE-bench", "aliases": ["mlebench", "mle-bench"], "note": "ML engineering tasks."},
@@ -985,6 +987,83 @@ def test_arxiv_discovery_state_suppresses_unchanged_overlap(monkeypatch):
     assert run.discovery_state["arxiv"]["2607.12345"]["discovered_at"] == (
         "2026-07-26T19:00:00+00:00"
     )
+
+
+def test_reviewed_arxiv_backfill_reaches_radar_once(monkeypatch, tmp_path):
+    # RSS only exposes recent announcements, so a paper from before collection
+    # began could never enter the local search dataset.
+    source = tmp_path / "reviewed-arxiv.yml"
+    source.write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": 1,
+                "records": [
+                    {
+                        "id": "2602.16763",
+                        "url": "https://arxiv.org/abs/2602.16763",
+                        "title": "When AI Benchmarks Plateau",
+                        "published_at": "2026-02-18T16:51:37Z",
+                        "updated_at": "2026-08-06T17:25:29Z",
+                        "abstract_excerpt": "Nearly half of the benchmarks exhibit saturation.",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setitem(
+        __import__("benchmark_radar.pipeline", fromlist=["SOURCE_FETCHERS"]).SOURCE_FETCHERS,
+        "arxiv",
+        lambda config, since, limit: [],
+    )
+    config = {
+        "radar": {
+            "lookback_hours": 48,
+            "max_items_per_source": 10,
+            "report_limit": 10,
+            "minimum_score": 0,
+        },
+        "taxonomy": {"benchmark": ["benchmark"]},
+        "sources": {
+            "arxiv": {
+                "enabled": True,
+                "required": True,
+                "allow_empty": True,
+                "reviewed_backfill": str(source),
+            }
+        },
+    }
+    now = datetime(2026, 9, 29, tzinfo=UTC)
+    first = run_pipeline(config, now)
+    second = run_pipeline(config, now, previous_snapshot={"discovery_state": first.discovery_state})
+
+    assert [record.source_id for record in first.items] == ["2602.16763"]
+    assert first.items[0].event_kind == "discovered"
+    assert first.health[0].method == "Reviewed backfill"
+    assert first.items[0].published_at == datetime(2026, 2, 18, 16, 51, 37, tzinfo=UTC)
+    assert first.items[0].discovered_at == now
+    assert second.items == []
+    write_snapshot(first, tmp_path / "snapshots")
+    assert load_snapshots(tmp_path / "snapshots")[0]["evidence_items"][0]["source_id"] == (
+        "2602.16763"
+    )
+
+    live = item(
+        source_id="2602.16763",
+        title="When AI Benchmarks Plateau",
+        url="https://arxiv.org/abs/2602.16763",
+        published_at=datetime(2026, 2, 18, 16, 51, 37, tzinfo=UTC),
+        updated_at=now,
+        summary="A newer live feed version of the benchmark saturation paper.",
+    )
+    monkeypatch.setitem(
+        __import__("benchmark_radar.pipeline", fromlist=["SOURCE_FETCHERS"]).SOURCE_FETCHERS,
+        "arxiv",
+        lambda config, since, limit: [live],
+    )
+    live_run = run_pipeline(config, now)
+    assert len(live_run.items) == 1
+    assert live_run.items[0].summary == live.summary
 
 
 def test_dedupe_merges_short_titles_across_sources():
