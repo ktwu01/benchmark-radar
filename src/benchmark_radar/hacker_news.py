@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -32,7 +33,15 @@ def match_categories(title: str, taxonomy: dict[str, list[str]]) -> list[str]:
 
 
 def normalized_title(title: str) -> str:
-    return " ".join(re.findall(r"[a-z0-9]+", title.casefold()))
+    # Dropping non-ASCII words collapsed unrelated submissions into one
+    # engagement total. Keep Unicode words, with canonical spelling normalized
+    # so composed and decomposed accents still identify the same title.
+    title = unicodedata.normalize("NFC", title.casefold())
+    words = "".join(
+        character if character.isalnum() or unicodedata.category(character).startswith("M") else " "
+        for character in title
+    )
+    return " ".join(words.split())
 
 
 def _numeric_id_sort_key(value: dict[str, Any]) -> tuple[bool, int]:
