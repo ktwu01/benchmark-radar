@@ -354,13 +354,19 @@ class DataStore:
                         or member.is_absolute()
                         or ".." in member.parts
                         or not member.parts
-                        or info.filename in names
+                        # Raw ZIP names can alias after path normalization, or
+                        # on case-insensitive Windows/macOS filesystems. Require
+                        # portable POSIX names before counting them as files.
+                        or info.filename != member.as_posix()
+                        or "\\" in info.filename
+                        or ":" in info.filename
+                        or info.filename.casefold() in names
                     ):
                         raise DataSyncError(
                             f"unsafe archive path: {info.filename!r}",
                             code="invalid_artifact",
                         )
-                    names.add(info.filename)
+                    names.add(info.filename.casefold())
                     destination = (target / Path(*member.parts)).resolve()
                     if target_root not in destination.parents:
                         raise DataSyncError(
