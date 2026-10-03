@@ -4582,7 +4582,9 @@ function searchBenchmarkIndex(records, query) {
     // fields a "tasks, domains" query can land on here.
     const names = [record.name, ...(record.aliases || [])].map(foldName);
     const named = names.some((value) => value.includes(needle));
+    // Task words may appear only in the source description (#710).
     if (!named && !foldName(record.publisher).includes(needle) && !foldName(record.modality).includes(needle)
+      && !foldName(record.description).includes(needle)
       && !(record.categories || []).some((value) => foldName(value).includes(needle))) {
       continue;
     }
