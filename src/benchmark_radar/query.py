@@ -451,19 +451,35 @@ class QueryService:
     def _catalog_candidates(self) -> list[dict[str, Any]]:
         return [{"kind": "catalog", **record} for record in self._load_index()["benchmarks"]]
 
+    def _load_detail_shard(self, record: dict[str, Any]) -> dict[str, Any]:
+        path = self.paths.shards / f"{record['slug']}.json"
+        shard = _read_object(path, label="benchmark detail shard")
+        # A matching key does not make a newer or mismatched shard safe to
+        # consume. Detail lookup and health checks must validate the same contract.
+        shard_record = shard.get("record")
+        if not isinstance(shard_record, dict) or shard_record.get("key") != record["key"]:
+            raise QueryError(
+                f"detail shard {path} does not match catalog key {record['key']}",
+                code="invalid_data",
+            )
+        if shard.get("schema_version") != 1:
+            raise QueryError(
+                f"detail shard {path} schema {shard.get('schema_version')!r} is unsupported",
+                code="unsupported_schema",
+            )
+        if shard_record.get("slug") != record["slug"]:
+            raise QueryError(
+                f"detail shard {path} does not match catalog slug {record['slug']}",
+                code="invalid_data",
+            )
+        return shard
+
     def _validate_detail_shards(self) -> int:
         if self._validated_shards is not None:
             return self._validated_shards
         index = self._load_index()
         for record in index["benchmarks"]:
-            path = self.paths.shards / f"{record['slug']}.json"
-            shard = _read_object(path, label="benchmark detail shard")
-            shard_record = shard.get("record")
-            if not isinstance(shard_record, dict) or shard_record.get("key") != record["key"]:
-                raise QueryError(
-                    f"detail shard {path} does not match catalog key {record['key']}",
-                    code="invalid_data",
-                )
+            self._load_detail_shard(record)
         self._validated_shards = index["count"]
         return self._validated_shards
 
@@ -689,24 +705,7 @@ class QueryService:
             )
         record = matches[0]
         path = self.paths.shards / f"{record['slug']}.json"
-        if not path.exists():
-            raise QueryError(
-                f"detail shard is missing at {path}; run `benchmark-radar normalize-catalog`",
-                code="data_unavailable",
-                status=503,
-            )
-        shard = _read_object(path, label="benchmark detail shard")
-        shard_record = shard.get("record")
-        if not isinstance(shard_record, dict):
-            raise QueryError(
-                f"detail shard {path} record must be a JSON object",
-                code="invalid_data",
-            )
-        if shard_record.get("key") != record["key"]:
-            raise QueryError(
-                f"detail shard {path} does not match catalog key {record['key']}",
-                code="invalid_data",
-            )
+        shard = self._load_detail_shard(record)
         return {
             "schema_version": QUERY_SCHEMA_VERSION,
             "identifier": record["key"],

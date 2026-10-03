@@ -47,7 +47,8 @@ def _write_catalog(
         (shards_dir / f"{slug}.json").write_text(
             json.dumps(
                 {
-                    "record": {"key": shard_key},
+                    "schema_version": 1,
+                    "record": {"key": shard_key, "slug": slug},
                     "scores_by_source": scores_by_source,
                 }
             ),
@@ -452,7 +453,8 @@ def test_export_hf_dataset_rejects_duplicate_score_ids_across_shards(
     (custom_paths.shards / "test-other.json").write_text(
         json.dumps(
             {
-                "record": {"key": "test:other"},
+                "schema_version": 1,
+                "record": {"key": "test:other", "slug": "test-other"},
                 "scores_by_source": {"llm_stats": {"rows": [_score_row(key="test:other")]}},
             }
         ),
