@@ -256,7 +256,7 @@ class DataStore:
         with response:
             try:
                 value = json.loads(response.read())
-            except json.JSONDecodeError as error:
+            except (UnicodeDecodeError, json.JSONDecodeError) as error:
                 raise DataSyncError(
                     "remote manifest is invalid JSON", code="invalid_manifest"
                 ) from error
