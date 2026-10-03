@@ -1634,3 +1634,19 @@ def test_a_data_only_rebuild_writes_no_blog(tmp_path):
         for node in ET.parse(output.parent / "sitemap.xml").getroot().findall("sm:url/sm:loc", ns)
     ]
     assert not [url for url in urls if "/blog/" in url]
+
+
+def test_merge_snapshot_window_compares_offset_timestamps_as_instants():
+    from benchmark_radar.snapshots import merge_snapshots
+
+    existing = snapshot_for_run(radar_run())
+    incoming = snapshot_for_run(radar_run())
+    existing["since"] = "2026-07-25T01:00:00+02:00"
+    incoming["since"] = "2026-07-25T00:00:00+00:00"
+    validate_snapshot(existing)
+    validate_snapshot(incoming)
+    # Lexical ordering chooses midnight UTC, losing the earlier 23:00Z window.
+    merged = merge_snapshots(existing, incoming)
+    assert datetime.fromisoformat(merged["since"]).astimezone(UTC) == datetime(
+        2026, 7, 24, 23, tzinfo=UTC
+    )

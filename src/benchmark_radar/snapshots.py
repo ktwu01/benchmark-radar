@@ -745,7 +745,12 @@ def merge_snapshots(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[
         "attention": {"observations": list(merged_attention.values())},
         # The union covers everything either pass looked at, so the earlier
         # `since` is the honest lower bound on the window it describes.
-        "since": min(existing["since"], incoming["since"]),
+        # Valid offsets can invert lexical order; preserve the earliest instant.
+        "since": min(
+            existing["since"],
+            incoming["since"],
+            key=lambda value: _validate_time(value, source="merged snapshot", field="since"),
+        ),
     }
     if briefing:
         merged["briefing"] = briefing
