@@ -5524,7 +5524,7 @@ results:
   - benchmark_id: asi_bench
     instrument: asi_bench_b3_60_tasks
     protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs except Claude-Opus-5 (single run); harness: Claude Code"
-    model: DeepSeek V4 Flash
+    model: DeepSeek-V4-Flash
     organization: DeepSeek
     source_id: asi_bench_results_table
     reported_at: 2026-08-18
@@ -5554,7 +5554,7 @@ results:
   - benchmark_id: asi_bench
     instrument: asi_bench_b3_60_tasks
     protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs except Claude-Opus-5 (single run); harness: Claude Code"
-    model: DeepSeek V4 Pro
+    model: DeepSeek-V4-Pro
     organization: DeepSeek
     source_id: asi_bench_results_table
     reported_at: 2026-08-18
@@ -5564,7 +5564,7 @@ results:
   - benchmark_id: asi_bench
     instrument: asi_bench_b3_60_tasks
     protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs except Claude-Opus-5 (single run); harness: Claude Code"
-    model: MiMo V2.5 Pro
+    model: MiMo-V2.5-Pro
     organization: Xiaomi
     source_id: asi_bench_results_table
     reported_at: 2026-08-18
@@ -5594,7 +5594,7 @@ results:
   - benchmark_id: asi_bench
     instrument: asi_bench_b3_60_tasks
     protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs; harness: MiMo Code"
-    model: MiMo V2.5 Pro
+    model: MiMo-V2.5-Pro
     organization: Xiaomi
     source_id: asi_bench_results_table
     reported_at: 2026-08-18
@@ -5604,7 +5604,7 @@ results:
   - benchmark_id: asi_bench
     instrument: asi_bench_b3_60_tasks
     protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs; harness: OpenHands"
-    model: DeepSeek V4 Flash
+    model: DeepSeek-V4-Flash
     organization: DeepSeek
     source_id: asi_bench_results_table
     reported_at: 2026-08-18
@@ -5614,7 +5614,7 @@ results:
   - benchmark_id: asi_bench
     instrument: asi_bench_b3_60_tasks
     protocol: "B3 guidance (only research goal, data, constraints and required outputs); 60 official seed-42 project tasks in 11 domains; no external tool access; macro-average over 3 runs; harness: OpenHands"
-    model: DeepSeek V4 Pro
+    model: DeepSeek-V4-Pro
     organization: DeepSeek
     source_id: asi_bench_results_table
     reported_at: 2026-08-18
@@ -5649,7 +5649,7 @@ results:
   - benchmark_id: swe_bench_science
     instrument: swe_bench_science_119_tasks
     protocol: "119 tasks from 98 repositories across 20 scientific domains; overall pass@1 on the reference set; harness: Claude Code"
-    model: DeepSeek-V4-Pro (max)
+    model: DeepSeek-V4-Pro-Max
     organization: DeepSeek
     source_id: swe_bench_science_results_table
     reported_at: 2026-09-01
@@ -5689,7 +5689,7 @@ results:
   - benchmark_id: swe_bench_science
     instrument: swe_bench_science_119_tasks
     protocol: "119 tasks from 98 repositories across 20 scientific domains; overall pass@1 on the reference set; harness: Claude Code"
-    model: DeepSeek-V4-flash (max)
+    model: DeepSeek-V4-Flash-Max
     organization: DeepSeek
     source_id: swe_bench_science_results_table
     reported_at: 2026-09-01
@@ -5699,7 +5699,7 @@ results:
   - benchmark_id: swe_bench_science
     instrument: swe_bench_science_119_tasks
     protocol: "119 tasks from 98 repositories across 20 scientific domains; overall pass@1 on the reference set; harness: Codex"
-    model: Qwen3.5-397B
+    model: Qwen3.5-397B-A17B
     organization: Alibaba
     source_id: swe_bench_science_results_table
     reported_at: 2026-09-01
