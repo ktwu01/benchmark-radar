@@ -414,7 +414,11 @@ class DataStore:
                 self.manifest_url = DEFAULT_MANIFEST_URL
             manifest, etag = self._manifest(
                 previous_etag=(
-                    str(previous.get("etag")) if previous and previous.get("etag") else None
+                    str(previous["etag"])
+                    if previous
+                    and previous.get("etag")
+                    and previous.get("manifest_url") == self.manifest_url
+                    else None
                 )
             )
             if manifest is None:
