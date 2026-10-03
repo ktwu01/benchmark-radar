@@ -16,8 +16,10 @@ const here = dirname(fileURLToPath(import.meta.url));
 // that only differ in how the file is loaded.
 const glyphs = readFileSync(join(here, "..", "site", "assets", "glyphs.js"), "utf8")
   .replace(/^export \{[\s\S]*?\};$/m, "");
+const research = readFileSync(join(here, "..", "site", "assets", "fields.js"), "utf8")
+  .replace(/^export /gm, "") + "\nconst researchFields = fields;\n";
 const source =
-  glyphs +
+  research + glyphs +
   readFileSync(join(here, "..", "site", "assets", "app.js"), "utf8").replace(
     /^import \{[\s\S]*?\} from "\.\/glyphs\.js";$/m,
     "",

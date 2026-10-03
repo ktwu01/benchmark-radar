@@ -7,6 +7,7 @@ import yaml
 
 from benchmark_radar import cli
 from benchmark_radar.briefing import GeneratedBriefing
+from benchmark_radar.http import RequestError
 from benchmark_radar.models import ProducerHealth, RadarItem, RadarRun
 from benchmark_radar.pipeline import SOURCE_FETCHERS
 from benchmark_radar.snapshots import write_snapshot
@@ -18,6 +19,13 @@ def _isolate_openai_credentials(monkeypatch):
     monkeypatch.delenv("OPENAI_BRIEFING_REQUIRED", raising=False)
     monkeypatch.delenv("OPENAI_QUESTIONS", raising=False)
     monkeypatch.delenv("OPENAI_QUESTIONS_REQUIRED", raising=False)
+
+    # Question-flag tests set a dummy key but do not stub briefing generation.
+    # Prevent those fixtures from sending their synthetic evidence to a real API.
+    def offline_post_json(*args, **kwargs):
+        raise RequestError("CLI tests do not make live briefing requests")
+
+    monkeypatch.setattr("benchmark_radar.briefing.post_json", offline_post_json)
 
 
 def _config_path(tmp_path: Path) -> Path:

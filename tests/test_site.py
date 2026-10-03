@@ -607,6 +607,10 @@ def test_clean_route_model_migrates_legacy_urls_and_preserves_utility_background
 
     route_source = "\n".join(
         (
+            (
+                Path("site/assets/fields.js").read_text().replace("export ", "")
+                + "\nconst researchFields = fields;"
+            ),
             section("const VIEW_SEO = {", "// These sheets are also indexable pages."),
             section("const UTILITY_SEO = {", "// One list, not two:"),
             section("const VIEW_PATHS =", "function applySeo("),
@@ -1608,6 +1612,7 @@ def test_unranked_rows_select_their_grid_by_class_not_has():
     # file's other `:has()` use is a hover de-emphasis on the trend chart, which
     # is cosmetic: a browser that drops it loses an effect, not a layout. This
     # rule decides column widths, so it must not be droppable.
+    css = re.sub(r"@layer[^;{]+;", "", css)
     selectors = [
         line for line in css.splitlines() if line.rstrip().endswith("{") and "*" not in line
     ]
@@ -3224,6 +3229,7 @@ def test_the_blog_menubar_label_is_translated():
 def test_blog_styles_cannot_reach_the_dashboard():
     """Every rule in blog.css is scoped to a class only generated blog pages carry."""
     css = Path("site/assets/blog.css").read_text(encoding="utf-8")
+    css = re.sub(r"@layer[^;{]+;", "", css)
     selectors = [
         part.strip()
         for block in re.findall(r"([^{}]+)\{", re.sub(r"/\*.*?\*/", "", css, flags=re.S))

@@ -1,3 +1,5 @@
+@layer legacy, tokens, base, components, pages, responsive;
+@layer legacy {
 /* The logo audit page. Deliberately plain: the marks are the content, so the
    page around them stays out of the way and never tints or filters a glyph in
    a way that could hide the defect being looked for. */
@@ -171,4 +173,6 @@
 .chip-source {
   background: rgba(128, 128, 128, 0.16);
   border: 1px solid rgba(128, 128, 128, 0.55);
+}
+
 }

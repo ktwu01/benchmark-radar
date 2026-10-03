@@ -196,7 +196,11 @@ def test_the_picker_and_the_search_both_cover_both_layers():
     script = source("site/assets/app.js")
     rows = script.split("function scoreBrowseRows(", 1)[1].split("\n}", 1)[0]
     assert "board?.entries" not in rows
-    assert "state.benchmarkIndex" in rows
+    assert "researchRecords()" in rows
+    scope = script.split("function researchRecords()", 1)[1].split("\n}", 1)[0]
+    assert "state.benchmarkIndex" in scope
+    browse = script.split("function saturationRows()", 1)[1].split("\n}", 1)[0]
+    assert "matches ? state.benchmarkIndex : researchRecords()" in browse
     assert "scorePopulation(" in rows
     assert "a.source.localeCompare" not in rows
     render = script.split("function renderBenchmarkSearch()", 1)[1].split("\nfunction ", 1)[0]

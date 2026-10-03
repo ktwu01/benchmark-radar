@@ -551,6 +551,7 @@ def test_dashboard_and_blog_share_the_reduced_chrome_contract(tmp_path):
     page = (tmp_path / "blog" / "2026-08-30" / "index.html").read_text(encoding="utf-8")
     expected = [
         "/",
+        "/research/",
         "/cli/",
         "/leaderboard/",
         "/saturation/",
