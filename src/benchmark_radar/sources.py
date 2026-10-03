@@ -10,7 +10,7 @@ from datetime import UTC, datetime, timedelta
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit
 
 from .describe import (
     clean_card_text,
@@ -128,44 +128,54 @@ def fetch_first_party_feeds(config: dict[str, Any], since: datetime, limit: int)
                 entries = [child for child in root if _xml_local_name(child.tag) == "entry"]
             else:
                 raise ConnectorPayloadError(f"{name} returned an incompatible feed document")
-            for entry in entries:
-                title = _feed_text(entry, "title")
-                summary = clean_card_text(_feed_text(entry, "description", "summary", "content"))
-                haystack = f"{title} {summary}".casefold()
-                if not title or (keywords and not any(keyword in haystack for keyword in keywords)):
-                    continue
-                if require_any and not any(keyword in haystack for keyword in require_any):
-                    continue
-                # Some first-party feeds publish site-relative entry links.
-                # Resolving them against the feed URL keeps the item URL
-                # absolute, which the snapshot and corpus schemas both require.
-                # An absent link stays empty so the missing-field check below
-                # still catches it, which urljoin would otherwise mask by
-                # returning the feed's own URL.
-                link = _feed_link(entry)
-                url = urljoin(feed_url, link) if link else ""
-                source_id = _feed_text(entry, "id", "guid") or url
-                published = _feed_date(_feed_text(entry, "published", "pubDate", "date"))
-                updated = _feed_date(_feed_text(entry, "updated")) or published
-                activity = updated or published
-                if not url or not source_id or published is None or activity is None:
-                    raise ConnectorPayloadError(f"{name} feed item is missing required fields")
-                identity = f"{name}:{source_id}"
-                if activity < since or _reject_future(config, identity, published, updated):
-                    continue
-                feed_found[identity] = RadarItem(
-                    source="First-party feed",
-                    source_id=identity,
-                    title=title,
-                    url=url,
-                    published_at=published,
-                    updated_at=updated,
-                    summary=summary,
-                    event_kind="updated" if updated > published else "released",
-                    organizations=[name],
-                    raw={"xml": ET.tostring(entry, encoding="unicode")},
-                    parser_version="first-party-rss-atom/1",
-                )
+            for index, entry in enumerate(entries, start=1):
+                try:
+                    title = _feed_text(entry, "title")
+                    summary = clean_card_text(
+                        _feed_text(entry, "description", "summary", "content")
+                    )
+                    haystack = f"{title} {summary}".casefold()
+                    if not title or (
+                        keywords and not any(keyword in haystack for keyword in keywords)
+                    ):
+                        continue
+                    if require_any and not any(keyword in haystack for keyword in require_any):
+                        continue
+                    # A malformed entry must not discard unrelated valid items
+                    # from the same publisher. Resolve relative links before
+                    # checking the HTTP(S) contract enforced by snapshots.
+                    link = _feed_link(entry)
+                    url = urljoin(feed_url, link) if link else ""
+                    parsed_url = urlsplit(url)
+                    if parsed_url.scheme not in {"http", "https"} or not parsed_url.netloc:
+                        raise ConnectorPayloadError(f"{name} feed item has a non-HTTP link")
+                    source_id = _feed_text(entry, "id", "guid") or url
+                    published = _feed_date(_feed_text(entry, "published", "pubDate", "date"))
+                    updated = _feed_date(_feed_text(entry, "updated")) or published
+                    activity = updated or published
+                    if not source_id or published is None or activity is None:
+                        raise ConnectorPayloadError(f"{name} feed item is missing required fields")
+                    identity = f"{name}:{source_id}"
+                    if activity < since or _reject_future(config, identity, published, updated):
+                        continue
+                    feed_found[identity] = RadarItem(
+                        source="First-party feed",
+                        source_id=identity,
+                        title=title,
+                        url=url,
+                        published_at=published,
+                        updated_at=updated,
+                        summary=summary,
+                        event_kind="updated" if updated > published else "released",
+                        organizations=[name],
+                        raw={"xml": ET.tostring(entry, encoding="unicode")},
+                        parser_version="first-party-rss-atom/1",
+                    )
+                except (ConnectorPayloadError, ValueError) as error:
+                    item_id = _feed_text(entry, "id", "guid") or str(index)
+                    config.setdefault("_source_warnings", []).append(
+                        f"{name} item {item_id}: {type(error).__name__}: {error}"
+                    )
         except Exception as error:
             warnings = config.setdefault("_source_warnings", [])
             warnings.append(f"{name}: {type(error).__name__}: {error}")

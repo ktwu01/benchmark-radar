@@ -192,6 +192,30 @@ def test_first_party_feeds_isolate_one_broken_feed(monkeypatch):
     ]
 
 
+@pytest.mark.parametrize("bad_link", ["", "javascript:alert(1)"])
+def test_first_party_feed_keeps_valid_items_when_one_link_is_bad(monkeypatch, bad_link):
+    # One malformed entry used to discard every valid entry from that feed;
+    # a non-HTTP link also escaped into the snapshot and failed validation.
+    bad_entry = f"""<item>
+      <title>New benchmark with broken link</title>
+      <link>{bad_link}</link>
+      <guid>bad-entry</guid>
+      <pubDate>Sat, 08 Aug 2026 12:00:00 GMT</pubDate>
+      <description>A benchmark suite.</description>
+    </item>"""
+    payload = FIRST_PARTY_RSS.replace("</channel>", bad_entry + "</channel>")
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_text", lambda url, attempts=3, timeout=30: payload
+    )
+    config = {"feeds": [{"name": "Mixed Lab", "url": "https://lab.example/rss"}]}
+
+    items = fetch_first_party_feeds(config, datetime(2026, 8, 8, 0, tzinfo=UTC), 10)
+
+    assert [item.source_id for item in items] == ["Mixed Lab:benchmark-one"]
+    assert len(config["_source_warnings"]) == 1
+    assert "bad-entry" in config["_source_warnings"][0]
+
+
 ARXIV_XML = """\
 <feed xmlns="http://www.w3.org/2005/Atom">
   <entry>
