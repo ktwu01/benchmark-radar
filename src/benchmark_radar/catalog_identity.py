@@ -249,7 +249,18 @@ def load_identity(
             raise IdentityError(f"{path}: duplicate group_id {group_id!r}")
         seen_group_ids.add(group_id)
 
-        anchors = group.get("anchors") or []
+        # A repeated URL/identifier is one warrant, even if a copied entry
+        # spells its repository differently. Use the same folding as _anchors
+        # so duplication cannot bypass the independent-artifact gate.
+        raw_anchors = group.get("anchors") or []
+        if not isinstance(raw_anchors, list) or any(
+            not isinstance(anchor, str) or not anchor.strip() for anchor in raw_anchors
+        ):
+            raise IdentityError(
+                f"{path}: equivalent group {group_id!r} anchors must be a list "
+                "of non-empty identifiers"
+            )
+        anchors = {anchor.strip().lower() for anchor in raw_anchors}
         if group.get("basis") == "reviewer_asserted":
             # A hand-reviewed cross-source equivalence. The two-anchor bar
             # governs machine candidates; here the reviewer's signature is the
