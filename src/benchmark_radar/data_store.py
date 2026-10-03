@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import http.client
 import ipaddress
 import json
 import os
@@ -250,12 +251,12 @@ class DataStore:
             **({"If-None-Match": previous_etag} if previous_etag else {}),
         }
         request = urllib.request.Request(manifest_url, headers=headers)
-        response = self._open(request, allow_not_modified=True)
+        response = self._open(request, allow_not_modified=previous_etag is not None)
         if response is None:
             return None, previous_etag
         with response:
             try:
-                value = json.loads(response.read())
+                value = json.loads(self._read_body(response))
             except json.JSONDecodeError as error:
                 raise DataSyncError(
                     "remote manifest is invalid JSON", code="invalid_manifest"
@@ -302,6 +303,20 @@ class DataStore:
             raise DataSyncError("remote artifact file_count is invalid", code="invalid_manifest")
         return value, etag
 
+    @staticmethod
+    def _read_body(response: Any, *args: int) -> bytes:
+        # The connection can fail after _open returns headers. Translate only
+        # read failures, keeping local disk-write errors distinct and avoiding
+        # partial response contents in the public error message.
+        try:
+            return response.read(*args)
+        except (OSError, http.client.HTTPException) as error:
+            raise DataSyncError(
+                f"remote transfer failed: {type(error).__name__}",
+                code="remote_unavailable",
+                status=503,
+            ) from error
+
     def _download(self, manifest: dict[str, Any], target: Path) -> None:
         artifact = manifest["artifact"]
         request = urllib.request.Request(
@@ -314,7 +329,7 @@ class DataStore:
         digest = hashlib.sha256()
         size = 0
         with self._open(request) as response, target.open("wb") as handle:
-            while chunk := response.read(1024 * 1024):
+            while chunk := self._read_body(response, 1024 * 1024):
                 size += len(chunk)
                 if size > artifact["size"]:
                     raise DataSyncError("download exceeds manifest size", code="invalid_artifact")
