@@ -510,6 +510,18 @@ assert.deepEqual(nameSearch(searchable,'HLE').map(row=>row.slug),['exact','prefi
 assert.deepEqual(nameSearch(searchable,'science').map(row=>row.slug),['domain']);
 assert.deepEqual(nameSearch(searchable.map(row=>({...row,source:'another_source'})),'HLE').map(row=>row.slug),['exact','prefix']);
 
+// #710: task words in a source description must remain discoverable.
+const descriptionRecords = [
+  {slug:'weather',name:'RealBench',description:'Benchmark for numerical weather forecasting.',source:'claire_radar'},
+  {slug:'grasp',name:'R2HandoverSim',description:'Tasks for robot grasp planning.',source:'opencompass_hub'},
+  {slug:'unknown',name:'Unknown',source:'artificial_analysis'},
+  {slug:'name',name:'Weather Forecasting',source:'model_reports'},
+];
+assert.deepEqual(nameSearch(descriptionRecords,'weather forecasting').map(row=>row.slug),['name','weather']);
+assert.deepEqual(nameSearch(descriptionRecords,'robot grasp planning').map(row=>row.slug),['grasp']);
+assert.deepEqual(nameSearch(descriptionRecords.map(row=>({...row,source:'any'})),'robot grasp planning').map(row=>row.slug),['grasp']);
+assert.deepEqual(nameSearch(descriptionRecords,'not documented').map(row=>row.slug),[]);
+
 // Execute the shared slider handler against both sets of controls.
 state.benchmarkIndex = fixtureRecords;
 const controls = new Map(['leaderboard-score-filter','leaderboard-score-value','saturation-score-filter','saturation-score-value'].map(id=>[id,{}]));
