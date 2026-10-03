@@ -73,7 +73,7 @@ def _read_json(path: Path, *, label: str) -> dict[str, Any]:
             code="not_initialized",
             status=409,
         ) from error
-    except (OSError, json.JSONDecodeError) as error:
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
         raise DataSyncError(
             f"cannot read {label} at {path}: {type(error).__name__}: {error}",
             code="invalid_local_state",
