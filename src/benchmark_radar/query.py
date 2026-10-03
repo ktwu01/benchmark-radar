@@ -11,6 +11,7 @@ from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 from .citation import citation_block
 from .science_domains import science_domains_for_record
@@ -161,6 +162,29 @@ def _field_text(value: Any) -> str:
 
 def _filter_value(value: Any) -> str:
     return str(value or "").strip().casefold()
+
+
+def _radar_artifact_flags(urls: list[Any]) -> dict[str, bool]:
+    flags = {"has_paper": False, "has_repo": False, "has_dataset": False}
+    for url in urls:
+        if not isinstance(url, str):
+            continue
+        try:
+            parsed = urlsplit(url)
+            host = (parsed.hostname or "").casefold().removeprefix("www.")
+        except ValueError:
+            continue
+        if parsed.scheme.casefold() not in {"http", "https"}:
+            continue
+        # Domain text in a query, path, userinfo, or lookalike host is not
+        # artifact evidence. These indicators describe links, not page verification.
+        if host == "arxiv.org":
+            flags["has_paper"] = True
+        if host == "github.com":
+            flags["has_repo"] = True
+        if host in {"huggingface.co", "kaggle.com"} and parsed.path.startswith("/datasets/"):
+            flags["has_dataset"] = True
+    return flags
 
 
 def _matches_filter(record: dict[str, Any], filters: dict[str, Any]) -> bool:
@@ -504,12 +528,7 @@ class QueryService:
                     "score": item.get("total_score"),
                     "recommended": item.get("recommended", False),
                     "openness": None,
-                    "has_paper": any("arxiv.org" in value for value in urls),
-                    "has_repo": any("github.com" in value for value in urls),
-                    "has_dataset": any(
-                        "huggingface.co/datasets/" in value or "kaggle.com/datasets/" in value
-                        for value in urls
-                    ),
+                    **_radar_artifact_flags(urls),
                     "has_size": False,
                     "snapshot_date": snapshot["date"],
                 }
