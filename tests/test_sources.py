@@ -636,6 +636,22 @@ def test_github_preserves_creation_and_update_times(monkeypatch):
     assert items[0].event_kind == "updated"
 
 
+def test_github_keeps_missing_forks_unknown(monkeypatch):
+    row = _github_row(1)
+    row.pop("forks_count")
+    row["stargazers_count"] = 0
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, params=None, headers=None: {"items": [row]},
+    )
+    items = fetch_github(
+        {"queries": ["benchmark"], "request_delay_seconds": 0},
+        datetime(2026, 7, 26, tzinfo=UTC),
+        10,
+    )
+    assert items[0].metrics == {"stars": 0.0}
+
+
 def test_github_config_discovers_and_routes_rsi_exam(monkeypatch):
     """Issue #408: the named benchmark matched no configured GitHub query."""
     config = yaml.safe_load(Path("config.yml").read_text(encoding="utf-8"))
@@ -2445,6 +2461,26 @@ def test_github_release_popularity_comes_from_repository_metadata(monkeypatch):
     assert radar_item.adoption_score > 0
 
 
+def test_github_release_omits_incomplete_download_totals_and_repository_counters(monkeypatch):
+    release = {
+        "tag_name": "v2",
+        "html_url": "https://github.com/example/benchmark/releases/tag/v2",
+        "published_at": "2026-07-27T12:00:00Z",
+        "assets": [{"download_count": 4}, {"name": "missing-count.zip"}],
+    }
+
+    def fake_get_json(url, **kwargs):
+        return [release] if url.endswith("/releases") else {"stargazers_count": 0}
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+    item = fetch_github_releases(
+        {"repositories": ["example/benchmark"], "repository_metadata_requests": 1},
+        datetime(2026, 7, 26, tzinfo=UTC),
+        10,
+    )[0]
+    assert item.metrics == {"stars": 0.0}
+
+
 def test_github_release_repository_counters_are_covered_by_raw_hash(monkeypatch):
     stars = 7_000
 
@@ -3163,6 +3199,26 @@ def test_huggingface_preserves_creation_and_update_times(monkeypatch):
     assert items[0].published_at == datetime(2026, 6, 1, tzinfo=UTC)
     assert items[0].updated_at == datetime(2026, 7, 27, 12, tzinfo=UTC)
     assert items[0].event_kind == "updated"
+
+
+def test_huggingface_does_not_publish_absent_counters_as_zero(monkeypatch):
+    # A missing API field is unknown, while a reported zero is a real measurement.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, params: [
+            {
+                "id": "org/benchmark",
+                "lastModified": "2026-07-27T12:00:00Z",
+                "likes": 0,
+            }
+        ],
+    )
+    items = fetch_huggingface(
+        {"kinds": ["datasets"], "searches": ["benchmark"]},
+        datetime(2026, 7, 26, tzinfo=UTC),
+        10,
+    )
+    assert items[0].metrics == {"likes": 0.0}
 
 
 def test_huggingface_filters_future_rows_before_the_local_cap(monkeypatch):
