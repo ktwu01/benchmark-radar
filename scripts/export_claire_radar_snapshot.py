@@ -72,6 +72,8 @@ def _url(value: Any) -> str:
             address = ipaddress.ip_address(socket.inet_aton(host))
         except (OSError, ValueError):
             address = None
+    if isinstance(address, ipaddress.IPv6Address) and address.ipv4_mapped is not None:
+        address = address.ipv4_mapped
     valid_domain = address is not None or all(
         0 < len(label) <= 63 and re.fullmatch(r"[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", label)
         for label in host.split(".")
