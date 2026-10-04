@@ -31,6 +31,8 @@ const LEGACY_SOURCE_COLLECTION_METHODS = {
   kaggle_datasets: "API",
   zenodo: "API",
   crossref: "API",
+  datacite: "API",
+  openaire: "API",
   openreview: "API",
   semantic_scholar: "API",
   github_releases: "API",
@@ -53,6 +55,8 @@ const SOURCE_DISPLAY_NAMES = {
   kaggle_datasets: "Kaggle Dataset",
   zenodo: "Zenodo",
   crossref: "Crossref",
+  datacite: "DataCite",
+  openaire: "OpenAIRE",
   openreview: "OpenReview",
   semantic_scholar: "Semantic Scholar",
   github_releases: "GitHub Release",
@@ -998,6 +1002,8 @@ const I18N = {
     "Use the CLI version to export all data.": "使用我们的命令行版本导出全部数据。",
     "Query it locally (CLI version)": "在本地查询（命令行版本）",
     Install: "安装",
+    "Continue your search for “{query}” with the CLI.": "用命令行继续搜索“{query}”。",
+    "Agent prompt": "给编程智能体的提示词",
     "Read the setup guide": "查看安装指南",
     "Share Benchmark Radar": "分享 Benchmark Radar",
     Share: "分享",
@@ -1501,6 +1507,11 @@ function readUrl() {
 function writeUrl(mode = "replace") {
   const utility = activeUtility();
   const params = new URLSearchParams();
+  // The CLI handoff is the one utility that needs the current search term.
+  // Keep the background filters in history, while exposing only q in its URL.
+  if (utility === "cli" && state.view === "today" && state.q.trim()) {
+    params.set("q", state.q.trim());
+  }
   // Every filter below belongs to exactly one view, so only that view may write
   // it. Serializing all of them unconditionally is what leaked `lfrontier` onto
   // Today/Trends/Map links and `date` onto Leaderboard links (issue #123): the
@@ -2633,6 +2644,11 @@ function todaySearchUrl() {
   return `/?${params.toString()}`;
 }
 
+function cliSearchUrl(query) {
+  const params = new URLSearchParams({ q: query });
+  return `/cli/?${params.toString()}`;
+}
+
 function renderSearchScopeBanner(observationCount, benchmarkMatches) {
   const banner = byId("search-scope-banner");
   const query = state.q.trim();
@@ -2667,7 +2683,7 @@ function renderSearchScopeBanner(observationCount, benchmarkMatches) {
   const totalResults = observationCount + knownBenchmarkMatches;
   const cliLink = element("a", {
     text: t("Use the CLI version to export all data."),
-    attrs: { href: "/cli/" },
+    attrs: { href: cliSearchUrl(query) },
   });
   cliLink.addEventListener("click", (event) => {
     event.preventDefault();
@@ -8637,16 +8653,22 @@ function openCite(updateUrl = true) {
   showModalDialog(dialog);
 }
 
-// The setup route published in the README under "Query it locally (CLI
-// version)". The prompt is held verbatim: it names the Skill file a coding
-// agent has to read, and a prompt this page paraphrases is a prompt that can
-// drift from the instructions it points at.
+// The consumer Skill owns setup end to end (48413f8); do not duplicate its
+// steps in page copy. This query-only prompt points to the Skill and passes on
+// the reader's current search request for issue #487.
 const CLI_SKILL_URL =
   "https://github.com/ktwu01/benchmark-radar/blob/main/skills/benchmark-radar/SKILL.md";
 const CLI_SKILL_INSTALL = "npx skills add ktwu01/benchmark-radar";
-// The README wraps its last sentence across two lines at 80 columns; the card
-// is narrower than that, so keeping the break would re-wrap into ragged text.
-// Only the URL needs a line of its own, and it keeps one.
+
+function cliAgentPrompt(query) {
+  return [
+    "Set up Benchmark Radar for local benchmark search. Follow",
+    CLI_SKILL_URL,
+    "to install the CLI and consumer Skill, initialize the local data, and verify the setup.",
+    `Then search for ${JSON.stringify(query)} using this CLI and Skill.`,
+  ].join("\n");
+}
+
 // True only while the open card owns a history entry this page pushed, for the
 // same reason the citation card tracks it: closing a directly-opened /cli/ must
 // not step a reader back off the site.
@@ -8657,6 +8679,7 @@ let cliOwnsHistoryEntry = false;
 function openCli(updateUrl = true) {
   if (updateUrl) viewNavigationSequence += 1;
   const dialog = byId("cli-dialog");
+  const query = state.view === "today" ? state.q.trim() : "";
   closeOtherSheets("cli-dialog");
   state.rubric = "";
   state.contact = false;
@@ -8673,8 +8696,13 @@ function openCli(updateUrl = true) {
       text: t("Query it locally (CLI version)"),
       attrs: { id: "cli-title" },
     }),
+    query && element("p", {
+      className: "detail-summary",
+      text: t("Continue your search for “{query}” with the CLI.", { query }),
+    }),
     element("div", { className: "copy-blocks" }, [
       copyBlock("Install", CLI_SKILL_INSTALL, "Click to copy", true),
+      query && copyBlock("Agent prompt", cliAgentPrompt(query), "Click to copy"),
     ]),
     element("a", {
       className: "secondary-link dialog-link",

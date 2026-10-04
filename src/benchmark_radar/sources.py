@@ -1125,6 +1125,538 @@ def fetch_crossref(
     return sorted(found.values(), key=lambda item: item.published_at, reverse=True)[:limit]
 
 
+OPENAIRE_API_URL = "https://api.openaire.eu/graph/v3/research-products"
+
+_OPENAIRE_QUOTE_TRIGGER = re.compile(r"\b(?:OR|AND|NOT)\b|[\s()]")
+
+
+def _openaire_filter_value(value: str) -> str:
+    """Quote a configured phrase so Graph v3 matches it as a phrase.
+
+    Every shipped search phrase contains a space. v3 accepts an unquoted one,
+    but matches its words far more loosely: `LLM benchmark` reports 213 titles
+    quoted against 3,021 unquoted, so without this the source would collect
+    titles that share only one common word with the phrase. A value that is
+    already quoted or parenthesised is passed through, so a maintainer can
+    write an inline `"a" OR "b"` expression without it being quoted again.
+    """
+    if value.startswith(('"', "(")):
+        return value
+    if not _OPENAIRE_QUOTE_TRIGGER.search(value):
+        return value
+    # A quote inside the phrase would close the wrapper early and hand the rest
+    # of the phrase to the parser as query structure.
+    return '"{}"'.format(value.replace('"', '\\"'))
+
+
+def _openaire_rows(value: Any, field: str) -> list[dict[str, Any]]:
+    if not isinstance(value, list) or not all(isinstance(row, dict) for row in value):
+        raise ConnectorPayloadError(f"OpenAIRE {field} must be an array of objects")
+    return value
+
+
+def _openaire_author_name(author: dict[str, Any]) -> str:
+    """The deposited full name, or the given and family parts joined.
+
+    `fullName` is what the API records for display. The split parts are the
+    fallback for a record that carries them without the joined form; nothing
+    is reordered, because OpenAIRE aggregates from sources that disagree about
+    whether `fullName` reads "Family, Given" or "Given Family" and a rule that
+    guessed would rewrite one of them into a name no source deposited.
+    """
+    full_name = str(author.get("fullName") or "").strip()
+    if full_name:
+        return full_name
+    parts = (str(author.get("name") or "").strip(), str(author.get("surname") or "").strip())
+    return " ".join(part for part in parts if part)
+
+
+def _openaire_organizations(value: Any) -> list[str]:
+    """Legal names from the organization relations, when the row carries them.
+
+    A v3 relation is a flat object carrying `legalName`, `acronym`, `id` and
+    `pids`. The relation is absent from many products, and an entry naming
+    neither field contributes nothing rather than a name assembled out of
+    whatever other keys it happens to have.
+    """
+    if value in (None, ""):
+        return []
+    names: list[str] = []
+    for entry in _openaire_rows(value, "organizations"):
+        name = str(entry.get("legalName") or entry.get("acronym") or "").strip()
+        if name:
+            names.append(name)
+    return names
+
+
+_OPENAIRE_DOI_PREFIXES = (
+    "https://doi.org/",
+    "http://doi.org/",
+    "https://dx.doi.org/",
+    "http://dx.doi.org/",
+    "doi:",
+)
+
+
+def _openaire_doi(pids: Any) -> str:
+    """The first DOI among the record's persistent identifiers, as a bare name.
+
+    OpenAIRE aggregates the sources this project already collects, so the DOI
+    is what lets a record merge with the Crossref or Zenodo copy of the same
+    artifact instead of publishing it a second time. Contributors
+    deposit the identifier both bare and as a link, and passing a link through
+    would build `https://doi.org/https://doi.org/10.x`, which resolves nowhere
+    and shares no identity with the other copies of the same artifact.
+
+    A value that does not name a DOI registrant is not returned at all: every
+    DOI begins `10.`, and guessing at anything else would invent an address.
+    """
+    for pid in _openaire_rows(pids, "pids"):
+        value = str(pid.get("value") or "").strip().casefold()
+        if not value or str(pid.get("scheme") or "").strip().casefold() != "doi":
+            continue
+        for prefix in _OPENAIRE_DOI_PREFIXES:
+            if value.startswith(prefix):
+                value = value[len(prefix) :]
+                break
+        if value.startswith("10."):
+            return value
+    return ""
+
+
+def _openaire_instance_urls(instances: Any) -> list[str]:
+    urls: list[str] = []
+    for instance in _openaire_rows(instances, "instances"):
+        candidates = instance.get("urls") or []
+        if not isinstance(candidates, list):
+            raise ConnectorPayloadError("OpenAIRE instance urls must be an array")
+        for candidate in candidates:
+            url = str(candidate or "").strip()
+            if url.startswith(("https://", "http://")):
+                urls.append(url)
+    return urls
+
+
+def fetch_openaire(
+    config: dict[str, Any],
+    since: datetime,
+    limit: int,
+) -> list[RadarItem]:
+    """Collect research products OpenAIRE published inside the collection window.
+
+    Issue #545. OpenAIRE aggregates publications, datasets, software and other
+    research products from repositories across Europe and beyond, including
+    institutional repositories this project reaches through no other source.
+    Reads need no credential.
+
+    The window is `publicationDate`, the same field the query is bounded on and
+    the same instant the record is dated by, so a backfilled day holds what a
+    live run that day would have published. `dateOfCollection` records when
+    OpenAIRE indexed the product rather than when it appeared, and the endpoint
+    offers no range filter for it.
+
+    Records duplicate the Crossref and arXiv copies of the same artifact by
+    design: the DOI travels with every record that has one, so
+    dedupe merges them instead of counting the artifact twice.
+    """
+    searches = [str(value).strip() for value in config.get("searches", []) if str(value).strip()]
+    budget = max(1, int(config.get("max_requests", len(searches) or 1)))
+    # V3 rejects a page larger than 100 rather than silently truncating it.
+    page_size = min(100, max(1, int(config.get("page_size", 50))))
+    window_start = since.astimezone(UTC).date()
+    window_end = _latest_allowed(config).date()
+    found: dict[str, RadarItem] = {}
+    for search in searches[:budget]:
+        payload = get_json(
+            OPENAIRE_API_URL,
+            params={
+                # Title-scoped like the Crossref connector: the
+                # full-text `search` field matches any abstract that mentions a
+                # benchmark in passing, and the shared taxonomy filters what is
+                # left downstream.
+                "mainTitle": _openaire_filter_value(search),
+                "fromPublicationDate": window_start.isoformat(),
+                "toPublicationDate": window_end.isoformat(),
+                "sortBy": "publicationDate DESC",
+                "pageSize": max(1, min(page_size, limit)),
+            },
+            **_request_options(config),
+        )
+        parsed = _payload_dict(payload, "OpenAIRE")
+        if "results" not in parsed:
+            # An absent key is not an empty page. An error-shaped HTTP 200 body
+            # carries no `results` at all, and reading it as "matched nothing"
+            # would report the source healthy on a day it collected nothing,
+            # which is the silent failure `_payload_rows` raises on everywhere
+            # else. Only the documented null below is an ordinary empty page.
+            raise ConnectorPayloadError("OpenAIRE response is missing results")
+        rows = parsed["results"]
+        if rows is None:
+            # v3 sends `results: null` for a page that matched nothing. Failing
+            # the payload here would mark the whole source broken for the day
+            # on the strength of an ordinary empty result.
+            rows = []
+        if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
+            raise ConnectorPayloadError("OpenAIRE returned invalid results")
+        for row in rows:
+            source_id = str(row.get("id") or "").strip()
+            title_value = row.get("mainTitle") or row.get("title") or ""
+            if not isinstance(title_value, str):
+                raise ConnectorPayloadError("OpenAIRE mainTitle must be a string")
+            title = title_value.strip()
+            published = _optional_date(row.get("publicationDate"))
+            if not source_id or not title or published is None:
+                continue
+            if published.date() < window_start or _reject_future(config, source_id, published):
+                continue
+            doi = _openaire_doi(row.get("pids") or [])
+            doi_url = f"https://doi.org/{doi}" if doi else ""
+            instance_urls = _openaire_instance_urls(row.get("instances") or [])
+            repository = str(row.get("codeRepositoryUrl") or "").strip()
+            if not repository.startswith(("https://", "http://")):
+                # Deposits write "N/A", a bare host or an ssh remote here. The
+                # daily digest renders every link it is given, so a value that
+                # does not open is dropped rather than published as a link.
+                repository = ""
+            url = doi_url or next(iter(instance_urls), "") or repository
+            if not url:
+                # Every record has to be checkable against something a reader
+                # can open. A product with no DOI and no instance URL names no
+                # such place, and OpenAIRE's own id does not resolve to one.
+                continue
+            # The record's own URL stays in the list, as it does for the
+            # Crossref sibling: the cross-link evidence credit
+            # reads `artifact_urls`, so dropping it would quietly score a
+            # DOI-only product below an identical one that happens to carry a
+            # second link.
+            artifact_urls = [
+                candidate
+                for candidate in dict.fromkeys([url, doi_url, *instance_urls, repository])
+                if candidate
+            ]
+            # v3 returns the abstract as `descriptions`, a list, and carries no
+            # singular `description` member at all. A product may hold several,
+            # none, or a null, and a deposit sometimes leads with an empty one,
+            # so the first entry that survives cleaning is the prose a reader
+            # would recognise as the abstract.
+            descriptions = row.get("descriptions")
+            if descriptions is not None and not isinstance(descriptions, list):
+                raise ConnectorPayloadError("OpenAIRE descriptions must be an array")
+            if descriptions and not all(isinstance(value, str) for value in descriptions):
+                raise ConnectorPayloadError("OpenAIRE descriptions must hold strings")
+            summary = next(
+                (cleaned for value in descriptions or [] if (cleaned := clean_card_text(value))),
+                "",
+            )
+            indicators = row.get("indicators") or {}
+            if not isinstance(indicators, dict):
+                raise ConnectorPayloadError("OpenAIRE indicators must be an object")
+            citations = indicators.get("citationImpact") or {}
+            usage = indicators.get("usageCounts") or {}
+            if not isinstance(citations, dict) or not isinstance(usage, dict):
+                raise ConnectorPayloadError("OpenAIRE indicator groups must be objects")
+            found[source_id] = RadarItem(
+                source="OpenAIRE",
+                source_id=source_id,
+                title=title,
+                url=url,
+                published_at=published,
+                # The window key and the record's activity key are the same
+                # field, so a simulated backfill places a product on the day a
+                # live run would have found it.
+                updated_at=published,
+                summary=summary,
+                event_kind="released",
+                authors=[
+                    name
+                    for name in (
+                        _openaire_author_name(author)
+                        for author in _openaire_rows(row.get("authors") or [], "authors")
+                    )
+                    if name
+                ],
+                organizations=list(
+                    dict.fromkeys(_openaire_organizations(row.get("organizations")))
+                ),
+                artifact_urls=artifact_urls,
+                metrics={
+                    "citations": float(citations.get("citationCount") or 0),
+                    "downloads": float(usage.get("downloads") or 0),
+                    "views": float(usage.get("views") or 0),
+                },
+                raw=row,
+                parser_version="openaire-graph-v3/1",
+            )
+    return sorted(found.values(), key=lambda item: item.published_at, reverse=True)[:limit]
+
+
+DATACITE_API_URL = "https://api.datacite.org/dois"
+
+
+def _datacite_query_time(value: datetime) -> str:
+    """Render one bound of the `registered:[a TO b]` range the API is asked for.
+
+    Second precision in UTC with an explicit `Z`, the resolution DataCite
+    records `registered` at. A bare date would hand the bound to the index's
+    day rounding and widen the window past the collection instant it is
+    supposed to mean.
+    """
+    return value.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+# Characters that change the structure of an Elasticsearch query_string.
+# `<` and `>` have no escape sequence at all, so they are dropped instead.
+_DATACITE_RESERVED = frozenset('+-=&|!(){}[]^"~*?:\\/')
+
+
+def _datacite_query_terms(search: str) -> str:
+    """Escape a configured phrase and require every term of it.
+
+    The phrase is interpolated into `titles.title:(...)`, which DataCite hands
+    to a query_string parser. Two things about that parser matter here.
+
+    An unescaped colon in a phrase such as "Benchmark: agents" reads as a
+    clause on an unmapped field and returns zero rows while source health
+    still reports the source healthy -- the silent emptiness this project
+    treats as a bug rather than a quiet gap. So every reserved character is
+    escaped first.
+
+    Its default operator is then OR, so a bare "LLM benchmark" would match a
+    title carrying only "benchmark" and pull geodesy and toxicology deposits
+    into the feed under this project's broad benchmark taxonomy. The terms are
+    joined with an explicit AND, which is the all-terms rule the config block
+    documents.
+    """
+    stripped = "".join(" " if character in "<>" else character for character in search)
+    terms = [
+        "".join(
+            f"\\{character}" if character in _DATACITE_RESERVED else character for character in term
+        )
+        for term in stripped.split()
+    ]
+    return " AND ".join(terms)
+
+
+def _datacite_rows(value: Any, field: str) -> list[dict[str, Any]]:
+    if not isinstance(value, list) or not all(isinstance(row, dict) for row in value):
+        raise ConnectorPayloadError(f"DataCite {field} must be an array of objects")
+    return value
+
+
+def _datacite_array(attributes: dict[str, Any], field: str) -> list[dict[str, Any]]:
+    """Read one array field, defaulting only when it is absent or null.
+
+    `attributes.get(field) or []` looked equivalent and was not: it also
+    swallowed `{}`, `""` and `0`, so a shape the connector cannot read passed
+    as an empty list and the row was quietly dropped or published without its
+    authors while source health still reported the source healthy. Absent and
+    null are the two ways DataCite says "nothing here"; everything else is a
+    parsing gap this connector is meant to surface.
+    """
+    value = attributes.get(field)
+    return [] if value is None else _datacite_rows(value, field)
+
+
+def _datacite_text(row: dict[str, Any], field: str) -> str:
+    """One string field of a typed row, or raise if it is not a string.
+
+    `str(value or "")` published a malformed object or array as its Python
+    repr, which is upstream text no reader could trace back to the deposit.
+    """
+    value = row.get(field)
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        raise ConnectorPayloadError(f"DataCite {field} must be a string")
+    return value.strip()
+
+
+def _datacite_title(titles: Any) -> str:
+    """The main title: an untyped entry first, then any non-empty one.
+
+    `titles` is an array of typed objects. A `Subtitle` or `AlternativeTitle`
+    is upstream text too, but listed first it would become the record's name.
+    """
+    texts = [
+        (_datacite_text(row, "titleType"), _datacite_text(row, "title"))
+        for row in _datacite_rows(titles, "titles")
+    ]
+    for title_type, text in texts:
+        if text and not title_type:
+            return text
+    return next((text for _, text in texts if text), "")
+
+
+def _datacite_description(descriptions: Any) -> str:
+    """The abstract when one is typed, otherwise the first description given."""
+    texts = [
+        (_datacite_text(row, "descriptionType"), _datacite_text(row, "description"))
+        for row in _datacite_rows(descriptions, "descriptions")
+    ]
+    for description_type, text in texts:
+        if text and description_type == "Abstract":
+            return text
+    return next((text for _, text in texts if text), "")
+
+
+def _datacite_creator_name(creator: dict[str, Any]) -> str:
+    """Render a creator as `Given Family`, matching the Crossref connector.
+
+    A deposit without split name parts writes a person as "Family, Given", so
+    that one shape is reordered. Only an explicitly personal name is: the
+    field is optional in the DataCite schema and absent from older deposits,
+    and treating a missing one as personal turns "University of California,
+    Berkeley" into a name that appears in no source document.
+    """
+    given = str(creator.get("givenName") or "").strip()
+    family = str(creator.get("familyName") or "").strip()
+    if family:
+        return " ".join(part for part in (given, family) if part)
+    name = str(creator.get("name") or "").strip()
+    if ", " in name and str(creator.get("nameType") or "").strip() == "Personal":
+        family, given = name.split(", ", 1)
+        return f"{given.strip()} {family.strip()}".strip()
+    return name
+
+
+def fetch_datacite(
+    config: dict[str, Any],
+    since: datetime,
+    limit: int,
+) -> list[RadarItem]:
+    """Collect DOIs that DataCite made findable inside the collection window.
+
+    Sibling of `fetch_crossref` for the other DOI registration agency (issue
+    #544): datasets, software and reports deposited with Zenodo, Figshare,
+    Dryad and institutional repositories. Reads need no credential, and an
+    anonymous request only ever sees `findable` DOIs, so a draft cannot enter
+    the feed.
+
+    The window is the `registered` timestamp, the moment the DOI started to
+    resolve, on both ends of the query and again on the parsed record. The
+    metadata `published` value is not used because it is frequently a bare
+    year, and `created` can predate registration by however long a deposit
+    sat in draft.
+    """
+    searches = [str(value).strip() for value in config.get("searches", []) if str(value).strip()]
+    budget = max(1, int(config.get("max_requests", len(searches) or 1)))
+    page_size = min(1000, max(1, int(config.get("page_size", 50))))
+    window_start = since.astimezone(UTC)
+    window = (
+        f"registered:[{_datacite_query_time(window_start)} TO "
+        f"{_datacite_query_time(_latest_allowed(config))}]"
+    )
+    found: dict[str, RadarItem] = {}
+    for search in searches[:budget]:
+        terms = _datacite_query_terms(search)
+        # `titles.title:()` is a query_string parse error that would fail every search.
+        if not terms:
+            continue
+        payload = get_json(
+            DATACITE_API_URL,
+            params={
+                # Title-scoped, like the Crossref connector: the description
+                # field indexes every abstract that mentions a benchmark in
+                # passing, and the shared taxonomy filters the rest downstream.
+                "query": f"titles.title:({terms}) AND {window}",
+                # The API cannot sort on `registered`; `-created` is the
+                # closest server-side order, and the result is re-sorted below.
+                "sort": "-created",
+                "page[size]": min(page_size, limit),
+            },
+            **_request_options(config),
+        )
+        for row in _payload_rows(payload, "data", "DataCite"):
+            attributes = row.get("attributes")
+            if not isinstance(attributes, dict):
+                raise ConnectorPayloadError("DataCite attributes must be an object")
+            doi = str(attributes.get("doi") or row.get("id") or "").strip().casefold()
+            title = _datacite_title(_datacite_array(attributes, "titles"))
+            registered = _optional_date(attributes.get("registered"))
+            if not doi or not title or registered is None:
+                continue
+            # Anonymous reads only return findable DOIs, so this guards a
+            # credentialed run: a draft or registered-only DOI does not
+            # resolve yet and must not be published as a release.
+            if str(attributes.get("state") or "findable").strip().casefold() != "findable":
+                continue
+            # Only `registered` is checked against the collection instant,
+            # because only `registered` dates this record. DataCite stamps
+            # `updated` on every metadata edit, so during a simulated backfill
+            # a DOI registered inside the requested window and edited after it
+            # is ordinary history, not a future timestamp; rejecting it would
+            # drop evidence that belongs on its registration day. The sibling
+            # Crossref connector checks its own `published` alone for the same
+            # reason. The deposited `updated` still travels in `raw`.
+            if registered < window_start or _reject_future(config, doi, registered):
+                continue
+            authors: list[str] = []
+            organizations: list[str] = []
+            for creator in _datacite_array(attributes, "creators"):
+                name = _datacite_creator_name(creator)
+                if name:
+                    authors.append(name)
+                affiliations = creator.get("affiliation") or []
+                if not isinstance(affiliations, list):
+                    raise ConnectorPayloadError("DataCite creator affiliation must be an array")
+                for affiliation in affiliations:
+                    # A string by default; an object when `affiliation=true`
+                    # is requested, which a later ROR lookup may want.
+                    if isinstance(affiliation, dict):
+                        affiliation = affiliation.get("name")
+                    elif not isinstance(affiliation, str):
+                        raise ConnectorPayloadError(
+                            "DataCite affiliation entries must be strings or objects"
+                        )
+                    text = str(affiliation or "").strip()
+                    if text:
+                        organizations.append(text)
+            doi_url = f"https://doi.org/{doi}"
+            landing_page = str(attributes.get("url") or "").strip()
+            artifact_urls = [doi_url]
+            if landing_page.startswith(("https://", "http://")) and landing_page != doi_url:
+                # The deposit's own page. The shared DOI already merges this
+                # record with the Zenodo connector's copy, so this earns its
+                # place on the deposits whose landing page is the GitHub or
+                # Hugging Face URL that `dedupe_keys` resolves exactly.
+                artifact_urls.append(landing_page)
+            found[doi] = RadarItem(
+                source="DataCite",
+                source_id=doi,
+                title=title,
+                url=doi_url,
+                published_at=registered,
+                # Recency scoring and simulated backfill both read `updated_at`
+                # (`score_item` and `simulate_backfill` in pipeline.py), so it
+                # has to name the same instant the window was tested against.
+                # DataCite stamps `updated` on every metadata edit, seconds
+                # after registration and again years later; keying on it would
+                # give a long-stale DOI a brand-new record's recency score and
+                # place it in a backfilled day this connector's own guard
+                # rejects. The deposited value stays in `raw`.
+                updated_at=registered,
+                summary=clean_card_text(
+                    _datacite_description(_datacite_array(attributes, "descriptions"))
+                ),
+                # Registration inside the window is the release event. A later
+                # metadata edit does not demote it to an update: DataCite
+                # touches `updated` seconds after registering, which would mark
+                # nearly every new DOI as an update and halve its recency.
+                event_kind="released",
+                authors=authors,
+                organizations=list(dict.fromkeys(organizations)),
+                artifact_urls=artifact_urls,
+                metrics={
+                    "citations": float(attributes.get("citationCount") or 0),
+                    "downloads": float(attributes.get("downloadCount") or 0),
+                    "views": float(attributes.get("viewCount") or 0),
+                },
+                raw=row,
+                parser_version="datacite-dois/1",
+            )
+    return sorted(found.values(), key=lambda item: item.published_at, reverse=True)[:limit]
+
+
 def fetch_openreview(
     config: dict[str, Any],
     since: datetime,
@@ -1721,6 +2253,8 @@ SOURCE_FETCHERS = {
     "kaggle_datasets": fetch_kaggle_datasets,
     "zenodo": fetch_zenodo_records,
     "crossref": fetch_crossref,
+    "datacite": fetch_datacite,
+    "openaire": fetch_openaire,
     "openreview": fetch_openreview,
     "semantic_scholar": fetch_semantic_scholar,
     "github_releases": fetch_github_releases,
@@ -1743,6 +2277,8 @@ _PARSER_VERSION_METHODS = {
     "kaggle-datasets": "API",
     "zenodo-records": "API",
     "crossref-works": "API",
+    "datacite-dois": "API",
+    "openaire-graph-v3": "API",
     "openreview-api-v2": "API",
     "semantic-scholar-graph": "API",
     "github-releases": "API",
@@ -1761,6 +2297,8 @@ SOURCE_DEFAULT_METHODS = {
     "kaggle_datasets": "API",
     "zenodo": "API",
     "crossref": "API",
+    "datacite": "API",
+    "openaire": "API",
     "openreview": "API",
     "semantic_scholar": "API",
     "github_releases": "API",

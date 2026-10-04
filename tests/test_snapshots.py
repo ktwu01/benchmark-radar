@@ -642,6 +642,35 @@ def test_dashboard_reports_per_category_deltas_and_cumulative(tmp_path):
     assert second["cumulative_evidence_count"] == 2
 
 
+def test_dashboard_derives_science_domains_without_touching_snapshots(tmp_path):
+    # Issue #511: a domain tag is a routing facet replayed at rebuild time
+    # from stored title/summary, so history lights up without rewriting the
+    # durable evidence, and the query surfaces derive from the same text.
+    snapshot_dir = tmp_path / "snapshots"
+    write_snapshot(radar_run(26), snapshot_dir)
+    write_snapshot(
+        radar_run(
+            27,
+            title="BrainBench: Benchmarking Large Language Models for "
+            "Comprehensive EEG Understanding",
+        ),
+        snapshot_dir,
+    )
+
+    data = rebuild_dashboard(snapshot_dir, tmp_path / "radar.json")
+
+    first, second = data["days"]
+    assert first["evidence_items"][0]["science_domains"] == []
+    assert second["evidence_items"][0]["science_domains"] == ["neuroscience"]
+    assert data["facets"]["science_domains"] == ["neuroscience"]
+    # The durable snapshot on disk stays exactly what the collector wrote:
+    # derivation happens at rebuild time only.
+    stored = json.loads(
+        (snapshot_dir / "2026-07-27.json").read_text(encoding="utf-8"),
+    )
+    assert "science_domains" not in stored["evidence_items"][0]
+
+
 def test_trend_deltas_exclude_records_reannounced_as_updated(tmp_path):
     # Issue #50: a paper reannounced as an "updated" version is not new
     # activity in the field, so it must not move the 30-day change the way a
