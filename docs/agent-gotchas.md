@@ -51,8 +51,3 @@ Known traps in this repo. Each entry states the trap and what to do.
   dropped 296 of 306 evidence records without a report. If a budget trims
   content, count and publish the trim.
 
-## arXiv submission
-
-- **arXiv deletes `X.pdf` when `X.tex` exists.** Do not ship the figure `.tex`
-  wrappers. Before an upload, extract the tarball, delete each `X.pdf` that has
-  an `X.tex`, and compile. Exit 0 means arXiv will accept it.
