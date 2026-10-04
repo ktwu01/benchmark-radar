@@ -83,11 +83,8 @@ Applies to `README*`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `site/**`,
 - Show the insight before the pipeline. Crawling, normalization, scoring, and
   data-cleaning details matter, but they should support the takeaway instead of
   becoming the takeaway.
-- A report is not a dashboard. A dashboard lists metrics; a report answers a
-  question with a story: what was found, why it matters, and what evidence
-  supports it. When asked for a report or for insight, do not deliver a list of
-  counts or a rendered metrics page. Frame the open questions the data raises,
-  answer them with cited evidence, and say what remains uncertain.
+- A report is not a dashboard. Answer a question with cited evidence and
+  state what remains uncertain; a list of counts is not a report.
 - Use bilingual guidance when it helps contributors or readers provide better
   signal. Avoid jargon-heavy summaries that only say what changed; explain why
   the change matters to someone reading, reviewing, or sharing the project.
@@ -116,17 +113,10 @@ Applies to `README*`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `site/**`,
 
 - Run the full CI sequence locally and get it passing before opening a PR. Do
   not open one against a red local run.
-- Skip the local CI run for a docs-only PR: one that changes or deletes only
-  Markdown files that no test, generator, or site build reads. Check it with
-  this command, which searches tracked files only:
+- Skip it for a docs-only PR, when this prints nothing:
 
       git diff --name-only origin/main... | xargs -n1 basename \
         | xargs -I{} git grep -lF {} -- tests src site
-
-  If it prints nothing, open the PR and let remote CI confirm it. The README
-  files, `principle.md`, `docs/catalog/`, `docs/technical-report/`,
-  `docs/kw-bench-rubric.md`, and `skills/` are all read by tests, so a change
-  to any of them needs the full run.
 - A PR that adds a model card must also add every numeric score that card
   reports and that can be read with certainty to `data/benchmark_scores.yml`.
   Follow [`docs/sop-add-model-cards.md`](docs/sop-add-model-cards.md); a card
