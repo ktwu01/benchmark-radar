@@ -1,9 +1,20 @@
 name: CI
 
+# Markdown is not tested, except the READMEs and the technical report.
 on:
   push:
     branches: [main]
+    paths:
+      - "**"
+      - "!**/*.md"
+      - "README*.md"
+      - "docs/technical-report/**"
   pull_request:
+    paths:
+      - "**"
+      - "!**/*.md"
+      - "README*.md"
+      - "docs/technical-report/**"
 
 permissions:
   contents: read
