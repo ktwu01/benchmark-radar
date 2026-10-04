@@ -83,6 +83,11 @@ Applies to `README*`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `site/**`,
 - Show the insight before the pipeline. Crawling, normalization, scoring, and
   data-cleaning details matter, but they should support the takeaway instead of
   becoming the takeaway.
+- A report is not a dashboard. A dashboard lists metrics; a report answers a
+  question with a story: what was found, why it matters, and what evidence
+  supports it. When asked for a report or for insight, do not deliver a list of
+  counts or a rendered metrics page. Frame the open questions the data raises,
+  answer them with cited evidence, and say what remains uncertain.
 - Use bilingual guidance when it helps contributors or readers provide better
   signal. Avoid jargon-heavy summaries that only say what changed; explain why
   the change matters to someone reading, reviewing, or sharing the project.
