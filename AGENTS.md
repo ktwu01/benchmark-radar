@@ -19,6 +19,7 @@ the constraint that holds whether or not you open it.
 | [`docs/sop-add-model-cards.md`](docs/sop-add-model-cards.md) | Adding a model card, a benchmark, or a score | `data/model_cards.yml` and `data/benchmark_scores.yml` move together. Every value is read out of the cited document, never from memory. |
 | [`docs/query-surfaces.md`](docs/query-surfaces.md) | Changing search, detail lookup, the CLI or HTTP query surface, or the consumer Skill | `QueryService` is the single source of truth. No interface-specific ranking, and no silent network fallback. |
 | [`principle.md`](principle.md) | Changing any benchmark-facing surface | Start from the full corpus across all sources. |
+| [`docs/agent-gotchas.md`](docs/agent-gotchas.md) | Verifying locally, merging, or answering a literature question | A local result counts only from a clean worktree with its own venv. |
 
 ## Glob rule: showcase and UI communication
 
@@ -86,6 +87,15 @@ Applies to `README*`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `site/**`,
 - Use bilingual guidance when it helps contributors or readers provide better
   signal. Avoid jargon-heavy summaries that only say what changed; explain why
   the change matters to someone reading, reviewing, or sharing the project.
+
+## Working rules
+
+- Finish the task without nudges. Stop only for a merge, a credential, or a
+  destructive action.
+- If a request has two opposite readings, state your reading in one line, then
+  proceed.
+- Keep each fix minimal. File each follow-up as its own issue.
+- End with a link to the rendered result, after you open it yourself.
 
 ## Branches and pull requests
 
