@@ -116,6 +116,17 @@ Applies to `README*`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `site/**`,
 
 - Run the full CI sequence locally and get it passing before opening a PR. Do
   not open one against a red local run.
+- Skip the local CI run for a docs-only PR: one that changes or deletes only
+  Markdown files that no test, generator, or site build reads. Check it with
+  this command, which searches tracked files only:
+
+      git diff --name-only origin/main... | xargs -n1 basename \
+        | xargs -I{} git grep -lF {} -- tests src site
+
+  If it prints nothing, open the PR and let remote CI confirm it. The README
+  files, `principle.md`, `docs/catalog/`, `docs/technical-report/`,
+  `docs/kw-bench-rubric.md`, and `skills/` are all read by tests, so a change
+  to any of them needs the full run.
 - A PR that adds a model card must also add every numeric score that card
   reports and that can be read with certainty to `data/benchmark_scores.yml`.
   Follow [`docs/sop-add-model-cards.md`](docs/sop-add-model-cards.md); a card
