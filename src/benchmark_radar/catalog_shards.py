@@ -50,14 +50,17 @@ def _scores_by_source(
     Artificial Analysis both supply observations, and filing one under the
     other's name would be the cross-source merge this shape exists to prevent.
 
-    Only sources that actually recorded a score for this key get a key here. An
-    OpenCompass record, which has no observations, gets `{}` rather than a
-    source key holding an empty list, so the absence is visible as absence.
+    Only sources that actually recorded a score for this key, or that declared
+    a score series for it, get a key here. A source with a declared series but
+    no observations yet ships its declared scale with empty rows, so "not
+    measured" stays distinguishable from "not comparable". An OpenCompass
+    record, which has neither, gets `{}` rather than a source key holding an
+    empty list, so the absence is visible as absence.
     """
     key = record["key"]
     series = series_by_key.get(key)
     rows = observations_by_key.get(key)
-    if not rows:
+    if not series and not rows:
         return {}
     return {
         record["source"]: {

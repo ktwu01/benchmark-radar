@@ -1110,7 +1110,46 @@ def test_llm_stats_shard_carries_its_scores(shard_inputs: dict, tmp_path: Path) 
     assert block["series"]["display_scale"] is None
 
 
-def test_series_without_observations_does_not_create_a_score_bucket() -> None:
+def test_declared_series_without_observations_keeps_its_score_bucket() -> None:
+    """Zero observations must not erase a source-declared scale (#709).
+
+    A series with no rows is unknown measurements, not an unknown scale: the
+    declared bounds and direction still ship so downstream readers can tell
+    "not measured" apart from "not comparable".
+    """
+    from benchmark_radar.catalog_identity import IdentityIndex
+    from benchmark_radar.catalog_shards import build_shard
+
+    record = {
+        "key": "source:unscored",
+        "slug": "source-unscored",
+        "source": "source",
+    }
+    series = {
+        "key": record["key"],
+        "observation_count": 0,
+        "declared_max": 1.0,
+        "bounds": {"basis": "aggregator_declared"},
+        "direction": "higher_is_better",
+        "direction_basis": "source_rank_descending",
+    }
+    shard = build_shard(
+        record,
+        identity=IdentityIndex(),
+        series_by_key={record["key"]: series},
+        observations_by_key={},
+    )
+
+    block = shard["scores_by_source"]["source"]
+    assert block["rows"] == []
+    assert block["series"]["declared_max"] == 1.0
+    assert block["series"]["bounds"]["basis"] == "aggregator_declared"
+    assert block["series"]["direction"] == "higher_is_better"
+    assert block["series"]["direction_basis"] == "source_rank_descending"
+
+
+def test_record_without_series_or_observations_ships_empty_scores() -> None:
+    """The empty branch stays: no declared scale and no rows renders as absence."""
     from benchmark_radar.catalog_identity import IdentityIndex
     from benchmark_radar.catalog_shards import build_shard
 
@@ -1122,7 +1161,7 @@ def test_series_without_observations_does_not_create_a_score_bucket() -> None:
     shard = build_shard(
         record,
         identity=IdentityIndex(),
-        series_by_key={record["key"]: {"key": record["key"], "observation_count": 0}},
+        series_by_key={},
         observations_by_key={},
     )
 
