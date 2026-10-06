@@ -133,6 +133,22 @@ const unavailable = makeLoaders(async () => ({ok:false,status:503}));
 assert.equal(await unavailable.loadBenchmarkIndex(),null);
 assert.equal(await unavailable.loadBenchmarkShard('missing'),null);
 
+// A temporary outage must not poison the session's entire catalog cache.
+let recoveryAttempts = 0;
+const recovered = makeLoaders(async () => {
+  recoveryAttempts += 1;
+  if (recoveryAttempts <= 2) return {ok:false,status:503};
+  return {ok:true,json:async()=>({benchmarks:[{slug:'restored'}],record:{slug:'restored'}})};
+});
+assert.equal(await recovered.loadBenchmarkIndex(),null);
+assert.equal(await recovered.loadBenchmarkShard('restored'),null);
+assert.deepEqual(await recovered.loadBenchmarkIndex(),[{slug:'restored'}]);
+assert.equal((await recovered.loadBenchmarkShard('restored')).record.slug,'restored');
+assert.equal(recoveryAttempts,4,'failed requests are retried, successes remain cached');
+await recovered.loadBenchmarkIndex();
+await recovered.loadBenchmarkShard('restored');
+assert.equal(recoveryAttempts,4);
+
 function fixtureCatalog(benchmarks={},entries=[],catalog=[]) {
   if (catalog.some(row => row.source === 'model_reports')) return catalog;
   return [...Object.entries(benchmarks).map(([id, record]) => {

@@ -4562,7 +4562,12 @@ function loadBenchmarkIndex() {
         state.catalogDocuments = payload.document_registry || null;
         return payload.benchmarks;
       })
-      .catch(() => null);
+      .catch(() => {
+        // Cache successes and in-flight requests, not a transient outage that
+        // would otherwise hide the complete catalog for the whole session.
+        benchmarkIndexPromise = null;
+        return null;
+      });
   }
   return benchmarkIndexPromise;
 }
@@ -5298,7 +5303,10 @@ function loadBenchmarkShard(slug) {
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           return response.json();
         })
-        .catch(() => null),
+        .catch(() => {
+          benchmarkShardCache.delete(slug);
+          return null;
+        }),
     );
   }
   return benchmarkShardCache.get(slug);
