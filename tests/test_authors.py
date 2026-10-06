@@ -163,3 +163,50 @@ def test_contacts_csv_contains_every_contact_and_flattens_lists():
     assert "data quality; dataset" in rendered
     assert "org/one; org/two" in rendered
     assert "other" in rendered
+
+
+def test_survey_keeps_observed_repository_when_corpus_prefers_linked_paper():
+    repo = _repo("example/benchmark", stars=100, categories=["benchmark"])
+    paper = RadarItem(
+        source="arXiv",
+        source_id="2608.12345",
+        title="A benchmark paper",
+        url="https://arxiv.org/abs/2608.12345",
+        published_at=repo.published_at,
+        categories=["benchmark"],
+        artifact_urls=[repo.url],
+        summary="A scored benchmark with an observed repository.",
+    )
+    current = snapshot_for_run(_run([repo, paper]))
+    ranked = authors.popular_repositories([current])
+    assert [row["full_name"] for row in ranked] == ["example/benchmark"]
+    assert ranked[0]["stars"] == 100
+    assert ranked[0]["url"] == repo.url
+
+
+def test_survey_does_not_treat_unobserved_paper_links_as_repository_seeds():
+    paper = RadarItem(
+        source="arXiv",
+        source_id="2608.12345",
+        title="A benchmark paper",
+        url="https://arxiv.org/abs/2608.12345",
+        published_at=datetime(2026, 8, 4, tzinfo=UTC),
+        categories=["benchmark"],
+        artifact_urls=["https://github.com/example/unobserved"],
+    )
+    assert authors.popular_repositories([snapshot_for_run(_run([paper]))]) == []
+
+
+def test_survey_does_not_assign_aggregate_stars_to_ambiguous_repository_aliases():
+    first = _repo("one/benchmark", stars=100, categories=["benchmark"])
+    second = _repo("two/benchmark", stars=50, categories=["benchmark"])
+    paper = RadarItem(
+        source="arXiv",
+        source_id="2608.12345",
+        title="A benchmark paper",
+        url="https://arxiv.org/abs/2608.12345",
+        published_at=first.published_at,
+        categories=["benchmark"],
+        artifact_urls=[first.url, second.url],
+    )
+    assert authors.popular_repositories([snapshot_for_run(_run([first, second, paper]))]) == []

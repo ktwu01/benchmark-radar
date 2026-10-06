@@ -132,13 +132,31 @@ def popular_repositories(
     a week is a real signal; so is a highly starred one seen once.
     """
     corpus = build_corpus(snapshots)
+    observed_repos: dict[str, dict[str, str]] = {}
+    for observation in corpus["observations"]:
+        match = _GITHUB_REPO.match(str(observation.get("url") or ""))
+        if match:
+            owner, name = match.group(1), match.group(2).removesuffix(".git")
+            full_name = f"{owner}/{name}"
+            observed_repos.setdefault(observation["entity_id"], {})[full_name.casefold()] = (
+                f"https://github.com/{full_name}"
+            )
     ranked = []
     for entity in corpus["entities"]:
         if entity["type"] != "artifact":
             continue
-        match = _GITHUB_REPO.match(str(entity.get("url") or ""))
+        repo_url = str(entity.get("url") or "")
+        match = _GITHUB_REPO.match(repo_url)
         if not match:
-            continue
+            candidates = observed_repos.get(entity["id"], {})
+            # Recover only an actually observed, unambiguous repository. A
+            # paper's links alone must not invent seeds or assign stars to one
+            # of several distinct repositories joined by the artifact graph.
+            if len(candidates) != 1:
+                continue
+            repo_url = next(iter(candidates.values()))
+            match = _GITHUB_REPO.match(repo_url)
+            assert match is not None
         owner, name = match.group(1), match.group(2).removesuffix(".git")
         if owner.lower() in {"apps", "marketplace", "sponsors", "topics"}:
             continue
@@ -155,7 +173,7 @@ def popular_repositories(
                 "full_name": f"{owner}/{name}",
                 "owner": owner,
                 "name": name,
-                "url": entity.get("url"),
+                "url": repo_url,
                 "title": entity.get("label"),
                 "stars": float(metrics.get("stars") or 0),
                 "seen_days": len(entity.get("seen_days") or []),
