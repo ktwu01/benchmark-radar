@@ -30,6 +30,7 @@ class ConnectorPayloadError(ValueError):
 
 FUTURE_TIMESTAMP_TOLERANCE = timedelta(minutes=5)
 GITHUB_RELEASE_PARSER_VERSION = "github-releases/3"
+_XML_BASE = "{http://www.w3.org/XML/1998/namespace}base"
 
 
 def _xml_local_name(tag: str) -> str:
@@ -62,7 +63,7 @@ def _feed_date(value: str) -> datetime | None:
         return None
 
 
-def _feed_link(entry: ET.Element) -> str:
+def _feed_link(entry: ET.Element, *, base_url: str = "") -> str:
     # RSS puts the URL in the node text; Atom uses an href attribute and may
     # include alternate, self, and enclosure links.
     for child in entry:
@@ -70,7 +71,7 @@ def _feed_link(entry: ET.Element) -> str:
             continue
         href = str(child.get("href") or child.text or "").strip()
         if href and child.get("rel", "alternate") == "alternate":
-            return href
+            return urljoin(urljoin(base_url, child.get(_XML_BASE, "")), href)
     return ""
 
 
@@ -128,6 +129,10 @@ def fetch_first_party_feeds(config: dict[str, Any], since: datetime, limit: int)
                 entries = [child for child in root if _xml_local_name(child.tag) == "entry"]
             else:
                 raise ConnectorPayloadError(f"{name} returned an incompatible feed document")
+            bases = {root: urljoin(feed_url, root.get(_XML_BASE, ""))}
+            for parent in root.iter():
+                for child in parent:
+                    bases[child] = urljoin(bases[parent], child.get(_XML_BASE, ""))
             for entry in entries:
                 title = _feed_text(entry, "title")
                 summary = clean_card_text(_feed_text(entry, "description", "summary", "content"))
@@ -142,7 +147,7 @@ def fetch_first_party_feeds(config: dict[str, Any], since: datetime, limit: int)
                 # An absent link stays empty so the missing-field check below
                 # still catches it, which urljoin would otherwise mask by
                 # returning the feed's own URL.
-                link = _feed_link(entry)
+                link = _feed_link(entry, base_url=bases[entry])
                 url = urljoin(feed_url, link) if link else ""
                 source_id = _feed_text(entry, "id", "guid") or url
                 published = _feed_date(_feed_text(entry, "published", "pubDate", "date"))

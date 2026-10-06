@@ -3375,3 +3375,46 @@ def test_collection_method_falls_back_to_a_static_default_without_items():
     assert collection_method("brave", []) == "API"
     assert collection_method("datacite", []) == "API"
     assert collection_method("openaire", []) == "API"
+
+
+@pytest.mark.parametrize(
+    ("feed_base", "entry_base", "link_base", "expected"),
+    [
+        (
+            "https://announcements.example/releases/",
+            "",
+            "",
+            "https://announcements.example/releases/benchmark",
+        ),
+        (
+            "https://announcements.example/releases/",
+            "../evals/",
+            "",
+            "https://announcements.example/evals/benchmark",
+        ),
+        (
+            "https://announcements.example/releases/",
+            "../evals/",
+            "v2/",
+            "https://announcements.example/evals/v2/benchmark",
+        ),
+    ],
+)
+def test_first_party_atom_resolves_link_xml_base_scope(
+    monkeypatch, feed_base, entry_base, link_base, expected
+):
+    # Atom's xml:base belongs to its effective ancestor scope, not the URL
+    # used to fetch the feed. Losing it publishes a different artifact URL.
+    xml = f"""<feed xmlns="http://www.w3.org/2005/Atom" xml:base="{feed_base}">
+      <entry xml:base="{entry_base}"><id>urn:benchmark:one</id>
+      <title>A new benchmark</title>
+      <link rel="alternate" xml:base="{link_base}" href="benchmark"/>
+      <published>2026-08-08T12:00:00Z</published></entry></feed>"""
+    monkeypatch.setattr("benchmark_radar.sources.get_text", lambda *_a, **_k: xml)
+    items = fetch_first_party_feeds(
+        {"feeds": [{"name": "Lab", "url": "https://feeds.example/atom.xml"}]},
+        datetime(2026, 8, 8, tzinfo=UTC),
+        10,
+    )
+    assert [item.url for item in items] == [expected]
+    assert items[0].source_id == "Lab:urn:benchmark:one"
