@@ -748,3 +748,37 @@ def test_client_malformed_chrome_i18n_logs_error_without_throwing():
     res = _run_blog_language_harness("malformed-json", "zh")
     assert any("Failed to parse #chrome-i18n payload" in err for err in res["consoleErrors"])
     assert res["contactText"] == "Contact"
+
+
+def test_failed_blog_publication_retains_previous_pages(tmp_path, monkeypatch):
+    write_blog_with_chrome([_snapshot("2026-08-08")], tmp_path)
+    previous = (tmp_path / "blog" / "index.html").read_bytes()
+    rename = Path.rename
+
+    def fail_publication(path, target):
+        if path.name == "blog.staging":
+            raise OSError("publication rename failed")
+        return rename(path, target)
+
+    monkeypatch.setattr(Path, "rename", fail_publication)
+    with pytest.raises(OSError, match="publication rename failed"):
+        write_blog_with_chrome([_snapshot("2026-08-10")], tmp_path)
+    assert (tmp_path / "blog" / "index.html").read_bytes() == previous
+
+
+def test_failed_blog_restoration_keeps_backup_for_recovery(tmp_path, monkeypatch):
+    write_blog_with_chrome([_snapshot("2026-08-08")], tmp_path)
+    previous = (tmp_path / "blog" / "index.html").read_bytes()
+    rename = Path.rename
+
+    def fail_publication_and_restore(path, target):
+        if path.name == "blog.staging" or path.name.startswith("blog.backup-"):
+            raise OSError("rename unavailable")
+        return rename(path, target)
+
+    monkeypatch.setattr(Path, "rename", fail_publication_and_restore)
+    with pytest.raises(OSError, match="rename unavailable"):
+        write_blog_with_chrome([_snapshot("2026-08-10")], tmp_path)
+    backups = list(tmp_path.glob("blog.backup-*"))
+    assert len(backups) == 1
+    assert (backups[0] / "index.html").read_bytes() == previous

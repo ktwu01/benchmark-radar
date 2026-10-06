@@ -29,6 +29,7 @@ from datetime import UTC, date, datetime, time
 from email.utils import format_datetime
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 from xml.etree import ElementTree as ET
 
 from .blog_content import build_post
@@ -257,7 +258,7 @@ def write_blog(
     dashboard_html: str | None = None,
     app_js: str | None = None,
 ) -> dict[str, Any]:
-    """Write the whole blog tree atomically and report what it published.
+    """Stage the whole blog tree and restore the previous tree if publication fails.
 
     The chrome around every page is extracted from the dashboard source,
     ``site/index.html``, so the site has one masthead, nav, and footer rather
@@ -310,9 +311,17 @@ def write_blog(
     ET.indent(tree, space="  ")
     tree.write(staging / "feed.xml", encoding="utf-8", xml_declaration=True)
 
+    backup = site_dir / f"blog.backup-{uuid4().hex}"
     if output_dir.exists():
-        shutil.rmtree(output_dir)
-    staging.rename(output_dir)
+        output_dir.rename(backup)
+    try:
+        staging.rename(output_dir)
+    except OSError:
+        if backup.exists():
+            backup.rename(output_dir)
+        raise
+    if backup.exists():
+        shutil.rmtree(backup)
 
     lastmod = max((post.updated for post in posts), default=None)
     sitemap_entries: list[tuple[str, str | None]] = [
