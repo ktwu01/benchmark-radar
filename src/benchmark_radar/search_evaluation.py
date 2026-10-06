@@ -107,12 +107,9 @@ def evaluate(service: QueryService, dataset: dict[str, Any]) -> dict[str, Any]:
         ranks = {row["key"]: row["rank"] for row in result["results"]}
         relevant = list(case["relevant_keys"])
         if case["kind"] == "catalog_gap":
-            full_matches = [
-                row["key"] for row in result["results"] if not row["match"]["missing_tokens"]
-            ]
-            partial_keys = {
-                row["key"] for row in result["results"] if row["match"]["missing_tokens"]
-            }
+            recall_rows = [row for row in result["results"] if row["rank"] <= recall_cutoff]
+            full_matches = [row["key"] for row in recall_rows if not row["match"]["missing_tokens"]]
+            partial_keys = {row["key"] for row in recall_rows if row["match"]["missing_tokens"]}
             expected_partial = list(case["expected_partial_keys"])
             retained_partial = sum(key in partial_keys for key in expected_partial)
             gap_cases.append(
@@ -154,7 +151,9 @@ def evaluate(service: QueryService, dataset: dict[str, Any]) -> dict[str, Any]:
         ),
         f"mrr_at_{recall_cutoff}": _mean(
             [
-                1.0 / case["first_relevant_rank"] if case["first_relevant_rank"] else 0.0
+                1.0 / case["first_relevant_rank"]
+                if case["first_relevant_rank"] and case["first_relevant_rank"] <= recall_cutoff
+                else 0.0
                 for case in positive_cases
             ]
         ),
