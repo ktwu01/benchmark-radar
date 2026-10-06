@@ -368,8 +368,15 @@ class DataStore:
                             code="invalid_artifact",
                         )
                     destination.parent.mkdir(parents=True, exist_ok=True)
-                    with archive.open(info) as source, destination.open("wb") as output:
-                        shutil.copyfileobj(source, output)
+                    try:
+                        with archive.open(info) as source, destination.open("wb") as output:
+                            shutil.copyfileobj(source, output)
+                    except (RuntimeError, NotImplementedError) as error:
+                        # Encrypted members and unavailable/unsupported decompressors
+                        # must fail through the same public contract as a corrupt ZIP.
+                        raise DataSyncError(
+                            f"unsupported ZIP member: {info.filename!r}", code="invalid_artifact"
+                        ) from error
         except zipfile.BadZipFile as error:
             raise DataSyncError(
                 "downloaded artifact is not a valid ZIP", code="invalid_artifact"

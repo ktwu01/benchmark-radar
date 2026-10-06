@@ -546,3 +546,92 @@ def test_unsafe_archive_member_is_rejected(tmp_path: Path) -> None:
     with pytest.raises(DataSyncError, match="unsafe archive path"):
         store.initialize()
     assert not (tmp_path / "escaped.json").exists()
+
+
+@pytest.mark.parametrize("mode", ["encrypted", "unsupported-compression"])
+def test_init_reports_unsupported_zip_members_without_crashing(
+    monkeypatch, tmp_path: Path, capsys, mode: str
+) -> None:
+    manifest, bundle, manifest_url = _release(tmp_path)
+    # Exercise the native ZIP reader with unsupported central/local header
+    # flags rather than replacing archive.open with a synthetic exception.
+    payload = bytearray(bundle)
+    for signature, flag_offset, compression_offset in [
+        (b"PK\x03\x04", 6, 8),
+        (b"PK\x01\x02", 8, 10),
+    ]:
+        offset = payload.find(signature)
+        assert offset >= 0
+        if mode == "encrypted":
+            payload[offset + flag_offset] |= 1
+        else:
+            payload[offset + compression_offset : offset + compression_offset + 2] = (99).to_bytes(
+                2, "little"
+            )
+    bundle = bytes(payload)
+    manifest["artifact"]["sha256"] = hashlib.sha256(bundle).hexdigest()
+    manifest["artifact"]["size"] = len(bundle)
+    remote = _Remote(manifest_url, manifest, bundle)
+    monkeypatch.setattr("benchmark_radar.data_store.urllib.request.urlopen", remote.urlopen)
+    home = tmp_path / "home"
+    assert (
+        run_query_cli(["init", "--data-dir", str(home), "--manifest-url", manifest_url, "--json"])
+        == 1
+    )
+    assert json.loads(capsys.readouterr().err)["error"]["code"] == "invalid_artifact"
+    assert not (home / "state.json").exists()
+    assert not (home / ".download.tmp").exists()
+    assert not list((home / "versions").iterdir())
+
+
+@pytest.mark.parametrize(
+    "compression", [zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED, zipfile.ZIP_BZIP2, zipfile.ZIP_LZMA]
+)
+def test_init_keeps_native_zip_compression_support(tmp_path: Path, compression: int) -> None:
+    manifest, original, manifest_url = _release(tmp_path)
+    buffer = io.BytesIO()
+    with (
+        zipfile.ZipFile(io.BytesIO(original)) as source,
+        zipfile.ZipFile(buffer, "w", compression=compression) as target,
+    ):
+        for member in source.infolist():
+            target.writestr(member.filename, source.read(member))
+    bundle = buffer.getvalue()
+    manifest["artifact"]["sha256"] = hashlib.sha256(bundle).hexdigest()
+    manifest["artifact"]["size"] = len(bundle)
+    store = DataStore(
+        root=tmp_path / "home",
+        manifest_url=manifest_url,
+        urlopen=_Remote(manifest_url, manifest, bundle).urlopen,
+    )
+    assert store.initialize()["status"] == "initialized"
+    assert (
+        QueryService(store.query_paths()).show("agent-workbench")["benchmark"]["record"]["name"]
+        == "Agent Workbench"
+    )
+
+
+def test_init_reports_unavailable_zip_decompressor(monkeypatch, tmp_path: Path) -> None:
+    manifest, original, manifest_url = _release(tmp_path)
+    buffer = io.BytesIO()
+    with (
+        zipfile.ZipFile(io.BytesIO(original)) as source,
+        zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_BZIP2) as target,
+    ):
+        for member in source.infolist():
+            target.writestr(member.filename, source.read(member))
+    bundle = buffer.getvalue()
+    manifest["artifact"]["sha256"] = hashlib.sha256(bundle).hexdigest()
+    manifest["artifact"]["size"] = len(bundle)
+    # Simulate Python built without this optional module. Let its native ZIP
+    # reader discover the missing dependency rather than injecting an exception.
+    monkeypatch.setattr(zipfile, "bz2", None)
+    store = DataStore(
+        root=tmp_path / "home",
+        manifest_url=manifest_url,
+        urlopen=_Remote(manifest_url, manifest, bundle).urlopen,
+    )
+    with pytest.raises(DataSyncError) as failure:
+        store.initialize()
+    assert failure.value.code == "invalid_artifact"
+    assert not store.state_path.exists()
