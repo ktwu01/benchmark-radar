@@ -3375,3 +3375,36 @@ def test_collection_method_falls_back_to_a_static_default_without_items():
     assert collection_method("brave", []) == "API"
     assert collection_method("datacite", []) == "API"
     assert collection_method("openaire", []) == "API"
+
+
+def test_huggingface_preserves_same_named_repositories_of_different_kinds(monkeypatch):
+    from benchmark_radar.pipeline import deduplicate
+
+    def get_hub_rows(url, **_kwargs):
+        return [
+            {
+                "id": "lab/suite",
+                "createdAt": "2026-08-08T12:00:00Z",
+                "lastModified": "2026-08-08T13:00:00Z",
+                "downloads": 3,
+                "likes": 2,
+            }
+        ]
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", get_hub_rows)
+    items = fetch_huggingface(
+        {"kinds": ["datasets", "models", "spaces"], "searches": ["suite", "suite"]},
+        datetime(2026, 8, 8, tzinfo=UTC),
+        10,
+    )
+    # Hub namespaces are independent: a lab can own a dataset, model and Space
+    # under the same name. Keying only on owner/name silently keeps the last.
+    assert len(items) == 3
+    assert {item.source_id for item in items} == {"lab/suite"}
+    urls = {item.to_dict()["url"] for item in items}
+    assert len(urls) == 3
+    assert {
+        "https://huggingface.co/datasets/lab/suite",
+        "https://huggingface.co/spaces/lab/suite",
+    } <= urls
+    assert len(deduplicate(items)) == 3

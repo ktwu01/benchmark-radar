@@ -443,7 +443,7 @@ def fetch_arxiv(config: dict[str, Any], since: datetime, limit: int) -> list[Rad
 
 
 def fetch_huggingface(config: dict[str, Any], since: datetime, limit: int) -> list[RadarItem]:
-    found: dict[str, RadarItem] = {}
+    found: dict[tuple[str, str], RadarItem] = {}
     for kind in config.get("kinds", ["datasets"]):
         for search in config.get("searches", []):
             rows = get_json(
@@ -476,7 +476,7 @@ def fetch_huggingface(config: dict[str, Any], since: datetime, limit: int) -> li
                     or _reject_future(config, str(item_id), created, changed)
                 ):
                     continue
-                found[item_id] = RadarItem(
+                found[(kind, item_id)] = RadarItem(
                     source="Hugging Face",
                     source_id=item_id,
                     title=item_id,
