@@ -626,3 +626,24 @@ def test_publisher_runs_require_a_named_benchmark_publisher(tmp_path, overrides)
     }
     with pytest.raises(BenchmarkScoreError, match="named publisher"):
         score_progression(load_scores(path), registry)
+
+
+def test_best_gain_compares_unrounded_moves_between_protocols(tmp_path):
+    # A smaller later candidate beat a larger move merely because the first
+    # move had already been rounded for display, changing its named evidence.
+    rows = []
+    for protocol, delta in [("a", 1.0049), ("b", 1.001)]:
+        rows.extend(
+            [
+                result(protocol=protocol, model="Start", value=50.0),
+                result(protocol=protocol, model="End", reported_at="2025-02-01", value=50 + delta),
+            ]
+        )
+    for ordered in [rows, list(reversed(rows))]:
+        path = write_scores(tmp_path, minimal_scores(results=ordered))
+        gain = score_progression(load_scores(path))["benchmarks"]["alpha"]["saturation"][
+            "best_gain"
+        ]
+        assert gain["protocol"] == "a"
+        assert gain["to_value"] == pytest.approx(51.0049)
+        assert gain["improvement"] == 1.0

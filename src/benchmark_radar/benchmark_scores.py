@@ -531,6 +531,7 @@ def _saturation(
         )
 
     gain = None
+    gain_rank = None
     for item in series:
         if not item["connectable"]:
             continue
@@ -569,11 +570,12 @@ def _saturation(
         # The longest-running comparable series wins, then the largest move.
         # Picking the largest move first would surface a two-point jump over a
         # four-date run that actually shows a shape.
-        if gain is None or (item["dated_points"], abs(delta)) > (
-            gain["dated_points"],
-            abs(gain["improvement"]),
-        ):
+        # Display rounding must not make a smaller move replace the evidence
+        # for a larger one. Rank both candidates at their original precision.
+        candidate_rank = (item["dated_points"], abs(delta))
+        if gain_rank is None or candidate_rank > gain_rank:
             gain = candidate
+            gain_rank = candidate_rank
 
     return {
         "best_value": best["value"],
