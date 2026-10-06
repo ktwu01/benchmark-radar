@@ -1239,3 +1239,32 @@ def test_no_curated_layer_still_attributes_a_model_to_google_deepmind():
     for name in ("data/benchmark_scores.yml", "data/model_cards.yml"):
         text = Path(name).read_text(encoding="utf-8")
         assert "Google DeepMind" not in text, name
+
+
+def test_shard_publish_rename_failure_preserves_previous_corpus(tmp_path, monkeypatch):
+    # Replacing a completed live catalog must not erase it if publication fails.
+    from benchmark_radar.catalog_identity import IdentityIndex
+    from benchmark_radar.catalog_shards import write_shards
+
+    output = tmp_path / "benchmarks"
+    output.mkdir()
+    old = output / "old.json"
+    old.write_bytes(b'{"previous": true}\n')
+    rename = Path.rename
+
+    def fail_staging_publication(path, target):
+        if path.name.endswith(".staging"):
+            raise OSError("publication failed")
+        return rename(path, target)
+
+    monkeypatch.setattr(Path, "rename", fail_staging_publication)
+    with pytest.raises(OSError, match="publication failed"):
+        write_shards(
+            [{"key": "new", "slug": "new", "source": "fixture"}],
+            identity=IdentityIndex(),
+            series=[],
+            observations=[],
+            output_dir=output,
+        )
+    assert old.read_bytes() == b'{"previous": true}\n'
+    assert not (output / "new.json").exists()

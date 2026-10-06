@@ -22,14 +22,16 @@ WHY A FRESH DIRECTORY IS SWAPPED IN
 
 Benchmarks leave the crawl. If a removed record's shard were left behind, its
 URL would keep serving last month's data as if it were current. So shards are
-written to a sibling directory and swapped in atomically, and the old directory
-is deleted, so the set of live shards is exactly the set of current records.
+written to a sibling directory before publication. The previous directory stays
+recoverable until the rename succeeds, so a publication error does not destroy
+the last complete catalog.
 """
 
 from __future__ import annotations
 
 import json
 import shutil
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -91,7 +93,7 @@ def write_shards(
     observations: list[dict[str, Any]],
     output_dir: Path = DEFAULT_SHARD_DIR,
 ) -> dict[str, Any]:
-    """Write one shard per record, swapping a fresh directory in atomically.
+    """Write one shard per record, restoring the old directory on rename failure.
 
     Returns the shard count and total byte size so a build can report them
     without re-walking the directory.
@@ -119,10 +121,21 @@ def write_shards(
         path.write_text(payload, encoding="utf-8")
         total_bytes += len(payload.encode("utf-8"))
 
-    # Swap: remove the live directory only once the fresh one is fully written,
-    # so a crash mid-build never leaves a half-populated live directory.
+    # Keep the last valid catalog recoverable until the new directory lands.
+    # Deleting it first made a failed rename erase every live benchmark shard.
+    backup_root = None
     if output_dir.exists():
-        shutil.rmtree(output_dir)
-    staging.rename(output_dir)
+        backup_root = Path(tempfile.mkdtemp(prefix=f".{output_dir.name}-", dir=output_dir.parent))
+        output_dir.rename(backup_root / "previous")
+    try:
+        staging.rename(output_dir)
+    except OSError:
+        if backup_root is not None:
+            (backup_root / "previous").rename(output_dir)
+            backup_root.rmdir()
+        raise
+    else:
+        if backup_root is not None:
+            shutil.rmtree(backup_root)
 
     return {"shard_count": len(records), "total_bytes": total_bytes, "output_dir": output_dir}
