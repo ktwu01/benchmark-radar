@@ -188,25 +188,35 @@ def repository_contributors(
     per_repo: int = DEFAULT_CONTRIBUTORS_PER_REPO,
 ) -> list[dict[str, Any]]:
     """Public contributor logins and commit counts for one repository."""
-    try:
-        payload = get_json(
-            f"{GITHUB_API}/repos/{full_name}/contributors",
-            params={"per_page": min(per_repo, 100)},
-            headers=_headers(),
-        )
-    except RequestError as error:
-        raise AuthorLookupError(f"contributors for {full_name}: {error}") from error
-    if not isinstance(payload, list):
+    if per_repo <= 0:
         return []
-    return [
-        {
-            "login": str(entry.get("login") or ""),
-            "contributions": int(entry.get("contributions") or 0),
-            "type": str(entry.get("type") or "User"),
-        }
-        for entry in payload
-        if isinstance(entry, dict) and entry.get("login") and entry.get("type") == "User"
-    ][:per_repo]
+    page_size = min(per_repo, 100)
+    contributors = []
+    page = 1
+    while len(contributors) < per_repo:
+        try:
+            payload = get_json(
+                f"{GITHUB_API}/repos/{full_name}/contributors",
+                params={"per_page": page_size, "page": page},
+                headers=_headers(),
+            )
+        except RequestError as error:
+            raise AuthorLookupError(f"contributors for {full_name}: {error}") from error
+        if not isinstance(payload, list):
+            break
+        contributors.extend(
+            {
+                "login": str(entry.get("login") or ""),
+                "contributions": int(entry.get("contributions") or 0),
+                "type": str(entry.get("type") or "User"),
+            }
+            for entry in payload
+            if isinstance(entry, dict) and entry.get("login") and entry.get("type") == "User"
+        )
+        if len(payload) < page_size:
+            break
+        page += 1
+    return contributors[:per_repo]
 
 
 def data_signals(profile: dict[str, Any]) -> list[str]:

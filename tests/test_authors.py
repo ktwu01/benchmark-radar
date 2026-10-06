@@ -163,3 +163,38 @@ def test_contacts_csv_contains_every_contact_and_flattens_lists():
     assert "data quality; dataset" in rendered
     assert "org/one; org/two" in rendered
     assert "other" in rendered
+
+
+def test_contributor_survey_reads_later_pages_and_skips_bots(monkeypatch):
+    calls = []
+
+    def get_json(url, *, params, headers):
+        calls.append(params.copy())
+        page = params.get("page", 1)
+        if page == 1:
+            return [{"login": "bot", "type": "Bot", "contributions": 200}] + [
+                {"login": f"person-{i}", "type": "User", "contributions": 100 - i}
+                for i in range(99)
+            ]
+        return [
+            {"login": f"person-{i}", "type": "User", "contributions": 1} for i in range(99, 159)
+        ]
+
+    monkeypatch.setattr(authors, "get_json", get_json)
+    contributors = authors.repository_contributors("example/benchmark", per_repo=150)
+    assert len(contributors) == 150
+    assert contributors[-1]["login"] == "person-149"
+    assert calls == [{"per_page": 100, "page": 1}, {"per_page": 100, "page": 2}]
+
+
+def test_failed_later_contributor_page_does_not_publish_partial_survey(monkeypatch):
+    def get_json(url, *, params, headers):
+        if params["page"] == 2:
+            raise authors.RequestError("second page unavailable")
+        return [{"login": f"person-{i}", "type": "User"} for i in range(100)]
+
+    monkeypatch.setattr(authors, "get_json", get_json)
+    import pytest
+
+    with pytest.raises(authors.AuthorLookupError, match="second page unavailable"):
+        authors.repository_contributors("example/benchmark", per_repo=150)
