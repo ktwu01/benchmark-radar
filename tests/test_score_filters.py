@@ -1,5 +1,6 @@
 """Score cutoff semantics and the data shared by ranking, charts and HTML seeds."""
 
+import csv
 import json
 import math
 import shutil
@@ -372,3 +373,34 @@ def test_seed_preserves_score_entry_proxy_and_prefers_release_or_publication():
     assert "First dated LLM score (model-release proxy) Feb 29, 2024" in markup
     assert "Pre-2024 score entry" in markup
     assert "2 of 2 matches" in markup
+
+
+@pytest.mark.parametrize(("query", "name"), [("τ", "τ-Rec"), ("π", "π-SUB"), ("Φ", "Φ-Bench")])
+def test_catalog_search_keeps_unicode_letters_in_source_names(query, name):
+    # These names come from the committed source snapshot, not invented metadata.
+    with Path("data/leaderboard_snapshots/claire_radar_benchmarks_2026-09-25.csv").open() as file:
+        records = [
+            {"name": row["name"], "slug": row["benchmark_id"], "source": "claire_radar"}
+            for row in csv.DictReader(file)
+        ]
+    script = r"""
+const fs = require('node:fs');
+const source = fs.readFileSync('site/assets/app.js','utf8');
+const fn = name => {
+  const start = source.indexOf(`function ${name}(`);
+  return source.slice(start,source.indexOf('\n}\n',start)+2);
+};
+const search = new Function(
+  `${fn('foldName')}\n${fn('searchBenchmarkIndex')}\nreturn searchBenchmarkIndex;`
+)();
+const input = JSON.parse(fs.readFileSync(0,'utf8'));
+console.log(JSON.stringify(search(input.records,input.query).map(row => row.name)));
+"""
+    result = subprocess.run(
+        ["node", "-e", script],
+        input=json.dumps({"records": records, "query": query}),
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    assert name in json.loads(result.stdout)

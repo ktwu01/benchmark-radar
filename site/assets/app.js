@@ -4568,7 +4568,9 @@ function loadBenchmarkIndex() {
 }
 
 function foldName(value) {
-  return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+  // Source names include τ-Rec and Φ-Bench; stripping their letters made
+  // literal name queries empty and hid real catalog records.
+  return String(value || "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
 }
 
 // Names and aliases use the same matching rules for every source.
