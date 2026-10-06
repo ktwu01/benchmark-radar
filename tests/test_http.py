@@ -296,3 +296,45 @@ def test_http_honors_http_date_retry_after(monkeypatch, seconds, expected):
     # second despite a future date consumes the rate-limit quota again.
     assert get_json("https://example.test/data", attempts=2) == {"ok": True}
     assert sleeps == [expected]
+
+
+@pytest.mark.parametrize("host_timezone", ["UTC0", "EST5", "CET-1"])
+def test_http_asctime_retry_after_uses_utc_in_every_host_timezone(monkeypatch, host_timezone):
+    import os
+    import time
+    from datetime import UTC, datetime
+
+    if not hasattr(time, "tzset"):
+        pytest.skip("Native timezone switching requires time.tzset")
+    original_timezone = os.environ.get("TZ")
+    monkeypatch.setenv("TZ", host_timezone)
+    time.tzset()
+    now = datetime(2026, 10, 6, 12, tzinfo=UTC)
+    calls = 0
+    sleeps = []
+
+    def fake_urlopen(request, **kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise urllib.error.HTTPError(
+                request.full_url,
+                429,
+                "rate limited",
+                {"Retry-After": "Tue Oct  6 12:00:30 2026"},
+                io.BytesIO(),
+            )
+        return Response(b'{"ok": true}')
+
+    monkeypatch.setattr("benchmark_radar.http.urllib.request.urlopen", fake_urlopen)
+    monkeypatch.setattr("benchmark_radar.http.time.time", lambda: now.timestamp())
+    monkeypatch.setattr("benchmark_radar.http.time.sleep", sleeps.append)
+    try:
+        assert get_json("https://example.test/data", attempts=2) == {"ok": True}
+        assert sleeps == [30.0]
+    finally:
+        if original_timezone is None:
+            monkeypatch.delenv("TZ", raising=False)
+        else:
+            monkeypatch.setenv("TZ", original_timezone)
+        time.tzset()
