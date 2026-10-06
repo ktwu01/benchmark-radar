@@ -1042,3 +1042,54 @@ def test_stale_values_are_displayed_but_do_not_change_score_order():
     stale = next(entry for entry in entries if entry["name"] == "Stale context")
     assert stale["components"]["hf_paper_upvotes"]["value"] == 1_000
     assert stale["components"]["hf_paper_upvotes"]["status"] == "stale"
+
+
+def test_mixed_case_github_host_keeps_release_ranking_available():
+    # URL hosts are case-insensitive; a valid copied link used to raise while
+    # resolving attention, aborting all release windows rather than one row.
+    stamp = "2026-09-01T12:00:00+00:00"
+    cid = "artifact:github:org/bench"
+    snapshot = make_snapshot(
+        "2026-09-01",
+        stamp,
+        evidence_items=[
+            {
+                "url": "https://github.com/org/bench",
+                "title": "Benchmark",
+                "event_kind": "released",
+                "published_at": stamp,
+                "source": "GitHub",
+                "source_id": "org/bench",
+            }
+        ],
+        benchmark_attention={
+            "schema_version": 1,
+            "observed_at": stamp,
+            "health": [],
+            "observations": [
+                {
+                    "canonical_artifact_id": cid,
+                    "source": "github",
+                    "metric": "stars",
+                    "value": 10,
+                    "value_kind": "cumulative",
+                    "source_url": "https://GITHUB.COM/org/bench?tab=readme#results",
+                    "status": "fresh",
+                }
+            ],
+        },
+    )
+    result = build_latest_releases_leaderboard(
+        [snapshot], as_of=stamp, reviewed_benchmark_ids=set()
+    )
+    assert result["windows"]["30d"]["ranked_count"] == 1
+    assert result["windows"]["30d"]["entries"][0]["name"] == "Benchmark"
+
+    # A malformed authority must remain unranked, rather than gaining a new
+    # exception path when URL parsing replaces the old regex.
+    for invalid_url in ("https://[github.com]/org/bench", "https://[github.com/org/bench"):
+        snapshot["benchmark_attention"]["observations"][0]["source_url"] = invalid_url
+        rejected = build_latest_releases_leaderboard(
+            [snapshot], as_of=stamp, reviewed_benchmark_ids=set()
+        )
+        assert rejected["windows"]["30d"]["ranked_count"] == 0

@@ -25,7 +25,6 @@ Cohorts:
 from __future__ import annotations
 
 import math
-import re
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -99,15 +98,17 @@ def is_dedicated_benchmark_repo(url: str | None) -> bool:
     """Check if URL points to a dedicated GitHub repository rather than a subdirectory/tree."""
     if not url or not isinstance(url, str):
         return False
-    url = url.strip()
-    if re.search(r"github\.com/[^/]+/[^/]+/(?:tree|blob)/", url, re.I):
+    # Parse the authority once: case-insensitive matching followed by a
+    # case-sensitive string split crashed the whole ranking for GITHUB.COM.
+    try:
+        parsed = urlsplit(url.strip())
+    except ValueError:
         return False
-    match = re.search(r"^https?://(?:www\.)?github\.com/([^/]+)/([^/#?]+)", url, re.I)
-    if not match:
+    if parsed.scheme not in {"http", "https"}:
         return False
-    path_suffix = url.split("github.com/", 1)[1].split("?")[0].split("#")[0].strip("/")
-    parts = [p for p in path_suffix.split("/") if p]
-    return len(parts) == 2
+    host = parsed.netloc.casefold().removeprefix("www.")
+    parts = [part for part in parsed.path.strip("/").split("/") if part]
+    return host == "github.com" and len(parts) == 2
 
 
 def is_exact_attention_source_url(signal: str, url: str | None) -> bool:
