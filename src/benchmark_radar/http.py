@@ -150,7 +150,12 @@ def _request(
         except urllib.error.HTTPError as error:
             # Only rate limits and server failures are transient. Never expose
             # a query string: some APIs carry credentials there.
-            detail = _safe_openai_error_detail(url, error)
+            try:
+                detail = _safe_openai_error_detail(url, error)
+            finally:
+                # HTTPError owns a response body even when no detail is read.
+                # Close every failed attempt rather than wait for garbage collection.
+                error.close()
             if error.code != 429 and error.code < 500:
                 raise RequestError(
                     f"HTTP {error.code} from {_safe_url(url)}{detail}"

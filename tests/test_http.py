@@ -265,3 +265,47 @@ def test_post_json_sends_compact_json_and_headers(monkeypatch):
     assert captured["request"].data == b'{"input":"brief me"}'
     assert captured["request"].get_header("Content-type") == "application/json"
     assert captured["request"].get_header("Authorization") == "Bearer secret"
+
+
+@pytest.mark.parametrize("status", [401, 429, 503])
+def test_http_failures_close_real_error_response_streams(monkeypatch, status):
+    import threading
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+
+    errors = []
+    native_urlopen = urllib.request.urlopen
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(status)
+            self.send_header("Retry-After", "0")
+            self.end_headers()
+            self.wfile.write(b"upstream failure")
+
+        def log_message(self, *_args):
+            pass
+
+    def capture_error(*args, **kwargs):
+        try:
+            return native_urlopen(*args, **kwargs)
+        except urllib.error.HTTPError as error:
+            errors.append(error)
+            raise
+
+    monkeypatch.setattr("benchmark_radar.http.urllib.request.urlopen", capture_error)
+    server = HTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        with pytest.raises(RequestError, match=f"HTTP {status}"):
+            get_json(f"http://127.0.0.1:{server.server_port}/data", attempts=2)
+        assert len(errors) == (1 if status == 401 else 2)
+        # urllib's HTTPError owns the response stream. Suppressing its cause
+        # does not close it, including each abandoned retry response.
+        assert all(error.fp.closed for error in errors)
+    finally:
+        for error in errors:
+            error.close()
+        server.shutdown()
+        thread.join(timeout=2)
+        server.server_close()
