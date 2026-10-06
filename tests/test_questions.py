@@ -578,3 +578,12 @@ def test_generate_daily_questions_translates_answers_to_chinese_when_requested(m
         for a in answers
     )
     assert result["zh_translation"]["response_id"] == "resp_zh"
+
+
+@pytest.mark.parametrize(
+    "signal", ["Downloads changed by -999.", "The download count is 999.", "The share is -999%."]
+)
+def test_quantity_signs_and_sentence_punctuation_do_not_form_identifiers(signal):
+    group, stats_by_id, evidence = _fixture()
+    with pytest.raises(BriefingError, match="uncited quantity"):
+        questions._validate([_answer(signal=signal)], group, stats_by_id, evidence)

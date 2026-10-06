@@ -338,8 +338,8 @@ def _is_identifier_fragment(text: str, match: re.Match[str]) -> bool:
     return (
         before.isalpha()
         or after.isalpha()
-        or before in _IDENTIFIER_GLUE
-        or after in _IDENTIFIER_GLUE
+        or (before in _IDENTIFIER_GLUE and start > 1 and text[start - 2].isalnum())
+        or (after in _IDENTIFIER_GLUE and end + 1 < len(text) and text[end + 1].isalnum())
     )
 
 
