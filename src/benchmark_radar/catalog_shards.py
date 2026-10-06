@@ -30,6 +30,7 @@ the last complete catalog.
 from __future__ import annotations
 
 import json
+import logging
 import shutil
 import tempfile
 from pathlib import Path
@@ -136,6 +137,15 @@ def write_shards(
         raise
     else:
         if backup_root is not None:
-            shutil.rmtree(backup_root)
+            try:
+                shutil.rmtree(backup_root)
+            except OSError as error:
+                # Publication has succeeded. Do not prevent later consumers
+                # from generating matching pages because old cleanup failed.
+                logging.getLogger(__name__).warning(
+                    "Catalog published; previous backup cleanup failed at %s: %s",
+                    backup_root,
+                    error,
+                )
 
     return {"shard_count": len(records), "total_bytes": total_bytes, "output_dir": output_dir}

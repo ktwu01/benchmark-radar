@@ -1268,3 +1268,45 @@ def test_shard_publish_rename_failure_preserves_previous_corpus(tmp_path, monkey
         )
     assert old.read_bytes() == b'{"previous": true}\n'
     assert not (output / "new.json").exists()
+
+
+def test_published_shard_cleanup_failure_still_allows_page_generation(
+    tmp_path, monkeypatch, caplog
+):
+    import shutil
+
+    from benchmark_radar.catalog_identity import IdentityIndex
+    from benchmark_radar.catalog_shards import write_shards
+    from benchmark_radar.site_pages import write_benchmark_pages
+
+    output = tmp_path / "benchmarks"
+    pages = tmp_path / "pages"
+    identity = IdentityIndex()
+    previous = {"key": "old", "slug": "old", "name": "Previous Benchmark", "source": "fixture"}
+    write_shards([previous], identity=identity, series=[], observations=[], output_dir=output)
+    write_benchmark_pages(output, pages)
+    old_shard = (output / "old.json").read_bytes()
+    rmtree = shutil.rmtree
+
+    def fail_backup_cleanup(path, *args, **kwargs):
+        if Path(path).name.startswith(".benchmarks-"):
+            raise PermissionError("previous shard is busy")
+        return rmtree(path, *args, **kwargs)
+
+    monkeypatch.setattr("benchmark_radar.catalog_shards.shutil.rmtree", fail_backup_cleanup)
+    current = {"key": "new", "slug": "new", "name": "Current Benchmark", "source": "fixture"}
+    # The normalizer invokes these production consumers in this order. A
+    # cleanup exception used to skip page generation after new shards went live.
+    report = write_shards(
+        [current], identity=identity, series=[], observations=[], output_dir=output
+    )
+    page_report = write_benchmark_pages(output, pages)
+
+    assert report["shard_count"] == page_report["page_count"] == 1
+    assert not (output / "old.json").exists()
+    assert "Current Benchmark" in (pages / "new" / "index.html").read_text()
+    assert not (pages / "old").exists()
+    backups = list(tmp_path.glob(".benchmarks-*"))
+    assert len(backups) == 1
+    assert (backups[0] / "previous" / "old.json").read_bytes() == old_shard
+    assert str(backups[0]) in caplog.text
