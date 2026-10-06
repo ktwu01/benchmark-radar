@@ -29,7 +29,7 @@ class ConnectorPayloadError(ValueError):
 
 
 FUTURE_TIMESTAMP_TOLERANCE = timedelta(minutes=5)
-GITHUB_RELEASE_PARSER_VERSION = "github-releases/3"
+GITHUB_RELEASE_PARSER_VERSION = "github-releases/4"
 
 
 def _xml_local_name(tag: str) -> str:
@@ -503,7 +503,7 @@ def fetch_huggingface(config: dict[str, Any], since: datetime, limit: int) -> li
                     ),
                     metrics=_reported_metrics(row, {"downloads": "downloads", "likes": "likes"}),
                     raw=row,
-                    parser_version="huggingface-hub/1",
+                    parser_version="huggingface-hub/2",
                 )
     _clear_inherited_short_descriptions(found.values())
     # `limit` is applied per request, and this fetcher issues one per kind per
@@ -631,7 +631,7 @@ def fetch_github(config: dict[str, Any], since: datetime, limit: int) -> list[Ra
                         row, {"stars": "stargazers_count", "forks": "forks_count"}
                     ),
                     raw=row,
-                    parser_version="github-search/1",
+                    parser_version="github-search/2",
                 )
             if len(rows) < min(limit, page_size):
                 exhausted.add(index)
@@ -645,9 +645,9 @@ def fetch_github(config: dict[str, Any], since: datetime, limit: int) -> list[Ra
     )[:limit]
 
 
-GITHUB_ORGANIZATIONS_PARSER_VERSION = "github-organizations/1"
-KAGGLE_DATASETS_PARSER_VERSION = "kaggle-datasets/1"
-HUGGINGFACE_PAPERS_PARSER_VERSION = "huggingface-papers/1"
+GITHUB_ORGANIZATIONS_PARSER_VERSION = "github-organizations/2"
+KAGGLE_DATASETS_PARSER_VERSION = "kaggle-datasets/2"
+HUGGINGFACE_PAPERS_PARSER_VERSION = "huggingface-papers/2"
 
 
 def _github_headers() -> dict[str, str]:
@@ -964,7 +964,7 @@ def fetch_zenodo_records(
                 artifact_urls=artifact_urls,
                 metrics=_reported_metrics(stats, {"downloads": "downloads", "views": "views"}),
                 raw=row,
-                parser_version="zenodo-records/1",
+                parser_version="zenodo-records/2",
             )
     return sorted(
         collapse_batch_deposits(found.values()),
@@ -1126,7 +1126,7 @@ def fetch_crossref(
                 artifact_urls=[doi_url],
                 metrics=_reported_metrics(row, {"citations": "is-referenced-by-count"}),
                 raw=row,
-                parser_version="crossref-works/1",
+                parser_version="crossref-works/2",
             )
     return sorted(found.values(), key=lambda item: item.published_at, reverse=True)[:limit]
 
@@ -1390,7 +1390,7 @@ def fetch_openaire(
                     **_reported_metrics(usage, {"downloads": "downloads", "views": "views"}),
                 },
                 raw=row,
-                parser_version="openaire-graph-v3/1",
+                parser_version="openaire-graph-v3/2",
             )
     return sorted(found.values(), key=lambda item: item.published_at, reverse=True)[:limit]
 
@@ -1660,7 +1660,7 @@ def fetch_datacite(
                     },
                 ),
                 raw=row,
-                parser_version="datacite-dois/1",
+                parser_version="datacite-dois/2",
             )
     return sorted(found.values(), key=lambda item: item.published_at, reverse=True)[:limit]
 
@@ -1885,7 +1885,7 @@ def fetch_semantic_scholar(
                         },
                     ),
                     raw=row,
-                    parser_version="semantic-scholar-graph/1",
+                    parser_version="semantic-scholar-graph/2",
                 )
             next_offset = _payload_dict(payload, "Semantic Scholar").get("next")
             if next_offset is None or len(rows) < min(page_size, limit - len(found)):
@@ -2184,7 +2184,7 @@ def fetch_openalex(
                 organizations=organizations,
                 metrics=_reported_metrics(row, {"citations": "cited_by_count"}),
                 raw=row,
-                parser_version="openalex-works/1",
+                parser_version="openalex-works/2",
             )
     return list(found.values())
 

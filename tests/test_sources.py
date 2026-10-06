@@ -395,6 +395,7 @@ def test_openalex_carries_author_institutions(monkeypatch):
 
     assert items[0].authors == ["Radar Author"]
     assert items[0].organizations == ["Example University", "Example Lab"]
+    assert items[0].parser_version == "openalex-works/2"
 
 
 def test_openalex_accepts_explicitly_null_authorships(monkeypatch):
@@ -650,6 +651,7 @@ def test_github_keeps_missing_forks_unknown(monkeypatch):
         10,
     )
     assert items[0].metrics == {"stars": 0.0}
+    assert items[0].parser_version == "github-search/2"
 
 
 def test_github_config_discovers_and_routes_rsi_exam(monkeypatch):
@@ -754,6 +756,7 @@ def test_github_organizations_collect_only_recent_non_fork_repositories(monkeypa
     assert items[0].source == "GitHub Organization"
     assert items[0].organizations == ["First Lab"]
     assert items[0].event_kind == "released"
+    assert items[0].parser_version == "github-organizations/2"
 
 
 def test_github_organizations_isolate_one_failed_organization(monkeypatch):
@@ -807,6 +810,7 @@ def test_huggingface_papers_preserves_arxiv_and_project_identifiers(monkeypatch)
         "https://lab.example/benchmark",
     ]
     assert items[0].summary == "An upstream evaluation suite."
+    assert items[0].parser_version == "huggingface-papers/2"
 
 
 def test_kaggle_datasets_preserves_source_text_and_tags(monkeypatch):
@@ -836,6 +840,7 @@ def test_kaggle_datasets_preserves_source_text_and_tags(monkeypatch):
     assert items[0].source == "Kaggle Dataset"
     assert items[0].summary == "A public evaluation dataset. | benchmark | llm"
     assert items[0].metrics == {"downloads": 11.0, "votes": 2.0, "views": 31.0}
+    assert items[0].parser_version == "kaggle-datasets/2"
 
 
 def test_zenodo_records_preserve_doi_and_upstream_metadata(monkeypatch):
@@ -872,6 +877,7 @@ def test_zenodo_records_preserve_doi_and_upstream_metadata(monkeypatch):
     assert items[0].authors == ["Zenodo Author"]
     assert items[0].artifact_urls == ["https://doi.org/10.5281/zenodo.12345"]
     assert items[0].metrics == {"downloads": 13.0, "views": 21.0}
+    assert items[0].parser_version == "zenodo-records/2"
 
 
 def _deposit(recid: str, title: str, description: str, creators: list[str], day: int) -> dict:
@@ -1061,7 +1067,7 @@ def test_crossref_preserves_doi_metadata_and_bounds_the_query(monkeypatch):
     assert items[0].organizations == ["Radar Lab"]
     assert items[0].artifact_urls == ["https://doi.org/10.1000/radar"]
     assert items[0].metrics == {"citations": 3.0}
-    assert items[0].parser_version == "crossref-works/1"
+    assert items[0].parser_version == "crossref-works/2"
     assert calls[0][0] == "https://api.crossref.org/works"
     assert calls[0][1]["params"]["query.title"] == "agent benchmark"
     assert calls[0][1]["params"]["filter"] == ("from-pub-date:2026-07-26,until-pub-date:2026-07-28")
@@ -1203,7 +1209,7 @@ def test_openaire_preserves_upstream_metadata_and_bounds_the_query(monkeypatch):
     assert item.updated_at == datetime(2026, 7, 27, tzinfo=UTC)
     assert item.raw["dateOfCollection"] == "2026-08-30T00:00:00Z"
     assert item.event_kind == "released"
-    assert item.parser_version == "openaire-graph-v3/1"
+    assert item.parser_version == "openaire-graph-v3/2"
     assert calls[0][0] == "https://api.openaire.eu/graph/v3/research-products"
     assert calls[0][1]["params"] == {
         "mainTitle": '"agent benchmark"',
@@ -1669,7 +1675,7 @@ def test_openaire_stops_at_the_configured_request_budget(monkeypatch):
 
 
 def test_openaire_preserves_a_product_that_carries_almost_nothing(monkeypatch):
-    # An absent public counter is a real zero rather than a missing metric.
+    # An absent public counter is unknown and must remain omitted.
     monkeypatch.setattr(
         "benchmark_radar.sources.get_json",
         lambda url, **kwargs: _openaire_rows_payload(
@@ -1857,7 +1863,7 @@ def test_datacite_preserves_doi_metadata_and_bounds_the_query(monkeypatch):
     assert item.updated_at == datetime(2026, 7, 27, 9, tzinfo=UTC)
     assert item.raw["attributes"]["updated"] == "2026-07-27T09:00:05.000Z"
     assert item.event_kind == "released"
-    assert item.parser_version == "datacite-dois/1"
+    assert item.parser_version == "datacite-dois/2"
     assert calls[0][0] == "https://api.datacite.org/dois"
     params = calls[0][1]["params"]
     # Both ends of the window travel with the query, second-precise and in UTC.
@@ -2095,7 +2101,7 @@ def test_datacite_truncates_to_the_per_source_limit(monkeypatch):
 
 def test_datacite_preserves_a_deposit_that_carries_almost_nothing(monkeypatch):
     # A DOI, a title and a registration date are all DataCite requires. An
-    # absent public counter is a real zero rather than a missing metric, and a
+    # absent public counter is unknown and remains omitted, and a
     # deposit whose landing page is its own DOI must not list that URL twice.
     monkeypatch.setattr(
         "benchmark_radar.sources.get_json",
@@ -2413,7 +2419,7 @@ def test_semantic_scholar_success_preserves_external_ids(monkeypatch):
     assert items[0].summary == "The upstream scholarly abstract."
     assert "https://doi.org/10.1000/radar" in items[0].artifact_urls
     assert "https://arxiv.org/abs/2607.12345" in items[0].artifact_urls
-    assert items[0].parser_version == "semantic-scholar-graph/1"
+    assert items[0].parser_version == "semantic-scholar-graph/2"
 
 
 def test_semantic_scholar_paces_an_individual_api_key(monkeypatch):
@@ -2470,6 +2476,7 @@ def test_github_releases_success_uses_release_notes(monkeypatch):
     assert items[0].summary == "The upstream release notes."
     assert items[0].metrics["downloads"] == 7
     assert items[0].parser_version == GITHUB_RELEASE_PARSER_VERSION
+    assert items[0].parser_version == "github-releases/4"
 
 
 def test_github_release_popularity_comes_from_repository_metadata(monkeypatch):
@@ -3274,6 +3281,7 @@ def test_huggingface_does_not_publish_absent_counters_as_zero(monkeypatch):
         10,
     )
     assert items[0].metrics == {"likes": 0.0}
+    assert items[0].parser_version == "huggingface-hub/2"
 
 
 def test_huggingface_filters_future_rows_before_the_local_cap(monkeypatch):
