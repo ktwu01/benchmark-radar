@@ -26,7 +26,7 @@ def _item_block(index: int, item: RadarItem) -> str:
         authors += " et al."
     marker = f"⭐ {_escape(item.watchlist)} · " if item.watchlist else ""
     lines = [
-        f"### {index}. [{_escape(item.title)}]({item.url})",
+        f"### {index}. [{_escape(markdown_bullet(item.title))}]({_safe_markdown_url(item.url)})",
         "",
         f"**{marker}{item.source} · {item.event_kind} · {category} · "
         f"priority {item.total_score:.1f}/{item.score_max:.0f}**",
@@ -57,7 +57,9 @@ def _item_block(index: int, item: RadarItem) -> str:
     if item.rationale:
         lines.append(f"- Why surfaced: {_escape('; '.join(item.rationale))}")
     if item.artifact_urls:
-        links = " · ".join(f"[related source]({url})" for url in item.artifact_urls[:4])
+        links = " · ".join(
+            f"[related source]({_safe_markdown_url(url)})" for url in item.artifact_urls[:4]
+        )
         lines.append(f"- Cross-source evidence: {links}")
     lines.append("")
     return "\n".join(lines)

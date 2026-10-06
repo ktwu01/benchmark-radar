@@ -365,3 +365,16 @@ def test_merged_report_counts_badges_over_the_daily_union():
 
     assert "**1** ranked evidence items" in markdown
     assert "Recommendation: **1** score 40 or above; **0** retained without the badge" in markdown
+
+
+def test_ranked_evidence_links_escape_source_labels_and_destinations():
+    record = _record(1)
+    record.title = "MemoryBench](https://wrong.test)"
+    record.url = "https://example.test/bench)version"
+    record.artifact_urls = ["https://example.test/data)version"]
+    report = render_markdown(_run([record]))
+    assert (
+        "[MemoryBench\\]\\(https://wrong\\.test\\)](https://example.test/bench%29version)" in report
+    )
+    assert "[related source](https://example.test/data%29version)" in report
+    assert "[MemoryBench](https://wrong.test)" not in report
