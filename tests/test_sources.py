@@ -3375,3 +3375,44 @@ def test_collection_method_falls_back_to_a_static_default_without_items():
     assert collection_method("brave", []) == "API"
     assert collection_method("datacite", []) == "API"
     assert collection_method("openaire", []) == "API"
+
+
+def test_semantic_scholar_follows_explicit_next_after_short_page(monkeypatch):
+    offsets = []
+
+    def get_page(_url, *, params, **_kwargs):
+        offset = params["offset"]
+        offsets.append(offset)
+        row = {
+            "paperId": f"paper-{offset}",
+            "title": f"Evaluation {offset}",
+            "publicationDate": "2026-08-08",
+            "externalIds": {},
+            "authors": [],
+        }
+        return {"data": [row], **({"next": 1} if offset == 0 else {})}
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", get_page)
+    items = fetch_semantic_scholar(
+        {"searches": ["benchmark"], "page_size": 5, "max_requests": 2},
+        datetime(2026, 8, 8, tzinfo=UTC),
+        5,
+    )
+    # The API limits response bytes as well as rows. Only the explicit next
+    # marker says whether more data exists; a short page is not exhaustion.
+    assert offsets == [0, 1]
+    assert {item.source_id for item in items} == {"paper-0", "paper-1"}
+
+
+@pytest.mark.parametrize("next_offset", [0, -1])
+def test_semantic_scholar_rejects_nonadvancing_page_offset(monkeypatch, next_offset):
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda *_a, **_k: {"data": [{"paperId": "bad"}], "next": next_offset},
+    )
+    with pytest.raises(ConnectorPayloadError, match="next offset"):
+        fetch_semantic_scholar(
+            {"searches": ["benchmark"], "page_size": 1, "max_requests": 3},
+            datetime(2026, 8, 8, tzinfo=UTC),
+            5,
+        )

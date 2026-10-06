@@ -1877,10 +1877,15 @@ def fetch_semantic_scholar(
                     parser_version="semantic-scholar-graph/1",
                 )
             next_offset = _payload_dict(payload, "Semantic Scholar").get("next")
-            if next_offset is None or len(rows) < min(page_size, limit - len(found)):
+            # The API's response-byte cap can shorten a page while `next`
+            # still identifies more results. Row count cannot prove exhaustion.
+            if next_offset is None:
                 break
             try:
-                offset = int(next_offset)
+                next_offset = int(next_offset)
+                if next_offset <= offset:
+                    raise ValueError("next offset must advance")
+                offset = next_offset
             except (TypeError, ValueError) as error:
                 raise ConnectorPayloadError(
                     "Semantic Scholar returned an invalid next offset"
