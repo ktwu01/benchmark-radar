@@ -546,3 +546,59 @@ def test_unsafe_archive_member_is_rejected(tmp_path: Path) -> None:
     with pytest.raises(DataSyncError, match="unsafe archive path"):
         store.initialize()
     assert not (tmp_path / "escaped.json").exists()
+
+
+def test_cli_server_reads_committed_managed_versions_after_sync(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    import threading
+    import urllib.request
+
+    from benchmark_radar.query_http import create_query_server
+
+    manifest, bundle, manifest_url = _release(tmp_path / "first", name="Original Workbench", day=29)
+    store = DataStore(
+        root=tmp_path / "home",
+        manifest_url=manifest_url,
+        urlopen=_Remote(manifest_url, manifest, bundle).urlopen,
+    )
+    store.initialize()
+    original_path = store.query_paths().index.parent
+
+    def run_server(service, **kwargs):
+        server = create_query_server(service, port=0)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+
+        def get(path):
+            with urllib.request.urlopen(f"http://127.0.0.1:{server.server_port}{path}") as response:
+                return json.load(response)
+
+        try:
+            assert get("/api/v1/search?q=workbench")["results"][0]["name"] == "Original Workbench"
+            manifest, bundle, _ = _release(tmp_path / "second", name="Updated Workbench", day=30)
+            store.urlopen = _Remote(manifest_url, manifest, bundle).urlopen
+            assert store.sync()["status"] == "updated"
+            assert not original_path.exists()
+            # A live CLI server held retired paths forever. Search reused an old
+            # cached index, while show tried to read its now-deleted detail shard.
+            detail = get("/api/v1/benchmarks/agent-workbench")
+            assert detail["benchmark"]["record"]["name"] == "Updated Workbench"
+            assert detail["data"]["data_version"] == manifest["data_version"]
+            assert get("/api/v1/search?q=workbench")["results"][0]["name"] == "Updated Workbench"
+            assert get("/api/v1/recent")["date"] == "2026-08-30"
+            # Resolving managed state must retain the API's machine-readable
+            # failure contract, rather than falling back to a previously cached version.
+            store.state_path.unlink()
+            with pytest.raises(urllib.error.HTTPError) as failure:
+                get("/api/v1/benchmarks/agent-workbench")
+            assert failure.value.code == 409
+            assert json.load(failure.value)["error"]["code"] == "not_initialized"
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=5)
+
+    monkeypatch.setattr("benchmark_radar.query_cli.serve_query_api", run_server)
+    assert run_query_cli(["serve", "--data-dir", str(store.root), "--port", "0"]) == 0
+    capsys.readouterr()

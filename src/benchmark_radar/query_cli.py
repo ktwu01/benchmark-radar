@@ -242,7 +242,23 @@ def run_query_cli(argv: Sequence[str] | None = None) -> int:
                     )
                 print(f"Serving Benchmark Radar at http://{args.host}:{args.port}", file=sys.stderr)
                 print(cite_reminder(), file=sys.stderr)
-                serve_query_api(service, host=args.host, port=args.port)
+
+                # Explicit paths denote an immutable caller-selected dataset;
+                # managed state must be resolved again after a successful sync.
+                def managed_service() -> QueryService:
+                    nonlocal service
+                    paths = DataStore(root=args.data_dir).query_paths()
+                    selected = service
+                    if paths != selected.paths:
+                        selected = QueryService(paths)
+                        service = selected
+                    return selected
+
+                serve_query_api(
+                    managed_service if args.index is None else service,
+                    host=args.host,
+                    port=args.port,
+                )
                 return 0
         assert printer is not None  # every non-serve command above sets it
         printer(payload)

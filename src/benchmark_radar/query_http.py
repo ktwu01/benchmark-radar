@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Callable
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
@@ -69,12 +70,17 @@ def _boolean(parameters: dict[str, list[str]], name: str, *, default: bool = Fal
 
 
 def create_query_server(
-    service: QueryService,
+    service: QueryService | Callable[[], QueryService],
     *,
     host: str = "127.0.0.1",
     port: int = 8765,
 ) -> ThreadingHTTPServer:
     """Create, but do not start, a local query server backed by ``service``."""
+
+    def current_service() -> QueryService:
+        # Managed CLI clients resolve committed state per request. Retaining a
+        # fixed version would keep cached search stale after sync retires its files.
+        return service() if callable(service) else service
 
     class QueryRequestHandler(BaseHTTPRequestHandler):
         server_version = "BenchmarkRadarQuery/1"
@@ -120,7 +126,7 @@ def create_query_server(
                         code="invalid_scope",
                         status=400,
                     )
-                return service.search(
+                return current_service().search(
                     query,
                     scope=scope,
                     limit=_integer(parameters, "limit", default=20),
@@ -141,14 +147,14 @@ def create_query_server(
             if path.startswith("/api/v1/benchmarks/"):
                 _parse_parameters(request.query, allowed=set())
                 identifier = unquote(path.removeprefix("/api/v1/benchmarks/"))
-                return service.show(identifier)
+                return current_service().show(identifier)
 
             if path == "/api/v1/recent":
                 parameters = _parse_parameters(
                     request.query,
                     allowed={"limit", "category", "source", "recommended"},
                 )
-                return service.recent(
+                return current_service().recent(
                     limit=_integer(parameters, "limit", default=20),
                     category=_value(parameters, "category"),
                     source=_value(parameters, "source"),
@@ -157,11 +163,11 @@ def create_query_server(
 
             if path == "/api/v1/status":
                 _parse_parameters(request.query, allowed=set())
-                return service.status()
+                return current_service().status()
 
             if path == "/healthz":
                 _parse_parameters(request.query, allowed=set())
-                status = service.status()
+                status = current_service().status()
                 return {
                     "schema_version": QUERY_SCHEMA_VERSION,
                     "retrieval_mode": "health_check",
@@ -229,7 +235,7 @@ def create_query_server(
 
 
 def serve_query_api(
-    service: QueryService,
+    service: QueryService | Callable[[], QueryService],
     *,
     host: str = "127.0.0.1",
     port: int = 8765,
