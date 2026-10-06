@@ -250,7 +250,7 @@ class DataStore:
             **({"If-None-Match": previous_etag} if previous_etag else {}),
         }
         request = urllib.request.Request(manifest_url, headers=headers)
-        response = self._open(request, allow_not_modified=True)
+        response = self._open(request, allow_not_modified=bool(previous_etag))
         if response is None:
             return None, previous_etag
         with response:

@@ -546,3 +546,63 @@ def test_unsafe_archive_member_is_rejected(tmp_path: Path) -> None:
     with pytest.raises(DataSyncError, match="unsafe archive path"):
         store.initialize()
     assert not (tmp_path / "escaped.json").exists()
+
+
+@pytest.mark.parametrize("command", ["init", "sync"])
+def test_unconditional_not_modified_is_a_structured_download_error(
+    tmp_path: Path, capsys, command: str
+) -> None:
+    import threading
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+    requests = []
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):  # noqa: N802 - BaseHTTPRequestHandler API
+            requests.append(dict(self.headers))
+            self.send_response(304)
+            self.end_headers()
+
+        def log_message(self, *args):
+            pass
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    url = f"http://127.0.0.1:{server.server_port}/manifest.json"
+    home = tmp_path / "home"
+    try:
+        arguments = [command, "--data-dir", str(home), "--json"]
+        if command == "init":
+            arguments.extend(["--manifest-url", url])
+        else:
+            manifest, bundle, manifest_url = _release(tmp_path)
+            store = DataStore(
+                root=home,
+                manifest_url=manifest_url,
+                urlopen=_Remote(manifest_url, manifest, bundle).urlopen,
+            )
+            store.initialize()
+            state = store.state()
+            state.pop("etag")
+            state["manifest_url"] = url
+            store.state_path.write_text(json.dumps(state))
+        # HTTP 304 is meaningful only when a validator was sent. An initial
+        # request otherwise returned None and dereferenced nonexistent state.
+        assert run_query_cli(arguments) == 1
+        assert json.loads(capsys.readouterr().err)["error"]["code"] == "remote_unavailable"
+        assert len(requests) == 1
+        assert "If-None-Match" not in requests[0]
+        if command == "init":
+            assert not (home / "state.json").exists()
+        else:
+            assert (
+                QueryService(store.query_paths()).show("agent-workbench")["benchmark"]["record"][
+                    "name"
+                ]
+                == "Agent Workbench"
+            )
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
