@@ -569,7 +569,7 @@ def test_init_rejects_malformed_download_authorities_as_structured_errors(
     def no_download(*args, **kwargs):
         raise AssertionError("invalid URL reached the downloader")
 
-    monkeypatch.setattr("benchmark_radar.data_store.urllib.request.urlopen", no_download)
+    monkeypatch.setattr("benchmark_radar.data_store.urllib.request.build_opener", no_download)
     assert (
         run_query_cli(
             ["init", "--data-dir", str(tmp_path / "home"), "--manifest-url", url, "--json"]
