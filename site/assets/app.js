@@ -654,6 +654,7 @@ const I18N = {
     "Showing {shown} of {total} registry records matching \u201c{q}\u201d. Narrow the search to see the rest.":
       "显示与\u201c{q}\u201d匹配的 {total} 条登记册记录中的 {shown} 条。缩小搜索范围可查看其余记录。",
     "Still checking the benchmark registry\u2026": "正在查询benchmark登记册\u2026",
+    "Retry": "重试",
     "The benchmark catalog could not be loaded.":
       "无法加载抓取的benchmark目录,因此这些结果可能不完整。",
     "The benchmark registry could not be loaded, so this search covered collected observations only.":
@@ -2581,12 +2582,7 @@ function renderTodayBenchmarks() {
   // another handler on the same fetch and they would all fire together when it
   // landed, each one re-filtering the observations and rebuilding the list.
   if (!state.benchmarkIndexLoaded && !benchmarkIndexRerenderQueued) {
-    benchmarkIndexRerenderQueued = true;
-    loadBenchmarkIndex().then((records) => {
-      state.benchmarkIndex = records;
-      state.benchmarkIndexLoaded = true;
-      if (state.q.trim()) renderToday({ resultsOnly: true });
-    });
+    reloadBenchmarkIndex();
   }
   const matches = searchBenchmarkIndex(state.benchmarkIndex || [], query);
   const indexFailed = state.benchmarkIndexLoaded && state.benchmarkIndex === null;
@@ -2628,7 +2624,8 @@ function renderTodayBenchmarks() {
       ? t("Still checking the benchmark registry\u2026")
       : "";
   byId("today-benchmarks-note").textContent = [note, warning].filter(Boolean).join(" ");
-  replaceChildren(byId("today-benchmarks-results"), rows);
+  replaceChildren(byId("today-benchmarks-results"), indexFailed
+    ? [...rows, benchmarkIndexRetryButton(() => renderToday({ resultsOnly: true }))] : rows);
   return !total && indexPending ? "pending" : total;
 }
 
@@ -4572,6 +4569,35 @@ function loadBenchmarkIndex() {
   return benchmarkIndexPromise;
 }
 
+// The callers share one settlement handler as well as one fetch. A failed
+// catalog stays explicit until the reader clicks Retry or edits their search.
+function reloadBenchmarkIndex() {
+  if (benchmarkIndexRerenderQueued || (state.benchmarkIndexLoaded && state.benchmarkIndex)) return;
+  benchmarkIndexRerenderQueued = true;
+  state.benchmarkIndexLoaded = false;
+  loadBenchmarkIndex().then((records) => {
+    state.benchmarkIndex = records;
+    state.benchmarkIndexLoaded = true;
+    benchmarkIndexRerenderQueued = false;
+    // No preferred-source fallback: a failed request still means unavailable.
+    // Resolve permalink and document views only after the common index settles.
+    if (state.view === "today" && state.q.trim()) renderToday({ resultsOnly: true });
+    if (state.view === "leaderboard") renderLeaderboard();
+    if (state.view === "saturation") renderSaturation();
+  });
+}
+
+function benchmarkIndexRetryButton(renderView) {
+  const button = element("button", {
+    className: "clear-button", text: t("Retry"), attrs: { type: "button" },
+  });
+  button.addEventListener("click", () => {
+    reloadBenchmarkIndex();
+    renderView();
+  });
+  return button;
+}
+
 function foldName(value) {
   return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
@@ -4830,6 +4856,7 @@ function renderBenchmarkSearch() {
     .replace("{shown}", shown.length.toLocaleString())
     .replace("{total}", rows.length.toLocaleString()),
     state.benchmarkQuery ? t("Searching all benchmarks (filters paused)") : "", coverage].filter(Boolean).join(" · ");
+  if (failed) container.append(benchmarkIndexRetryButton(() => renderSaturation()));
   if (!rows.length) {
     container.append(element("p", { className: "empty-state", text: loading
       ? t("Loading benchmark details…") : t("No benchmarks match these filters.") }));
@@ -5267,31 +5294,21 @@ function initBenchmarkSearch() {
   const onInput = debounce(() => {
     state.benchmarkQuery = input.value.trim();
     state.benchmarkVisibleLimit = BENCHMARK_SEARCH_LIMIT;
+    if (state.benchmarkIndexLoaded && state.benchmarkIndex === null) reloadBenchmarkIndex();
     renderSaturation();
     writeUrl();
   });
   input.addEventListener("input", onInput);
-  loadBenchmarkIndex().then((records) => {
-    // Loading and failure remain explicit; no source-specific fallback corpus.
-    state.benchmarkIndex = records;
-    state.benchmarkIndexLoaded = true;
-    // A ?lfrontier=<slug> permalink can only resolve once the index fetch has
-    // settled either way: a resolved index confirms the slug, a failed one
-    // turns the panel's loading state into an explicit unavailability note
-    // (see renderAdoptionFrontier).
-    // Rebuild the document counts and navigation after the common index loads.
-    if (state.view === "leaderboard") renderLeaderboard();
-    if (state.view === "saturation") renderSaturation();
-  });
+  reloadBenchmarkIndex();
 }
 
 // --- Catalog detail ---------------------------------------------------------
 // All source records, including model reports, resolve through this index and
 // shard contract. The source does not select a different chart or fallback.
 
-// A shard is fetched on selection and cached for the rest of the session,
-// keyed by slug. Payloads are tens of kilobytes and a session opens a handful,
-// so the cache is never evicted (display plan step 7).
+// Successful shards stay cached for the rest of the session, keyed by slug.
+// Payloads are tens of kilobytes and a session opens a handful (display plan
+// step 7). Failed loads are removed so the next selection can retry.
 const benchmarkShardCache = new Map();
 
 function loadBenchmarkShard(slug) {

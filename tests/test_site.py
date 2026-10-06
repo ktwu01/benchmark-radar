@@ -2728,7 +2728,12 @@ def test_a_benchmark_name_search_reaches_the_registry_not_only_the_daily_feed():
     # Attached once. The promise is cached, so one handler per keystroke would
     # all fire together on a slow fetch, each re-filtering and rebuilding.
     assert "!state.benchmarkIndexLoaded && !benchmarkIndexRerenderQueued" in section
-    assert "benchmarkIndexRerenderQueued = true;" in section
+    assert "reloadBenchmarkIndex();" in section
+    settlement = script.split("function reloadBenchmarkIndex()", 1)[1].split(
+        "function benchmarkIndexRetryButton", 1
+    )[0]
+    assert "benchmarkIndexRerenderQueued = true;" in settlement
+    assert "benchmarkIndexRerenderQueued = false;" in settlement
 
     # Capped before the rows are built. "bench" matches 355 of the 1,148
     # crawled records, and building all of them into DOM subtrees with

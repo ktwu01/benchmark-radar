@@ -149,6 +149,78 @@ await recovered.loadBenchmarkIndex();
 await recovered.loadBenchmarkShard('restored');
 assert.equal(recoveryAttempts,4);
 
+// Drive the production callers through DOM events, not a second loader call.
+const callerFailures = [];
+for (const retryMode of ['today-button', 'saturation-button', 'saturation-input']) {
+  try {
+    const callerState = {view:retryMode === 'today-button' ? 'today' : 'saturation',q:'Recovered',
+      data:{},benchmarkIndex:null,benchmarkIndexLoaded:false,benchmarkQuery:'',benchmarkVisibleLimit:50,lscore:100};
+    const domNode = () => ({dataset:{},children:[],listeners:{},registrations:{},value:'',hidden:false,
+      append(child) {this.children.push(child);},
+      addEventListener(type, listener) {this.listeners[type] = listener;this.registrations[type]=(this.registrations[type] || 0)+1;}});
+    const nodes = new Map();
+    const nodeById = id => {if (!nodes.has(id)) nodes.set(id,domNode()); return nodes.get(id);};
+    const createElement = (_tag,options={}) => Object.assign(domNode(),{textContent:options.text || ''});
+    let callerRequests = 0;
+    const fetchIndex = async () => {
+      callerRequests += 1;
+      return callerRequests === 1 ? {ok:false,status:503}
+        : {ok:true,json:async()=>({benchmarks:[{slug:'recovered',name:'Recovered benchmark',source:'llm_stats'}]})};
+    };
+    let callers;
+    const renderToday = () => callers.renderTodayBenchmarks();
+    const renderSaturation = () => callers.renderBenchmarkSearch();
+    const helperNames = ['reloadBenchmarkIndex','benchmarkIndexRetryButton']
+      .filter(name => source.includes(`function ${name}(`));
+    const callerNames = ['loadBenchmarkIndex','searchBenchmarkIndex','foldName','renderTodayBenchmarks','renderBenchmarkSearch','initBenchmarkSearch'];
+    callers = new Function('state','fetch','byId','element','replaceChildren','t','renderToday',
+      'renderSaturation','renderLeaderboard','debounce','writeUrl','benchmarkResultRow',
+      'saturationRows','scoreBrowseResultRow','setScoreFilter',`
+      const BENCHMARK_SEARCH_LIMIT = 50;
+      let benchmarkIndexPromise = null;
+      let benchmarkIndexRerenderQueued = false;
+      ${[...callerNames,...helperNames].map(fn).join('\n')}
+      return {renderTodayBenchmarks,renderBenchmarkSearch,initBenchmarkSearch};`)(
+      callerState,fetchIndex,nodeById,createElement,(node,children)=>{node.children=children;},value=>value,
+      renderToday,renderSaturation,()=>{},handler=>handler,()=>{},
+      record=>createElement('button',{text:record.name}),()=>callerState.benchmarkIndex || [],
+      record=>createElement('button',{text:record.name}),()=>{});
+    if (retryMode === 'today-button') callers.renderTodayBenchmarks();
+    else callers.initBenchmarkSearch();
+    callers.initBenchmarkSearch();
+    callers.renderTodayBenchmarks();
+    assert.equal(nodeById('benchmark-search-input').registrations.input,1,'input is bound once');
+    const settle = async () => {for(let tick=0;tick<12;tick+=1) await Promise.resolve();};
+    await settle();
+    assert.equal(callerState.benchmarkIndex,null);
+    callers.initBenchmarkSearch();
+    callers.renderTodayBenchmarks();
+    await settle();
+    assert.equal(callerRequests,1,'failure cannot trigger polling');
+    if (retryMode === 'saturation-input') {
+      const input=nodeById('benchmark-search-input');
+      input.value='Recovered';
+      input.listeners.input();
+    } else {
+      const results=nodeById(retryMode === 'today-button' ? 'today-benchmarks-results' : 'benchmark-search-results');
+      const retry=results.children.find(child=>child.textContent === 'Retry');
+      assert(retry,'the failed caller must provide a user-triggered retry');
+      retry.listeners.click();
+    }
+    await settle();
+    assert.equal(callerRequests,2,'one user action performs one retry');
+    assert.equal(callerState.benchmarkIndex[0].slug,'recovered');
+    const results=nodeById(retryMode === 'today-button' ? 'today-benchmarks-results' : 'benchmark-search-results');
+    assert(results.children.some(child=>child.textContent === 'Recovered benchmark'));
+    if (retryMode === 'today-button') callers.renderTodayBenchmarks();
+    else callers.initBenchmarkSearch();
+    await settle();
+    assert.equal(callerRequests,2,'successful caller results remain cached');
+  } catch (error) {callerFailures.push(`${retryMode}: ${error.message}`);}
+}
+assert.deepEqual(callerFailures,[],callerFailures.join('\n'));
+console.log('Catalog caller retry passed: Today button, Saturation button and search-input event.');
+
 function fixtureCatalog(benchmarks={},entries=[],catalog=[]) {
   if (catalog.some(row => row.source === 'model_reports')) return catalog;
   return [...Object.entries(benchmarks).map(([id, record]) => {

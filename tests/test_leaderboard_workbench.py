@@ -263,8 +263,12 @@ def test_a_slug_permalink_survives_loading_and_failed_catalog_fetches():
     assert "Full benchmark catalog could not be loaded." in loading
     assert "state.lfrontier =" not in loading
     init = script.split("function initBenchmarkSearch()", 1)[1].split("\n// ---", 1)[0]
-    assert "state.benchmarkIndexLoaded = true" in init
-    assert "renderLeaderboard();" in init
+    assert "reloadBenchmarkIndex();" in init
+    settlement = script.split("function reloadBenchmarkIndex()", 1)[1].split(
+        "function benchmarkIndexRetryButton", 1
+    )[0]
+    assert "state.benchmarkIndexLoaded = true" in settlement
+    assert "renderLeaderboard();" in settlement
 
 
 def test_detail_panel_renders_for_any_selected_record():
