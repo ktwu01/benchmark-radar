@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from datetime import UTC, datetime
+from math import isfinite
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -10,6 +11,24 @@ from .http import get_json
 from .models import AttentionObservation, ProducerHealth, SourceHealth
 
 LEGACY_HACKER_NEWS_PRODUCER = "benchmark-social-signal"
+
+
+def _metrics(values: Any) -> dict[str, float]:
+    # Public feeds must not turn booleans into measurements or persist Infinity,
+    # which cannot be read as a JSON number by downstream consumers.
+    if not isinstance(values, dict):
+        return {}
+    normalized = {}
+    for key, value in values.items():
+        if type(value) not in (int, float):
+            continue
+        try:
+            numeric = float(value)
+        except OverflowError:
+            continue
+        if isfinite(numeric) and numeric >= 0:
+            normalized[str(key)] = numeric
+    return normalized
 
 
 def _date(value: str | None, *, fallback: datetime) -> datetime:
@@ -47,11 +66,7 @@ def _supporting_observations(
                 "source_id": source_id,
                 "url": url,
                 "published_at": str(published_at),
-                "metrics": {
-                    str(key): float(metric)
-                    for key, metric in (value.get("metrics") or {}).items()
-                    if isinstance(metric, int | float) and metric >= 0
-                },
+                "metrics": _metrics(value.get("metrics")),
                 **(
                     {"primary_artifact_url": primary}
                     if (primary := _http_url(value.get("primary_artifact_url")))
@@ -103,11 +118,7 @@ def _normalize_feed(
             event_kind=str(raw.get("event_kind") or "discussed"),
             authors=[str(author) for author in raw.get("authors") or []],
             primary_artifact_url=_http_url(raw.get("primary_artifact_url")),
-            metrics={
-                str(key): float(value)
-                for key, value in (raw.get("metrics") or {}).items()
-                if isinstance(value, int | float) and value >= 0
-            },
+            metrics=_metrics(raw.get("metrics")),
             categories=sorted(
                 {str(category) for category in raw.get("categories") or [] if category}
             ),
@@ -167,11 +178,7 @@ def _restore_previous(
                     event_kind=str(raw.get("event_kind") or "discussed"),
                     authors=[str(author) for author in raw.get("authors") or []],
                     primary_artifact_url=_http_url(raw.get("primary_artifact_url")),
-                    metrics={
-                        str(key): float(value)
-                        for key, value in (raw.get("metrics") or {}).items()
-                        if isinstance(value, int | float) and value >= 0
-                    },
+                    metrics=_metrics(raw.get("metrics")),
                     categories=[str(value) for value in raw.get("categories") or []],
                     rationale=[str(value) for value in raw.get("rationale") or []],
                     supporting_observations=_supporting_observations(

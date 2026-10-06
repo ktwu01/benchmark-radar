@@ -1,3 +1,4 @@
+import json
 from datetime import UTC, datetime
 
 from benchmark_radar.attention import fetch_attention_feeds
@@ -165,3 +166,58 @@ def test_first_observed_time_survives_reingestion(monkeypatch):
     )
 
     assert observations[0].observed_at.isoformat() == first
+
+
+def test_feed_metrics_preserve_measured_zero_but_cannot_emit_non_json_numbers(monkeypatch):
+    # A producer's overflowing JSON number became Infinity in the public snapshot;
+    # booleans also acquired a fabricated numeric measurement of one.
+    now = datetime(2026, 7, 27, 12, tzinfo=UTC)
+    invalid = {
+        "points": float("inf"),
+        "flag": True,
+        "zero": 0,
+        "valid": 2.5,
+        "nan": float("nan"),
+        "huge": 10**400,
+        "negative": -1,
+    }
+    raw = local_observation(now)
+    raw["metrics"] = invalid
+    raw["supporting_observations"] = [
+        {
+            "source_id": "2",
+            "url": "https://news.ycombinator.com/item?id=2",
+            "published_at": raw["published_at"],
+            "metrics": invalid,
+        }
+    ]
+    payload = {"schema_version": 1, "producer": "fixture", "observations": [raw], "health": []}
+    monkeypatch.setattr("benchmark_radar.attention.get_json", lambda url: payload)
+    observations, health, _, _ = fetch_attention_feeds(
+        {"feeds": [{"url": "https://example.test/feed.json"}]}, observed_at=now
+    )
+    assert health[0].ok
+    assert observations[0].metrics == {"zero": 0.0, "valid": 2.5}
+    assert observations[0].supporting_observations[0]["metrics"] == observations[0].metrics
+    json.dumps(observations[0].to_dict(), allow_nan=False)
+
+
+def test_failed_collector_sanitizes_metrics_from_legacy_observations(monkeypatch):
+    now = datetime(2026, 7, 27, 12, tzinfo=UTC)
+    monkeypatch.setattr(
+        "benchmark_radar.attention.collect_hacker_news",
+        lambda *args, **kwargs: ([], {"ok": False, "error": "offline"}),
+    )
+    previous = {
+        **local_observation(now),
+        "producer": "benchmark-social-signal",
+        "observation_id": "benchmark-social-signal:hacker-news:1",
+        "observed_at": now.isoformat(),
+        "metrics": {"points": float("inf"), "flag": True, "zero": 0},
+    }
+    restored, health, _, _ = fetch_attention_feeds(
+        LOCAL_CONFIG, observed_at=now, previous_observations=[previous]
+    )
+    assert not health[0].ok
+    assert restored[0].metrics == {"zero": 0.0}
+    json.dumps(restored[0].to_dict(), allow_nan=False)
