@@ -16,7 +16,7 @@ from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 from . import __version__
 from .data_release import DATA_RELEASE_SCHEMA_VERSION
@@ -48,9 +48,27 @@ def _allowed_download_url(value: str) -> bool:
     ):
         return False
     try:
+        # urllib sends ASCII request targets. IDNA hostnames and escaped Unicode
+        # paths remain usable; raw Unicode URLs cannot be sent by this downloader.
+        value.encode("ascii")
         parsed = urlsplit(value)
         _port = parsed.port
-    except ValueError:
+        hostname = unquote(parsed.hostname or "")
+        hostname.encode("ascii")
+    except (ValueError, UnicodeError):
+        return False
+    # urllib unquotes the authority before connecting; encoded controls must
+    # not bypass the same validation applied to their literal representation.
+    if any(
+        character.isspace() or ord(character) < 32 or ord(character) == 127
+        for character in hostname
+    ):
+        return False
+    # Percent escapes may not introduce authority structure after urlsplit has
+    # validated credentials and ports. Literal IPv6 colons remain supported.
+    if any(character in "@/?#[]\\" for character in hostname) or hostname.count(":") != (
+        parsed.hostname or ""
+    ).count(":"):
         return False
     if parsed.username is not None or parsed.password is not None:
         return False
@@ -228,7 +246,8 @@ class DataStore:
             if not _allowed_download_url(final_url):
                 response.close()
                 raise DataSyncError(
-                    f"download redirected to an insecure URL: {final_url}",
+                    "download redirected to an invalid URL; require credential-free HTTPS "
+                    "(HTTP is allowed only for loopback testing)",
                     code="invalid_manifest",
                 )
             return response
@@ -253,7 +272,8 @@ class DataStore:
         manifest_url = self.manifest_url or DEFAULT_MANIFEST_URL
         if not _allowed_download_url(manifest_url):
             raise DataSyncError(
-                "manifest URL must use HTTPS (HTTP is allowed only for loopback testing)",
+                "manifest URL must be valid, ASCII and credential-free HTTPS "
+                "(HTTP is allowed only for loopback testing)",
                 code="invalid_manifest",
             )
         headers = {
@@ -296,7 +316,8 @@ class DataStore:
             raise DataSyncError("remote artifact format must be zip", code="invalid_manifest")
         if not isinstance(artifact.get("url"), str) or not _allowed_download_url(artifact["url"]):
             raise DataSyncError(
-                "remote artifact URL must use HTTPS (HTTP is allowed only for loopback testing)",
+                "remote artifact URL must be valid, ASCII and credential-free HTTPS "
+                "(HTTP is allowed only for loopback testing)",
                 code="invalid_manifest",
             )
         if not re.fullmatch(r"[0-9a-f]{64}", str(artifact.get("sha256") or "")):

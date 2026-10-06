@@ -295,7 +295,7 @@ def test_sync_does_not_call_current_when_active_data_is_corrupt(tmp_path: Path) 
 def test_plain_http_is_limited_to_loopback_development(tmp_path: Path) -> None:
     # Regression: update endpoints transport the checksum and must not allow HTTP downgrade.
     store = DataStore(root=tmp_path / "home", manifest_url="http://example.test/manifest.json")
-    with pytest.raises(DataSyncError, match="must use HTTPS"):
+    with pytest.raises(DataSyncError, match="credential-free HTTPS"):
         store.initialize()
 
 
@@ -316,7 +316,7 @@ def test_https_download_rejects_redirect_downgrade(tmp_path: Path) -> None:
         return _Response(b"{}", url="http://evil.example/download")
 
     store = DataStore(root=tmp_path / "home", manifest_url=manifest_url, urlopen=downgraded)
-    with pytest.raises(DataSyncError, match="redirected to an insecure URL"):
+    with pytest.raises(DataSyncError, match="redirected to an invalid URL"):
         store.initialize()
 
 
@@ -588,3 +588,57 @@ def test_init_rejects_malformed_artifact_authorities(tmp_path: Path, url: str) -
         store.initialize()
     assert failure.value.code == "invalid_manifest"
     assert remote.bundle_requests == 0
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://%FF/data",
+        "https://例え.test/data",
+        "https://example.test/測定",
+        "https://%00.example.test/data",
+        "https://%75ser%3Asecret%40example.test/data",
+        "https://example.test%3Ainvalid/data",
+        "https://example.test%2Fevil.test/data",
+    ],
+)
+def test_native_cli_rejects_unencodable_download_urls(monkeypatch, tmp_path, capsys, url):
+    import socket
+
+    def no_connection(*args, **kwargs):
+        raise AssertionError("disallowed URL reached network connection")
+
+    monkeypatch.setattr(socket, "create_connection", no_connection)
+    assert (
+        run_query_cli(
+            ["init", "--data-dir", str(tmp_path / "home"), "--manifest-url", url, "--json"]
+        )
+        == 1
+    )
+    error = json.loads(capsys.readouterr().err)
+    assert error["error"]["code"] == "invalid_manifest"
+    assert url not in error["error"]["message"]
+
+
+@pytest.mark.parametrize("location", ["manifest", "artifact", "redirect"])
+def test_credential_url_errors_describe_policy_without_exposing_credentials(tmp_path, location):
+    url = "https://user:secret@example.test/data"
+    manifest, bundle, manifest_url = _release(tmp_path)
+    remote = _Remote(manifest_url, manifest, bundle)
+    if location == "manifest":
+        manifest_url = url
+    elif location == "artifact":
+        manifest["artifact"]["url"] = url
+    else:
+        remote.urlopen = lambda *args, **kwargs: _Response(b"{}", url=url)
+    store = DataStore(root=tmp_path / "home", manifest_url=manifest_url, urlopen=remote.urlopen)
+    with pytest.raises(DataSyncError) as failure:
+        store.initialize()
+    assert failure.value.code == "invalid_manifest"
+    assert "credential-free" in str(failure.value)
+    assert "secret" not in str(failure.value)
+
+
+def test_download_url_policy_preserves_encoded_ascii_and_idna_hosts():
+    assert _allowed_download_url("https://%65xample.test/data")
+    assert _allowed_download_url("https://xn--r8jz45g.test/%E6%B8%AC%E5%AE%9A")
