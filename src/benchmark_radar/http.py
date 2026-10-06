@@ -74,6 +74,15 @@ def _safe_openai_rate_headers(url: str, error: urllib.error.HTTPError) -> str:
     return f" [{', '.join(fields)}]" if fields else ""
 
 
+def _with_query_params(url: str, params: dict[str, Any]) -> str:
+    # Feed/API URLs can already have query parameters or a fragment. Appending
+    # another '?' corrupts the query; appending after '#' sends no params at all.
+    parts = urllib.parse.urlsplit(url)
+    encoded = urllib.parse.urlencode(params)
+    query = "&".join(value for value in (parts.query, encoded) if value)
+    return urllib.parse.urlunsplit((parts.scheme, parts.netloc, parts.path, query, parts.fragment))
+
+
 def get_json(
     url: str,
     *,
@@ -84,7 +93,7 @@ def get_json(
 ) -> Any:
     if params:
         clean = {key: value for key, value in params.items() if value is not None}
-        url = f"{url}?{urllib.parse.urlencode(clean)}"
+        url = _with_query_params(url, clean)
     request_headers = {"Accept": "application/json", "User-Agent": USER_AGENT}
     request_headers.update(headers or {})
     return json.loads(_request(url, request_headers, attempts, timeout=timeout).decode("utf-8"))
@@ -99,7 +108,7 @@ def get_text(
     timeout: float = DEFAULT_TIMEOUT_SECONDS,
 ) -> str:
     if params:
-        url = f"{url}?{urllib.parse.urlencode(params)}"
+        url = _with_query_params(url, params)
     request_headers = {"User-Agent": USER_AGENT}
     request_headers.update(headers or {})
     return _request(url, request_headers, attempts, timeout=timeout).decode("utf-8")

@@ -265,3 +265,44 @@ def test_post_json_sends_compact_json_and_headers(monkeypatch):
     assert captured["request"].data == b'{"input":"brief me"}'
     assert captured["request"].get_header("Content-type") == "application/json"
     assert captured["request"].get_header("Authorization") == "Bearer secret"
+
+
+@pytest.mark.parametrize("helper", ["json", "text"])
+def test_http_helpers_preserve_existing_query_when_adding_params(helper):
+    import json
+    import threading
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+    from urllib.parse import parse_qs, urlsplit
+
+    from benchmark_radar.http import get_text
+
+    seen = []
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            seen.append(parse_qs(urlsplit(self.path).query, keep_blank_values=True))
+            body = json.dumps({"ok": True}).encode()
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, *_args):
+            pass
+
+    server = HTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        url = f"http://127.0.0.1:{server.server_port}/data?scope=benchmarks&empty=#details"
+        fetch = get_json if helper == "json" else get_text
+        result = fetch(url, params={"query": "new eval", "page": 2})
+        assert result == ({"ok": True} if helper == "json" else '{"ok": true}')
+        # A second '?' turned the supplied query into the old parameter's value.
+        # Use a real HTTP receiver to check the request that an API sees.
+        assert seen == [
+            {"scope": ["benchmarks"], "empty": [""], "query": ["new eval"], "page": ["2"]}
+        ]
+    finally:
+        server.shutdown()
+        thread.join(timeout=2)
+        server.server_close()
