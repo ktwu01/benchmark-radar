@@ -3377,13 +3377,16 @@ def test_collection_method_falls_back_to_a_static_default_without_items():
     assert collection_method("openaire", []) == "API"
 
 
-def test_huggingface_preserves_same_named_repositories_of_different_kinds(monkeypatch):
+@pytest.mark.parametrize("repository_id", ["lab/suite", "lab/a-long-benchmark-suite-name"])
+def test_huggingface_preserves_same_named_repositories_of_different_kinds(
+    monkeypatch, repository_id
+):
     from benchmark_radar.pipeline import deduplicate
 
     def get_hub_rows(url, **_kwargs):
         return [
             {
-                "id": "lab/suite",
+                "id": repository_id,
                 "createdAt": "2026-08-08T12:00:00Z",
                 "lastModified": "2026-08-08T13:00:00Z",
                 "downloads": 3,
@@ -3400,11 +3403,28 @@ def test_huggingface_preserves_same_named_repositories_of_different_kinds(monkey
     # Hub namespaces are independent: a lab can own a dataset, model and Space
     # under the same name. Keying only on owner/name silently keeps the last.
     assert len(items) == 3
-    assert {item.source_id for item in items} == {"lab/suite"}
+    assert {item.source_id for item in items} == {repository_id}
     urls = {item.to_dict()["url"] for item in items}
     assert len(urls) == 3
     assert {
-        "https://huggingface.co/datasets/lab/suite",
-        "https://huggingface.co/spaces/lab/suite",
+        f"https://huggingface.co/datasets/{repository_id}",
+        f"https://huggingface.co/spaces/{repository_id}",
     } <= urls
     assert len(deduplicate(items)) == 3
+    # Repeated observations of each exact repository still merge; kind-specific
+    # lineage and measurements must not leak into its same-named siblings.
+    from copy import deepcopy
+
+    duplicates = []
+    for index, item in enumerate(items):
+        duplicate = deepcopy(item)
+        duplicate.metrics["likes"] = 10 + index
+        duplicate.artifact_urls = [f"https://evidence.example/{index}"]
+        duplicates.append(duplicate)
+    merged = deduplicate(items + duplicates)
+    assert len(merged) == 3
+    for index, item in enumerate(merged):
+        assert item.source == "Hugging Face"
+        assert item.source_id == repository_id
+        assert item.metrics["likes"] == 10 + index
+        assert item.artifact_urls == [f"https://evidence.example/{index}"]

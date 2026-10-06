@@ -66,7 +66,13 @@ def dedupe_keys(item: RadarItem) -> list[str]:
         if not exact.startswith("artifact:url:")
     ]
     title_key = normalized_title(item.title)
-    if len(title_key) >= 24:
+    # Hub repository titles are their upstream owner/name, not a shared paper
+    # title. Only the exact kind-aware artifact identity can identify them:
+    # datasets, models and Spaces may use the same owner/name independently.
+    hub_repository = item.source == "Hugging Face" and any(
+        key.startswith("artifact:huggingface:") for key in keys
+    )
+    if len(title_key) >= 24 and not hub_repository:
         keys.append(f"title:{hashlib.sha256(title_key.encode()).hexdigest()}")
     keys.append(f"url:{hashlib.sha256(canonical_url(item.url).encode()).hexdigest()}")
     return keys
