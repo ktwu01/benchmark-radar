@@ -546,3 +546,55 @@ def test_unsafe_archive_member_is_rejected(tmp_path: Path) -> None:
     with pytest.raises(DataSyncError, match="unsafe archive path"):
         store.initialize()
     assert not (tmp_path / "escaped.json").exists()
+
+
+@pytest.mark.parametrize("failure_stage", ["manifest-write", "bundle-publish", "manifest-publish"])
+def test_failed_release_publication_keeps_last_verified_bundle(
+    tmp_path: Path, monkeypatch, failure_stage: str
+) -> None:
+    paths = _source_tree(tmp_path)
+    output = tmp_path / "published"
+    first = build_data_release(paths=paths, output_dir=output)
+    bundle_path = output / DEFAULT_RELEASE_FILENAME
+    manifest_path = output / "manifest.json"
+    old_bundle = bundle_path.read_bytes()
+    old_manifest = manifest_path.read_bytes()
+    index = json.loads(paths.index.read_text())
+    index["benchmarks"][0]["description"] = "Updated benchmark description."
+    paths.index.write_text(json.dumps(index))
+    write_text = Path.write_text
+    replace = Path.replace
+
+    def fail_manifest_write(path, *args, **kwargs):
+        if failure_stage == "manifest-write" and path.parent == output and "manifest" in path.name:
+            raise OSError("publication interrupted")
+        return write_text(path, *args, **kwargs)
+
+    def fail_publication_replace(path, target):
+        if failure_stage == "bundle-publish" and path.name == f".{DEFAULT_RELEASE_FILENAME}.tmp":
+            raise OSError("publication interrupted")
+        if failure_stage == "manifest-publish" and Path(target) == manifest_path:
+            raise OSError("publication interrupted")
+        return replace(path, target)
+
+    monkeypatch.setattr(Path, "write_text", fail_manifest_write)
+    monkeypatch.setattr(Path, "replace", fail_publication_replace)
+    # A manifest write failure used to leave its old checksum pointing at the
+    # newly replaced ZIP. Verify the published pair with the actual installer.
+    with pytest.raises(OSError, match="publication interrupted"):
+        build_data_release(paths=paths, output_dir=output)
+    assert bundle_path.read_bytes() == old_bundle
+    assert manifest_path.read_bytes() == old_manifest
+    manifest_url = "https://example.test/manifest.json"
+    store = DataStore(
+        root=tmp_path / "home",
+        manifest_url=manifest_url,
+        urlopen=_Remote(manifest_url, first, bundle_path.read_bytes()).urlopen,
+    )
+    assert store.initialize()["status"] == "initialized"
+    assert (
+        QueryService(store.query_paths()).show("agent-workbench")["benchmark"]["record"][
+            "description"
+        ]
+        == "Long-horizon coding agent evaluation."
+    )

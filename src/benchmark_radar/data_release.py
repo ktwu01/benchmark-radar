@@ -5,6 +5,8 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import shutil
+import tempfile
 import zipfile
 from pathlib import Path
 from typing import Any
@@ -61,6 +63,11 @@ def build_data_release(
         (f"snapshots/{path.name}", path) for path in sorted(paths.snapshots.glob("*.json"))
     )
     temporary = output_dir / f".{DEFAULT_RELEASE_FILENAME}.tmp"
+    manifest_temporary = output_dir / ".manifest.json.tmp"
+    bundle_path = output_dir / DEFAULT_RELEASE_FILENAME
+    manifest_path = output_dir / "manifest.json"
+    backup_root = None
+    published = False
     try:
         with zipfile.ZipFile(temporary, "w") as archive:
             for archive_name, source in members:
@@ -68,31 +75,47 @@ def build_data_release(
         payload = temporary.read_bytes()
         digest = hashlib.sha256(payload).hexdigest()
         data_version = f"{timestamp_version}-{digest[:12]}"
-        filename = DEFAULT_RELEASE_FILENAME
-        bundle_path = output_dir / filename
-        temporary.replace(bundle_path)
+        manifest = {
+            "schema_version": DATA_RELEASE_SCHEMA_VERSION,
+            "data_version": data_version,
+            "generated_at": generated_at,
+            "benchmark_count": status["catalog"]["count"],
+            "snapshot_count": status["radar"]["snapshot_count"],
+            "artifact": {
+                "filename": DEFAULT_RELEASE_FILENAME,
+                "url": f"{base_url.rstrip('/')}/{DEFAULT_RELEASE_FILENAME}",
+                "sha256": digest,
+                "size": len(payload),
+                "uncompressed_size": sum(path.stat().st_size for _, path in members),
+                "file_count": len(members),
+                "format": "zip",
+            },
+        }
+        manifest_temporary.write_text(
+            json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        # A failed manifest write must not leave the old checksum pointing at
+        # a new ZIP. Stage both files and retain the previous bundle for rollback.
+        if bundle_path.exists():
+            backup_root = Path(tempfile.mkdtemp(prefix=".release-backup-", dir=output_dir))
+            bundle_path.replace(backup_root / DEFAULT_RELEASE_FILENAME)
+        try:
+            temporary.replace(bundle_path)
+            manifest_temporary.replace(manifest_path)
+        except OSError:
+            if backup_root is not None:
+                (backup_root / DEFAULT_RELEASE_FILENAME).replace(bundle_path)
+            else:
+                bundle_path.unlink(missing_ok=True)
+            raise
+        published = True
+        return manifest
     finally:
         temporary.unlink(missing_ok=True)
-
-    manifest = {
-        "schema_version": DATA_RELEASE_SCHEMA_VERSION,
-        "data_version": data_version,
-        "generated_at": generated_at,
-        "benchmark_count": status["catalog"]["count"],
-        "snapshot_count": status["radar"]["snapshot_count"],
-        "artifact": {
-            "filename": filename,
-            "url": f"{base_url.rstrip('/')}/{filename}",
-            "sha256": digest,
-            "size": len(payload),
-            "uncompressed_size": sum(path.stat().st_size for _, path in members),
-            "file_count": len(members),
-            "format": "zip",
-        },
-    }
-    manifest_path = output_dir / "manifest.json"
-    manifest_path.write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    return manifest
+        manifest_temporary.unlink(missing_ok=True)
+        if backup_root is not None and (
+            published or not (backup_root / DEFAULT_RELEASE_FILENAME).exists()
+        ):
+            # If restoring the old bundle itself fails, retain its backup.
+            shutil.rmtree(backup_root, ignore_errors=True)
