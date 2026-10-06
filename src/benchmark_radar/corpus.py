@@ -75,7 +75,7 @@ def _exact_candidates(item: dict[str, Any]) -> list[tuple[int, str]]:
         if host == "openreview.net":
             forum = (parse_qs(parsed.query).get("id") or [None])[0]
             if forum:
-                candidates.add((3, f"artifact:openreview:{str(forum).casefold()}"))
+                candidates.add((3, f"artifact:openreview:{str(forum)}"))
         if host == "github.com" and len(segments) >= 2:
             candidates.add(
                 (4, f"artifact:github:{segments[0].casefold()}/{segments[1].casefold()}")
@@ -103,17 +103,23 @@ def _exact_candidates(item: dict[str, Any]) -> list[tuple[int, str]]:
 
     # No recognizable URL identifier, so fall back to the source's own id.
     source = str(item.get("source") or "").casefold()
-    source_id = str(item.get("source_id") or "").strip().casefold()
+    source_id = str(item.get("source_id") or "").strip()
     if source == "arxiv":
-        base_id = re.sub(r"v\d+$", "", source_id)
+        base_id = re.sub(r"v\d+$", "", source_id.casefold())
         return [(2, f"artifact:arxiv:{base_id}")]
     if source == "openreview":
         return [(3, f"artifact:openreview:{source_id}")]
     if source in {"github", "github release"}:
-        return [(4, f"artifact:github:{source_id.split('@', 1)[0]}")]
+        return [(4, f"artifact:github:{source_id.casefold().split('@', 1)[0]}")]
     if source == "hugging face":
-        return [(5, f"artifact:huggingface:datasets:{source_id}")]
-    return [(9, _stable_id("artifact:url", str(item.get("url") or source_id).casefold()))]
+        return [(5, f"artifact:huggingface:datasets:{source_id.casefold()}")]
+    # Schemes and hostnames are case-insensitive; paths and queries are not.
+    url = str(item.get("url") or source_id)
+    parsed = urlsplit(url)
+    normalized = parsed._replace(
+        scheme=parsed.scheme.lower(), netloc=parsed.netloc.lower()
+    ).geturl()
+    return [(9, _stable_id("artifact:url", normalized))]
 
 
 def exact_artifact_keys(item: dict[str, Any]) -> list[str]:

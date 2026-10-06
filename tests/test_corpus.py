@@ -135,3 +135,44 @@ def test_validation_rejects_edges_to_unknown_entities():
 
     with pytest.raises(CorpusError, match="unknown entity"):
         validate_corpus(corpus)
+
+
+@pytest.mark.parametrize(
+    "first,second",
+    [
+        (
+            item(
+                source="OpenReview",
+                source_id="AbC123",
+                url="https://openreview.net/forum?id=AbC123",
+            ),
+            item(
+                source="OpenReview",
+                source_id="abc123",
+                url="https://openreview.net/forum?id=abc123",
+            ),
+        ),
+        (
+            item(source="OpenReview", source_id="AbC123", url="https://openreview.net/pdf/AbC123"),
+            item(source="OpenReview", source_id="abc123", url="https://openreview.net/pdf/abc123"),
+        ),
+        (
+            item(url="https://example.com/Benchmark?version=A"),
+            item(source_id="paper-2", url="https://example.com/benchmark?version=a"),
+        ),
+    ],
+)
+def test_corpus_keeps_case_sensitive_identifiers_distinct(first, second):
+    corpus = build_corpus([snapshot(first, second)])
+    artifacts = [entity for entity in corpus["entities"] if entity["type"] == "artifact"]
+    assert len(artifacts) == 2
+    assert all(entity["observation_count"] == 1 for entity in artifacts)
+
+
+def test_generic_url_hostname_is_case_insensitive():
+    first = item(url="https://EXAMPLE.com/Benchmark?version=A")
+    second = item(source_id="paper-2", url="https://example.COM/Benchmark?version=A")
+    corpus = build_corpus([snapshot(first, second)])
+    artifacts = [entity for entity in corpus["entities"] if entity["type"] == "artifact"]
+    assert len(artifacts) == 1
+    assert artifacts[0]["observation_count"] == 2
