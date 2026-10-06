@@ -578,3 +578,26 @@ def test_generate_daily_questions_translates_answers_to_chinese_when_requested(m
         for a in answers
     )
     assert result["zh_translation"]["response_id"] == "resp_zh"
+
+
+def test_daily_questions_rejects_provider_answers_bound_to_wrong_questions(monkeypatch):
+    current = snapshot_for_run(_run([_item(1), _item(2)]))
+
+    def post_json(url, payload, **kwargs):
+        packet = json.loads(payload["input"])
+        answers = [
+            _answer(question=question, signal="Captured records need review.")
+            for question in reversed(packet["questions"])
+        ]
+        return {
+            "output": [
+                {
+                    "type": "message",
+                    "content": [{"type": "output_text", "text": json.dumps({"answers": answers})}],
+                }
+            ]
+        }
+
+    monkeypatch.setattr(questions, "post_json", post_json)
+    with pytest.raises(BriefingError, match="question"):
+        questions.generate_daily_questions([], current, [], "test-key")

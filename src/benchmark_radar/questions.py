@@ -420,6 +420,8 @@ def _validate(
     for answer, question in zip(answers, group["questions"], strict=True):
         if not isinstance(answer, dict):
             raise BriefingError("OpenAI returned a malformed answer")
+        if answer.get("question") != question:
+            raise BriefingError("OpenAI returned an answer for a different question")
         unknown_stats = [
             stat_id for stat_id in answer.get("stat_ids") or [] if stat_id not in stats_by_id
         ]
