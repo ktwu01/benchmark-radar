@@ -46,7 +46,11 @@ from .science_domains import science_domains_for_record
 from .site_about import write_about
 from .site_pages import DEFAULT_SHARD_DIR, benchmark_sitemap_entries
 from .site_seo import site_lastmod, write_sitemap
-from .sources import GITHUB_RELEASE_PARSER_VERSION, github_release_title
+from .sources import github_release_title
+
+# This migration only applies the release-title correction introduced in /3.
+# It does not reparse metrics and must not inherit newer fetch semantics.
+GITHUB_RELEASE_TITLE_BACKFILL_PARSER_VERSION = "github-releases/3"
 
 SCHEMA_VERSION = 2
 SUPPORTED_SCHEMA_VERSIONS = {1, SCHEMA_VERSION}
@@ -1561,7 +1565,7 @@ def migrate_snapshot_history(config: dict[str, Any], snapshot_dir: Path) -> list
 
 
 def _backfill_github_release_titles(snapshot: dict[str, Any]) -> int:
-    """Reparse persisted bare-tag release titles with the current connector."""
+    """Apply the /3 title correction without reparsing persisted metrics."""
     changed = 0
     for record in snapshot.get("evidence_items") or []:
         if record.get("source") != "GitHub Release":
@@ -1577,6 +1581,6 @@ def _backfill_github_release_titles(snapshot: dict[str, Any]) -> int:
         if corrected == current:
             continue
         record["title"] = corrected
-        record["parser_version"] = GITHUB_RELEASE_PARSER_VERSION
+        record["parser_version"] = GITHUB_RELEASE_TITLE_BACKFILL_PARSER_VERSION
         changed += 1
     return changed
