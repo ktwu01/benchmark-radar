@@ -598,3 +598,53 @@ def test_failed_release_publication_keeps_last_verified_bundle(
         ]
         == "Long-horizon coding agent evaluation."
     )
+
+
+def test_failed_release_rollback_retains_recoverable_bundle(tmp_path: Path, monkeypatch) -> None:
+    paths = _source_tree(tmp_path)
+    output = tmp_path / "published"
+    first = build_data_release(paths=paths, output_dir=output)
+    bundle_path = output / DEFAULT_RELEASE_FILENAME
+    manifest_path = output / "manifest.json"
+    old_bundle = bundle_path.read_bytes()
+    old_manifest = manifest_path.read_bytes()
+    index = json.loads(paths.index.read_text())
+    index["benchmarks"][0]["description"] = "Updated benchmark description."
+    paths.index.write_text(json.dumps(index))
+    replace = Path.replace
+    failures = []
+
+    def fail_manifest_and_restore(path, target):
+        if Path(target) == manifest_path:
+            failures.append("manifest-publication")
+            raise OSError("manifest publication interrupted")
+        if path.parent.name.startswith(".release-backup-") and Path(target) == bundle_path:
+            failures.append("bundle-restoration")
+            raise OSError("bundle restoration interrupted")
+        return replace(path, target)
+
+    monkeypatch.setattr(Path, "replace", fail_manifest_and_restore)
+    with pytest.raises(OSError, match="bundle restoration interrupted"):
+        build_data_release(paths=paths, output_dir=output)
+    assert failures == ["manifest-publication", "bundle-restoration"]
+    backups = list(output.glob(".release-backup-*"))
+    assert len(backups) == 1
+    retained_bundle = backups[0] / DEFAULT_RELEASE_FILENAME
+    assert retained_bundle.read_bytes() == old_bundle
+    assert manifest_path.read_bytes() == old_manifest
+
+    # The retained bytes remain a verified release, recoverable even though the
+    # attempted filesystem restoration failed. Exercise the actual installer.
+    manifest_url = "https://example.test/manifest.json"
+    store = DataStore(
+        root=tmp_path / "home",
+        manifest_url=manifest_url,
+        urlopen=_Remote(manifest_url, first, retained_bundle.read_bytes()).urlopen,
+    )
+    assert store.initialize()["status"] == "initialized"
+    assert (
+        QueryService(store.query_paths()).show("agent-workbench")["benchmark"]["record"][
+            "description"
+        ]
+        == "Long-horizon coding agent evaluation."
+    )
