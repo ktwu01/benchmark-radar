@@ -799,3 +799,22 @@ def test_cli_json_mode_keeps_stdout_parseable_and_cites_on_stderr(tmp_path: Path
     assert payload["status"] == "ok"
     assert "please cite it" in captured.err
     assert "please cite it" not in captured.out
+
+
+def test_recent_chooses_latest_snapshot_by_instant_across_offsets(tmp_path: Path) -> None:
+    paths = _catalog(tmp_path)
+    original = json.loads(next(paths.snapshots.glob("*.json")).read_text())
+    # Both snapshots describe the same UTC day. Lexical sorting incorrectly
+    # chose 07:30Z over 01:00-07:00 (08:00Z), so recent/status regressed.
+    later = {**original, "generated_at": "2026-08-29T01:00:00-07:00"}
+    earlier = {**original, "generated_at": "2026-08-29T07:30:00+00:00"}
+    later["evidence_items"] = [{**original["evidence_items"][0], "title": "Later evidence"}]
+    earlier["evidence_items"] = [{**original["evidence_items"][0], "title": "Earlier evidence"}]
+    for path in paths.snapshots.glob("*.json"):
+        path.unlink()
+    (paths.snapshots / "later.json").write_text(json.dumps(later))
+    (paths.snapshots / "earlier.json").write_text(json.dumps(earlier))
+    service = QueryService(paths)
+    assert service.recent()["results"][0]["title"] == "Later evidence"
+    assert service.status()["radar"]["latest_generated_at"] == later["generated_at"]
+    assert service.search("evidence", scope="radar")["results"][0]["name"] == "Later evidence"

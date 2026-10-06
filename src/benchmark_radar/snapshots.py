@@ -792,7 +792,14 @@ def load_snapshots(snapshot_dir: Path) -> list[dict[str, Any]]:
         except json.JSONDecodeError as error:
             raise SnapshotError(f"{path}: invalid JSON: {error}") from error
         snapshots.append(normalize_snapshot(snapshot, source=str(path)))
-    snapshots.sort(key=lambda value: (value["date"], value["generated_at"]))
+    # Valid ISO offsets can reverse lexical order. Every downstream consumer
+    # takes the last snapshot as latest, so order by the actual UTC instant.
+    snapshots.sort(
+        key=lambda value: (
+            value["date"],
+            _validate_time(value["generated_at"], source="snapshot", field="generated_at"),
+        )
+    )
     return snapshots
 
 
