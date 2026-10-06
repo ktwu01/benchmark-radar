@@ -136,7 +136,7 @@ def _escape_cell(value: str) -> str:
     # Escape backslashes first so literal brackets and emphasis markers cannot
     # change a contributor's displayed name or terminate its link label.
     value = value.replace("\\", "\\\\")
-    for character in "|[]*_`":
+    for character in "|[]*_`~<>&":
         value = value.replace(character, "\\" + character)
     return value.replace("\n", " ").replace("\r", " ").strip()
 
@@ -165,7 +165,7 @@ def leaderboard_markdown(
         # Linked only when the registry recorded a URL. A bare `[name]()` renders
         # as a dead link, which is worse than plain text.
         # Parentheses and table separators belong to the URL, not Markdown.
-        url = quote(entry["url"], safe=":/?#@!$&'*+,;=%~_-.") if entry["url"] else None
+        url = quote(entry["url"], safe=":/?#@!$&'*+,;=%~_-.[]") if entry["url"] else None
         label = f"[{name}]({url})" if url else name
         lines.append(
             f"| {entry['rank']} | {label} | {_escape_cell(entry['source'])} "
