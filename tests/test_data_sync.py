@@ -514,7 +514,10 @@ def test_sync_requires_init_and_cli_uses_managed_store(monkeypatch, tmp_path: Pa
 
     manifest, bundle, manifest_url = _release(tmp_path / "release")
     remote = _Remote(manifest_url, manifest, bundle)
-    monkeypatch.setattr("benchmark_radar.data_store.urllib.request.urlopen", remote.urlopen)
+    monkeypatch.setattr(
+        "benchmark_radar.data_store.urllib.request.build_opener",
+        lambda *_args: type("Opener", (), {"open": staticmethod(remote.urlopen)})(),
+    )
     assert run_query_cli(["init", "--manifest-url", manifest_url, "--json"]) == 0
     capsys.readouterr()
 
@@ -642,3 +645,102 @@ def test_credential_url_errors_describe_policy_without_exposing_credentials(tmp_
 def test_download_url_policy_preserves_encoded_ascii_and_idna_hosts():
     assert _allowed_download_url("https://%65xample.test/data")
     assert _allowed_download_url("https://xn--r8jz45g.test/%E6%B8%AC%E5%AE%9A")
+
+
+@pytest.mark.parametrize(
+    "location",
+    [
+        "https://user:secret@example.test/data",
+        "http://example.test/data",
+        "https://[broken/data",
+        "https://%75ser%3Asecret%40example.test/data",
+        "https://%FF/data",
+    ],
+)
+def test_native_redirect_is_rejected_before_following(monkeypatch, tmp_path, capsys, location):
+    import socket
+    import threading
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(302)
+            self.send_header("Location", location)
+            self.end_headers()
+
+        def log_message(self, *_args):
+            pass
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    connect = socket.create_connection
+    attempts = []
+
+    def owned_connection(address, *args, **kwargs):
+        attempts.append(address)
+        assert address == server.server_address, "redirect reached another network destination"
+        return connect(address, *args, **kwargs)
+
+    monkeypatch.setattr(socket, "create_connection", owned_connection)
+    monkeypatch.setenv("NO_PROXY", "*")
+    try:
+        url = f"http://127.0.0.1:{server.server_port}/manifest.json"
+        assert (
+            run_query_cli(
+                ["init", "--data-dir", str(tmp_path / "home"), "--manifest-url", url, "--json"]
+            )
+            == 1
+        )
+        error = json.loads(capsys.readouterr().err)
+        assert error["error"]["code"] == "invalid_manifest"
+        assert "secret" not in error["error"]["message"]
+        assert attempts == [server.server_address]
+        assert not (tmp_path / "home" / "state.json").exists()
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join()
+
+
+@pytest.mark.parametrize("redirect_code", [301, 302, 303, 307, 308])
+def test_native_relative_redirect_preserves_verified_install(tmp_path, redirect_code):
+    import threading
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+    manifest, bundle, _ = _release(tmp_path / "release")
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            if self.path == "/manifest.json":
+                self.send_response(redirect_code)
+                self.send_header("Location", "/resolved.json")
+                self.end_headers()
+                return
+            payload = bundle if self.path == "/bundle.zip" else json.dumps(manifest).encode()
+            self.send_response(200)
+            self.send_header("Content-Length", str(len(payload)))
+            self.end_headers()
+            self.wfile.write(payload)
+
+        def log_message(self, *_args):
+            pass
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    manifest["artifact"]["url"] = f"http://127.0.0.1:{server.server_port}/bundle.zip"
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        store = DataStore(
+            root=tmp_path / "home",
+            manifest_url=f"http://127.0.0.1:{server.server_port}/manifest.json",
+        )
+        assert store.initialize()["status"] == "initialized"
+        assert (
+            QueryService(store.query_paths()).search("agent workbench")["results"][0]["name"]
+            == "Agent Workbench"
+        )
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join()

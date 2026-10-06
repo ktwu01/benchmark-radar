@@ -16,7 +16,7 @@ from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
 from typing import Any
-from urllib.parse import unquote, urlsplit
+from urllib.parse import unquote, urljoin, urlsplit
 
 from . import __version__
 from .data_release import DATA_RELEASE_SCHEMA_VERSION
@@ -82,6 +82,38 @@ def _allowed_download_url(value: str) -> bool:
         return ipaddress.ip_address(parsed.hostname).is_loopback
     except ValueError:
         return False
+
+
+class _ValidatedRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def http_error_302(self, request, response, code, message, headers):
+        # The standard handler parses Location before calling redirect_request.
+        # Validate the raw header first, then every resolved hop before opening
+        # it, so malformed URLs cannot escape or reach another destination.
+        location = headers.get("location", headers.get("uri"))
+        if location is not None:
+            try:
+                invalid_raw = any(
+                    character.isspace() or ord(character) < 32 or ord(character) == 127
+                    for character in location
+                )
+                allowed = not invalid_raw and _allowed_download_url(
+                    urljoin(request.full_url, location)
+                )
+            except (ValueError, UnicodeError):
+                allowed = False
+            if not allowed:
+                response.close()
+                raise DataSyncError(
+                    "download redirected to an invalid URL; require credential-free HTTPS "
+                    "(HTTP is allowed only for loopback testing)",
+                    code="invalid_manifest",
+                )
+        return super().http_error_302(request, response, code, message, headers)
+
+    http_error_301 = http_error_302
+    http_error_303 = http_error_302
+    http_error_307 = http_error_302
+    http_error_308 = http_error_302
 
 
 def _utc_timestamp(value: Any, *, label: str, code: str) -> datetime:
@@ -239,7 +271,7 @@ class DataStore:
             lock_path.unlink(missing_ok=True)
 
     def _open(self, request: urllib.request.Request, *, allow_not_modified: bool = False):
-        opener = self.urlopen or urllib.request.urlopen
+        opener = self.urlopen or urllib.request.build_opener(_ValidatedRedirectHandler()).open
         try:
             response = opener(request, timeout=60)
             final_url = response.geturl() if hasattr(response, "geturl") else request.full_url
