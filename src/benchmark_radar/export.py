@@ -12,6 +12,7 @@ import io
 import json
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 from .query import DEFAULT_INDEX_PATH
 
@@ -132,7 +133,12 @@ def _escape_cell(value: str) -> str:
     is a matter of when rather than whether. Newlines get the same treatment:
     a table row is a single line by definition.
     """
-    return value.replace("|", "\\|").replace("\n", " ").replace("\r", " ").strip()
+    # Escape backslashes first so literal brackets and emphasis markers cannot
+    # change a contributor's displayed name or terminate its link label.
+    value = value.replace("\\", "\\\\")
+    for character in "|[]*_`":
+        value = value.replace(character, "\\" + character)
+    return value.replace("\n", " ").replace("\r", " ").strip()
 
 
 def leaderboard_markdown(
@@ -158,7 +164,9 @@ def leaderboard_markdown(
         name = _escape_cell(entry["name"])
         # Linked only when the registry recorded a URL. A bare `[name]()` renders
         # as a dead link, which is worse than plain text.
-        label = f"[{name}]({entry['url']})" if entry["url"] else name
+        # Parentheses and table separators belong to the URL, not Markdown.
+        url = quote(entry["url"], safe=":/?#@!$&'*+,;=%~_-.") if entry["url"] else None
+        label = f"[{name}]({url})" if url else name
         lines.append(
             f"| {entry['rank']} | {label} | {_escape_cell(entry['source'])} "
             f"| {entry['document_count']} | {entry['organization_count']} |"

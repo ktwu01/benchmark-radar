@@ -258,3 +258,19 @@ def test_shipped_registry_exports_cleanly(tmp_path):
     # Zero-adoption benchmarks are kept and ranked last: "in the registry,
     # adopted by nobody" is a finding, not a row to drop from the export.
     assert int(rows[-1]["document_count"]) <= int(rows[0]["document_count"])
+
+
+def test_markdown_preserves_bracketed_names_and_url_delimiters(tmp_path):
+    # Contributor text must remain one label and one link, not new Markdown.
+    registry = minimal_registry()
+    registry["benchmarks"][0]["name"] = r"Alpha [v2] \_private\_"
+    registry["benchmarks"][0]["url"] = "https://example.com/report)revision|2026"
+    written = write_exports(tmp_path / "out", catalog_path=write_catalog(tmp_path, registry))
+    table = written["markdown"].read_text()
+    row = next(line for line in table.splitlines() if "Alpha" in line)
+    assert r"Alpha \[v2\] \\\_private\\\_" in row
+    assert "(https://example.com/report%29revision%7C2026)" in row
+    assert row.count("|") - row.count("\\|") == 6
+    # Fixing Markdown presentation must not alter the stored evidence URL.
+    exported = json.loads(written["json"].read_text())
+    assert exported["entries"][0]["url"] == registry["benchmarks"][0]["url"]
