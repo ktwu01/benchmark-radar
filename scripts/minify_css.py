@@ -19,26 +19,18 @@ import re
 import sys
 from pathlib import Path
 
-_COMMENT = re.compile(r"/\*.*?\*/", flags=re.DOTALL)
+_TOKEN = re.compile(r"/\*.*?\*/" r"|\"(?:\\.|[^\"\\])*\"" r"|'(?:\\.|[^'\\])*'", flags=re.DOTALL)
 _TRAILING_WS = re.compile(r"[ \t]+(?=\n)")
 _BLANK_RUN = re.compile(r"\n{3,}")
-_STRING = re.compile(r'"[^"]*"')
 
 
 def minify_css(source: str) -> str:
     """Return the stylesheet with comments and blank runs removed."""
-    # Hold string literals aside so a `/*` inside one is not mistaken for a
-    # comment (a background-image url could legally contain it).
-    held: list[str] = []
-
-    def _hold(match: re.Match[str]) -> str:
-        held.append(match.group(0))
-        return f"__BRCSS_STRING_{len(held) - 1}__"
-
-    protected = _STRING.sub(_hold, source)
-    cleaned = _COMMENT.sub("", protected)
-    for index, literal in enumerate(held):
-        cleaned = cleaned.replace(f"__BRCSS_STRING_{index}__", literal)
+    # Match comments and strings in one pass: quotes inside comments cannot
+    # hide the terminator, and comment markers inside strings remain literal.
+    cleaned = _TOKEN.sub(
+        lambda match: "" if match.group(0).startswith("/*") else match.group(0), source
+    )
     cleaned = _TRAILING_WS.sub("", cleaned)
     return _BLANK_RUN.sub("\n\n", cleaned).strip() + "\n"
 

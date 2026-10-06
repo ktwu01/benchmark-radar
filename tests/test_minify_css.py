@@ -51,3 +51,16 @@ def test_selectors_and_declarations_are_never_rewritten():
     result = minify_css(source)
     assert "@media (max-width: 700px)" in result
     assert ".a,.b { color: rgb(1 2 3 / 50%); margin: 0 auto; }" in result
+
+
+def test_cli_preserves_single_quoted_and_escaped_literals(tmp_path):
+    source = 'x { background: url(\'a/*b*/c.png\'); content: "say \\"/*literal*/\\""; }\n'
+    path = tmp_path / "styles.css"
+    path.write_text(source + "/* removable comment */\n")
+    assert mc.main([str(path)]) == 0
+    assert path.read_text() == source
+
+
+def test_quotes_inside_comments_do_not_hide_following_rules():
+    source = '/* a " quote */\nx { color: red; }\n/* another " quote */\n'
+    assert minify_css(source) == "x { color: red; }\n"
