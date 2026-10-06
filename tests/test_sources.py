@@ -109,6 +109,7 @@ def test_first_party_feeds_parse_rss_and_atom_and_filter_noise(monkeypatch):
     assert items[0].source == "First-party feed"
     assert items[0].source_id == "Lab Atom:tag:lab.example,2026:leaderboard"
     assert items[0].organizations == ["Lab Atom"]
+    assert {item.parser_version for item in items} == {"first-party-rss-atom/2"}
 
 
 def test_first_party_feeds_resolve_relative_entry_links(monkeypatch):
@@ -3418,3 +3419,4 @@ def test_first_party_atom_resolves_link_xml_base_scope(
     )
     assert [item.url for item in items] == [expected]
     assert items[0].source_id == "Lab:urn:benchmark:one"
+    assert items[0].parser_version == "first-party-rss-atom/2"

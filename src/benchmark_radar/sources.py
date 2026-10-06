@@ -30,6 +30,7 @@ class ConnectorPayloadError(ValueError):
 
 FUTURE_TIMESTAMP_TOLERANCE = timedelta(minutes=5)
 GITHUB_RELEASE_PARSER_VERSION = "github-releases/3"
+FIRST_PARTY_FEED_PARSER_VERSION = "first-party-rss-atom/2"
 _XML_BASE = "{http://www.w3.org/XML/1998/namespace}base"
 
 
@@ -169,7 +170,7 @@ def fetch_first_party_feeds(config: dict[str, Any], since: datetime, limit: int)
                     event_kind="updated" if updated > published else "released",
                     organizations=[name],
                     raw={"xml": ET.tostring(entry, encoding="unicode")},
-                    parser_version="first-party-rss-atom/1",
+                    parser_version=FIRST_PARTY_FEED_PARSER_VERSION,
                 )
         except Exception as error:
             warnings = config.setdefault("_source_warnings", [])
