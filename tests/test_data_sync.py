@@ -546,3 +546,45 @@ def test_unsafe_archive_member_is_rejected(tmp_path: Path) -> None:
     with pytest.raises(DataSyncError, match="unsafe archive path"):
         store.initialize()
     assert not (tmp_path / "escaped.json").exists()
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://[broken/data",
+        "https://example.test:invalid/data",
+        "https://example.test:99999/data",
+        "https://example.test\n/data",
+        "https://user:secret@example.test/data",
+    ],
+)
+def test_init_rejects_malformed_download_authorities_as_structured_errors(
+    monkeypatch, tmp_path: Path, capsys, url: str
+) -> None:
+    # Malformed authorities escaped validation as ValueError/InvalidURL, or
+    # reached the downloader before being rejected by the JSON CLI contract.
+    def no_download(*args, **kwargs):
+        raise AssertionError("invalid URL reached the downloader")
+
+    monkeypatch.setattr("benchmark_radar.data_store.urllib.request.urlopen", no_download)
+    assert (
+        run_query_cli(
+            ["init", "--data-dir", str(tmp_path / "home"), "--manifest-url", url, "--json"]
+        )
+        == 1
+    )
+    error = json.loads(capsys.readouterr().err)
+    assert error["error"]["code"] == "invalid_manifest"
+    assert not (tmp_path / "home" / "state.json").exists()
+
+
+@pytest.mark.parametrize("url", ["https://[broken/data", "https://example.test:invalid/data"])
+def test_init_rejects_malformed_artifact_authorities(tmp_path: Path, url: str) -> None:
+    manifest, bundle, manifest_url = _release(tmp_path)
+    manifest["artifact"]["url"] = url
+    remote = _Remote(manifest_url, manifest, bundle)
+    store = DataStore(root=tmp_path / "home", manifest_url=manifest_url, urlopen=remote.urlopen)
+    with pytest.raises(DataSyncError) as failure:
+        store.initialize()
+    assert failure.value.code == "invalid_manifest"
+    assert remote.bundle_requests == 0

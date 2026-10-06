@@ -41,7 +41,19 @@ def default_data_home() -> Path:
 
 
 def _allowed_download_url(value: str) -> bool:
-    parsed = urlsplit(value)
+    # urlsplit removes controls and delays port validation. Reject malformed
+    # authorities before a request or its error can expose embedded credentials.
+    if any(
+        character.isspace() or ord(character) < 32 or ord(character) == 127 for character in value
+    ):
+        return False
+    try:
+        parsed = urlsplit(value)
+        _port = parsed.port
+    except ValueError:
+        return False
+    if parsed.username is not None or parsed.password is not None:
+        return False
     if parsed.scheme == "https" and parsed.hostname:
         return True
     if parsed.scheme != "http" or not parsed.hostname:
