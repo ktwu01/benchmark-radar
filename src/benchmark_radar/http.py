@@ -8,6 +8,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from email.utils import parsedate_to_datetime
 from typing import Any
 
 import certifi
@@ -162,7 +163,10 @@ def _request(
             try:
                 delay = max(0.0, float(retry_after)) if retry_after else float(2**attempt)
             except ValueError:
-                delay = float(2**attempt)
+                try:
+                    delay = max(0.0, parsedate_to_datetime(retry_after).timestamp() - time.time())
+                except (TypeError, ValueError, OverflowError):
+                    delay = float(2**attempt)
             if attempt + 1 < attempts:
                 time.sleep(min(delay, MAX_RETRY_DELAY_SECONDS))
         except (urllib.error.URLError, TimeoutError) as error:

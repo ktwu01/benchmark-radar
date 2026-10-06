@@ -265,3 +265,34 @@ def test_post_json_sends_compact_json_and_headers(monkeypatch):
     assert captured["request"].data == b'{"input":"brief me"}'
     assert captured["request"].get_header("Content-type") == "application/json"
     assert captured["request"].get_header("Authorization") == "Bearer secret"
+
+
+@pytest.mark.parametrize(("seconds", "expected"), [(30, 30.0), (-30, 0.0), (120, 60.0)])
+def test_http_honors_http_date_retry_after(monkeypatch, seconds, expected):
+    from datetime import UTC, datetime, timedelta
+    from email.utils import format_datetime
+
+    now = datetime(2026, 10, 6, 12, tzinfo=UTC)
+    calls = 0
+    sleeps = []
+
+    def fake_urlopen(request, **kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise urllib.error.HTTPError(
+                request.full_url,
+                429,
+                "rate limited",
+                {"Retry-After": format_datetime(now + timedelta(seconds=seconds), usegmt=True)},
+                io.BytesIO(),
+            )
+        return Response(b'{"ok": true}')
+
+    monkeypatch.setattr("benchmark_radar.http.urllib.request.urlopen", fake_urlopen)
+    monkeypatch.setattr("benchmark_radar.http.time.time", lambda: now.timestamp())
+    monkeypatch.setattr("benchmark_radar.http.time.sleep", sleeps.append)
+    # RFC 9110 permits an HTTP-date, not only delta seconds. Retrying in one
+    # second despite a future date consumes the rate-limit quota again.
+    assert get_json("https://example.test/data", attempts=2) == {"ok": True}
+    assert sleeps == [expected]
