@@ -1,0 +1,41 @@
+name: Open item cap
+
+# Closes a new issue or pull request when its author already has 10 open ones
+# (issues and pull requests counted together). Maintainers and bots are exempt.
+# pull_request_target is safe here because the job never checks out or runs any
+# code from the pull request: it only calls the GitHub API.
+on:
+  issues:
+    types: [opened, reopened]
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+# One author at a time, so a burst of items is counted one by one.
+concurrency:
+  group: open-item-cap-${{ github.event.sender.login }}
+  cancel-in-progress: false
+
+jobs:
+  cap:
+    if: github.event.sender.type != 'Bot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/scripts
+      - name: Close the item if its author is over the cap
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          AUTHOR: ${{ github.event.pull_request.user.login || github.event.issue.user.login }}
+          NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+          KIND: ${{ github.event_name == 'pull_request_target' && 'pr' || 'issue' }}
+          CAP: "10"
+          # Repo maintainers and regular contributors, space separated.
+          EXEMPT: "ktwu01 junjiezhou1122"
+        run: .github/scripts/enforce-open-item-cap.sh

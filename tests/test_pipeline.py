@@ -10,6 +10,7 @@ from benchmark_radar.pipeline import (
     assert_no_boilerplate_summaries,
     canonical_url,
     deduplicate,
+    flag_repeated_summaries,
     normalized_title,
     run_pipeline,
     score_item,
@@ -351,6 +352,96 @@ def test_repeated_summaries_still_require_same_owner_card_bodies(invalid_evidenc
 
     with pytest.raises(RuntimeError, match="templated descriptions"):
         assert_no_boilerplate_summaries(records)
+
+
+def test_a_small_upstream_cluster_warns_instead_of_failing(capsys):
+    """Regression: the 2026-10-06 and 2026-10-07 daily runs aborted because three
+    unrelated datasets shared the summary 'Original synthetic data for testing
+    ML evaluation assumptions.' Three records must not cost the whole snapshot."""
+    shared = "Original synthetic data for testing ML evaluation assumptions."
+    records = [
+        _fresh(
+            source="Hugging Face",
+            source_id=f"uploader-{n}/synthetic-{n}",
+            title=f"Synthetic Evaluation Dataset {n}",
+            summary=shared,
+        )
+        for n in range(3)
+    ]
+    records.extend(
+        _fresh(source_id=f"distinct-{n}", title=f"Distinct Benchmark {n}", summary=f"Finding {n}.")
+        for n in range(3)
+    )
+
+    published, selection = _score_and_select(
+        records,
+        _funnel_config(),
+        now=FUNNEL_NOW,
+        fetched_count=len(records),
+        suppressed_count=0,
+    )
+
+    assert selection["summaries_repeated"] == 3
+    assert selection["deduplicated"] == 6
+    assert selection["published"] == 6
+    repeated = [record for record in published if record.source == "Hugging Face"]
+    assert len(repeated) == 3
+    assert all(record.summary == shared for record in repeated)
+    assert "::warning title=Repeated summaries::3 records" in capsys.readouterr().out
+
+
+def test_repeated_text_keeps_the_categories_it_earned():
+    """The shared card text may be a record's only taxonomy signal. Dropping it
+    would leave the record uncategorized and remove it from the snapshot."""
+    records = [
+        _fresh(
+            source="Hugging Face",
+            source_id=f"lab/opaque-{n}",
+            title=f"Opaque Repo {n}",
+            summary="A benchmark for code agents.",
+        )
+        for n in range(3)
+    ]
+
+    published, selection = _score_and_select(
+        records,
+        _funnel_config(),
+        now=FUNNEL_NOW,
+        fetched_count=len(records),
+        suppressed_count=0,
+    )
+
+    assert selection["summaries_repeated"] == 3
+    assert len(published) == 3
+    assert all(record.categories == ["benchmark"] for record in published)
+
+
+def test_a_systemic_template_still_fails_the_run():
+    templated = [
+        item(source_id=f"org/repo-{n}", summary="Dataset repository updated on Hugging Face.")
+        for n in range(26)
+    ]
+    templated.extend(item(source_id=f"org/real-{n}", summary=f"Finding {n}.") for n in range(4))
+    with pytest.raises(RuntimeError, match="templated descriptions"):
+        flag_repeated_summaries(templated)
+
+
+def test_several_small_clusters_are_not_mistaken_for_a_template():
+    records = [
+        item(source_id=f"org/{size}-{n}", summary=f"Shared card text {size}.")
+        for size in (4, 3, 3)
+        for n in range(size)
+    ]
+    records.extend(item(source_id=f"org/real-{n}", summary=f"Finding {n}.") for n in range(20))
+
+    assert flag_repeated_summaries(records) == 10
+
+
+def test_a_healthy_run_flags_nothing():
+    assert (
+        _select([_fresh(source_id="keep", summary="One distinct finding.")])["summaries_repeated"]
+        == 0
+    )
 
 
 def test_boilerplate_summary_cannot_earn_relevance():
@@ -1796,3 +1887,60 @@ def test_self_exclusion_survives_a_watchlist_hit():
     # The record really did match the watchlist; suppression still won.
     assert selection["watchlisted"] == 0
     assert retained == []
+
+
+def test_sources_fetch_concurrently_but_shared_hosts_stay_serial(monkeypatch):
+    """Fetching sixteen sources in turn was most of the daily run. Separate
+    hosts now overlap; GitHub's three connectors still share one lane so the
+    token's rate limit sees them one at a time."""
+    import threading
+    import time
+
+    from benchmark_radar import pipeline
+
+    active: dict[str, int] = {"github": 0}
+    overlap = {"github": 0}
+    lock = threading.Lock()
+    started = threading.Barrier(2, timeout=5)
+
+    def github_fetcher(name):
+        def fetch(config, since, limit):
+            with lock:
+                active["github"] += 1
+                overlap["github"] = max(overlap["github"], active["github"])
+            time.sleep(0.05)
+            with lock:
+                active["github"] -= 1
+            return [item(source_id=f"{name}/1", url=f"https://github.com/{name}/1")]
+
+        return fetch
+
+    def barrier_fetcher(name):
+        def fetch(config, since, limit):
+            # Both separate-host sources must be in flight at once to pass.
+            started.wait()
+            return [item(source_id=f"{name}/1", url=f"https://example.test/{name}")]
+
+        return fetch
+
+    names = ["github", "zenodo", "github_releases", "crossref", "github_organizations"]
+    for name in names:
+        fetcher = github_fetcher(name) if name.startswith("github") else barrier_fetcher(name)
+        monkeypatch.setitem(pipeline.SOURCE_FETCHERS, name, fetcher)
+    config = {
+        "radar": {
+            "lookback_hours": 48,
+            "max_items_per_source": 10,
+            "report_limit": 10,
+            "minimum_score": 0,
+        },
+        "taxonomy": {"benchmark": ["benchmark"]},
+        "sources": {name: {"enabled": True} for name in names},
+    }
+
+    run = run_pipeline(config, datetime(2026, 7, 27, tzinfo=UTC))
+
+    assert overlap["github"] == 1
+    # Health stays in config order, exactly as a sequential fetch reported it.
+    assert [source.source for source in run.health] == names
+    assert all(source.ok for source in run.health)

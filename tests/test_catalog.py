@@ -71,6 +71,22 @@ def test_search_index_carries_semantic_source_fields_without_inference(normalize
         assert isinstance(row["languages"], list)
 
 
+def test_index_model_filter_evidence_is_scoped_to_its_source_record(normalized: dict) -> None:
+    from benchmark_radar.catalog import build_benchmark_index
+
+    observations = normalized["score_observations"]
+    index = build_benchmark_index(normalized["source_records"], observations=observations)
+    by_key = {record["key"]: record for record in index}
+    for key, record in by_key.items():
+        source_rows = [row for row in observations if row["key"] == key]
+        assert {model["name"] for model in record["scored_models"]} == {
+            row["model_name"] for row in source_rows
+        }
+        assert all(
+            model["date_precision"] == "model_announcement" for model in record["scored_models"]
+        )
+
+
 def test_obs_id_is_unique(normalized: dict) -> None:
     """Without this a rerun silently duplicates every score row."""
     obs_ids = [row["obs_id"] for row in normalized["score_observations"]]
@@ -509,7 +525,14 @@ def test_index_has_one_row_per_source_record(normalized: dict) -> None:
     from benchmark_radar.catalog_opencompass import normalize_opencompass
 
     records = normalized["source_records"] + normalize_opencompass()["source_records"]
-    index = build_benchmark_index(records, {row["key"]: row for row in normalized["score_series"]})
+    series_by_key = {row["key"]: row for row in normalized["score_series"]}
+    unscored_key = next(
+        record["key"] for record in records if record["source"] == "opencompass_hub"
+    )
+    series_by_key[unscored_key] = {"observation_count": 0, "score_summary": {"max": 99}}
+    index = build_benchmark_index(
+        records, series_by_key, observations=normalized["score_observations"]
+    )
     assert len(index) == 1148
     assert len({row["key"] for row in index}) == 1148
     assert len({row["slug"] for row in index}) == 1148
@@ -526,6 +549,8 @@ def test_index_has_one_row_per_source_record(normalized: dict) -> None:
     assert unscored["first_score_source_reference"] is None
     assert unscored["first_score_record"] is None
     assert unscored["score_summary"] is None
+    assert unscored["scored_models"] == []
+    assert any(row["scored_models"] for row in index)
     scored = [row for row in index if row["first_score_record"]]
     assert len(scored) > 600, "the index must preserve dates for the whole scored catalog"
     for row in scored:
@@ -588,16 +613,31 @@ def all_records(normalized: dict) -> list[dict]:
 
 @pytest.fixture(scope="module")
 def full_records() -> list[dict]:
+    from benchmark_radar.benchmark_scores import DEFAULT_SCORES_PATH, load_scores
     from benchmark_radar.catalog import SOURCES
     from benchmark_radar.catalog_opencompass import normalize_opencompass
+    from benchmark_radar.catalog_reports import normalize_reports
+    from benchmark_radar.model_cards import DEFAULT_REGISTRY_PATH, load_registry
 
+    # The model-report registry is a source record population like the crawls,
+    # and `normalize-catalog` resolves identity across all of them. Without it
+    # here, a reviewed group naming a registry record passes every test in this
+    # file and fails the real build with "not a source record" -- the exact
+    # failure the seed test below exists to prevent.
     snapshots = load_snapshots(DEFAULT_SNAPSHOTS_PATH)["snapshots"]
-    return [
-        record
-        for snapshot in snapshots
-        if snapshot["id"] in SOURCES
-        for record in normalize_snapshot(snapshot)["source_records"]
-    ] + normalize_opencompass()["source_records"]
+    return (
+        [
+            record
+            for snapshot in snapshots
+            if snapshot["id"] in SOURCES
+            for record in normalize_snapshot(snapshot)["source_records"]
+        ]
+        + normalize_opencompass()["source_records"]
+        + normalize_reports(
+            load_registry(DEFAULT_REGISTRY_PATH),
+            load_scores(DEFAULT_SCORES_PATH),
+        )["source_records"]
+    )
 
 
 # Identity candidate generation
@@ -949,20 +989,15 @@ def test_inheritance_never_touches_scores_or_other_records(
     assert all("identity_inheritance" not in obs for obs in normalized["score_observations"])
 
 
-def test_claire_exact_identity_links_are_reviewed_and_bidirectional() -> None:
-    from benchmark_radar.catalog import SOURCES, normalize_snapshot
+def test_claire_exact_identity_links_are_reviewed_and_bidirectional(
+    full_records: list[dict],
+) -> None:
     from benchmark_radar.catalog_identity import DEFAULT_IDENTITY_PATH, load_identity
-    from benchmark_radar.catalog_opencompass import normalize_opencompass
-    from benchmark_radar.leaderboard_snapshots import load_snapshots
 
-    snapshots = load_snapshots()["snapshots"]
-    records = [
-        record
-        for snapshot in snapshots
-        if snapshot["id"] in SOURCES
-        for record in normalize_snapshot(snapshot)["source_records"]
-    ] + normalize_opencompass()["source_records"]
-    identity = load_identity(records, DEFAULT_IDENTITY_PATH)
+    # `load_identity` validates every group in the seed, not just the Claire
+    # ones, so it needs the same record population `normalize-catalog` resolves
+    # against -- model reports included.
+    identity = load_identity(full_records, DEFAULT_IDENTITY_PATH)
 
     expected = {
         "claire-radar:2608.05948": "opencompass:2574",
@@ -1110,7 +1145,46 @@ def test_llm_stats_shard_carries_its_scores(shard_inputs: dict, tmp_path: Path) 
     assert block["series"]["display_scale"] is None
 
 
-def test_series_without_observations_does_not_create_a_score_bucket() -> None:
+def test_declared_series_without_observations_keeps_its_score_bucket() -> None:
+    """Zero observations must not erase a source-declared scale (#709).
+
+    A series with no rows is unknown measurements, not an unknown scale: the
+    declared bounds and direction still ship so downstream readers can tell
+    "not measured" apart from "not comparable".
+    """
+    from benchmark_radar.catalog_identity import IdentityIndex
+    from benchmark_radar.catalog_shards import build_shard
+
+    record = {
+        "key": "source:unscored",
+        "slug": "source-unscored",
+        "source": "source",
+    }
+    series = {
+        "key": record["key"],
+        "observation_count": 0,
+        "declared_max": 1.0,
+        "bounds": {"basis": "aggregator_declared"},
+        "direction": "higher_is_better",
+        "direction_basis": "source_rank_descending",
+    }
+    shard = build_shard(
+        record,
+        identity=IdentityIndex(),
+        series_by_key={record["key"]: series},
+        observations_by_key={},
+    )
+
+    block = shard["scores_by_source"]["source"]
+    assert block["rows"] == []
+    assert block["series"]["declared_max"] == 1.0
+    assert block["series"]["bounds"]["basis"] == "aggregator_declared"
+    assert block["series"]["direction"] == "higher_is_better"
+    assert block["series"]["direction_basis"] == "source_rank_descending"
+
+
+def test_record_without_series_or_observations_ships_empty_scores() -> None:
+    """The empty branch stays: no declared scale and no rows renders as absence."""
     from benchmark_radar.catalog_identity import IdentityIndex
     from benchmark_radar.catalog_shards import build_shard
 
@@ -1122,11 +1196,43 @@ def test_series_without_observations_does_not_create_a_score_bucket() -> None:
     shard = build_shard(
         record,
         identity=IdentityIndex(),
-        series_by_key={record["key"]: {"key": record["key"], "observation_count": 0}},
+        series_by_key={},
         observations_by_key={},
     )
 
     assert shard["scores_by_source"] == {}
+
+
+def test_index_keeps_declared_scale_summary_for_zero_observation_series() -> None:
+    """#709: the index must not null a summary the shard still publishes.
+
+    A series that declares a scale keeps its summary at zero observations so
+    the index agrees with the shard. A count-only stub without declared
+    evidence still reads as absent.
+    """
+    from benchmark_radar.catalog import build_benchmark_index
+
+    record = {
+        "key": "source:unscored",
+        "slug": "source-unscored",
+        "name": "unscored",
+        "source": "source",
+    }
+    declared = {
+        "key": record["key"],
+        "observation_count": 0,
+        "declared_max": 1.0,
+        "bounds": {"basis": "aggregator_declared"},
+        "direction": "higher_is_better",
+        "direction_basis": "source_rank_descending",
+        "score_summary": {"numeric_count": 0},
+    }
+    index = build_benchmark_index([record], {record["key"]: declared})
+    assert index[0]["score_summary"] == {"numeric_count": 0}
+
+    bare = {"observation_count": 0, "score_summary": {"max": 99}}
+    index = build_benchmark_index([record], {record["key"]: bare})
+    assert index[0]["score_summary"] is None
 
 
 def test_opencompass_shard_has_empty_scores(shard_inputs: dict, tmp_path: Path) -> None:

@@ -432,7 +432,7 @@ def test_each_view_serializes_only_the_filters_it_reads():
         1
     ].split('if (!utility && state.view === "saturation")', 1)
     assert 'params.set("lfrontier"' not in leaderboard
-    for key in ("lscore", "bq", "lfrontier"):
+    for key in ("lscore", "bq", "bmodel", "lfrontier"):
         assert f'params.set("{key}"' in saturation
     for key in ("lq", "ldomain", "lorg", "lera", "lscore"):
         assert f'params.set("{key}"' in leaderboard
@@ -613,6 +613,9 @@ def test_clean_route_model_migrates_legacy_urls_and_preserves_utility_background
             section("const VIEW_PATHS =", "function applySeo("),
             # readUrl parses the score cutoff through this helper.
             section("function scoreCutoff(", "function matchesScoreFilter("),
+            # readUrl and writeUrl resolve the leaderboard mode and window
+            # (issue #530) through these.
+            section("const LATEST_WINDOWS =", "function latestReleasesWindowKey("),
             section("function readUrl()", "// `push` adds a history entry"),
             section("function writeUrl(", "// A pushed entry changes the URL"),
             section("function cliSearchUrl(", "function renderSearchScopeBanner("),
@@ -658,12 +661,12 @@ for (const url of [
   results.legacyBenchmarks.push(window.location.pathname + window.location.search);
 }}
 
-install("/saturation/?lscore=40&bq=bench-95&lfrontier=bench-95&lq=agent&lheight=documents");
+install("/saturation/?lscore=40&bq=bench-95&bmodel=GPT-6+Sol&lfrontier=bench-95&lq=agent&lheight=documents");
 readUrl();
 writeUrl("replace");
 results.saturation = {{
   url: window.location.pathname + window.location.search,
-  view: state.view, query: state.benchmarkQuery, cutoff: state.lscore,
+  view: state.view, query: state.benchmarkQuery, model: state.benchmarkModel, cutoff: state.lscore,
   selected: state.lfrontier, explicit: state.lfrontierExplicit,
 }};
 state.view = "leaderboard";
@@ -671,7 +674,10 @@ writeUrl("push");
 results.sharedCutoff = window.location.pathname + window.location.search;
 state.view = "saturation";
 state.benchmarkQuery = "";
+state.benchmarkModel = "";
 writeUrl("replace");
+readUrl();
+results.clearedModel = state.benchmarkModel;
 results.clearedSearch = window.location.pathname + window.location.search;
 
 install("/#rubric=2");
@@ -733,14 +739,16 @@ console.log(JSON.stringify(results));
         * 2
     )
     assert routes["saturation"] == {
-        "url": "/saturation/?lscore=40&bq=bench-95&lfrontier=bench-95",
+        "url": "/saturation/?lscore=40&bq=bench-95&bmodel=GPT-6+Sol&lfrontier=bench-95",
         "view": "saturation",
         "query": "bench-95",
+        "model": "GPT-6 Sol",
         "cutoff": 40,
         "selected": "bench-95",
         "explicit": True,
     }
     assert routes["sharedCutoff"] == "/leaderboard/?lscore=40&lheight=documents&lq=agent"
+    assert routes["clearedModel"] == ""
     assert routes["clearedSearch"] == "/saturation/?lscore=40&lfrontier=bench-95"
     assert routes["legacyRubric"] == "/rubric/?version=2"
     assert routes["legacyReturns"] is False
@@ -3271,3 +3279,50 @@ def test_blog_styles_cannot_reach_the_dashboard():
     assert selectors
     assert all(selector.startswith(".blog-page") for selector in selectors)
     assert "blog-page" not in Path("site/index.html").read_text(encoding="utf-8")
+
+
+def test_model_filter_controls_and_status_have_chinese_translations():
+    import json
+    import shutil
+    import subprocess
+
+    import pytest
+
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node is not installed")
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+    html = Path("site/index.html").read_text(encoding="utf-8")
+    keys = [
+        "Model with a reported score",
+        "Filter by model, e.g. GPT-6 Sol",
+        "Model release",
+        "Document published",
+        "Searching all benchmarks (score cutoff paused)",
+    ]
+    assert f'data-i18n="{keys[0]}"' in html
+    assert f'data-i18n-placeholder="{keys[1]}"' in html
+    start = script.index("const I18N = {")
+    dictionary = script[start : script.index("\n};", start) + 3]
+    start = script.index("function t(")
+    translate = script[start : script.index("\n}\n", start) + 2]
+    program = (
+        dictionary
+        + translate
+        + "\nlet lang = 'zh'; function getLang() { return lang; }\n"
+        + f"const keys = {json.dumps(keys)};\n"
+        + "const zh = keys.map(key => t(key)); lang = 'en';\n"
+        + "console.log(JSON.stringify({zh, en: keys.map(key => t(key))}));"
+    )
+    result = subprocess.run(
+        [node, "-e", program], capture_output=True, text=True, timeout=60, check=True
+    )
+    translated = json.loads(result.stdout)
+    assert translated["en"] == keys
+    assert translated["zh"] == [
+        "已有报告成绩的模型",
+        "按模型筛选，例如 GPT-6 Sol",
+        "模型发布日期",
+        "文档发布日期",
+        "搜索全部 benchmark（暂不按分数筛选）",
+    ]

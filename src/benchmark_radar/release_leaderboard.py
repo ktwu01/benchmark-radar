@@ -105,7 +105,14 @@ def is_dedicated_benchmark_repo(url: str | None) -> bool:
     match = re.search(r"^https?://(?:www\.)?github\.com/([^/]+)/([^/#?]+)", url, re.I)
     if not match:
         return False
-    path_suffix = url.split("github.com/", 1)[1].split("?")[0].split("#")[0].strip("/")
+    # Split the same way the match above was made: case-insensitively. A
+    # capitalised "GitHub.com/..." matched the regex and then found nothing to
+    # split on, raising IndexError. That was survivable while only the
+    # leaderboard build called this, but the attention collector now calls it
+    # inside run_pipeline, where one such link in historical evidence would
+    # abort the whole daily run.
+    path_suffix = re.split(r"github\.com/", url, maxsplit=1, flags=re.I)[1]
+    path_suffix = path_suffix.split("?")[0].split("#")[0].strip("/")
     parts = [p for p in path_suffix.split("/") if p]
     return len(parts) == 2
 

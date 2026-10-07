@@ -999,7 +999,9 @@ def collapse_batch_deposits(items: Iterable[RadarItem]) -> list[RadarItem]:
     kept: list[RadarItem] = []
     for item in items:
         description = item.summary.strip().casefold()
-        if not description:
+        if not description or not item.authors:
+            # Unknown creators cannot establish a common depositor. Otherwise
+            # unrelated DOI records with the same prose become a fictitious batch.
             kept.append(item)
             continue
         creators = "\x1f".join(name.casefold() for name in item.authors)

@@ -494,6 +494,22 @@ def test_merge_snapshots_keeps_an_existing_briefing_when_the_incoming_pass_has_n
     assert merged["briefing"]["bullets"] == ["Already recorded."]
 
 
+def test_merge_snapshots_never_replaces_a_gpt_briefing_with_a_fallback():
+    run = _run([_item(1)])
+    run.daily_briefing = ["GPT synthesis."]
+    run.daily_briefing_metadata = {"generator": "openai-responses", "model": "gpt-5.6"}
+    existing = snapshot_for_run(run)
+    later = _run([_item(2)])
+    later.daily_briefing = ["Deterministic finding."]
+    later.daily_briefing_metadata = {"generator": "deterministic-fallback", "reason": "429"}
+
+    merged = merge_snapshots(existing, snapshot_for_run(later))
+
+    # A same-day rerun that hit a rate limit keeps the earlier GPT synthesis.
+    assert merged["briefing"]["bullets"] == ["GPT synthesis."]
+    assert merged["briefing"]["generator"] == "openai-responses"
+
+
 def test_merge_snapshots_leaves_no_briefing_key_when_neither_pass_had_one():
     merged = merge_snapshots(snapshot_for_run(_run([_item(1)])), snapshot_for_run(_run([_item(2)])))
 

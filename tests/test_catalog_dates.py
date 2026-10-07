@@ -192,3 +192,49 @@ def test_retrospectively_scored_models_do_not_date_new_benchmarks_before_2024():
             assert row["released"], (
                 f"{row['key']}: audit benchmark age before relying on an old model release"
             )
+
+
+def test_the_four_undated_vbench_family_reports_carry_their_reviewed_release_dates():
+    """The registry's undated visual-generation entries reach the chart dated.
+
+    These four have no crawl record to inherit from, so nothing but this archive
+    can date them, and an entry with no `released` is dropped from every dated
+    leaderboard era. The dates are the first version of the paper each
+    benchmark's own repository cites; the maintainer confirmed the four arXiv
+    listings resolve in the review of #583.
+    """
+    import json
+
+    index = json.loads(Path("site/data/benchmark-index.json").read_text())["benchmarks"]
+    by_key = {row["key"]: row for row in index}
+    for key, released in {
+        "model-reports:vbench_plus_plus": "2024-11-20",
+        "model-reports:vbench_2_0": "2025-03-27",
+        "model-reports:evaluation_agent": "2024-12-10",
+        "model-reports:uni_mmmu": "2025-10-15",
+    }.items():
+        row = by_key[key]
+        assert row["released"] == released
+        reference = row["released_reference"]
+        assert reference["basis"] == "paper_first_version"
+        assert reference["source_url"].startswith("https://arxiv.org/abs/")
+    # Inheritance is the other way a registry record can acquire a date, and
+    # these four have no donor to inherit one from. Asserting that against the
+    # index row would be vacuous, because the index drops the provenance key the
+    # shard keeps, so check the mechanism instead: no reviewed group names them.
+    identity = yaml.safe_load(Path("data/catalog/identity.yml").read_text(encoding="utf-8"))
+    grouped = {
+        member
+        for relation in identity.values()
+        if isinstance(relation, list)
+        for group in relation
+        for member in (group.get("members") or [])
+    }
+    assert grouped.isdisjoint(
+        {
+            "model-reports:vbench_plus_plus",
+            "model-reports:vbench_2_0",
+            "model-reports:evaluation_agent",
+            "model-reports:uni_mmmu",
+        }
+    )

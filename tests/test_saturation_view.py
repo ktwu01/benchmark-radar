@@ -830,3 +830,15 @@ def _css_rule(styles: str, selector: str) -> str:
     """Return the body of the first rule whose selector matches exactly."""
     assert selector in styles, f"missing selector: {selector}"
     return styles.split(selector, 1)[1].split("}", 1)[0]
+
+
+def test_reported_result_lists_preserve_observations_sources_and_localization():
+    import shutil
+    import subprocess
+
+    import pytest
+
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node is not installed")
+    subprocess.run([node, "tests/catalog_score_results_harness.mjs"], check=True, timeout=60)

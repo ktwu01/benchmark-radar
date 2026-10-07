@@ -49,10 +49,23 @@ state.benchmarkIndex = [
   {slug:'missing',name:'Missing',source:'llm_stats',score_summary:summary(null,0)},
 ];
 state.lscore = 70;
-const scoreNames = ['scoreRecord','matchesScoreFilter','scoreBrowseRows','saturationRows','scoreRankingRows','benchmarkQueryIds','searchBenchmarkIndex','foldName','frontierDefaultEntry','catalogDisplayFactor'];
+const scoreNames = ['scoreRecord','matchesScoreFilter','scoreBrowseRows','saturationRows','latestMatchingModel','scoreRankingRows','benchmarkQueryIds','searchBenchmarkIndex','foldName','frontierDefaultEntry','catalogDisplayFactor'];
 state.benchmarkQuery = '';
 const scores = new Function('state', 'scorePopulation', 'matchesScoreCutoff', 'SKYLINE_START_DATE', `${scoreNames.map(fn).join('\n')}\nreturn {${scoreNames.join(',')}};`)(state, scorePopulation, matchesScoreCutoff, SKYLINE_START_DATE);
 assert.deepEqual(scores.scoreBrowseRows().map(r=>r.id), ['external','curated','missing']);
+state.benchmarkIndex[0].scored_models = [{name:'GPT-5.6 Sol',date:'2026-06-01',date_precision:'document_publication'}];
+state.benchmarkIndex[1].scored_models = [{name:'GPT-5.6 Sol (high)',date:'2026-09-01',date_precision:'model_announcement'}];
+state.benchmarkModel = 'gpt-5.6-sol';
+assert.deepEqual(scores.saturationRows().map(r=>r.id), ['external','curated'], 'model filtering searches every source beyond the score cutoff and orders by recorded date');
+state.benchmarkModel = 'gpt-6-sol';
+assert.deepEqual(scores.saturationRows(), [], 'an unrecorded model does not imply a benchmark result');
+for (const query of ['-', '---', '()']) {
+  state.benchmarkModel = query;
+  assert.deepEqual(scores.saturationRows(), [], 'punctuation-only queries have no model match');
+}
+assert.equal(state.lscore, 70, 'unmatched model lookup preserves the cutoff');
+state.benchmarkModel = '';
+assert.deepEqual(scores.saturationRows().map(r=>r.id), ['external','curated','missing'], 'clearing the model restores cutoff browsing');
 assert.equal(scores.frontierDefaultEntry(state.data.model_card_leaderboard).id,'external');
 assert.equal(scores.matchesScoreFilter(summary(69.999)),true);
 assert.equal(scores.matchesScoreFilter(summary(70)),false);

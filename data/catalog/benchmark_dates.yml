@@ -501,3 +501,33 @@ benchmarks:
     basis: "release_announcement"
     source_url: "https://artificialanalysis.ai/articles/aa-briefcase"
     note: "The publisher launches AA-Briefcase and its four held-out knowledge-work scenarios on June 18."
+
+  # Model-report registry records carry no crawl to inherit a date from, so the
+  # introducing paper's first version dates them. Each arXiv identifier below is
+  # the one the benchmark's own repository cites, and the fill reaches these
+  # records because `normalize-catalog` applies this archive to every normalized
+  # source population, the registry included.
+  "model-reports:vbench_plus_plus":
+    name: "VBench++"
+    released: "2024-11-20"
+    basis: "paper_first_version"
+    source_url: "https://arxiv.org/abs/2411.13503"
+    note: "First version of the paper introducing VBench++. It extends VBench to image-to-video generation over a different dimension set, so this dates a distinct instrument rather than the 2023 VBench release."
+  "model-reports:vbench_2_0":
+    name: "VBench-2.0"
+    released: "2025-03-27"
+    basis: "paper_first_version"
+    source_url: "https://arxiv.org/abs/2503.21755"
+    note: "First version of the paper introducing VBench-2.0. It measures intrinsic faithfulness where VBench 1.x measures surface quality, so it is its own release and not a revision of the earlier suite."
+  "model-reports:evaluation_agent":
+    name: "Evaluation Agent"
+    released: "2024-12-10"
+    basis: "paper_first_version"
+    source_url: "https://arxiv.org/abs/2412.09645"
+    note: "First version of the paper introducing the Evaluation Agent framework, the identifier its repository cites. The repository was created two months earlier, which dates the code rather than the benchmark."
+  "model-reports:uni_mmmu":
+    name: "Uni-MMMU"
+    released: "2025-10-15"
+    basis: "paper_first_version"
+    source_url: "https://arxiv.org/abs/2510.13759"
+    note: "First version of the paper introducing Uni-MMMU, the identifier its repository's citation block gives. The paper's later conference acceptance is not its release."

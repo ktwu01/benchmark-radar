@@ -12,10 +12,9 @@ import yaml
 
 from .authors import contacts_csv
 from .authors import survey as author_survey
-from .briefing import BriefingError, current_day_snapshot, daily_report_run, generate_daily_briefing
+from .briefing import current_day_snapshot, daily_report_run, generate_daily_briefing
 from .export import DEFAULT_TABLE_LIMIT, write_exports
 from .findings import daily_findings
-from .http import RequestError
 from .kw_bench_store import STORE_FILENAME as KW_BENCH_STORE_FILENAME
 from .kw_bench_tracks import DEFAULT_BATCH_SIZE
 from .kw_bench_tracks import backfill as backfill_classifications
@@ -449,7 +448,7 @@ def main() -> None:
         # One index over every source, one row per source record. Two sources
         # describing the same benchmark stay two rows until identity.yml says
         # otherwise under human review.
-        index = build_benchmark_index(resolved_records, series_by_key)
+        index = build_benchmark_index(resolved_records, series_by_key, all_observations)
         index_path = write_benchmark_index(
             index,
             Path("site/data/benchmark-index.json"),
@@ -760,6 +759,7 @@ def main() -> None:
     run = run_pipeline(
         config,
         previous_snapshot=snapshots[-1] if snapshots else None,
+        snapshots=snapshots,
     )
     _emit_persistent_source_warnings(run, config)
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -770,7 +770,11 @@ def main() -> None:
     report_run = daily_report_run(daily_snapshot, run)
     today = run.generated_at.astimezone(UTC).date().isoformat()
     history = [*(s for s in snapshots if s["date"] != today), daily_snapshot]
-    deterministic_findings = daily_findings(history, config)
+    try:
+        deterministic_findings = daily_findings(history, config)
+    except Exception as error:  # a briefing input must never cost the snapshot
+        print(f"::warning title=Deterministic findings skipped::{type(error).__name__}: {error}")
+        deterministic_findings = []
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     briefing_required = os.getenv("OPENAI_BRIEFING_REQUIRED", "").lower() in {
         "1",
@@ -801,13 +805,25 @@ def main() -> None:
             )
             daily_briefing = generated.bullets
             briefing_metadata = generated.metadata
-        except (BriefingError, RequestError, ValueError) as error:
+        except Exception as error:  # enrichment must never cost the snapshot
             if briefing_required:
                 raise RuntimeError(f"required OpenAI briefing failed: {error}") from error
             briefing_metadata["reason"] = f"{type(error).__name__}: {error}"
             print(f"::warning title=GPT briefing fell back::{error}")
     elif briefing_required:
         raise RuntimeError("OPENAI_BRIEFING_REQUIRED is true but OPENAI_API_KEY is missing")
+    # merge_snapshots keeps an earlier pass's GPT briefing over a fallback, so
+    # the report and items.json must show that same briefing for the day.
+    stored_briefing = next(
+        (s.get("briefing") or {} for s in snapshots if s.get("date") == today), {}
+    )
+    if briefing_metadata.get("generator") == "deterministic-fallback" and stored_briefing.get(
+        "generator"
+    ) not in (None, "deterministic-fallback"):
+        daily_briefing = list(stored_briefing.get("bullets") or [])
+        briefing_metadata = {
+            key: value for key, value in stored_briefing.items() if key not in {"date", "bullets"}
+        }
 
     # The daily Q&A is opt-in: it costs one API call per question group. By
     # default a failure here must never cost the run its briefing or its
@@ -831,7 +847,7 @@ def main() -> None:
                 config=config,
                 translate_zh=questions_zh,
             )
-        except (BriefingError, RequestError, ValueError) as error:
+        except Exception as error:  # enrichment must never cost the snapshot
             if questions_required:
                 raise RuntimeError(f"required daily questions failed: {error}") from error
             print(f"::warning title=Daily questions skipped::{error}")
@@ -854,6 +870,12 @@ def main() -> None:
             "reason": "OPENAI_QUESTIONS is not enabled",
         }
     elif not api_key:
+        # Enrichment was asked for but the key is gone: production must not
+        # pass green day after day on fallbacks without saying so.
+        print(
+            "::warning title=OpenAI key missing::OPENAI_QUESTIONS is enabled but "
+            "OPENAI_API_KEY is empty; the briefing fell back and Q&A was skipped"
+        )
         daily_questions = {
             "schema_version": QA_SCHEMA_VERSION,
             "date": today,
@@ -895,6 +917,11 @@ def main() -> None:
                 ],
                 "producer_health": [health.to_dict() for health in run.producer_health],
                 "selection": report_run.selection,
+                **(
+                    {"benchmark_attention": report_run.benchmark_attention}
+                    if report_run.benchmark_attention
+                    else {}
+                ),
                 # Day-scoped like the evidence above: the briefing describes the
                 # whole UTC day and is shared by every pass over it. Omitted
                 # when the day has none.
@@ -917,14 +944,21 @@ def main() -> None:
         encoding="utf-8",
     )
     snapshot_path = write_snapshot(run, args.snapshot_dir)
-    dashboard = rebuild_dashboard(
-        args.snapshot_dir,
-        args.dashboard_output,
-        feed_output=feed_output,
-        registry_path=args.model_cards,
-        scores_path=args.benchmark_scores,
-        kw_bench_store_path=args.kw_bench_store,
-    )
+    # The snapshot above is the day's record; Deploy Dashboard rebuilds the
+    # site from snapshots on its own, so a failure here must not lose it.
+    try:
+        dashboard = rebuild_dashboard(
+            args.snapshot_dir,
+            args.dashboard_output,
+            feed_output=feed_output,
+            registry_path=args.model_cards,
+            scores_path=args.benchmark_scores,
+            kw_bench_store_path=args.kw_bench_store,
+        )
+    except Exception as error:
+        print(f"::warning title=Dashboard rebuild skipped::{type(error).__name__}: {error}")
+        print(f"Wrote {len(run.items)} items and snapshot {snapshot_path}")
+        return
     print(
         f"Wrote {len(run.items)} items, snapshot {snapshot_path}, and dashboard data "
         f"for {dashboard['snapshot_count']} days"

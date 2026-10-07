@@ -239,6 +239,12 @@ def test_consumer_skill_offers_starter_example_on_setup() -> None:
     assert "present a concise summary" in text
 
 
+def test_consumer_skill_routes_related_work_to_the_draft_command() -> None:
+    text = " ".join(SKILL.read_text(encoding="utf-8").split())
+    assert "benchmark-radar related-work" in text
+    assert "do not browse, sync, install, or call a remote API" in text
+
+
 def test_consumer_skill_keeps_acceptance_with_the_agent() -> None:
     text = SKILL.read_text(encoding="utf-8")
     assert "retrieval_score" in text

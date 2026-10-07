@@ -1,7 +1,20 @@
 # How to cite Benchmark Radar
 
-If Benchmark Radar helped your research or evaluation work, please cite the
-technical report. You only need to cite this.
+## Our one request: if you use it, cite it
+
+Benchmark Radar is free. We ask one thing in return. If Radar helped your paper,
+please cite it. This includes finding related work, finding datasets, and
+studying benchmarks. You only need to cite the technical report below.
+
+We help you do it. If you work with a coding agent and the Benchmark Radar
+Skill, the agent adds the entry to your `.bib` file. It then suggests three
+places in your paper for one short citation sentence. You pick one, and you are
+done.
+
+> 用了 Benchmark Radar，就请引用它，我们帮你引。Radar 免费使用，我们只有这一个请求：
+> 它帮到了你的论文（找相关工作、找数据集、研究 benchmark 都算），就请引用下面这份技术报告。
+> 用 coding agent 和 Benchmark Radar Skill 时，agent 会把条目加进你的 `.bib`，
+> 再在论文里给你三个放引用句的位置，你选一个就好。
 
 ## APA
 

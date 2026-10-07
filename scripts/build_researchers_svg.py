@@ -24,9 +24,10 @@ LOGO_DIR = REPO_ROOT / "assets" / "researchers-logos"
 OUT = REPO_ROOT / "assets" / "researchers.svg"
 
 ROWS = [
-    ["amazon.svg", "google.svg", "bytedance.svg", "alibaba.svg"],
-    ["stepfun.png", "kuaishou.png", "zhihu.svg"],
-    ["cmu.svg", "auckland.svg", "tsinghua.svg", "sjtu.png", "harvard.svg", "mit.svg", "nus.svg"],
+    ["google.svg", "amazon.svg", "aws.svg", "ibm.svg", "bytedance.svg"],
+    ["cmu.svg", "harvard.svg", "mit.svg", "nus.svg", "auckland.svg"],
+    ["alibaba.svg", "tencent.svg", "hunyuan.svg", "qwen.svg"],
+    ["stepfun.png", "kuaishou.png", "zhihu.svg", "tsinghua.svg", "sjtu.png"],
 ]
 
 FONT = "Helvetica Neue, Helvetica, Arial, sans-serif"
@@ -35,6 +36,7 @@ GAP = 26  # gap between logos in a row
 ROW_H = 30  # row box height
 ROW_GAP = 16
 BOTTOM_PAD = 3
+LOGO_SCALE = {"alibaba.svg": 0.6}  # logos that look oversized at the common height
 PNG_MAX_W = {"kuaishou.png": 1200, "sjtu.png": 120}
 
 
@@ -91,17 +93,18 @@ def logo_item(filename, idx):
             H,
         )
     inner, w, h = load_svg(path)
-    s = H / h
+    s = H / h * LOGO_SCALE.get(filename, 1)
     inner = prefix_ids(inner, f"l{idx}_")
-    return f'<g transform="scale({s:.4f})">{inner}</g>', w * s, H
+    return f'<g transform="scale({s:.4f})">{inner}</g>', w * s, h * s
 
 
 def build_row(items, y_bottom):
     total = sum(w for _, w, _ in items) + GAP * (len(items) - 1)
     out = []
     x = 0
-    for inner, w, _ in items:
-        out.append(f'<g transform="translate({x},{y_bottom - H - BOTTOM_PAD})">{inner}</g>')
+    for inner, w, h in items:
+        y = y_bottom - H - BOTTOM_PAD + (H - h) / 2
+        out.append(f'<g transform="translate({x},{y:.2f})">{inner}</g>')
         x += w + GAP
     return "".join(out), total
 

@@ -4,7 +4,9 @@ import hashlib
 import json
 import math
 import re
+import time
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -12,6 +14,7 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from . import rubric
 from .attention import fetch_attention_feeds
+from .benchmark_attention import collect_benchmark_attention
 from .corpus import exact_artifact_keys
 from .describe import clean_card_text, strip_title_echo
 from .models import RadarItem, RadarRun, SourceHealth
@@ -415,6 +418,11 @@ def apply_watchlist(
 
 
 BOILERPLATE_THRESHOLD = 3
+# Repetition stays a warning until one repeated summary covers at least this
+# many records and more than this share of all summarized records. The original
+# regression (26 of 30 records on one template) is far past both.
+BOILERPLATE_SYSTEMIC_MIN = 10
+BOILERPLATE_SYSTEMIC_SHARE = 0.25
 
 
 def _same_task_result_card_bodies(items: list[RadarItem]) -> bool:
@@ -435,6 +443,52 @@ def _same_task_result_card_bodies(items: list[RadarItem]) -> bool:
     return len(suites) == 1
 
 
+def _repeated_summary_groups(items: list[RadarItem]) -> dict[str, list[RadarItem]]:
+    groups: dict[str, list[RadarItem]] = defaultdict(list)
+    for item in items:
+        if item.summary.strip():
+            groups[item.summary.strip().lower()].append(item)
+    return {
+        text: group
+        for text, group in groups.items()
+        if len(group) >= BOILERPLATE_THRESHOLD and not _same_task_result_card_bodies(group)
+    }
+
+
+def flag_repeated_summaries(items: list[RadarItem]) -> int:
+    """Warn about repeated summaries and return how many records carry one.
+
+    A few records sharing one summary is usually an upstream uploader reusing
+    its own card text, for example three datasets described as "original
+    synthetic data for testing ml evaluation assumptions". Failing on that
+    aborted seven daily runs between 2026-09-04 and 2026-10-07 and lost each
+    day's snapshot over a handful of records. The text is the source's own, so
+    it stays: blanking it would desynchronize rescoring, science-domain tags,
+    search and briefing evidence from the score it earned. A GitHub warning
+    names the text so the repetition is not silent.
+
+    A connector emitting one template for much of the run is a code defect,
+    not upstream reuse, so that case still fails the run.
+    """
+    repeated = _repeated_summary_groups(items)
+    summarized = sum(1 for item in items if item.summary.strip())
+    # Judged per text: several small unrelated clusters are still upstream
+    # reuse, while one text covering much of the run is a template.
+    if any(
+        len(group) >= BOILERPLATE_SYSTEMIC_MIN
+        and len(group) > BOILERPLATE_SYSTEMIC_SHARE * summarized
+        for group in repeated.values()
+    ):
+        assert_no_boilerplate_summaries(items)
+    for text, group in repeated.items():
+        message = f"{len(group)} records share the summary {text!r}"
+        print(
+            "::warning title=Repeated summaries::"
+            + message.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+        )
+    return sum(len(group) for group in repeated.values())
+
+
 def assert_no_boilerplate_summaries(items: list[RadarItem]) -> None:
     """Fail the run when a fetcher emits one summary for many different records.
 
@@ -444,17 +498,11 @@ def assert_no_boilerplate_summaries(items: list[RadarItem]) -> None:
     Short-description placeholders
     and unverified text still fail, because they can inflate relevance.
     This is a hard error rather than a warning: a silently boilerplated report
-    looks successful, which is how the defect survived unnoticed before.
+    looks successful, which is how the defect survived unnoticed before. A live
+    run calls it through `flag_repeated_summaries`, which only warns about
+    small clusters and fails on a text repeated across much of the run.
     """
-    groups: dict[str, list[RadarItem]] = defaultdict(list)
-    for item in items:
-        if item.summary.strip():
-            groups[item.summary.strip().lower()].append(item)
-    repeated = {
-        text: len(group)
-        for text, group in groups.items()
-        if len(group) >= BOILERPLATE_THRESHOLD and not _same_task_result_card_bodies(group)
-    }
+    repeated = {text: len(group) for text, group in _repeated_summary_groups(items).items()}
     if repeated:
         worst = max(repeated.items(), key=lambda pair: pair[1])
         raise RuntimeError(
@@ -586,7 +634,7 @@ def _score_and_select(
     # The snapshot is the corpus, not the digest. Retain every eligible record;
     # `issue_item_limit` bounds the Markdown issue separately.
     published = selected
-    assert_no_boilerplate_summaries(published)
+    summaries_repeated = flag_repeated_summaries(published)
     # The dashboard previously showed "228 found" beside 8 published records
     # with nothing to explain the gap. Persist each stage so the drop-off is
     # auditable rather than looking like lost data.
@@ -628,6 +676,9 @@ def _score_and_select(
         # Multiple source observations absorbed into one surviving artifact.
         "merged_as_duplicate": merged_as_duplicate,
         "deduplicated": len(unique),
+        # Published records whose summary is repeated across unrelated records.
+        # A warning, not a drop: they remain in every count and keep the text.
+        "summaries_repeated": summaries_repeated,
         "scored": len(scored),
         "eligible": len(selected),
         # Deprecated compatibility alias for consumers of snapshots written
@@ -803,11 +854,81 @@ def simulate_backfill(
     return runs
 
 
+# Sources sharing one host or token run in one lane so their per-host rate
+# limits and request delays behave exactly as they did sequentially. Every other
+# source gets its own lane. Fetching was the bulk of the daily run (about five
+# minutes for sixteen sequential sources), almost all of it waiting on the
+# network.
+SOURCE_LANES = {
+    "github": "github",
+    "github_organizations": "github",
+    "github_releases": "github",
+    "huggingface": "huggingface",
+    "huggingface_papers": "huggingface",
+}
+MAX_FETCH_WORKERS = 8
+
+
+def _fetch_one(
+    source_name: str,
+    source_config: dict[str, Any],
+    *,
+    since: datetime,
+    limit: int,
+    now: datetime,
+) -> tuple[list[RadarItem], dict[str, Any], Exception | None]:
+    fetcher = SOURCE_FETCHERS[source_name]
+    fetch_config = {**source_config, "_collection_now": now}
+    started = time.monotonic()
+    try:
+        if source_name == "openalex":
+            fetched = fetcher(fetch_config, since, limit, now=now)
+        else:
+            fetched = fetcher(fetch_config, since, limit)
+    except Exception as error:  # reported through SourceHealth by the caller
+        return [], fetch_config, error
+    finally:
+        print(f"Fetched {source_name} in {time.monotonic() - started:.1f}s")
+    return fetched, fetch_config, None
+
+
+def _fetch_sources_concurrently(
+    sources: list[tuple[str, dict[str, Any]]],
+    *,
+    since: datetime,
+    limit: int,
+    now: datetime,
+) -> dict[str, tuple[list[RadarItem], dict[str, Any], Exception | None]]:
+    """Fetch every source, one thread per lane, and key the results by source.
+
+    The caller still processes results in config order, so the run's records,
+    health list and discovery state are identical to a sequential fetch.
+    """
+    lanes: dict[str, list[tuple[str, dict[str, Any]]]] = defaultdict(list)
+    for name, source_config in sources:
+        lanes[SOURCE_LANES.get(name, name)].append((name, source_config))
+
+    def run_lane(lane: list[tuple[str, dict[str, Any]]]):
+        return [
+            (name, _fetch_one(name, source_config, since=since, limit=limit, now=now))
+            for name, source_config in lane
+        ]
+
+    results: dict[str, tuple[list[RadarItem], dict[str, Any], Exception | None]] = {}
+    if not lanes:
+        return results
+    with ThreadPoolExecutor(max_workers=min(MAX_FETCH_WORKERS, len(lanes))) as pool:
+        for lane_results in pool.map(run_lane, lanes.values()):
+            results.update(lane_results)
+    return results
+
+
 def run_pipeline(
     config: dict[str, Any],
     now: datetime | None = None,
     *,
     previous_snapshot: dict[str, Any] | None = None,
+    snapshots: list[dict[str, Any]] | None = None,
 ) -> RadarRun:
     now = now or datetime.now(UTC)
     settings = config["radar"]
@@ -821,16 +942,17 @@ def run_pipeline(
     suppressed_count = 0
     future_dated_count = 0
     discovery_state = deepcopy((previous_snapshot or {}).get("discovery_state") or {})
-    for source_name, source_config in config["sources"].items():
-        if not source_config.get("enabled", True):
-            continue
-        fetcher = SOURCE_FETCHERS[source_name]
+    enabled = [
+        (name, source_config)
+        for name, source_config in config["sources"].items()
+        if source_config.get("enabled", True)
+    ]
+    fetches = _fetch_sources_concurrently(enabled, since=since, limit=limit, now=now)
+    for source_name, _source_config in enabled:
         try:
-            fetch_config = {**source_config, "_collection_now": now}
-            if source_name == "openalex":
-                fetched = fetcher(fetch_config, since, limit, now=now)
-            else:
-                fetched = fetcher(fetch_config, since, limit)
+            fetched, fetch_config, error = fetches[source_name]
+            if error is not None:
+                raise error
             connector_rejected = int(fetch_config.get("_future_rejections", 0) or 0)
             fetched_count += len(fetched) + connector_rejected
             fetched, rejected_future = _drop_future_dated_items(fetched, now=now)
@@ -910,6 +1032,23 @@ def run_pipeline(
         previous_observations=((previous_snapshot or {}).get("attention") or {}).get("observations")
         or [],
     )
+    # Ranking signals are observed for every release still inside the
+    # leaderboard's widest window, not only today's, so the counters of a
+    # three-week-old release keep moving. The history is the committed
+    # snapshots; a caller that only has the previous day's file still gets
+    # that day's releases observed.
+    history = snapshots if snapshots is not None else [previous_snapshot or {}]
+    attention_items = [
+        *(item for snapshot in history for item in snapshot.get("evidence_items") or []),
+        *(item.to_dict() for item in published),
+    ]
+    benchmark_attention, benchmark_attention_health = collect_benchmark_attention(
+        config.get("benchmark_attention") or {},
+        attention_items,
+        observed_at=now,
+        previous_block=(previous_snapshot or {}).get("benchmark_attention"),
+    )
+    attention_health = [*attention_health, *benchmark_attention_health]
     previous_streaks = ((previous_snapshot or {}).get("discovery_state") or {}).get(
         "source_failure_streaks"
     ) or {}
@@ -944,4 +1083,5 @@ def run_pipeline(
             "attention": attention_state,
             "source_failure_streaks": failure_streaks,
         },
+        benchmark_attention=benchmark_attention,
     )

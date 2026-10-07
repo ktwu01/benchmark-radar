@@ -21,7 +21,7 @@ need no JavaScript to read.
 - [About Benchmark Radar](https://benchmark-radar.org/about/): what the project collects, where the records come from, and every place it publishes. Plain prose, no JavaScript needed.
 - [Technical report](https://arxiv.org/abs/2609.11115): *Benchmark Radar: A Living Database and Search Engine for AI Benchmarks and Evaluation* (arXiv:2609.11115), the paper describing how the collection, catalog, and retrieval work. This is the preferred citation for the project.
 - [Benchmark directory](https://benchmark-radar.org/benchmarks/): every benchmark in the catalog, each with its own page covering what it tests, who published it, and which scores are on record.
-- [Model card adoption leaderboard](https://benchmark-radar.org/leaderboard/): which benchmarks frontier labs report in their own model and system cards, plus reported scores over time.
+- [Leaderboard](https://benchmark-radar.org/leaderboard/): opens on the latest releases, recently released benchmarks ranked by the attention they are receiving now (GitHub stars, Hugging Face paper upvotes and 30-day dataset downloads, each dated and linked to its source); one click away is the model card adoption ranking, which benchmarks frontier labs report in their own model and system cards.
 - [Benchmark saturation](https://benchmark-radar.org/saturation/): benchmarks ranked by their highest reported score, and each score's history over time with the source, date, and test conditions it was read from.
 - [Discovery trends](https://benchmark-radar.org/trends/): how many new benchmarks arrive by category, source, and day.
 - [Explore the connections](https://benchmark-radar.org/explore/): how benchmarks, datasets, organizations, and sources link to each other.

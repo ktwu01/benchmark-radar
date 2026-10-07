@@ -80,18 +80,22 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENREVIEW_USERNAME: ${{ secrets.OPENREVIEW_USERNAME }}
           OPENREVIEW_PASSWORD: ${{ secrets.OPENREVIEW_PASSWORD }}
-          # Publishing a deterministic fallback would look successful while
-          # violating the purpose of this production run: prove a real GPT
-          # synthesis occurred and retain its model/usage metadata.
-          OPENAI_BRIEFING_REQUIRED: "true"
-          # Issue #159: the Q&A implementation shipped opt-in behind this flag
-          # and production never set it, so every run silently skipped
-          # question generation despite a successful briefing. Enabling and
-          # requiring it here closes that gap the same way the briefing is
-          # required above: a green run must carry real answers, not a quiet
+          # Stream progress (per-source fetch times, warnings) as it happens;
+          # buffered stdout printed everything at the end of the step.
+          PYTHONUNBUFFERED: "1"
+          # The evidence snapshot is the vital output; the GPT briefing and
+          # Q&A are enrichment. Requiring them cost whole days of evidence to
+          # a revoked key (2026-09-07) and to a briefing-side data error
+          # (2026-09-11). A failure now publishes the deterministic briefing
+          # and an "error" Q&A status, and raises a `::warning` annotation on
+          # the run so the gap is visible rather than silent.
+          OPENAI_BRIEFING_REQUIRED: "false"
+          # Issue #159: Q&A shipped opt-in and production never enabled it, so
+          # every run silently skipped it. Keep it enabled here; a failure is
+          # a warning annotation plus a recorded error status, not a quiet
           # absence.
           OPENAI_QUESTIONS: "true"
-          OPENAI_QUESTIONS_REQUIRED: "true"
+          OPENAI_QUESTIONS_REQUIRED: "false"
           # Issue #231: render the day's GPT briefing and Q&A prose in
           # Simplified Chinese as well. Each flag is independent; a failed
           # translation never fails the run, it just leaves the zh fields out.
@@ -106,6 +110,8 @@ jobs:
       # checkout above feeds the repo-change sentence; a shallow clone would
       # report "no code changes" on most days.
       - name: Render daily social post material
+        # Social copy is non-vital: never let it block the snapshot upload.
+        continue-on-error: true
         run: >
           benchmark-radar social
           --items out/items.json

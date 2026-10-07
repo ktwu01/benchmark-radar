@@ -14,7 +14,9 @@ from .query import QUERY_SCHEMA_VERSION, SEARCH_SCOPES, QueryError, QueryService
 LOGGER = logging.getLogger(__name__)
 
 
-def _parse_parameters(query: str, *, allowed: set[str]) -> dict[str, list[str]]:
+def _parse_parameters(
+    query: str, *, allowed: set[str], repeatable: frozenset[str] = frozenset()
+) -> dict[str, list[str]]:
     parameters = parse_qs(query, keep_blank_values=True)
     unknown = sorted(set(parameters) - allowed)
     if unknown:
@@ -23,7 +25,9 @@ def _parse_parameters(query: str, *, allowed: set[str]) -> dict[str, list[str]]:
             code="invalid_request",
             status=400,
         )
-    repeated = sorted(key for key, values in parameters.items() if len(values) != 1)
+    repeated = sorted(
+        key for key, values in parameters.items() if len(values) != 1 and key not in repeatable
+    )
     if repeated:
         raise QueryError(
             f"query parameter(s) must occur once: {', '.join(repeated)}",
@@ -136,6 +140,22 @@ def create_query_server(
                     openness=_value(parameters, "openness"),
                     modality=_value(parameters, "modality"),
                     source=_value(parameters, "source"),
+                )
+
+            if path == "/api/v1/related-work":
+                parameters = _parse_parameters(
+                    request.query,
+                    allowed={"q", "per_topic", "include_partial", "include_radar"},
+                    repeatable=frozenset({"q"}),
+                )
+                topics = parameters.get("q") or []
+                if not topics:
+                    raise QueryError("q is required", code="invalid_request", status=400)
+                return service.related_work(
+                    topics,
+                    per_topic=_integer(parameters, "per_topic", default=6),
+                    include_partial=_boolean(parameters, "include_partial"),
+                    include_radar=_boolean(parameters, "include_radar", default=True),
                 )
 
             if path.startswith("/api/v1/benchmarks/"):

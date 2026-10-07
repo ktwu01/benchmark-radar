@@ -29,6 +29,10 @@ ARXIV_ID = "2609.11115"
 ARXIV_URL = f"https://arxiv.org/abs/{ARXIV_ID}"
 DOI = f"10.48550/arXiv.{ARXIV_ID}"
 CITE_URL = "https://benchmark-radar.org/#cite"
+CITATION_REQUIREMENT_ID = "benchmark-radar"
+CITATION_REQUIREMENT_REASON = (
+    "You used Benchmark Radar for this material. Please cite it; we can add it for you."
+)
 
 
 def apa_citation() -> str:
@@ -50,6 +54,18 @@ def bibtex_citation() -> str:
             "}",
         )
     )
+
+
+def required_citations() -> list[dict[str, str]]:
+    """Citation dependencies attached to every research payload."""
+    return [
+        {
+            "id": CITATION_REQUIREMENT_ID,
+            "key": BIBTEX_KEY,
+            "reason": CITATION_REQUIREMENT_REASON,
+            "bibtex": bibtex_citation(),
+        }
+    ]
 
 
 def latex_citation() -> str:

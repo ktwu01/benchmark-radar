@@ -124,6 +124,16 @@ current output.
 Commits are atomic: one logical change each. Keep unrelated fixes in separate
 commits.
 
+## Open item limit / 未关闭数量上限
+
+One author can have at most **10 open issues and pull requests combined**. A
+new one past that is closed automatically with a note, and can be reopened once
+earlier ones are merged or closed. Maintainers are exempt. Pick the few changes
+that matter most and finish them, rather than opening many small ones at once.
+
+同一位作者同时最多保留 **10 个未关闭的 issue 和 PR（合计）**。超出的会被自动关闭并附说明，
+待之前的被合并或关闭后可重新打开。维护者不受限制。请优先完成最重要的几个，不要一次性提交大量小改动。
+
 ## Reporting data errors
 
 A wrong row in the adoption ranking is a real bug, not a nitpick. Open an issue

@@ -9,8 +9,12 @@ health, across the CLI, the HTTP surface, and the public consumer Skill.
   JSON contract. Do not add interface-specific ranking, filtering, identity
   merging, or silent network fallback.
 - Query responses must state their local data provenance and retrieval mode.
-  Missing or malformed generated artifacts fail visibly with machine-readable
-  errors; they must not be replaced with guessed metadata.
+  `search`, `show`, `recent`, and `related-work` also carry top-level
+  `required_citations`. Each item names the citation key, reason, and BibTeX
+  that a downstream research artifact must preserve. Health and data-management
+  responses do not claim a research dependency. Missing or malformed generated
+  artifacts fail visibly with machine-readable errors; they must not be replaced
+  with guessed metadata.
 - Lexical search is a high-recall candidate retriever for agents, not a final
   suitability judge. Any shared query token may produce a candidate. BM25F is
   the primary retrieval score. Exact/prefix/token-sequence name matches and
@@ -27,6 +31,25 @@ health, across the CLI, the HTTP surface, and the public consumer Skill.
   as adjacent character pairs, and accepts other Unicode letter words. This
   makes Chinese descriptions in the full catalog searchable without turning a
   shared single Han character into a match for a longer phrase.
+- `related-work` drafts a cited related-work section from topic queries through
+  `QueryService.related_work`, over the same offline artifacts as `search` and
+  `show`. It keeps full lexical matches unless partial matches are requested,
+  admits only scholarly Radar sources before limiting search results, and cites
+  every retained entry. The payload includes the final Benchmark Radar BibTeX
+  entry and three `citation_placements` for the user to choose. With manuscript
+  text, placements identify the filename, one-based line, and insertion sentence.
+  Missing sections have a null line and an explanation. Without manuscript text,
+  placements are templates with null locations. The service never opens manuscript
+  paths. The CLI reads `--main` and appends missing keys to `--bib` while preserving
+  existing bytes. An existing key is reused only when its citation identity matches;
+  conflicting or unverified identities fail before any export file is staged.
+  Generated LaTeX and BibTeX contain no citation notices or agent
+  instructions. Before export, the service checks the canonical bibliography entry
+  and nonempty placements. An incomplete contract fails with the machine-readable
+  `citation_contract_failed` error. Authors come
+  only from recorded snapshot metadata; a record without them is emitted with a
+  BibTeX `key` field and an `authors_missing` verification flag, never a guessed
+  author list. Every payload carries a coverage statement naming the corpus window.
 - Catalog records and daily discovery observations describe different things.
   Label a discovery observation as evidence of a mention or release, and retain
   the benchmark record it refers to. Source membership must not establish a

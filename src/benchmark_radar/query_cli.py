@@ -5,7 +5,11 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
+import stat
 import sys
+import tempfile
+import uuid
 from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
@@ -20,8 +24,12 @@ from .query import (
     error_payload,
 )
 from .query_http import serve_query_api
+from .related_work import ManuscriptContext, append_missing_bibtex
 
-QUERY_COMMANDS = frozenset({"init", "sync", "search", "show", "recent", "status", "serve"})
+QUERY_COMMANDS = frozenset(
+    {"init", "sync", "search", "show", "recent", "status", "serve", "related-work"}
+)
+RELATED_WORK_FORMATS = ("latex", "bibtex", "markdown")
 
 
 def _data_parent() -> argparse.ArgumentParser:
@@ -78,6 +86,30 @@ def _parser() -> argparse.ArgumentParser:
     recent.add_argument("--source")
     recent.add_argument("--recommended", action="store_true")
     recent.add_argument("--json", action="store_true")
+
+    related = subparsers.add_parser(
+        "related-work",
+        parents=[data_parent],
+        help="Draft a cited related-work section and BibTeX from topic queries.",
+    )
+    related.add_argument(
+        "topics",
+        nargs="+",
+        metavar="TOPIC",
+        help="A short query, or 'Label=query' to name the paragraph it becomes.",
+    )
+    related.add_argument("--per-topic", type=int, default=6)
+    related.add_argument(
+        "--include-partial",
+        action="store_true",
+        help="Keep candidates that miss some query tokens (noisier).",
+    )
+    related.add_argument("--no-radar", dest="include_radar", action="store_false")
+    related.add_argument("--format", choices=RELATED_WORK_FORMATS, default="latex")
+    related.add_argument("--tex", type=Path, help="Write the LaTeX section to this file.")
+    related.add_argument("--bib", type=Path, help="Append missing BibTeX entries to this file.")
+    related.add_argument("--main", type=Path, help="Locate citation options in this manuscript.")
+    related.add_argument("--json", action="store_true")
 
     status = subparsers.add_parser(
         "status", parents=[data_parent], help="Inspect local catalog and snapshot health."
@@ -167,6 +199,176 @@ def _print_show(payload: dict[str, Any]) -> None:
             print(f"  {artifact.get('kind')}: {artifact.get('url')}")
 
 
+def _stage_related_work_file(path: Path, content: bytes, mode: int | None) -> Path:
+    temporary = path.parent / f".{path.name}.{uuid.uuid4().hex}.tmp"
+    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o666)
+    try:
+        if mode is not None:
+            os.fchmod(descriptor, mode)
+        with os.fdopen(descriptor, "wb") as handle:
+            descriptor = -1
+            handle.write(content)
+    except Exception:
+        if descriptor >= 0:
+            os.close(descriptor)
+        temporary.unlink(missing_ok=True)
+        raise
+    return temporary
+
+
+def _write_related_work_files(
+    outputs: list[tuple[Path, str, str]],
+) -> set[Path]:
+    staged: list[tuple[Path, Path]] = []
+    changed: set[Path] = set()
+    backups: list[tuple[Path, Path | None]] = []
+    try:
+        destinations = [path for path, _, _ in outputs]
+        canonical_destinations = [path.resolve(strict=False) for path in destinations]
+        if len(set(canonical_destinations)) != len(canonical_destinations) or any(
+            left.exists() and right.exists() and left.samefile(right)
+            for index, left in enumerate(destinations)
+            for right in destinations[index + 1 :]
+        ):
+            raise OSError("related-work export destinations must be distinct")
+        modes: dict[Path, int | None] = {}
+        for path in destinations:
+            if path.is_symlink() or (path.exists() and not path.is_file()):
+                raise OSError(f"related-work export destination is not a regular file: {path}")
+            modes[path] = stat.S_IMODE(path.stat().st_mode) if path.exists() else None
+        planned = []
+        for path, field, content in outputs:
+            existing = path.read_bytes() if path.exists() else b""
+            merged = (
+                append_missing_bibtex(existing, content)
+                if field == "bibtex"
+                else content.encode("utf-8")
+            )
+            if path.exists() and existing == merged:
+                continue
+            planned.append((path, merged))
+            changed.add(path)
+        for path, content in planned:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            staged.append((_stage_related_work_file(path, content, modes[path]), path))
+        for temporary, path in staged:
+            backup = None
+            if path.exists():
+                handle = tempfile.NamedTemporaryFile(dir=path.parent, delete=False)
+                backup = Path(handle.name)
+                handle.close()
+                try:
+                    os.replace(path, backup)
+                except OSError:
+                    backup.unlink(missing_ok=True)
+                    raise
+            backups.append((path, backup))
+            os.replace(temporary, path)
+    except (OSError, ValueError) as error:
+        rollback_errors = []
+        for path, backup in reversed(backups):
+            try:
+                if backup is None:
+                    path.unlink(missing_ok=True)
+                else:
+                    os.replace(backup, path)
+            except OSError as rollback_error:
+                rollback_errors.append(f"{path}: {rollback_error}")
+        for temporary, _ in staged:
+            try:
+                temporary.unlink(missing_ok=True)
+            except OSError as cleanup_error:
+                rollback_errors.append(f"{temporary}: {cleanup_error}")
+        message = f"could not write related-work artifact: {error}"
+        if rollback_errors:
+            message += f"; rollback incomplete: {'; '.join(rollback_errors)}"
+        raise QueryError(message, code="artifact_write_failed") from error
+    cleanup_errors = []
+    for _, backup in backups:
+        if backup is None:
+            continue
+        try:
+            backup.unlink(missing_ok=True)
+        except OSError as cleanup_error:
+            cleanup_errors.append(f"{backup}: {cleanup_error}")
+    if cleanup_errors:
+        raise QueryError(
+            "related-work outputs were committed, but backup cleanup failed: "
+            + "; ".join(cleanup_errors),
+            code="artifact_cleanup_failed",
+        )
+    return changed
+
+
+def _read_manuscript(args: argparse.Namespace) -> ManuscriptContext | None:
+    if args.main is None:
+        return None
+    try:
+        for path in (args.tex, args.bib):
+            if path is not None and (
+                path.resolve(strict=False) == args.main.resolve(strict=False)
+                or (path.exists() and args.main.exists() and path.samefile(args.main))
+            ):
+                raise QueryError(
+                    "the manuscript must not be an export destination",
+                    code="invalid_paths",
+                    status=400,
+                )
+        return ManuscriptContext(file=str(args.main), text=args.main.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError) as error:
+        raise QueryError(
+            f"could not read manuscript {args.main}: {error}",
+            code="manuscript_read_failed",
+            status=400,
+        ) from error
+
+
+def _related_work_printer(args: argparse.Namespace) -> Callable[[dict[str, Any]], None]:
+    """Write requested files first, then print one format for the terminal."""
+
+    def printer(payload: dict[str, Any]) -> None:
+        outputs = [
+            (path, field, payload[field])
+            for path, field in ((args.tex, "latex"), (args.bib, "bibtex"))
+            if path is not None
+        ]
+        changed = _write_related_work_files(outputs)
+        for path, field, _ in outputs:
+            if field != "bibtex":
+                print(f"wrote {field} to {path}", file=sys.stderr)
+        if args.json:
+            _print_json(payload)
+        else:
+            print(payload[args.format], end="")
+        flagged = [
+            entry for entry in payload["entries"] if "authors_missing" in entry["verification"]
+        ]
+        if flagged:
+            print(
+                f"\n% {len(flagged)} of {payload['count']} entries lack authors in local data; "
+                "complete them before citing.",
+                file=sys.stderr,
+            )
+        stream = sys.stderr if args.json or args.format in {"latex", "bibtex"} else sys.stdout
+        for placement in payload["citation_placements"]:
+            location = (
+                f"{placement['file']}:{placement['line']}"
+                if placement["available"]
+                else placement["reason"]
+            )
+            print(f"{placement['option']}. {location}\n   {placement['sentence']}", file=stream)
+        prefix = ""
+        if args.bib is not None:
+            prefix = (
+                f"Added missing references to {args.bib}. Benchmark Radar is available there. "
+                if args.bib in changed
+                else f"Benchmark Radar and these references are already in {args.bib}. "
+            )
+        print(prefix + "Pick where to cite it: 1 / 2 / 3", file=stream)
+
+    return printer
+
+
 def _print_status(payload: dict[str, Any]) -> None:
     print(f"status: {payload['status']}")
     print(f"catalog: {payload['catalog']['count']} records at {payload['catalog']['path']}")
@@ -190,10 +392,6 @@ def run_query_cli(argv: Sequence[str] | None = None) -> int:
 
     args = _parser().parse_args(argv)
     try:
-        # Every payload command collects (payload, printer) and falls through
-        # to one shared tail that prints both, so a new command cannot forget
-        # the citation reminder (issue #483 review); `serve` is the lone
-        # long-lived exception and prints it once at startup.
         printer: Callable[[dict[str, Any]], None] | None = None
         payload: dict[str, Any]
         if args.command == "init":
@@ -228,6 +426,15 @@ def run_query_cli(argv: Sequence[str] | None = None) -> int:
                     recommended=args.recommended,
                 )
                 printer = _print_json if args.json else _print_recent
+            elif args.command == "related-work":
+                payload = service.related_work(
+                    args.topics,
+                    per_topic=args.per_topic,
+                    include_partial=args.include_partial,
+                    include_radar=args.include_radar,
+                    manuscript=_read_manuscript(args),
+                )
+                printer = _related_work_printer(args)
             elif args.command == "status":
                 payload = service.status()
                 printer = _print_json if args.json else _print_status
@@ -246,7 +453,8 @@ def run_query_cli(argv: Sequence[str] | None = None) -> int:
                 return 0
         assert printer is not None  # every non-serve command above sets it
         printer(payload)
-        _print_cite_reminder(args)
+        if args.command != "related-work":
+            _print_cite_reminder(args)
         return 0
     except QueryError as error:
         print(json.dumps(error_payload(error), ensure_ascii=False, sort_keys=True), file=sys.stderr)
