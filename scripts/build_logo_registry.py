@@ -75,15 +75,24 @@ def main() -> None:
     model_keys = [f"{model}␟{organization}" for model, organization in models]
     from benchmark_radar.models_registry import model_key
 
-    by_identity = {}
+    # A renamed model inherits its old label's ID, but only from a label the
+    # data no longer carries. models.json can keep two live records whose
+    # slugs collide ("Gemini 2.5 Flash" and "Gemini-2.5-Flash"); letting the
+    # new one inherit from a still-live twin handed both cards the same ID.
+    live_labels = set(model_keys)
+    by_identity: dict[str, list[str]] = {}
     for label, identifier in model_ids.items():
+        if label in live_labels:
+            continue
         model, organization = label.split("␟", 1)
-        by_identity.setdefault(model_key(model, organization), identifier)
+        by_identity.setdefault(model_key(model, organization), []).append(identifier)
     for label in model_keys:
+        if label in model_ids:
+            continue
         model, organization = label.split("␟", 1)
-        previous = by_identity.get(model_key(model, organization))
-        if label not in model_ids and previous:
-            model_ids[label] = previous
+        donors = by_identity.get(model_key(model, organization))
+        if donors:
+            model_ids[label] = donors.pop(0)
     assign(model_ids, model_keys, "M")
 
     # An entry the data no longer carries is dropped. Freezing an ID protects a

@@ -202,6 +202,50 @@ def test_the_logo_generator_preserves_a_retired_high_water_mark(tmp_path, monkey
     assert generated["high_water"] == {"O": 68, "M": 1048}
 
 
+def test_slug_twins_that_are_both_live_get_distinct_logo_ids(tmp_path, monkeypatch):
+    """Rename inheritance must not hand a live label's ID to its slug twin.
+
+    models.json keeps "Gemini 2.5 Flash" and "Gemini-2.5-Flash" as separate
+    records; inheriting from the still-live twin gave 36 cards a shared ID.
+    A retired label's ID is still inherited by its renamed successor.
+    """
+    script = Path("scripts/build_logo_registry.py").resolve()
+    data_dir = tmp_path / "site" / "data"
+    data_dir.mkdir(parents=True)
+    (data_dir / "models.json").write_text(
+        json.dumps(
+            {
+                "models": [
+                    {"model": "Gemini 2.5 Flash", "organization": "Google"},
+                    {"model": "Gemini-2.5-Flash", "organization": "Google"},
+                    {"model": "Grok 4", "organization": "xAI"},
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    (data_dir / "logo-registry.json").write_text(
+        json.dumps(
+            {
+                "high_water": {"O": 2, "M": 2},
+                "organizations": {"Google": "O-01", "xAI": "O-02"},
+                "models": {"Gemini 2.5 Flash␟Google": "M-01", "Grok-4␟xAI": "M-02"},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.chdir(tmp_path)
+    runpy.run_path(str(script), run_name="__main__")
+
+    models = json.loads((data_dir / "logo-registry.json").read_text(encoding="utf-8"))["models"]
+    assert models == {
+        "Gemini 2.5 Flash␟Google": "M-01",
+        "Grok 4␟xAI": "M-02",
+        "Gemini-2.5-Flash␟Google": "M-03",
+    }
+
+
 def test_a_missing_shard_directory_refuses_to_write_a_curated_only_registry(tmp_path):
     """The 321-model drop this module opens on, reachable again since the
     shards stopped being committed.
