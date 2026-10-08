@@ -4,6 +4,7 @@ import json
 import threading
 import urllib.parse
 import urllib.request
+from copy import deepcopy
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -18,10 +19,12 @@ from benchmark_radar.citation import (
     latex_citation,
 )
 from benchmark_radar.models import RadarItem, RadarRun, SourceHealth
+from benchmark_radar.pipeline import deduplicate
 from benchmark_radar.query import QueryError, QueryPaths, QueryService, _tokens
 from benchmark_radar.query_cli import run_query_cli
 from benchmark_radar.query_http import create_query_server
-from benchmark_radar.snapshots import write_snapshot
+from benchmark_radar.snapshots import load_snapshots, write_snapshot
+from benchmark_radar.sources import fetch_huggingface
 
 
 def _catalog(tmp_path: Path) -> QueryPaths:
@@ -512,6 +515,95 @@ def test_radar_results_carry_derived_science_domains(tmp_path: Path) -> None:
     assert recent["results"][0]["science_domains"] == ["neuroscience"]
     radar_hits = [record for record in searched["results"] if record["kind"] == "radar"]
     assert radar_hits and radar_hits[0]["science_domains"] == ["neuroscience"]
+
+
+@pytest.mark.parametrize("repository_id", ["lab/suite", "lab/a-long-benchmark-suite-name", None])
+def test_hub_kinds_survive_collection_snapshot_and_public_search(
+    tmp_path: Path, monkeypatch, capsys, repository_id: str | None
+) -> None:
+    paths = _catalog(tmp_path)
+    generated_at = datetime(2026, 8, 30, 8, tzinfo=UTC)
+
+    def get_hub_rows(url, **_kwargs):
+        kind = url.rsplit("/", 1)[-1]
+        return [
+            {
+                "id": repository_id or f"lab/{kind}-suite",
+                "createdAt": "2026-08-30T06:00:00Z",
+                "lastModified": "2026-08-30T07:00:00Z",
+                "downloads": 3,
+                "likes": 2,
+            }
+        ]
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", get_hub_rows)
+    items = fetch_huggingface(
+        {"kinds": ["datasets", "models", "spaces"], "searches": ["suite", "suite"]},
+        generated_at - timedelta(days=1),
+        10,
+    )
+    assert len(items) == 3
+    items = deduplicate(items)
+    assert len(items) == 3
+    run = RadarRun(
+        generated_at=generated_at,
+        since=generated_at - timedelta(days=1),
+        items=items,
+        health=[SourceHealth(source="huggingface", ok=True, item_count=3, method="API")],
+    )
+    write_snapshot(run, paths.snapshots)
+    write_snapshot(run, paths.snapshots)
+    assert len(load_snapshots(paths.snapshots)[-1]["evidence_items"]) == 3
+
+    initial = QueryService(paths).search("suite", scope="radar", limit=10)
+    assert initial["total_matches"] == 3
+    keys_by_url = {row["url"]: row["key"] for row in initial["results"]}
+    assert len(set(keys_by_url.values())) == 3
+    assert {row["source_id"] for row in initial["results"]} == {item.source_id for item in items}
+
+    # A later observation of only the dataset replaces that kind, while its
+    # same-named model and Space remain discoverable with stable public keys.
+    dataset = deepcopy(next(item for item in items if "/datasets/" in item.url))
+    dataset.summary = "A newer dataset observation."
+    dataset.updated_at = generated_at + timedelta(days=1)
+    write_snapshot(
+        RadarRun(
+            generated_at=generated_at + timedelta(days=1),
+            since=generated_at,
+            items=[dataset],
+            health=[SourceHealth(source="huggingface", ok=True, item_count=1, method="API")],
+        ),
+        paths.snapshots,
+    )
+    searched = QueryService(paths).search("suite", scope="radar", limit=10)
+    assert searched["total_matches"] == 3
+    assert {row["url"]: row["key"] for row in searched["results"]} == keys_by_url
+    for row in searched["results"]:
+        if row["url"] == dataset.url:
+            assert row["description"] == dataset.summary
+            assert row["snapshot_date"] == "2026-08-31"
+        else:
+            assert row["snapshot_date"] == "2026-08-30"
+
+    exit_code = run_query_cli(
+        [
+            "search",
+            "suite",
+            "--scope",
+            "radar",
+            "--limit",
+            "10",
+            "--json",
+            "--index",
+            str(paths.index),
+            "--shards",
+            str(paths.shards),
+            "--snapshots",
+            str(paths.snapshots),
+        ]
+    )
+    assert exit_code == 0
+    assert json.loads(capsys.readouterr().out) == searched
 
 
 def test_status_exposes_incomplete_detail_shards(tmp_path: Path) -> None:

@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from .citation import citation_block, required_citations
+from .corpus import exact_artifact_key
 from .science_domains import science_domains_for_record
 from .snapshots import REQUIRED_SOURCES, load_snapshots
 
@@ -485,10 +486,18 @@ class QueryService:
             for item in snapshot["evidence_items"]:
                 source = str(item.get("source") or "")
                 source_id = str(item.get("source_id") or "")
+                identity = source_id
+                if source == "Hugging Face":
+                    # Hub kinds have independent owner/name namespaces. Use
+                    # the primary repository URL, excluding related artifacts,
+                    # to keep each kind's latest observation and public key.
+                    identity = exact_artifact_key(
+                        {"source": source, "source_id": source_id, "url": item.get("url")}
+                    )
                 urls = [str(item.get("url") or ""), *(item.get("artifact_urls") or [])]
-                latest_by_identity[(source, source_id)] = {
+                latest_by_identity[(source, identity)] = {
                     "kind": "radar",
-                    "key": f"radar:{source.casefold()}:{source_id}",
+                    "key": f"radar:{source.casefold()}:{identity}",
                     "slug": None,
                     "name": str(item.get("title") or ""),
                     "description": str(item.get("summary") or ""),
