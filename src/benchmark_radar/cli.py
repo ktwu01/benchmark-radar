@@ -891,7 +891,9 @@ def main() -> None:
     snapshot_path = write_snapshot(run, args.snapshot_dir)
     # An optional failure must merge as nongenerated, not as stale pre-read answers.
     # Render the Q&A that the writer actually preserved from an intervening pass.
-    daily_questions = json.loads(snapshot_path.read_text(encoding="utf-8")).get("questions")
+    committed_snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    report_run = daily_report_run(committed_snapshot, run)
+    daily_questions = committed_snapshot.get("questions")
     args.output.write_text(
         render_markdown(
             report_run,
