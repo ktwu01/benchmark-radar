@@ -762,3 +762,128 @@ def test_a_thin_day_reports_insufficient_volume_rather_than_a_pattern(monkeypatc
     # single day has no baseline. Saying so is the correct output: a quota would
     # be an incentive to manufacture significance.
     assert "Insufficient" in bullets or "No material pattern" in bullets
+
+
+@pytest.mark.parametrize(
+    "later_pass",
+    ["error", "disabled", "missing-key", "generated", "next-day-error", "required-error"],
+)
+def test_rerun_report_agrees_with_the_days_persisted_questions(monkeypatch, tmp_path, later_pass):
+    """Issue #805: a failed later pass must not hide answers the day already holds."""
+    day = datetime(2026, 8, 2, 9, tzinfo=UTC)
+    clock = [day]
+    original_pipeline = cli.run_pipeline
+    monkeypatch.setattr(
+        cli,
+        "run_pipeline",
+        lambda *args, **kwargs: original_pipeline(*args, **kwargs, now=clock[0]),
+    )
+    _stub_sources(monkeypatch, day)
+    monkeypatch.setattr("sys.argv", _briefing_argv(tmp_path))
+    monkeypatch.setenv("OPENAI_API_KEY", "inert-fixture-key")
+    monkeypatch.setenv("OPENAI_QUESTIONS", "true")
+    monkeypatch.setattr(
+        cli,
+        "generate_daily_briefing",
+        lambda *args, **kwargs: GeneratedBriefing(
+            bullets=["Fixture briefing. Evidence: E001."],
+            metadata={
+                "generator": "openai-responses",
+                "model": "fixture-model",
+                "response_id": "resp_fixture",
+                "usage": {"input_tokens": 10, "output_tokens": 5, "total_tokens": 15},
+                "input": {"evidence_items": 1},
+                "citations": [],
+            },
+        ),
+    )
+
+    def questions(signal):
+        return {
+            "schema_version": 1,
+            "date": clock[0].date().isoformat(),
+            "status": "generated",
+            "generator": "openai-responses",
+            "model": "fixture-model",
+            "groups": [
+                {
+                    "title": "Today's evidence",
+                    "answers": [
+                        {
+                            "question": "What was captured?",
+                            "signal": signal,
+                            "plain_english": "A fixture repository was captured.",
+                            "takeaway": "Inspect the evidence.",
+                            "counter_view": "One fixture cannot establish a trend.",
+                            "cited_evidence": [
+                                {
+                                    "id": "E001",
+                                    "title": "Fixture evidence",
+                                    "url": "https://github.com/org/repo",
+                                    "source": "GitHub",
+                                }
+                            ],
+                        }
+                    ],
+                }
+            ],
+            "calls": 1,
+            "usage": {"input_tokens": 10, "output_tokens": 5},
+        }
+
+    first_questions = questions("Stored answer from the first pass.")
+    monkeypatch.setattr(cli, "generate_daily_questions", lambda *args, **kwargs: first_questions)
+    cli.main()
+    report_path = tmp_path / "report.md"
+    first_report = report_path.read_bytes()
+    snapshot_path = tmp_path / "snapshots" / f"{day.date().isoformat()}.json"
+    first_snapshot = snapshot_path.read_bytes()
+    assert r"Stored answer from the first pass\." in first_report.decode()
+
+    def fail_questions(*args, **kwargs):
+        raise BriefingError("inert later-pass failure")
+
+    monkeypatch.setattr(cli, "generate_daily_questions", fail_questions)
+    expected = first_questions
+    if later_pass == "disabled":
+        monkeypatch.delenv("OPENAI_QUESTIONS")
+    elif later_pass == "missing-key":
+        monkeypatch.delenv("OPENAI_API_KEY")
+    elif later_pass == "generated":
+        expected = questions("New answer from the later pass.")
+        monkeypatch.setattr(cli, "generate_daily_questions", lambda *args, **kwargs: expected)
+    elif later_pass == "next-day-error":
+        clock[0] = day + timedelta(days=1)
+    elif later_pass == "required-error":
+        monkeypatch.setenv("OPENAI_QUESTIONS_REQUIRED", "true")
+        with pytest.raises(RuntimeError, match="required daily questions failed"):
+            cli.main()
+        assert report_path.read_bytes() == first_report
+        assert snapshot_path.read_bytes() == first_snapshot
+        return
+
+    cli.main()
+    report = report_path.read_text(encoding="utf-8")
+    stored = json.loads(
+        (tmp_path / "snapshots" / f"{clock[0].date().isoformat()}.json").read_text()
+    )
+    dashboard = json.loads((tmp_path / "radar.json").read_text())
+    dashboard_day = next(row for row in dashboard["days"] if row["date"] == stored["date"])
+    if later_pass == "next-day-error":
+        assert stored["questions"]["status"] == "error"
+        assert dashboard_day["questions"] == stored["questions"]
+        assert r"Stored answer from the first pass\." not in report
+        assert "## Questions for today" not in report
+    else:
+        assert stored["questions"] == expected
+        assert dashboard_day["questions"] == expected
+        rendered_answer = (
+            r"New answer from the later pass\."
+            if later_pass == "generated"
+            else r"Stored answer from the first pass\."
+        )
+        assert rendered_answer in report
+        assert "[Fixture evidence](https://github.com/org/repo)" in report
+        assert "Answered by fixture-model in 1 calls" in report
+        if later_pass == "generated":
+            assert r"Stored answer from the first pass\." not in report

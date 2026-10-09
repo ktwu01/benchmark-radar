@@ -885,6 +885,15 @@ def main() -> None:
 
     # Attach before writing so the snapshot, the dashboard payload, and the
     # Markdown report all describe the same briefing.
+    # Keep the report aligned with the same-day answers merge_snapshots retains.
+    stored_questions = next(
+        (s.get("questions") or {} for s in snapshots if s.get("date") == today), {}
+    )
+    if (daily_questions or {}).get("status") != "generated" and stored_questions.get(
+        "status"
+    ) == "generated":
+        daily_questions = stored_questions
+
     run.daily_briefing = daily_briefing
     run.daily_briefing_metadata = briefing_metadata
     run.daily_questions = daily_questions
