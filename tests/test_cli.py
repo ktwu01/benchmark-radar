@@ -887,3 +887,119 @@ def test_rerun_report_agrees_with_the_days_persisted_questions(monkeypatch, tmp_
         assert "Answered by fixture-model in 1 calls" in report
         if later_pass == "generated":
             assert r"Stored answer from the first pass\." not in report
+
+
+@pytest.mark.parametrize("has_earlier_answers", [True, False])
+def test_optional_questions_failure_uses_write_time_answers(
+    monkeypatch, tmp_path, has_earlier_answers
+):
+    """PR #815: an optional fallback must not promote stale answers over another pass."""
+    from dataclasses import replace
+
+    day = datetime(2026, 8, 2, 9, tzinfo=UTC)
+    clock = [day]
+    original_pipeline = cli.run_pipeline
+    monkeypatch.setattr(
+        cli,
+        "run_pipeline",
+        lambda *args, **kwargs: original_pipeline(*args, **kwargs, now=clock[0]),
+    )
+    _stub_sources(monkeypatch, day)
+    monkeypatch.setattr("sys.argv", _briefing_argv(tmp_path))
+    monkeypatch.setenv("OPENAI_API_KEY", "inert-fixture-key")
+    monkeypatch.setenv("OPENAI_QUESTIONS", "true")
+    monkeypatch.setattr(
+        cli,
+        "generate_daily_briefing",
+        lambda *args, **kwargs: GeneratedBriefing(
+            bullets=["Fixture briefing. Evidence: E001."],
+            metadata={
+                "generator": "openai-responses",
+                "model": "fixture-model",
+                "response_id": "resp_fixture",
+                "usage": {"input_tokens": 10, "output_tokens": 5, "total_tokens": 15},
+                "input": {"evidence_items": 1},
+                "citations": [],
+            },
+        ),
+    )
+
+    def questions(signal):
+        return {
+            "schema_version": 1,
+            "date": day.date().isoformat(),
+            "status": "generated",
+            "generator": "openai-responses",
+            "model": "fixture-model",
+            "groups": [
+                {
+                    "title": "Today's evidence",
+                    "answers": [
+                        {
+                            "question": "What was captured?",
+                            "signal": signal,
+                            "plain_english": "A fixture repository was captured.",
+                            "takeaway": "Inspect the evidence.",
+                            "counter_view": "One fixture cannot establish a trend.",
+                            "cited_evidence": [
+                                {
+                                    "id": "E001",
+                                    "title": "Fixture evidence",
+                                    "url": "https://github.com/org/repo",
+                                    "source": "GitHub",
+                                }
+                            ],
+                        }
+                    ],
+                }
+            ],
+            "calls": 1,
+            "usage": {"input_tokens": 10, "output_tokens": 5},
+        }
+
+    old_questions = questions("Earlier answer.")
+    newer_questions = questions("Intervening writer answer.")
+    if has_earlier_answers:
+        monkeypatch.setattr(cli, "generate_daily_questions", lambda *a, **k: old_questions)
+        cli.main()
+    clock[0] = day + timedelta(hours=2)
+
+    def fail_questions(*args, **kwargs):
+        raise BriefingError("inert overlapping-pass failure")
+
+    monkeypatch.setattr(cli, "generate_daily_questions", fail_questions)
+    boundary = {}
+
+    def persist_intervening_pass_then_this_pass(run, snapshot_dir):
+        path = snapshot_dir / f"{day.date().isoformat()}.json"
+        boundary["initial_questions"] = (
+            json.loads(path.read_text())["questions"] if path.exists() else None
+        )
+        boundary["incoming_questions"] = run.daily_questions
+        # The second writer really commits through the production validator/merge.
+        # It was generated after the seed but before this optional failing pass.
+        competing = replace(
+            run,
+            generated_at=day + timedelta(hours=1),
+            daily_questions=newer_questions,
+        )
+        write_snapshot(competing, snapshot_dir)
+        boundary["intervening_questions"] = json.loads(path.read_text())["questions"]
+        result = write_snapshot(run, snapshot_dir)
+        boundary["final_questions"] = json.loads(result.read_text())["questions"]
+        return result
+
+    monkeypatch.setattr(cli, "write_snapshot", persist_intervening_pass_then_this_pass)
+    cli.main()
+    report = (tmp_path / "report.md").read_text()
+    dashboard = json.loads((tmp_path / "radar.json").read_text())
+    dashboard_day = next(row for row in dashboard["days"] if row["date"] == day.date().isoformat())
+    assert boundary["initial_questions"] == (old_questions if has_earlier_answers else None)
+    assert boundary["intervening_questions"] == newer_questions
+    print("WRITE_TIME_QUESTIONS_PROOF=" + json.dumps(boundary, sort_keys=True))
+    assert boundary["final_questions"] == newer_questions
+    assert dashboard_day["questions"] == newer_questions
+    assert r"Intervening writer answer\." in report
+    assert r"Earlier answer\." not in report
+    assert "[Fixture evidence](https://github.com/org/repo)" in report
+    assert "Answered by fixture-model in 1 calls" in report

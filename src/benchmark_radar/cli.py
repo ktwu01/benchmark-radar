@@ -885,18 +885,13 @@ def main() -> None:
 
     # Attach before writing so the snapshot, the dashboard payload, and the
     # Markdown report all describe the same briefing.
-    # Keep the report aligned with the same-day answers merge_snapshots retains.
-    stored_questions = next(
-        (s.get("questions") or {} for s in snapshots if s.get("date") == today), {}
-    )
-    if (daily_questions or {}).get("status") != "generated" and stored_questions.get(
-        "status"
-    ) == "generated":
-        daily_questions = stored_questions
-
     run.daily_briefing = daily_briefing
     run.daily_briefing_metadata = briefing_metadata
     run.daily_questions = daily_questions
+    snapshot_path = write_snapshot(run, args.snapshot_dir)
+    # An optional failure must merge as nongenerated, not as stale pre-read answers.
+    # Render the Q&A that the writer actually preserved from an intervening pass.
+    daily_questions = json.loads(snapshot_path.read_text(encoding="utf-8")).get("questions")
     args.output.write_text(
         render_markdown(
             report_run,
@@ -952,7 +947,6 @@ def main() -> None:
         + "\n",
         encoding="utf-8",
     )
-    snapshot_path = write_snapshot(run, args.snapshot_dir)
     # The snapshot above is the day's record; Deploy Dashboard rebuilds the
     # site from snapshots on its own, so a failure here must not lose it.
     try:
