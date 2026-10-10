@@ -1472,6 +1472,26 @@ benchmarks:
 # canonical ids that document reports a result for. It is a set, not a ranking:
 # a card that reports AIME once and a card that reports it in four
 # configurations both contribute exactly one adoption.
+  - id: mgsm
+    name: MGSM
+    aliases:
+    - Multilingual Grade School Math
+    domain: math
+    url: https://arxiv.org/abs/2210.03057
+    released: '2022-10-06'
+    caveat: Translations of 250 GSM8K questions; language selection, prompting and answer
+      extraction change accuracy.
+  - id: math
+    name: MATH
+    aliases:
+    - MATH dataset
+    domain: math
+    url: https://arxiv.org/abs/2103.03874
+    released: '2021-03-05'
+    caveat: Full MATH and sampled subsets are different instruments. The Phi-4 card
+      names MATH under simple-evals without stating the subset; do not assume it is
+      MATH-500.
+
 model_cards:
   - id: openai_gpt_5_system_card
     organization: OpenAI
@@ -2393,3 +2413,19 @@ model_cards:
       - matharena_apex_2025
       - brokenarxiv
 
+
+  - id: microsoft_phi_4_model_card
+    organization: Microsoft
+    model: Phi-4 (14B)
+    document_type: model_card
+    published: '2024-12-12'
+    retrieved_at: '2026-10-10'
+    url: https://huggingface.co/microsoft/phi-4/blob/f957856cd926f9d681b14153374d755dd97e45ed/README.md
+    benchmarks:
+    - mmlu
+    - gpqa_diamond
+    - mgsm
+    - math
+    - humaneval
+    - simpleqa
+    - drop

@@ -329,6 +329,7 @@ def test_gpqa_diamond_frontier_reaches_the_visible_94_3_record():
     record = progression["benchmarks"]["gpqa_diamond"]
 
     assert [point["value"] for point in record["historical_best_frontier"]["points"]] == [
+        56.1,
         59.1,
         71.5,
         79.6,
