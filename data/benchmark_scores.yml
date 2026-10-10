@@ -5725,7 +5725,7 @@ results:
     model: Phi-4 (14B)
     organization: Microsoft
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 84.8
     read_from: html_text
   - benchmark_id: mmlu
@@ -5735,7 +5735,7 @@ results:
     model: Phi-3 (14B)
     organization: Microsoft
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 77.9
     read_from: html_text
   - benchmark_id: mmlu
@@ -5745,7 +5745,7 @@ results:
     model: Qwen2.5-14B-Instruct
     organization: Qwen
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 79.9
     read_from: html_text
     reported_by: Microsoft
@@ -5756,7 +5756,7 @@ results:
     model: GPT-4o-mini
     organization: OpenAI
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 81.8
     read_from: html_text
     reported_by: Microsoft
@@ -5767,7 +5767,7 @@ results:
     model: Llama-3.3-70B-Instruct
     organization: Meta
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 86.3
     read_from: html_text
     reported_by: Microsoft
@@ -5778,7 +5778,7 @@ results:
     model: Qwen2.5-72B-Instruct
     organization: Qwen
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 85.3
     read_from: html_text
     reported_by: Microsoft
@@ -5789,7 +5789,7 @@ results:
     model: GPT-4o
     organization: OpenAI
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 88.1
     read_from: html_text
     reported_by: Microsoft
@@ -5800,7 +5800,7 @@ results:
     model: Phi-4 (14B)
     organization: Microsoft
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 56.1
     read_from: html_text
   - benchmark_id: gpqa_diamond
@@ -5810,7 +5810,7 @@ results:
     model: Phi-3 (14B)
     organization: Microsoft
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 31.2
     read_from: html_text
   - benchmark_id: gpqa_diamond
@@ -5820,7 +5820,7 @@ results:
     model: Qwen2.5-14B-Instruct
     organization: Qwen
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 42.9
     read_from: html_text
     reported_by: Microsoft
@@ -5831,7 +5831,7 @@ results:
     model: GPT-4o-mini
     organization: OpenAI
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 40.9
     read_from: html_text
     reported_by: Microsoft
@@ -5842,7 +5842,7 @@ results:
     model: Llama-3.3-70B-Instruct
     organization: Meta
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 49.1
     read_from: html_text
     reported_by: Microsoft
@@ -5853,7 +5853,7 @@ results:
     model: Qwen2.5-72B-Instruct
     organization: Qwen
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 49.0
     read_from: html_text
     reported_by: Microsoft
@@ -5864,7 +5864,7 @@ results:
     model: GPT-4o
     organization: OpenAI
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 50.6
     read_from: html_text
     reported_by: Microsoft
@@ -5875,7 +5875,7 @@ results:
     model: Phi-4 (14B)
     organization: Microsoft
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 80.6
     read_from: html_text
   - benchmark_id: mgsm
@@ -5885,7 +5885,7 @@ results:
     model: Phi-3 (14B)
     organization: Microsoft
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 53.5
     read_from: html_text
   - benchmark_id: mgsm
@@ -5895,7 +5895,7 @@ results:
     model: Qwen2.5-14B-Instruct
     organization: Qwen
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 79.6
     read_from: html_text
     reported_by: Microsoft
@@ -5906,7 +5906,7 @@ results:
     model: GPT-4o-mini
     organization: OpenAI
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 86.5
     read_from: html_text
     reported_by: Microsoft
@@ -5917,7 +5917,7 @@ results:
     model: Llama-3.3-70B-Instruct
     organization: Meta
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 89.1
     read_from: html_text
     reported_by: Microsoft
@@ -5928,7 +5928,7 @@ results:
     model: Qwen2.5-72B-Instruct
     organization: Qwen
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 87.3
     read_from: html_text
     reported_by: Microsoft
@@ -5939,7 +5939,7 @@ results:
     model: GPT-4o
     organization: OpenAI
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 90.4
     read_from: html_text
     reported_by: Microsoft
@@ -5950,7 +5950,7 @@ results:
     model: Phi-4 (14B)
     organization: Microsoft
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 80.4
     read_from: html_text
   - benchmark_id: math
@@ -5960,7 +5960,7 @@ results:
     model: Phi-3 (14B)
     organization: Microsoft
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 44.6
     read_from: html_text
   - benchmark_id: math
@@ -5970,7 +5970,7 @@ results:
     model: Qwen2.5-14B-Instruct
     organization: Qwen
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 75.6
     read_from: html_text
     reported_by: Microsoft
@@ -5981,7 +5981,7 @@ results:
     model: GPT-4o-mini
     organization: OpenAI
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 73.0
     read_from: html_text
     reported_by: Microsoft
@@ -5992,7 +5992,7 @@ results:
     model: Llama-3.3-70B-Instruct
     organization: Meta
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 66.3
     read_from: html_text
     reported_by: Microsoft
@@ -6003,7 +6003,7 @@ results:
     model: Qwen2.5-72B-Instruct
     organization: Qwen
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 80.0
     read_from: html_text
     reported_by: Microsoft
@@ -6014,7 +6014,7 @@ results:
     model: GPT-4o
     organization: OpenAI
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 74.6
     read_from: html_text
     reported_by: Microsoft
@@ -6025,7 +6025,7 @@ results:
     model: Phi-4 (14B)
     organization: Microsoft
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 82.6
     read_from: html_text
   - benchmark_id: humaneval
@@ -6035,7 +6035,7 @@ results:
     model: Phi-3 (14B)
     organization: Microsoft
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 67.8
     read_from: html_text
   - benchmark_id: humaneval
@@ -6045,7 +6045,7 @@ results:
     model: Qwen2.5-14B-Instruct
     organization: Qwen
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 72.1
     read_from: html_text
     reported_by: Microsoft
@@ -6056,7 +6056,7 @@ results:
     model: GPT-4o-mini
     organization: OpenAI
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 86.2
     read_from: html_text
     reported_by: Microsoft
@@ -6067,7 +6067,7 @@ results:
     model: Llama-3.3-70B-Instruct
     organization: Meta
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 78.9
     read_from: html_text
     reported_by: Microsoft
@@ -6078,7 +6078,7 @@ results:
     model: Qwen2.5-72B-Instruct
     organization: Qwen
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 80.4
     read_from: html_text
     reported_by: Microsoft
@@ -6089,7 +6089,7 @@ results:
     model: GPT-4o
     organization: OpenAI
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 90.6
     read_from: html_text
     reported_by: Microsoft
@@ -6100,7 +6100,7 @@ results:
     model: Phi-4 (14B)
     organization: Microsoft
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 75.5
     read_from: html_text
   - benchmark_id: drop
@@ -6110,7 +6110,7 @@ results:
     model: Phi-3 (14B)
     organization: Microsoft
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 68.3
     read_from: html_text
   - benchmark_id: drop
@@ -6120,7 +6120,7 @@ results:
     model: Qwen2.5-14B-Instruct
     organization: Qwen
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 85.5
     read_from: html_text
     reported_by: Microsoft
@@ -6131,7 +6131,7 @@ results:
     model: GPT-4o-mini
     organization: OpenAI
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 79.3
     read_from: html_text
     reported_by: Microsoft
@@ -6142,7 +6142,7 @@ results:
     model: Llama-3.3-70B-Instruct
     organization: Meta
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 90.2
     read_from: html_text
     reported_by: Microsoft
@@ -6153,7 +6153,7 @@ results:
     model: Qwen2.5-72B-Instruct
     organization: Qwen
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 76.7
     read_from: html_text
     reported_by: Microsoft
@@ -6164,7 +6164,7 @@ results:
     model: GPT-4o
     organization: OpenAI
     source_id: microsoft_phi_4_model_card
-    reported_at: '2024-12-12'
+    reported_at: '2024-12-11'
     value: 80.9
     read_from: html_text
     reported_by: Microsoft
@@ -6175,7 +6175,7 @@ results:
     model: Llama-3.3-70B-Instruct
     organization: Meta
     source_id: microsoft_phi_4_model_card
-    reported_at: 2024-12-12
+    reported_at: 2024-12-11
     value: 77
     read_from: html_text
     reported_by: Microsoft
@@ -6185,7 +6185,7 @@ results:
     model: Llama-3.3-70B-Instruct
     organization: Meta
     source_id: microsoft_phi_4_model_card
-    reported_at: 2024-12-12
+    reported_at: 2024-12-11
     value: 88
     read_from: html_text
     reported_by: Microsoft

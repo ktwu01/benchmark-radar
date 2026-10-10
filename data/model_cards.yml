@@ -2418,9 +2418,9 @@ model_cards:
     organization: Microsoft
     model: Phi-4 (14B)
     document_type: model_card
-    published: '2024-12-12'
+    published: '2024-12-11'
     retrieved_at: '2026-10-10'
-    url: https://huggingface.co/microsoft/phi-4/blob/f957856cd926f9d681b14153374d755dd97e45ed/README.md
+    url: https://huggingface.co/microsoft/phi-4/blob/8ee52dc636b27b99caf046e717a87fb37ad9f33e/README.md
     benchmarks:
     - mmlu
     - gpqa_diamond
