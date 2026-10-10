@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480"
+  role="img" aria-labelledby="title description">
+  <title id="title">ktwu01/benchmark-radar star history</title>
+  <desc id="description">290 stars · 2026-07-27 – 2026-10-10</desc>
+  <rect width="800" height="480" rx="12" fill="#0d1117" />
+  <style>
+    text {
+      fill: #e6edf3;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .grid line { stroke: #30363d; stroke-width: 1; }
+    .grid text { fill: #8b949e; font-size: 12px; }
+  </style>
+  <text x="72" y="34" font-size="22" font-weight="600">ktwu01/benchmark-radar Star History</text>
+  <text x="72" y="56" font-size="13" fill="#8b949e">290 stars · 2026-07-27 – 2026-10-10</text>
+  <g class="grid"><line x1="72" y1="418.0" x2="772" y2="418.0" /><text x="60" y="423.0" text-anchor="end">0</text><line x1="72" y1="330.9" x2="772" y2="330.9" /><text x="60" y="335.9" text-anchor="end">73</text><line x1="72" y1="243.8" x2="772" y2="243.8" /><text x="60" y="248.8" text-anchor="end">146</text><line x1="72" y1="156.7" x2="772" y2="156.7" /><text x="60" y="161.7" text-anchor="end">219</text><line x1="72" y1="72.0" x2="772" y2="72.0" /><text x="60" y="77.0" text-anchor="end">290</text><text x="72.0" y="452" text-anchor="start">2026-07-27</text><text x="249.3" y="452" text-anchor="middle">2026-08-15</text><text x="426.7" y="452" text-anchor="middle">2026-09-03</text><text x="594.7" y="452" text-anchor="middle">2026-09-21</text><text x="772.0" y="452" text-anchor="end">2026-10-10</text></g><path d="M 72.0 418.0 L 72.0 416.8 L 81.3 412.0 L 100.0 410.8 L 109.3 409.6 L 137.3 408.5 L 156.0 407.3 L 174.7 403.7 L 202.7 402.5 L 230.7 400.1 L 240.0 398.9 L 249.3 397.7 L 258.7 396.5 L 268.0 392.9 L 277.3 389.4 L 286.7 379.8 L 324.0 378.6 L 333.3 347.6 L 342.7 316.6 L 352.0 291.5 L 361.3 284.4 L 370.7 282.0 L 380.0 274.8 L 389.3 272.4 L 398.7 266.5 L 408.0 264.1 L 417.3 255.7 L 426.7 247.4 L 436.0 243.8 L 445.3 228.3 L 454.7 218.8 L 464.0 215.2 L 473.3 203.2 L 482.7 200.9 L 492.0 199.7 L 501.3 197.3 L 510.7 194.9 L 520.0 187.7 L 529.3 173.4 L 538.7 159.1 L 548.0 153.1 L 557.3 144.8 L 566.7 140.0 L 576.0 138.8 L 585.3 136.4 L 594.7 134.0 L 604.0 124.5 L 613.3 120.9 L 622.7 119.7 L 632.0 117.3 L 641.3 113.8 L 650.7 111.4 L 660.0 103.0 L 669.3 100.6 L 678.7 98.2 L 697.3 93.5 L 706.7 89.9 L 716.0 86.3 L 725.3 85.1 L 734.7 83.9 L 744.0 80.4 L 753.3 74.4 L 762.7 73.2 L 772.0 72.0 L 772.0 418.0 Z" fill="#1f6feb" opacity="0.18" /><path d="M 72.0 416.8 L 81.3 412.0 L 100.0 410.8 L 109.3 409.6 L 137.3 408.5 L 156.0 407.3 L 174.7 403.7 L 202.7 402.5 L 230.7 400.1 L 240.0 398.9 L 249.3 397.7 L 258.7 396.5 L 268.0 392.9 L 277.3 389.4 L 286.7 379.8 L 324.0 378.6 L 333.3 347.6 L 342.7 316.6 L 352.0 291.5 L 361.3 284.4 L 370.7 282.0 L 380.0 274.8 L 389.3 272.4 L 398.7 266.5 L 408.0 264.1 L 417.3 255.7 L 426.7 247.4 L 436.0 243.8 L 445.3 228.3 L 454.7 218.8 L 464.0 215.2 L 473.3 203.2 L 482.7 200.9 L 492.0 199.7 L 501.3 197.3 L 510.7 194.9 L 520.0 187.7 L 529.3 173.4 L 538.7 159.1 L 548.0 153.1 L 557.3 144.8 L 566.7 140.0 L 576.0 138.8 L 585.3 136.4 L 594.7 134.0 L 604.0 124.5 L 613.3 120.9 L 622.7 119.7 L 632.0 117.3 L 641.3 113.8 L 650.7 111.4 L 660.0 103.0 L 669.3 100.6 L 678.7 98.2 L 697.3 93.5 L 706.7 89.9 L 716.0 86.3 L 725.3 85.1 L 734.7 83.9 L 744.0 80.4 L 753.3 74.4 L 762.7 73.2 L 772.0 72.0" fill="none" stroke="#58a6ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /><circle cx="772.0" cy="72.0" r="5" fill="#58a6ff" />
+</svg>
