@@ -2393,3 +2393,15 @@ model_cards:
       - matharena_apex_2025
       - brokenarxiv
 
+
+  - id: microsoft_phi_4_mini_reasoning_model_card
+    organization: Microsoft
+    model: Phi-4-mini-reasoning (3.8B)
+    document_type: model_card
+    published: '2025-04-30'
+    retrieved_at: '2026-10-10'
+    url: https://huggingface.co/microsoft/Phi-4-mini-reasoning/blob/9db0932ec642e32cbc6fb4eaf3c630587225415c/README.md
+    benchmarks:
+    - aime
+    - math_500
+    - gpqa_diamond
