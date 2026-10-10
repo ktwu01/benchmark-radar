@@ -92,6 +92,18 @@ def previous_calendar_day(snapshots: list[dict[str, Any]], run: RadarRun) -> dic
     )
 
 
+def _ranked_evidence_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return sorted(
+        items,
+        key=lambda item: (
+            bool(item.get("watchlist")),
+            float(item.get("total_score") or 0),
+            str(item.get("published_at") or ""),
+        ),
+        reverse=True,
+    )
+
+
 def current_day_snapshot(snapshots: list[dict[str, Any]], run: RadarRun) -> dict[str, Any]:
     """Return this run merged with an earlier pass from the same UTC day."""
     incoming = snapshot_for_run(run)
@@ -102,14 +114,7 @@ def current_day_snapshot(snapshots: list[dict[str, Any]], run: RadarRun) -> dict
     if not existing:
         return incoming
     merged = merge_snapshots(existing, incoming)
-    merged["evidence_items"].sort(
-        key=lambda item: (
-            bool(item.get("watchlist")),
-            float(item.get("total_score") or 0),
-            str(item.get("published_at") or ""),
-        ),
-        reverse=True,
-    )
+    merged["evidence_items"] = _ranked_evidence_items(merged["evidence_items"])
     return merged
 
 
@@ -127,7 +132,10 @@ def daily_report_run(snapshot: dict[str, Any], latest_run: RadarRun) -> RadarRun
         latest_run,
         generated_at=datetime.fromisoformat(str(snapshot["generated_at"]).replace("Z", "+00:00")),
         since=datetime.fromisoformat(str(snapshot["since"]).replace("Z", "+00:00")),
-        items=[_record_from_dict(RadarItem, item) for item in snapshot["evidence_items"]],
+        items=[
+            _record_from_dict(RadarItem, item)
+            for item in _ranked_evidence_items(snapshot["evidence_items"])
+        ],
         attention=[
             _record_from_dict(AttentionObservation, item)
             for item in (snapshot.get("attention") or {}).get("observations") or []

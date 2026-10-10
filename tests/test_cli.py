@@ -762,3 +762,429 @@ def test_a_thin_day_reports_insufficient_volume_rather_than_a_pattern(monkeypatc
     # single day has no baseline. Saying so is the correct output: a quota would
     # be an incentive to manufacture significance.
     assert "Insufficient" in bullets or "No material pattern" in bullets
+
+
+@pytest.mark.parametrize(
+    "later_pass",
+    ["error", "disabled", "missing-key", "generated", "next-day-error", "required-error"],
+)
+def test_rerun_report_agrees_with_the_days_persisted_questions(monkeypatch, tmp_path, later_pass):
+    """Issue #805: a failed later pass must not hide answers the day already holds."""
+    day = datetime(2026, 8, 2, 9, tzinfo=UTC)
+    clock = [day]
+    original_pipeline = cli.run_pipeline
+    monkeypatch.setattr(
+        cli,
+        "run_pipeline",
+        lambda *args, **kwargs: original_pipeline(*args, **kwargs, now=clock[0]),
+    )
+    _stub_sources(monkeypatch, day)
+    monkeypatch.setattr("sys.argv", _briefing_argv(tmp_path))
+    monkeypatch.setenv("OPENAI_API_KEY", "inert-fixture-key")
+    monkeypatch.setenv("OPENAI_QUESTIONS", "true")
+    monkeypatch.setattr(
+        cli,
+        "generate_daily_briefing",
+        lambda *args, **kwargs: GeneratedBriefing(
+            bullets=["Fixture briefing. Evidence: E001."],
+            metadata={
+                "generator": "openai-responses",
+                "model": "fixture-model",
+                "response_id": "resp_fixture",
+                "usage": {"input_tokens": 10, "output_tokens": 5, "total_tokens": 15},
+                "input": {"evidence_items": 1},
+                "citations": [],
+            },
+        ),
+    )
+
+    def questions(signal):
+        return {
+            "schema_version": 1,
+            "date": clock[0].date().isoformat(),
+            "status": "generated",
+            "generator": "openai-responses",
+            "model": "fixture-model",
+            "groups": [
+                {
+                    "title": "Today's evidence",
+                    "answers": [
+                        {
+                            "question": "What was captured?",
+                            "signal": signal,
+                            "plain_english": "A fixture repository was captured.",
+                            "takeaway": "Inspect the evidence.",
+                            "counter_view": "One fixture cannot establish a trend.",
+                            "cited_evidence": [
+                                {
+                                    "id": "E001",
+                                    "title": "Fixture evidence",
+                                    "url": "https://github.com/org/repo",
+                                    "source": "GitHub",
+                                }
+                            ],
+                        }
+                    ],
+                }
+            ],
+            "calls": 1,
+            "usage": {"input_tokens": 10, "output_tokens": 5},
+        }
+
+    first_questions = questions("Stored answer from the first pass.")
+    monkeypatch.setattr(cli, "generate_daily_questions", lambda *args, **kwargs: first_questions)
+    cli.main()
+    report_path = tmp_path / "report.md"
+    first_report = report_path.read_bytes()
+    snapshot_path = tmp_path / "snapshots" / f"{day.date().isoformat()}.json"
+    first_snapshot = snapshot_path.read_bytes()
+    assert r"Stored answer from the first pass\." in first_report.decode()
+
+    def fail_questions(*args, **kwargs):
+        raise BriefingError("inert later-pass failure")
+
+    monkeypatch.setattr(cli, "generate_daily_questions", fail_questions)
+    expected = first_questions
+    if later_pass == "disabled":
+        monkeypatch.delenv("OPENAI_QUESTIONS")
+    elif later_pass == "missing-key":
+        monkeypatch.delenv("OPENAI_API_KEY")
+    elif later_pass == "generated":
+        expected = questions("New answer from the later pass.")
+        monkeypatch.setattr(cli, "generate_daily_questions", lambda *args, **kwargs: expected)
+    elif later_pass == "next-day-error":
+        clock[0] = day + timedelta(days=1)
+    elif later_pass == "required-error":
+        monkeypatch.setenv("OPENAI_QUESTIONS_REQUIRED", "true")
+        with pytest.raises(RuntimeError, match="required daily questions failed"):
+            cli.main()
+        assert report_path.read_bytes() == first_report
+        assert snapshot_path.read_bytes() == first_snapshot
+        return
+
+    cli.main()
+    report = report_path.read_text(encoding="utf-8")
+    stored = json.loads(
+        (tmp_path / "snapshots" / f"{clock[0].date().isoformat()}.json").read_text()
+    )
+    dashboard = json.loads((tmp_path / "radar.json").read_text())
+    dashboard_day = next(row for row in dashboard["days"] if row["date"] == stored["date"])
+    if later_pass == "next-day-error":
+        assert stored["questions"]["status"] == "error"
+        assert dashboard_day["questions"] == stored["questions"]
+        assert r"Stored answer from the first pass\." not in report
+        assert "## Questions for today" not in report
+    else:
+        assert stored["questions"] == expected
+        assert dashboard_day["questions"] == expected
+        rendered_answer = (
+            r"New answer from the later pass\."
+            if later_pass == "generated"
+            else r"Stored answer from the first pass\."
+        )
+        assert rendered_answer in report
+        assert "[Fixture evidence](https://github.com/org/repo)" in report
+        assert "Answered by fixture-model in 1 calls" in report
+        if later_pass == "generated":
+            assert r"Stored answer from the first pass\." not in report
+
+
+@pytest.mark.parametrize("has_earlier_answers", [True, False])
+def test_optional_questions_failure_uses_write_time_answers(
+    monkeypatch, tmp_path, has_earlier_answers
+):
+    """PR #815: an optional fallback must not promote stale answers over another pass."""
+    from dataclasses import replace
+
+    day = datetime(2026, 8, 2, 9, tzinfo=UTC)
+    clock = [day]
+    original_pipeline = cli.run_pipeline
+    monkeypatch.setattr(
+        cli,
+        "run_pipeline",
+        lambda *args, **kwargs: original_pipeline(*args, **kwargs, now=clock[0]),
+    )
+    _stub_sources(monkeypatch, day)
+    monkeypatch.setattr("sys.argv", _briefing_argv(tmp_path))
+    monkeypatch.setenv("OPENAI_API_KEY", "inert-fixture-key")
+    monkeypatch.setenv("OPENAI_QUESTIONS", "true")
+    monkeypatch.setattr(
+        cli,
+        "generate_daily_briefing",
+        lambda *args, **kwargs: GeneratedBriefing(
+            bullets=["Fixture briefing. Evidence: E001."],
+            metadata={
+                "generator": "openai-responses",
+                "model": "fixture-model",
+                "response_id": "resp_fixture",
+                "usage": {"input_tokens": 10, "output_tokens": 5, "total_tokens": 15},
+                "input": {"evidence_items": 1},
+                "citations": [],
+            },
+        ),
+    )
+
+    def questions(signal):
+        return {
+            "schema_version": 1,
+            "date": day.date().isoformat(),
+            "status": "generated",
+            "generator": "openai-responses",
+            "model": "fixture-model",
+            "groups": [
+                {
+                    "title": "Today's evidence",
+                    "answers": [
+                        {
+                            "question": "What was captured?",
+                            "signal": signal,
+                            "plain_english": "A fixture repository was captured.",
+                            "takeaway": "Inspect the evidence.",
+                            "counter_view": "One fixture cannot establish a trend.",
+                            "cited_evidence": [
+                                {
+                                    "id": "E001",
+                                    "title": "Fixture evidence",
+                                    "url": "https://github.com/org/repo",
+                                    "source": "GitHub",
+                                }
+                            ],
+                        }
+                    ],
+                }
+            ],
+            "calls": 1,
+            "usage": {"input_tokens": 10, "output_tokens": 5},
+        }
+
+    old_questions = questions("Earlier answer.")
+    newer_questions = questions("Intervening writer answer.")
+    if has_earlier_answers:
+        monkeypatch.setattr(cli, "generate_daily_questions", lambda *a, **k: old_questions)
+        cli.main()
+    clock[0] = day + timedelta(hours=2)
+
+    def fail_questions(*args, **kwargs):
+        raise BriefingError("inert overlapping-pass failure")
+
+    monkeypatch.setattr(cli, "generate_daily_questions", fail_questions)
+    boundary = {}
+
+    def persist_intervening_pass_then_this_pass(run, snapshot_dir):
+        path = snapshot_dir / f"{day.date().isoformat()}.json"
+        boundary["initial_questions"] = (
+            json.loads(path.read_text())["questions"] if path.exists() else None
+        )
+        boundary["incoming_questions"] = run.daily_questions
+        # The second writer really commits through the production validator/merge.
+        # It was generated after the seed but before this optional failing pass.
+        competing = replace(
+            run,
+            generated_at=day + timedelta(hours=1),
+            daily_questions=newer_questions,
+        )
+        write_snapshot(competing, snapshot_dir)
+        boundary["intervening_questions"] = json.loads(path.read_text())["questions"]
+        result = write_snapshot(run, snapshot_dir)
+        boundary["final_questions"] = json.loads(result.read_text())["questions"]
+        return result
+
+    monkeypatch.setattr(cli, "write_snapshot", persist_intervening_pass_then_this_pass)
+    cli.main()
+    report = (tmp_path / "report.md").read_text()
+    dashboard = json.loads((tmp_path / "radar.json").read_text())
+    dashboard_day = next(row for row in dashboard["days"] if row["date"] == day.date().isoformat())
+    assert boundary["initial_questions"] == (old_questions if has_earlier_answers else None)
+    assert boundary["intervening_questions"] == newer_questions
+    print("WRITE_TIME_QUESTIONS_PROOF=" + json.dumps(boundary, sort_keys=True))
+    assert boundary["final_questions"] == newer_questions
+    assert dashboard_day["questions"] == newer_questions
+    assert r"Intervening writer answer\." in report
+    assert r"Earlier answer\." not in report
+    assert "[Fixture evidence](https://github.com/org/repo)" in report
+    assert "Answered by fixture-model in 1 calls" in report
+
+
+@pytest.mark.parametrize("interleaved", [True, False])
+@pytest.mark.parametrize("issue_item_limit", [40, 1])
+def test_write_time_questions_and_report_share_committed_evidence(
+    monkeypatch, tmp_path, interleaved, issue_item_limit
+):
+    """PR #815: a fresh writer's answers need its full day's report view too."""
+    from benchmark_radar import briefing, questions
+
+    day = datetime(2026, 8, 2, 8, tzinfo=UTC)
+    clock = [day]
+    source_name = ["alpha"]
+    original_pipeline = cli.run_pipeline
+    monkeypatch.setattr(
+        cli,
+        "run_pipeline",
+        lambda *args, **kwargs: original_pipeline(*args, **kwargs, now=clock[0]),
+    )
+
+    def source_items(config, since, limit):
+        name = source_name[0]
+        return [
+            RadarItem(
+                source="GitHub",
+                source_id=f"org/{name}",
+                title=f"{name.title()} benchmark",
+                url=f"https://github.com/org/{name}",
+                published_at=day,
+                summary="Benchmark suite for language model evaluation.",
+            )
+        ]
+
+    for source in ("github", "arxiv", "huggingface"):
+        monkeypatch.setitem(SOURCE_FETCHERS, source, source_items)
+    argv = _briefing_argv(tmp_path)
+    config_path = Path(argv[argv.index("--config") + 1])
+    config = yaml.safe_load(config_path.read_text())
+    config["radar"]["issue_item_limit"] = issue_item_limit
+    config["watchlist"] = [{"name": "Beta", "note": "Fixture priority."}]
+    config_path.write_text(yaml.safe_dump(config))
+    monkeypatch.setattr("sys.argv", argv)
+    cli.main()
+    path = tmp_path / "snapshots" / f"{day.date().isoformat()}.json"
+    seed = json.loads(path.read_text())
+    assert [item["source_id"] for item in seed["evidence_items"]] == ["org/alpha"]
+
+    def fail_transport(*args, **kwargs):
+        raise BriefingError("inert optional provider failure")
+
+    monkeypatch.setenv("OPENAI_API_KEY", "inert-fixture-key")
+    monkeypatch.setenv("OPENAI_QUESTIONS", "true")
+    monkeypatch.setenv("OPENAI_BRIEFING_MODEL", "fixture-model")
+    monkeypatch.setattr(briefing, "post_json", fail_transport)
+    monkeypatch.setattr(questions, "post_json", fail_transport)
+    packets = []
+
+    def grounded_transport(url, payload, **kwargs):
+        packet = json.loads(payload["input"])
+        packets.append(packet)
+        evidence_ids = [item["id"] for item in packet.get("first_observed_evidence") or []]
+        answers = [
+            {
+                "question": question,
+                "signal": "Captured records are available.",
+                "plain_english": "Inspect the captured evidence.",
+                "takeaway": "Review the evidence.",
+                "counter_view": "Captured evidence does not establish a trend.",
+                "stat_ids": ["S001"],
+                "evidence_ids": evidence_ids,
+                "confidence": "medium",
+                "sufficient_evidence": True,
+            }
+            for question in packet["questions"]
+        ]
+        return {
+            "output": [
+                {
+                    "type": "message",
+                    "content": [{"type": "output_text", "text": json.dumps({"answers": answers})}],
+                }
+            ],
+            "usage": {"input_tokens": 10, "output_tokens": 5},
+        }
+
+    competing_dir = tmp_path / "competing"
+    competing_dir.mkdir()
+    competing_argv = list(argv)
+    for flag, name in (
+        ("--output", "report.md"),
+        ("--json-output", "items.json"),
+        ("--dashboard-output", "radar.json"),
+    ):
+        competing_argv[competing_argv.index(flag) + 1] = str(competing_dir / name)
+    boundary = {}
+
+    def competing_pass():
+        source_name[0] = "beta"
+        clock[0] = day + timedelta(hours=2)
+        with monkeypatch.context() as context:
+            context.setattr("sys.argv", competing_argv)
+            context.setattr(cli, "write_snapshot", write_snapshot)
+            context.setattr(questions, "post_json", grounded_transport)
+            cli.main()
+        boundary["intervening"] = json.loads(path.read_text())
+        competing_report = (competing_dir / "report.md").read_text()
+        assert "- **2** ranked evidence items" in competing_report
+        assert len(packets) == 3
+        generated = boundary["intervening"]["questions"]
+        assert generated["status"] == "generated"
+        assert generated["calls"] == 3
+        assert (
+            next(stat for stat in generated["stat_registry"] if stat["id"] == "S001")["value"] == 2
+        )
+        assert {item["source_id"] for item in boundary["intervening"]["evidence_items"]} == {
+            "org/alpha",
+            "org/beta",
+        }
+        source_name[0] = "alpha"
+        clock[0] = day + timedelta(hours=3)
+
+    def persist_with_intervening_pass(run, snapshot_dir):
+        boundary["initial"] = json.loads(path.read_text())
+        boundary["incoming_questions"] = run.daily_questions
+        competing_pass()
+        result = write_snapshot(run, snapshot_dir)
+        boundary["committed"] = json.loads(result.read_text())
+        return result
+
+    if interleaved:
+        monkeypatch.setattr(cli, "write_snapshot", persist_with_intervening_pass)
+    else:
+        competing_pass()
+    clock[0] = day + timedelta(hours=3)
+    cli.main()
+    committed = json.loads(path.read_text())
+    report = (tmp_path / "report.md").read_text()
+    items = json.loads((tmp_path / "items.json").read_text())
+    dashboard = json.loads((tmp_path / "radar.json").read_text())
+    dashboard_day = next(row for row in dashboard["days"] if row["date"] == seed["date"])
+    assert committed["questions"] == boundary["intervening"]["questions"]
+    assert dashboard_day["questions"] == committed["questions"]
+    assert {item["source_id"] for item in committed["evidence_items"]} == {
+        "org/alpha",
+        "org/beta",
+    }
+    assert "`S001` evidence records captured today: **2**" in report
+    assert "[Beta benchmark](https://github.com/org/beta)" in report
+    assert "Answered by fixture-model in 3 calls" in report
+    print(
+        "DISTINCT_EVIDENCE_PROOF="
+        + json.dumps({"boundary": boundary, "items": items, "report": report}, sort_keys=True)
+    )
+    assert "- **2** ranked evidence items" in report
+    assert [item["source_id"] for item in items["evidence_items"]] == ["org/beta", "org/alpha"]
+    assert items["selection"] == committed["selection"]
+    assert items["generated_at"] == committed["generated_at"]
+    assert items["since"] == committed["since"]
+    if issue_item_limit == 1:
+        assert "## Today's signals (top 1 of 2)" in report
+    else:
+        assert "## Today's signals (top" not in report
+
+
+def test_first_day_report_projection_preserves_committed_metadata(monkeypatch, tmp_path):
+    """Project a fresh day without manufacturing another collection pass."""
+    day = datetime(2026, 8, 2, 8, tzinfo=UTC)
+    original_pipeline = cli.run_pipeline
+    monkeypatch.setattr(
+        cli,
+        "run_pipeline",
+        lambda *args, **kwargs: original_pipeline(*args, **kwargs, now=day),
+    )
+    _stub_sources(monkeypatch, day)
+    monkeypatch.setattr("sys.argv", _briefing_argv(tmp_path))
+    cli.main()
+
+    committed = json.loads((tmp_path / "snapshots" / f"{day.date().isoformat()}.json").read_text())
+    items = json.loads((tmp_path / "items.json").read_text())
+    assert "published_total" not in committed["selection"]
+    assert "merged_from" not in committed["selection"]
+    assert items["selection"] == committed["selection"]
+    assert items["generated_at"] == committed["generated_at"]
+    assert items["since"] == committed["since"]
+    print("FIRST_DAY_METADATA_PROOF=" + json.dumps({"committed": committed, "items": items}))
