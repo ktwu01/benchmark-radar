@@ -67,9 +67,14 @@ The loader enforces these rules:
   restyle are three PRs. Stacked PRs say so and land in order.
 - **Is current and green.** Rebased on the latest `main`, with the full CI
   sequence passing from a clean checkout (`git worktree add`, then
-  `git submodule update --init --recursive`):
+  `git submodule update --init --recursive`). Give that checkout its own
+  environment first; a global install can run code from the wrong checkout:
 
   ```bash
+  python3 -m venv .venv
+  source .venv/bin/activate
+  python -m pip install -e '.[dev]'
+
   ruff check .
   ruff format --check .
   benchmark-radar normalize-catalog
@@ -78,13 +83,21 @@ The loader enforces these rules:
   pytest -q
   ```
 
+  A docs-only PR may skip the sequence when this prints nothing, meaning no
+  test, source or site file refers to the files you changed:
+
+  ```bash
+  git diff --name-only origin/main... | xargs -n1 basename \
+    | xargs -I{} git grep -lF {} -- tests src site
+  ```
+
 - **Shows UI changes.** Before/after screenshots at desktop and phone width,
   light and dark. Keep the existing header, logo, colors and layout. UI changes
   are merged on design quality, so keep the first screen simple.
 - **Cites primary evidence.** Every entry links to the official paper, card,
   dataset or leaderboard it came from. Nothing asks a reader to take our word.
-- **Fixes a real bug with a regression test.** Name the failure, show the test
-  failing before the fix and passing after. Comments explain what the design
+- **Carries a regression test when it fixes a bug.** Name the failure, show
+  the test failing before the fix and passing after. Comments explain what the design
   prevents, not what the code does.
 - **Discloses authorship.** You may add a benchmark you wrote. Say so in the PR.
 
@@ -96,7 +109,7 @@ The loader enforces these rules:
 - **从完整语料出发。** 所有面向 benchmark 的图表、搜索、表格、计数和导出都覆盖全部来源的全部记录；
   缺少测量值不能删掉记录。只显示几十条 benchmark 就说明有记录丢失。见 `principle.md`。
 - **一个 PR 只做一件事。** 连接器、页面、改样式是三个 PR；有依赖的 PR 要写明并按顺序合并。
-- **基于最新 main，CI 全绿。** 在干净的 worktree 中按上面顺序跑完六步。
+- **基于最新 main，CI 全绿。** 在干净的 worktree 中先建独立 venv 并 `pip install -e '.[dev]'`，再按上面顺序跑完六步。纯文档 PR 若上面的检查命令无输出，可跳过。
 - **UI 改动附截图。** 桌面和手机宽度、浅色和深色的前后对比；保留现有页头、logo、配色和布局。
 - **引用一手证据。** 每条记录都链接到官方论文、模型卡、数据集或排行榜。
 - **修 bug 要带回归测试。** 写明故障，测试在修复前失败、修复后通过。
