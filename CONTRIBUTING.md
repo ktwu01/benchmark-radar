@@ -138,6 +138,53 @@ Stated up front so nobody writes work that has to be turned down.
   comment, see `AGENTS.md`). Many near-identical or unverified agent PRs are
   closed without review.
 
+### A real example of a flood / 真实案例：刷屏式提交
+
+Between 2026-09-29 and 2026-10-09, one account opened **58 pull requests and
+11 issues**. At the peak, 56 PRs and 11 issues were open at the same time.
+
+- **Bursts faster than anyone can review.** 15 PRs in 37 minutes on
+  2026-09-30 ([#716](https://github.com/ktwu01/benchmark-radar/pull/716) to
+  [#730](https://github.com/ktwu01/benchmark-radar/pull/730)). On 2026-10-06,
+  29 PRs in one day, including 8 in 27 seconds
+  ([#768](https://github.com/ktwu01/benchmark-radar/pull/768) to
+  [#775](https://github.com/ktwu01/benchmark-radar/pull/775)).
+- **Self-issue, self-PR.** On the afternoon of 2026-10-06 the account filed 11
+  issues ([#782](https://github.com/ktwu01/benchmark-radar/issues/782) to
+  [#798](https://github.com/ktwu01/benchmark-radar/issues/798)), then opened a
+  PR "fixing" each one minutes later. For example, issue
+  [#788](https://github.com/ktwu01/benchmark-radar/issues/788) at 14:01 became
+  PR [#799](https://github.com/ktwu01/benchmark-radar/pull/799) at 14:15. An
+  issue written by the PR's own author, to justify that PR, is not evidence
+  that anyone needs the change.
+- **Hypothetical edge cases.** Most reproductions were inputs no user or source
+  had produced: a JSON number `1e400` turning into Infinity, a single-quoted
+  `url('a/*b*/c.png')` in the CSS minifier, an HTTP-date `Retry-After` header,
+  `xml:base` in Atom feeds, a source title crafted as `MemoryBench](https://wrong.test)`.
+  Each came with long, polished, AI-generated verification text.
+- **Outcome.** Five PRs were merged, the ones that fixed silent data loss in
+  the corpus or a real report bug
+  ([#706](https://github.com/ktwu01/benchmark-radar/pull/706),
+  [#723](https://github.com/ktwu01/benchmark-radar/pull/723),
+  [#773](https://github.com/ktwu01/benchmark-radar/pull/773),
+  [#774](https://github.com/ktwu01/benchmark-radar/pull/774),
+  [#815](https://github.com/ktwu01/benchmark-radar/pull/815)). The other 53
+  PRs and all 11 issues were closed as not planned on 2026-10-07, so the queue
+  could be reviewed again.
+
+The lesson is not "never send fixes". It is: **send the few that a real user or
+caller would hit, one at a time, and wait for review before sending the next.**
+Five merged fixes from 58 PRs means 53 reviews nobody needed.
+
+2026-09-29 至 2026-10-09，一个账号共开了 **58 个 PR 和 11 个 issue**，高峰时 56 个 PR 和 11 个 issue
+同时未关闭。2026-09-30 在 37 分钟内开了 15 个 PR；2026-10-06 一天开了 29 个 PR，其中 8 个在 27 秒内提交。
+同一天下午先自己开 11 个 issue，几分钟后再开 PR "修复"自己的 issue（例如 issue #788 于 14:01 开、
+PR #799 于 14:15 开）——作者为自己的 PR 写的 issue 不能证明有人需要这个改动。大多数复现是没有用户或数据源
+产生过的假想输入（`1e400` 变成 Infinity、CSS 单引号 `url()`、HTTP 日期格式的 `Retry-After`、Atom 的
+`xml:base`、刻意构造的标题），并附有大段 AI 生成的验证文字。最终合并了 5 个修复语料静默丢失或报告真实缺陷的 PR，
+其余 53 个 PR 和全部 11 个 issue 于 2026-10-07 以 not planned 关闭。教训：只提交真实用户或调用方会遇到的修复，
+一次一个，等审阅后再提交下一个。
+
 ### Open item limit / 未关闭数量上限
 
 One author can have at most **10 open issues and pull requests combined**. A new
