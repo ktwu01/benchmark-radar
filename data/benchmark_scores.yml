@@ -537,6 +537,11 @@ benchmarks:
     direction: higher_is_better
     unit: percent
 
+  - benchmark_id: ruler
+    metric: score
+    direction: higher_is_better
+    unit: percent
+
 results:
   # FrontierChallenge's official leaderboard reports model-scaffold systems,
   # not model-only measurements. Preserve the scaffold in every protocol so
@@ -5706,3 +5711,173 @@ results:
     value: 14.29
     read_from: html_text
     measurement_kind: benchmark_publisher_run
+
+# NVIDIA Nemotron Nano v2 card: both model columns, all reported benchmark rows.
+  - benchmark_id: aime
+    instrument: aime_2025
+    protocol: Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify
+      sampling budget or task-window details
+    model: Qwen3-8B
+    organization: Qwen
+    source_id: nvidia_nemotron_nano_9b_v2_model_card
+    reported_at: '2025-08-18'
+    value: 69.3
+    read_from: html_text
+    reported_by: NVIDIA
+  - benchmark_id: aime
+    instrument: aime_2025
+    protocol: Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify
+      sampling budget or task-window details
+    model: NVIDIA-Nemotron-Nano-9B-v2
+    organization: NVIDIA
+    source_id: nvidia_nemotron_nano_9b_v2_model_card
+    reported_at: '2025-08-18'
+    value: 72.1
+    read_from: html_text
+  - benchmark_id: math_500
+    instrument: math_500
+    protocol: Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify
+      sampling budget or task-window details
+    model: Qwen3-8B
+    organization: Qwen
+    source_id: nvidia_nemotron_nano_9b_v2_model_card
+    reported_at: '2025-08-18'
+    value: 96.3
+    read_from: html_text
+    reported_by: NVIDIA
+  - benchmark_id: math_500
+    instrument: math_500
+    protocol: Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify
+      sampling budget or task-window details
+    model: NVIDIA-Nemotron-Nano-9B-v2
+    organization: NVIDIA
+    source_id: nvidia_nemotron_nano_9b_v2_model_card
+    reported_at: '2025-08-18'
+    value: 97.8
+    read_from: html_text
+  - benchmark_id: gpqa_diamond
+    instrument: gpqa_diamond_198
+    protocol: Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify
+      sampling budget or task-window details
+    model: Qwen3-8B
+    organization: Qwen
+    source_id: nvidia_nemotron_nano_9b_v2_model_card
+    reported_at: '2025-08-18'
+    value: 59.6
+    read_from: html_text
+    reported_by: NVIDIA
+  - benchmark_id: gpqa_diamond
+    instrument: gpqa_diamond_198
+    protocol: Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify
+      sampling budget or task-window details
+    model: NVIDIA-Nemotron-Nano-9B-v2
+    organization: NVIDIA
+    source_id: nvidia_nemotron_nano_9b_v2_model_card
+    reported_at: '2025-08-18'
+    value: 64.0
+    read_from: html_text
+  - benchmark_id: livecodebench
+    instrument: livecodebench_nano_v2_window_unspecified
+    protocol: Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify
+      sampling budget or task-window details
+    model: Qwen3-8B
+    organization: Qwen
+    source_id: nvidia_nemotron_nano_9b_v2_model_card
+    reported_at: '2025-08-18'
+    value: 59.5
+    read_from: html_text
+    reported_by: NVIDIA
+  - benchmark_id: livecodebench
+    instrument: livecodebench_nano_v2_window_unspecified
+    protocol: Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify
+      sampling budget or task-window details
+    model: NVIDIA-Nemotron-Nano-9B-v2
+    organization: NVIDIA
+    source_id: nvidia_nemotron_nano_9b_v2_model_card
+    reported_at: '2025-08-18'
+    value: 71.1
+    read_from: html_text
+  - benchmark_id: bfcl
+    instrument: bfcl_v3
+    protocol: Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify
+      sampling budget or task-window details
+    model: Qwen3-8B
+    organization: Qwen
+    source_id: nvidia_nemotron_nano_9b_v2_model_card
+    reported_at: '2025-08-18'
+    value: 66.3
+    read_from: html_text
+    reported_by: NVIDIA
+  - benchmark_id: bfcl
+    instrument: bfcl_v3
+    protocol: Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify
+      sampling budget or task-window details
+    model: NVIDIA-Nemotron-Nano-9B-v2
+    organization: NVIDIA
+    source_id: nvidia_nemotron_nano_9b_v2_model_card
+    reported_at: '2025-08-18'
+    value: 66.9
+    read_from: html_text
+  - benchmark_id: ifeval
+    instrument: ifeval_instruction_strict
+    protocol: Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify
+      sampling budget or task-window details
+    model: Qwen3-8B
+    organization: Qwen
+    source_id: nvidia_nemotron_nano_9b_v2_model_card
+    reported_at: '2025-08-18'
+    value: 89.4
+    read_from: html_text
+    reported_by: NVIDIA
+  - benchmark_id: ifeval
+    instrument: ifeval_instruction_strict
+    protocol: Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify
+      sampling budget or task-window details
+    model: NVIDIA-Nemotron-Nano-9B-v2
+    organization: NVIDIA
+    source_id: nvidia_nemotron_nano_9b_v2_model_card
+    reported_at: '2025-08-18'
+    value: 90.3
+    read_from: html_text
+  - benchmark_id: hle
+    instrument: hle
+    protocol: Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify
+      sampling budget or task-window details
+    model: Qwen3-8B
+    organization: Qwen
+    source_id: nvidia_nemotron_nano_9b_v2_model_card
+    reported_at: '2025-08-18'
+    value: 4.4
+    read_from: html_text
+    reported_by: NVIDIA
+  - benchmark_id: hle
+    instrument: hle
+    protocol: Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify
+      sampling budget or task-window details
+    model: NVIDIA-Nemotron-Nano-9B-v2
+    organization: NVIDIA
+    source_id: nvidia_nemotron_nano_9b_v2_model_card
+    reported_at: '2025-08-18'
+    value: 6.5
+    read_from: html_text
+  - benchmark_id: ruler
+    instrument: ruler_128k
+    protocol: Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning off; 128K context; benchmark table
+      does not specify sampling budget or task-window details
+    model: Qwen3-8B
+    organization: Qwen
+    source_id: nvidia_nemotron_nano_9b_v2_model_card
+    reported_at: '2025-08-18'
+    value: 74.1
+    read_from: html_text
+    reported_by: NVIDIA
+  - benchmark_id: ruler
+    instrument: ruler_128k
+    protocol: Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning off; 128K context; benchmark table
+      does not specify sampling budget or task-window details
+    model: NVIDIA-Nemotron-Nano-9B-v2
+    organization: NVIDIA
+    source_id: nvidia_nemotron_nano_9b_v2_model_card
+    reported_at: '2025-08-18'
+    value: 78.9
+    read_from: html_text

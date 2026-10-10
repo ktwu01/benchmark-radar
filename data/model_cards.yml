@@ -1472,6 +1472,15 @@ benchmarks:
 # canonical ids that document reports a result for. It is a set, not a ranking:
 # a card that reports AIME once and a card that reports it in four
 # configurations both contribute exactly one adoption.
+  - id: ruler
+    name: RULER
+    aliases:
+    - RULER long-context evaluation
+    domain: long_context
+    url: https://github.com/NVIDIA/RULER
+    caveat: Synthetic long-context tasks at multiple context lengths; 128K averages
+      must not be compared to other lengths or reasoning modes.
+
 model_cards:
   - id: openai_gpt_5_system_card
     organization: OpenAI
@@ -2393,3 +2402,20 @@ model_cards:
       - matharena_apex_2025
       - brokenarxiv
 
+
+  - id: nvidia_nemotron_nano_9b_v2_model_card
+    organization: NVIDIA
+    model: NVIDIA-Nemotron-Nano-9B-v2
+    document_type: model_card
+    published: '2025-08-18'
+    retrieved_at: '2026-10-10'
+    url: https://huggingface.co/nvidia/NVIDIA-Nemotron-Nano-9B-v2/blob/6533e8de2c68e4536bf7c411d7a3ce5734111476/README.md
+    benchmarks:
+    - aime
+    - math_500
+    - gpqa_diamond
+    - livecodebench
+    - bfcl
+    - ifeval
+    - hle
+    - ruler
