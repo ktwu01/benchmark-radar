@@ -5716,7 +5716,7 @@ results:
     model: o1-mini
     organization: OpenAI
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 63.6
     read_from: html_text
     reported_by: Microsoft
@@ -5728,7 +5728,7 @@ results:
     model: o1-mini
     organization: OpenAI
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 90.0
     read_from: html_text
     reported_by: Microsoft
@@ -5740,7 +5740,7 @@ results:
     model: o1-mini
     organization: OpenAI
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 60.0
     read_from: html_text
     reported_by: Microsoft
@@ -5752,7 +5752,7 @@ results:
     model: DeepSeek-R1-Distill-Qwen-7B
     organization: DeepSeek
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 53.3
     read_from: html_text
     reported_by: Microsoft
@@ -5764,7 +5764,7 @@ results:
     model: DeepSeek-R1-Distill-Qwen-7B
     organization: DeepSeek
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 91.4
     read_from: html_text
     reported_by: Microsoft
@@ -5776,7 +5776,7 @@ results:
     model: DeepSeek-R1-Distill-Qwen-7B
     organization: DeepSeek
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 49.5
     read_from: html_text
     reported_by: Microsoft
@@ -5788,7 +5788,7 @@ results:
     model: DeepSeek-R1-Distill-Llama-8B
     organization: DeepSeek
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 43.3
     read_from: html_text
     reported_by: Microsoft
@@ -5800,7 +5800,7 @@ results:
     model: DeepSeek-R1-Distill-Llama-8B
     organization: DeepSeek
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 86.9
     read_from: html_text
     reported_by: Microsoft
@@ -5812,7 +5812,7 @@ results:
     model: DeepSeek-R1-Distill-Llama-8B
     organization: DeepSeek
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 47.3
     read_from: html_text
     reported_by: Microsoft
@@ -5824,7 +5824,7 @@ results:
     model: Bespoke-Stratos-7B
     organization: Bespoke Labs
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 20.0
     read_from: html_text
     reported_by: Microsoft
@@ -5836,7 +5836,7 @@ results:
     model: Bespoke-Stratos-7B
     organization: Bespoke Labs
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 82.0
     read_from: html_text
     reported_by: Microsoft
@@ -5848,7 +5848,7 @@ results:
     model: Bespoke-Stratos-7B
     organization: Bespoke Labs
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 37.8
     read_from: html_text
     reported_by: Microsoft
@@ -5860,7 +5860,7 @@ results:
     model: OpenThinker-7B
     organization: OpenThoughts
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 31.3
     read_from: html_text
     reported_by: Microsoft
@@ -5872,7 +5872,7 @@ results:
     model: OpenThinker-7B
     organization: OpenThoughts
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 83.0
     read_from: html_text
     reported_by: Microsoft
@@ -5884,7 +5884,7 @@ results:
     model: OpenThinker-7B
     organization: OpenThoughts
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 42.4
     read_from: html_text
     reported_by: Microsoft
@@ -5896,7 +5896,7 @@ results:
     model: Llama-3.2-3B-Instruct
     organization: Meta
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 6.7
     read_from: html_text
     reported_by: Microsoft
@@ -5908,7 +5908,7 @@ results:
     model: Llama-3.2-3B-Instruct
     organization: Meta
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 44.4
     read_from: html_text
     reported_by: Microsoft
@@ -5920,7 +5920,7 @@ results:
     model: Llama-3.2-3B-Instruct
     organization: Meta
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 25.3
     read_from: html_text
     reported_by: Microsoft
@@ -5932,7 +5932,7 @@ results:
     model: Phi-4-Mini (base model, 3.8B)
     organization: Microsoft
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 10.0
     read_from: html_text
   - benchmark_id: math_500
@@ -5943,7 +5943,7 @@ results:
     model: Phi-4-Mini (base model, 3.8B)
     organization: Microsoft
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 71.8
     read_from: html_text
   - benchmark_id: gpqa_diamond
@@ -5954,7 +5954,7 @@ results:
     model: Phi-4-Mini (base model, 3.8B)
     organization: Microsoft
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 36.9
     read_from: html_text
   - benchmark_id: aime
@@ -5965,7 +5965,7 @@ results:
     model: Phi-4-mini-reasoning (3.8B)
     organization: Microsoft
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 57.5
     read_from: html_text
   - benchmark_id: math_500
@@ -5976,7 +5976,7 @@ results:
     model: Phi-4-mini-reasoning (3.8B)
     organization: Microsoft
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 94.6
     read_from: html_text
   - benchmark_id: gpqa_diamond
@@ -5987,6 +5987,6 @@ results:
     model: Phi-4-mini-reasoning (3.8B)
     organization: Microsoft
     source_id: microsoft_phi_4_mini_reasoning_model_card
-    reported_at: '2025-04-30'
+    reported_at: '2025-04-29'
     value: 52.0
     read_from: html_text
