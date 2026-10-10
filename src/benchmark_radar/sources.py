@@ -426,15 +426,30 @@ def fetch_arxiv(config: dict[str, Any], since: datetime, limit: int) -> list[Rad
             atom_error = error
 
     if atom_error or not found:
-        rss_items = _fetch_arxiv_rss(
-            config,
-            overlap_since=overlap_since,
-            limit=limit,
-        )
-        if rss_items:
-            return rss_items
+        try:
+            rss_items = _fetch_arxiv_rss(
+                config,
+                overlap_since=overlap_since,
+                limit=limit,
+            )
+        except Exception as error:
+            if not found:
+                raise
+            config.setdefault("_source_warnings", []).append(
+                f"arXiv RSS fallback: {type(error).__name__}: {error}"
+            )
+            rss_items = []
+        # A later query failing does not invalidate evidence already returned
+        # by earlier queries. RSS covers only recent announcements, so replacing
+        # the Atom results with it loses older papers updated in the overlap.
+        for item in rss_items:
+            found.setdefault(item.source_id, item)
         if atom_error:
-            raise atom_error
+            if not found:
+                raise atom_error
+            config.setdefault("_source_warnings", []).append(
+                f"arXiv Atom: {type(atom_error).__name__}: {atom_error}"
+            )
     return sorted(
         found.values(),
         key=lambda item: (item.updated_at or item.published_at, item.source_id),

@@ -3456,3 +3456,59 @@ def test_zenodo_keeps_identical_descriptions_with_unknown_creators(monkeypatch):
     # Retain both distinct DOI records instead of inventing a shared identity.
     assert {item.source_id for item in items} == {"1", "2"}
     assert all(not item.rationale for item in items)
+
+
+def test_arxiv_keeps_successful_atom_query_when_later_query_needs_rss(monkeypatch):
+    calls = 0
+
+    def fake_get_text(url, params=None):
+        nonlocal calls
+        if url == "https://export.arxiv.org/api/query":
+            calls += 1
+            if calls == 2:
+                raise RequestError("HTTP 503 from https://export.arxiv.org/api/query")
+            return ARXIV_XML
+        return ARXIV_RSS
+
+    monkeypatch.setattr("benchmark_radar.sources.get_text", fake_get_text)
+    config = {
+        "queries": ["all:benchmark", "all:evaluation"],
+        "rss_categories": ["cs.AI"],
+        "request_delay_seconds": 0,
+    }
+    items = fetch_arxiv(config, datetime(2026, 7, 25, 12, tzinfo=UTC), 10)
+    assert {item.source_id for item in items} == {"2607.12345", "2607.54321"}
+    atom = next(item for item in items if item.source_id == "2607.12345")
+    assert atom.published_at == datetime(2026, 7, 23, 18, tzinfo=UTC)
+    assert atom.updated_at == datetime(2026, 7, 26, 18, tzinfo=UTC)
+    assert atom.parser_version == "arxiv-atom/1"
+
+
+@pytest.mark.parametrize("fallback", ["empty", "failed", "duplicate"])
+def test_arxiv_partial_atom_survives_empty_failed_or_duplicate_rss(monkeypatch, fallback):
+    calls = 0
+
+    def fake_get_text(url, params=None):
+        nonlocal calls
+        if url == "https://export.arxiv.org/api/query":
+            calls += 1
+            if calls == 2:
+                raise RequestError("HTTP 503 from https://export.arxiv.org/api/query")
+            return ARXIV_XML
+        if fallback == "failed":
+            raise RequestError("HTTP 503 from https://rss.arxiv.org/rss/cs.AI")
+        if fallback == "empty":
+            return '<rss version="2.0"><channel /></rss>'
+        return ARXIV_RSS.replace("2607.54321", "2607.12345")
+
+    monkeypatch.setattr("benchmark_radar.sources.get_text", fake_get_text)
+    config = {
+        "queries": ["all:benchmark", "all:evaluation"],
+        "rss_categories": ["cs.AI"],
+        "request_delay_seconds": 0,
+    }
+    items = fetch_arxiv(config, datetime(2026, 7, 25, 12, tzinfo=UTC), 10)
+    assert len(items) == 1
+    assert items[0].source_id == "2607.12345"
+    assert items[0].parser_version == "arxiv-atom/1"
+    assert any("arXiv Atom: RequestError" in warning for warning in config["_source_warnings"])
