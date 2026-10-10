@@ -49,9 +49,13 @@ The loader enforces these rules:
   really gained a benchmark later, record the real `revised` date.
 - **A new benchmark needs a `caveat`:** what would mislead someone comparing two
   reported numbers, such as a small split or a score that depends on tool access.
-- **Scores move with the card.** Every number you can read with certainty from
-  the document goes in [`data/benchmark_scores.yml`](data/benchmark_scores.yml),
-  with the document cited. Read every value out of the document, never from memory.
+
+One more rule is yours to check by hand, because no loader can see what the
+document left out: **scores move with the card.** Every number you can read with
+certainty from the document goes in
+[`data/benchmark_scores.yml`](data/benchmark_scores.yml), with the document
+cited. Read every value out of the document, never from memory. A card merged
+without its readable scores leaves that model invisible to the score history.
 
 ### Every PR we merge does these things
 
