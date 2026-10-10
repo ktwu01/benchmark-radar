@@ -299,8 +299,7 @@ def render_markdown(ledger: dict[str, Any]) -> str:
     lines = [
         "# Contribution score",
         "",
-        "This public ledger is rebuilt from GitHub once per day. Do not edit the "
-        "totals by hand.",
+        "This public ledger is rebuilt from GitHub once per day. Do not edit the totals by hand.",
         "",
         "## How it works",
         "",
