@@ -52,10 +52,12 @@ The loader enforces these rules:
 
 One more rule is yours to check by hand, because no loader can see what the
 document left out: **scores move with the card.** Every number you can read with
-certainty from the document goes in
+certainty from the document, in the benchmark's declared metric, goes in
 [`data/benchmark_scores.yml`](data/benchmark_scores.yml), with the document
-cited. Read every value out of the document, never from memory. A card merged
-without its readable scores leaves that model invisible to the score history.
+cited. Leave out numbers reported in a different metric rather than filing them
+under the wrong one. Read every value out of the document, never from memory. A
+card merged without its readable scores leaves that model invisible to the score
+history.
 
 ### Every PR we merge does these things
 
