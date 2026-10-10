@@ -1,16 +1,16 @@
 # Contribution score
 
-This public ledger is rebuilt from GitHub once per day. Do not edit the totals by hand. / 本公开账本每天从 GitHub 自动重建，请勿手工修改总分。
+This public ledger is rebuilt from GitHub once per day. Do not edit the totals by hand.
 
-## How it works / 计分规则
+## How it works
 
-- Choose an open issue whose title starts with `[N points]`, then comment `/claim`. One person gets 168 hours to merge a PR that closes it. / 选择标题以 `[N points]` 开头的 issue，评论 `/claim`；每次一人，须在 168 小时内合并关闭它的 PR。
-- Only work an outside contributor can complete is scored. A clear bug is at least 2 points; a clear model-card addition is 3 and a new real use case is 6. Broader or ambiguous work may be higher. / 只有外部贡献者能完成的任务才计分；明确的 bug 最低 2 分，明确的模型卡补充为 3 分，新真实使用案例为 6 分；范围更广或更模糊的任务可以更高。
-- Twelve points earns a collaborator seat. Technical-report coauthorship also requires substantive intellectual contribution, drafting or critical revision, final approval, and accountability. / 累计 12 分获得协作者席位；技术报告署名还要求实质性智力贡献、撰写或关键修订、最终批准和责任承担。
+- Choose an open issue whose title starts with `[N points]`, then comment `/claim`. One person gets 168 hours to merge a PR that closes it.
+- Only work an outside contributor can complete is scored. A clear bug is at least 2 points; a clear model-card addition is 3 and a new real use case is 6. Broader or ambiguous work may be higher.
+- Twelve points earns a collaborator seat. Technical-report coauthorship also requires substantive intellectual contribution, drafting or critical revision, final approval, and accountability.
 
 [Available scored issues](https://github.com/ktwu01/benchmark-radar/issues?q=is%3Aissue%20state%3Aopen%20%22points%5D%22) · [Propose a real use case](https://github.com/ktwu01/benchmark-radar/issues/new?template=use-case.yml) · [Full collaboration call](https://github.com/ktwu01/benchmark-radar/issues/447)
 
-## Totals / 总分
+## Totals
 
 | Contributor | Points | Collaborator seat |
 |---|---:|:---:|
@@ -23,7 +23,7 @@ This public ledger is rebuilt from GitHub once per day. Do not edit the totals b
 | @Lareina1024 | 2 | no |
 | @yzliu03 | 1 | no |
 
-## Earned points / 得分记录
+## Earned points
 
 | Work | Contributor | Points |
 |---|---|---:|
