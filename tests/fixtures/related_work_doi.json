@@ -1,0 +1,93 @@
+[
+  {
+    "adoption_score": 0.0,
+    "artifact_urls": [
+      "https://doi.org/10.1098/rsos.261022"
+    ],
+    "authors": [
+      "Mahiro Nakao",
+      "Kazuhiro Takemoto"
+    ],
+    "categories": [
+      "benchmark",
+      "evaluation",
+      "dataset"
+    ],
+    "discovered_at": "2026-09-30T10:48:19.770876+00:00",
+    "event_kind": "released",
+    "evidence_score": 90.0,
+    "metrics": {
+      "citations": 0.0
+    },
+    "organizations": [
+      "Department of Bioscience and Bioinformatics, Kyushu Institute of Technology 1 , Iizuka, Fukuoka, Japan",
+      "Data Science and AI Research Center, Kyushu Institute of Technology 2 , Iizuka, Fukuoka, Japan"
+    ],
+    "parser_version": "crossref-works/1",
+    "published_at": "2026-09-30T00:00:00+00:00",
+    "rationale": [
+      "Matched: benchmark, dataset, evaluat, safety eval",
+      "Primary record: Crossref"
+    ],
+    "raw_payload_hash": "sha256:18925246760786cffb088b0b9227ccbc1dc0790f05fbf7c9e756eadc5f89f795",
+    "recency_score": 77.48855852083332,
+    "recommended": true,
+    "relevance_score": 80.0,
+    "retrieved_at": "2026-09-30T10:48:19.770876+00:00",
+    "score_max": 100.0,
+    "score_version": 5,
+    "source": "Crossref",
+    "source_id": "10.1098/rsos.261022",
+    "summary": "Abstract Large language models (LLMs) are increasingly considered for deployment as the control component of robotic health attendants (RHAs), yet their safety in this context remains poorly characterized. We introduce a dataset of 270 harmful instructions spanning nine prohibited behaviour categories grounded in the American Medical Association (AMA) Principles of Medical Ethics, and use it to evaluate 72 LLMs in a simulation environment based on the RHA framework. The mean violation rate across all models was 54.4%, with more than half exceeding 50%, and violation rates varied substantially across behaviour categories, with superficially plausible instructions such as device manipulation and emergency delay proving harder to refuse than overtly destructive ones. Model size and release date were the primary determinants of safety performance among open-weight models, and proprietary models were substantially safer than open-weight counterparts (median 23.7% versus 72.8%). Medical domain fine-tuning conferred no significant overall safety benefit, and a prompt-based defence strategy produced only a modest reduction in violation rates among the least safe models, leaving violation rates that would preclude safe clinical deployment. These findings demonstrate that safety evaluation must be treated as a first-class criterion in the development and deployment of LLM-based RHAs.",
+    "suppression_reasons": [],
+    "title": "Benchmarking the safety of large language models for robotic health attendant control",
+    "total_score": 61.5,
+    "updated_at": "2026-09-30T00:00:00+00:00",
+    "url": "https://doi.org/10.1098/rsos.261022",
+    "watchlist": null,
+    "watchlist_note": ""
+  },
+  {
+    "adoption_score": 0.0,
+    "artifact_urls": [],
+    "authors": [
+      "Mahiro Nakao",
+      "Kazuhiro Takemoto"
+    ],
+    "categories": [
+      "benchmark"
+    ],
+    "discovered_at": "2026-10-02T10:47:27.456297+00:00",
+    "event_kind": "released",
+    "evidence_score": 70.0,
+    "metrics": {
+      "citations": 0.0
+    },
+    "organizations": [
+      "Kyushu Institute of Technology"
+    ],
+    "parser_version": "openalex-works/1",
+    "published_at": "2026-09-30T00:00:00+00:00",
+    "rationale": [
+      "Matched: benchmark",
+      "Primary record: OpenAlex"
+    ],
+    "raw_payload_hash": "sha256:c9c0fdae76afd5149b1a298570ad2205e79749a60ce3f15cb6d668b8d70cb20e",
+    "recency_score": 0.0,
+    "recommended": false,
+    "relevance_score": 25.0,
+    "retrieved_at": "2026-10-02T10:47:27.456297+00:00",
+    "score_max": 100.0,
+    "score_version": 5,
+    "source": "OpenAlex",
+    "source_id": "W7158888898",
+    "summary": "",
+    "suppression_reasons": [],
+    "title": "Benchmarking the safety of large language models for robotic health attendant control",
+    "total_score": 22.75,
+    "updated_at": null,
+    "url": "https://doi.org/10.1098/rsos.261022",
+    "watchlist": null,
+    "watchlist_note": ""
+  }
+]

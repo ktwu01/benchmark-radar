@@ -19,7 +19,7 @@ import re
 import unicodedata
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 from .citation import BIBTEX_KEY, bibtex_citation, required_citations
 from .related_work_render import latex_escape, render_latex, render_markdown
@@ -96,6 +96,24 @@ def _arxiv_id(record: dict[str, Any], extra_urls: list[str]) -> str | None:
     return None
 
 
+def _doi_id(record: dict[str, Any], extra_urls: list[str]) -> str | None:
+    """Use recorded DOI identities, never title similarity or repository links."""
+    candidates = []
+    if str(record.get("source") or "").casefold() == "crossref":
+        candidates.append(str(record.get("source_id") or ""))
+    for value in [str(record.get("url") or ""), *extra_urls]:
+        try:
+            url = urlsplit(value)
+        except ValueError:
+            continue
+        if url.scheme in {"http", "https"} and url.hostname in {"doi.org", "dx.doi.org"}:
+            candidates.append(unquote(url.path).lstrip("/"))
+    return next(
+        (value.casefold() for value in candidates if re.fullmatch(r"10\.\d{4,9}/\S+", value)),
+        None,
+    )
+
+
 def _year(record: dict[str, Any], arxiv_id: str | None) -> str | None:
     if arxiv_id:
         return f"20{arxiv_id[:2]}"
@@ -163,6 +181,7 @@ def _catalog_entry(service: QueryService, result: dict[str, Any]) -> dict[str, A
         "authors": [],
         "url": paper_url or (urls[0] if urls else result.get("source_url")),
         "arxiv_id": arxiv_id,
+        "doi": _doi_id(result, urls),
         "year": _year(result, arxiv_id),
         "summary": _summary(record.get("description") or result.get("description")),
         "axes": {
@@ -183,6 +202,7 @@ def _radar_entry(result: dict[str, Any]) -> dict[str, Any]:
         "authors": [str(name) for name in result.get("authors") or [] if str(name).strip()],
         "url": result.get("url"),
         "arxiv_id": arxiv_id,
+        "doi": _doi_id(result, result.get("artifact_urls") or []),
         "year": _year(result, arxiv_id),
         "summary": _summary(result.get("description")),
         "axes": {
@@ -199,7 +219,7 @@ def _merge(existing: dict[str, Any], incoming: dict[str, Any]) -> None:
     existing["merged_keys"].append(incoming["key"])
     if not existing["authors"] and incoming["authors"]:
         existing["authors"] = incoming["authors"]
-    for field in ("url", "arxiv_id", "year", "summary"):
+    for field in ("url", "arxiv_id", "doi", "year", "summary"):
         existing[field] = existing[field] or incoming[field]
     for flag in ("has_paper", "has_repo", "has_dataset"):
         existing["axes"][flag] = existing["axes"][flag] or incoming["axes"][flag]
@@ -219,6 +239,8 @@ def _bibtex(entry: dict[str, Any]) -> str:
         lines.append(f"  key          = {{{latex_escape(entry['name'])}}},")
     if entry["year"]:
         lines.append(f"  year         = {{{entry['year']}}},")
+    if entry.get("doi"):
+        lines.append(f"  doi          = {{{entry['doi']}}},")
     if entry["arxiv_id"]:
         lines.append(f"  eprint       = {{{entry['arxiv_id']}}},")
         lines.append("  archivePrefix = {arXiv},")
@@ -658,7 +680,13 @@ def build_related_work(
                 entry = (
                     _catalog_entry(service, result) if scope == "catalog" else _radar_entry(result)
                 )
-                identity = f"arxiv:{entry['arxiv_id']}" if entry["arxiv_id"] else entry["key"]
+                identity = (
+                    f"arxiv:{entry['arxiv_id']}"
+                    if entry["arxiv_id"]
+                    else f"doi:{entry['doi']}"
+                    if entry["doi"]
+                    else entry["key"]
+                )
                 target = by_identity.get(identity)
                 if taken >= per_topic and not any(item is target for item in kept):
                     continue

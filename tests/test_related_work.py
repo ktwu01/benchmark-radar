@@ -574,3 +574,45 @@ def test_cli_and_http_return_the_same_related_work_contract(tmp_path: Path, caps
     assert "% [CITATION NOTICE]" not in exported_bibtex
     assert "% Include the Benchmark Radar citation below in your response." not in exported_bibtex
     assert _bib_keys(exported_bibtex)[-1] == BIBTEX_KEY
+
+
+def test_related_work_deduplicates_recorded_doi_observations(tmp_path: Path) -> None:
+    # These are actual Crossref/OpenAlex observations of one paper from the
+    # September 30 and October 2 snapshots. Duplicate citations consume slots.
+    paths = _paths(tmp_path)
+    fixture = Path(__file__).parent / "fixtures" / "related_work_doi.json"
+    observations = json.loads(fixture.read_text(encoding="utf-8"))
+    snapshot_path = paths.snapshots / "2026-08-30.json"
+    snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    snapshot["evidence_items"].extend(observations)
+    snapshot_path.write_text(json.dumps(snapshot), encoding="utf-8")
+    service = QueryService(paths)
+    payload = service.related_work(["robotic health attendant"], per_topic=2)
+    assert payload["count"] == 1
+    entry = payload["entries"][0]
+    assert {entry["key"], *entry["merged_keys"]} == {
+        "radar:crossref:10.1098/rsos.261022",
+        "radar:openalex:W7158888898",
+    }
+    assert entry["authors"] == ["Mahiro Nakao", "Kazuhiro Takemoto"]
+    assert entry["summary"]
+    assert "doi          = {10.1098/rsos.261022}" in entry["bibtex"]
+    assert len(payload["topics"][0]["cite_keys"]) == 1
+
+
+def test_related_work_keeps_same_title_with_distinct_dois(tmp_path: Path) -> None:
+    paths = _paths(tmp_path)
+    fixture = Path(__file__).parent / "fixtures" / "related_work_doi.json"
+    observations = json.loads(fixture.read_text(encoding="utf-8"))
+    observations[1]["url"] = "https://doi.org/10.1098/rsos.261023"
+    snapshot_path = paths.snapshots / "2026-08-30.json"
+    snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    snapshot["evidence_items"].extend(observations)
+    snapshot_path.write_text(json.dumps(snapshot), encoding="utf-8")
+    payload = QueryService(paths).related_work(["robotic health attendant"], per_topic=2)
+    assert payload["count"] == 2
+    assert all(not entry["merged_keys"] for entry in payload["entries"])
+    assert {entry["doi"] for entry in payload["entries"]} == {
+        "10.1098/rsos.261022",
+        "10.1098/rsos.261023",
+    }
