@@ -537,6 +537,36 @@ benchmarks:
     direction: higher_is_better
     unit: percent
 
+  # Preserve the card's unspecified percentage metric without relabeling it.
+  - benchmark_id: hellaswag
+    metric: reported_score
+    direction: higher_is_better
+    unit: percent
+  - benchmark_id: winogrande
+    metric: reported_score
+    direction: higher_is_better
+    unit: percent
+  - benchmark_id: openbookqa
+    metric: reported_score
+    direction: higher_is_better
+    unit: percent
+  - benchmark_id: commonsenseqa
+    metric: reported_score
+    direction: higher_is_better
+    unit: percent
+  - benchmark_id: truthfulqa
+    metric: reported_score
+    direction: higher_is_better
+    unit: percent
+  - benchmark_id: triviaqa
+    metric: reported_score
+    direction: higher_is_better
+    unit: percent
+  - benchmark_id: natural_questions
+    metric: reported_score
+    direction: higher_is_better
+    unit: percent
+
 results:
   # FrontierChallenge's official leaderboard reports model-scaffold systems,
   # not model-only measurements. Preserve the scaffold in every protocol so
@@ -5706,3 +5736,154 @@ results:
     value: 14.29
     read_from: html_text
     measurement_kind: benchmark_publisher_run
+
+  # All 16 percentages in the vendor README, including language-specific MMLU.
+  # These are Base checkpoint evaluations, also printed in the July 18 Base README:
+  # https://huggingface.co/mistralai/Mistral-Nemo-Base-2407/blob/d2efb15544d5401f761235bef327babb850887d0/README.md
+  # The release labels the matching main benchmark table as Base model performance:
+  # https://mistral.ai/news/mistral-nemo/
+  # The cited Instruct document title does not identify the measured checkpoint.
+  - benchmark_id: hellaswag
+    instrument: hellaswag
+    protocol: "0-shot; split, normalization, and remaining evaluation conditions unspecified in this card"
+    model: Mistral-Nemo-Base-2407
+    organization: Mistral
+    source_id: mistral_nemo_instruct_2407_model_card
+    reported_at: 2024-07-18
+    value: 83.5
+    read_from: html_text
+  - benchmark_id: winogrande
+    instrument: winogrande
+    protocol: "0-shot; split, normalization, and remaining evaluation conditions unspecified in this card"
+    model: Mistral-Nemo-Base-2407
+    organization: Mistral
+    source_id: mistral_nemo_instruct_2407_model_card
+    reported_at: 2024-07-18
+    value: 76.8
+    read_from: html_text
+  - benchmark_id: openbookqa
+    instrument: openbookqa
+    protocol: "0-shot; split, normalization, and remaining evaluation conditions unspecified in this card"
+    model: Mistral-Nemo-Base-2407
+    organization: Mistral
+    source_id: mistral_nemo_instruct_2407_model_card
+    reported_at: 2024-07-18
+    value: 60.6
+    read_from: html_text
+  - benchmark_id: commonsenseqa
+    instrument: commonsenseqa
+    protocol: "0-shot; split, normalization, and remaining evaluation conditions unspecified in this card"
+    model: Mistral-Nemo-Base-2407
+    organization: Mistral
+    source_id: mistral_nemo_instruct_2407_model_card
+    reported_at: 2024-07-18
+    value: 70.4
+    read_from: html_text
+  - benchmark_id: truthfulqa
+    instrument: truthfulqa
+    protocol: "0-shot; split, normalization, and remaining evaluation conditions unspecified in this card"
+    model: Mistral-Nemo-Base-2407
+    organization: Mistral
+    source_id: mistral_nemo_instruct_2407_model_card
+    reported_at: 2024-07-18
+    value: 50.3
+    read_from: html_text
+  - benchmark_id: mmlu
+    instrument: mmlu
+    protocol: "5-shot; split, normalization, and remaining evaluation conditions unspecified in this card"
+    model: Mistral-Nemo-Base-2407
+    organization: Mistral
+    source_id: mistral_nemo_instruct_2407_model_card
+    reported_at: 2024-07-18
+    value: 68.0
+    read_from: html_text
+  - benchmark_id: triviaqa
+    instrument: triviaqa
+    protocol: "5-shot; split, normalization, and remaining evaluation conditions unspecified in this card"
+    model: Mistral-Nemo-Base-2407
+    organization: Mistral
+    source_id: mistral_nemo_instruct_2407_model_card
+    reported_at: 2024-07-18
+    value: 73.8
+    read_from: html_text
+  - benchmark_id: natural_questions
+    instrument: natural_questions
+    protocol: "5-shot; split, normalization, and remaining evaluation conditions unspecified in this card"
+    model: Mistral-Nemo-Base-2407
+    organization: Mistral
+    source_id: mistral_nemo_instruct_2407_model_card
+    reported_at: 2024-07-18
+    value: 31.2
+    read_from: html_text
+  - benchmark_id: mmlu
+    instrument: mmlu_french
+    protocol: "language: French; shot count, translation provenance, split, and remaining evaluation conditions unspecified in this card"
+    model: Mistral-Nemo-Base-2407
+    organization: Mistral
+    source_id: mistral_nemo_instruct_2407_model_card
+    reported_at: 2024-07-18
+    value: 62.3
+    read_from: html_text
+  - benchmark_id: mmlu
+    instrument: mmlu_german
+    protocol: "language: German; shot count, translation provenance, split, and remaining evaluation conditions unspecified in this card"
+    model: Mistral-Nemo-Base-2407
+    organization: Mistral
+    source_id: mistral_nemo_instruct_2407_model_card
+    reported_at: 2024-07-18
+    value: 62.7
+    read_from: html_text
+  - benchmark_id: mmlu
+    instrument: mmlu_spanish
+    protocol: "language: Spanish; shot count, translation provenance, split, and remaining evaluation conditions unspecified in this card"
+    model: Mistral-Nemo-Base-2407
+    organization: Mistral
+    source_id: mistral_nemo_instruct_2407_model_card
+    reported_at: 2024-07-18
+    value: 64.6
+    read_from: html_text
+  - benchmark_id: mmlu
+    instrument: mmlu_italian
+    protocol: "language: Italian; shot count, translation provenance, split, and remaining evaluation conditions unspecified in this card"
+    model: Mistral-Nemo-Base-2407
+    organization: Mistral
+    source_id: mistral_nemo_instruct_2407_model_card
+    reported_at: 2024-07-18
+    value: 61.3
+    read_from: html_text
+  - benchmark_id: mmlu
+    instrument: mmlu_portuguese
+    protocol: "language: Portuguese; shot count, translation provenance, split, and remaining evaluation conditions unspecified in this card"
+    model: Mistral-Nemo-Base-2407
+    organization: Mistral
+    source_id: mistral_nemo_instruct_2407_model_card
+    reported_at: 2024-07-18
+    value: 63.3
+    read_from: html_text
+  - benchmark_id: mmlu
+    instrument: mmlu_russian
+    protocol: "language: Russian; shot count, translation provenance, split, and remaining evaluation conditions unspecified in this card"
+    model: Mistral-Nemo-Base-2407
+    organization: Mistral
+    source_id: mistral_nemo_instruct_2407_model_card
+    reported_at: 2024-07-18
+    value: 59.2
+    read_from: html_text
+  - benchmark_id: mmlu
+    instrument: mmlu_chinese
+    protocol: "language: Chinese; shot count, translation provenance, split, and remaining evaluation conditions unspecified in this card"
+    model: Mistral-Nemo-Base-2407
+    organization: Mistral
+    source_id: mistral_nemo_instruct_2407_model_card
+    reported_at: 2024-07-18
+    value: 59.0
+    read_from: html_text
+  - benchmark_id: mmlu
+    instrument: mmlu_japanese
+    protocol: "language: Japanese; shot count, translation provenance, split, and remaining evaluation conditions unspecified in this card"
+    model: Mistral-Nemo-Base-2407
+    organization: Mistral
+    source_id: mistral_nemo_instruct_2407_model_card
+    reported_at: 2024-07-18
+    value: 59.0
+    read_from: html_text

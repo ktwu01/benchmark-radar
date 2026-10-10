@@ -1472,6 +1472,57 @@ benchmarks:
 # canonical ids that document reports a result for. It is a set, not a ranking:
 # a card that reports AIME once and a card that reports it in four
 # configurations both contribute exactly one adoption.
+  # Historical instruments reported in the Mistral NeMo model card.
+  - id: hellaswag
+    name: HellaSwag
+    domain: reasoning
+    url: https://arxiv.org/abs/1905.07830
+    caveat: >-
+      Multiple-choice continuation scoring depends on length normalization and evaluation split; the vendor card does not specify either.
+
+  - id: winogrande
+    name: WinoGrande
+    domain: reasoning
+    url: https://arxiv.org/abs/1907.10641
+    caveat: >-
+      Adversarial pronoun-resolution task; training size, split, and prompting must match before scores are compared.
+
+  - id: openbookqa
+    name: OpenBookQA
+    domain: knowledge
+    url: https://arxiv.org/abs/1809.02789
+    caveat: >-
+      Open-book and closed-book access produce different conditions; the cited card does not state access to supporting facts.
+
+  - id: commonsenseqa
+    name: CommonsenseQA
+    domain: knowledge
+    url: https://arxiv.org/abs/1811.00937
+    caveat: >-
+      Static ConceptNet-derived multiple-choice questions; shot count and held-out split affect comparisons.
+
+  - id: truthfulqa
+    name: TruthfulQA
+    domain: reasoning
+    url: https://arxiv.org/abs/2109.07958
+    caveat: >-
+      Generation, MC1, and MC2 measure different outcomes; the cited percentage does not identify which metric was used.
+
+  - id: triviaqa
+    name: TriviaQA
+    domain: knowledge
+    url: https://arxiv.org/abs/1705.03551
+    caveat: >-
+      Closed-book and evidence-conditioned answer evaluation differ; the cited card omits split, evidence access, and answer metric.
+
+  - id: natural_questions
+    name: Natural Questions
+    domain: knowledge
+    url: https://aclanthology.org/Q19-1026/
+    caveat: >-
+      Short-answer and long-answer evaluations differ; the cited card does not identify answer metric, evidence access, or split.
+
+
 model_cards:
   - id: openai_gpt_5_system_card
     organization: OpenAI
@@ -2393,3 +2444,20 @@ model_cards:
       - matharena_apex_2025
       - brokenarxiv
 
+
+  - id: mistral_nemo_instruct_2407_model_card
+    organization: Mistral
+    model: Mistral-Nemo-Instruct-2407
+    document_type: model_card
+    published: 2024-07-18
+    url: https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407/blob/main/README.md
+    retrieved_at: 2026-10-10
+    benchmarks:
+      - hellaswag
+      - winogrande
+      - openbookqa
+      - commonsenseqa
+      - truthfulqa
+      - triviaqa
+      - natural_questions
+      - mmlu
