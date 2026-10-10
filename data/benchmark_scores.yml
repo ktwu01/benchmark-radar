@@ -537,6 +537,11 @@ benchmarks:
     direction: higher_is_better
     unit: percent
 
+  - benchmark_id: tau_bench
+    metric: pass@1
+    direction: higher_is_better
+    unit: percent
+
 results:
   # FrontierChallenge's official leaderboard reports model-scaffold systems,
   # not model-only measurements. Preserve the scaffold in every protocol so
@@ -5706,3 +5711,82 @@ results:
     value: 14.29
     read_from: html_text
     measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: bfcl
+    instrument: bfcl_v3
+    protocol: Cohere Command A Reasoning launch comparison; highest available reasoning; Function Calling (FC) setting; remaining generation settings not specified
+    model: Command A Reasoning
+    organization: Cohere
+    source_id: cohere_command_a_reasoning_release
+    reported_at: '2025-08-21'
+    value: 70.3
+    read_from: table_image
+  - benchmark_id: tau_bench
+    instrument: tau_bench_airline_retail_average
+    protocol: Cohere Command A Reasoning launch comparison; highest available reasoning; average of airline and retail; mean pass@1 over 10 runs
+    model: Command A Reasoning
+    organization: Cohere
+    source_id: cohere_command_a_reasoning_release
+    reported_at: '2025-08-21'
+    value: 59.8
+    read_from: table_image
+  - benchmark_id: bfcl
+    instrument: bfcl_v3
+    protocol: Cohere Command A Reasoning launch comparison; highest available reasoning; official BFCL leaderboard score where available, otherwise best of prompted and FC evaluation; individual score origin and generation settings not specified
+    model: DeepSeek-R1-0528
+    organization: DeepSeek
+    source_id: cohere_command_a_reasoning_release
+    reported_at: '2025-08-21'
+    value: 63.8
+    read_from: table_image
+    reported_by: Cohere
+  - benchmark_id: tau_bench
+    instrument: tau_bench_airline_retail_average
+    protocol: Cohere Command A Reasoning launch comparison; highest available reasoning; average of airline and retail; competitor officially reported values where available; run count not stated for these values
+    model: DeepSeek-R1-0528
+    organization: DeepSeek
+    source_id: cohere_command_a_reasoning_release
+    reported_at: '2025-08-21'
+    value: 58.7
+    read_from: table_image
+    reported_by: Cohere
+  - benchmark_id: bfcl
+    instrument: bfcl_v3
+    protocol: Cohere Command A Reasoning launch comparison; highest available reasoning; official BFCL leaderboard score where available, otherwise best of prompted and FC evaluation; individual score origin and generation settings not specified
+    model: gpt-oss-120b
+    organization: OpenAI
+    source_id: cohere_command_a_reasoning_release
+    reported_at: '2025-08-21'
+    value: 61.6
+    read_from: table_image
+    reported_by: Cohere
+  - benchmark_id: tau_bench
+    instrument: tau_bench_airline_retail_average
+    protocol: Cohere Command A Reasoning launch comparison; highest available reasoning; average of airline and retail; competitor officially reported values where available; run count not stated for these values
+    model: gpt-oss-120b
+    organization: OpenAI
+    source_id: cohere_command_a_reasoning_release
+    reported_at: '2025-08-21'
+    value: 58.5
+    read_from: table_image
+    reported_by: Cohere
+  - benchmark_id: bfcl
+    instrument: bfcl_v3
+    protocol: Cohere Command A Reasoning launch comparison; highest available reasoning; official BFCL leaderboard score where available, otherwise best of prompted and FC evaluation; individual score origin and generation settings not specified
+    model: Magistral Medium
+    organization: Mistral
+    source_id: cohere_command_a_reasoning_release
+    reported_at: '2025-08-21'
+    value: 50.4
+    read_from: table_image
+    reported_by: Cohere
+  - benchmark_id: tau_bench
+    instrument: tau_bench_airline_retail_average
+    protocol: Cohere Command A Reasoning launch comparison; highest available reasoning; average of airline and retail; mean pass@1 over 10 runs
+    model: Magistral Medium
+    organization: Mistral
+    source_id: cohere_command_a_reasoning_release
+    reported_at: '2025-08-21'
+    value: 39.8
+    read_from: table_image
+    reported_by: Cohere

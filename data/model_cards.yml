@@ -1472,6 +1472,15 @@ benchmarks:
 # canonical ids that document reports a result for. It is a set, not a ranking:
 # a card that reports AIME once and a card that reports it in four
 # configurations both contribute exactly one adoption.
+  - id: deepresearch_bench
+    name: DeepResearch Bench
+    aliases:
+    - DeepResearch Bench
+    - DeepResearchBench
+    domain: tool_use
+    url: https://deepresearch-bench.github.io/
+    caveat: RACE grades report quality while FACT grades retrieval and citation behavior; the task language, agent scaffold, and judge must be recorded because they are different measurements.
+
 model_cards:
   - id: openai_gpt_5_system_card
     organization: OpenAI
@@ -2393,3 +2402,18 @@ model_cards:
       - matharena_apex_2025
       - brokenarxiv
 
+
+  # Public vendor release post; numeric labels read from its agentic chart.
+  # DeepResearch RACE has unlabelled bars: mention retained, no guessed values.
+  # Private multilingual tau, North and safety evaluations remain untracked.
+  - id: cohere_command_a_reasoning_release
+    organization: Cohere
+    model: Command A Reasoning
+    document_type: release_post
+    published: '2025-08-21'
+    url: https://cohere.com/blog/command-a-reasoning
+    retrieved_at: '2026-10-10'
+    benchmarks:
+    - bfcl
+    - tau_bench
+    - deepresearch_bench
