@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import gzip
 import http.client
 import json
 import re
@@ -146,7 +147,12 @@ def _request(
                 timeout=timeout,
                 context=ssl.create_default_context(cafile=certifi.where()),
             ) as response:
-                return response.read()
+                body = response.read()
+                # urllib does not decode Content-Encoding. First-party feeds
+                # can return gzip even when callers did not request compression.
+                if response.headers.get("Content-Encoding", "").strip().casefold() == "gzip":
+                    body = gzip.decompress(body)
+                return body
         except urllib.error.HTTPError as error:
             # Only rate limits and server failures are transient. Never expose
             # a query string: some APIs carry credentials there.

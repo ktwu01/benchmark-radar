@@ -1,15 +1,18 @@
+import gzip
 import http.client
 import io
 import urllib.error
+from datetime import UTC, datetime
 
 import pytest
 
-from benchmark_radar.http import RequestError, get_json, post_json
+from benchmark_radar.http import RequestError, get_json, get_text, post_json
 
 
 class Response:
-    def __init__(self, body: bytes):
+    def __init__(self, body: bytes, headers=None):
         self.body = body
+        self.headers = headers or {}
 
     def __enter__(self):
         return self
@@ -265,3 +268,52 @@ def test_post_json_sends_compact_json_and_headers(monkeypatch):
     assert captured["request"].data == b'{"input":"brief me"}'
     assert captured["request"].get_header("Content-type") == "application/json"
     assert captured["request"].get_header("Authorization") == "Bearer secret"
+
+
+@pytest.mark.parametrize("encoding", [None, "gzip", "GZip"])
+@pytest.mark.parametrize("kind", ["text", "json"])
+def test_http_decodes_gzip_before_parsing_payload(monkeypatch, encoding, kind):
+    # DeepMind's configured RSS feed returned Content-Encoding: gzip, causing
+    # the October 10 snapshot to record a UTF-8 failure instead of its posts.
+    body = (
+        b"<rss><channel><title>Google DeepMind</title></channel></rss>"
+        if kind == "text"
+        else b'{"ok":true}'
+    )
+    wire = gzip.compress(body, mtime=0) if encoding else body
+    headers = {"Content-Encoding": encoding} if encoding else {}
+    monkeypatch.setattr(
+        "benchmark_radar.http.urllib.request.urlopen",
+        lambda request, **kwargs: Response(wire, headers),
+    )
+    if kind == "text":
+        assert get_text("https://deepmind.google/blog/rss.xml") == body.decode("utf-8")
+    else:
+        assert get_json("https://example.test/data") == {"ok": True}
+
+
+def test_gzip_first_party_feed_retains_real_deepmind_announcement(monkeypatch):
+    from benchmark_radar.sources import fetch_first_party_feeds
+
+    # Public DeepMind RSS title/link/date retrieved October 10, 2026. Keep only
+    # identifying metadata so the regression does not depend on the live feed.
+    xml = b"""<rss><channel><item>
+    <title>Piloting the world's first double-blind AI evaluations</title>
+    <link>https://deepmind.google/blog/piloting-the-worlds-first-double-blind-ai-evaluations/</link>
+    <pubDate>Thu, 27 Aug 2026 12:59:16 +0000</pubDate>
+    </item></channel></rss>"""
+    monkeypatch.setattr(
+        "benchmark_radar.http.urllib.request.urlopen",
+        lambda request, **kwargs: Response(
+            gzip.compress(xml, mtime=0), {"Content-Encoding": "gzip"}
+        ),
+    )
+    config = {
+        "feeds": [{"name": "Google DeepMind", "url": "https://deepmind.google/blog/rss.xml"}],
+        "_collection_now": datetime(2026, 8, 28, tzinfo=UTC),
+    }
+    items = fetch_first_party_feeds(config, datetime(2026, 8, 27, tzinfo=UTC), 10)
+    assert len(items) == 1
+    assert items[0].title == "Piloting the world's first double-blind AI evaluations"
+    assert items[0].published_at == datetime(2026, 8, 27, 12, 59, 16, tzinfo=UTC)
+    assert "_source_warnings" not in config
