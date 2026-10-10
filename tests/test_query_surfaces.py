@@ -474,6 +474,8 @@ def test_recent_and_status_report_snapshot_health(tmp_path: Path) -> None:
     assert status["radar"]["snapshot_count"] == 1
     assert status["radar"]["latest_date"] == "2026-08-29"
     assert status["radar"]["required_coverage_complete"] is True
+    assert status["collectors"]["status"] == "ok"
+    assert status["collectors"]["affected_count"] == 0
 
 
 def test_radar_results_carry_derived_science_domains(tmp_path: Path) -> None:
@@ -741,7 +743,8 @@ def test_cli_and_http_return_the_same_non_search_contracts(tmp_path: Path, capsy
 
 def test_healthz_identifies_local_health_check_contract(tmp_path: Path) -> None:
     # Regression: the lightweight health route omitted provenance and retrieval mode.
-    server = create_query_server(QueryService(_catalog(tmp_path)), host="127.0.0.1", port=0)
+    service = QueryService(_catalog(tmp_path))
+    server = create_query_server(service, host="127.0.0.1", port=0)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
@@ -760,6 +763,7 @@ def test_healthz_identifies_local_health_check_contract(tmp_path: Path) -> None:
         "data": {"source": "local", "citation": citation_block()},
         "status": "ok",
         "data_status": "ok",
+        "collectors": service.status()["collectors"],
     }
 
 
@@ -915,3 +919,73 @@ def test_cli_json_mode_keeps_stdout_parseable_and_cites_on_stderr(tmp_path: Path
     assert payload["status"] == "ok"
     assert "please cite it" in captured.err
     assert "please cite it" not in captured.out
+
+
+def test_status_discloses_recorded_collector_failures(tmp_path: Path, capsys) -> None:
+    # The October 10 snapshot contains real 429s, partial collector failures,
+    # and absent optional credentials even though required coverage is healthy.
+    paths = _catalog(tmp_path)
+    fixture = Path(__file__).parent / "fixtures" / "query_ingest_health.json"
+    health = json.loads(fixture.read_text(encoding="utf-8"))
+    snapshot_path = paths.snapshots / "2026-08-29.json"
+    snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    snapshot["ingest_health"] = health
+    snapshot_path.write_text(json.dumps(snapshot), encoding="utf-8")
+    payload = QueryService(paths).status()
+    assert payload["status"] == "ok"  # The offline dataset remains usable.
+    assert payload["collectors"]["status"] == "degraded"
+    assert payload["collectors"]["health"] == health
+    assert payload["collectors"]["affected_count"] == sum(
+        item["ok"] is not True or bool(item["error"]) for item in health
+    )
+    assert (
+        run_query_cli(
+            [
+                "status",
+                "--index",
+                str(paths.index),
+                "--shards",
+                str(paths.shards),
+                "--snapshots",
+                str(paths.snapshots),
+            ]
+        )
+        == 0
+    )
+    output = capsys.readouterr().out
+    assert "collectors: degraded" in output
+    assert "semantic_scholar: failed" in output
+    assert "HTTP 429" in output
+    assert "first_party_feeds: partial" in output
+    assert "Google DeepMind" in output
+    assert "arxiv: ok" in output
+
+
+def test_healthz_reports_usable_data_with_degraded_collectors(tmp_path: Path) -> None:
+    paths = _catalog(tmp_path)
+    snapshot_path = paths.snapshots / "2026-08-29.json"
+    snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    snapshot["ingest_health"].append(
+        {
+            "source": "semantic_scholar",
+            "ok": False,
+            "item_count": 0,
+            "method": "API",
+            "error": "HTTP 429 after 3 attempts",
+        }
+    )
+    snapshot_path.write_text(json.dumps(snapshot), encoding="utf-8")
+    service = QueryService(paths)
+    server = create_query_server(service, port=0)
+    worker = threading.Thread(target=server.serve_forever, daemon=True)
+    worker.start()
+    try:
+        with urllib.request.urlopen(f"http://127.0.0.1:{server.server_port}/healthz") as response:
+            payload = json.load(response)
+        assert payload["status"] == "degraded"
+        assert payload["data_status"] == "ok"
+        assert payload["collectors"] == service.status()["collectors"]
+    finally:
+        server.shutdown()
+        server.server_close()
+        worker.join(timeout=5)

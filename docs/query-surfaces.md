@@ -50,6 +50,13 @@ health, across the CLI, the HTTP surface, and the public consumer Skill.
   only from recorded snapshot metadata; a record without them is emitted with a
   BibTeX `key` field and an `authors_missing` verification flag, never a guessed
   author list. Every payload carries a coverage statement naming the corpus window.
+- Health distinguishes local dataset usability from collector outcomes. `status`
+  keeps its required-source and shard-completeness contract for installed data;
+  `collectors` separately reports every recorded source outcome and counts failed
+  or partial collectors. Human CLI output prints those source names and errors.
+  `/healthz` reports overall `degraded` when either dimension is degraded and
+  retains `data_status` so callers can see whether offline data remains usable.
+  Collector errors are recorded snapshot evidence, not a live connectivity check.
 - Catalog records and daily discovery observations describe different things.
   Label a discovery observation as evidence of a mention or release, and retain
   the benchmark record it refers to. Source membership must not establish a

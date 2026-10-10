@@ -186,8 +186,13 @@ def create_query_server(
                     "schema_version": QUERY_SCHEMA_VERSION,
                     "retrieval_mode": "health_check",
                     "data": status["data"],
-                    "status": "ok",
+                    "status": (
+                        "ok"
+                        if status["status"] == "ok" and status["collectors"]["status"] == "ok"
+                        else "degraded"
+                    ),
                     "data_status": status["status"],
+                    "collectors": status["collectors"],
                 }
 
             raise QueryError(

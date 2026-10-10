@@ -378,6 +378,17 @@ def _print_status(payload: dict[str, Any]) -> None:
     )
     gaps = payload["radar"]["required_coverage_gaps"]
     print(f"required source gaps: {', '.join(gaps) if gaps else 'none'}")
+    collectors = payload["collectors"]
+    print(
+        f"collectors: {collectors['status']} "
+        f"({collectors['affected_count']} of {collectors['count']} affected)"
+    )
+    for health in collectors["health"]:
+        state = (
+            "failed" if health.get("ok") is not True else "partial" if health.get("error") else "ok"
+        )
+        detail = f"; {health['error']}" if health.get("error") else ""
+        print(f"  {health['source']}: {state}; {health.get('item_count', 0)} items{detail}")
 
 
 def _print_sync(payload: dict[str, Any]) -> None:

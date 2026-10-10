@@ -828,10 +828,22 @@ class QueryService:
             for source in REQUIRED_SOURCES
             if source not in health or health[source].get("ok") is not True
         )
+        collector_health = latest.get("ingest_health") or []
+        affected_count = sum(
+            item.get("ok") is not True or bool(item.get("error")) for item in collector_health
+        )
         return {
             "schema_version": QUERY_SCHEMA_VERSION,
             "retrieval_mode": "health_check",
             "data": self._provenance(),
+            # Dataset usability and collection failures are separate: optional
+            # outages must be visible without making offline sync unusable.
+            "collectors": {
+                "status": "degraded" if affected_count else "ok",
+                "count": len(collector_health),
+                "affected_count": affected_count,
+                "health": collector_health,
+            },
             "status": "ok" if not gaps and not missing_shards else "degraded",
             "catalog": {
                 "path": str(self.paths.index),

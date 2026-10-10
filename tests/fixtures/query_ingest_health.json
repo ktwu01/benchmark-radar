@@ -1,0 +1,162 @@
+[
+  {
+    "error": null,
+    "item_count": 51,
+    "kind": "evidence",
+    "method": "RSS",
+    "ok": true,
+    "source": "arxiv"
+  },
+  {
+    "error": null,
+    "item_count": 173,
+    "kind": "evidence",
+    "method": "API",
+    "ok": true,
+    "source": "huggingface"
+  },
+  {
+    "error": null,
+    "item_count": 300,
+    "kind": "evidence",
+    "method": "API",
+    "ok": true,
+    "source": "github"
+  },
+  {
+    "error": null,
+    "item_count": 14,
+    "kind": "evidence",
+    "method": "API",
+    "ok": true,
+    "source": "github_organizations"
+  },
+  {
+    "error": null,
+    "item_count": 72,
+    "kind": "evidence",
+    "method": "API",
+    "ok": true,
+    "source": "huggingface_papers"
+  },
+  {
+    "error": null,
+    "item_count": 54,
+    "kind": "evidence",
+    "method": "API",
+    "ok": true,
+    "source": "kaggle_datasets"
+  },
+  {
+    "error": "Discarded 1 future-dated record(s)",
+    "item_count": 68,
+    "kind": "evidence",
+    "method": "API",
+    "ok": true,
+    "source": "zenodo"
+  },
+  {
+    "error": null,
+    "item_count": 188,
+    "kind": "evidence",
+    "method": "API",
+    "ok": true,
+    "source": "crossref"
+  },
+  {
+    "error": null,
+    "item_count": 72,
+    "kind": "evidence",
+    "method": "API",
+    "ok": true,
+    "source": "datacite"
+  },
+  {
+    "error": null,
+    "item_count": 0,
+    "kind": "evidence",
+    "method": "API",
+    "ok": true,
+    "source": "openaire"
+  },
+  {
+    "error": "OpenReviewException: {'name': 'Error', 'message': 'Invalid username or password (2026-10-10-6042807)', 'status': 400, 'details': {'reqId': '2026-10-10-6042807'}}",
+    "item_count": 0,
+    "kind": "evidence",
+    "method": "",
+    "ok": false,
+    "source": "openreview"
+  },
+  {
+    "error": "RequestError: HTTP 429 from https://api.semanticscholar.org/graph/v1/paper/search after 3 attempts",
+    "item_count": 0,
+    "kind": "evidence",
+    "method": "",
+    "ok": false,
+    "source": "semantic_scholar"
+  },
+  {
+    "error": null,
+    "item_count": 3,
+    "kind": "evidence",
+    "method": "API",
+    "ok": true,
+    "source": "github_releases"
+  },
+  {
+    "error": "Google DeepMind: UnicodeDecodeError: 'utf-8' codec can't decode byte 0x8b in position 1: invalid start byte",
+    "item_count": 1,
+    "kind": "evidence",
+    "method": "RSS/Atom",
+    "ok": true,
+    "source": "first_party_feeds"
+  },
+  {
+    "error": null,
+    "item_count": 319,
+    "kind": "evidence",
+    "method": "API",
+    "ok": true,
+    "source": "openalex"
+  },
+  {
+    "error": "RuntimeError: BRAVE_API_KEY is not configured",
+    "item_count": 0,
+    "kind": "evidence",
+    "method": "",
+    "ok": false,
+    "source": "brave"
+  },
+  {
+    "error": null,
+    "item_count": 15,
+    "kind": "attention",
+    "method": "",
+    "ok": true,
+    "source": "Hacker News collector"
+  },
+  {
+    "error": "54 resources not read, 51 carried forward as stale",
+    "item_count": 800,
+    "kind": "attention",
+    "method": "API",
+    "ok": true,
+    "source": "GitHub stars"
+  },
+  {
+    "error": "5 of 135 requests failed; last: RequestError: HTTP 429 from https://huggingface.co/api/papers/2608.31100 after 1 attempts; Hugging Face paper upvotes paused after 5 consecutive failures; 15 resources not read, 18 carried forward as stale",
+    "item_count": 130,
+    "kind": "attention",
+    "method": "API",
+    "ok": true,
+    "source": "Hugging Face paper upvotes"
+  },
+  {
+    "error": "43 of 758 requests failed; last: RequestError: HTTP 429 from https://huggingface.co/api/datasets/Gro97/adaption-med-preference-pairs after 1 attempts; Hugging Face dataset downloads paused after 5 consecutive failures; 673 resources not read, 186 carried forward as stale",
+    "item_count": 715,
+    "kind": "attention",
+    "method": "API",
+    "ok": true,
+    "source": "Hugging Face dataset downloads"
+  }
+]
