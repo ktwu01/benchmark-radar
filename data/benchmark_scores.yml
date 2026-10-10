@@ -537,6 +537,23 @@ benchmarks:
     direction: higher_is_better
     unit: percent
 
+  - benchmark_id: math
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+  - benchmark_id: ai2d
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+  - benchmark_id: chartqa
+    metric: relaxed_accuracy
+    direction: higher_is_better
+    unit: percent
+  - benchmark_id: docvqa
+    metric: ANLS
+    direction: higher_is_better
+    unit: percent
+
 results:
   # FrontierChallenge's official leaderboard reports model-scaffold systems,
   # not model-only measurements. Preserve the scaffold in every protocol so
@@ -5706,3 +5723,220 @@ results:
     value: 14.29
     read_from: html_text
     measurement_kind: benchmark_publisher_run
+
+  - benchmark_id: arena_hard
+    instrument: arena_hard_v2
+    protocol: Mistral Small 3.2 model-card comparison; judge and generation settings not specified
+    model: Mistral Small 3.1 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 19.56
+    read_from: html_text
+  - benchmark_id: arena_hard
+    instrument: arena_hard_v2
+    protocol: Mistral Small 3.2 model-card comparison; judge and generation settings not specified
+    model: Mistral Small 3.2 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 43.1
+    read_from: html_text
+  - benchmark_id: mmlu
+    instrument: mmlu
+    protocol: Mistral Small 3.2 model-card comparison; shot count and generation settings not specified
+    model: Mistral Small 3.1 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 80.62
+    read_from: html_text
+  - benchmark_id: mmlu
+    instrument: mmlu
+    protocol: Mistral Small 3.2 model-card comparison; shot count and generation settings not specified
+    model: Mistral Small 3.2 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 80.5
+    read_from: html_text
+  - benchmark_id: mmlu_pro
+    instrument: mmlu_pro
+    protocol: Mistral Small 3.2 model-card comparison; 5-shot CoT; remaining evaluation settings not specified
+    model: Mistral Small 3.1 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 66.76
+    read_from: html_text
+  - benchmark_id: mmlu_pro
+    instrument: mmlu_pro
+    protocol: Mistral Small 3.2 model-card comparison; 5-shot CoT; remaining evaluation settings not specified
+    model: Mistral Small 3.2 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 69.06
+    read_from: html_text
+  - benchmark_id: math
+    instrument: math_split_unspecified
+    protocol: Mistral Small 3.2 model-card comparison; split, shot count and generation settings not specified
+    model: Mistral Small 3.1 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 69.3
+    read_from: html_text
+  - benchmark_id: math
+    instrument: math_split_unspecified
+    protocol: Mistral Small 3.2 model-card comparison; split, shot count and generation settings not specified
+    model: Mistral Small 3.2 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 69.42
+    read_from: html_text
+  - benchmark_id: gpqa
+    instrument: gpqa_main
+    protocol: Mistral Small 3.2 model-card comparison; 5-shot CoT; remaining evaluation settings not specified
+    model: Mistral Small 3.1 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 44.42
+    read_from: html_text
+  - benchmark_id: gpqa
+    instrument: gpqa_main
+    protocol: Mistral Small 3.2 model-card comparison; 5-shot CoT; remaining evaluation settings not specified
+    model: Mistral Small 3.2 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 44.22
+    read_from: html_text
+  - benchmark_id: gpqa_diamond
+    instrument: gpqa_diamond
+    protocol: Mistral Small 3.2 model-card comparison; 5-shot CoT; remaining evaluation settings not specified
+    model: Mistral Small 3.1 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 45.96
+    read_from: html_text
+  - benchmark_id: gpqa_diamond
+    instrument: gpqa_diamond
+    protocol: Mistral Small 3.2 model-card comparison; 5-shot CoT; remaining evaluation settings not specified
+    model: Mistral Small 3.2 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 46.13
+    read_from: html_text
+  - benchmark_id: simpleqa
+    instrument: simpleqa
+    protocol: Mistral Small 3.2 model-card comparison; TotalAcc; generation and grader settings not specified
+    model: Mistral Small 3.1 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 10.43
+    read_from: html_text
+  - benchmark_id: simpleqa
+    instrument: simpleqa
+    protocol: Mistral Small 3.2 model-card comparison; TotalAcc; generation and grader settings not specified
+    model: Mistral Small 3.2 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 12.1
+    read_from: html_text
+  - benchmark_id: mmmu
+    instrument: mmmu
+    protocol: Mistral Small 3.2 model-card comparison; split and image preprocessing settings not specified
+    model: Mistral Small 3.1 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 64.0
+    read_from: html_text
+  - benchmark_id: mmmu
+    instrument: mmmu
+    protocol: Mistral Small 3.2 model-card comparison; split and image preprocessing settings not specified
+    model: Mistral Small 3.2 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 62.5
+    read_from: html_text
+  - benchmark_id: mathvista
+    instrument: mathvista
+    protocol: Mistral Small 3.2 model-card comparison; split and image preprocessing settings not specified
+    model: Mistral Small 3.1 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 68.91
+    read_from: html_text
+  - benchmark_id: mathvista
+    instrument: mathvista
+    protocol: Mistral Small 3.2 model-card comparison; split and image preprocessing settings not specified
+    model: Mistral Small 3.2 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 67.09
+    read_from: html_text
+  - benchmark_id: chartqa
+    instrument: chartqa
+    protocol: Mistral Small 3.2 model-card comparison; split, relaxed-accuracy tolerance and image preprocessing not specified
+    model: Mistral Small 3.1 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 86.24
+    read_from: html_text
+  - benchmark_id: chartqa
+    instrument: chartqa
+    protocol: Mistral Small 3.2 model-card comparison; split, relaxed-accuracy tolerance and image preprocessing not specified
+    model: Mistral Small 3.2 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 87.4
+    read_from: html_text
+  - benchmark_id: docvqa
+    instrument: docvqa
+    protocol: Mistral Small 3.2 model-card comparison; split, ANLS threshold and image preprocessing not specified
+    model: Mistral Small 3.1 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 94.08
+    read_from: html_text
+  - benchmark_id: docvqa
+    instrument: docvqa
+    protocol: Mistral Small 3.2 model-card comparison; split, ANLS threshold and image preprocessing not specified
+    model: Mistral Small 3.2 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 94.86
+    read_from: html_text
+  - benchmark_id: ai2d
+    instrument: ai2d
+    protocol: Mistral Small 3.2 model-card comparison; split, prompt format and image preprocessing not specified
+    model: Mistral Small 3.1 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 93.72
+    read_from: html_text
+  - benchmark_id: ai2d
+    instrument: ai2d
+    protocol: Mistral Small 3.2 model-card comparison; split, prompt format and image preprocessing not specified
+    model: Mistral Small 3.2 24B Instruct
+    organization: Mistral
+    source_id: mistral_small_3_2_model_card
+    reported_at: '2025-06-20'
+    value: 92.91
+    read_from: html_text

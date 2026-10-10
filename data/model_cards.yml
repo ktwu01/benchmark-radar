@@ -1472,6 +1472,30 @@ benchmarks:
 # canonical ids that document reports a result for. It is a set, not a ranking:
 # a card that reports AIME once and a card that reports it in four
 # configurations both contribute exactly one adoption.
+  - id: wildbench
+    name: WildBench
+    aliases:
+    - Wildbench v2
+    - WildBench
+    domain: human_preference
+    url: https://github.com/allenai/WildBench
+    caveat: WB-Score and WB-Reward are distinct judge-based metrics; a card naming only WildBench does not identify which score was reported.
+  - id: math
+    name: MATH (split unspecified)
+    aliases:
+    - MATH (split unspecified)
+    domain: math
+    url: https://github.com/hendrycks/math
+    caveat: An unqualified MATH result does not establish use of the 500-question subset; preserve the reported split and reasoning protocol instead of assuming MATH-500.
+  - id: ai2d
+    name: AI2D
+    aliases:
+    - AI2D
+    - AI2 Diagrams
+    domain: multimodal
+    url: https://prior.allenai.org/projects/diagram-understanding
+    caveat: Diagram question answering is multiple-choice; prompt format and image preprocessing can alter the reported accuracy.
+
 model_cards:
   - id: openai_gpt_5_system_card
     organization: OpenAI
@@ -2393,3 +2417,30 @@ model_cards:
       - matharena_apex_2025
       - brokenarxiv
 
+
+  # Initial vendor README commit dated June 20, 2025; comparison columns retained.
+  # Pass@5 Plus coding scores do not match the tracked pass@1 metrics.
+  # WildBench identifies no metric; private IF/infinite-generation tests are untracked.
+  - id: mistral_small_3_2_model_card
+    organization: Mistral
+    model: Mistral Small 3.2 24B Instruct
+    document_type: model_card
+    published: '2025-06-20'
+    url: https://huggingface.co/mistralai/Mistral-Small-3.2-24B-Instruct-2506/blob/a708d64a95670340389e6dd9cdaf1cf22189c841/README.md
+    retrieved_at: '2026-10-10'
+    benchmarks:
+    - wildbench
+    - arena_hard
+    - mmlu
+    - mmlu_pro
+    - math
+    - gpqa
+    - gpqa_diamond
+    - mbpp
+    - humaneval
+    - simpleqa
+    - mmmu
+    - mathvista
+    - chartqa
+    - docvqa
+    - ai2d
