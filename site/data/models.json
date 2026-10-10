@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
-  "model_count": 910,
+  "model_count": 948,
   "source_counts": {
-    "artificial_analysis": 594,
+    "artificial_analysis": 595,
     "llm_stats": 339,
-    "model_reports": 106
+    "model_reports": 111
   },
-  "multiple_sources": 124,
+  "multiple_sources": 94,
   "organizations": [
     "AI21 Labs",
     "AI9Stars",
@@ -1610,16 +1610,27 @@
       }
     },
     {
-      "key": "cohere-command-a",
-      "model": "Command A",
+      "key": "cohere-command-a-03958f7698bfb01e4be29c4f2473a719b1556dbd3bf26267bb98d92c07145a23",
+      "model": "Command A+",
       "organization": "Cohere",
       "provenance_sources": [
         "artificial_analysis",
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 28,
+        "artificial_analysis": 16,
         "llm_stats": 15
+      }
+    },
+    {
+      "key": "cohere-command-a-d9b24830a076f47bc61c9197b05ad5076f0a9353ea2f21b85ef2e9111b8265a7",
+      "model": "Command A",
+      "organization": "Cohere",
+      "provenance_sources": [
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 12
       }
     },
     {
@@ -1910,16 +1921,25 @@
       }
     },
     {
-      "key": "deepseek-deepseek-v3-0324",
-      "model": "DeepSeek V3 0324",
+      "key": "deepseek-deepseek-v3-0324-676a26cc177476a3ed3ed50898ed4204dadbc417fd3ebbbe201cf47e97d9db7f",
+      "model": "DeepSeek-V3 0324",
       "organization": "DeepSeek",
       "provenance_sources": [
-        "artificial_analysis",
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 16,
         "llm_stats": 5
+      }
+    },
+    {
+      "key": "deepseek-deepseek-v3-0324-72d664391a094ed153609deb317ecb7eb5adf714b9c02a51e2a7197daeee9958",
+      "model": "DeepSeek V3 0324",
+      "organization": "DeepSeek",
+      "provenance_sources": [
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 16
       }
     },
     {
@@ -2046,15 +2066,24 @@
       }
     },
     {
-      "key": "deepseek-deepseek-v3-2-speciale",
+      "key": "deepseek-deepseek-v3-2-speciale-40bf67004ea5917f725d7bbab55713be7f149f2db43d5f6962d0ffdeefeb4d5d",
       "model": "DeepSeek V3.2 Speciale",
       "organization": "DeepSeek",
       "provenance_sources": [
-        "artificial_analysis",
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 12
+      }
+    },
+    {
+      "key": "deepseek-deepseek-v3-2-speciale-eed2e20b06d5b9022cc3a0a3961df4409d1b46f323502d504faf64d7f5dc447f",
+      "model": "DeepSeek-V3.2-Speciale",
+      "organization": "DeepSeek",
+      "provenance_sources": [
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 12,
         "llm_stats": 8
       }
     },
@@ -2125,16 +2154,25 @@
       }
     },
     {
-      "key": "deepseek-deepseek-v4-flash-0731",
+      "key": "deepseek-deepseek-v4-flash-0731-c0f7c899eb90d1ce609621a96bfc3ec66c7e0a27d83cd068889af25d897d3a59",
       "model": "DeepSeek V4 Flash-0731",
       "organization": "DeepSeek",
       "provenance_sources": [
-        "llm_stats",
         "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 9,
         "model_reports": 1
+      }
+    },
+    {
+      "key": "deepseek-deepseek-v4-flash-0731-cf2eabc1c8dd15c957efd497352699b783f1ee8e83e7f290820cee8a3f46136c",
+      "model": "DeepSeek-V4-Flash-0731",
+      "organization": "DeepSeek",
+      "provenance_sources": [
+        "llm_stats"
+      ],
+      "source_counts": {
+        "llm_stats": 9
       }
     },
     {
@@ -2217,8 +2255,8 @@
       }
     },
     {
-      "key": "deepseek-deepseek-v4-pro-0813",
-      "model": "DeepSeek V4 Pro-0813",
+      "key": "deepseek-deepseek-v4-pro-0813-41ba717433081fe08c5f88d5609ac0bf38458d07bded719d0877bb315cd8a574",
+      "model": "DeepSeek-V4-Pro-0813",
       "organization": "DeepSeek",
       "provenance_sources": [
         "llm_stats",
@@ -2226,7 +2264,18 @@
       ],
       "source_counts": {
         "llm_stats": 12,
-        "model_reports": 7
+        "model_reports": 6
+      }
+    },
+    {
+      "key": "deepseek-deepseek-v4-pro-0813-d1495aec1f986a66ccca25787d9544c7d2ef7bc13975ac162cdf92d22120b4f2",
+      "model": "DeepSeek V4 Pro-0813",
+      "organization": "DeepSeek",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -2320,16 +2369,25 @@
       }
     },
     {
-      "key": "google-diffusiongemma-26b-a4b",
-      "model": "DiffusionGemma 26B A4B",
+      "key": "google-diffusiongemma-26b-a4b-52f66e1c96630be3d4175a9c5182a5da06b77ba2213d2480a74f53e7b3ceb274",
+      "model": "DiffusionGemma 26B-A4B",
       "organization": "Google",
       "provenance_sources": [
-        "artificial_analysis",
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 12,
         "llm_stats": 14
+      }
+    },
+    {
+      "key": "google-diffusiongemma-26b-a4b-abd30f43375f09e589ff481a151e0c772a4d4ed7230dcd0840a17b2af11f25e9",
+      "model": "DiffusionGemma 26B A4B",
+      "organization": "Google",
+      "provenance_sources": [
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 12
       }
     },
     {
@@ -2368,16 +2426,25 @@
       }
     },
     {
-      "key": "google-gemini-1-5-flash-8b",
+      "key": "google-gemini-1-5-flash-8b-d1fc517130282f49196319dba7a7a2dc459d95233d821d25acbae925ee6eda81",
       "model": "Gemini 1.5 Flash 8B",
       "organization": "Google",
       "provenance_sources": [
-        "artificial_analysis",
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 5,
         "llm_stats": 13
+      }
+    },
+    {
+      "key": "google-gemini-1-5-flash-8b-f2112d9305a5436f6d5d75b5ecf41ec5162d6d363070b0124d9a96891fce669b",
+      "model": "Gemini 1.5 Flash-8B",
+      "organization": "Google",
+      "provenance_sources": [
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 5
       }
     },
     {
@@ -2438,15 +2505,24 @@
       }
     },
     {
-      "key": "google-gemini-2-0-flash",
+      "key": "google-gemini-2-0-flash-403f4a47e355062a719f42bc51c904d5d63e2ba9a016900d7dbb2b66879c12eb",
       "model": "Gemini 2.0 Flash",
       "organization": "Google",
       "provenance_sources": [
-        "llm_stats",
+        "llm_stats"
+      ],
+      "source_counts": {
+        "llm_stats": 13
+      }
+    },
+    {
+      "key": "google-gemini-2-0-flash-a9e3c57e51b53c744146afee405479a37757cc73768c203edb1c1a5185648e7e",
+      "model": "Gemini-2.0-Flash",
+      "organization": "Google",
+      "provenance_sources": [
         "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 13,
         "model_reports": 2
       }
     },
@@ -2539,7 +2615,7 @@
       }
     },
     {
-      "key": "google-gemini-2-5-flash",
+      "key": "google-gemini-2-5-flash-0cac08b9249fd3f586a0972c487fed11862f1c73cb7a770b4d359910012e5048",
       "model": "Gemini 2.5 Flash",
       "organization": "Google",
       "provenance_sources": [
@@ -2548,7 +2624,18 @@
       ],
       "source_counts": {
         "llm_stats": 14,
-        "model_reports": 2
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "google-gemini-2-5-flash-1ae97bf301f4c7373923938909db3def720107eafa8ebaa49faaba11c1f89584",
+      "model": "Gemini-2.5-Flash",
+      "organization": "Google",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -2673,7 +2760,18 @@
       }
     },
     {
-      "key": "google-gemini-2-5-pro",
+      "key": "google-gemini-2-5-pro-276496ef167be17be8823826d070943b7fedac82ea24bdab128fec645a4ec9d8",
+      "model": "Gemini-2.5-Pro",
+      "organization": "Google",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "google-gemini-2-5-pro-62d06f5939c4e69a5b4d85f79f9143061518b56746e0e6a6b7d1642fda8ab905",
       "model": "Gemini 2.5 Pro",
       "organization": "Google",
       "provenance_sources": [
@@ -2684,7 +2782,7 @@
       "source_counts": {
         "artificial_analysis": 17,
         "llm_stats": 16,
-        "model_reports": 11
+        "model_reports": 10
       }
     },
     {
@@ -3290,16 +3388,25 @@
       }
     },
     {
-      "key": "google-gemma-4-31b",
+      "key": "google-gemma-4-31b-7ca1c3f908a1edec6b3ed1c476dfa0638e80c788623bacc49f3bb5dadda95bde",
       "model": "Gemma 4 (31B)",
       "organization": "Google",
       "provenance_sources": [
-        "llm_stats",
         "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 12,
         "model_reports": 14
+      }
+    },
+    {
+      "key": "google-gemma-4-31b-8758d0db1e286e372cf76df7b95c2e67a9949c1ecc522660f0fe515ba3986c96",
+      "model": "Gemma 4 31B",
+      "organization": "Google",
+      "provenance_sources": [
+        "llm_stats"
+      ],
+      "source_counts": {
+        "llm_stats": 12
       }
     },
     {
@@ -4479,15 +4586,24 @@
       }
     },
     {
-      "key": "microsoft-phi-4",
+      "key": "microsoft-phi-4-e0334e77423aacc5c4202ec3abe34a00b844fae4881e7b1b8fc4fc0cd45f7f5d",
+      "model": "Phi-4",
+      "organization": "Microsoft",
+      "provenance_sources": [
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 12
+      }
+    },
+    {
+      "key": "microsoft-phi-4-f92de5a8703eb6f7c2e58c1a7a0f2f31c2a33ceaa7958d95ea65937e1922ebec",
       "model": "Phi 4",
       "organization": "Microsoft",
       "provenance_sources": [
-        "artificial_analysis",
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 12,
         "llm_stats": 13
       }
     },
@@ -4525,16 +4641,25 @@
       }
     },
     {
-      "key": "microsoft-phi-4-multimodal-instruct",
-      "model": "Phi-4 Multimodal Instruct",
+      "key": "microsoft-phi-4-multimodal-instruct-372efe8bc5b01dc5174dfba56d852a4c1b55826d22c74a9c8ad53fd332fe75bb",
+      "model": "Phi-4-multimodal-instruct",
       "organization": "Microsoft",
       "provenance_sources": [
-        "artificial_analysis",
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 5,
         "llm_stats": 15
+      }
+    },
+    {
+      "key": "microsoft-phi-4-multimodal-instruct-bbb7c8d355a08c2bf3688ea95f0362236406d429e074f263f36082686db23530",
+      "model": "Phi-4 Multimodal Instruct",
+      "organization": "Microsoft",
+      "provenance_sources": [
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 5
       }
     },
     {
@@ -4586,68 +4711,113 @@
       }
     },
     {
-      "key": "minimax-minimax-m2",
-      "model": "MiniMax M2",
+      "key": "minimax-minimax-m2-1-3285bc99d9af11dd59433d434d3a0553ecc9e02d8c8229e1bc97fbc3841d0c0a",
+      "model": "MiniMax-M2.1",
       "organization": "MiniMax",
       "provenance_sources": [
-        "artificial_analysis",
-        "llm_stats"
+        "artificial_analysis"
       ],
       "source_counts": {
-        "artificial_analysis": 12,
-        "llm_stats": 16
+        "artificial_analysis": 12
       }
     },
     {
-      "key": "minimax-minimax-m2-1",
+      "key": "minimax-minimax-m2-1-9ecc47c4326201fd92315775ccd58ca4aa5b0c1c388ab6efc087757d6d840293",
       "model": "MiniMax M2.1",
       "organization": "MiniMax",
       "provenance_sources": [
-        "artificial_analysis",
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 12,
         "llm_stats": 25
       }
     },
     {
-      "key": "minimax-minimax-m2-5",
+      "key": "minimax-minimax-m2-5-283d153937ce33cdac299e259fb85d7251508de8096e687e900d7b264d13bb93",
       "model": "MiniMax M2.5",
       "organization": "MiniMax",
       "provenance_sources": [
-        "artificial_analysis",
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 10,
         "llm_stats": 8
       }
     },
     {
-      "key": "minimax-minimax-m2-7",
+      "key": "minimax-minimax-m2-5-b4aa7cc16db1162e7034675f22466f4a17486063e8ca957dbb6c36df8f065d2b",
+      "model": "MiniMax-M2.5",
+      "organization": "MiniMax",
+      "provenance_sources": [
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 10
+      }
+    },
+    {
+      "key": "minimax-minimax-m2-7-c47e6179eb283e0005ed8899c3b3cd19c2eb57041ca9f20bef9c66837922bc5a",
       "model": "MiniMax M2.7",
       "organization": "MiniMax",
       "provenance_sources": [
-        "artificial_analysis",
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 18,
         "llm_stats": 11
       }
     },
     {
-      "key": "minimax-minimax-m3",
+      "key": "minimax-minimax-m2-7-c8b2e807832539b11d68a5a7b6bb41ed67254a3c76abb13c6776381feb957286",
+      "model": "MiniMax-M2.7",
+      "organization": "MiniMax",
+      "provenance_sources": [
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 18
+      }
+    },
+    {
+      "key": "minimax-minimax-m2-92aea0acc9519266326ab5e3d637e0ecb1cc029d42b11954342a31e4a57f2f40",
+      "model": "MiniMax M2",
+      "organization": "MiniMax",
+      "provenance_sources": [
+        "llm_stats"
+      ],
+      "source_counts": {
+        "llm_stats": 16
+      }
+    },
+    {
+      "key": "minimax-minimax-m2-e3408151dbc8bc4351a1dc077491d76a8f481073c90bcf978996e3af7ba6274d",
+      "model": "MiniMax-M2",
+      "organization": "MiniMax",
+      "provenance_sources": [
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 12
+      }
+    },
+    {
+      "key": "minimax-minimax-m3-4b7b62966e720b17d003da3928762c76c2ec204b925ba8cddcaed0ea59bd4e06",
+      "model": "MiniMax-M3",
+      "organization": "MiniMax",
+      "provenance_sources": [
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 21
+      }
+    },
+    {
+      "key": "minimax-minimax-m3-53cccccc90d592c6e5bfc79b1416a6448e7351876c601d4b0824eb7e0aead1b8",
       "model": "MiniMax M3",
       "organization": "MiniMax",
       "provenance_sources": [
-        "artificial_analysis",
         "llm_stats",
         "model_reports"
       ],
       "source_counts": {
-        "artificial_analysis": 21,
         "llm_stats": 35,
         "model_reports": 1
       }
@@ -5542,15 +5712,24 @@
       }
     },
     {
-      "key": "moonshot-ai-kimi-k3-max",
+      "key": "moonshot-ai-kimi-k3-max-412f2bd22726b49667dd62589ff55ba8c5d809d2770067f5b494d80e3f8d5e8b",
       "model": "Kimi K3 (max)",
       "organization": "Moonshot AI",
       "provenance_sources": [
-        "artificial_analysis",
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 20
+      }
+    },
+    {
+      "key": "moonshot-ai-kimi-k3-max-cf4c573e516ca667bf33293591cc2f4c1b8e7f6b299b52f1fed49a1378213ce2",
+      "model": "Kimi-K3 (max)",
+      "organization": "Moonshot AI",
+      "provenance_sources": [
         "model_reports"
       ],
       "source_counts": {
-        "artificial_analysis": 20,
         "model_reports": 1
       }
     },
@@ -6028,6 +6207,17 @@
       }
     },
     {
+      "key": "nvidia-nvidia-nemotron-nano-9b-v2",
+      "model": "NVIDIA-Nemotron-Nano-9B-v2",
+      "organization": "NVIDIA",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 9
+      }
+    },
+    {
       "key": "nvidia-nvidia-nemotron-nano-9b-v2-non-reasoning",
       "model": "NVIDIA Nemotron Nano 9B V2 (Non-reasoning)",
       "organization": "NVIDIA",
@@ -6279,16 +6469,25 @@
       }
     },
     {
-      "key": "openai-gpt-5-1-codex-high",
-      "model": "GPT-5.1 Codex (high)",
+      "key": "openai-gpt-5-1-codex-high-2b2be65680d32f4f2c04889d3251b642fe8550df52afe56c4748d7159bb3a7c6",
+      "model": "GPT-5.1 Codex High",
       "organization": "OpenAI",
       "provenance_sources": [
-        "artificial_analysis",
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 13,
         "llm_stats": 1
+      }
+    },
+    {
+      "key": "openai-gpt-5-1-codex-high-f308d36ea2c820679d9b82c9b0de90ec4dac04180329ec46a15c0a1a4072646f",
+      "model": "GPT-5.1 Codex (high)",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 13
       }
     },
     {
@@ -6314,15 +6513,24 @@
       }
     },
     {
-      "key": "openai-gpt-5-1-high",
+      "key": "openai-gpt-5-1-high-bee4306131de69a2863c090d9285a160446bd88c0dac02d55f2d5bb1ab35070a",
       "model": "GPT-5.1 (high)",
       "organization": "OpenAI",
       "provenance_sources": [
-        "artificial_analysis",
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 17
+      }
+    },
+    {
+      "key": "openai-gpt-5-1-high-f0af4af3e726025cb2a7a5b247b2ac7cc541fd6aca201014abab0a1bc1b756ae",
+      "model": "GPT-5.1 High",
+      "organization": "OpenAI",
+      "provenance_sources": [
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 17,
         "llm_stats": 3
       }
     },
@@ -6870,16 +7078,25 @@
       }
     },
     {
-      "key": "openai-gpt-5-6-sol-max",
-      "model": "GPT-5.6 Sol (max)",
+      "key": "openai-gpt-5-6-sol-max-0cb2e28d59335ed6b03cddfa68f9c91a413041b557651f68857b120061e4ce97",
+      "model": "GPT-5.6-sol (max)",
       "organization": "OpenAI",
       "provenance_sources": [
-        "artificial_analysis",
         "model_reports"
       ],
       "source_counts": {
-        "artificial_analysis": 22,
         "model_reports": 1
+      }
+    },
+    {
+      "key": "openai-gpt-5-6-sol-max-ad412d05bd23940b2123b00a403f176560d5410292bf2a8361e8b632fbeeef86",
+      "model": "GPT-5.6 Sol (max)",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 22
       }
     },
     {
@@ -7052,16 +7269,25 @@
       }
     },
     {
-      "key": "openai-gpt-5-high",
-      "model": "GPT-5 (high)",
+      "key": "openai-gpt-5-high-6b308bea964847654d75fe1c8ef835803a5070ff5359263b9d17d7dddfbd2449",
+      "model": "GPT-5 High",
       "organization": "OpenAI",
       "provenance_sources": [
-        "artificial_analysis",
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 17,
         "llm_stats": 2
+      }
+    },
+    {
+      "key": "openai-gpt-5-high-c353a807d045ae79b9ca6df6378582727fab8811b073ec99cd9b945b67a3c10f",
+      "model": "GPT-5 (high)",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 17
       }
     },
     {
@@ -7076,15 +7302,24 @@
       }
     },
     {
-      "key": "openai-gpt-5-medium",
+      "key": "openai-gpt-5-medium-75dd41573d1ea295579af36628b0592cb3e4298e6d5fa9706d4d73ee77a06e2b",
       "model": "GPT-5 (medium)",
       "organization": "OpenAI",
       "provenance_sources": [
-        "artificial_analysis",
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 13
+      }
+    },
+    {
+      "key": "openai-gpt-5-medium-d0b000be1a96be6eaaf361653eddf0bad7b7a1da33721d9fba709da9da6869ee",
+      "model": "GPT-5 Medium",
+      "organization": "OpenAI",
+      "provenance_sources": [
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 13,
         "llm_stats": 2
       }
     },
@@ -7199,16 +7434,25 @@
       }
     },
     {
-      "key": "openai-gpt-oss-120b-high",
+      "key": "openai-gpt-oss-120b-high-3bb9f57a02f33576f30812e9502e731e7dcacd3129a39b00a98035c413c47d55",
       "model": "GPT OSS 120B High",
       "organization": "OpenAI",
       "provenance_sources": [
-        "artificial_analysis",
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 22,
         "llm_stats": 7
+      }
+    },
+    {
+      "key": "openai-gpt-oss-120b-high-d74cb9238794da53d24b44af7611ef0d7b0f4773a11029b9856208f2b4407b83",
+      "model": "gpt-oss-120b (high)",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 22
       }
     },
     {
@@ -7234,16 +7478,25 @@
       }
     },
     {
-      "key": "openai-gpt-oss-20b-high",
+      "key": "openai-gpt-oss-20b-high-336d6d396ba9a8971263f87e876ccb9c5d0e3239953b1b5867cae2af2ef1207c",
       "model": "GPT OSS 20B High",
       "organization": "OpenAI",
       "provenance_sources": [
-        "artificial_analysis",
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 19,
         "llm_stats": 2
+      }
+    },
+    {
+      "key": "openai-gpt-oss-20b-high-861a9c8549ff847c84360fd94787b83170706dd562e98bfb5cf80531eb82290f",
+      "model": "gpt-oss-20b (high)",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 19
       }
     },
     {
@@ -7631,16 +7884,25 @@
       }
     },
     {
-      "key": "qwen-qwen2-5-coder-32b-instruct",
-      "model": "Qwen2.5-Coder 32B Instruct",
+      "key": "qwen-qwen2-5-coder-32b-instruct-1633b56d5abf71c8a5e496bbef70edcc973922410492d264bcec70cfe629abea",
+      "model": "Qwen2.5-Coder-32B-Instruct",
       "organization": "Qwen",
       "provenance_sources": [
-        "llm_stats",
         "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 15,
         "model_reports": 3
+      }
+    },
+    {
+      "key": "qwen-qwen2-5-coder-32b-instruct-ab55bfc5397c947b4937fc7db785c8d30b3bc308ea68eb1109c99969bca8626f",
+      "model": "Qwen2.5-Coder 32B Instruct",
+      "organization": "Qwen",
+      "provenance_sources": [
+        "llm_stats"
+      ],
+      "source_counts": {
+        "llm_stats": 15
       }
     },
     {
@@ -8497,16 +8759,25 @@
       }
     },
     {
-      "key": "qwen-qwen3-7-plus",
-      "model": "Qwen3.7 Plus",
+      "key": "qwen-qwen3-7-plus-2e7d42bac72f68daf836c89be1b08b007eff3bb3242205d4b207c6ba0a8a9a3f",
+      "model": "Qwen3.7-Plus",
       "organization": "Qwen",
       "provenance_sources": [
-        "artificial_analysis",
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 20,
         "llm_stats": 70
+      }
+    },
+    {
+      "key": "qwen-qwen3-7-plus-65ec50cb8925fa42d2f876d127211d1a194c03133c54278899f0bdc0d86f0241",
+      "model": "Qwen3.7 Plus",
+      "organization": "Qwen",
+      "provenance_sources": [
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 20
       }
     },
     {
@@ -8591,6 +8862,17 @@
       }
     },
     {
+      "key": "qwen-qwen3-8b",
+      "model": "Qwen3-8B",
+      "organization": "Qwen",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 8
+      }
+    },
+    {
       "key": "qwen-qwen3-8b-non-reasoning",
       "model": "Qwen3 8B (Non-reasoning)",
       "organization": "Qwen",
@@ -8624,15 +8906,24 @@
       }
     },
     {
-      "key": "qwen-qwen3-coder-480b-a35b-instruct",
+      "key": "qwen-qwen3-coder-480b-a35b-instruct-06f07a07f541c7786e814ea10b2facb74efeff47f8627a2e15d1c4475bb2da40",
       "model": "Qwen3 Coder 480B A35B Instruct",
       "organization": "Qwen",
       "provenance_sources": [
-        "artificial_analysis",
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 12
+      }
+    },
+    {
+      "key": "qwen-qwen3-coder-480b-a35b-instruct-1fa9094a0af1f894896c1a9e326fd42787c47e6cd1fd871baa73ae6a5b594b8d",
+      "model": "Qwen3-Coder 480B A35B Instruct",
+      "organization": "Qwen",
+      "provenance_sources": [
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 12,
         "llm_stats": 10
       }
     },
@@ -8694,15 +8985,24 @@
       }
     },
     {
-      "key": "qwen-qwen3-next-80b-a3b-instruct",
+      "key": "qwen-qwen3-next-80b-a3b-instruct-0f1ba4d23ebe850cd3782daec021ec6ff8cad70f05c3f40dc5bbd5085e86f6ff",
       "model": "Qwen3 Next 80B A3B Instruct",
       "organization": "Qwen",
       "provenance_sources": [
-        "artificial_analysis",
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 12
+      }
+    },
+    {
+      "key": "qwen-qwen3-next-80b-a3b-instruct-704ed4feb091b89f226a598e96455a1715b67189fe87d48e60cea453b42db840",
+      "model": "Qwen3-Next-80B-A3B-Instruct",
+      "organization": "Qwen",
+      "provenance_sources": [
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 12,
         "llm_stats": 24
       }
     },
@@ -8926,29 +9226,47 @@
       }
     },
     {
-      "key": "qwen-qwq-32b",
-      "model": "QwQ 32B",
+      "key": "qwen-qwq-32b-8705a2f1ee9e7a95046487c46df3b07956b7ff474a9c04e1dcf55115201e944a",
+      "model": "QwQ-32B",
       "organization": "Qwen",
       "provenance_sources": [
-        "artificial_analysis",
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 7,
         "llm_stats": 7
       }
     },
     {
-      "key": "qwen-qwq-32b-preview",
-      "model": "QwQ 32B-Preview",
+      "key": "qwen-qwq-32b-c79037a1ec52a6a310f8cdc7c51e39fe61296c80ae1ec7ba65ebd3ba5941bd65",
+      "model": "QwQ 32B",
       "organization": "Qwen",
       "provenance_sources": [
-        "artificial_analysis",
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 7
+      }
+    },
+    {
+      "key": "qwen-qwq-32b-preview-6599a8903024c1a78445b8205c14773db1f2c01000530d29985c46db695753c4",
+      "model": "QwQ-32B-Preview",
+      "organization": "Qwen",
+      "provenance_sources": [
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 4,
         "llm_stats": 4
+      }
+    },
+    {
+      "key": "qwen-qwq-32b-preview-67f80dabdfd0a7f3c1fb3cb68ba826a24f19361d76a33a925ca4be49d74c2b1f",
+      "model": "QwQ 32B-Preview",
+      "organization": "Qwen",
+      "provenance_sources": [
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 4
       }
     },
     {
@@ -9106,21 +9424,30 @@
       }
     },
     {
-      "key": "stepfun-step-3-5-flash",
-      "model": "Step 3.5 Flash",
+      "key": "stepfun-step-3-5-flash-2603",
+      "model": "Step 3.5 Flash 2603",
       "organization": "StepFun",
       "provenance_sources": [
-        "artificial_analysis",
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 10
+      }
+    },
+    {
+      "key": "stepfun-step-3-5-flash-abce0452ab704bffd040615197717de105fedc43b552fd0e0e626ed1218136b6",
+      "model": "Step-3.5-Flash",
+      "organization": "StepFun",
+      "provenance_sources": [
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 10,
         "llm_stats": 7
       }
     },
     {
-      "key": "stepfun-step-3-5-flash-2603",
-      "model": "Step 3.5 Flash 2603",
+      "key": "stepfun-step-3-5-flash-d95a40caf18cdaa06bdb65d530b39b5eef73a4be2fb53bc92c5732887f67eb96",
+      "model": "Step 3.5 Flash",
       "organization": "StepFun",
       "provenance_sources": [
         "artificial_analysis"
@@ -9141,15 +9468,24 @@
       }
     },
     {
-      "key": "stepfun-step3-vl-10b",
+      "key": "stepfun-step3-vl-10b-475e6168bc6fd5e2cd26f2cb4bf752b53f490011b18392919cbcafa6c50d2da8",
       "model": "Step3 VL 10B",
       "organization": "StepFun",
       "provenance_sources": [
-        "artificial_analysis",
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 11
+      }
+    },
+    {
+      "key": "stepfun-step3-vl-10b-8679d233be1f7ed42af5e92a0df85489e1f2d786df3b4daa4ae92a855874dd51",
+      "model": "Step3-VL-10B",
+      "organization": "StepFun",
+      "provenance_sources": [
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 11,
         "llm_stats": 6
       }
     },
@@ -9477,15 +9813,24 @@
       }
     },
     {
-      "key": "xai-grok-3",
+      "key": "xai-grok-3-66c7ec604210552d736e0bde0fb09745ff2d66f5dedf1a8f09ac1fc6898c45a5",
       "model": "Grok 3",
       "organization": "xAI",
       "provenance_sources": [
-        "artificial_analysis",
+        "artificial_analysis"
+      ],
+      "source_counts": {
+        "artificial_analysis": 12
+      }
+    },
+    {
+      "key": "xai-grok-3-6a4599292175b8e6926abcdeee8bcd08652a710ae6e5f5e42ba53c4a810c99dc",
+      "model": "Grok-3",
+      "organization": "xAI",
+      "provenance_sources": [
         "llm_stats"
       ],
       "source_counts": {
-        "artificial_analysis": 12,
         "llm_stats": 5
       }
     },
@@ -9520,21 +9865,6 @@
       ],
       "source_counts": {
         "artificial_analysis": 12
-      }
-    },
-    {
-      "key": "xai-grok-4",
-      "model": "Grok 4",
-      "organization": "xAI",
-      "provenance_sources": [
-        "artificial_analysis",
-        "llm_stats",
-        "model_reports"
-      ],
-      "source_counts": {
-        "artificial_analysis": 13,
-        "llm_stats": 7,
-        "model_reports": 1
       }
     },
     {
@@ -9770,6 +10100,30 @@
       ],
       "source_counts": {
         "artificial_analysis": 12
+      }
+    },
+    {
+      "key": "xai-grok-4-bdb07f5231d1f570e8826e1c85ebd77c13e1eaea9f12b25e31e76eda61a053e5",
+      "model": "Grok 4",
+      "organization": "xAI",
+      "provenance_sources": [
+        "artificial_analysis",
+        "model_reports"
+      ],
+      "source_counts": {
+        "artificial_analysis": 13,
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "xai-grok-4-f6759cc8c175288a150a80c65f6a45c270363899684384b620cfd8fe8fa260e3",
+      "model": "Grok-4",
+      "organization": "xAI",
+      "provenance_sources": [
+        "llm_stats"
+      ],
+      "source_counts": {
+        "llm_stats": 7
       }
     },
     {
