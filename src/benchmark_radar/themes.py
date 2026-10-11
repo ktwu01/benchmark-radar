@@ -44,9 +44,10 @@ _EMPTY_STATE = (
 # for every record it was built from.
 _UNTHEMED = "No theme tag yet"
 
-# Sections render the first slice of their grid and hand the rest to a
-# "show all" control -- a theme with several thousand records must not paint
-# them all before a reader scrolls past the first screen.
+# Each section renders its newest slice and no more. The page is a browse
+# surface, not an export: rendering every record made it a 9 MB document with
+# the overflow parked in `hidden` cards, and Pages serves a 100 GB/month
+# bandwidth cap. The ledger states the trim, and Explore holds the full corpus.
 _SLICE = 60
 
 _PAGE_STYLE = """
@@ -79,10 +80,6 @@ _PAGE_STYLE = """
 .theme-card-title:hover{text-decoration:underline}
 .theme-card-meta{font-size:.78rem;color:var(--muted)}
 .theme-card-summary{margin:0;font-size:.87rem}
-.theme-more{margin-top:.7rem;border:1px solid var(--edge);border-radius:var(--radius-sm);
-  background:var(--panel);color:var(--ink);padding:.4rem .8rem;font:inherit;
-  font-size:.85rem;cursor:pointer}
-.theme-more:hover{border-color:var(--ink)}
 .themes-empty{background:var(--panel);border:1px solid var(--edge);
   border-radius:var(--radius);padding:1.2rem;margin:1.4rem 0}
 .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;
@@ -160,21 +157,22 @@ def build_theme_index(snapshots: list[dict[str, Any]]) -> dict[str, Any]:
         for tag, identities in sorted(members.items(), key=lambda kv: (-len(kv[1]), kv[0]))
     ]
     unthemed = _ordered(set(newest) - tagged)
+    dates = [row["date"] for row in newest.values() if row["date"]]
     return {
         "groups": groups,
         "unthemed": unthemed,
         "records": len(newest),
         "tagged": len(tagged),
+        "updated": max(dates) if dates else None,
     }
 
 
-def _record_card(record: dict[str, Any], *, hidden: bool = False) -> str:
+def _record_card(record: dict[str, Any]) -> str:
     meta = " · ".join(part for part in (record["source"], record["date"]) if part)
     summary_text = " ".join(str(record.get("summary") or "").split())[:_SUMMARY_CLIP]
     summary = f'<p class="theme-card-summary">{esc(summary_text)}</p>' if summary_text else ""
-    hidden_attr = " hidden" if hidden else ""
     return (
-        f'<article class="theme-card"{hidden_attr}>'
+        f'<article class="theme-card">'
         f'<a class="theme-card-title" href="{esc(record["url"])}">{esc(record["title"])}</a>'
         f'<p class="theme-card-meta">{esc(meta)}</p>'
         f"{summary}"
@@ -186,18 +184,19 @@ def _slug(category: str) -> str:
     return "".join(char if char.isalnum() else "-" for char in category).strip("-")
 
 
-def _section(category: str, records: list[dict[str, Any]]) -> str:
+def _section(category: str, records: list[dict[str, Any]]) -> tuple[str, int]:
     slug = _slug(category)
-    cards = "".join(_record_card(record) for record in records[:_SLICE])
-    more = ""
-    if len(records) > _SLICE:
-        cards += "".join(_record_card(record, hidden=True) for record in records[_SLICE:])
-        more = f'<button type="button" class="theme-more">Show all {len(records)} records</button>'
+    shown = records[:_SLICE]
+    cards = "".join(_record_card(record) for record in shown)
+    count = f"{len(records)} records"
+    if len(records) > len(shown):
+        count += f" · newest {len(shown)} shown"
     return (
         f'<section class="theme-section" id="theme-{slug}" data-slug="{slug}">'
         f"<header><h2>{esc(category)}</h2>"
-        f'<span class="theme-count">{len(records)} records</span></header>'
-        f'<div class="theme-grid">{cards}</div>{more}</section>'
+        f'<span class="theme-count">{count}</span></header>'
+        f'<div class="theme-grid">{cards}</div></section>',
+        len(shown),
     )
 
 
@@ -205,26 +204,37 @@ def _themes_page(
     index: dict[str, Any],
     chrome: SiteChrome,
     chrome_i18n: dict[str, str],
-    updated: str | None,
-) -> str:
+) -> tuple[str, int]:
     groups = index["groups"]
     unthemed = index["unthemed"]
-    sections = [_section(group["category"], group["records"]) for group in groups]
+    rendered = 0
+    sections = []
+    for group in groups:
+        html, shown = _section(group["category"], group["records"])
+        sections.append(html)
+        rendered += shown
     chips = "".join(
         f'<button type="button" class="theme-chip" data-target="{_slug(group["category"])}">'
         f'{esc(group["category"])} <span class="n">{group["count"]}</span></button>'
         for group in groups
     )
     if unthemed:
-        sections.append(_section(_UNTHEMED, unthemed))
+        html, shown = _section(_UNTHEMED, unthemed)
+        sections.append(html)
+        rendered += shown
         chips += (
             f'<button type="button" class="theme-chip" data-target="{_slug(_UNTHEMED)}">'
             f'{esc(_UNTHEMED)} <span class="n">{len(unthemed)}</span></button>'
         )
     empty = f'<div class="themes-empty">{esc(_EMPTY_STATE)}</div>' if not groups else ""
+    # A bounded page is a trim, and principle.md says a trim gets counted and
+    # published rather than left for the reader to guess at.
     ledger = (
         f"{index['records']} discovery records read from the daily snapshots: "
-        f"{index['tagged']} carry a source theme tag, {len(unthemed)} do not."
+        f"{index['tagged']} carry a source theme tag, {len(unthemed)} do not. "
+        f"Each section renders its newest {_SLICE}, so {rendered} of "
+        f"{index['records']} are on this page; the full corpus is in "
+        '<a href="/explore/">Explore</a>.'
     )
     body = f"""{_PAGE_STYLE}
 <div class="themes-page">
@@ -237,11 +247,11 @@ def _themes_page(
   catalog.</p>
   <p class="themes-lede-zh" lang="zh-Hans">按来源自带的能力主题浏览每日新发现的记录，
   不是 benchmark 目录的计数。</p>
-  <p class="themes-ledger">{esc(ledger)}</p>
+  <p class="themes-ledger">{ledger}</p>
   <div class="themes-toolbar">
     <label class="themes-filter">
-      <span class="visually-hidden">Filter records by title or summary</span>
-      <input id="theme-filter" type="search" placeholder="Filter by title, source, summary…"
+      <span class="visually-hidden">Filter the records rendered on this page</span>
+      <input id="theme-filter" type="search" placeholder="Filter what's shown below…"
         autocomplete="off">
     </label>
     {chips}
@@ -254,16 +264,6 @@ def _themes_page(
   const filter = document.getElementById("theme-filter");
   const sections = Array.from(document.querySelectorAll(".theme-section"));
   const chips = Array.from(document.querySelectorAll(".theme-chip"));
-
-  sections.forEach((section) => {{
-    const extra = Array.from(section.querySelectorAll(".theme-card[hidden]"));
-    const button = section.querySelector(".theme-more");
-    if (!button || !extra.length) return;
-    button.addEventListener("click", () => {{
-      extra.forEach((card) => card.removeAttribute("hidden"));
-      button.remove();
-    }});
-  }});
 
   // Chips pin by the section's own slug. They used to carry a "theme-" prefix
   // the sections did not, so no slug ever matched and one click hid every
@@ -286,6 +286,9 @@ def _themes_page(
     }});
   }});
 
+  // The filter only sees the rendered slice, which is why the ledger above
+  // says how much of the corpus is on the page. A query with no hits means
+  // "nothing in the newest {_SLICE} of any section", not "nothing collected".
   function applyFilter() {{
     const query = (filter.value || "").trim().toLowerCase();
     sections.forEach((section) => {{
@@ -297,8 +300,6 @@ def _themes_page(
         if (!hidden) visible += 1;
       }});
       section.classList.toggle("hidden-by-filter", Boolean(query) && visible === 0);
-      const more = section.querySelector(".theme-more");
-      if (query && more) more.click();
     }});
   }}
   if (filter) filter.addEventListener("input", applyFilter);
@@ -324,15 +325,18 @@ def _themes_page(
             canonical=canonical,
         ),
     ]
-    return render_page(
-        title=title,
-        description=description,
-        canonical=canonical,
-        body=body,
-        chrome=chrome,
-        updated=updated,
-        chrome_i18n=chrome_i18n,
-        schemas=schemas,
+    return (
+        render_page(
+            title=title,
+            description=description,
+            canonical=canonical,
+            body=body,
+            chrome=chrome,
+            updated=index["updated"],
+            chrome_i18n=chrome_i18n,
+            schemas=schemas,
+        ),
+        rendered,
     )
 
 
@@ -371,19 +375,7 @@ def write_themes(
     chrome = extract_site_chrome(dashboard_html, active_path=THEMES_PATH)
     chrome_i18n = chrome_i18n_table(chrome, app_js)
     index = build_theme_index(snapshots)
-    newest = next(
-        (
-            group["records"][0]["date"]
-            for group in sorted(
-                [*index["groups"], {"records": index["unthemed"]}],
-                key=lambda group: len(group["records"]),
-                reverse=True,
-            )
-            if group["records"]
-        ),
-        None,
-    )
-    page = _themes_page(index, chrome, chrome_i18n, newest)
+    page, rendered = _themes_page(index, chrome, chrome_i18n)
     output_dir = site_dir / "themes"
     staging = site_dir / "themes.staging"
     if staging.exists():
@@ -399,5 +391,6 @@ def write_themes(
         "records": index["records"],
         "tagged": index["tagged"],
         "unthemed": len(index["unthemed"]),
-        "sitemap_entries": [(THEMES_PATH, newest)],
+        "rendered": rendered,
+        "sitemap_entries": [(THEMES_PATH, index["updated"])],
     }

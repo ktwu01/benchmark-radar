@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from benchmark_radar.themes import build_theme_index, write_themes
+from benchmark_radar.themes import _SLICE, build_theme_index, write_themes
 
 # The real dashboard and app.js, same contract test_blog.py relies on: a
 # fixture copy could drift from what ships.
@@ -151,6 +151,8 @@ def test_build_theme_index_keeps_one_record_recurring_across_snapshots():
     # The newest copy supplies what the reader sees.
     assert index["groups"][0]["records"][0]["date"] == "2026-09-11"
     assert index["groups"][0]["records"][0]["summary"] == "Revised abstract."
+    # ...and what the sitemap dates the page by.
+    assert index["updated"] == "2026-09-11"
 
 
 def test_write_themes_writes_page_with_groups_and_counts(tmp_path):
@@ -199,6 +201,35 @@ def test_write_themes_lists_unthemed_records_instead_of_dropping_them(tmp_path):
     assert "No source has tagged a record with a theme yet." in page
     assert "No theme tag yet" in page
     assert "A Drift-Aware Agent Benchmark" in page
+
+
+def test_write_themes_caps_a_section_and_publishes_the_trim(tmp_path):
+    # Rendering every record made the page a 9 MB document, with the overflow
+    # parked in `hidden` cards a "show all" button revealed. Pages serves a
+    # 100 GB/month bandwidth cap, so a section renders its newest slice and the
+    # ledger states what was left out -- principle.md's rule that a budget which
+    # trims content must count and publish the trim.
+    total = _SLICE + 25
+    items = [
+        _item(
+            source_id=f"xbsleepy:2609.{n}",
+            url=f"https://arxiv.org/abs/2609.{n}",
+            title=f"Record {n}",
+            published_at=f"2026-09-{(n % 28) + 1:02d}T18:00:00Z",
+        )
+        for n in range(total)
+    ]
+
+    report = _write_themes([_snapshot(items)], tmp_path)
+    page = (tmp_path / "themes" / "index.html").read_text(encoding="utf-8")
+
+    assert report["records"] == total
+    assert report["rendered"] == _SLICE
+    assert page.count('<article class="theme-card">') == _SLICE
+    assert f"{total} records · newest {_SLICE} shown" in page
+    assert f"so {_SLICE} of {total} are on this page" in page
+    # The full count is still on the page; only the cards are bounded.
+    assert f"{total} discovery records read from the daily snapshots" in page
 
 
 def test_every_chip_targets_a_slug_the_page_actually_carries(tmp_path):
