@@ -5,23 +5,9 @@
 // "mentions the word insight", so the renderer is run for real against a
 // minimal DOM rather than grepped.
 import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import { loadDashboardSource } from "./load_dashboard_source.mjs";
 
-const here = dirname(fileURLToPath(import.meta.url));
-// app.js imports its brand-mark resolvers from glyphs.js (issue #261), and
-// `new Function` below cannot take an import statement. Inlining the module
-// and dropping the import keeps the harness evaluating the real source rather
-// than a copy: the same text runs here and in the browser, minus the two lines
-// that only differ in how the file is loaded.
-const glyphs = readFileSync(join(here, "..", "site", "assets", "glyphs.js"), "utf8")
-  .replace(/^export \{[\s\S]*?\};$/m, "");
-const source =
-  glyphs +
-  readFileSync(join(here, "..", "site", "assets", "app.js"), "utf8").replace(
-    /^import \{[\s\S]*?\} from "\.\/glyphs\.js";$/m,
-    "",
-  );
+const source = loadDashboardSource();
 
 class StubNode {
   constructor(tag) {
@@ -105,7 +91,7 @@ new Function(harness)();
 const lang = process.argv[3];
 if (lang) globalThis.__render.setLang(lang);
 
-const fixturePath = process.argv[2] || join(here, "fixtures", "daily_briefing.json");
+const fixturePath = process.argv[2] || new URL("./fixtures/daily_briefing.json", import.meta.url);
 const day = JSON.parse(readFileSync(fixturePath, "utf8"));
 globalThis.__render.renderDailyBriefing(day);
 

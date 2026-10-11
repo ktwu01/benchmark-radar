@@ -606,8 +606,10 @@ def test_clean_route_model_migrates_legacy_urls_and_preserves_utility_background
     def section(start: str, end: str) -> str:
         return source[source.index(start) : source.index(end, source.index(start))]
 
+    field_source = Path("site/assets/fields.js").read_text(encoding="utf-8")
     route_source = "\n".join(
         (
+            re.sub(r"^export ", "", field_source, flags=re.M) + "\nconst researchFields = fields;",
             section("const VIEW_SEO = {", "// These sheets are also indexable pages."),
             section("const UTILITY_SEO = {", "// One list, not two:"),
             section("const VIEW_PATHS =", "function applySeo("),
@@ -1390,6 +1392,7 @@ def test_static_html_references_existing_local_assets():
     # during the build.
     generated_assets = {
         "feed.xml",
+        "research/",
         "data/radar.json",
         "blog/",
         "leaderboard/",

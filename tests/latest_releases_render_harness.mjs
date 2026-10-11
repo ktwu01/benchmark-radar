@@ -5,21 +5,9 @@
 // open across a redraw. The Python test compares the rows and the note with
 // the seeds app_seeds.py writes, so the two can never disagree silently.
 import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import { loadDashboardSource } from "./load_dashboard_source.mjs";
 
-const here = dirname(fileURLToPath(import.meta.url));
-// app.js imports its brand-mark resolvers from glyphs.js; `new Function`
-// cannot take an import statement, so the module is inlined (as the other
-// render harnesses do) and the real source runs otherwise unchanged.
-const glyphs = readFileSync(join(here, "..", "site", "assets", "glyphs.js"), "utf8")
-  .replace(/^export \{[\s\S]*?\};$/m, "");
-const source =
-  glyphs +
-  readFileSync(join(here, "..", "site", "assets", "app.js"), "utf8").replace(
-    /^import \{[\s\S]*?\} from "\.\/glyphs\.js";$/m,
-    "",
-  );
+const source = loadDashboardSource();
 
 const allNodes = [];
 

@@ -4,25 +4,9 @@
 // assertions alone cannot tell "renders an actions row" from "mentions the
 // word Contact", so the renderer is run for real against a minimal DOM.
 import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import { loadDashboardSource } from "./load_dashboard_source.mjs";
 
-const here = dirname(fileURLToPath(import.meta.url));
-// app.js imports its brand-mark resolvers from glyphs.js (issue #261), and
-// `new Function` below cannot take an import statement. Inlining the module
-// and dropping the import keeps the harness evaluating the real source rather
-// than a copy: the same text runs here and in the browser, minus the two lines
-// that only differ in how the file is loaded.
-const glyphs = readFileSync(join(here, "..", "site", "assets", "glyphs.js"), "utf8").replace(
-  /^export \{[\s\S]*?\};$/m,
-  "",
-);
-const source =
-  glyphs +
-  readFileSync(join(here, "..", "site", "assets", "app.js"), "utf8").replace(
-    /^import \{[\s\S]*?\} from "\.\/glyphs\.js";$/m,
-    "",
-  );
+const source = loadDashboardSource();
 
 class StubNode {
   constructor(tag) {
@@ -154,7 +138,7 @@ const fixtureArg = process.argv[2];
 const fixturePath =
   fixtureArg && fixtureArg !== "--resolve-failure"
     ? fixtureArg
-    : join(here, "fixtures", "stale_radar.json");
+    : new URL("./fixtures/stale_radar.json", import.meta.url);
 globalThis.__render.state.data = JSON.parse(readFileSync(fixturePath, "utf8"));
 globalThis.__render.renderStaleBanner();
 

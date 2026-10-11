@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { SKYLINE_START_DATE, benchmarkDate, benchmarkDateLabel, skylineModel as buildSkylineModel, skylineGeometry, skylineDateLanes, skylineScoreLanes, skylineCapPositions, skylineFrontierSteps, scorePopulation, matchesScoreCutoff } from '../site/assets/skyline.js';
+import { matchesField } from '../site/assets/fields.js';
 const source = readFileSync('site/assets/app.js', 'utf8');
 function fn(name) {
   const start = source.indexOf(`function ${name}(`);
@@ -49,9 +50,9 @@ state.benchmarkIndex = [
   {slug:'missing',name:'Missing',source:'llm_stats',score_summary:summary(null,0)},
 ];
 state.lscore = 70;
-const scoreNames = ['scoreRecord','matchesScoreFilter','scoreBrowseRows','saturationRows','latestMatchingModel','scoreRankingRows','benchmarkQueryIds','searchBenchmarkIndex','foldName','frontierDefaultEntry','catalogDisplayFactor'];
+const scoreNames = ['researchRecords','scoreRecord','matchesScoreFilter','scoreBrowseRows','saturationRows','latestMatchingModel','scoreRankingRows','benchmarkQueryIds','searchBenchmarkIndex','foldName','frontierDefaultEntry','catalogDisplayFactor'];
 state.benchmarkQuery = '';
-const scores = new Function('state', 'scorePopulation', 'matchesScoreCutoff', 'SKYLINE_START_DATE', `${scoreNames.map(fn).join('\n')}\nreturn {${scoreNames.join(',')}};`)(state, scorePopulation, matchesScoreCutoff, SKYLINE_START_DATE);
+const scores = new Function('matchesField', 'state', 'scorePopulation', 'matchesScoreCutoff', 'SKYLINE_START_DATE', `${scoreNames.map(fn).join('\n')}\nreturn {${scoreNames.join(',')}};`)(matchesField, state, scorePopulation, matchesScoreCutoff, SKYLINE_START_DATE);
 assert.deepEqual(scores.scoreBrowseRows().map(r=>r.id), ['external','curated','missing']);
 state.benchmarkIndex[0].scored_models = [{name:'GPT-5.6 Sol',date:'2026-06-01',date_precision:'document_publication'}];
 state.benchmarkIndex[1].scored_models = [{name:'GPT-5.6 Sol (high)',date:'2026-09-01',date_precision:'model_announcement'}];
@@ -617,3 +618,22 @@ const ordinaryMarks = ordinary.children.filter(node => node.attrs['data-frontier
 assert.equal(ordinaryMarks.length,2);
 assert.deepEqual(ordinaryMarks.map(node=>node.children.find(child=>child.tag==='circle').attrs.cx),[68,500]);
 assert(!ordinary.children.some(node=>node.attrs.class==='score-tie-guide'));
+
+// Field scope narrows browsing, but a name query still searches every source.
+state.benchmarkIndex = [
+  {slug:'agent',name:'Agent',source:'model_reports',categories:['tool_use'],score_summary:summary(40)},
+  {slug:'unknown',name:'Unknown',source:'llm_stats',categories:[],score_summary:summary(null,0)},
+  {slug:'safety',name:'Safety',source:'artificial_analysis',categories:['safety'],score_summary:summary(95)},
+];
+state.researchField = 'agents';
+state.researchSub = 'Tool use';
+state.lscore = 70;
+state.benchmarkQuery = '';
+assert.deepEqual(scores.saturationRows().map(r=>r.id), ['agent']);
+state.benchmarkQuery = 'Safety';
+assert.deepEqual(scores.saturationRows().map(r=>r.id), ['safety']);
+assert.equal(state.researchField, 'agents');
+state.benchmarkQuery = 'Unknown';
+assert.deepEqual(scores.saturationRows().map(r=>r.id), ['unknown']);
+state.benchmarkQuery = '';
+assert.deepEqual(scores.saturationRows().map(r=>r.id), ['agent']);

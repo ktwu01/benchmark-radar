@@ -207,6 +207,7 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="alternate" type="application/rss+xml" title="Benchmark Radar RSS" href="/feed.xml">
     <link rel="stylesheet" href="/assets/styles.css">
+    <link rel="stylesheet" href="/assets/research.css">
     <script src="/assets/clarity.js" defer></script>
     <script src="/assets/app.js" type="module"></script>
   </head>
@@ -223,6 +224,7 @@
         </a>
         <nav class="view-nav" aria-label="Dashboard views" data-i18n-aria="Dashboard views">
           <button type="button" class="nav-active" data-view="today" aria-controls="today-view" aria-current="page" data-i18n="Today">Today</button>
+          <a href="/research/" data-i18n="Research fields">Research fields</a>
           <a
             href="/cli/"
             id="cli-nav"
@@ -580,6 +582,7 @@
              seeded rows stay in the document for crawlers and readers
              without scripts. -->
         <div id="leaderboard-adoption" hidden>
+        <div class="research-domain-controls" data-scope-view="leaderboard"></div>
         <section class="benchmark-skyline" id="benchmark-skyline" aria-labelledby="benchmark-skyline-heading">
           <div class="skyline-heading">
             <div>
@@ -802,6 +805,7 @@
           </label>
         </div>
 
+        <div class="research-domain-controls" data-scope-view="saturation"></div>
         <div class="benchmark-workbench">
           <!-- A tool region, not a content section. The examples used to be a
                titled block with two subheadings and eight cards, which outranked

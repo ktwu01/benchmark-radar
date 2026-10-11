@@ -1,0 +1,500 @@
+/* Research components reuse the palette and typography owned by styles.css. */
+#radar-explorer {
+  --selected: rgb(37 94 168 / 8%);
+  font: 400 16px/1.6 var(--body);
+  color: var(--ink);
+}
+
+#radar-explorer .workspace {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+#radar-explorer .sidebar {
+  position: sticky;
+  top: 80px;
+  align-self: start;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  padding: 24px 16px 24px 0;
+  border-right: 1px solid var(--line);
+}
+
+#radar-explorer .sidebar-heading,
+#radar-explorer .sidebar-bottom {
+  color: var(--muted);
+  font-size: 14px;
+  padding: 0 12px;
+}
+
+#radar-explorer .sidebar-bottom {
+  margin-top: 24px;
+}
+
+#radar-explorer .field-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  margin: 4px 0;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+#radar-explorer .field-button.active {
+  background: var(--selected);
+  border-color: var(--blue);
+  color: var(--blue-deep);
+}
+
+#radar-explorer .nav-count {
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+#radar-explorer #subfield-nav {
+  display: none;
+}
+
+#radar-explorer .main {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 24px 0 32px 24px;
+}
+
+#radar-explorer .page-heading,
+#radar-explorer .result-bar,
+#radar-explorer .pagination,
+#radar-explorer .detail-top,
+#radar-explorer .detail-links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+#radar-explorer .page-heading {
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+#radar-explorer h1 {
+  margin: 0;
+  font: 600 24px/32px var(--body);
+}
+
+#radar-explorer button,
+#radar-explorer select,
+#radar-explorer input,
+#radar-explorer .detail-links a,
+#radar-explorer .research-detail-link,
+.research-domain-tabs button,
+.research-direction-tabs button,
+.research-scope-toggle {
+  min-height: 44px;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  color: var(--ink);
+  font: 400 14px/22px var(--body);
+  padding: 10px 12px;
+}
+
+#radar-explorer button:hover,
+#radar-explorer .detail-links a:hover {
+  border-color: var(--blue);
+}
+
+#radar-explorer button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+#radar-explorer .field-grid {
+  margin-bottom: 24px;
+}
+
+#radar-explorer .summary-count {
+  display: block;
+  font-size: 28px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+#radar-explorer .summary-label,
+#radar-explorer .source-line,
+#radar-explorer .na,
+#radar-explorer .score-sub,
+#radar-explorer .chart-note,
+#radar-explorer .detail-top {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+#radar-explorer .band-track {
+  display: block;
+  height: 4px;
+  background: var(--line);
+}
+
+#radar-explorer .band-track > span {
+  display: block;
+  height: 100%;
+  background: var(--blue);
+}
+
+#radar-explorer .domain-summary,
+#radar-explorer .detail-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+#radar-explorer .domain-summary {
+  grid-column: 1 / -1;
+  padding: 16px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+}
+
+#radar-explorer .catalog-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+}
+
+#radar-explorer .view-tabs,
+#radar-explorer .filter-row,
+#radar-explorer .search-wrap,
+#radar-explorer .sort-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#radar-explorer .view-tabs {
+  border-bottom: 1px solid var(--line);
+}
+
+#radar-explorer .view-tabs button {
+  border: 0;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+  padding-inline: 0;
+  background: transparent;
+}
+
+#radar-explorer .view-tabs button[aria-selected="true"] {
+  border-bottom-color: var(--blue);
+  color: var(--blue-deep);
+  font-weight: 600;
+}
+
+#radar-explorer .filter-row {
+  flex-wrap: wrap;
+}
+
+#radar-explorer .search-wrap {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+#radar-explorer .search-wrap input {
+  width: 100%;
+  min-width: 0;
+}
+
+#radar-explorer .search-wrap > span,
+#radar-explorer kbd {
+  display: none;
+}
+
+#radar-explorer .filter-row select {
+  max-width: 100%;
+}
+
+#radar-explorer .result-bar {
+  justify-content: flex-start;
+  font-size: 14px;
+}
+
+#radar-explorer .sort-label {
+  margin-left: auto;
+}
+
+#radar-explorer .table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+#radar-explorer table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+}
+
+#radar-explorer th,
+#radar-explorer td {
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+
+#radar-explorer th {
+  color: var(--muted);
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+#radar-explorer td {
+  font-size: 14px;
+}
+
+#radar-explorer #rows tr {
+  cursor: pointer;
+}
+
+#radar-explorer #rows tr:hover,
+#radar-explorer #rows tr:focus-within {
+  background: var(--selected);
+}
+
+#radar-explorer .benchmark-name {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  font-weight: 600;
+}
+
+#radar-explorer .source-line {
+  display: block;
+}
+
+#radar-explorer .pagination button,
+#radar-explorer .close-detail {
+  min-width: 44px;
+}
+
+#radar-explorer .pagination > div {
+  display: flex;
+  gap: 8px;
+}
+
+#radar-explorer .band-row {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 8px 0;
+  text-align: left;
+}
+
+#radar-explorer .method-note,
+#radar-explorer .main-footer {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+#radar-explorer .main-footer {
+  margin-top: 24px;
+}
+
+#radar-explorer #detail-dialog {
+  width: calc(100% - 32px);
+  max-width: 820px;
+  max-height: calc(100% - 32px);
+  overflow-y: auto;
+  padding: 24px;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--ink);
+}
+
+#radar-explorer #detail-dialog::backdrop {
+  background: rgb(21 36 42 / 40%);
+}
+
+#radar-explorer .detail-title {
+  margin: 16px 0;
+}
+
+#radar-explorer .detail-metrics {
+  margin: 24px 0;
+}
+
+#radar-explorer .detail-metrics strong,
+#radar-explorer .detail-metrics span {
+  display: block;
+}
+
+#radar-explorer .detail-metrics strong {
+  font-size: 24px;
+}
+
+#radar-explorer .detail-metrics span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+#radar-explorer .detail-section-title {
+  margin: 24px 0 12px;
+}
+
+#radar-explorer .history-chart {
+  display: block;
+  width: 100%;
+}
+
+#radar-explorer .evidence-item {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr) 60px;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+#radar-explorer .detail-links {
+  justify-content: flex-start;
+  margin-top: 24px;
+}
+
+#radar-explorer .research-detail-link {
+  display: inline-flex;
+}
+
+.research-domain-controls {
+  margin-bottom: 24px;
+}
+
+.research-domain-tabs,
+.research-direction-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.research-domain-tabs {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.research-direction-tabs {
+  padding-top: 16px;
+}
+
+.research-domain-tabs button,
+.research-direction-tabs button {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.research-domain-tabs button[aria-pressed="true"],
+.research-direction-tabs button[aria-pressed="true"] {
+  border-color: var(--blue);
+  color: var(--blue-deep);
+  background: rgb(37 94 168 / 8%);
+}
+
+.research-scope-toggle {
+  display: none;
+  width: 100%;
+  text-align: left;
+}
+
+.research-scope-toggle::after {
+  content: "⌄";
+  margin-left: auto;
+}
+
+.research-scope-toggle[aria-expanded="true"]::after {
+  content: "⌃";
+}
+
+@media (max-width: 900px) {
+  #radar-explorer .workspace {
+    display: block;
+  }
+
+  #radar-explorer .sidebar {
+    position: static;
+    max-height: none;
+    padding: 16px 0;
+    border: 0;
+  }
+
+  #radar-explorer .sidebar-heading,
+  #radar-explorer .sidebar-bottom {
+    display: none;
+  }
+
+  #radar-explorer #field-nav {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+  }
+
+  #radar-explorer .field-button {
+    width: auto;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  #radar-explorer .main {
+    padding: 8px 0 32px;
+  }
+}
+
+@media (max-width: 640px) {
+  #radar-explorer .workspace {
+    padding-inline: 16px;
+  }
+
+  #radar-explorer .catalog-section,
+  #radar-explorer #detail-dialog {
+    padding: 16px;
+  }
+
+  #radar-explorer .sort-label {
+    margin-left: 0;
+  }
+
+  #radar-explorer .band-row {
+    grid-template-columns: 140px minmax(0, 1fr) 32px;
+  }
+
+  .research-scope-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .research-domain-controls:not([data-expanded="true"]) .research-scope-panel,
+  .research-explorer-directions:not([data-expanded="true"]) .research-direction-tabs {
+    display: none;
+  }
+
+  .research-scope-panel {
+    padding-top: 12px;
+  }
+}
