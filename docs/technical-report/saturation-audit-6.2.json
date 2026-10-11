@@ -5,7 +5,7 @@
       "benchmark_id": "aime",
       "conflicts": [
         "instruments: aime, aime_2024, aime_2025, aime_2026",
-        "protocols: AIME 2025, as printed in Table 3 (Large Models), AIME 2025, as printed in Table 4 (Efficient Models), AIME 2026 I, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge, AIME 2026, as printed in Table 3 (Large Models), AIME 2026, as printed in Table 4 (Efficient Models), AIME 2026, as reported, AIME 2026, temp 1.0, top_p 0.95, max gen 163840 tokens, GPT-5.5 (medium) judge, Pass@1, extended thinking up to 64K tokens, top-p 0.95, no parallel test-time compute, no tools, thinking (temp 0.6, top_p 0.95, top_k 20), thinking mode",
+        "protocols: AIME 2025, as printed in Table 3 (Large Models), AIME 2025, as printed in Table 4 (Efficient Models), AIME 2026 I, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge, AIME 2026, as printed in Table 3 (Large Models), AIME 2026, as printed in Table 4 (Efficient Models), AIME 2026, as reported, AIME 2026, temp 1.0, top_p 0.95, max gen 163840 tokens, GPT-5.5 (medium) judge, Pass@1, Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained, extended thinking up to 64K tokens, top-p 0.95, no parallel test-time compute, no tools, thinking (temp 0.6, top_p 0.95, top_k 20), thinking mode",
         "pass@k, majority vote and Python tool access each shift this by double digits."
       ],
       "counterexamples": [
@@ -45,6 +45,38 @@
       ],
       "direction": "higher_is_better",
       "exclusions": [
+        {
+          "observation_id": "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Bespoke-Stratos-7B",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000DeepSeek-R1-Distill-Llama-8B",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000DeepSeek-R1-Distill-Qwen-7B",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Llama-3.2-3B-Instruct",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Phi-4-Mini (base model, 3.8B)",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Phi-4-mini-reasoning (3.8B)",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000o1-mini",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000OpenThinker-7B",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
         {
           "observation_id": "curated\u0000aime\u0000qwen3_technical_report\u0000aime_2024\u0000thinking mode\u0000Qwen3-235B-A22B (Thinking)",
           "reason": "not in the selected repeated instrument+protocol series"
@@ -122,6 +154,30 @@
             "curated\u0000aime\u0000deepseek_r1_report\u0000aime_2024\u0000Pass@1\u0000DeepSeek-R1"
           ],
           "single_organization": true
+        },
+        {
+          "best_observation_id": "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000o1-mini",
+          "best_value": 63.6,
+          "connectable": false,
+          "dated_points": 1,
+          "first_reported_at": "2025-04-29",
+          "headroom": 36.4,
+          "instrument": "aime_2024",
+          "last_reported_at": "2025-04-29",
+          "organization_count": 6,
+          "point_count": 8,
+          "protocol": "Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained",
+          "score_ids": [
+            "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Bespoke-Stratos-7B",
+            "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000DeepSeek-R1-Distill-Llama-8B",
+            "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000DeepSeek-R1-Distill-Qwen-7B",
+            "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Llama-3.2-3B-Instruct",
+            "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Phi-4-Mini (base model, 3.8B)",
+            "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Phi-4-mini-reasoning (3.8B)",
+            "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000o1-mini",
+            "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000OpenThinker-7B"
+          ],
+          "single_organization": false
         },
         {
           "best_observation_id": "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2025, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Lite",
@@ -351,6 +407,14 @@
       "score_ids": [
         "curated\u0000aime\u0000deepseek_v3_report\u0000aime_2024\u0000Pass@1\u0000DeepSeek-V3",
         "curated\u0000aime\u0000deepseek_r1_report\u0000aime_2024\u0000Pass@1\u0000DeepSeek-R1",
+        "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Bespoke-Stratos-7B",
+        "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000DeepSeek-R1-Distill-Llama-8B",
+        "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000DeepSeek-R1-Distill-Qwen-7B",
+        "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Llama-3.2-3B-Instruct",
+        "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Phi-4-Mini (base model, 3.8B)",
+        "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Phi-4-mini-reasoning (3.8B)",
+        "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000o1-mini",
+        "curated\u0000aime\u0000microsoft_phi_4_mini_reasoning_model_card\u0000aime_2024\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000OpenThinker-7B",
         "curated\u0000aime\u0000qwen3_technical_report\u0000aime_2024\u0000thinking mode\u0000Qwen3-235B-A22B (Thinking)",
         "curated\u0000aime\u0000anthropic_claude_4_system_card\u0000aime_2025\u0000extended thinking up to 64K tokens, top-p 0.95, no parallel test-time compute\u0000Claude Opus 4",
         "curated\u0000aime\u0000anthropic_claude_4_system_card\u0000aime_2025\u0000extended thinking up to 64K tokens, top-p 0.95, no parallel test-time compute\u0000Claude Sonnet 4",
@@ -414,6 +478,12 @@
           "id": "google_gemma_4_model_card",
           "name": "google_gemma_4_model_card",
           "url": "https://huggingface.co/google/gemma-4-31B-it"
+        },
+        {
+          "caveat": "",
+          "id": "microsoft_phi_4_mini_reasoning_model_card",
+          "name": "microsoft_phi_4_mini_reasoning_model_card",
+          "url": "https://huggingface.co/microsoft/Phi-4-mini-reasoning/blob/661e72224c678e7360429603fd898712ee0c74b9/README.md"
         },
         {
           "caveat": "",
@@ -1034,7 +1104,7 @@
     {
       "benchmark_id": "math_500",
       "conflicts": [
-        "protocols: EM, 8K output limit, Pass@1, thinking mode",
+        "protocols: EM, 8K output limit, Pass@1, Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained, thinking mode",
         "Largely saturated at the frontier."
       ],
       "counterexamples": [
@@ -1062,14 +1132,14 @@
         },
         {
           "instrument": "math_500",
-          "model": "DeepSeek-V3",
-          "observation_id": "curated\u0000math_500\u0000deepseek_v3_report\u0000math_500\u0000EM, 8K output limit\u0000DeepSeek-V3",
-          "organization": "DeepSeek",
-          "protocol": "EM, 8K output limit",
+          "model": "Phi-4-mini-reasoning (3.8B)",
+          "observation_id": "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Phi-4-mini-reasoning (3.8B)",
+          "organization": "Microsoft",
+          "protocol": "Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained",
           "reason": "no instrument+protocol series spans at least two dates",
-          "reported_at": "2024-12-27",
-          "source_id": "deepseek_v3_report",
-          "value": 90.2
+          "reported_at": "2025-04-29",
+          "source_id": "microsoft_phi_4_mini_reasoning_model_card",
+          "value": 94.6
         }
       ],
       "direction": "higher_is_better",
@@ -1083,6 +1153,38 @@
           "reason": "no instrument+protocol series spans at least two dates"
         },
         {
+          "observation_id": "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Bespoke-Stratos-7B",
+          "reason": "no instrument+protocol series spans at least two dates"
+        },
+        {
+          "observation_id": "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000DeepSeek-R1-Distill-Llama-8B",
+          "reason": "no instrument+protocol series spans at least two dates"
+        },
+        {
+          "observation_id": "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000DeepSeek-R1-Distill-Qwen-7B",
+          "reason": "no instrument+protocol series spans at least two dates"
+        },
+        {
+          "observation_id": "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Llama-3.2-3B-Instruct",
+          "reason": "no instrument+protocol series spans at least two dates"
+        },
+        {
+          "observation_id": "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Phi-4-Mini (base model, 3.8B)",
+          "reason": "no instrument+protocol series spans at least two dates"
+        },
+        {
+          "observation_id": "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Phi-4-mini-reasoning (3.8B)",
+          "reason": "no instrument+protocol series spans at least two dates"
+        },
+        {
+          "observation_id": "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000o1-mini",
+          "reason": "no instrument+protocol series spans at least two dates"
+        },
+        {
+          "observation_id": "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000OpenThinker-7B",
+          "reason": "no instrument+protocol series spans at least two dates"
+        },
+        {
           "observation_id": "curated\u0000math_500\u0000qwen3_technical_report\u0000math_500\u0000thinking mode\u0000Qwen3-235B-A22B (Thinking)",
           "reason": "no instrument+protocol series spans at least two dates"
         }
@@ -1090,6 +1192,30 @@
       "metric": "accuracy",
       "name": "MATH-500",
       "protocol_strata": [
+        {
+          "best_observation_id": "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Phi-4-mini-reasoning (3.8B)",
+          "best_value": 94.6,
+          "connectable": false,
+          "dated_points": 1,
+          "first_reported_at": "2025-04-29",
+          "headroom": 5.4,
+          "instrument": "math_500",
+          "last_reported_at": "2025-04-29",
+          "organization_count": 6,
+          "point_count": 8,
+          "protocol": "Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained",
+          "score_ids": [
+            "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Bespoke-Stratos-7B",
+            "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000DeepSeek-R1-Distill-Llama-8B",
+            "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000DeepSeek-R1-Distill-Qwen-7B",
+            "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Llama-3.2-3B-Instruct",
+            "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Phi-4-Mini (base model, 3.8B)",
+            "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Phi-4-mini-reasoning (3.8B)",
+            "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000o1-mini",
+            "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000OpenThinker-7B"
+          ],
+          "single_organization": false
+        },
         {
           "best_observation_id": "curated\u0000math_500\u0000deepseek_v3_report\u0000math_500\u0000EM, 8K output limit\u0000DeepSeek-V3",
           "best_value": 90.2,
@@ -1179,6 +1305,14 @@
       "score_ids": [
         "curated\u0000math_500\u0000deepseek_v3_report\u0000math_500\u0000EM, 8K output limit\u0000DeepSeek-V3",
         "curated\u0000math_500\u0000deepseek_r1_report\u0000math_500\u0000Pass@1\u0000DeepSeek-R1",
+        "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Bespoke-Stratos-7B",
+        "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000DeepSeek-R1-Distill-Llama-8B",
+        "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000DeepSeek-R1-Distill-Qwen-7B",
+        "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Llama-3.2-3B-Instruct",
+        "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Phi-4-Mini (base model, 3.8B)",
+        "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000Phi-4-mini-reasoning (3.8B)",
+        "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000o1-mini",
+        "curated\u0000math_500\u0000microsoft_phi_4_mini_reasoning_model_card\u0000math_500\u0000Phi-4-mini-reasoning model card comparison table; Appendix A identifies AIME 2024; maximum sequence length 32768; common temperature unspecified; sampling count and starred-row provenance not explained\u0000OpenThinker-7B",
         "curated\u0000math_500\u0000qwen3_technical_report\u0000math_500\u0000thinking mode\u0000Qwen3-235B-A22B (Thinking)"
       ],
       "selected_repeated_series": null,
@@ -1194,6 +1328,12 @@
           "id": "deepseek_v3_report",
           "name": "deepseek_v3_report",
           "url": "https://arxiv.org/abs/2412.19437"
+        },
+        {
+          "caveat": "",
+          "id": "microsoft_phi_4_mini_reasoning_model_card",
+          "name": "microsoft_phi_4_mini_reasoning_model_card",
+          "url": "https://huggingface.co/microsoft/Phi-4-mini-reasoning/blob/661e72224c678e7360429603fd898712ee0c74b9/README.md"
         },
         {
           "caveat": "",
