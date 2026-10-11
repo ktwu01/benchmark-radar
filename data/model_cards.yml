@@ -1538,14 +1538,13 @@ benchmarks:
     url: https://arxiv.org/abs/2602.07621
     released: 2026-02-07
     caveat: >-
-      1,664 claims from 180 papers verified against tables and figures, with
-      refuted claims made by editing the evidence. Supported and Refuted
-      claims come in pairs, and the SciTrue NTCIR-19 report shows a pair prior
-      alone lifts Subtask-1 pair accuracy from 72.2 to 93.5, more than any
-      model swap. It also finds the released file ordering can leak the label,
-      and many residual errors are label noise, so a high score may reflect
-      the pairing structure rather than evidence reading. Table and figure
-      scores are not interchangeable.
+      1,664 claims from 180 papers in machine learning, NLP and medicine,
+      verified against tables and figures. Refuted cases keep the authentic
+      claim and edit the evidence instead, so a refuted item can differ from a
+      supported one only in a small change to a table or figure. The authors
+      report that figure-based verification remains particularly challenging
+      for all models, so a blended score depends on the table/figure mix, and
+      table and figure numbers are not interchangeable.
 
   - id: mer2026_mer_fg
     name: MER2026 MER-FG
@@ -1555,12 +1554,12 @@ benchmarks:
     released: 2026-04-21
     caveat: >-
       Track 2 of the MER2026 challenge: open-vocabulary, fine-grained emotion
-      recognition from video, audio and subtitles, scored by EW-F1 after
-      predictions are mapped onto an emotion wheel. Because free-form labels
-      must land on wheel entries, vocabulary normalization moves the score
-      independently of recognition (the first-place MultiMER system applies a
-      211-rule normalization map before voting). Results are on the
-      challenge's test set, and the dataset licence forbids redistribution.
+      recognition from video, audio and subtitles, ranked on a 1,000-sample
+      test set with emotion-wheel-based metrics that group synonyms (happy and
+      joyful count as one label). Because the label space is open, how a
+      system normalizes its vocabulary onto the wheel moves the score
+      independently of recognition. Reference labels were built by merging
+      top MER2025 team predictions and then manually validated.
 
   - id: nafbench
     name: NAFBench
@@ -1572,8 +1571,8 @@ benchmarks:
       Solver-certified normal logic programs verbalized into natural language,
       each labelled under four negation semantics (SLDNF, well-founded, and
       credulous and skeptical stable-model reasoning) that can disagree on the
-      same instance. A score without the semantics named is not comparable,
-      models are sensitive to rule order. The leaderboard's hidden test split
+      same instance. A score without the semantics named is not comparable.
+      Models are also sensitive to rule order. The leaderboard's hidden test split
       (Hugging Face qbao775/naf-bench, as described by the repository README
       at revision 83ede91) has 495 rows drawn from only 77 programs, so the
       effective sample is the program, not the row. The arXiv v1 appendix
