@@ -2190,9 +2190,9 @@ def fetch_xbsleepy(
     that introduce agent benchmarks and tags each one with capability themes
     (issue #380). Its published index is cumulative, so `since` filtering
     happens locally and an unchanged index legitimately yields zero new rows.
-    Theme tags ride through in `categories` prefixed with the source so
-    downstream grouping can use the digest's own taxonomy without colliding
-    with keyword-derived categories.
+    Theme tags ride through in `source_tags` prefixed with the source, so
+    downstream grouping can use the digest's own taxonomy while `categories`
+    stays the pipeline's own keyword classification.
     """
     index_url = str(config.get("index_url") or "").strip()
     if not index_url:
@@ -2212,10 +2212,21 @@ def fetch_xbsleepy(
         announced = _optional_date(str(row.get("announced_date") or ""))
         updated = _optional_date(str(row.get("updated") or ""))
         published_at = published or announced
-        activity_at = updated or published_at
+        updated_at = updated or published_at
+        # `published` is the arXiv v1 submission time, not the announcement, so
+        # a paper announced today with an older submission and no revision would
+        # fall outside `since` and never be collected. Mirror fetch_arxiv and
+        # take the latest known timestamp as the activity signal, while the
+        # item's own dates stay the paper's publication provenance.
+        activity_at = max(
+            (value for value in (updated, published_at, announced) if value is not None),
+            default=None,
+        )
         if not paper_id or not title or not url or activity_at is None:
             continue
-        if activity_at < since or _reject_future(config, paper_id, published_at, updated):
+        if activity_at < since or _reject_future(
+            config, paper_id, published_at, updated, announced
+        ):
             continue
         raw_authors = row.get("authors")
         if raw_authors is not None and not isinstance(raw_authors, list):
@@ -2229,20 +2240,20 @@ def fetch_xbsleepy(
             for key in ("pdf", "html")
             if str(links.get(key) or "").startswith(("https://", "http://"))
         ]
-        categories = [f"xbsleepy:{str(tag).strip()}" for tag in raw_tags or [] if str(tag).strip()]
+        source_tags = [f"xbsleepy:{str(tag).strip()}" for tag in raw_tags or [] if str(tag).strip()]
         found[f"xbsleepy:{paper_id}"] = RadarItem(
             source="XBsleepy",
             source_id=f"xbsleepy:{paper_id}",
             title=title,
             url=url,
             published_at=published_at,
-            updated_at=updated or published_at,
+            updated_at=updated_at,
             summary=clean_card_text(str(row.get("abstract") or "")),
             event_kind="discovered",
             authors=authors,
             artifact_urls=artifact_urls,
             metrics={"citations": float(row.get("citations") or 0)},
-            categories=categories,
+            source_tags=source_tags,
             raw=row,
             parser_version="xbsleepy-index/1",
         )

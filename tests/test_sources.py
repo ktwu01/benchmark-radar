@@ -3496,7 +3496,7 @@ XBSLEEPY_INDEX_PAPERS = [
 ]
 
 
-def test_xbsleepy_maps_index_papers_and_carries_theme_categories(monkeypatch):
+def test_xbsleepy_maps_index_papers_and_carries_theme_tags(monkeypatch):
     monkeypatch.setattr(
         "benchmark_radar.sources.get_json",
         lambda url, attempts=3, timeout=30: {"papers": XBSLEEPY_INDEX_PAPERS},
@@ -3515,7 +3515,10 @@ def test_xbsleepy_maps_index_papers_and_carries_theme_categories(monkeypatch):
     assert item.url == "https://arxiv.org/abs/2609.11115v1"
     assert item.published_at == datetime(2026, 9, 9, 18, tzinfo=UTC)
     assert item.event_kind == "discovered"
-    assert item.categories == ["xbsleepy:coding", "xbsleepy:planning"]
+    # The digest's own themes ride in `source_tags`; `categories` stays empty
+    # until the pipeline's taxonomy classifies the record.
+    assert item.source_tags == ["xbsleepy:coding", "xbsleepy:planning"]
+    assert item.categories == []
     assert item.artifact_urls == [
         "https://arxiv.org/pdf/2609.11115v1",
         "https://arxiv.org/html/2609.11115",
@@ -3547,7 +3550,39 @@ def test_xbsleepy_accepts_date_only_announced_dates(monkeypatch):
     )
 
     assert items[0].published_at == datetime(2026, 9, 10, tzinfo=UTC)
-    assert items[0].categories == []
+    assert items[0].source_tags == []
+
+
+def test_xbsleepy_collects_a_paper_announced_after_it_was_published(monkeypatch):
+    # The digest announces papers after arXiv publishes them. A paper submitted
+    # before a weekend and announced today carries an older `published` and no
+    # `updated`, so a cutoff read off either one alone drops it on its first and
+    # only announcement -- the trap fetch_arxiv's overlap window exists to avoid.
+    paper = {
+        "id": "2609.00003",
+        "title": "A Weekend Agent Benchmark",
+        "abstract": "Announced after it was published.",
+        "published": "2026-09-04T18:00:00Z",
+        "announced_date": "2026-09-10",
+        "links": {"abs": "https://arxiv.org/abs/2609.00003"},
+        "tags": ["planning"],
+    }
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, attempts=3, timeout=30: {"papers": [paper]},
+    )
+
+    items = fetch_xbsleepy(
+        {"index_url": "https://digest.example/data/index.json"},
+        datetime(2026, 9, 8, tzinfo=UTC),
+        10,
+    )
+
+    assert [item.source_id for item in items] == ["xbsleepy:2609.00003"]
+    # The announcement decides freshness; the record's own dates stay the
+    # paper's publication provenance rather than being rewritten to it.
+    assert items[0].published_at == datetime(2026, 9, 4, 18, tzinfo=UTC)
+    assert items[0].updated_at == datetime(2026, 9, 4, 18, tzinfo=UTC)
 
 
 def test_xbsleepy_drops_papers_older_than_since(monkeypatch):
@@ -3566,17 +3601,38 @@ def test_xbsleepy_drops_papers_older_than_since(monkeypatch):
 
 
 def test_xbsleepy_requires_papers_array(monkeypatch):
+    # Both cases must reach `_payload_rows`. Passing `{}` as config used to
+    # raise on the missing `index_url` first, so the payload validation this
+    # test names was never exercised.
+    config = {"index_url": "https://digest.example/data/index.json"}
+
     monkeypatch.setattr(
         "benchmark_radar.sources.get_json",
         lambda url, attempts=3, timeout=30: {"total": 3},
     )
+    with pytest.raises(ConnectorPayloadError, match="missing papers"):
+        fetch_xbsleepy(config, datetime(2026, 9, 8, tzinfo=UTC), 10)
 
-    with pytest.raises(ConnectorPayloadError):
-        fetch_xbsleepy({}, datetime(2026, 9, 8, tzinfo=UTC), 10)  # 无 index_url 直接报错
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, attempts=3, timeout=30: {"papers": {"2609.11115": {}}},
+    )
+    with pytest.raises(ConnectorPayloadError, match="invalid papers"):
+        fetch_xbsleepy(config, datetime(2026, 9, 8, tzinfo=UTC), 10)
 
 
-def test_xbsleepy_rejects_future_timestamps_instead_of_publishing_them(monkeypatch):
-    paper = dict(XBSLEEPY_INDEX_PAPERS[0], published="2027-01-01T00:00:00Z")
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("published", "2027-01-01T00:00:00Z"),
+        ("updated", "2027-01-01T00:00:00Z"),
+        # The announcement is a freshness signal too, so a digest row dated
+        # ahead of the run must not be published on the strength of it alone.
+        ("announced_date", "2027-01-01"),
+    ],
+)
+def test_xbsleepy_rejects_future_timestamps_instead_of_publishing_them(monkeypatch, field, value):
+    paper = dict(XBSLEEPY_INDEX_PAPERS[0], **{field: value})
     monkeypatch.setattr(
         "benchmark_radar.sources.get_json",
         lambda url, attempts=3, timeout=30: {"papers": [paper]},

@@ -102,6 +102,12 @@ def deduplicate(items: list[RadarItem]) -> list[RadarItem]:
         for organization in duplicate.organizations:
             if organization not in target.organizations:
                 target.organizations.append(organization)
+        # The newest copy becomes the target, so without this a curated source's
+        # theme tags would survive or vanish depending on which connector dated
+        # the same artifact later.
+        for tag in duplicate.source_tags:
+            if tag not in target.source_tags:
+                target.source_tags.append(tag)
         # A record with no description loses nothing by adopting one that has
         # it; a record that already has one keeps its own.
         if not target.summary.strip() and duplicate.summary.strip():
@@ -269,6 +275,9 @@ def score_item(
         if matches:
             categories.append(category)
             matched_terms.extend(matches[:2])
+    # Only the local taxonomy classifies. `item.source_tags` is left exactly as
+    # the connector set it: a curated source's own themes are provenance and
+    # must reach the snapshot, but they never earn relevance here.
     item.categories = categories
     relevance = min(
         rubric.SCORE_MAX,

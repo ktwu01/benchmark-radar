@@ -113,6 +113,49 @@ def test_scoring_is_explainable_and_bounded():
     assert any("Matched:" in reason for reason in scored.rationale)
 
 
+def test_source_native_tags_survive_scoring_and_a_cross_source_merge():
+    """Issue #380: the XBsleepy digest attaches its own capability themes, and
+    `score_item` used to assign `item.categories` wholesale, so the tags a
+    connector promised were gone before a snapshot was ever written. A
+    connector-level test passes either way, hence this one."""
+    taxonomy = {"benchmark": ["benchmark"]}
+    now = datetime(2026, 9, 10, tzinfo=UTC)
+    digest = {
+        "source": "XBsleepy",
+        "source_id": "xbsleepy:2609.11115",
+        "title": "Benchmark Radar: A Living Database for AI Benchmarks",
+        "url": "https://arxiv.org/abs/2609.11115v1",
+        "summary": "We present a living database of AI benchmarks.",
+        "published_at": datetime(2026, 9, 9, 18, tzinfo=UTC),
+        "updated_at": datetime(2026, 9, 9, 18, tzinfo=UTC),
+    }
+    tags = ["xbsleepy:coding", "xbsleepy:planning"]
+
+    tagged = score_item(item(**digest, source_tags=tags), taxonomy, now)
+    untagged = score_item(item(**digest), taxonomy, now)
+
+    assert tagged.source_tags == tags
+    assert tagged.categories == ["benchmark"]
+    # A source's own tag is provenance, not a keyword match: it must not earn
+    # relevance, or a connector could score itself into the corpus.
+    assert tagged.relevance_score == untagged.relevance_score
+
+    # The same paper also arrives from arXiv, newer, so dedup keeps that copy
+    # and drops the digest row. The themes must not leave with it.
+    arxiv_copy = item(
+        title=digest["title"],
+        url="https://arxiv.org/abs/2609.11115",
+        published_at=now,
+        updated_at=now,
+    )
+    merged = deduplicate([arxiv_copy, tagged])
+
+    assert len(merged) == 1
+    assert merged[0].source_tags == tags
+    # And they are on the record a snapshot serializes.
+    assert merged[0].to_dict()["source_tags"] == tags
+
+
 def test_agentic_taxonomy_requires_a_scoped_phrase_not_a_bare_word():
     """Regression for issue #52/#57: a bare 'agent' term would match almost
     every 2026 ML paper's related work, the same failure issue #51 hit with
