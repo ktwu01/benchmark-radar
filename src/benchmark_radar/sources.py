@@ -2179,6 +2179,89 @@ def fetch_openalex(
     return list(found.values())
 
 
+def fetch_xbsleepy(
+    config: dict[str, Any],
+    since: datetime,
+    limit: int,
+) -> list[RadarItem]:
+    """Collect agent-benchmark papers from the XBsleepy daily arXiv digest.
+
+    The digest (xbsleepy/daily-agent-benchmarks) pre-filters arXiv for papers
+    that introduce agent benchmarks and tags each one with capability themes
+    (issue #380). Its published index is cumulative, so `since` filtering
+    happens locally and an unchanged index legitimately yields zero new rows.
+    Theme tags ride through in `source_tags` prefixed with the source, so
+    downstream grouping can use the digest's own taxonomy while `categories`
+    stays the pipeline's own keyword classification.
+    """
+    index_url = str(config.get("index_url") or "").strip()
+    if not index_url:
+        raise ConnectorPayloadError("xbsleepy source config is missing index_url")
+    payload = get_json(index_url, **_request_options(config))
+    rows = _payload_rows(payload, "papers", "XBsleepy")
+    found: dict[str, RadarItem] = {}
+    for row in rows:
+        paper_id = str(row.get("id") or "").strip()
+        title = str(row.get("title") or "").strip()
+        links = row.get("links")
+        if links is not None and not isinstance(links, dict):
+            raise ConnectorPayloadError("XBsleepy paper links must be an object")
+        links = links if isinstance(links, dict) else {}
+        url = str(links.get("abs") or "").strip()
+        published = _optional_date(str(row.get("published") or ""))
+        announced = _optional_date(str(row.get("announced_date") or ""))
+        updated = _optional_date(str(row.get("updated") or ""))
+        published_at = published or announced
+        updated_at = updated or published_at
+        # `published` is the arXiv v1 submission time, not the announcement, so
+        # a paper announced today with an older submission and no revision would
+        # fall outside `since` and never be collected. Mirror fetch_arxiv and
+        # take the latest known timestamp as the activity signal, while the
+        # item's own dates stay the paper's publication provenance.
+        activity_at = max(
+            (value for value in (updated, published_at, announced) if value is not None),
+            default=None,
+        )
+        if not paper_id or not title or not url or activity_at is None:
+            continue
+        if activity_at < since or _reject_future(
+            config, paper_id, published_at, updated, announced
+        ):
+            continue
+        raw_authors = row.get("authors")
+        if raw_authors is not None and not isinstance(raw_authors, list):
+            raise ConnectorPayloadError("XBsleepy paper authors must be an array")
+        raw_tags = row.get("tags")
+        if raw_tags is not None and not isinstance(raw_tags, list):
+            raise ConnectorPayloadError("XBsleepy paper tags must be an array")
+        authors = [str(author).strip() for author in raw_authors or [] if str(author).strip()]
+        artifact_urls = [
+            str(links.get(key) or "").strip()
+            for key in ("pdf", "html")
+            if str(links.get(key) or "").startswith(("https://", "http://"))
+        ]
+        source_tags = [f"xbsleepy:{str(tag).strip()}" for tag in raw_tags or [] if str(tag).strip()]
+        found[f"xbsleepy:{paper_id}"] = RadarItem(
+            source="XBsleepy",
+            source_id=f"xbsleepy:{paper_id}",
+            title=title,
+            url=url,
+            published_at=published_at,
+            updated_at=updated_at,
+            summary=clean_card_text(str(row.get("abstract") or "")),
+            event_kind="discovered",
+            authors=authors,
+            artifact_urls=artifact_urls,
+            metrics={"citations": float(row.get("citations") or 0)},
+            source_tags=source_tags,
+            raw=row,
+            parser_version="xbsleepy-index/1",
+        )
+    return sorted(
+        found.values(), key=lambda item: item.updated_at or item.published_at, reverse=True
+    )[:limit]
+
+
 # Brave's freshness range is date-granular and inclusive. `since` plus the
 # longest lookback the radar runs with, rounded up, keeps today inside the range
 # without reading the clock.
@@ -2257,6 +2340,7 @@ SOURCE_FETCHERS = {
     "first_party_feeds": fetch_first_party_feeds,
     "openalex": fetch_openalex,
     "brave": fetch_brave,
+    "xbsleepy": fetch_xbsleepy,
 }
 
 # What each connector's `parser_version` prefix says about how a record was
@@ -2280,6 +2364,7 @@ _PARSER_VERSION_METHODS = {
     "github-releases": "API",
     "openalex-works": "API",
     "brave-web-search": "API",
+    "xbsleepy-index": "Index JSON",
 }
 
 # Fallback label when a connector run produced no items to inspect (an empty
@@ -2301,6 +2386,7 @@ SOURCE_DEFAULT_METHODS = {
     "first_party_feeds": "RSS/Atom",
     "openalex": "API",
     "brave": "API",
+    "xbsleepy": "Index JSON",
 }
 
 

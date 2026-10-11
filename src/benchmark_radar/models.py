@@ -27,6 +27,12 @@ class RadarItem:
     parser_version: str = "radar-item/1"
     raw_payload_hash: str = ""
     categories: list[str] = field(default_factory=list)
+    # Theme tags a curated source attached itself, namespaced by that source
+    # (e.g. `xbsleepy:planning`). Kept apart from `categories`, which only ever
+    # holds the local taxonomy's keyword matches: retention and the
+    # unclassified counts read `categories`, and a source must not be able to
+    # classify itself into the corpus.
+    source_tags: list[str] = field(default_factory=list)
     evidence_score: float = 0.0
     relevance_score: float = 0.0
     recency_score: float = 0.0
