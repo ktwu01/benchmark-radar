@@ -455,7 +455,8 @@
     {
       "benchmark_id": "arena_hard",
       "conflicts": [
-        "protocols: GPT-4-1106 judge, thinking mode",
+        "instruments: arena_hard, arena_hard_v2",
+        "protocols: GPT-4-1106 judge, Mistral Small 3.2 model-card comparison; judge and generation settings not specified, thinking mode",
         "LLM-judge dependent, with known style and length bias."
       ],
       "counterexamples": [
@@ -469,12 +470,42 @@
           "reported_at": "2025-05-14",
           "source_id": "qwen3_technical_report",
           "value": 95.6
+        },
+        {
+          "instrument": "arena_hard_v2",
+          "model": "Mistral Small 3.2 24B Instruct",
+          "observation_id": "curated\u0000arena_hard\u0000mistral_small_3_2_model_card\u0000arena_hard_v2\u0000Mistral Small 3.2 model-card comparison; judge and generation settings not specified\u0000Mistral Small 3.2 24B Instruct",
+          "organization": "Mistral",
+          "protocol": "Mistral Small 3.2 model-card comparison; judge and generation settings not specified",
+          "reason": "not in the selected repeated instrument+protocol series",
+          "reported_at": "2025-06-20",
+          "source_id": "mistral_small_3_2_model_card",
+          "value": 43.1
+        },
+        {
+          "instrument": "arena_hard_v2",
+          "model": "Mistral Small 3.1 24B Instruct",
+          "observation_id": "curated\u0000arena_hard\u0000mistral_small_3_2_model_card\u0000arena_hard_v2\u0000Mistral Small 3.2 model-card comparison; judge and generation settings not specified\u0000Mistral Small 3.1 24B Instruct",
+          "organization": "Mistral",
+          "protocol": "Mistral Small 3.2 model-card comparison; judge and generation settings not specified",
+          "reason": "not in the selected repeated instrument+protocol series",
+          "reported_at": "2025-06-20",
+          "source_id": "mistral_small_3_2_model_card",
+          "value": 19.56
         }
       ],
       "direction": "higher_is_better",
       "exclusions": [
         {
           "observation_id": "curated\u0000arena_hard\u0000qwen3_technical_report\u0000arena_hard\u0000thinking mode\u0000Qwen3-235B-A22B (Thinking)",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000arena_hard\u0000mistral_small_3_2_model_card\u0000arena_hard_v2\u0000Mistral Small 3.2 model-card comparison; judge and generation settings not specified\u0000Mistral Small 3.1 24B Instruct",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000arena_hard\u0000mistral_small_3_2_model_card\u0000arena_hard_v2\u0000Mistral Small 3.2 model-card comparison; judge and generation settings not specified\u0000Mistral Small 3.2 24B Instruct",
           "reason": "not in the selected repeated instrument+protocol series"
         }
       ],
@@ -496,6 +527,24 @@
           "score_ids": [
             "curated\u0000arena_hard\u0000deepseek_v3_report\u0000arena_hard\u0000GPT-4-1106 judge\u0000DeepSeek-V3",
             "curated\u0000arena_hard\u0000deepseek_r1_report\u0000arena_hard\u0000GPT-4-1106 judge\u0000DeepSeek-R1"
+          ],
+          "single_organization": true
+        },
+        {
+          "best_observation_id": "curated\u0000arena_hard\u0000mistral_small_3_2_model_card\u0000arena_hard_v2\u0000Mistral Small 3.2 model-card comparison; judge and generation settings not specified\u0000Mistral Small 3.2 24B Instruct",
+          "best_value": 43.1,
+          "connectable": false,
+          "dated_points": 1,
+          "first_reported_at": "2025-06-20",
+          "headroom": 56.9,
+          "instrument": "arena_hard_v2",
+          "last_reported_at": "2025-06-20",
+          "organization_count": 1,
+          "point_count": 2,
+          "protocol": "Mistral Small 3.2 model-card comparison; judge and generation settings not specified",
+          "score_ids": [
+            "curated\u0000arena_hard\u0000mistral_small_3_2_model_card\u0000arena_hard_v2\u0000Mistral Small 3.2 model-card comparison; judge and generation settings not specified\u0000Mistral Small 3.1 24B Instruct",
+            "curated\u0000arena_hard\u0000mistral_small_3_2_model_card\u0000arena_hard_v2\u0000Mistral Small 3.2 model-card comparison; judge and generation settings not specified\u0000Mistral Small 3.2 24B Instruct"
           ],
           "single_organization": true
         },
@@ -554,7 +603,9 @@
       "score_ids": [
         "curated\u0000arena_hard\u0000deepseek_v3_report\u0000arena_hard\u0000GPT-4-1106 judge\u0000DeepSeek-V3",
         "curated\u0000arena_hard\u0000deepseek_r1_report\u0000arena_hard\u0000GPT-4-1106 judge\u0000DeepSeek-R1",
-        "curated\u0000arena_hard\u0000qwen3_technical_report\u0000arena_hard\u0000thinking mode\u0000Qwen3-235B-A22B (Thinking)"
+        "curated\u0000arena_hard\u0000qwen3_technical_report\u0000arena_hard\u0000thinking mode\u0000Qwen3-235B-A22B (Thinking)",
+        "curated\u0000arena_hard\u0000mistral_small_3_2_model_card\u0000arena_hard_v2\u0000Mistral Small 3.2 model-card comparison; judge and generation settings not specified\u0000Mistral Small 3.1 24B Instruct",
+        "curated\u0000arena_hard\u0000mistral_small_3_2_model_card\u0000arena_hard_v2\u0000Mistral Small 3.2 model-card comparison; judge and generation settings not specified\u0000Mistral Small 3.2 24B Instruct"
       ],
       "selected_repeated_series": {
         "best_observation_id": "curated\u0000arena_hard\u0000deepseek_r1_report\u0000arena_hard\u0000GPT-4-1106 judge\u0000DeepSeek-R1",
@@ -586,6 +637,12 @@
           "id": "deepseek_v3_report",
           "name": "deepseek_v3_report",
           "url": "https://arxiv.org/abs/2412.19437"
+        },
+        {
+          "caveat": "",
+          "id": "mistral_small_3_2_model_card",
+          "name": "mistral_small_3_2_model_card",
+          "url": "https://huggingface.co/mistralai/Mistral-Small-3.2-24B-Instruct-2506/blob/a708d64a95670340389e6dd9cdaf1cf22189c841/README.md"
         },
         {
           "caveat": "",
