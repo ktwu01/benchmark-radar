@@ -5,7 +5,7 @@
       "benchmark_id": "aime",
       "conflicts": [
         "instruments: aime, aime_2024, aime_2025, aime_2026",
-        "protocols: AIME 2025, as printed in Table 3 (Large Models), AIME 2025, as printed in Table 4 (Efficient Models), AIME 2026 I, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge, AIME 2026, as printed in Table 3 (Large Models), AIME 2026, as printed in Table 4 (Efficient Models), AIME 2026, as reported, AIME 2026, temp 1.0, top_p 0.95, max gen 163840 tokens, GPT-5.5 (medium) judge, Pass@1, extended thinking up to 64K tokens, top-p 0.95, no parallel test-time compute, no tools, thinking (temp 0.6, top_p 0.95, top_k 20), thinking mode",
+        "protocols: AIME 2025, as printed in Table 3 (Large Models), AIME 2025, as printed in Table 4 (Efficient Models), AIME 2026 I, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge, AIME 2026, as printed in Table 3 (Large Models), AIME 2026, as printed in Table 4 (Efficient Models), AIME 2026, as reported, AIME 2026, temp 1.0, top_p 0.95, max gen 163840 tokens, GPT-5.5 (medium) judge, Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details, Pass@1, extended thinking up to 64K tokens, top-p 0.95, no parallel test-time compute, no tools, thinking (temp 0.6, top_p 0.95, top_k 20), thinking mode",
         "pass@k, majority vote and Python tool access each shift this by double digits."
       ],
       "counterexamples": [
@@ -55,6 +55,14 @@
         },
         {
           "observation_id": "curated\u0000aime\u0000anthropic_claude_4_system_card\u0000aime_2025\u0000extended thinking up to 64K tokens, top-p 0.95, no parallel test-time compute\u0000Claude Sonnet 4",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000aime\u0000nvidia_nemotron_nano_9b_v2_model_card\u0000aime_2025\u0000Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details\u0000NVIDIA-Nemotron-Nano-9B-v2",
+          "reason": "not in the selected repeated instrument+protocol series"
+        },
+        {
+          "observation_id": "curated\u0000aime\u0000nvidia_nemotron_nano_9b_v2_model_card\u0000aime_2025\u0000Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details\u0000Qwen3-8B",
           "reason": "not in the selected repeated instrument+protocol series"
         },
         {
@@ -158,6 +166,24 @@
             "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2026, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Mini"
           ],
           "single_organization": true
+        },
+        {
+          "best_observation_id": "curated\u0000aime\u0000nvidia_nemotron_nano_9b_v2_model_card\u0000aime_2025\u0000Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details\u0000NVIDIA-Nemotron-Nano-9B-v2",
+          "best_value": 72.1,
+          "connectable": false,
+          "dated_points": 1,
+          "first_reported_at": "2025-08-18",
+          "headroom": 27.9,
+          "instrument": "aime_2025",
+          "last_reported_at": "2025-08-18",
+          "organization_count": 2,
+          "point_count": 2,
+          "protocol": "Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details",
+          "score_ids": [
+            "curated\u0000aime\u0000nvidia_nemotron_nano_9b_v2_model_card\u0000aime_2025\u0000Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details\u0000NVIDIA-Nemotron-Nano-9B-v2",
+            "curated\u0000aime\u0000nvidia_nemotron_nano_9b_v2_model_card\u0000aime_2025\u0000Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details\u0000Qwen3-8B"
+          ],
+          "single_organization": false
         },
         {
           "best_observation_id": "curated\u0000aime\u0000anthropic_claude_4_system_card\u0000aime_2025\u0000extended thinking up to 64K tokens, top-p 0.95, no parallel test-time compute\u0000Claude Opus 4",
@@ -354,6 +380,8 @@
         "curated\u0000aime\u0000qwen3_technical_report\u0000aime_2024\u0000thinking mode\u0000Qwen3-235B-A22B (Thinking)",
         "curated\u0000aime\u0000anthropic_claude_4_system_card\u0000aime_2025\u0000extended thinking up to 64K tokens, top-p 0.95, no parallel test-time compute\u0000Claude Opus 4",
         "curated\u0000aime\u0000anthropic_claude_4_system_card\u0000aime_2025\u0000extended thinking up to 64K tokens, top-p 0.95, no parallel test-time compute\u0000Claude Sonnet 4",
+        "curated\u0000aime\u0000nvidia_nemotron_nano_9b_v2_model_card\u0000aime_2025\u0000Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details\u0000NVIDIA-Nemotron-Nano-9B-v2",
+        "curated\u0000aime\u0000nvidia_nemotron_nano_9b_v2_model_card\u0000aime_2025\u0000Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details\u0000Qwen3-8B",
         "curated\u0000aime\u0000zai_glm_5_model_card\u0000aime\u0000AIME 2026 I, temp 1.0, top_p 0.95, GPT-5.2 (medium) judge\u0000GLM-5",
         "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2025, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Lite",
         "curated\u0000aime\u0000bytedance_seed2_0_model_card\u0000aime\u0000AIME 2026, as printed in Table 4 (Efficient Models)\u0000Seed2.0 Lite",
@@ -414,6 +442,12 @@
           "id": "google_gemma_4_model_card",
           "name": "google_gemma_4_model_card",
           "url": "https://huggingface.co/google/gemma-4-31B-it"
+        },
+        {
+          "caveat": "",
+          "id": "nvidia_nemotron_nano_9b_v2_model_card",
+          "name": "nvidia_nemotron_nano_9b_v2_model_card",
+          "url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-Nano-9B-v2/blob/6533e8de2c68e4536bf7c411d7a3ce5734111476/README.md"
         },
         {
           "caveat": "",
@@ -1034,7 +1068,7 @@
     {
       "benchmark_id": "math_500",
       "conflicts": [
-        "protocols: EM, 8K output limit, Pass@1, thinking mode",
+        "protocols: EM, 8K output limit, Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details, Pass@1, thinking mode",
         "Largely saturated at the frontier."
       ],
       "counterexamples": [
@@ -1051,6 +1085,17 @@
         },
         {
           "instrument": "math_500",
+          "model": "NVIDIA-Nemotron-Nano-9B-v2",
+          "observation_id": "curated\u0000math_500\u0000nvidia_nemotron_nano_9b_v2_model_card\u0000math_500\u0000Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details\u0000NVIDIA-Nemotron-Nano-9B-v2",
+          "organization": "NVIDIA",
+          "protocol": "Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details",
+          "reason": "no instrument+protocol series spans at least two dates",
+          "reported_at": "2025-08-18",
+          "source_id": "nvidia_nemotron_nano_9b_v2_model_card",
+          "value": 97.8
+        },
+        {
+          "instrument": "math_500",
           "model": "DeepSeek-R1",
           "observation_id": "curated\u0000math_500\u0000deepseek_r1_report\u0000math_500\u0000Pass@1\u0000DeepSeek-R1",
           "organization": "DeepSeek",
@@ -1059,17 +1104,6 @@
           "reported_at": "2025-01-22",
           "source_id": "deepseek_r1_report",
           "value": 97.3
-        },
-        {
-          "instrument": "math_500",
-          "model": "DeepSeek-V3",
-          "observation_id": "curated\u0000math_500\u0000deepseek_v3_report\u0000math_500\u0000EM, 8K output limit\u0000DeepSeek-V3",
-          "organization": "DeepSeek",
-          "protocol": "EM, 8K output limit",
-          "reason": "no instrument+protocol series spans at least two dates",
-          "reported_at": "2024-12-27",
-          "source_id": "deepseek_v3_report",
-          "value": 90.2
         }
       ],
       "direction": "higher_is_better",
@@ -1085,11 +1119,37 @@
         {
           "observation_id": "curated\u0000math_500\u0000qwen3_technical_report\u0000math_500\u0000thinking mode\u0000Qwen3-235B-A22B (Thinking)",
           "reason": "no instrument+protocol series spans at least two dates"
+        },
+        {
+          "observation_id": "curated\u0000math_500\u0000nvidia_nemotron_nano_9b_v2_model_card\u0000math_500\u0000Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details\u0000NVIDIA-Nemotron-Nano-9B-v2",
+          "reason": "no instrument+protocol series spans at least two dates"
+        },
+        {
+          "observation_id": "curated\u0000math_500\u0000nvidia_nemotron_nano_9b_v2_model_card\u0000math_500\u0000Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details\u0000Qwen3-8B",
+          "reason": "no instrument+protocol series spans at least two dates"
         }
       ],
       "metric": "accuracy",
       "name": "MATH-500",
       "protocol_strata": [
+        {
+          "best_observation_id": "curated\u0000math_500\u0000nvidia_nemotron_nano_9b_v2_model_card\u0000math_500\u0000Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details\u0000NVIDIA-Nemotron-Nano-9B-v2",
+          "best_value": 97.8,
+          "connectable": false,
+          "dated_points": 1,
+          "first_reported_at": "2025-08-18",
+          "headroom": 2.2,
+          "instrument": "math_500",
+          "last_reported_at": "2025-08-18",
+          "organization_count": 2,
+          "point_count": 2,
+          "protocol": "Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details",
+          "score_ids": [
+            "curated\u0000math_500\u0000nvidia_nemotron_nano_9b_v2_model_card\u0000math_500\u0000Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details\u0000NVIDIA-Nemotron-Nano-9B-v2",
+            "curated\u0000math_500\u0000nvidia_nemotron_nano_9b_v2_model_card\u0000math_500\u0000Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details\u0000Qwen3-8B"
+          ],
+          "single_organization": false
+        },
         {
           "best_observation_id": "curated\u0000math_500\u0000deepseek_v3_report\u0000math_500\u0000EM, 8K output limit\u0000DeepSeek-V3",
           "best_value": 90.2,
@@ -1179,7 +1239,9 @@
       "score_ids": [
         "curated\u0000math_500\u0000deepseek_v3_report\u0000math_500\u0000EM, 8K output limit\u0000DeepSeek-V3",
         "curated\u0000math_500\u0000deepseek_r1_report\u0000math_500\u0000Pass@1\u0000DeepSeek-R1",
-        "curated\u0000math_500\u0000qwen3_technical_report\u0000math_500\u0000thinking mode\u0000Qwen3-235B-A22B (Thinking)"
+        "curated\u0000math_500\u0000qwen3_technical_report\u0000math_500\u0000thinking mode\u0000Qwen3-235B-A22B (Thinking)",
+        "curated\u0000math_500\u0000nvidia_nemotron_nano_9b_v2_model_card\u0000math_500\u0000Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details\u0000NVIDIA-Nemotron-Nano-9B-v2",
+        "curated\u0000math_500\u0000nvidia_nemotron_nano_9b_v2_model_card\u0000math_500\u0000Nemotron Nano 9B v2 model card; NeMo-Skills; reasoning on; benchmark table does not specify sampling budget or task-window details\u0000Qwen3-8B"
       ],
       "selected_repeated_series": null,
       "source_documents": [
@@ -1194,6 +1256,12 @@
           "id": "deepseek_v3_report",
           "name": "deepseek_v3_report",
           "url": "https://arxiv.org/abs/2412.19437"
+        },
+        {
+          "caveat": "",
+          "id": "nvidia_nemotron_nano_9b_v2_model_card",
+          "name": "nvidia_nemotron_nano_9b_v2_model_card",
+          "url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-Nano-9B-v2/blob/6533e8de2c68e4536bf7c411d7a3ce5734111476/README.md"
         },
         {
           "caveat": "",
