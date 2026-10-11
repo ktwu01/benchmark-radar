@@ -1465,6 +1465,159 @@ benchmarks:
       channel earned it, and a model that only understands or only generates
       is structurally capped on tasks that require both.
 
+  - id: pararule_plus
+    name: PARARULE-Plus
+    aliases: ["PARARULE-Plus", "PARARULE Plus", "ParaRule-Plus"]
+    domain: reasoning
+    url: https://arxiv.org/abs/2207.14000
+    released: 2022-07-28
+    caveat: >-
+      Synthetic multi-step deductive reasoning over natural-language facts and
+      rules under a closed-world assumption, with about 100,000 examples at
+      each reasoning depth from 2 to 5 (nearly 400,000 in total) over animal
+      and people entities. An aggregate number hides the per-depth breakdown
+      the dataset was built to expose, and a model fine-tuned on the templated
+      training split is not comparable with one prompted zero-shot.
+
+  - id: abductionrules
+    name: AbductionRules
+    aliases: ["AbductionRules", "Abduction Rules"]
+    domain: reasoning
+    url: https://aclanthology.org/2022.findings-acl.19/
+    released: 2022-03-23
+    caveat: >-
+      Four synthetic abductive-reasoning datasets (Animal and Person domains,
+      each Simple and Confounded): the model must supply the missing fact that
+      explains an observation. The paper itself reports that fine-tuned models
+      partly learned to exploit the structure of the data, so a high
+      fine-tuned score need not mean general abduction, and a number without
+      the subset named is not comparable across reports.
+
+  - id: reclor_plus
+    name: ReClor-plus
+    aliases: ["ReClor-plus", "ReClor-Plus", "ReClor plus"]
+    domain: reasoning
+    url: https://arxiv.org/abs/2310.09430
+    released: 2023-10-13
+    caveat: >-
+      A robustness variant of ReClor in three subsets: shuffled options,
+      the correct choice replaced by "none of the other options is correct",
+      and both combined. Read it against the same model's score on the
+      original ReClor, because the gap is the signal; one blended number hides
+      which variation caused the drop, and the source questions are public.
+
+  - id: logiqa_plus
+    name: LogiQA-plus
+    aliases: ["LogiQA-plus", "LogiQA-Plus", "LogiQA plus"]
+    domain: reasoning
+    url: https://arxiv.org/abs/2310.09430
+    released: 2023-10-13
+    caveat: >-
+      A robustness variant of LogiQA with the same three subsets as
+      ReClor-plus (shuffled options, correct choice replaced by "none of the
+      other options is correct", and both). A score is only meaningful next to
+      the original LogiQA score and with the subset named, and the source
+      questions are public.
+
+  - id: logiqav2_plus
+    name: LogiQAv2-plus
+    aliases: ["LogiQAv2-plus", "LogiQAv2-Plus", "LogiQA 2.0-plus"]
+    domain: reasoning
+    url: https://arxiv.org/abs/2310.09430
+    released: 2023-10-13
+    caveat: >-
+      A robustness variant of LogiQA 2.0 with the same three subsets as
+      ReClor-plus. As with its siblings, the drop from the original LogiQA 2.0
+      score is the measurement, a single blended number hides which variation
+      caused it, and the source questions are public.
+
+  - id: sciclaimeval
+    name: SciClaimEval
+    aliases: ["SciClaimEval", "SciClaim Eval", "NTCIR-19 SciClaimEval"]
+    domain: science
+    url: https://arxiv.org/abs/2602.07621
+    released: 2026-02-07
+    caveat: >-
+      1,664 claims from 180 papers in machine learning, NLP and medicine,
+      verified against tables and figures. Refuted cases keep the authentic
+      claim and edit the evidence instead, so a refuted item can differ from a
+      supported one only in a small change to a table or figure. The authors
+      report that figure-based verification remains particularly challenging
+      for all models, so a blended score depends on the table/figure mix, and
+      table and figure numbers are not interchangeable.
+
+  - id: mer2026_mer_fg
+    name: MER2026 MER-FG
+    aliases: ["MER-FG", "MER2026 Track 2", "MER2026 MER-FG", "MER 2026 fine-grained emotion recognition"]
+    domain: multimodal
+    url: https://arxiv.org/abs/2604.19417
+    released: 2026-04-21
+    caveat: >-
+      Track 2 of the MER2026 challenge: open-vocabulary, fine-grained emotion
+      recognition from video, audio and subtitles, ranked on a 1,000-sample
+      test set with emotion-wheel-based metrics that group synonyms (happy and
+      joyful count as one label). Because the label space is open, how a
+      system normalizes its vocabulary onto the wheel moves the score
+      independently of recognition. Reference labels were built by merging
+      top MER2025 team predictions and then manually validated.
+
+  - id: nafbench
+    name: NAFBench
+    aliases: ["NAFBench", "NAF-Bench", "NAF Bench"]
+    domain: reasoning
+    url: https://arxiv.org/abs/2609.27517
+    released: 2026-09-23
+    caveat: >-
+      Solver-certified normal logic programs verbalized into natural language,
+      each labelled under four negation semantics (SLDNF, well-founded, and
+      credulous and skeptical stable-model reasoning) that can disagree on the
+      same instance. A score without the semantics named is not comparable.
+      Models are also sensitive to rule order. The leaderboard's hidden test split
+      (Hugging Face qbao775/naf-bench, as described by the repository README
+      at revision 83ede91) has 495 rows drawn from only 77 programs, so the
+      effective sample is the program, not the row. The arXiv v1 appendix
+      describes an earlier 385-prompt evaluation set over 77 programs, so a
+      paper number and a leaderboard number are not on the same split.
+
+  - id: llm_abstract_reasoning
+    name: LLM Abstract Reasoning Benchmark
+    aliases: ["Large Language Models Are Not Strong Abstract Reasoners", "LLMs Are Not Strong Abstract Reasoners"]
+    domain: reasoning
+    url: https://arxiv.org/abs/2305.19555
+    released: 2023-05-31
+    caveat: >-
+      A suite of abstract-reasoning tasks (IJCAI 2024), several of them text
+      encodings of visual puzzles such as ARC, ACRE and RAVEN, plus PVR and
+      tasks drawn from OpenAI Evals. A text-encoded ARC score is not
+      comparable with a visual ARC score, and the source puzzles are public,
+      so contamination cannot be ruled out.
+
+  - id: med_fact
+    name: Med-Fact
+    aliases: ["Med-Fact", "MedFact", "Medfact"]
+    domain: health
+    url: https://aclanthology.org/2023.eacl-main.194/
+    caveat: >-
+      150K medical claims (50K each Supported, Refuted, Not-Enough-Info)
+      generated automatically from MedMCQA exam questions by the Multi2Claim
+      pipeline (EACL 2023), not written by fact-checkers. Labels come from
+      the generator, with sampled annotator agreement rather than full
+      review. Only 50 examples are public; the full set is available from
+      the authors on request.
+
+  - id: gsci_fact
+    name: Gsci-Fact
+    aliases: ["Gsci-Fact", "GsciFact", "Gscifact"]
+    domain: science
+    url: https://aclanthology.org/2023.eacl-main.194/
+    caveat: >-
+      About 32.2K general-science claims, balanced across Supported, Refuted
+      and Not-Enough-Info, generated automatically from SciQ crowd-sourced
+      exam questions by the Multi2Claim pipeline (EACL 2023). Annotators
+      judged a quarter of claims answerable without the evidence, so part
+      of a score can come from world knowledge rather than verification.
+      Only 50 examples are public; the full set is on request.
+
 
 # Model cards, technical reports and release posts.
 #
