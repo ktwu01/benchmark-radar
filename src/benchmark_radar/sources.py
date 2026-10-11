@@ -425,6 +425,7 @@ def fetch_arxiv(config: dict[str, Any], since: datetime, limit: int) -> list[Rad
         except Exception as error:
             atom_error = error
 
+    atom_ids = set(found)
     if atom_error or not found:
         try:
             rss_items = _fetch_arxiv_rss(
@@ -450,9 +451,15 @@ def fetch_arxiv(config: dict[str, Any], since: datetime, limit: int) -> list[Rad
             config.setdefault("_source_warnings", []).append(
                 f"arXiv Atom: {type(atom_error).__name__}: {atom_error}"
             )
+    # RSS supplements successful queries; the source cap must not let newer
+    # announcements evict the Atom evidence the fallback is meant to preserve.
     return sorted(
         found.values(),
-        key=lambda item: (item.updated_at or item.published_at, item.source_id),
+        key=lambda item: (
+            item.source_id in atom_ids,
+            item.updated_at or item.published_at,
+            item.source_id,
+        ),
         reverse=True,
     )[:limit]
 

@@ -3512,3 +3512,29 @@ def test_arxiv_partial_atom_survives_empty_failed_or_duplicate_rss(monkeypatch, 
     assert items[0].source_id == "2607.12345"
     assert items[0].parser_version == "arxiv-atom/1"
     assert any("arXiv Atom: RequestError" in warning for warning in config["_source_warnings"])
+
+
+@pytest.mark.parametrize("limit", [1, 2])
+def test_arxiv_partial_atom_is_not_evicted_by_newer_rss_at_source_cap(monkeypatch, limit):
+    calls = 0
+
+    def fake_get_text(url, params=None):
+        nonlocal calls
+        if url == "https://export.arxiv.org/api/query":
+            calls += 1
+            if calls == 2:
+                raise RequestError("HTTP 503 from https://export.arxiv.org/api/query")
+            return ARXIV_XML
+        return ARXIV_RSS
+
+    monkeypatch.setattr("benchmark_radar.sources.get_text", fake_get_text)
+    config = {
+        "queries": ["all:benchmark", "all:evaluation"],
+        "rss_categories": ["cs.AI"],
+        "request_delay_seconds": 0,
+    }
+    items = fetch_arxiv(config, datetime(2026, 7, 25, 12, tzinfo=UTC), limit)
+    assert [item.source_id for item in items] == ["2607.12345", "2607.54321"][:limit]
+    assert items[0].parser_version == "arxiv-atom/1"
+    assert len(items) == limit
+    assert any("arXiv Atom: RequestError" in warning for warning in config["_source_warnings"])
