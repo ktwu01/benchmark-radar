@@ -137,6 +137,14 @@ Stated up front so nobody writes work that has to be turned down.
 - **Useless bug fixes.** Changes without a reproducible failure a user could
   hit: cosmetic churn, defensive code for impossible inputs, rewording, or
   tests that pin source text or today's data counts instead of behavior.
+- **Technical burden without a real failure.** Every merged line is code a
+  maintainer reads, tests and keeps working. A fix must name a failure that
+  already happened, in a committed snapshot, a CI run, the live site or a user
+  report, and link that evidence. A test that fails on `main` proves the test,
+  not that anyone hit the bug. We do not merge new options, health fields,
+  dependencies or large fixtures for a case nobody hit, or fixes to code paths
+  that production has disabled. When in doubt, open an issue first and wait for
+  a maintainer to say the change is wanted.
 - **Floods of AI-generated PRs.** AI-assisted work is welcome when a person has
   read and checked it and it states the model (`330226 <model-id>` in a PR
   comment, see `AGENTS.md`). Many near-identical or unverified agent PRs are
