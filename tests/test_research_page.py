@@ -69,3 +69,13 @@ console.log(JSON.stringify([
         ["reasoning"],
         ["safety"],
     ]
+
+
+def test_adoption_field_scope_covers_ranking_counts_table_and_documents():
+    subprocess.run(
+        ["node", str(ROOT / "tests/research_adoption_harness.mjs")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=True,
+    )

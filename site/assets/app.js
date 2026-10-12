@@ -4422,8 +4422,27 @@ function catalogDocumentBoard() {
   return board;
 }
 
-function leaderboardEntries() {
-  const board = catalogDocumentBoard();
+function researchDocumentBoard(board) {
+  if (!board || ((!state.researchField || state.researchField === "all") && !state.researchSub)) return board;
+  const ids = new Set(researchRecords().map((record) => record.slug));
+  const entries = (board.entries || []).filter((entry) => ids.has(entry.benchmark_id || entry.id));
+  const documentIds = new Set(entries.flatMap((entry) => entry.document_ids || []));
+  // A document spanning fields counts once, and its disclosure lists only the
+  // selected records. Keep the cached all-field board intact for the next scope.
+  const cards = (board.model_cards || []).filter((card) => documentIds.has(card.id)).map((card) => {
+    const benchmarks = (card.reported_benchmarks || []).filter((entry) => ids.has(entry.benchmark_id));
+    return { ...card, reported_benchmarks: benchmarks, benchmark_count: benchmarks.length };
+  });
+  const organizations = {};
+  for (const card of cards) organizations[card.organization] = (organizations[card.organization] || 0) + 1;
+  return {
+    ...board, entries, model_cards: cards, organizations,
+    benchmark_count: entries.length, model_card_count: cards.length,
+    organization_count: Object.keys(organizations).length,
+  };
+}
+
+function leaderboardEntries(board = researchDocumentBoard(catalogDocumentBoard())) {
   if (!board) return [];
   const query = state.lq.trim().toLowerCase();
   const era = LEADERBOARD_ERAS.find((candidate) => candidate.value === state.lera);
@@ -4447,7 +4466,7 @@ function leaderboardEntries() {
   });
 }
 
-function adoptionBar(entry, maxCount) {
+function adoptionBar(entry, maxCount, documentCount = state.catalogDocuments?.document_count || 0) {
   // The 2% floor keeps a single-card benchmark from rendering as an empty
   // track, but it must not apply to a zero: a visible bar beside a count of 0
   // contradicts the number it is supposed to encode.
@@ -4462,7 +4481,7 @@ function adoptionBar(entry, maxCount) {
       attrs: {
         role: "img",
         "aria-label": `${metricLabel(entry.card_count, "source document")} of ${metricLabel(
-          state.catalogDocuments?.document_count || 0,
+          documentCount,
           "source document",
         )}`,
       },
@@ -7700,8 +7719,7 @@ function cardLabel(card, labelCounts) {
     : base;
 }
 
-function leaderboardRow(entry) {
-  const board = catalogDocumentBoard();
+function leaderboardRow(entry, board = researchDocumentBoard(catalogDocumentBoard())) {
   const maxCount = board.entries?.[0]?.card_count || 0;
   const labelCounts = modelCardLabelCounts(board);
   const header = element("summary", { className: "record-summary" }, [
@@ -7743,7 +7761,7 @@ function leaderboardRow(entry) {
         element("strong", { text: String(entry.card_count) }),
         element("span", { text: `/ ${board.model_card_count}` }),
       ]),
-      adoptionBar(entry, maxCount),
+      adoptionBar(entry, maxCount, board.model_card_count),
       element("p", { className: "score-label", text: t("Source documents") }),
     ]),
   ]);
@@ -7849,6 +7867,7 @@ function renderLeaderboardFilters(board) {
 const LEADERBOARD_TOP_LIMIT = 5;
 
 function renderLeaderboardTop(board) {
+  board = researchDocumentBoard(board);
   const host = byId("leaderboard-top-list");
   if (!host) return;
   // The eyebrow, the h1, the deck and the "How to read this evidence" note all
@@ -7878,8 +7897,7 @@ function renderLeaderboardTop(board) {
       ),
     ]);
   }
-  const researchIds = new Set(researchRecords().map((record) => record.slug));
-  const ranked = (board.entries || []).filter((entry) => entry.card_count > 0 && researchIds.has(entry.benchmark_id || entry.id));
+  const ranked = (board.entries || []).filter((entry) => entry.card_count > 0);
   const entries = state.leaderboardTopExpanded ? ranked : ranked.slice(0, LEADERBOARD_TOP_LIMIT);
   const more = byId("leaderboard-top-more");
   // A registry where nothing is reported yet is a real state, not a bug, and
@@ -8387,7 +8405,7 @@ function renderLeaderboard() {
   syncScoreFilters();
   renderBenchmarkSkyline();
   renderScoreRanking(scoreRankingRows());
-  const board = catalogDocumentBoard();
+  const board = researchDocumentBoard(catalogDocumentBoard());
   syncLeaderboardNav();
   if (!board) return;
 
@@ -8544,8 +8562,9 @@ function renderLeaderboard() {
     ]),
   ]);
 
-  const entries = leaderboardEntries();
-  const filtersActive = Boolean(state.lq || state.ldomain || state.lorg || state.lera);
+  const entries = leaderboardEntries(board);
+  const filtersActive = Boolean(state.lq || state.ldomain || state.lorg || state.lera ||
+    (state.researchField && state.researchField !== "all") || state.researchSub);
   const visibleEntries =
     filtersActive || state.leaderboardShowAll ? entries : entries.slice(0, 18);
   byId("leaderboard-count").textContent = filtersActive
@@ -8554,7 +8573,7 @@ function renderLeaderboard() {
   replaceChildren(
     byId("leaderboard-list"),
     visibleEntries.length
-      ? visibleEntries.map(leaderboardRow)
+      ? visibleEntries.map((entry) => leaderboardRow(entry, board))
       : [
           element("p", {
             className: "empty-state",

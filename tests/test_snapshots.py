@@ -368,7 +368,7 @@ def test_rebuild_writes_the_sitemap_at_the_site_root(tmp_path, site_shell):
     sitemap_output = tmp_path / "site" / "sitemap.xml"
     assert sitemap_output.exists()
     assert not (data_output.parent / "sitemap.xml").exists()
-    for slug in ("leaderboard", "trends", "explore", "cli", "cite", "rubric", "about"):
+    for slug in ("leaderboard", "trends", "explore", "cli", "cite", "rubric", "about", "research"):
         assert (tmp_path / "site" / slug / "index.html").exists()
     # The alias paths ship beside /about/ but stay out of the sitemap: they
     # immediately become /cite/, and a crawler asked to index both gets two
@@ -392,7 +392,17 @@ def test_rebuild_writes_the_sitemap_at_the_site_root(tmp_path, site_shell):
         f"{SITE_URL}/blog/archive/",
         f"{SITE_URL}/blog/2026-07-27/",
         f"{SITE_URL}/about/",
+        f"{SITE_URL}/research/",
     ]
+    research_urls = [
+        node
+        for node in root.findall("sm:url", ns)
+        if node.findtext("sm:loc", namespaces=ns) == f"{SITE_URL}/research/"
+    ]
+    assert len(research_urls) == 1
+    assert research_urls[0].findtext("sm:lastmod", namespaces=ns) == "2026-07-27"
+    research_page = (tmp_path / "site/research/index.html").read_text(encoding="utf-8")
+    assert research_page.count(f'<link rel="canonical" href="{SITE_URL}/research/" />') == 1
     lastmods = [node.text for node in root.findall("sm:url/sm:lastmod", ns)]
     # The two shards carry no dated evidence, so their pages claim no lastmod
     # rather than borrowing today's snapshot date.

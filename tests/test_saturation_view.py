@@ -327,7 +327,7 @@ def test_a_link_to_an_unscored_benchmark_uses_the_full_catalog():
 
 def test_document_rows_can_open_details_for_scored_and_unscored_records():
     script = source("site/assets/app.js")
-    row = script.split("function leaderboardRow(entry)", 1)[1].split("\nfunction ", 1)[0]
+    row = script.split("function leaderboardRow(", 1)[1].split("\nfunction ", 1)[0]
     assert 'const frontierButton = element("button"' in row
     assert "scoreRecord(" not in row
     assert 't("View benchmark details ↑")' in row

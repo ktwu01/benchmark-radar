@@ -1506,7 +1506,7 @@ def rebuild_dashboard(
     page_entries: list[tuple[str, str | None]] = []
     if feed_output is not None:
         app_pages = write_app_pages(value, sitemap_output.parent)
-        view_paths = [*app_pages["paths"], write_research_page(sitemap_output.parent)]
+        view_paths = app_pages["paths"]
         # /about/ is prose, not a view over the corpus, so it is written from
         # the shared chrome rather than from the dashboard document. The nav
         # links to it from every page this build writes, so it is written
@@ -1515,6 +1515,7 @@ def rebuild_dashboard(
         site_updated = site_lastmod(snapshots)
         about = write_about(sitemap_output.parent, updated=site_updated)
         page_entries = [(path, site_updated) for path in about["paths"]]
+        page_entries.append((write_research_page(sitemap_output.parent), site_updated))
         write_feed(snapshots, feed_output)
         # One page per collection day, plus the blog's own feed. Built from the
         # same validated snapshots the dashboard is, in the same run, so a

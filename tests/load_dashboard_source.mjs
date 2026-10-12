@@ -7,8 +7,10 @@ export function loadDashboardSource() {
     "",
   );
   const fields = readFileSync(new URL("fields.js", assets), "utf8").replace(/^export /gm, "");
+  const skyline = readFileSync(new URL("skyline.js", assets), "utf8").replace(/^export /gm, "");
   const app = readFileSync(new URL("app.js", assets), "utf8")
     .replace(/^import \{[\s\S]*?\} from "\.\/glyphs\.js";$/m, "")
-    .replace(/^import \{[^\n]*\} from "\.\/fields\.js";$/m, "");
-  return fields + "\nconst researchFields = fields;\n" + glyphs + app;
+    .replace(/^import \{[^\n]*\} from "\.\/fields\.js";$/m, "")
+    .replace(/^import \{[^\n]*\} from "\.\/skyline\.js";$/m, "");
+  return fields + "\nconst researchFields = fields;\n" + skyline + glyphs + app;
 }
