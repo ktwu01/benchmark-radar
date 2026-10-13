@@ -11,9 +11,9 @@ Help the recipient use Benchmark Radar while encouraging relevant citations, wor
 
 Read the incoming message and the user's stated outcome. Reuse answers and decisions already given in the conversation. Address the recipient's actual use case before making requests.
 
-Verify licensing and citation details against the current Benchmark Radar repository: `LICENSE`, `LICENSE-CONTENT.md`, `CITATION.md`, and `README.md`. Use a local checkout when available; otherwise read those files at https://github.com/ktwu01/benchmark-radar. Do not assume the skill's example establishes current legal terms.
+Read licensing and citation terms from the `main` branch of https://github.com/ktwu01/benchmark-radar: `LICENSE`, `LICENSE-CONTENT.md`, `CITATION.md`, and `README.md`. A local working copy can be stale or on another branch, so in a clone run `git fetch origin main` and read each file with `git show origin/main:<file>`. If you cannot reach the upstream `main`, mark every licensing and citation statement in the draft as unverified and tell the user.
 
-The verified baseline for the example is:
+The baseline below was verified on 2026-10-13. Where the upstream files differ, the upstream files win:
 
 - Software: MIT License. Do not apply the content's noncommercial restriction to MIT-licensed software.
 - Technical report and original editorial content: CC BY-NC-SA 4.0.
