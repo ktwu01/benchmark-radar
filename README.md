@@ -114,8 +114,8 @@ Scan the QR code to join the WeChat group for daily benchmark updates and eval d
 
 <img src="assets/wechat-group-qr.jpg" alt="WeChat group QR code" width="280" />
 
-<a href="https://discord.gg/rXqS38mkN">
-  <img src="assets/discord-group-qr.jpg" alt="Join the Benchmark Radar Discord: https://discord.gg/rXqS38mkN" width="360" />
+<a href="https://discord.com/invite/JX9Caj4fMF">
+  <img src="assets/discord-group-qr.jpg" alt="Join the Benchmark Radar Discord via the permanent invitation link: https://discord.com/invite/JX9Caj4fMF" width="360" />
 </a>
 
 ## Contributors
