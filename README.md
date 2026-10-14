@@ -67,7 +67,7 @@ catalog. Each record keeps its scores, test conditions and citations.
 - **[Open the dashboard](https://benchmark-radar.org/)** — today's findings, benchmark trends, scores and model coverage
 - **[Query it locally](https://benchmark-radar.org/cli/)** — install and use the offline CLI
 - **[Subscribe via RSS](https://benchmark-radar.org/feed.xml)** — get new benchmark signals every day
-- **[Get the complete dataset on Hugging Face](https://huggingface.co/datasets/ktwu01/benchmark-radar)** — the benchmark catalog, every reported score and the daily discovery records, ready to load with `datasets` or pandas
+- **[Download the complete dataset](https://huggingface.co/datasets/ktwu01/benchmark-radar)** — the benchmark catalog, scores and daily discovery records
 - **[Contribute](CONTRIBUTING.md)** — add benchmarks, model cards, sources, or fixes
 
 If Benchmark Radar saves you research time, **[star the repository](https://github.com/ktwu01/benchmark-radar)**. It helps other eval builders find it.

@@ -56,7 +56,7 @@ benchmark 目录。每条记录保留自己的分数、评测条件和引用来�
 - **[打开 dashboard](https://benchmark-radar.org/)** — 每日发现、benchmark 趋势、分数和模型覆盖情况
 - **[在本地查询](https://benchmark-radar.org/cli/)** — 安装并使用离线 CLI
 - **[通过 RSS 订阅](https://benchmark-radar.org/feed.xml)** — 每天获取最新的 benchmark 情报
-- **[在 Hugging Face 获取完整数据集](https://huggingface.co/datasets/ktwu01/benchmark-radar)** — benchmark 目录、全部已报告分数和每日发现记录，可直接用 `datasets` 或 pandas 加载
+- **[下载完整数据集](https://huggingface.co/datasets/ktwu01/benchmark-radar)** — benchmark 目录、分数和每日发现记录
 - **[参与贡献](CONTRIBUTING.md)** — 添加 benchmark、模型卡、信源或修复
 
 如果 Benchmark Radar 帮你节省了研究时间，请 **[给仓库点个 Star](https://github.com/ktwu01/benchmark-radar)**，让更多做评测的人发现它。
