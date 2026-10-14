@@ -49,7 +49,7 @@ same slug used in that benchmark's page URL.
 
 - [Source repository](https://github.com/ktwu01/benchmark-radar): MIT licensed, includes the collection pipeline, the scoring rubric, and the committed daily snapshots the site is built from.
 - [Install the CLI](https://github.com/ktwu01/benchmark-radar#query-it-locally-cli-version): `python -m pip install 'git+https://github.com/ktwu01/benchmark-radar.git'`, then `benchmark-radar init` downloads the dataset and `benchmark-radar search` queries it offline.
-- [CLI data release](https://github.com/ktwu01/benchmark-radar/releases/tag/cli-data): one checksummed archive of the same data, refreshed on every deploy.
+- [Hugging Face dataset](https://huggingface.co/datasets/ktwu01/benchmark-radar): the benchmark catalog, reported scores, and daily discovery records, synced from every deploy.
 
 ## Optional
 

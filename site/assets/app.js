@@ -9006,7 +9006,11 @@ function openContact(updateUrl = true) {
       element("a", {
         className: "primary-link",
         text: t("Download"),
-        attrs: { href: "/data/radar.json" },
+        attrs: {
+          href: "https://huggingface.co/datasets/ktwu01/benchmark-radar",
+          target: "_blank",
+          rel: "noopener noreferrer",
+        },
       }),
       element("a", {
         className: "secondary-link",

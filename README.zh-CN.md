@@ -14,7 +14,6 @@
 
 <p align="center">
   <a href="https://benchmark-radar.org/"><img alt="已收集的 benchmark 记录" src="https://img.shields.io/endpoint?url=https%3A%2F%2Fbenchmark-radar.org%2Fdata%2Frecords-badge.json&amp;style=for-the-badge"></a>
-  <a href="https://github.com/ktwu01/benchmark-radar/releases/download/cli-data/benchmark-radar-data.zip"><img alt="下载数据集" src="https://img.shields.io/badge/Dataset-download%20ZIP-2f81f7?style=for-the-badge&amp;logo=json&amp;logoColor=white"></a>
   <a href="https://huggingface.co/datasets/ktwu01/benchmark-radar"><img alt="Hugging Face 数据集" src="https://img.shields.io/badge/Hugging%20Face-Dataset-FFD21E?style=for-the-badge&amp;logo=huggingface&amp;logoColor=000"></a>
   <a href="https://arxiv.org/abs/2609.11115"><img src="https://img.shields.io/badge/arXiv-Paper-red?style=for-the-badge&logo=arxiv" alt="arXiv"></a>
   <a href="https://huggingface.co/papers/2609.11115"><img src="https://img.shields.io/badge/Hugging%20Face-Upvote%20us-FFD21E?style=for-the-badge&amp;logo=huggingface&amp;logoColor=000" alt="在 Hugging Face 为 Benchmark Radar 投一票"></a>
@@ -57,7 +56,7 @@ benchmark 目录。每条记录保留自己的分数、评测条件和引用来�
 - **[打开 dashboard](https://benchmark-radar.org/)** — 每日发现、benchmark 趋势、分数和模型覆盖情况
 - **[在本地查询](https://benchmark-radar.org/cli/)** — 安装并使用离线 CLI
 - **[通过 RSS 订阅](https://benchmark-radar.org/feed.xml)** — 每天获取最新的 benchmark 情报
-- **[下载完整数据集](https://github.com/ktwu01/benchmark-radar/releases/download/cli-data/benchmark-radar-data.zip)** — 一个 ZIP 包含 benchmark 目录、详情记录和每日发现快照
+- **[在 Hugging Face 获取完整数据集](https://huggingface.co/datasets/ktwu01/benchmark-radar)** — benchmark 目录、全部已报告分数和每日发现记录，可直接用 `datasets` 或 pandas 加载
 - **[参与贡献](CONTRIBUTING.md)** — 添加 benchmark、模型卡、信源或修复
 
 如果 Benchmark Radar 帮你节省了研究时间，请 **[给仓库点个 Star](https://github.com/ktwu01/benchmark-radar)**，让更多做评测的人发现它。

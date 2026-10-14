@@ -45,9 +45,10 @@ def test_readmes_offer_free_data_and_an_earned_star_request():
     assert "点击下面的动图" in chinese
     assert "assets/swe-bench-verified.gif" in english
     assert "assets/swe-bench-verified.gif" in chinese
-    download = "releases/download/cli-data/benchmark-radar-data.zip"
-    assert download in english and "daily discovery snapshots in one ZIP" in english
-    assert download in chinese and "每日发现快照" in chinese
+    dataset = "https://huggingface.co/datasets/ktwu01/benchmark-radar"
+    assert dataset in english and "daily discovery records" in english
+    assert dataset in chinese and "每日发现记录" in chinese
+    assert "releases/download/cli-data" not in english + chinese
     assert "star the repository" in english
     assert "给仓库点个 Star" in chinese
     assert Path("CITATION.cff").exists()
@@ -2899,7 +2900,7 @@ def test_issue_311_the_today_list_loads_one_page_at_a_time():
     assert pager_end < dataset_card < page_footer
     dataset = html.split('<div class="footer-dataset">', 1)[1].split("</div>", 1)[0]
     assert "Free dataset. No crawler needed." in dataset
-    assert 'href="/data/radar.json"' in dataset
+    assert 'href="https://huggingface.co/datasets/ktwu01/benchmark-radar"' in dataset
     assert "Star the repository" not in dataset
     assert "Contact" not in dataset
     footer = html.split("<footer>", 1)[1].split("</footer>", 1)[0]
@@ -2908,7 +2909,7 @@ def test_issue_311_the_today_list_loads_one_page_at_a_time():
     assert 'id="share-radar"' in footer
     contact = script.split("function openContact(", 1)[1].split("dialog.showModal();", 1)[0]
     assert "The complete dataset is free to download" in contact
-    assert 'href: "/data/radar.json"' in contact
+    assert 'href: "https://huggingface.co/datasets/ktwu01/benchmark-radar"' in contact
     assert 'className: "contact-dataset"' in contact
 
 
