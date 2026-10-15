@@ -378,8 +378,8 @@ def test_rebuild_writes_the_sitemap_at_the_site_root(tmp_path, site_shell):
     urls = [node.text for node in root.findall("sm:url/sm:loc", ns)]
     assert urls == [
         f"{SITE_URL}/",
-        f"{SITE_URL}/leaderboard/",
         f"{SITE_URL}/trends/",
+        f"{SITE_URL}/leaderboard/",
         f"{SITE_URL}/explore/",
         f"{SITE_URL}/cli/",
         f"{SITE_URL}/cite/",

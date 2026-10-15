@@ -238,11 +238,16 @@
                HTML, so a crawler and a reader with a slow connection both get content
                from the first response. app.js intercepts the click and keeps the
                navigation client-side for anyone whose script has loaded. -->
-          <a href="/leaderboard/" data-view="leaderboard" aria-controls="leaderboard-view" data-i18n="Leaderboard">
-            Leaderboard
-          </a>
-          <a href="/saturation/" data-view="saturation" aria-controls="saturation-view" data-i18n="Saturation">Saturation</a>
+          <a href="/library/" data-view="library" aria-controls="library-view" data-i18n="Library">Library</a>
+          <a href="/models/" data-view="models" aria-controls="models-view" data-i18n="Models">Models</a>
           <a href="/trends/" data-view="trends" aria-controls="trends-view" data-i18n="Trends">Trends</a>
+          <a href="/saturation/" data-view="saturation" aria-controls="saturation-view" data-i18n="Saturation">Saturation</a>
+          <!-- Labelled Landscape (#420): the page maps the field -- latest
+               releases, the benchmark frontier, documentation -- more than it
+               ranks. The path stays /leaderboard/, which is already indexed. -->
+          <a href="/leaderboard/" data-view="leaderboard" aria-controls="leaderboard-view" data-i18n="Landscape">
+            Landscape
+          </a>
           <!-- Blog and About are documents, not dashboard views, and they live
                in the footer nav instead: this row is for the tools a reader
                came to use, and every entry it carries competes with them for a
@@ -527,9 +532,62 @@
         </div>
       </section>
 
+      <!-- The Library merged from benchmark-radar.com (#420). One control row and
+           the directions beside the list, so the first screen is benchmarks,
+           not a header. The seeded rows and direction links are real HTML for
+           crawlers; app.js replaces them with the live, filterable list. -->
+      <section class="view" id="library-view" aria-labelledby="library-heading" hidden>
+        <div class="library-toolbar">
+          <h1 id="library-heading" class="library-heading" data-i18n="Library">Library</h1>
+          <input id="library-search" type="search" autocomplete="off"
+                 class="benchmark-search-input library-search"
+                 aria-label="Search the library" data-i18n-aria="Search the library"
+                 data-i18n-placeholder="Search benchmarks, tasks, domains…"
+                 placeholder="Search benchmarks, tasks, domains…" />
+          <select id="library-sort" class="library-sort" aria-label="Sort" data-i18n-aria="Sort">
+            <option value="latest" data-i18n="Newest">Newest</option>
+            <option value="documented" data-i18n="Most documented">Most documented</option>
+            <option value="stars" data-i18n="Most GitHub stars">Most GitHub stars</option>
+            <option value="stars30" data-i18n="Most stars gained (30 days)">Most stars gained (30 days)</option>
+            <option value="name" data-i18n="A–Z">A–Z</option>
+            <option value="relevance" data-i18n="Relevance (search)" hidden>Relevance (search)</option>
+          </select>
+          <button id="library-saved" class="library-saved-toggle" type="button" aria-pressed="false" data-i18n="Saved">Saved</button>
+          <button id="library-following" class="library-saved-toggle" type="button" aria-pressed="false" data-i18n="My directions">My directions</button>
+          <button id="library-follow" class="library-saved-toggle" type="button" aria-pressed="false" hidden>Follow this direction</button>
+          <p id="library-status" class="library-status" aria-live="polite"></p>
+        </div>
+        <div class="library-layout">
+          <nav id="library-directions" class="library-directions" aria-label="Research directions" data-i18n-aria="Research directions"></nav>
+          <div class="library-results">
+            <div id="library-list" class="library-list"></div>
+            <button id="library-more" class="clear-button" type="button" data-i18n="Show more" hidden>Show more</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Models, merged from benchmark-radar.com's Model Evals (#420): every model
+           with a reported score in the catalog, by lab, and each lab's own model
+           documents. Which benchmarks, never a cross-source score; the numbers
+           stay on each benchmark's page with their sources. -->
+      <section class="view" id="models-view" aria-labelledby="models-heading" hidden>
+        <div class="library-toolbar">
+          <h1 id="models-heading" class="library-heading" data-i18n="Models">Models</h1>
+          <p class="models-note" data-i18n="models.note">Every model with a reported score in the catalog, by lab, and the benchmarks it has scores on. Pick a lab to also see its own model cards, with benchmarks new for that lab highlighted. Scores are on each benchmark's page.</p>
+          <p id="models-status" class="library-status" aria-live="polite"></p>
+        </div>
+        <div class="library-layout">
+          <nav id="models-labs" class="library-directions" aria-label="AI labs" data-i18n-aria="AI labs"></nav>
+          <div class="library-results">
+            <div id="models-list" class="models-list"></div>
+            <button id="models-more" class="clear-button" type="button" data-i18n="Show more" hidden>Show more</button>
+          </div>
+        </div>
+      </section>
+
       <section class="view" id="leaderboard-view" aria-labelledby="leaderboard-heading" hidden>
         <div class="score-browse-header">
-          <h1 id="leaderboard-heading" data-i18n="Leaderboard">Leaderboard</h1>
+          <h1 id="leaderboard-heading" data-i18n="Landscape">Landscape</h1>
         </div>
 
         <!-- Three modes, one page (issue #530). Latest releases opens by
@@ -910,6 +968,37 @@
         <header class="view-heading">
           <h1 id="trends-heading" data-i18n="Trend">Trend</h1>
         </header>
+
+        <!-- Research directions, merged from benchmark-radar.com's Trends (#420).
+             Each row links to the same direction in the Library. -->
+        <section class="direction-trends" id="direction-trends" aria-labelledby="direction-trends-heading" hidden>
+          <div class="section-title direction-trends-title">
+            <h2 id="direction-trends-heading" data-i18n="New benchmarks by research direction">New benchmarks by research direction</h2>
+            <select id="direction-trends-window" class="library-sort" aria-label="Window" data-i18n-aria="Window">
+              <option value="30" data-i18n="Last 30 days">Last 30 days</option>
+              <option value="60" data-i18n="Last 60 days">Last 60 days</option>
+              <option value="90" data-i18n="Last 90 days">Last 90 days</option>
+            </select>
+            <select id="direction-trends-group" class="library-sort" aria-label="Group" data-i18n-aria="Group"></select>
+          </div>
+          <p class="section-note" id="direction-trends-note"></p>
+          <div class="direction-trends-frame">
+            <table class="direction-trends-table">
+              <thead>
+                <tr>
+                  <th scope="col" data-i18n="Research direction">Research direction</th>
+                  <th scope="col" class="direction-number" data-i18n="New">New</th>
+                  <th scope="col" class="direction-number" data-i18n="Previous">Previous</th>
+                  <th scope="col" class="direction-number" data-i18n="Change">Change</th>
+                  <th scope="col" class="direction-number" data-i18n="Undated">Undated</th>
+                  <th scope="col" class="direction-number" data-i18n="Stars gained, 30 days">Stars gained, 30 days</th>
+                  <th scope="col" data-i18n="16-week trend">16-week trend</th>
+                </tr>
+              </thead>
+              <tbody id="direction-trends-body"></tbody>
+            </table>
+          </div>
+        </section>
 
         <div class="domain-panel">
           <div class="section-title">

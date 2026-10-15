@@ -448,11 +448,34 @@ def main() -> None:
         # One index over every source, one row per source record. Two sources
         # describing the same benchmark stay two rows until identity.yml says
         # otherwise under human review.
-        index = build_benchmark_index(resolved_records, series_by_key, all_observations)
+        from .library_directions import (
+            assign_library_directions,
+            library_taxonomy,
+            load_direction_reviews,
+            load_library_directions,
+        )
+
+        # Directions join on the raw records: an artifact a record only borrows
+        # through identity inheritance must not become its own join anchor.
+        library_document = load_library_directions()
+        directions = assign_library_directions(
+            all_records, library_document, identity.equivalent_groups, load_direction_reviews()
+        )
+        from .library_signals import assign_library_signals, load_library_signals
+
+        signals = assign_library_signals(all_records, load_library_signals())
+        index = build_benchmark_index(
+            resolved_records,
+            series_by_key,
+            all_observations,
+            directions_by_key=directions,
+            signals_by_key=signals,
+        )
         index_path = write_benchmark_index(
             index,
             Path("site/data/benchmark-index.json"),
             documents=document_registry(resolved_records),
+            library_taxonomy=library_taxonomy(library_document),
         )
 
         shard_report = write_shards(

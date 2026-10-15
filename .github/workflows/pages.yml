@@ -28,6 +28,9 @@ on:
       - "data/catalog/identity.yml"
       - "data/catalog/benchmark_dates.yml"
       - "data/catalog/llm_stats_identity_overrides.yml"
+      - "data/catalog/claire_library_categories.json"
+      - "data/catalog/claire_library_signals.json"
+      - "data/catalog/library_direction_reviews.yml"
       - "site/**"
       # The dashboard build imports the package transitively through
       # snapshots.py. Keep the trigger broad so a new scoring, insight, rubric,
