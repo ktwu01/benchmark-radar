@@ -212,7 +212,7 @@ jobs:
           '
 
   deploy:
-    needs: [build, publish-cli-data]
+    needs: [build, publish-cli-data, publish-hf-dataset]
     permissions:
       pages: write
       id-token: write
