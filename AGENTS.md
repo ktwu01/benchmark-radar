@@ -65,6 +65,9 @@ Applies to `README*`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `site/**`,
 
 ## Working rules
 
+- When the contributor is not `ktwu01`, ask the four questions in
+  [`CONTRIBUTING.md`](CONTRIBUTING.md#before-you-start-a-pr) before
+  substantive work.
 - Finish the task without nudges. Stop only for a merge, a credential, or a
   destructive action.
 - If a request has two opposite readings, state your reading in one line, then
