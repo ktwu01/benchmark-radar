@@ -465,6 +465,50 @@ def test_related_benchmarks_link_siblings_in_the_same_category(tmp_path):
     assert alpha.count(f'href="{SITE_URL}/benchmarks/alpha-bench/"') == 1
 
 
+def _related_targets(page: str) -> list[str]:
+    section = page.split("<h2>Related", 1)[1].split("</ul>", 1)[0]
+    return [chunk.split("/", 1)[0] for chunk in section.split(f"{SITE_URL}/benchmarks/")[1:]]
+
+
+def test_related_links_spread_across_a_category_instead_of_its_alphabetical_head(tmp_path):
+    """Issue #673: name order sent every page's links to the same eight pages."""
+    shards = [
+        _shard(f"bench-{index:02d}", f"Bench {index:02d}", categories=["coding_agent"])
+        for index in range(20)
+    ]
+    output = _generated_pages(tmp_path, *shards)
+    linked = {
+        target
+        for shard in shards
+        for target in _related_targets(_page_text(output, shard["record"]["slug"]))
+    }
+    # Name order reached 9 of 20 pages; equal candidates must now spread.
+    assert len(linked) >= 15
+
+
+def test_a_shared_artifact_outranks_alphabetically_earlier_category_siblings(tmp_path):
+    siblings = [
+        _shard(f"a-bench-{index}", f"A Bench {index}", categories=["coding_agent"])
+        for index in range(10)
+    ]
+    alpha = _shard("alpha-tasks", "Alpha Tasks", categories=["coding_agent"])
+    zeta = _shard("zeta-bench", "Zeta Bench", categories=["coding_agent"])
+    shared = [{"kind": "paper", "url": "https://arxiv.org/abs/2601.00001"}]
+    alpha["record"]["artifacts"] = shared
+    zeta["record"]["artifacts"] = shared
+    output = _generated_pages(tmp_path, *siblings, alpha, zeta)
+    assert _related_targets(_page_text(output, "alpha-tasks"))[0] == "zeta-bench"
+
+
+def test_status_tags_do_not_relate_benchmarks(tmp_path):
+    output = _generated_pages(
+        tmp_path,
+        _shard("alpha-bench", "Alpha Bench", categories=["Unsupported", "不支持"]),
+        _shard("beta-bench", "Beta Bench", categories=["Unsupported", "不支持"]),
+    )
+    assert "beta-bench" not in _page_text(output, "alpha-bench")
+
+
 def test_citing_documents_are_listed_with_their_sources(tmp_path):
     shard = _shard("alpha-bench", "Alpha Bench")
     shard["record"]["documents"] = [
