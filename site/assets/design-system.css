@@ -1,0 +1,140 @@
+/* Shared reading and control rhythm; branding stays in styles.css. */
+:root {
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --control-height: 44px;
+}
+
+.view-heading,
+.score-browse-header {
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.view-heading h1,
+.score-browse-header h1,
+.blog-page .blog-hero h1 {
+  font-family: var(--body);
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  line-height: 1.35;
+}
+
+.today-filters {
+  gap: var(--space-3);
+}
+
+.today-filters input:not([type="checkbox"]):not([type="range"]),
+.today-filters select,
+.today-filters .filters-toggle,
+.today-filters .refresh-button,
+.today-pagination button,
+.leaderboard-top-more,
+.footer-dataset-actions a {
+  min-height: var(--control-height);
+  font-family: var(--body);
+  font-size: 14px;
+}
+
+.today-pagination,
+.footer-dataset-actions {
+  gap: var(--space-3);
+}
+
+.signal-meta,
+.record-facts,
+.daily-briefing-meta,
+.daily-briefing-caveat,
+.blog-page .blog-meta,
+.blog-page .blog-kicker,
+.blog-page .blog-chip {
+  font-family: var(--body);
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: normal;
+}
+
+.blog-page .blog-stat span {
+  font-family: var(--body);
+  font-size: 13px;
+  letter-spacing: normal;
+}
+
+.blog-page .blog-panel,
+.blog-page .blog-card {
+  padding: var(--space-6);
+}
+
+.blog-page .blog-section {
+  margin-block: var(--space-6);
+}
+
+.record-page main {
+  max-width: 900px;
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-4);
+}
+
+.record-page nav.site {
+  max-width: 900px;
+  margin-inline: auto;
+  padding: var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.record-page h1 {
+  margin: 0 0 var(--space-4);
+  font-size: 1.5rem;
+}
+
+.record-page h2 {
+  margin-top: var(--space-6);
+}
+
+.record-page dl {
+  display: grid;
+  grid-template-columns: minmax(100px, 160px) minmax(0, 1fr);
+  gap: var(--space-3) var(--space-6);
+}
+
+.record-page dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.record-page .record-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.record-page th,
+.record-page td {
+  padding: var(--space-2) var(--space-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.record-page th {
+  font-family: var(--body);
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.record-page main a {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 700px) {
+  .blog-page .blog-panel,
+  .blog-page .blog-card {
+    padding: var(--space-4);
+  }
+
+  .record-page dl {
+    gap: var(--space-2) var(--space-4);
+  }
+}

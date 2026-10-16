@@ -124,7 +124,6 @@ footer {
   justify-content: space-between;
   gap: 1.25rem;
   min-height: 80px;
-  border-bottom: 1px solid var(--edge);
   background: color-mix(in srgb, var(--canvas) 96%, transparent);
   backdrop-filter: blur(12px);
 }
@@ -5717,5 +5716,222 @@ dialog {
   .latest-release-signal {
     grid-template-columns: 1fr;
     gap: 0.15rem;
+  }
+}
+
+/* Responsive navigation and Today controls share the canonical site chrome. */
+/* Keep every destination visible when the wordmark and utilities compete for space. */
+.view-nav {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  overflow: visible;
+}
+
+.view-nav button,
+.view-nav a {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-width: 0;
+  height: var(--control-height);
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-3);
+  white-space: nowrap;
+  letter-spacing: normal;
+}
+
+.brand-mark {
+  flex-shrink: 0;
+}
+
+.masthead-end {
+  grid-template-columns: repeat(4, var(--control-height));
+  gap: var(--space-2);
+}
+
+.repo-badge {
+  width: var(--control-height);
+  height: var(--control-height);
+}
+
+.repo-badge svg,
+.today-filters .refresh-button svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+#today-view {
+  padding-top: var(--space-4);
+}
+
+.today-filters {
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.today-filters .filters-toggle {
+  align-items: center;
+  justify-content: center;
+  letter-spacing: normal;
+}
+
+/* A stable two-line caption keeps metadata from pushing the list down unevenly. */
+#today-view .section-title {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-2) var(--space-3);
+  align-items: baseline;
+  margin-bottom: var(--space-3);
+}
+
+#today-view .results-meta {
+  display: contents;
+}
+
+#today-view .section-title h2 {
+  grid-column: 1;
+  grid-row: 1;
+  font-size: 13px;
+  font-family: var(--body);
+  letter-spacing: normal;
+}
+
+#today-breakdown,
+#today-sort {
+  font-family: var(--body);
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+#today-breakdown {
+  grid-column: 2;
+  grid-row: 1;
+  text-align: right;
+}
+
+#today-sort {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  white-space: normal;
+  text-align: left;
+}
+
+/* An SVG chevron has a geometric center independent of the platform's mono font. */
+.record-summary::before {
+  content: "";
+  margin-top: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23173e71' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 6 6 6-6 6'/%3E%3C/svg%3E");
+  background-position: center;
+  background-size: 14px;
+  background-repeat: no-repeat;
+}
+
+.record-card[open] > .record-summary::before {
+  background: var(--blue) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 6 6 6-6 6'/%3E%3C/svg%3E") center / 14px no-repeat;
+}
+
+.record-card h3 {
+  margin-top: 0;
+}
+
+@media (max-width: 1280px) {
+  .masthead {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-2) var(--space-3);
+    padding-block: var(--space-3);
+  }
+
+  .masthead-main {
+    display: contents;
+  }
+
+  .brand {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .masthead-end {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .view-nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    padding-block: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .brand {
+    gap: var(--space-2);
+  }
+
+  .brand strong {
+    font-size: 13px;
+    line-height: 1.4;
+    letter-spacing: normal;
+  }
+
+  .view-nav button,
+  .view-nav a {
+    min-width: var(--control-height);
+    font-family: var(--body);
+    font-size: 13px;
+    padding-inline: 6px;
+  }
+
+  .today-filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto var(--control-height);
+  }
+
+  .today-filters .search-field {
+    grid-column: 1 / -1;
+  }
+
+  .today-filters .date-field {
+    min-width: 0;
+  }
+
+  .today-filters .date-field > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .today-filters .date-field select {
+    min-width: 0;
+    width: 100%;
+    padding-inline: var(--space-2);
+    font-size: 13px;
+  }
+
+  .today-filters .filters-toggle {
+    padding-inline: var(--space-2);
+  }
+}
+
+@media (max-width: 360px) {
+  .brand {
+    grid-column: 1 / -1;
+  }
+
+  .masthead-end {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: start;
+  }
+
+  .view-nav {
+    grid-row: 3;
   }
 }

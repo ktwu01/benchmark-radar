@@ -363,6 +363,7 @@ def render_page(
       href="{BLOG_FEED_PATH}">
 <link rel="stylesheet" href="/assets/styles.css">
 <link rel="stylesheet" href="/assets/blog.css">
+<link rel="stylesheet" href="/assets/design-system.css">
 {schema_blocks}
 {i18n_block}
 <script src="/assets/blog.js" defer></script>
