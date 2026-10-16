@@ -19,6 +19,7 @@ by the source that reported them, the same rule the shards enforce in JSON.
 
 from __future__ import annotations
 
+import hashlib
 import html
 import json
 import re
@@ -57,6 +58,9 @@ _ARTIFACT_LABELS = {
 # listed on the page and left out of the title.
 _TITLE_FACETS = ("paper", "repo", "dataset")
 _RELATED_LIMIT = 8
+# Tags that describe a record's status rather than what it tests. Two pages that
+# are both "Unsupported" in OpenCompass share nothing a reader came looking for.
+_NON_TOPICAL_CATEGORIES = frozenset({"Unsupported", "不支持", "Open-Source", "开源收录"})
 _DOCUMENT_LIMIT = 12
 
 _DIR_DESCRIPTION = (
@@ -126,6 +130,7 @@ class CatalogContext:
 
     shared_names: frozenset[str] = frozenset()
     by_category: dict[str, tuple[tuple[str, str], ...]] = field(default_factory=dict)
+    by_artifact: dict[str, tuple[tuple[str, str], ...]] = field(default_factory=dict)
 
 
 def _source_label(record: dict[str, Any]) -> str | None:
@@ -473,27 +478,53 @@ def _documents_section(name: str, record: dict[str, Any]) -> str:
     )
 
 
+def _tie_break(slug: str, other: str) -> str:
+    """A stable per-page order among equally related neighbours.
+
+    Sorting ties by name made every page in a category link to the same
+    alphabetical head, so a few hundred pages took every link and over 90% of
+    pages had none (issue #673). A digest of the pair is reproducible across
+    builds yet spreads equal candidates evenly.
+    """
+    return hashlib.sha256(f"{slug}\x00{other}".encode()).hexdigest()
+
+
 def _related_section(slug: str, record: dict[str, Any], context: CatalogContext) -> str:
-    """Sibling benchmarks in the same capability, as real links.
+    """Neighbouring benchmarks, ranked by the evidence they share, as real links.
 
     Without this every benchmark page is a leaf: reachable from the directory
-    and from nowhere else, and offering a reader who wanted "a coding agent
-    benchmark" exactly one of them.
+    and from nowhere else. A page that cites the same paper, repository or
+    dataset ranks first; then pages sharing categories, where a rare category
+    says more than a catch-all one. Status tags relate nothing.
     """
-    related: list[tuple[str, str]] = []
-    seen = {slug}
-    for category in record.get("categories") or []:
-        for name, other in context.by_category.get(str(category), ()):
-            if other in seen:
-                continue
-            seen.add(other)
-            related.append((name, other))
-    if not related:
+    shared_artifacts: dict[str, int] = defaultdict(int)
+    names: dict[str, str] = {}
+    for _, _, url in _artifacts(record):
+        for name, other in context.by_artifact.get(url, ()):
+            shared_artifacts[other] += 1
+            names[other] = name
+    overlap: dict[str, float] = defaultdict(float)
+    for category in {str(item) for item in record.get("categories") or []}:
+        if category in _NON_TOPICAL_CATEGORIES:
+            continue
+        members = context.by_category.get(category, ())
+        for name, other in members:
+            overlap[other] += 1.0 / len(members)
+            names[other] = name
+    names.pop(slug, None)
+    if not names:
         return ""
-    related.sort(key=lambda item: (item[0].lower(), item[1]))
+    ranked = sorted(
+        names,
+        key=lambda other: (
+            -shared_artifacts.get(other, 0),
+            -overlap.get(other, 0.0),
+            _tie_break(slug, other),
+        ),
+    )
     items = "".join(
-        f'<li><a href="{_canonical(other)}">{_esc(name)}</a></li>'
-        for name, other in related[:_RELATED_LIMIT]
+        f'<li><a href="{_canonical(other)}">{_esc(names[other])}</a></li>'
+        for other in ranked[:_RELATED_LIMIT]
     )
     words = _category_words(record)
     heading = f"Related {words} benchmarks" if words else "Related benchmarks"
@@ -713,19 +744,22 @@ def _catalog_context(loaded: list[tuple[str, dict[str, Any]]]) -> CatalogContext
     """Collect the two cross-page facts, in one pass over the already-read shards."""
     counts: dict[str, int] = defaultdict(int)
     by_category: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    by_artifact: dict[str, list[tuple[str, str]]] = defaultdict(list)
     for slug, shard in loaded:
         record = shard.get("record") or {}
         name = _text(record, "name")
         if not name:
             continue
         counts[name] += 1
-        for category in record.get("categories") or []:
-            by_category[str(category)].append((name, slug))
+        for category in dict.fromkeys(str(item) for item in record.get("categories") or []):
+            by_category[category].append((name, slug))
+        for _, _, url in _artifacts(record):
+            by_artifact[url].append((name, slug))
     return CatalogContext(
         shared_names=frozenset(name for name, count in counts.items() if count > 1),
-        by_category={
-            category: tuple(sorted(members, key=lambda item: (item[0].lower(), item[1])))
-            for category, members in by_category.items()
+        by_category={category: tuple(members) for category, members in by_category.items()},
+        by_artifact={
+            url: tuple(members) for url, members in by_artifact.items() if len(members) > 1
         },
     )
 
