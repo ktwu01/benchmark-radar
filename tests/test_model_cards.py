@@ -893,3 +893,154 @@ def test_the_registrys_vbench_is_linked_to_the_crawl_record_of_the_same_benchmar
     assert group["inherit_from"] == "opencompass:1375"
     # VBench++ and VBench-2.0 are separate instruments, never members here.
     assert not {member for member in group["members"] if member.startswith("model-reports:vbench_")}
+
+
+def test_cohere_private_evaluations_remain_in_the_export_without_guessed_task_urls():
+    from benchmark_radar.benchmark_scores import load_scores
+    from benchmark_radar.catalog_reports import normalize_reports
+
+    # These instruments are named in the public release, even though their
+    # tasks are private. Unknown task URLs and unlabelled scores stay unknown.
+    expected = {
+        "cohere_m_tau_bench",
+        "cohere_north_answer_satisfaction",
+        "cohere_north_multihop_search",
+        "cohere_absolute_safety",
+        "cohere_over_refusal",
+    }
+    registry = load_registry()
+    card = next(
+        card
+        for card in registry["model_cards"]
+        if card["id"] == "cohere_command_a_reasoning_release"
+    )
+    assert expected <= set(card["benchmarks"])
+    records = {
+        record["source_benchmark_id"]: record
+        for record in normalize_reports(registry, load_scores())["source_records"]
+        if record["source_benchmark_id"] in expected
+    }
+    assert set(records) == expected
+    for record in records.values():
+        assert record["artifacts"] == []
+        assert record["released"] is None
+        assert any(
+            document["source_id"] == "cohere_command_a_reasoning_release"
+            and document["source_url"] == "https://cohere.com/blog/command-a-reasoning"
+            for document in record["documents"]
+        )
+    observations = build_score_progression(DEFAULT_SCORES_PATH, registry)["benchmarks"]
+    for benchmark_id in expected - {"cohere_m_tau_bench"}:
+        assert not observations.get(benchmark_id, {}).get("observations")
+
+    # The referenced primary paper evaluates agents producing research reports;
+    # adoption-domain routing must not describe it as a tool-call episode.
+    entry = next(
+        row
+        for row in adoption_rank(registry)["entries"]
+        if row["benchmark_id"] == "deepresearch_bench"
+    )
+    assert entry["domain"] == "agent"
+
+    # Translation changes the task language, not the retail/airline tool task.
+    # Both normalization and the actual adoption surface must keep its shape.
+    assert records["cohere_m_tau_bench"]["categories"] == ["tool_use"]
+    translated_tau = next(
+        row
+        for row in adoption_rank(registry)["entries"]
+        if row["benchmark_id"] == "cohere_m_tau_bench"
+    )
+    assert translated_tau["domain"] == "tool_use"
+
+
+def test_cohere_agentic_chart_retains_all_twelve_labelled_scores():
+    from benchmark_radar.benchmark_scores import load_scores
+
+    # Public chart labels, in BFCL-v3 / tau-bench / m-tau-bench column order.
+    expected = {
+        "Command A Reasoning": (70.3, 59.8, 46.5),
+        "DeepSeek-R1-0528": (63.8, 58.7, 44.2),
+        "gpt-oss-120b": (61.6, 58.5, 42.7),
+        "Magistral Medium": (50.4, 39.8, 23.4),
+    }
+    expected_organizations = {
+        "Command A Reasoning": "Cohere",
+        "DeepSeek-R1-0528": "DeepSeek",
+        "gpt-oss-120b": "OpenAI",
+        "Magistral Medium": "Mistral",
+    }
+    rows = [
+        row
+        for row in load_scores()["results"]
+        if row["source_id"] == "cohere_command_a_reasoning_release"
+    ]
+    assert len(rows) == 12
+    assert {(row["model"], row["benchmark_id"]): row["value"] for row in rows} == {
+        (model, benchmark_id): value
+        for model, values in expected.items()
+        for benchmark_id, value in zip(
+            ("bfcl", "tau_bench", "cohere_m_tau_bench"), values, strict=True
+        )
+    }
+    for row in rows:
+        organization = expected_organizations[row["model"]]
+        assert row["organization"] == organization
+        assert row["reported_by"] == (None if organization == "Cohere" else "Cohere")
+
+
+def test_cohere_unknown_competitor_setups_do_not_establish_comparability():
+    from benchmark_radar.benchmark_scores import load_scores
+    from benchmark_radar.catalog_reports import normalize_reports
+
+    normalized = normalize_reports(load_registry(), load_scores())
+    observations = [
+        row
+        for row in normalized["score_observations"]
+        if row["source_id"] == "cohere_command_a_reasoning_release"
+    ]
+    groups = {
+        benchmark: {
+            row["model_name"]: row["comparable_group"]
+            for row in observations
+            if row["key"] == f"model-reports:{benchmark}"
+        }
+        for benchmark in ("bfcl", "tau_bench", "cohere_m_tau_bench")
+    }
+    assert len(set(groups["bfcl"].values())) == 4
+    assert len(set(groups["tau_bench"].values())) == 3
+    assert groups["tau_bench"]["Command A Reasoning"] == groups["tau_bench"]["Magistral Medium"]
+    # Footnote 1 explicitly identifies one ten-run translated-task setup for
+    # all four models, so the repair must retain that documented comparison.
+    assert len(set(groups["cohere_m_tau_bench"].values())) == 1
+    assert len(observations) == 12
+
+
+def test_cohere_multilingual_metric_does_not_guess_unspecified_pass_at_one():
+    from benchmark_radar.benchmark_scores import load_scores
+    from benchmark_radar.catalog_reports import normalize_reports
+
+    normalized = normalize_reports(load_registry(), load_scores())
+    observations = [
+        row
+        for row in normalized["score_observations"]
+        if row["key"] == "model-reports:cohere_m_tau_bench"
+        and row["source_id"] == "cohere_command_a_reasoning_release"
+    ]
+    # The multilingual clause reports average scores; only the English clause
+    # explicitly states pass@1. Normalization must not upgrade an unknown label.
+    assert len(observations) == 4
+    series = [
+        row
+        for row in normalized["score_series"]
+        if row["key"] == "model-reports:cohere_m_tau_bench"
+    ]
+    assert len(series) == 1
+    assert series[0]["metric"] == "score"
+    # reported_metric names the declared generic score, not an inferred pass@1.
+    assert series[0]["direction_basis"] == "reported_metric"
+    assert series[0]["observation_count"] == 4
+    assert series[0]["direction"] == "higher_is_better"
+    english = [row for row in normalized["score_series"] if row["key"] == "model-reports:tau_bench"]
+    assert len(english) == 1
+    assert english[0]["metric"] == "pass@1"
+    assert english[0]["direction_basis"] == "reported_metric"
