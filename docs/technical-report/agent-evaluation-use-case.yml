@@ -1,0 +1,70 @@
+schema_version: 1
+title: Scientific software research agent evaluation suite selection
+issue: 452
+workflow:
+  name: literature-backed scientific software maintenance
+  user: research engineer maintaining scientific Python repositories
+  decision: choose a benchmark suite for an agent that triages an issue, retrieves relevant papers and code, proposes a patch, and verifies the change
+  failure_cost: an incorrect patch or unsupported scientific claim can waste expert review time and invalidate downstream analysis
+  inclusion_rules:
+    - benchmark tasks must exercise research, scientific software, or real repository-level engineering
+    - the published task, metric, and evaluation protocol must be inspectable from a cited source
+    - the system must expose enough task material or evidence to reproduce a comparison
+  exclusion_rules:
+    - general chat or coding scores without a repository or research-task interpretation
+    - records whose source evidence cannot distinguish the task from a generic model leaderboard
+retrieval:
+  snapshot_date: 2026-09-07
+  software_commit: 8f46bbfa91f5d9900c8b08a5d552c3df5c9597b0
+  commands:
+    - benchmark-radar search "PaperBench" --scope catalog --limit 20 --json --index /path/to/v0.11.0/site/data/benchmark-index.json --shards /path/to/v0.11.0/site/data/benchmarks --snapshots /path/to/v0.11.0/data/snapshots
+    - benchmark-radar search "software engineering agent" --scope catalog --limit 20 --json --index /path/to/v0.11.0/site/data/benchmark-index.json --shards /path/to/v0.11.0/site/data/benchmarks --snapshots /path/to/v0.11.0/data/snapshots
+    - benchmark-radar show "model-reports:swe_bench_science" --json --index /path/to/v0.11.0/site/data/benchmark-index.json --shards /path/to/v0.11.0/site/data/benchmarks --snapshots /path/to/v0.11.0/data/snapshots
+    - benchmark-radar show "opencompass:1730" --json --index /path/to/v0.11.0/site/data/benchmark-index.json --shards /path/to/v0.11.0/site/data/benchmarks --snapshots /path/to/v0.11.0/data/snapshots
+    - benchmark-radar show "llm-stats:swe-lancer" --json --index /path/to/v0.11.0/site/data/benchmark-index.json --shards /path/to/v0.11.0/site/data/benchmarks --snapshots /path/to/v0.11.0/data/snapshots
+  record_ids:
+    - model-reports:swe_bench_science
+    - opencompass:1730
+    - llm-stats:swe-lancer
+candidates:
+  - record_id: model-reports:swe_bench_science
+    name: SWE-bench Science
+    source_evidence: https://arxiv.org/abs/2608.19799
+    task_fit: high
+    protocol: 119 repository-level scientific software tasks across 98 repositories and 20 scientific domains; issue-driven, expert-exploratory, and engineering-integration paradigms
+    maintenance: medium; released 2026-08-20 and requires repository/environment snapshots to remain repeatable
+    openness: unknown in the Radar record; the cited paper is available
+    evidence_coverage: paper and task description recorded; no repository or dataset link in the Radar record
+    decision: adopt
+    reason: closest match to issue triage and patch verification in scientific code, with explicit failure mechanisms
+  - record_id: opencompass:1730
+    name: PaperBench
+    source_evidence: https://arxiv.org/abs/2504.01848
+    task_fit: high for literature-led replication and experiment execution
+    protocol: 20 ICML 2024 papers decomposed into 8,316 gradable rubric tasks with hierarchical judging
+    maintenance: medium; paper and OpenAI repository are recorded in the frozen record
+    openness: unknown in Radar; paper and repository links are recorded
+    evidence_coverage: paper and repository recorded
+    decision: adopt as a complementary research-reasoning track
+    reason: covers end-to-end research replication and evidence chains that repository repair alone misses
+  - record_id: llm-stats:swe-lancer
+    name: SWE-Lancer
+    source_evidence: https://github.com/openai/frontier-evals/tree/main/project/swelancer
+    task_fit: medium; real software-freelancer tasks but no scientific-domain requirement
+    protocol: software engineering tasks with client communication and real-world constraints
+    maintenance: medium; repository artifact is recorded but the Radar record has no paper or dataset link
+    openness: repository link recorded; task licensing and evaluation details require source review
+    evidence_coverage: repository only in the Radar record
+    decision: reject as the primary suite; retain as an external-validity control
+    reason: tests client-facing engineering breadth, not the scientific evidence and domain reasoning required by this workflow
+selection:
+  primary:
+    - model-reports:swe_bench_science
+    - opencompass:1730
+  control:
+    - llm-stats:swe-lancer
+  conclusion: adopt the two-track primary suite and report SWE-Lancer separately as a non-scientific engineering control; do not combine their scores into one trend.
+limitations:
+  - Radar retrieval is candidate discovery, not a suitability judgment; every table cell above was checked against the cited source record.
+  - The records do not establish licensing, task freshness, or variance; those require a release-specific audit before deployment.
+  - No cross-suite score comparison is claimed because task units, verifiers, and protocols differ.
