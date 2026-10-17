@@ -56,11 +56,36 @@ def _claire_radar_v1(
         raise CatalogSnapshotAdapterError(
             f"{snapshot_id}: first_public_evidence must map source ids to URLs"
         )
-    unknown_options = set(options) - {"first_public_evidence"}
+    unknown_options = set(options) - {"first_public_evidence", "carried_forward"}
     if unknown_options:
         raise CatalogSnapshotAdapterError(
             f"{snapshot_id}: unsupported adapter options: {', '.join(sorted(unknown_options))}"
         )
+
+    # Rows the exporter carried forward from an earlier snapshot were collected
+    # then, not in this crawl, which no longer listed them. Keep that crawl time
+    # so `collected_at` does not claim a fresh collection. Each crawl that rows
+    # were last seen in is its own cohort, so a later refresh appends a cohort
+    # rather than relabelling the rows an earlier one already carried.
+    cohorts = options.get("carried_forward") or []
+    if not isinstance(cohorts, list) or any(
+        not isinstance(cohort, Mapping)
+        or not isinstance(cohort.get("crawled_at"), str)
+        or not isinstance(cohort.get("from_snapshot"), str)
+        or not isinstance(cohort.get("benchmark_ids"), list)
+        for cohort in cohorts
+    ):
+        raise CatalogSnapshotAdapterError(
+            f"{snapshot_id}: carried_forward must list cohorts with from_snapshot, "
+            "crawled_at and benchmark_ids"
+        )
+    matches = [cohort for cohort in cohorts if source_id in cohort["benchmark_ids"]]
+    if len(matches) > 1:
+        raise CatalogSnapshotAdapterError(
+            f"{snapshot_id}:{source_id}: listed in more than one carried_forward cohort"
+        )
+    if matches:
+        adapted["crawled_at"] = matches[0]["crawled_at"]
 
     metadata = adapted.get("source_metadata") or {}
     release_dates = metadata.get("releaseDates") or {}

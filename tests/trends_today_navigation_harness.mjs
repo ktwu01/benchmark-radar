@@ -104,6 +104,11 @@ globalThis.toggleLang = () => {};
 
 let releaseFullResponse;
 globalThis.fetch = (path) => {
+  // Trends also reads the catalog index for its research-direction table
+  // (#420); an empty catalog keeps that table out of this navigation test.
+  if (path === "/data/benchmark-index.json") {
+    return Promise.resolve({ ok: true, status: 200, json: async () => ({ benchmarks: [] }) });
+  }
   if (path !== "/data/radar.json") throw new Error(`Unexpected fetch path: ${path}`);
   return new Promise((resolve) => {
     releaseFullResponse = () => resolve({

@@ -322,9 +322,11 @@ def test_sitemap_includes_benchmark_pages_when_entries_are_passed(tmp_path):
     ]
     assert urls == [
         f"{SITE_URL}/",
-        f"{SITE_URL}/leaderboard/",
-        f"{SITE_URL}/saturation/",
+        f"{SITE_URL}/library/",
+        f"{SITE_URL}/models/",
         f"{SITE_URL}/trends/",
+        f"{SITE_URL}/saturation/",
+        f"{SITE_URL}/leaderboard/",
         f"{SITE_URL}/explore/",
         f"{SITE_URL}/cli/",
         f"{SITE_URL}/cite/",
@@ -339,8 +341,8 @@ def test_sitemap_includes_benchmark_pages_when_entries_are_passed(tmp_path):
             "sm:url/sm:lastmod", {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
         )
     ]
-    # Nine site-wide dates, then the benchmark's own; the undated page gets none.
-    assert lastmods == ["2026-08-21"] * 9 + ["2025-05-22"]
+    # Eleven site-wide dates, then the benchmark's own; the undated page gets none.
+    assert lastmods == ["2026-08-21"] * 11 + ["2025-05-22"]
 
 
 def test_benchmark_lastmod_comes_from_the_pages_own_evidence(tmp_path):

@@ -42,10 +42,11 @@ from typing import Any
 
 from .app_seeds import utility_seeds, view_seeds
 from .feed import SITE_URL
+from .models_registry import build_registry
 from .site_shell import breadcrumb_schema, esc, json_ld, webpage_schema
 
 # Published in this order. "map" is the view key; its path is /explore/.
-APP_VIEWS: tuple[str, ...] = ("leaderboard", "saturation", "trends", "map")
+APP_VIEWS: tuple[str, ...] = ("library", "models", "leaderboard", "saturation", "trends", "map")
 UTILITY_PAGES: tuple[str, ...] = ("cli", "cite", "rubric")
 UNLISTED_ROUTES = frozenset({"map", "rubric"})
 
@@ -63,7 +64,9 @@ HOME_NAV_INACTIVE = (
 
 # Breadcrumb names, matching the navigation labels a reader clicked to get here.
 VIEW_LABELS = {
-    "leaderboard": "Leaderboard",
+    "library": "Library",
+    "models": "Models",
+    "leaderboard": "Landscape",
     "saturation": "Saturation",
     "trends": "Trends",
     "map": "Explore",
@@ -341,6 +344,19 @@ def write_app_pages(
     catalog = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else {}
     catalog_index = catalog.get("benchmarks", [])
     documents = catalog.get("document_registry")
+    # The model registry is rebuilt from the catalog shards here, as
+    # write_model_registry does, because classify writes models.json only after
+    # these pages: reading the file would seed /models/ with the previous build's
+    # lab assignments.
+    shard_dir = site_dir / "data" / "benchmarks"
+    model_registry = None
+    if shard_dir.is_dir() and next(shard_dir.glob("*.json"), None) is not None:
+        model_registry = {
+            "models": [
+                {"model": record.model, "organization": record.organization}
+                for record in build_registry({}, shard_dir).values()
+            ]
+        }
     seed_dashboard = dict(dashboard)
     seed_dashboard["model_card_leaderboard"] = {
         **(documents or {}),
@@ -349,7 +365,14 @@ def write_app_pages(
             for entry in (documents or {}).get("entries", [])
         ],
     }
-    seeds = view_seeds(seed_dashboard, palette, catalog_index)
+    seeds = view_seeds(
+        seed_dashboard,
+        palette,
+        catalog_index,
+        library_taxonomy=catalog.get("library_taxonomy"),
+        model_registry=model_registry,
+        documents=documents,
+    )
     dialog_seeds = utility_seeds(dashboard)
     written: list[Path] = []
     published: list[str] = []

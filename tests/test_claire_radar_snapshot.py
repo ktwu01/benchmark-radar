@@ -161,14 +161,14 @@ def test_export_rejects_local_or_malformed_project_links(url):
 
 def test_registered_snapshot_preserves_review_provenance_and_links():
     snapshots = load_snapshots()
-    snapshot = next(row for row in snapshots["snapshots"] if row["id"] == "claire_radar_2026-09-25")
+    snapshot = next(row for row in snapshots["snapshots"] if row["id"] == "claire_radar_2026-10-14")
 
     normalized = normalize_snapshot(snapshot)
 
-    assert normalized["validation"]["source_record_count"] == 1914
+    assert normalized["validation"]["source_record_count"] == 2447
     assert normalized["validation"]["score_observation_count"] == 0
     assert normalized["validation"]["score_series_count"] == 0
-    assert len(normalized["validation"]["benchmarks_with_zero_observations"]) == 1914
+    assert len(normalized["validation"]["benchmarks_with_zero_observations"]) == 2447
     record = next(
         row
         for row in normalized["source_records"]
@@ -177,9 +177,11 @@ def test_registered_snapshot_preserves_review_provenance_and_links():
     assert record["key"] == "claire-radar:github:liningbest/apitest"
     assert record["released"] == "2026-09-13"
     assert record["released_reference"]["source_url"] == "https://github.com/liningbest/apitest"
-    assert record["provenance"]["review_state"] == "ai-reviewed"
+    # Upstream re-reviewed this record between the 2026-09-25 and 2026-10-14
+    # exports; the snapshot carries its current state.
+    assert record["provenance"]["review_state"] == "ai-name-audit-deferred"
     assert record["provenance"]["origin_source"] == "github"
-    assert record["provenance"]["display_eligible"] == "true"
+    assert record["provenance"]["display_eligible"] == "false"
     assert {item["kind"] for item in record["artifacts"]} == {"repo"}
     assert record["artifacts"][0]["id"] == "gh:liningbest/apitest"
     assert record["source_metadata"]["claire_radar"]["id"] == "bm_apitest_7d8e6901"
@@ -198,7 +200,7 @@ def test_registered_snapshot_preserves_review_provenance_and_links():
 
 def test_registered_snapshot_declares_source_neutral_normalization_contract():
     snapshot = next(
-        row for row in load_snapshots()["snapshots"] if row["id"] == "claire_radar_2026-09-25"
+        row for row in load_snapshots()["snapshots"] if row["id"] == "claire_radar_2026-10-14"
     )
 
     assert snapshot["score_series_policy"] == "observed_only"
@@ -213,7 +215,7 @@ def test_registered_snapshot_declares_source_neutral_normalization_contract():
 
 def test_claire_adapter_translates_every_private_release_date():
     snapshot = next(
-        row for row in load_snapshots()["snapshots"] if row["id"] == "claire_radar_2026-09-25"
+        row for row in load_snapshots()["snapshots"] if row["id"] == "claire_radar_2026-10-14"
     )
     records = {
         row["source_benchmark_id"]: row for row in normalize_snapshot(snapshot)["source_records"]
@@ -245,7 +247,7 @@ def test_catalog_normalizer_contains_no_claire_private_schema_or_series_branch()
 
 def test_claire_dates_distinguish_first_public_evidence_from_paper_dates():
     snapshot = next(
-        row for row in load_snapshots()["snapshots"] if row["id"] == "claire_radar_2026-09-25"
+        row for row in load_snapshots()["snapshots"] if row["id"] == "claire_radar_2026-10-14"
     )
     records = {row["name"]: row for row in normalize_snapshot(snapshot)["source_records"]}
 
@@ -281,7 +283,7 @@ def test_claire_dates_distinguish_first_public_evidence_from_paper_dates():
 
 def test_registered_snapshot_retains_every_original_object_losslessly():
     snapshot = next(
-        row for row in load_snapshots()["snapshots"] if row["id"] == "claire_radar_2026-09-25"
+        row for row in load_snapshots()["snapshots"] if row["id"] == "claire_radar_2026-10-14"
     )
 
     originals = []
@@ -294,5 +296,97 @@ def test_registered_snapshot_retains_every_original_object_losslessly():
         assert original["id"] == row["origin_record_id"]
         originals.append(original["id"])
 
-    assert len(originals) == 1914
-    assert len(set(originals)) == 1914
+    assert len(originals) == 2447
+    assert len(set(originals)) == 2447
+
+
+def test_refresh_carries_forward_records_the_upstream_window_dropped():
+    # The 2026-10-14 upstream export no longer listed 156 reviewed,
+    # display-eligible records from the 2026-09-25 export (AgroVG, KGI-Bench,
+    # ...). A source that stops repeating a record must not delete it from the
+    # corpus, so the exporter copies those rows unchanged.
+    module = _export_module()
+    exported = [{"benchmark_id": "b", **{field: "new" for field in module.FIELDS[1:]}}]
+    previous = [
+        {field: "old-a" if field != "benchmark_id" else "a" for field in module.FIELDS},
+        {field: "old-b" if field != "benchmark_id" else "b" for field in module.FIELDS},
+    ]
+
+    rows = module.carry_forward(exported, previous)
+
+    assert [row["benchmark_id"] for row in rows] == ["a", "b"]
+    assert rows[0] == previous[0]
+    assert rows[1]["name"] == "new"
+
+
+def test_registered_snapshot_keeps_every_record_of_the_previous_export():
+    snapshot = next(
+        row for row in load_snapshots()["snapshots"] if row["id"] == "claire_radar_2026-10-14"
+    )
+    ids = {row["benchmark_id"] for row in snapshot["benchmark_rows"]}
+
+    # Records only the previous export listed, kept by carry-forward.
+    for source_id in ("2605.22034", "2605.22304", "2605.24043"):
+        assert source_id in ids
+
+
+def test_carried_forward_rows_keep_their_original_crawl_time():
+    # The upstream 2026-10-14 export no longer listed these rows, so they were
+    # last collected on 2026-09-25; labelling them with the new crawl would
+    # claim a collection that never happened.
+    snapshot = next(
+        row for row in load_snapshots()["snapshots"] if row["id"] == "claire_radar_2026-10-14"
+    )
+    records = {
+        row["source_benchmark_id"]: row for row in normalize_snapshot(snapshot)["source_records"]
+    }
+    [carried] = snapshot["adapter_options"]["carried_forward"]
+    assert len(carried["benchmark_ids"]) == 156
+    assert records["2605.22034"]["provenance"]["crawled_at"] == "2026-09-25T04:40:22Z"
+    assert records["2608.16081"]["provenance"]["crawled_at"] == "2026-10-14T09:44:51Z"
+
+
+def test_a_row_in_two_carried_forward_cohorts_is_rejected():
+    from benchmark_radar.catalog_snapshot_adapters import (
+        CatalogSnapshotAdapterError,
+        adapt_catalog_row,
+    )
+
+    row = {"benchmark_id": "x", "extra_json": "{}"}
+    cohort = {"from_snapshot": "a", "crawled_at": "2026-01-01T00:00:00Z", "benchmark_ids": ["x"]}
+    with pytest.raises(CatalogSnapshotAdapterError):
+        adapt_catalog_row(
+            row,
+            adapter="claire_radar_v1",
+            adapter_options={"carried_forward": [cohort, {**cohort, "from_snapshot": "b"}]},
+            snapshot_id="s",
+        )
+    adapted = adapt_catalog_row(
+        row,
+        adapter="claire_radar_v1",
+        adapter_options={"carried_forward": [cohort]},
+        snapshot_id="s",
+    )
+    assert adapted["crawled_at"] == "2026-01-01T00:00:00Z"
+
+
+def test_refresh_moves_returned_records_out_of_old_cohorts():
+    # A carried record that upstream lists again was just recollected; leaving
+    # it in its old cohort would stamp the fresh row with the old crawl time.
+    module = _export_module()
+    cohorts = [
+        {"from_snapshot": "s1", "crawled_at": "2026-09-25T00:00:00Z", "benchmark_ids": ["a", "b"]}
+    ]
+
+    updated = module.update_cohorts(
+        cohorts,
+        upstream_ids={"b", "x"},
+        carried_ids={"a", "c"},
+        from_snapshot="s2",
+        crawled_at="2026-10-14T00:00:00Z",
+    )
+
+    assert updated == [
+        {"from_snapshot": "s1", "crawled_at": "2026-09-25T00:00:00Z", "benchmark_ids": ["a"]},
+        {"from_snapshot": "s2", "crawled_at": "2026-10-14T00:00:00Z", "benchmark_ids": ["c"]},
+    ]

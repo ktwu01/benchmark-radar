@@ -826,16 +826,308 @@ def _map_seed(dashboard: dict[str, Any]) -> dict[str, str]:
     }
 
 
+LIBRARY_SEED_ROWS = 120
+# The direction sidebar's opening tag, exactly as site/index.html writes it.
+LIBRARY_DIRECTIONS_OPEN = (
+    '<nav id="library-directions" class="library-directions" '
+    'aria-label="Research directions" data-i18n-aria="Research directions"'
+)
+
+
+def _library_seed(
+    catalog_index: list[dict[str, Any]], taxonomy: dict[str, Any] | None
+) -> dict[str, str]:
+    """The Library's direction links and newest rows, as crawlable HTML.
+
+    Each direction is a real link to its filtered address, and each row links to
+    the benchmark's own page, so a crawler reaches every direction and the
+    newest benchmarks from the first response. app.js replaces both with the
+    live list. Without the taxonomy there is no Library to publish.
+    """
+    if not catalog_index or not taxonomy:
+        return {}
+    counts: dict[str, int] = {}
+    for record in catalog_index:
+        for category in (record.get("library_direction") or {}).get("categories") or []:
+            counts[category] = counts.get(category, 0) + 1
+    directions = ""
+    for group in taxonomy["groups"]:
+        links = "".join(
+            f'<a class="library-direction" href="/library/?dir={esc(category["id"])}">'
+            f'<span class="library-direction-name">{esc(category["name"])}</span>'
+            f'<span class="library-direction-count">{counts.get(category["id"], 0):,}</span></a>'
+            for category in taxonomy["categories"]
+            if category["group"] == group["id"]
+        )
+        directions += (
+            '<div class="library-direction-group">'
+            f'<h3 class="library-direction-heading">{esc(group["name"])}</h3>{links}</div>'
+        )
+    names = {category["id"]: category["name"] for category in taxonomy["categories"]}
+    # The live list's "Newest" order: release date descending, then name and key
+    # ascending by code point (libraryCompare in app.js). Two stable sorts keep
+    # the tie-breakers ascending while the date runs descending.
+    by_name = sorted(catalog_index, key=lambda record: (record["name"], record.get("key") or ""))
+    newest = sorted(by_name, key=lambda record: record.get("released") or "", reverse=True)[
+        :LIBRARY_SEED_ROWS
+    ]
+    rows = ""
+    for record in newest:
+        direction = record.get("library_direction")
+        # Every filed direction, primary first, as the live row lists them.
+        facts = (
+            [
+                " · ".join(names.get(item, item) for item in direction["categories"])
+                + (" (provisional)" if direction.get("basis") == "keyword-provisional" else "")
+            ]
+            if direction
+            else []
+        )
+        if record.get("released"):
+            facts.append(_medium_date(record["released"]))
+        facts.append(SOURCE_LABELS.get(record["source"], record["source"]))
+        description = (
+            f'<p class="library-row-description">{esc(record["description"])}</p>'
+            if record.get("description")
+            else ""
+        )
+        rows += (
+            '<article class="library-row"><div class="library-row-body">'
+            f'<a class="library-row-name" href="/benchmarks/{esc(record["slug"])}/">'
+            f"{esc(record['name'])}</a>{description}"
+            f'<p class="library-row-facts">{" · ".join(esc(fact) for fact in facts)}</p>'
+            "</div></article>"
+        )
+    return {
+        f"{LIBRARY_DIRECTIONS_OPEN}></nav>": (
+            f"{LIBRARY_DIRECTIONS_OPEN} data-seed>{directions}</nav>"
+        ),
+        '<div id="library-list" class="library-list"></div>': (
+            f'<div id="library-list" class="library-list" data-seed>{rows}</div>'
+        ),
+        '<p id="library-status" class="library-status" aria-live="polite"></p>': (
+            '<p id="library-status" class="library-status" aria-live="polite" data-seed>'
+            f"{len(newest):,} of {len(catalog_index):,} benchmarks</p>"
+        ),
+    }
+
+
+MODEL_SEED_ROWS = 100
+MODEL_UNRECORDED = "Organization not recorded"
+
+
+def _preferred_name(a: str, b: str) -> str:
+    return min(a, b, key=lambda value: (value.lower(), value))
+
+
+def model_catalog(
+    catalog_index: list[dict[str, Any]], registry: dict[str, Any] | None
+) -> list[dict[str, Any]]:
+    """Every model with a reported score in the catalog, newest first.
+
+    The same population and order as modelCatalog in app.js. A model is any
+    `scored_models` name on any record; case-only spellings are one model, as
+    the registry treats them, named by the registry where it lists them. Its labs
+    come from the registry (a name filed under two labs keeps both), and the list
+    sorts by latest reported date, then name.
+    """
+    labs: dict[str, set[str]] = {}
+    names: dict[str, str] = {}
+    for entry in (registry or {}).get("models", []):
+        identity = entry["model"].lower()
+        labs.setdefault(identity, set()).add(entry["organization"])
+        names[identity] = _preferred_name(names.get(identity, entry["model"]), entry["model"])
+    models: dict[str, dict[str, Any]] = {}
+    for record in catalog_index:
+        for scored in record.get("scored_models") or []:
+            identity = scored["name"].lower()
+            model = models.setdefault(
+                identity,
+                {
+                    "name": names.get(identity, scored["name"]),
+                    "organizations": sorted(labs.get(identity, ())),
+                    "records": [],
+                    "keys": set(),
+                    "sources": set(),
+                    "latest": "",
+                },
+            )
+            model["sources"].add(record["source"])
+            if identity not in names:
+                model["name"] = _preferred_name(model["name"], scored["name"])
+            key = record.get("key") or record["slug"]
+            if key not in model["keys"]:
+                model["keys"].add(key)
+                model["records"].append(record)
+            model["latest"] = max(model["latest"], scored.get("date") or "")
+    by_name = sorted(models.values(), key=lambda model: model["name"])
+    return sorted(by_name, key=lambda model: model["latest"], reverse=True)
+
+
+MODEL_DOCUMENT_TYPES = ("model_card", "system_card", "technical_report", "release_post")
+
+
+def _models_seed(
+    catalog_index: list[dict[str, Any]],
+    registry: dict[str, Any] | None,
+    documents: dict[str, Any] | None = None,
+) -> dict[str, str]:
+    """Every scored model by lab, as crawlable HTML; scores stay on benchmark pages."""
+    models = model_catalog(catalog_index, registry)
+    if not models:
+        return {}
+    labs: dict[str, int] = {}
+    for model in models:
+        for lab in model["organizations"] or [MODEL_UNRECORDED]:
+            labs[lab] = labs.get(lab, 0) + 1
+    # Labs with model documents but no scored model under that name, as in
+    # the live list, so their documents stay reachable.
+    for document in (documents or {}).get("documents") or []:
+        if document.get("document_type") in MODEL_DOCUMENT_TYPES and document.get("organization"):
+            labs.setdefault(document["organization"], 0)
+    nav = "".join(
+        f'<a class="library-direction" href="/models/?lab={esc(lab)}">'
+        f'<span class="library-direction-name">{esc(lab)}</span>'
+        f'<span class="library-direction-count">{count:,}</span></a>'
+        for lab, count in sorted(
+            labs.items(), key=lambda item: (item[0] == MODEL_UNRECORDED, -item[1], item[0])
+        )
+        if lab != MODEL_UNRECORDED
+    )
+    rows = ""
+    for model in models[:MODEL_SEED_ROWS]:
+        count = len(model["records"])
+        facts = [
+            " / ".join(model["organizations"] or [MODEL_UNRECORDED]),
+            "scores on 1 benchmark record"
+            if count == 1
+            else f"scores on {count:,} benchmark records",
+            ", ".join(SOURCE_LABELS.get(source, source) for source in sorted(model["sources"])),
+            _medium_date(model["latest"]) if model["latest"] else "Date unknown",
+        ]
+        links = "".join(
+            f'<a class="model-benchmark" href="/benchmarks/{esc(record["slug"])}/">'
+            f"{esc(record['name'])}</a>"
+            for record in sorted(model["records"], key=lambda record: record["name"])
+        )
+        rows += (
+            '<details class="model-row"><summary class="model-row-summary">'
+            f'<span class="model-document-name">{esc(model["name"])}</span>'
+            f'<span class="model-document-facts">{esc(" · ".join(facts))}</span></summary>'
+            f'<p class="model-benchmarks">{links}</p></details>'
+        )
+    scored = sum(1 for record in catalog_index if record.get("scored_models"))
+    return {
+        '<nav id="models-labs" class="library-directions" aria-label="AI labs" '
+        'data-i18n-aria="AI labs"></nav>': (
+            '<nav id="models-labs" class="library-directions" aria-label="AI labs" '
+            f'data-i18n-aria="AI labs" data-seed>{nav}</nav>'
+        ),
+        '<div id="models-list" class="models-list"></div>': (
+            f'<div id="models-list" class="models-list" data-seed>{rows}'
+            '<p class="models-unscored">'
+            f"{len(catalog_index) - scored:,} benchmark records have no reported model score. "
+            '<a href="/library/">Browse them in the Library</a></p></div>'
+        ),
+        '<p id="models-status" class="library-status" aria-live="polite"></p>': (
+            '<p id="models-status" class="library-status" aria-live="polite" data-seed>'
+            f"{len(models):,} models with a reported score on {scored:,} of "
+            f"{len(catalog_index):,} benchmark records</p>"
+        ),
+    }
+
+
+DIRECTION_TREND_SECTION = (
+    '<section class="direction-trends" id="direction-trends" '
+    'aria-labelledby="direction-trends-heading"'
+)
+
+
+def weekly_summary(weekly: list[int | None]) -> str:
+    """The 16-week bars as text for screen readers; uncovered weeks say so."""
+    return "Weekly new records, oldest first: " + ", ".join(
+        "no data" if value is None else str(value) for value in weekly
+    )
+
+
+def _direction_trends_seed(
+    dashboard: dict[str, Any],
+    catalog_index: list[dict[str, Any]],
+    taxonomy: dict[str, Any] | None,
+) -> dict[str, str]:
+    """The Trends direction table at its default 30-day window, as HTML."""
+    from .library_directions import direction_trend_rows, discovery_anchor
+
+    anchor = discovery_anchor(catalog_index)
+    if not catalog_index or not taxonomy or not anchor:
+        return {}
+    model = direction_trend_rows(catalog_index, taxonomy, anchor, 30)
+    body = ""
+    for row in model["rows"]:
+        previous = "—" if row["previous"] is None else f"{row['previous']:,}"
+        if row["previous"] is None:
+            change = "—"
+        else:
+            delta = row["current"] - row["previous"]
+            change = f"+{delta}" if delta > 0 else (f"−{-delta}" if delta < 0 else "0")
+        body += (
+            f'<tr><th scope="row"><a href="/library/?dir={esc(row["id"])}">'
+            f"{esc(row['name'])}</a></th>"
+            f'<td class="direction-number">{row["current"]:,}</td>'
+            f'<td class="direction-number">{previous}</td>'
+            f'<td class="direction-number">{change}</td>'
+            f'<td class="direction-number">{row["undated"]:,}</td>'
+            '<td><span class="visually-hidden">'
+            f"{esc(weekly_summary(row['weekly']))}</span></td></tr>"
+        )
+    # The same caveats the live renderer writes: without them the seeded counts
+    # have no anchor date and read as complete and additive.
+    note = " ".join(
+        part
+        for part in (
+            f"New benchmark records by release date, 30 days to {_medium_date(anchor)}.",
+            "The latest days are still filling in as new papers are collected.",
+            "A record counts in every direction it is filed under, so rows overlap and do not "
+            "add up to a total.",
+            ""
+            if model["comparable"]
+            else "No comparison: the previous 30 days start before the discovery stream "
+            f"({_medium_date(model['discovery_since']) if model['discovery_since'] else '—'}).",
+        )
+        if part
+    )
+    return {
+        '<p class="section-note" id="direction-trends-note"></p>': (
+            f'<p class="section-note" id="direction-trends-note" data-seed>{esc(note)}</p>'
+        ),
+        f"{DIRECTION_TREND_SECTION} hidden>": f"{DIRECTION_TREND_SECTION} data-seed>",
+        '<tbody id="direction-trends-body"></tbody>': (
+            f'<tbody id="direction-trends-body" data-seed>{body}</tbody>'
+        ),
+    }
+
+
 def view_seeds(
     dashboard: dict[str, Any],
     palette: tuple[dict[str, str], list[str]],
     catalog_index: list[dict[str, Any]] | None = None,
+    *,
+    library_taxonomy: dict[str, Any] | None = None,
+    model_registry: dict[str, Any] | None = None,
+    documents: dict[str, Any] | None = None,
 ) -> dict[str, dict[str, str]]:
     """Every view's seed, keyed by view. An empty dict means nothing to publish."""
+    trends = _trends_seed(dashboard, palette)
+    if trends:
+        # The direction table rides on the Trends page; it never publishes the
+        # page on its own.
+        trends |= _direction_trends_seed(dashboard, catalog_index or [], library_taxonomy)
     return {
+        "library": _library_seed(catalog_index or [], library_taxonomy),
+        "models": _models_seed(catalog_index or [], model_registry, documents),
         "leaderboard": _leaderboard_seed(dashboard, catalog_index or []),
         "saturation": _score_browser_seed(dashboard, catalog_index or []),
-        "trends": _trends_seed(dashboard, palette),
+        "trends": trends,
         "map": _map_seed(dashboard),
     }
 

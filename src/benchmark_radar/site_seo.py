@@ -29,9 +29,11 @@ SITEMAP_NAMESPACE = "http://www.sitemaps.org/schemas/sitemap/0.9"
 # content="noindex">, so listing it would contradict the page itself.
 INDEXABLE_VIEWS: tuple[tuple[str, str], ...] = (
     ("Today", "/"),
-    ("Leaderboard", "/leaderboard/"),
-    ("Saturation", "/saturation/"),
+    ("Library", "/library/"),
+    ("Models", "/models/"),
     ("Trends", "/trends/"),
+    ("Saturation", "/saturation/"),
+    ("Landscape", "/leaderboard/"),
     ("Explore", "/explore/"),
     ("CLI", "/cli/"),
     ("Publications", "/cite/"),

@@ -552,9 +552,11 @@ def test_dashboard_and_blog_share_the_reduced_chrome_contract(tmp_path):
     expected = [
         "/",
         "/cli/",
-        "/leaderboard/",
-        "/saturation/",
+        "/library/",
+        "/models/",
         "/trends/",
+        "/saturation/",
+        "/leaderboard/",
         "/cite/",
     ]
     for document in (DASHBOARD_HTML, page):
