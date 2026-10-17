@@ -56,6 +56,20 @@ def test_one_owner_cannot_crowd_out_the_seed_list():
     assert "smallorg" in owners
 
 
+def test_an_unreported_star_count_stays_unknown_and_ranks_below_a_measured_zero():
+    unknown = _repo("org/unknown", stars=1.0, categories=["benchmark"])
+    unknown.metrics = {}
+    zero = _repo("org2/zero", stars=0.0, categories=["benchmark"])
+    current = snapshot_for_run(_run([unknown, zero]))
+
+    ranked = authors.popular_repositories([current])
+
+    assert [(repo["full_name"], repo["stars"]) for repo in ranked] == [
+        ("org2/zero", 0.0),
+        ("org/unknown", None),
+    ]
+
+
 def test_data_work_is_read_from_the_authors_own_words():
     # Never inferred from a repository name: an author is credited with data
     # work because they described it themselves.

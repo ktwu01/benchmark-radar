@@ -150,6 +150,9 @@ def popular_repositories(
         if not (categories & {"benchmark", "dataset"}) and len(categories) < 2:
             continue
         metrics = entity.get("metrics") or {}
+        # A connector omits a counter it did not report (see the reported-counter
+        # convention), so a missing star count is unknown, not zero.
+        stars = metrics.get("stars")
         ranked.append(
             {
                 "full_name": f"{owner}/{name}",
@@ -157,14 +160,19 @@ def popular_repositories(
                 "name": name,
                 "url": entity.get("url"),
                 "title": entity.get("label"),
-                "stars": float(metrics.get("stars") or 0),
+                "stars": float(stars) if stars is not None else None,
                 "seen_days": len(entity.get("seen_days") or []),
                 "sources": list(entity.get("sources") or []),
                 "categories": list(entity.get("categories") or []),
             }
         )
     ranked.sort(
-        key=lambda repo: (repo["stars"], repo["seen_days"], len(repo["sources"])),
+        key=lambda repo: (
+            repo["stars"] is not None,
+            repo["stars"] or 0.0,
+            repo["seen_days"],
+            len(repo["sources"]),
+        ),
         reverse=True,
     )
     # One owner should not consume the whole seed list: a single org publishing
