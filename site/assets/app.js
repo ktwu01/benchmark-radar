@@ -618,6 +618,7 @@ const I18N = {
     "All tracked benchmarks": "所有追踪的benchmark",
     "Search every benchmark": "搜索全部benchmark",
     "Most documented benchmarks": "来源文档最多的 benchmark",
+    "Adoption ranking": "采用情况排名",
     Rank: "排名",
     Benchmark: "benchmark",
     "leaderboard.column.model_cards": "来源文档数",

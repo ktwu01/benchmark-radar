@@ -698,7 +698,7 @@ def test_score_ranking_and_adoption_state_their_distinct_measures():
     # The score ranking is labelled by its own column headers rather than a
     # paragraph of prose, so the two rankings stay distinguishable by structure.
     assert 'data-i18n="Data points"' in html
-    assert 'data-i18n="Most documented benchmarks"' in html
+    assert 'data-i18n="Adoption ranking"' in html
     assert html.index('id="score-ranking-list"') < html.index('id="leaderboard-top-list"')
     script = source("site/assets/app.js")
     adoption = script.split("function renderLeaderboardTop(board)", 1)[1].split("\nfunction ", 1)[0]
