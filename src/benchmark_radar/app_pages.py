@@ -45,7 +45,7 @@ from .feed import SITE_URL
 from .site_shell import breadcrumb_schema, esc, json_ld, webpage_schema
 
 # Published in this order. "map" is the view key; its path is /explore/.
-APP_VIEWS: tuple[str, ...] = ("leaderboard", "saturation", "trends", "map")
+APP_VIEWS: tuple[str, ...] = ("library", "leaderboard", "saturation", "trends", "map")
 UTILITY_PAGES: tuple[str, ...] = ("cli", "cite", "rubric")
 UNLISTED_ROUTES = frozenset({"map", "rubric"})
 
@@ -63,6 +63,7 @@ HOME_NAV_INACTIVE = (
 
 # Breadcrumb names, matching the navigation labels a reader clicked to get here.
 VIEW_LABELS = {
+    "library": "Library",
     "leaderboard": "Leaderboard",
     "saturation": "Saturation",
     "trends": "Trends",
@@ -349,7 +350,9 @@ def write_app_pages(
             for entry in (documents or {}).get("entries", [])
         ],
     }
-    seeds = view_seeds(seed_dashboard, palette, catalog_index)
+    seeds = view_seeds(
+        seed_dashboard, palette, catalog_index, library_taxonomy=catalog.get("library_taxonomy")
+    )
     dialog_seeds = utility_seeds(dashboard)
     written: list[Path] = []
     published: list[str] = []

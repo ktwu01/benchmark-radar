@@ -826,13 +826,102 @@ def _map_seed(dashboard: dict[str, Any]) -> dict[str, str]:
     }
 
 
+LIBRARY_SEED_ROWS = 120
+# The direction sidebar's opening tag, exactly as site/index.html writes it.
+LIBRARY_DIRECTIONS_OPEN = (
+    '<nav id="library-directions" class="library-directions" '
+    'aria-label="Research directions" data-i18n-aria="Research directions"'
+)
+
+
+def _library_seed(
+    catalog_index: list[dict[str, Any]], taxonomy: dict[str, Any] | None
+) -> dict[str, str]:
+    """The Library's direction links and newest rows, as crawlable HTML.
+
+    Each direction is a real link to its filtered address, and each row links to
+    the benchmark's own page, so a crawler reaches every direction and the
+    newest benchmarks from the first response. app.js replaces both with the
+    live list. Without the taxonomy there is no Library to publish.
+    """
+    if not catalog_index or not taxonomy:
+        return {}
+    counts: dict[str, int] = {}
+    for record in catalog_index:
+        for category in (record.get("library_direction") or {}).get("categories") or []:
+            counts[category] = counts.get(category, 0) + 1
+    directions = ""
+    for group in taxonomy["groups"]:
+        links = "".join(
+            f'<a class="library-direction" href="/library/?dir={esc(category["id"])}">'
+            f'<span class="library-direction-name">{esc(category["name"])}</span>'
+            f'<span class="library-direction-count">{counts.get(category["id"], 0):,}</span></a>'
+            for category in taxonomy["categories"]
+            if category["group"] == group["id"]
+        )
+        directions += (
+            '<div class="library-direction-group">'
+            f'<h3 class="library-direction-heading">{esc(group["name"])}</h3>{links}</div>'
+        )
+    names = {category["id"]: category["name"] for category in taxonomy["categories"]}
+    # The live list's "Newest" order: release date descending, then name and key
+    # ascending by code point (libraryCompare in app.js). Two stable sorts keep
+    # the tie-breakers ascending while the date runs descending.
+    by_name = sorted(catalog_index, key=lambda record: (record["name"], record.get("key") or ""))
+    newest = sorted(by_name, key=lambda record: record.get("released") or "", reverse=True)[
+        :LIBRARY_SEED_ROWS
+    ]
+    rows = ""
+    for record in newest:
+        direction = record.get("library_direction")
+        # Every filed direction, primary first, as the live row lists them.
+        facts = (
+            [
+                " · ".join(names.get(item, item) for item in direction["categories"])
+                + (" (provisional)" if direction.get("basis") == "keyword-provisional" else "")
+            ]
+            if direction
+            else []
+        )
+        if record.get("released"):
+            facts.append(_medium_date(record["released"]))
+        facts.append(SOURCE_LABELS.get(record["source"], record["source"]))
+        description = (
+            f'<p class="library-row-description">{esc(record["description"])}</p>'
+            if record.get("description")
+            else ""
+        )
+        rows += (
+            '<article class="library-row"><div class="library-row-body">'
+            f'<a class="library-row-name" href="/benchmarks/{esc(record["slug"])}/">'
+            f"{esc(record['name'])}</a>{description}"
+            f'<p class="library-row-facts">{" · ".join(esc(fact) for fact in facts)}</p>'
+            "</div></article>"
+        )
+    return {
+        f"{LIBRARY_DIRECTIONS_OPEN}></nav>": (
+            f"{LIBRARY_DIRECTIONS_OPEN} data-seed>{directions}</nav>"
+        ),
+        '<div id="library-list" class="library-list"></div>': (
+            f'<div id="library-list" class="library-list" data-seed>{rows}</div>'
+        ),
+        '<p id="library-status" class="library-status" aria-live="polite"></p>': (
+            '<p id="library-status" class="library-status" aria-live="polite" data-seed>'
+            f"{len(newest):,} of {len(catalog_index):,} benchmarks</p>"
+        ),
+    }
+
+
 def view_seeds(
     dashboard: dict[str, Any],
     palette: tuple[dict[str, str], list[str]],
     catalog_index: list[dict[str, Any]] | None = None,
+    *,
+    library_taxonomy: dict[str, Any] | None = None,
 ) -> dict[str, dict[str, str]]:
     """Every view's seed, keyed by view. An empty dict means nothing to publish."""
     return {
+        "library": _library_seed(catalog_index or [], library_taxonomy),
         "leaderboard": _leaderboard_seed(dashboard, catalog_index or []),
         "saturation": _score_browser_seed(dashboard, catalog_index or []),
         "trends": _trends_seed(dashboard, palette),

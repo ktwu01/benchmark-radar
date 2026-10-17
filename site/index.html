@@ -238,6 +238,7 @@
                HTML, so a crawler and a reader with a slow connection both get content
                from the first response. app.js intercepts the click and keeps the
                navigation client-side for anyone whose script has loaded. -->
+          <a href="/library/" data-view="library" aria-controls="library-view" data-i18n="Library">Library</a>
           <a href="/leaderboard/" data-view="leaderboard" aria-controls="leaderboard-view" data-i18n="Leaderboard">
             Leaderboard
           </a>
@@ -523,6 +524,36 @@
                 <ul id="corpus-totals-list"></ul>
               </details>
             </aside>
+          </div>
+        </div>
+      </section>
+
+      <!-- The Library merged from benchmark-radar.com (#420). One control row and
+           the directions beside the list, so the first screen is benchmarks,
+           not a header. The seeded rows and direction links are real HTML for
+           crawlers; app.js replaces them with the live, filterable list. -->
+      <section class="view" id="library-view" aria-labelledby="library-heading" hidden>
+        <div class="library-toolbar">
+          <h1 id="library-heading" class="library-heading" data-i18n="Library">Library</h1>
+          <input id="library-search" type="search" autocomplete="off"
+                 class="benchmark-search-input library-search"
+                 aria-label="Search the library" data-i18n-aria="Search the library"
+                 data-i18n-placeholder="Search benchmarks, tasks, domains…"
+                 placeholder="Search benchmarks, tasks, domains…" />
+          <select id="library-sort" class="library-sort" aria-label="Sort" data-i18n-aria="Sort">
+            <option value="latest" data-i18n="Newest">Newest</option>
+            <option value="documented" data-i18n="Most documented">Most documented</option>
+            <option value="name" data-i18n="A–Z">A–Z</option>
+            <option value="relevance" data-i18n="Relevance (search)" hidden>Relevance (search)</option>
+          </select>
+          <button id="library-saved" class="library-saved-toggle" type="button" aria-pressed="false" data-i18n="Saved">Saved</button>
+          <p id="library-status" class="library-status" aria-live="polite"></p>
+        </div>
+        <div class="library-layout">
+          <nav id="library-directions" class="library-directions" aria-label="Research directions" data-i18n-aria="Research directions"></nav>
+          <div class="library-results">
+            <div id="library-list" class="library-list"></div>
+            <button id="library-more" class="clear-button" type="button" data-i18n="Show more" hidden>Show more</button>
           </div>
         </div>
       </section>

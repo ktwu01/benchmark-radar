@@ -63,6 +63,12 @@ graphify-out/
 # no donor record anywhere else in the corpus, written by hand from a crawl and
 # never regenerated from one.
 !/data/catalog/llm_stats_identity_overrides.yml
+# Library research directions: a pinned export of benchmark-radar.com's
+# taxonomy-v5 assignments (scripts/export_claire_library_categories.py, upstream
+# commit recorded inside) and the hand-reviewed gap fill beside it. Both are
+# inputs the catalog reads, not outputs it writes.
+!/data/catalog/claire_library_categories.json
+!/data/catalog/library_direction_reviews.yml
 # Cited benchmark dates are reviewed source facts, not normalization outputs.
 !/data/catalog/benchmark_dates.yml
 
@@ -84,6 +90,7 @@ graphify-out/
 # committed snapshots and report registries. Keep them derived for the same
 # reason as the benchmark pages: the generator and inputs are reviewed, not a
 # stale HTML copy.
+/site/library/
 /site/leaderboard/
 /site/saturation/
 # One page per collection day, written by the same `classify` run from the
