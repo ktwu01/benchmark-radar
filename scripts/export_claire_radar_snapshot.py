@@ -212,14 +212,82 @@ def export_rows(document: dict[str, Any]) -> list[dict[str, str]]:
     return sorted(rows, key=lambda row: row["benchmark_id"])
 
 
+def carry_forward(
+    rows: list[dict[str, str]], previous: list[dict[str, str]]
+) -> list[dict[str, str]]:
+    """Keep previously exported records that the upstream export no longer lists.
+
+    Claire Radar's records file is a rolling window: on 2026-10-14 it no longer
+    listed 156 reviewed, display-eligible benchmarks that the 2026-09-25 export
+    carried. Replacing the snapshot wholesale would have deleted them from the
+    catalog, and a record must not leave the corpus because a source stopped
+    repeating it. Carried rows are copied byte for byte, so their embedded
+    original object and its hash still verify.
+
+    The rows carry no crawl time of their own. Record each carried set as a
+    `carried_forward` cohort (snapshot, crawl time, ids) in
+    data/leaderboard_snapshots.yml; `update_cohorts` computes that list for a
+    refresh.
+    """
+    current = {row["benchmark_id"] for row in rows}
+    kept = [row for row in previous if row["benchmark_id"] not in current]
+    for row in kept:
+        if list(row) != list(FIELDS):
+            raise ValueError(f"previous row {row.get('benchmark_id')!r} has a different layout")
+    return sorted([*rows, *kept], key=lambda row: row["benchmark_id"])
+
+
+def update_cohorts(
+    cohorts: list[dict[str, Any]],
+    upstream_ids: set[str],
+    carried_ids: set[str],
+    *,
+    from_snapshot: str,
+    crawled_at: str,
+) -> list[dict[str, Any]]:
+    """The carried_forward cohorts after a refresh.
+
+    A record upstream lists again was just recollected, so it leaves every older
+    cohort; keeping it there would stamp the fresh row with the old crawl time.
+    Records newly carried this time form a cohort dated to the crawl they were
+    last seen in (the previous snapshot), and records already in a cohort keep
+    the one they have.
+    """
+    updated = []
+    claimed: set[str] = set()
+    for cohort in cohorts:
+        ids = sorted(set(cohort["benchmark_ids"]) - upstream_ids)
+        claimed.update(ids)
+        if ids:
+            updated.append({**cohort, "benchmark_ids": ids})
+    fresh = sorted(carried_ids - claimed)
+    if fresh:
+        updated.append(
+            {"from_snapshot": from_snapshot, "crawled_at": crawled_at, "benchmark_ids": fresh}
+        )
+    return updated
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("source", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument(
+        "--carry-forward",
+        type=Path,
+        help="previous snapshot CSV whose records absent from SOURCE are kept unchanged",
+    )
     args = parser.parse_args()
 
     document = json.loads(args.source.read_text(encoding="utf-8"))
     rows = export_rows(document)
+    if args.carry_forward:
+        csv.field_size_limit(1 << 30)
+        with args.carry_forward.open(encoding="utf-8", newline="") as handle:
+            previous = list(csv.DictReader(handle))
+        before = len(rows)
+        rows = carry_forward(rows, previous)
+        print(f"carried forward {len(rows) - before} records from {args.carry_forward}")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=FIELDS, lineterminator="\n")

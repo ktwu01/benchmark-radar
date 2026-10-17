@@ -1,0 +1,154 @@
+# Hand-reviewed research directions for curated records that no exact join
+# reaches. Hand-edited, never bulk-populated.
+#
+# The Library groups benchmarks into the taxonomy-v5 directions exported from
+# benchmark-radar.com (claire_library_categories.json). Most records receive a
+# direction through exact identity (library_directions.py). The model-report
+# registry and the Artificial Analysis snapshot are curated here, and their most
+# read entries -- AIME, MMLU, SWE-bench Verified, Humanity's Last Exam -- share no
+# exact identifier with a .com record, so they would otherwise sit in "not yet
+# classified".
+#
+# Each entry was assigned by reading the registry caveat or source description,
+# one benchmark at a time; a registry `domain` is not mapped mechanically,
+# because "multimodal", "agent" and "reasoning" each span several directions.
+# An exact join always wins over an entry here, so this file only fills gaps.
+schema_version: 1
+reviewed_by: 14H034160212
+reviewed_at: 2026-10-15
+
+directions:
+  # Model-report registry (data/model_cards.yml)
+  model-reports:aa_lcr: long-context
+  model-reports:abductionrules: abstract-reasoning
+  model-reports:agents_last_exam: agentic-coding
+  model-reports:agieval: knowledge-expert-qa
+  model-reports:aider_polyglot: code-generation
+  model-reports:aime: math
+  model-reports:arc_agi: abstract-reasoning
+  model-reports:arc_agi_2: abstract-reasoning
+  model-reports:arc_agi_3: abstract-reasoning
+  model-reports:arxivmath: math
+  model-reports:automationbench: professional-work
+  model-reports:babe: science
+  model-reports:babyvision: visual-reasoning
+  model-reports:bankertoolbench: finance-legal
+  model-reports:bfcl: tool-use
+  model-reports:blueprint_bench_2: spatial-3d
+  model-reports:brokenarxiv: math
+  model-reports:browsecomp: deep-research
+  model-reports:chartography: visual-reasoning
+  model-reports:chartqa: visual-reasoning
+  model-reports:charxiv_reasoning: visual-reasoning
+  model-reports:chatbot_arena: chat-writing
+  model-reports:codeforces: code-generation
+  model-reports:collie: instruction-following
+  model-reports:cursor_bench: agentic-coding
+  model-reports:cybergym: cybersecurity
+  model-reports:deepsearchqa: deep-research
+  model-reports:deepswe: agentic-coding
+  model-reports:docvqa: document-ocr
+  model-reports:draco: deep-research
+  model-reports:drop: knowledge-expert-qa
+  model-reports:evaluation_agent: image-video-generation
+  model-reports:exploitbench: cybersecurity
+  model-reports:exploitgym: cybersecurity
+  model-reports:frontier_challenge: ai-rnd
+  model-reports:frontiercode: agentic-coding
+  model-reports:gdp_pdf: document-ocr
+  model-reports:gdpval: professional-work
+  model-reports:gsci_fact: factuality
+  model-reports:gsm8k: math
+  model-reports:healthbench: health-medicine
+  model-reports:healthbench_professional: health-medicine
+  model-reports:hle: knowledge-expert-qa
+  model-reports:hmmt: math
+  model-reports:horizonmath: math
+  model-reports:ifeval: instruction-following
+  model-reports:imo_answer_bench: math
+  model-reports:inverse_ifeval: instruction-following
+  model-reports:jointavbench: video-understanding
+  model-reports:korbench: abstract-reasoning
+  model-reports:legal_agent_benchmark: finance-legal
+  model-reports:livebench: composite-index
+  model-reports:livecodebench: code-generation
+  model-reports:livecodebench_pro: code-generation
+  model-reports:llm_abstract_reasoning: abstract-reasoning
+  model-reports:logiqa_plus: abstract-reasoning
+  model-reports:logiqav2_plus: abstract-reasoning
+  model-reports:lpfqa: knowledge-expert-qa
+  model-reports:mars_bench: chat-writing
+  model-reports:matharena_apex_2025: math
+  model-reports:mathvision: visual-reasoning
+  model-reports:mathvista: visual-reasoning
+  model-reports:mbpp: code-generation
+  model-reports:mcp_atlas: tool-use
+  model-reports:mcp_mark: tool-use
+  model-reports:med_fact: health-medicine
+  model-reports:mer2026_mer_fg: video-understanding
+  model-reports:mle_bench: ai-rnd
+  model-reports:mmlu: knowledge-expert-qa
+  model-reports:mmmu: visual-reasoning
+  model-reports:mmvu: video-understanding
+  model-reports:mtob: multilingual
+  model-reports:multi_swe_bench: agentic-coding
+  model-reports:mvbench: video-understanding
+  model-reports:nafbench: abstract-reasoning
+  model-reports:nl2repo: agentic-coding
+  model-reports:office_qa_pro: document-ocr
+  model-reports:omnivideobench: video-understanding
+  model-reports:onemillionbench: long-context
+  model-reports:osworld: computer-use
+  model-reports:pararule_plus: abstract-reasoning
+  model-reports:phybench: science
+  model-reports:posttrainbench: ai-rnd
+  model-reports:reclor_plus: abstract-reasoning
+  model-reports:rsi_bench: agent-skills-evolution
+  model-reports:sciclaimeval: factuality
+  model-reports:scicode: science
+  model-reports:sec_bench_pro: cybersecurity
+  model-reports:seccodebench: cybersecurity
+  model-reports:simpleqa: factuality
+  model-reports:skillsbench: agent-skills-evolution
+  model-reports:superchem: science
+  model-reports:swe_bench_multilingual: agentic-coding
+  model-reports:swe_bench_pro: agentic-coding
+  model-reports:swe_bench_verified: agentic-coding
+  model-reports:swe_lancer: agentic-coding
+  model-reports:swe_marathon: agentic-coding
+  model-reports:terminal_bench: agentic-coding
+  model-reports:tool_decathlon: tool-use
+  model-reports:toolathlon_verified: tool-use
+  model-reports:uni_mmmu: image-video-generation
+  model-reports:vbench_2_0: image-video-generation
+  model-reports:vbench_plus_plus: image-video-generation
+  model-reports:vending_bench: multi-agent-games
+  model-reports:vibench: agentic-coding
+  model-reports:video_mme: video-understanding
+  model-reports:widesearch: deep-research
+
+  # Artificial Analysis snapshot
+  artificial-analysis:aa-analystagent: professional-work
+  artificial-analysis:aa-briefcase: professional-work
+  artificial-analysis:aa-lcr: long-context
+  artificial-analysis:aa-omniscience-accuracy: knowledge-expert-qa
+  artificial-analysis:aa-omniscience-non-hallucination: factuality
+  artificial-analysis:aime-2025: math
+  artificial-analysis:apex-agents-aa: professional-work
+  artificial-analysis:automationbench-aa: professional-work
+  artificial-analysis:critpt: science
+  artificial-analysis:enterpriseops-gym-aa: professional-work
+  artificial-analysis:gdpval-aa-v2:normalized_score: professional-work
+  artificial-analysis:gdpval-aa-v2:raw_elo: professional-work
+  artificial-analysis:gpqa-diamond: knowledge-expert-qa
+  artificial-analysis:harvey-lab-aa: finance-legal
+  artificial-analysis:humanitys-last-exam: knowledge-expert-qa
+  artificial-analysis:ifbench: instruction-following
+  artificial-analysis:itbench-aa: professional-work
+  artificial-analysis:livecodebench: code-generation
+  artificial-analysis:mmmu-pro: visual-reasoning
+  artificial-analysis:scicode: science
+  artificial-analysis:tau2-bench-telecom: tool-use
+  artificial-analysis:tau3-banking: tool-use
+  artificial-analysis:terminal-bench-hard: agentic-coding
+  artificial-analysis:terminal-bench-v2.1: agentic-coding

@@ -135,19 +135,23 @@ snapshots:
       rank: rank
       score: benchmark_score
 
-  - id: claire_radar_2026-09-25
+  - id: claire_radar_2026-10-14
     source: Claire Radar
     source_url: https://github.com/Claire1217/benchmark-radar
-    crawled_at: "2026-09-25T04:40:22Z"
+    crawled_at: "2026-10-14T09:44:51Z"
     description: >-
-      Immutable export of the complete 1,914-record Claire Radar benchmark
-      working-tree snapshot. The original object is embedded and hashed in each
-      row. Review and display states remain record-level provenance: accepted,
-      deferred, excluded and unreviewed records all remain inspectable. Exact
-      source ids are retained; similar names are not merged.
-    benchmark_file: leaderboard_snapshots/claire_radar_benchmarks_2026-09-25.csv
-    benchmark_sha256: cb15e3e585c4234517f4dfe6f93235980b3acf762f093739caea4338e77f166d
-    benchmark_count: 1914
+      Immutable export of the complete Claire Radar benchmark corpus at upstream
+      commit 522482b200274cf0b6d656df9fc4cd061f5fac23 (data/benchmarks.json,
+      2,291 records), plus the 156 records of the 2026-09-25 export that the
+      upstream rolling window no longer lists, carried forward byte for byte by
+      scripts/export_claire_radar_snapshot.py --carry-forward. The original
+      object is embedded and hashed in each row. Review and display states
+      remain record-level provenance: accepted, deferred, excluded and
+      unreviewed records all remain inspectable. Exact source ids are retained;
+      similar names are not merged.
+    benchmark_file: leaderboard_snapshots/claire_radar_benchmarks_2026-10-14.csv
+    benchmark_sha256: 5ad20a5b953e93b2f05b0b53be731f48d88fa84d8667800551df67bdd8077af0
+    benchmark_count: 2447
     score_series_policy: observed_only
     catalog_adapter: claire_radar_v1
     adapter_options:
@@ -155,6 +159,168 @@ snapshots:
         "2607.05155": https://edge-bench.org/
         "2607.07946": https://datacurve.ai/research
         "2608.00267": https://github.com/microsoft/Loopsbench
+      # Rows kept by --carry-forward keep the crawl they were last seen in, one
+      # cohort per crawl; a later refresh appends a cohort.
+      carried_forward:
+        - from_snapshot: claire_radar_2026-09-25
+          crawled_at: "2026-09-25T04:40:22Z"
+          benchmark_ids:
+            - "2605.22034"
+            - "2605.22304"
+            - "2605.22321"
+            - "2605.24043"
+            - "2605.24687"
+            - "2605.25626"
+            - "2605.26144"
+            - "2605.26239"
+            - "2605.26321"
+            - "2605.26457"
+            - "2605.26525"
+            - "2605.26641"
+            - "2605.26978"
+            - "2605.27210"
+            - "2605.27851"
+            - "2605.27886"
+            - "2605.28257"
+            - "2605.28721"
+            - "2605.29277"
+            - "2605.29330"
+            - "2605.29710"
+            - "2605.30188"
+            - "2605.30235"
+            - "2605.30599"
+            - "2605.30931"
+            - "2605.31042"
+            - "2605.31351"
+            - "2606.00152"
+            - "2606.00329"
+            - "2606.00477"
+            - "2606.00773"
+            - "2606.01247"
+            - "2606.02915"
+            - "2606.03410"
+            - "2606.05070"
+            - "2606.05233"
+            - "2606.05249"
+            - "2606.05405"
+            - "2606.05806"
+            - "2606.06294"
+            - "2606.06492"
+            - "2606.06622"
+            - "2606.07032"
+            - "2606.07146"
+            - "2606.07661"
+            - "2606.08340"
+            - "2606.09027"
+            - "2606.09118"
+            - "2606.09219"
+            - "2606.09278"
+            - "2606.09376"
+            - "2606.10156"
+            - "2606.10254"
+            - "2606.10298"
+            - "2606.12494"
+            - "2606.12581"
+            - "2606.12594"
+            - "2606.12936"
+            - "2606.13218"
+            - "2606.13610"
+            - "2606.13706"
+            - "2606.13715"
+            - "2606.15899"
+            - "2606.16748"
+            - "2606.17188"
+            - "2606.17861"
+            - "2606.18557"
+            - "2606.18943"
+            - "2606.19218"
+            - "2606.19501"
+            - "2606.19830"
+            - "2606.20634"
+            - "2606.20668"
+            - "2606.21116"
+            - "2606.21309"
+            - "2606.21618"
+            - "2606.22873"
+            - "2606.22902"
+            - "2606.23032"
+            - "2606.23189"
+            - "2606.23238"
+            - "2606.23643"
+            - "2606.24548"
+            - "2606.24589"
+            - "2606.25325"
+            - "2606.25369"
+            - "2606.25592"
+            - "2606.26040"
+            - "2606.26793"
+            - "2606.27444"
+            - "2606.28551"
+            - "2606.29520"
+            - "2606.29573"
+            - "2606.30473"
+            - "2606.30702"
+            - "2606.30755"
+            - "2606.31187"
+            - "2607.01245"
+            - "2607.01793"
+            - "2607.01938"
+            - "2607.02255"
+            - "2607.02271"
+            - "2607.03006"
+            - "2607.03069"
+            - "2607.03870"
+            - "2607.03934"
+            - "2607.04383"
+            - "2607.08784"
+            - "2607.09068"
+            - "2607.09142"
+            - "2607.11327"
+            - "2607.11818"
+            - "2607.11862"
+            - "2607.12523"
+            - "2607.13034"
+            - "2607.13457"
+            - "2607.15434"
+            - "2607.16165"
+            - "2607.17765"
+            - "2607.18063"
+            - "2607.18066"
+            - "2607.18448"
+            - "2607.18867"
+            - "2607.19359"
+            - "2607.20491"
+            - "2607.20767"
+            - "2607.21471"
+            - "2607.22015"
+            - "2607.23116"
+            - "2607.24573"
+            - "2607.25398"
+            - "2607.25485"
+            - "2607.26977"
+            - "2607.27180"
+            - "2607.27189"
+            - "2607.27877"
+            - "2607.28074"
+            - "2607.28645"
+            - "2607.28934"
+            - "2608.00548"
+            - "2608.00805"
+            - "2608.00909"
+            - "2608.00915"
+            - "2608.01189"
+            - "2608.01437"
+            - "2608.01575"
+            - "2608.01709"
+            - "2608.02396"
+            - "2608.02639"
+            - "2608.03708"
+            - "2608.03803"
+            - "2608.04222"
+            - "2608.07508"
+            - "2608.07525"
+            - "2608.11232"
+            - "2608.11242"
     benchmark_columns:
       benchmark_id: benchmark_id
       benchmark_name: name
