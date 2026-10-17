@@ -626,3 +626,81 @@ def test_publisher_runs_require_a_named_benchmark_publisher(tmp_path, overrides)
     }
     with pytest.raises(BenchmarkScoreError, match="named publisher"):
         score_progression(load_scores(path), registry)
+
+
+def test_phi_4_mini_reasoning_comparison_preserves_exact_source_matrix():
+    # Read from the pinned Microsoft README's eight-row, three-column table.
+    # A generic loader cannot catch an omitted cell or a plausible wrong score.
+    expected = {
+        "o1-mini": (63.6, 90.0, 60.0),
+        "DeepSeek-R1-Distill-Qwen-7B": (53.3, 91.4, 49.5),
+        "DeepSeek-R1-Distill-Llama-8B": (43.3, 86.9, 47.3),
+        "Bespoke-Stratos-7B": (20.0, 82.0, 37.8),
+        "OpenThinker-7B": (31.3, 83.0, 42.4),
+        "Llama-3.2-3B-Instruct": (6.7, 44.4, 25.3),
+        "Phi-4-Mini (base model, 3.8B)": (10.0, 71.8, 36.9),
+        "Phi-4-mini-reasoning (3.8B)": (57.5, 94.6, 52.0),
+    }
+    organizations = {
+        "o1-mini": "OpenAI",
+        "DeepSeek-R1-Distill-Qwen-7B": "DeepSeek",
+        "DeepSeek-R1-Distill-Llama-8B": "DeepSeek",
+        "Bespoke-Stratos-7B": "Bespoke Labs",
+        "OpenThinker-7B": "OpenThoughts",
+        "Llama-3.2-3B-Instruct": "Meta",
+        "Phi-4-Mini (base model, 3.8B)": "Microsoft",
+        "Phi-4-mini-reasoning (3.8B)": "Microsoft",
+    }
+    benchmark_ids = ("aime", "math_500", "gpqa_diamond")
+    rows = [
+        row
+        for row in load_scores()["results"]
+        if row["source_id"] == "microsoft_phi_4_mini_reasoning_model_card"
+    ]
+    assert len(rows) == 24
+    assert {(row["model"], row["benchmark_id"]): row["value"] for row in rows} == {
+        (model, benchmark_id): value
+        for model, values in expected.items()
+        for benchmark_id, value in zip(benchmark_ids, values, strict=True)
+    }
+    for row in rows:
+        organization = organizations[row["model"]]
+        assert row["organization"] == organization
+        assert row["reported_by"] == (None if organization == "Microsoft" else "Microsoft")
+        assert row["model"] in row["protocol"]
+        assert (
+            row["instrument"]
+            == {
+                "aime": "aime_2024",
+                "math_500": "math_500",
+                "gpqa_diamond": "gpqa_diamond",
+            }[row["benchmark_id"]]
+        )
+        # Upload history does not establish public visibility on April 29.
+        # The cited Microsoft announcement confirms all three releases April 30.
+        assert row["reported_at"] == "2025-04-30"
+    card = next(
+        card
+        for card in load_registry()["model_cards"]
+        if card["id"] == "microsoft_phi_4_mini_reasoning_model_card"
+    )
+    assert card["published"] == "2025-04-30"
+
+
+def test_phi_4_unknown_comparison_setups_do_not_form_a_shared_series():
+    # Appendix A does not map common sampling/prompt details to every table row;
+    # the unexplained asterisks cannot justify combining separate model setups.
+    progression = build_score_progression(DEFAULT_SCORES_PATH, load_registry())
+    for benchmark_id in ("aime", "math_500", "gpqa_diamond"):
+        series = [
+            group
+            for group in progression["benchmarks"][benchmark_id]["series"]
+            if any(
+                point["source_id"] == "microsoft_phi_4_mini_reasoning_model_card"
+                for point in group["points"]
+            )
+        ]
+        assert len(series) == 8
+        assert all(group["point_count"] == 1 for group in series)
+        assert all(group["organization_count"] == 1 for group in series)
+        assert not any(group["connectable"] for group in series)
