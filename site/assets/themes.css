@@ -1,0 +1,31 @@
+.themes-page{max-width:72rem;margin:0 auto;padding:1.2rem 0 3rem}
+.themes-page h1{font-size:clamp(1.5rem,3vw,2rem);margin:.2rem 0 .5rem}
+.themes-lede{color:var(--muted);margin:.3rem 0;max-width:52rem}
+.themes-lede-zh{color:var(--muted);font-size:.92rem;margin:.2rem 0 0}
+.themes-ledger{color:var(--muted);font-size:.85rem;margin:.4rem 0 0}
+.themes-toolbar{position:sticky;top:.6rem;z-index:5;display:flex;flex-wrap:wrap;
+  gap:.5rem;align-items:center;background:var(--panel);border:1px solid var(--edge);
+  border-radius:var(--radius);padding:.7rem .8rem;margin:1.1rem 0 1.3rem;
+  box-shadow:0 2px 10px rgba(21,36,42,.06)}
+.themes-filter{flex:1 1 15rem;min-width:0}
+.themes-filter input{box-sizing:border-box;width:100%;min-height:44px;padding:.55rem .75rem;
+  border:1px solid var(--ink);border-radius:var(--radius-sm);background:var(--canvas,#fff);
+  color:var(--ink);font:inherit}
+.themes-category{flex:0 1 20rem;min-width:0}
+.themes-category select{box-sizing:border-box;max-width:100%;width:100%;min-height:44px;
+  padding:.55rem .75rem;font:inherit;border:1px solid var(--edge);
+  border-radius:var(--radius-sm);background:var(--panel);color:var(--ink)}
+.themes-coverage{color:var(--muted);font-size:.85rem;margin:.7rem 0}
+.themes-hint{color:var(--muted);font-size:.85rem;margin:-.7rem 0 1rem}
+.theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(19rem,100%),1fr));gap:.7rem}
+.theme-card{display:flex;flex-direction:column;gap:.3rem;background:var(--panel);
+  border:1px solid var(--edge);border-radius:var(--radius);padding:.75rem .85rem}
+.theme-card-title{color:var(--ink);font-weight:600;text-decoration:none;line-height:1.35}
+.theme-card-title:hover{text-decoration:underline}
+.theme-card-meta{font-size:.78rem;color:var(--muted)}
+.theme-card-summary{margin:0;font-size:.87rem;display:-webkit-box;
+  -webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.themes-empty{background:var(--panel);border:1px solid var(--edge);
+  border-radius:var(--radius);padding:1.2rem;margin:1.4rem 0}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap}
