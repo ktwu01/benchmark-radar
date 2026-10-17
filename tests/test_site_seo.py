@@ -23,6 +23,8 @@ def test_sitemap_covers_every_indexable_view():
     urls = [node.text for node in root.findall("sm:url/sm:loc", NS)]
     assert urls == [
         f"{SITE_URL}/",
+        f"{SITE_URL}/library/",
+        f"{SITE_URL}/models/",
         f"{SITE_URL}/leaderboard/",
         f"{SITE_URL}/saturation/",
         f"{SITE_URL}/trends/",

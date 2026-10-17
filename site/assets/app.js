@@ -353,6 +353,8 @@ function rerenderCurrentView() {
   if (state.view === "today") renderToday();
   if (state.view === "leaderboard") renderLeaderboard();
   if (state.view === "saturation") renderSaturation();
+  if (state.view === "library") renderLibrary();
+  if (state.view === "models") renderModels();
   if (state.view === "trends") renderTrends();
   if (state.view === "map") renderTrendMap();
   renderStaleBanner();
@@ -396,6 +398,46 @@ const I18N = {
     "Benchmark Frontier: {n} individual benchmarks from all sources. Dated benchmarks run left to right from 2024. Undated benchmarks remain visible by score. Gold rings mark the measured Pareto frontier.": "Benchmark 前沿：全部来源的 {n} 个独立标记。日期从 2024 年起向右排列，日期未知的仍按分数显示。金色环标出有测量依据的 Pareto 前沿。",
     "{unscored} without scores excluded · {older} before 2024 · {hidden} hidden by score": "未报告成绩的 {unscored} 个已排除 · {older} 个早于 2024 年 · 分数筛选隐藏 {hidden} 个",
     "Saturation": "饱和度",
+    "Library": "Benchmark 库",
+    "Search the library": "搜索 benchmark 库",
+    "Research directions": "研究方向",
+    "All benchmarks": "全部 benchmark",
+    "Not yet classified": "尚未分类",
+    "Newest": "最新",
+    "Most documented": "引用文档最多",
+    "A–Z": "按名称",
+    "Relevance (search)": "相关度（搜索时）",
+    "provisional": "待审核",
+    "Saved": "已收藏",
+    "Save benchmark": "收藏这个 benchmark",
+    "Remove from saved": "取消收藏",
+    "{shown} of {total} benchmarks": "{total} 个 benchmark 中显示 {shown} 个",
+    "Paper": "论文",
+    "Code": "代码",
+    "Data": "数据",
+    "Sort": "排序",
+    "Models": "模型",
+    "models.note": "目录中所有有报告成绩的模型，按实验室分组，以及每个模型有成绩的 benchmark。选择一个实验室，还可以看到它自己的模型卡，其中该实验室首次报告的 benchmark 会高亮。成绩见各 benchmark 页面。",
+    "AI labs": "AI 实验室",
+    "All labs": "全部实验室",
+    "Model card": "模型卡",
+    "System card": "系统卡",
+    "Technical report": "技术报告",
+    "Release post": "发布文章",
+    "{n} benchmarks": "{n} 个 benchmark",
+    "{n} new for this lab": "其中 {n} 个是该实验室首次报告",
+    "First reported by this lab here": "该实验室在这份文档中首次报告",
+    "In this lab's own model documents ({n})": "该实验室自己的模型文档（{n} 份）",
+    "scores on 1 benchmark record": "在 1 条 benchmark 记录上有成绩",
+    "Organization not recorded": "未记录机构",
+    "Lab assignments could not be loaded. The list below is from the last build.": "无法加载实验室归属，下面的列表来自上一次构建。",
+    "Lab assignments could not be loaded.": "无法加载实验室归属。",
+    "No model with a reported score is filed under this lab.": "没有归在该实验室名下、有报告成绩的模型。",
+    "{n} benchmark records have no reported model score. ": "有 {n} 条 benchmark 记录没有任何模型的报告成绩。",
+    "Browse them in the Library": "在 Library 中查看",
+    "scores on {n} benchmark records": "在 {n} 条 benchmark 记录上有成绩",
+    "{models} models with a reported score on {scored} of {total} benchmark records": "{models} 个模型在 {total} 条 benchmark 记录中的 {scored} 条上有报告成绩",
+    "{documents} documents · {benchmarks} benchmarks": "{documents} 份文档 · {benchmarks} 个 benchmark",
     "Searching all benchmarks (filters paused)": "搜索全部 benchmark（暂不筛选）",
     "No comparable score": "没有可比较的分数",
     "Benchmark date": "Benchmark 日期",
@@ -1290,6 +1332,18 @@ const state = {
   benchmarkIndexLoaded: false,
   benchmarkQuery: "",
   benchmarkModel: "",
+  // Library (#420): the merged benchmark-radar.com catalog browser.
+  libraryQuery: "",
+  libraryDirection: "",
+  librarySort: "latest",
+  librarySaved: false,
+  libraryVisibleLimit: 120,
+  libraryTaxonomy: null,
+  // Models (#420): the lab whose model documents are shown; empty is every lab.
+  modelsLab: "",
+  modelsVisibleLimit: 100,
+  // undefined until /data/models.json settles; null when it failed.
+  modelRegistry: undefined,
   leaderboardShowAll: false,
   leaderboardTopExpanded: false,
   // Issue #530: the leaderboard opens on the latest releases; the cumulative
@@ -1537,6 +1591,12 @@ function readUrl() {
   state.benchmarkVisibleLimit = BENCHMARK_SEARCH_LIMIT;
   state.benchmarkQuery = (params.get("bq") || "").trim();
   state.benchmarkModel = (params.get("bmodel") || "").trim();
+  state.libraryQuery = (params.get("libq") || "").trim();
+  state.libraryDirection = params.get("dir") || "";
+  state.librarySort = LIBRARY_SORTS.includes(params.get("lsort")) ? params.get("lsort") : "latest";
+  state.librarySaved = params.get("saved") === "1";
+  state.libraryVisibleLimit = LIBRARY_PAGE_SIZE;
+  state.modelsLab = (params.get("lab") || "").trim();
   state.lfrontier = params.get("lfrontier") || "";
   state.lfrontierExplicit = Boolean(state.lfrontier);
   // Existing benchmark permalinks follow the score history to its new tab.
@@ -1644,6 +1704,13 @@ function writeUrl(mode = "replace") {
       params.set("lfrontier", state.lfrontier);
     }
   }
+  if (!utility && state.view === "library") {
+    if (state.libraryQuery) params.set("libq", state.libraryQuery);
+    if (state.libraryDirection) params.set("dir", state.libraryDirection);
+    if (state.librarySort !== "latest") params.set("lsort", state.librarySort);
+    if (state.librarySaved) params.set("saved", "1");
+  }
+  if (!utility && state.view === "models" && state.modelsLab) params.set("lab", state.modelsLab);
   if (utility === "rubric" && state.rubric && state.rubric !== "current") {
     params.set("version", state.rubric);
   }
@@ -1765,6 +1832,18 @@ const VIEW_SEO = {
     description:
       "Search an open database of AI, LLM, agent, multimodal and AI-for-science benchmarks, each with its own page carrying the paper, code, dataset and scores.",
     canonical: "/",
+  },
+  library: {
+    title: "AI benchmark library by research direction | Benchmark Radar",
+    description:
+      "Browse every AI benchmark in the catalog by research direction, from math and agentic coding to robotics and safety, with its paper, code and dataset.",
+    canonical: "/library/",
+  },
+  models: {
+    title: "Which benchmarks AI labs report in model cards | Benchmark Radar",
+    description:
+      "For each AI lab, the model cards, system cards and technical reports on record and the benchmarks each one reports, with the benchmarks a lab reports for the first time marked.",
+    canonical: "/models/",
   },
   leaderboard: {
     title: "Latest AI benchmark releases and rankings | Benchmark Radar",
@@ -4649,6 +4728,7 @@ function loadBenchmarkIndex() {
       .then((payload) => {
         if (!Array.isArray(payload.benchmarks)) throw new Error("Invalid benchmark catalog");
         state.catalogDocuments = payload.document_registry || null;
+        state.libraryTaxonomy = payload.library_taxonomy || null;
         return payload.benchmarks;
       })
       .catch(() => null);
@@ -5392,6 +5472,603 @@ function initBenchmarkSearch() {
     // Rebuild the document counts and navigation after the common index loads.
     if (state.view === "leaderboard") renderLeaderboard();
     if (state.view === "saturation") renderSaturation();
+    if (state.view === "library") renderLibrary();
+    if (state.view === "models") renderModels();
+  });
+}
+
+// --- Library ---------------------------------------------------------------
+// benchmark-radar.com's Library, merged here (#420): every catalog record,
+// grouped by the taxonomy-v5 research direction it was filed under. Records
+// without a direction stay listed under "Not yet classified", because a missing
+// label must not remove a record from the corpus (principle.md). A direction is
+// a labelled review, not source text; library_directions.py names its basis.
+//
+// The page opens on the list itself. The .com Library put a header, intro and
+// controls above the first row; here the controls are one line and the
+// directions sit beside the rows, so the first screen is benchmarks.
+const LIBRARY_UNCLASSIFIED = "unclassified";
+// Saved entries are catalog keys, not slugs: a refresh can hand an existing
+// slug to a newly added record that sorts first (assign_slugs), and a saved
+// slug would then star a different benchmark.
+const LIBRARY_SAVED_KEY = "benchmark-radar:saved-keys:v1";
+
+// Saved benchmarks live in this browser only. Storage can be blocked (private
+// windows, strict settings, a full quota), so every access is guarded. Once a
+// write fails, the list is kept in memory for the rest of the visit: rereading
+// the blocked store would return nothing and the star would undo the click.
+let librarySavedMemory = null;
+
+function librarySavedSlugs() {
+  if (librarySavedMemory) return new Set(librarySavedMemory);
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(LIBRARY_SAVED_KEY) || "[]");
+    return new Set(Array.isArray(saved) ? saved.filter((item) => typeof item === "string") : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function setLibrarySaved(slug, saved) {
+  const slugs = librarySavedSlugs();
+  if (saved) slugs.add(slug);
+  else slugs.delete(slug);
+  try {
+    window.localStorage.setItem(LIBRARY_SAVED_KEY, JSON.stringify([...slugs].sort()));
+  } catch {
+    librarySavedMemory = slugs;
+  }
+}
+
+function libraryCategoryNames() {
+  return new Map((state.libraryTaxonomy?.categories || []).map((category) => [category.id, category.name]));
+}
+
+function libraryInDirection(record, direction) {
+  if (!direction) return true;
+  if (direction === LIBRARY_UNCLASSIFIED) return !record.library_direction;
+  return Boolean(record.library_direction?.categories?.includes(direction));
+}
+
+// Newest first by the record's own release date; records without one follow,
+// so an undated benchmark is listed rather than dropped. Ties break by plain
+// code-point order, which app_seeds.py reproduces, so the seeded first page
+// and the live one list the same records in the same order.
+function codePointCompare(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+function libraryCompare(sort) {
+  const tie = (a, b) => codePointCompare(a.name, b.name) || codePointCompare(a.key, b.key);
+  if (sort === "name") return (a, b) => a.name.localeCompare(b.name) || codePointCompare(a.key, b.key);
+  if (sort === "documented") {
+    const documents = (record) => record.evidence_summary?.document_count || 0;
+    return (a, b) => documents(b) - documents(a) || tie(a, b);
+  }
+  return (a, b) => codePointCompare(b.released || "", a.released || "") || tie(a, b);
+}
+
+// The query narrows first and keeps the shared catalog search's rank, the same
+// one Saturation uses; without a query the reader's sort decides. Direction and
+// saved filters apply to both.
+function libraryMatches() {
+  const records = state.benchmarkIndex || [];
+  return state.libraryQuery ? searchBenchmarkIndex(records, state.libraryQuery) : records;
+}
+
+function libraryRows() {
+  const saved = state.librarySaved ? librarySavedSlugs() : null;
+  const rows = libraryMatches().filter(
+    (record) => libraryInDirection(record, state.libraryDirection) && (!saved || saved.has(record.key)),
+  );
+  return state.libraryQuery ? rows : rows.sort(libraryCompare(state.librarySort));
+}
+
+function libraryDirectionCounts() {
+  const saved = state.librarySaved ? librarySavedSlugs() : null;
+  const counts = new Map([["", 0], [LIBRARY_UNCLASSIFIED, 0]]);
+  for (const record of libraryMatches()) {
+    if (saved && !saved.has(record.key)) continue;
+    counts.set("", counts.get("") + 1);
+    const categories = record.library_direction?.categories || [];
+    if (!categories.length) counts.set(LIBRARY_UNCLASSIFIED, counts.get(LIBRARY_UNCLASSIFIED) + 1);
+    for (const category of categories) counts.set(category, (counts.get(category) || 0) + 1);
+  }
+  return counts;
+}
+
+function libraryDirectionButton(id, label, count) {
+  const button = element("button", {
+    className: "library-direction",
+    attrs: { type: "button", "data-direction": id, "aria-pressed": String(state.libraryDirection === id) },
+  }, [
+    element("span", { className: "library-direction-name", text: label }),
+    element("span", { className: "library-direction-count", text: count.toLocaleString() }),
+  ]);
+  button.addEventListener("click", () => {
+    state.libraryDirection = state.libraryDirection === id ? "" : id;
+    state.libraryVisibleLimit = LIBRARY_PAGE_SIZE;
+    renderLibrary();
+    writeUrl();
+  });
+  return button;
+}
+
+function renderLibraryDirections() {
+  const host = byId("library-directions");
+  const taxonomy = state.libraryTaxonomy;
+  if (!host || !taxonomy) return;
+  const counts = libraryDirectionCounts();
+  const groups = taxonomy.groups.map((group) => {
+    const buttons = taxonomy.categories
+      .filter((category) => category.group === group.id)
+      .map((category) => libraryDirectionButton(category.id, category.name, counts.get(category.id) || 0));
+    return element("div", { className: "library-direction-group" }, [
+      element("h3", { className: "library-direction-heading", text: group.name }),
+      ...buttons,
+    ]);
+  });
+  replaceChildren(host, [
+    libraryDirectionButton("", t("All benchmarks"), counts.get("")),
+    ...groups,
+    libraryDirectionButton(LIBRARY_UNCLASSIFIED, t("Not yet classified"), counts.get(LIBRARY_UNCLASSIFIED)),
+  ]);
+}
+
+function libraryArtifactLinks(record) {
+  const kinds = [
+    ["has_paper", t("Paper")],
+    ["has_repo", t("Code")],
+    ["has_dataset", t("Data")],
+  ];
+  return kinds
+    .filter(([field]) => record[field])
+    .map(([, label]) => element("span", { className: "library-artifact", text: label }));
+}
+
+function libraryRow(record, names, saved) {
+  const isSaved = saved.has(record.key);
+  const star = element("button", {
+    className: "library-save",
+    text: isSaved ? "★" : "☆",
+    attrs: {
+      type: "button",
+      "aria-pressed": String(isSaved),
+      "aria-label": t(isSaved ? "Remove from saved" : "Save benchmark"),
+      title: t(isSaved ? "Remove from saved" : "Save benchmark"),
+    },
+  });
+  star.addEventListener("click", () => {
+    setLibrarySaved(record.key, !librarySavedSlugs().has(record.key));
+    renderLibrary();
+  });
+  const direction = record.library_direction;
+  const facts = [
+    // Every direction the record is filed under, primary first, so a row listed
+    // under a secondary direction shows why it matched.
+    direction ? element("span", {
+      className: "library-chip",
+      text: direction.categories.map((id) => names.get(id) || id).join(" · ")
+        // A keyword match awaiting review is labelled as such, not presented
+        // like a reviewed assignment.
+        + (direction.basis === "keyword-provisional" ? ` (${t("provisional")})` : ""),
+    }) : null,
+    record.released ? element("span", { text: formatDate(record.released, { dateStyle: "medium" }) }) : null,
+    element("span", { text: scoreSourceLabel(record.source) }),
+    ...libraryArtifactLinks(record),
+  ];
+  return element("article", { className: "library-row" }, [
+    star,
+    element("div", { className: "library-row-body" }, [
+      element("a", { className: "library-row-name", text: record.name, attrs: { href: `/benchmarks/${record.slug}/` } }),
+      record.description ? element("p", { className: "library-row-description", text: record.description }) : null,
+      element("p", { className: "library-row-facts" }, facts),
+    ]),
+  ]);
+}
+
+function renderLibrary() {
+  initLibrary();
+  const list = byId("library-list");
+  const status = byId("library-status");
+  if (!list) return;
+  if (!state.benchmarkIndexLoaded) {
+    status.textContent = t("Still checking the benchmark registry\u2026");
+    loadBenchmarkIndex().then((records) => {
+      state.benchmarkIndex = records;
+      state.benchmarkIndexLoaded = true;
+      if (state.view === "library") renderLibrary();
+    });
+    return;
+  }
+  if (!state.benchmarkIndex) {
+    // The server-seeded rows are the fallback for exactly this case: keep
+    // them and say the live list could not be loaded.
+    status.textContent = t("The benchmark catalog could not be loaded.");
+    return;
+  }
+  byId("library-search").value = state.libraryQuery;
+  // A query lists results by search relevance, so the selector says so rather
+  // than showing a sort the list is not in.
+  byId("library-sort").value = state.libraryQuery ? "relevance" : state.librarySort;
+  byId("library-sort").disabled = Boolean(state.libraryQuery);
+  const saved = librarySavedSlugs();
+  const savedToggle = byId("library-saved");
+  savedToggle.setAttribute("aria-pressed", String(state.librarySaved));
+  savedToggle.textContent = `${t("Saved")} (${saved.size.toLocaleString()})`;
+  renderLibraryDirections();
+  const rows = libraryRows();
+  const shown = rows.slice(0, state.libraryVisibleLimit);
+  const names = libraryCategoryNames();
+  status.textContent = [
+    t("{shown} of {total} benchmarks", {
+      shown: shown.length.toLocaleString(),
+      total: rows.length.toLocaleString(),
+    }),
+    partialMatchNote(rows, state.libraryQuery, (record) => record.slug),
+  ].filter(Boolean).join(" · ");
+  replaceChildren(list, shown.length
+    ? shown.map((record) => libraryRow(record, names, saved))
+    : [element("p", { className: "empty-state", text: t("No benchmarks match these filters.") })]);
+  byId("library-more").hidden = rows.length <= shown.length;
+}
+
+function initLibrary() {
+  const input = byId("library-search");
+  if (!input || input.dataset.bound === "1") return;
+  input.dataset.bound = "1";
+  input.addEventListener("input", debounce(() => {
+    state.libraryQuery = input.value.trim();
+    state.libraryVisibleLimit = LIBRARY_PAGE_SIZE;
+    renderLibrary();
+    writeUrl();
+  }));
+  byId("library-sort").addEventListener("change", (event) => {
+    state.librarySort = LIBRARY_SORTS.includes(event.target.value) ? event.target.value : "latest";
+    renderLibrary();
+    writeUrl();
+  });
+  byId("library-saved").addEventListener("click", () => {
+    state.librarySaved = !state.librarySaved;
+    state.libraryVisibleLimit = LIBRARY_PAGE_SIZE;
+    renderLibrary();
+    writeUrl();
+  });
+  byId("library-more").addEventListener("click", () => {
+    state.libraryVisibleLimit += LIBRARY_PAGE_SIZE;
+    renderLibrary();
+  });
+}
+
+// --- Models ----------------------------------------------------------------
+// benchmark-radar.com's Model Evals, merged here (#420): for each lab, the model
+// cards, system cards, technical reports and release posts in the registry, and
+// the benchmarks each one reports. It shows mentions, never a cross-source
+// score: two reported numbers are rarely comparable (CONTRIBUTING.md), so the
+// .com page's "shared-benchmark average" has no counterpart here. A benchmark a
+// lab reports for the first time in a document is marked, which is the signal
+// the .com page highlighted; scores stay on each benchmark's own page.
+const MODEL_DOCUMENT_TYPES = ["model_card", "system_card", "technical_report", "release_post"];
+const MODEL_DOCUMENT_LABELS = {
+  model_card: "Model card",
+  system_card: "System card",
+  technical_report: "Technical report",
+  release_post: "Release post",
+};
+
+function modelDocuments() {
+  return (state.catalogDocuments?.documents || [])
+    .filter((document) => MODEL_DOCUMENT_TYPES.includes(document.document_type) && document.organization)
+    .sort((a, b) => (b.published || "").localeCompare(a.published || "") || a.id.localeCompare(b.id));
+}
+
+// Per lab, which benchmarks each document reports for the first time. Dated
+// documents are read oldest first, so "new" means new to that lab, not new to
+// the corpus. An undated document has no place in that order: it neither
+// claims a first nor counts as earlier, or it would mask the real first card.
+function modelFirstMentions(documents) {
+  const firsts = new Map(documents.map((document) => [document.id, new Set()]));
+  const seenByLab = new Map();
+  const dated = documents
+    .filter((document) => document.published)
+    .sort((a, b) => a.published.localeCompare(b.published) || a.id.localeCompare(b.id));
+  for (const document of dated) {
+    const seen = seenByLab.get(document.organization);
+    const ids = (document.benchmarks || []).map((benchmark) => benchmark.benchmark_id);
+    // A lab's first dated document has nothing earlier to compare with.
+    if (seen) firsts.set(document.id, new Set(ids.filter((id) => !seen.has(id))));
+    seenByLab.set(document.organization, new Set([...(seen || []), ...ids]));
+  }
+  return firsts;
+}
+
+function modelBenchmarkLink(benchmark, isNew, recordsByKey, names) {
+  const record = recordsByKey.get(`model-reports:${benchmark.benchmark_id}`);
+  const direction = record?.library_direction?.primary;
+  const link = element("a", {
+    className: `model-benchmark${isNew ? " model-benchmark-new" : ""}`,
+    text: benchmark.name,
+    attrs: {
+      href: record ? `/benchmarks/${record.slug}/` : benchmark.url,
+      title: [direction ? names.get(direction) : null, isNew ? t("First reported by this lab here") : null]
+        .filter(Boolean).join(" · ") || null,
+    },
+  });
+  // The highlight and tooltip are not announced; say it in the link text too.
+  if (isNew) link.append(element("span", { className: "visually-hidden", text: ` (${t("First reported by this lab here")})` }));
+  return link;
+}
+
+function modelDocumentCard(document, firsts, recordsByKey, names) {
+  const fresh = firsts.get(document.id) || new Set();
+  const benchmarks = [...(document.benchmarks || [])].sort(
+    (a, b) => Number(fresh.has(b.benchmark_id)) - Number(fresh.has(a.benchmark_id)) || a.name.localeCompare(b.name),
+  );
+  return element("article", { className: "model-document" }, [
+    element("header", { className: "model-document-header" }, [
+      element("a", {
+        className: "model-document-name",
+        text: document.model_name || document.title,
+        attrs: { href: document.source_url, target: "_blank", rel: "noopener noreferrer" },
+      }),
+      element("span", { className: "model-document-facts", text: [
+        document.organization,
+        t(MODEL_DOCUMENT_LABELS[document.document_type] || document.document_type),
+        document.published ? formatDate(document.published, { dateStyle: "medium" }) : t("Date unknown"),
+        t("{n} benchmarks", { n: benchmarks.length }),
+        fresh.size ? t("{n} new for this lab", { n: fresh.size }) : null,
+      ].filter(Boolean).join(" · ") }),
+    ]),
+    element("p", { className: "model-benchmarks" }, benchmarks.map(
+      (benchmark) => modelBenchmarkLink(benchmark, fresh.has(benchmark.benchmark_id), recordsByKey, names),
+    )),
+  ]);
+}
+
+// Every model with a reported score anywhere in the catalog, from every source,
+// grouped by lab. principle.md requires a main surface to start from the full
+// population, so the page is built on the catalog's scored models (every
+// source), not on the few dozen model documents. The lab comes from the model
+// registry (models.json) by exact name; a model it does not list stays visible
+// under "Organization not recorded" rather than being guessed into a lab.
+const MODEL_UNRECORDED = "__unrecorded__";
+const MODEL_PAGE_SIZE = 100;
+
+// The registry keeps (model, organization) identities, and one display name can
+// sit under two labs (Qwen2.5-Omni-7B under Alibaba and Qwen). A score names the
+// model only, so it cannot be split between them: the model is listed under
+// every lab the registry gives it, and counted once under "All labs".
+// Case-only spellings are one model, as the registry treats them
+// (models_registry.build_registry: "MiniMax M1 40K" and "40k"); the display
+// name is the registry's, else the same casefold-then-value minimum.
+function modelIdentity(name) {
+  return name.toLowerCase();
+}
+
+function preferredModelName(a, b) {
+  const fa = a.toLowerCase();
+  const fb = b.toLowerCase();
+  return fa < fb || (fa === fb && a < b) ? a : b;
+}
+
+function modelCatalog(records, registry) {
+  const labs = new Map();
+  const registryNames = new Map();
+  for (const entry of registry?.models || []) {
+    const identity = modelIdentity(entry.model);
+    labs.set(identity, [...new Set([...(labs.get(identity) || []), entry.organization])].sort());
+    const known = registryNames.get(identity);
+    registryNames.set(identity, known ? preferredModelName(known, entry.model) : entry.model);
+  }
+  const models = new Map();
+  let scoredRecords = 0;
+  for (const record of records) {
+    if (record.scored_models?.length) scoredRecords += 1;
+    for (const scored of record.scored_models || []) {
+      const identity = modelIdentity(scored.name);
+      const model = models.get(identity) || {
+        name: registryNames.get(identity) || scored.name,
+        organizations: labs.get(identity) || [MODEL_UNRECORDED],
+        records: [],
+        keys: new Set(),
+        sources: new Set(),
+        latest: "",
+      };
+      if (!registryNames.has(identity)) model.name = preferredModelName(model.name, scored.name);
+      // One record counts once per model, whichever spelling reported it.
+      if (!model.keys.has(record.key)) {
+        model.keys.add(record.key);
+        model.records.push(record);
+      }
+      model.sources.add(record.source);
+      if ((scored.date || "") > model.latest) model.latest = scored.date || "";
+      models.set(identity, model);
+    }
+  }
+  const list = [...models.values()].sort((a, b) =>
+    (b.latest < a.latest ? -1 : b.latest > a.latest ? 1 : 0) || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+  return { models: list, scoredRecords };
+}
+
+function modelLabCounts(models) {
+  const counts = new Map();
+  for (const model of models) {
+    for (const lab of model.organizations) counts.set(lab, (counts.get(lab) || 0) + 1);
+  }
+  return [...counts].sort((a, b) =>
+    (a[0] === MODEL_UNRECORDED) - (b[0] === MODEL_UNRECORDED) || b[1] - a[1] || a[0].localeCompare(b[0]));
+}
+
+function modelLabLabel(lab) {
+  if (!lab) return t("All labs");
+  return lab === MODEL_UNRECORDED ? t("Organization not recorded") : lab;
+}
+
+function modelLabButton(lab, count) {
+  const button = element("button", {
+    className: "library-direction",
+    attrs: { type: "button", "aria-pressed": String(state.modelsLab === lab) },
+  }, [
+    element("span", { className: "library-direction-name", text: modelLabLabel(lab) }),
+    element("span", { className: "library-direction-count", text: count.toLocaleString() }),
+  ]);
+  button.addEventListener("click", () => {
+    state.modelsLab = state.modelsLab === lab ? "" : lab;
+    state.modelsVisibleLimit = MODEL_PAGE_SIZE;
+    renderModels();
+    writeUrl();
+  });
+  return button;
+}
+
+// One model: the benchmark records it has a reported score on, across sources.
+// The scores themselves stay on each benchmark's page with their protocols.
+function modelRow(model) {
+  const records = [...model.records].sort((a, b) => a.name.localeCompare(b.name));
+  return element("details", { className: "model-row" }, [
+    element("summary", { className: "model-row-summary" }, [
+      element("span", { className: "model-document-name", text: model.name }),
+      element("span", { className: "model-document-facts", text: [
+        model.organizations.map(modelLabLabel).join(" / "),
+        records.length === 1
+          ? t("scores on 1 benchmark record")
+          : t("scores on {n} benchmark records", { n: records.length.toLocaleString() }),
+        [...model.sources].sort().map(scoreSourceLabel).join(", "),
+        model.latest ? formatDate(model.latest, { dateStyle: "medium" }) : t("Date unknown"),
+      ].join(" · ") }),
+    ]),
+    element("p", { className: "model-benchmarks" }, records.map((record) => element("a", {
+      className: "model-benchmark",
+      text: record.name,
+      attrs: { href: `/benchmarks/${record.slug}/`, title: scoreSourceLabel(record.source) },
+    }))),
+  ]);
+}
+
+// Within one lab: the benchmarks its own model documents report most often.
+function modelLabSummary(documents, recordsByKey, names) {
+  const counts = new Map();
+  for (const document of documents) {
+    for (const benchmark of document.benchmarks || []) {
+      const entry = counts.get(benchmark.benchmark_id) || { benchmark, count: 0 };
+      entry.count += 1;
+      counts.set(benchmark.benchmark_id, entry);
+    }
+  }
+  const top = [...counts.values()].sort((a, b) => b.count - a.count || a.benchmark.name.localeCompare(b.benchmark.name)).slice(0, 12);
+  return element("p", { className: "model-benchmarks" }, top.map(({ benchmark, count }) => {
+    const link = modelBenchmarkLink(benchmark, false, recordsByKey, names);
+    link.append(element("span", { className: "model-benchmark-count", text: ` ${count}` }));
+    return link;
+  }));
+}
+
+let modelRegistryPromise = null;
+function loadModelRegistry() {
+  if (!modelRegistryPromise) {
+    modelRegistryPromise = fetch("/data/models.json", { cache: "no-cache" })
+      .then((response) => (response.ok ? response.json() : null))
+      .catch(() => null);
+  }
+  return modelRegistryPromise;
+}
+
+function renderModels() {
+  const list = byId("models-list");
+  const status = byId("models-status");
+  if (!list) return;
+  if (!state.benchmarkIndexLoaded || state.modelRegistry === undefined) {
+    status.textContent = t("Still checking the benchmark registry…");
+    Promise.all([loadBenchmarkIndex(), loadModelRegistry()]).then(([records, registry]) => {
+      state.benchmarkIndex = records;
+      state.benchmarkIndexLoaded = true;
+      state.modelRegistry = registry;
+      if (state.view === "models") renderModels();
+    });
+    return;
+  }
+  if (!state.benchmarkIndex) {
+    // Keep the server-seeded rows, the fallback for this case, beside the error.
+    status.textContent = t("The benchmark catalog could not be loaded.");
+    return;
+  }
+  // Without the registry every model would read as "Organization not
+  // recorded", which is a failed fetch, not missing source data. A page that
+  // arrived with the server seed keeps it; a page reached through the client
+  // nav has no seed, so it lists the models with their labs marked unknown
+  // and says why, rather than showing nothing.
+  const registryFailed = !state.modelRegistry;
+  if (registryFailed && list.querySelector(".model-row")) {
+    status.textContent = t("Lab assignments could not be loaded. The list below is from the last build.");
+    return;
+  }
+  initModels();
+  const records = state.benchmarkIndex;
+  const catalog = modelCatalog(records, state.modelRegistry);
+  // A lab whose model documents are on record but whose scored models are filed
+  // under another spelling (Ai2's Olmo 3 post; scores say Allen Institute for AI)
+  // still gets an entry, with zero models, so its documents can be opened.
+  const labs = modelLabCounts(catalog.models);
+  for (const lab of new Set(modelDocuments().map((document) => document.organization))) {
+    if (!labs.some(([name]) => name === lab)) labs.push([lab, 0]);
+  }
+  if (state.modelsLab && !labs.some(([lab]) => lab === state.modelsLab)) state.modelsLab = "";
+  replaceChildren(byId("models-labs"), [
+    modelLabButton("", catalog.models.length),
+    ...labs.map(([lab, count]) => modelLabButton(lab, count)),
+  ]);
+  const models = state.modelsLab
+    ? catalog.models.filter((model) => model.organizations.includes(state.modelsLab))
+    : catalog.models;
+  const shown = models.slice(0, state.modelsVisibleLimit);
+  status.textContent = (registryFailed ? `${t("Lab assignments could not be loaded.")} ` : "") + t("{models} models with a reported score on {scored} of {total} benchmark records", {
+    models: models.length.toLocaleString(),
+    // The lab's own coverage when one is selected, not every lab's.
+    scored: (state.modelsLab
+      ? new Set(models.flatMap((model) => model.records.map((record) => record.key))).size
+      : catalog.scoredRecords).toLocaleString(),
+    total: records.length.toLocaleString(),
+  });
+  // The lab's own model documents, when it has any: which benchmarks it chose
+  // to report, with first mentions marked. A narrower record set, so it is a
+  // collapsed section above the full model list rather than the page itself,
+  // and the first screen stays the lab's models.
+  const documents = state.modelsLab ? modelDocuments().filter((document) => document.organization === state.modelsLab) : [];
+  const recordsByKey = new Map(records.map((record) => [record.key, record]));
+  const names = libraryCategoryNames();
+  const firsts = modelFirstMentions(modelDocuments());
+  replaceChildren(list, [
+    documents.length ? element("details", { className: "model-summary" }, [
+      element("summary", { className: "model-summary-heading", text: t("In this lab's own model documents ({n})", { n: documents.length }) }),
+      modelLabSummary(documents, recordsByKey, names),
+      ...documents.map((document) => modelDocumentCard(document, firsts, recordsByKey, names)),
+    ]) : null,
+    ...shown.map(modelRow),
+    // A document-only lab (Ai2) has documents above and no scored model under
+    // that name; say that, rather than that nothing matched.
+    shown.length ? null : element("p", { className: "empty-state", text: documents.length
+      ? t("No model with a reported score is filed under this lab.")
+      : t("No benchmarks match these filters.") }),
+    // Records with no reported model score have no model to sit under, but a
+    // missing measurement must not hide them (principle.md): they are counted
+    // here and every one is listed in the Library.
+    state.modelsLab ? null : element("p", { className: "models-unscored" }, [
+      document.createTextNode(t("{n} benchmark records have no reported model score. ", {
+        n: (records.length - catalog.scoredRecords).toLocaleString(),
+      })),
+      element("a", { text: t("Browse them in the Library"), attrs: { href: "/library/" } }),
+    ]),
+  ].filter(Boolean));
+  byId("models-more").hidden = models.length <= shown.length;
+}
+
+function initModels() {
+  const more = byId("models-more");
+  if (!more || more.dataset.bound === "1") return;
+  more.dataset.bound = "1";
+  more.addEventListener("click", () => {
+    state.modelsVisibleLimit += MODEL_PAGE_SIZE;
+    renderModels();
   });
 }
 
@@ -7921,6 +8598,9 @@ function renderLeaderboardTop(board) {
 // components, coverage, confidence and method version arrive as published, so
 // what a reader sees is what the snapshot recorded.
 const LATEST_WINDOWS = ["7d", "30d", "90d"];
+// The Library's address parameters, read and written with the other views'.
+const LIBRARY_PAGE_SIZE = 120;
+const LIBRARY_SORTS = ["latest", "documented", "name"];
 const LATEST_WINDOW_DAYS = { "7d": 7, "30d": 30, "90d": 90 };
 // Order and wording follow the signals issue #530 names. Each component's
 // weight is read from the payload rather than restated here, so a re-weighted
@@ -9349,6 +10029,8 @@ function bindEvents() {
       if (view === "today") renderToday();
       if (view === "leaderboard") renderLeaderboard();
       if (view === "saturation") renderSaturation();
+      if (view === "library") renderLibrary();
+      if (view === "models") renderModels();
       if (view === "trends") renderTrends();
       if (view === "map") renderTrendMap();
       try {
@@ -10005,6 +10687,8 @@ async function initialize() {
     if (state.view === "today") renderToday();
     if (state.view === "leaderboard") renderLeaderboard();
     if (state.view === "saturation") renderSaturation();
+    if (state.view === "library") renderLibrary();
+    if (state.view === "models") renderModels();
     if (state.view === "trends") renderTrends();
     if (state.view === "map") renderTrendMap();
 
