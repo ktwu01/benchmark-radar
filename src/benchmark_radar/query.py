@@ -639,6 +639,12 @@ class QueryService:
         results = [
             {**record, "rank": rank} for rank, (_, record) in enumerate(scored[:limit], start=1)
         ]
+        answerable_results = [
+            {**record, "rank": rank}
+            for rank, (_, record) in enumerate(
+                (item for item in scored if not item[1]["match"]["missing_tokens"]), start=1
+            )
+        ][:limit]
         if full_match_count:
             status = "full_matches_found"
         elif partial_match_count:
@@ -676,6 +682,11 @@ class QueryService:
             "total_matches": len(scored),
             "full_match_count": full_match_count,
             "partial_match_count": partial_match_count,
+            # `results` preserves inspectable partial evidence for discovery. Consumers
+            # that need an answer to the whole query must use this explicit subset;
+            # a partial lexical candidate is never a full-query match.
+            "answerable_count": full_match_count,
+            "answerable_results": answerable_results,
             "count": len(results),
             "data": self._data_summary(scope=scope),
             "required_citations": required_citations(),

@@ -311,6 +311,8 @@ def test_search_returns_partial_candidates_with_evidence_for_agent_judgment(
     assert result["total_matches"] == 2
     assert result["full_match_count"] == 0
     assert result["partial_match_count"] == 2
+    assert result["answerable_count"] == 0
+    assert result["answerable_results"] == []
     assert [item["key"] for item in result["results"]] == [
         "opencompass:agent-workbench",
         "llm-stats:agent-workbench-extended",
@@ -680,7 +682,7 @@ def test_cli_labels_partial_candidates_without_hiding_them(tmp_path: Path, capsy
             "--scope",
             "catalog",
             "--limit",
-            "2",
+            "1",
             "--index",
             str(paths.index),
             "--shards",
@@ -692,8 +694,8 @@ def test_cli_labels_partial_candidates_without_hiding_them(tmp_path: Path, capsy
     output = capsys.readouterr().out
 
     assert exit_code == 0
-    assert "2 of 2 partial lexical candidates" in output
-    assert "none matched every query token" in output
+    assert "No benchmark matched every query token" in output
+    assert "Inspecting 1 of 2 partial lexical candidates" in output
     assert "Agent Workbench" in output
 
 

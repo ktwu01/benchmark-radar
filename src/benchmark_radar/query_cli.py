@@ -167,8 +167,11 @@ def _print_search(payload: dict[str, Any]) -> None:
         return
     if payload["search_status"] == "partial_candidates_only":
         print(
-            f"{payload['count']} of {payload['total_matches']} partial lexical candidates; "
-            f"none matched every query token (scope={payload['scope']})"
+            "No benchmark matched every query token; partial candidates are not answers "
+            f"(scope={payload['scope']})."
+        )
+        print(
+            f"Inspecting {payload['count']} of {payload['total_matches']} partial lexical candidates with missing query terms:"
         )
     else:
         print(
