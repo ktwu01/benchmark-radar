@@ -1619,12 +1619,81 @@ benchmarks:
       Only 50 examples are public; the full set is on request.
 
 
+  - id: deepresearch_bench
+    name: DeepResearch Bench
+    aliases:
+    - DeepResearch Bench
+    - DeepResearchBench
+    domain: agent
+    url: https://deepresearch-bench.github.io/
+    caveat: RACE grades report quality while FACT grades retrieval and citation behavior; the task language, agent scaffold, and judge must be recorded because they are different measurements.
+
+
+  # Named vendor-internal instruments still count as reported benchmarks.
+  # Their task sets are not public; the release post is the provenance link.
+  - id: cohere_m_tau_bench
+    name: Cohere m-tau-bench (internal multilingual translation)
+    aliases: ["Cohere m-tau-bench", "Cohere M-taubench"]
+    domain: tool_use
+    caveat: >-
+      Cohere's in-house tau-bench translation, not the public English task set.
+      The release caption says five translated languages; footnote 1 lists Ja,
+      Ko, Ar, Es, Fr and En, averaged across airline and retail over ten runs.
+      Unlike the adjacent English tau-bench footnote, the multilingual footnote
+      does not explicitly name pass@1. Its values retain the generic score label
+      rather than inheriting the English task set's metric.
+      The release provides no translated task set or complete reproduction details.
+
+  - id: cohere_north_answer_satisfaction
+    name: Cohere North answer satisfaction (internal)
+    aliases: ["Cohere North human evaluation"]
+    domain: tool_use
+    caveat: >-
+      Human satisfaction on enterprise tasks using Cohere's real enterprise
+      data. Footnote 3 describes 112 questions, six annotators per answer and
+      an internal rubric covering quality, appropriateness, correctness and
+      latency. The release provides no task data or full rubric; chart bars have no
+      exact numeric labels, so their heights are not transcribed as scores.
+
+  - id: cohere_north_multihop_search
+    name: Cohere North multi-hop search (internal)
+    aliases: ["Cohere North thinking-budget evaluation"]
+    domain: tool_use
+    caveat: >-
+      Difficult multi-hop search questions evaluated at different thinking
+      budgets. Footnote 4 describes automatic correctness using LlamaIndex
+      against known reference answers, distinct from the human satisfaction
+      evaluation. The chart labels a 1-5 satisfaction scale, but the mapping
+      from the automatic scorer is not specified. No tasks or exact bar
+      labels are supplied; budgets and the agent scaffold affect the result.
+
+  - id: cohere_absolute_safety
+    name: Cohere Absolute Safety (internal)
+    aliases: ["Cohere Absolute Safety"]
+    domain: safety
+    caveat: >-
+      Vendor-internal safety evaluation; higher is better in the release chart.
+      The release names five safety areas but provides neither the task set nor
+      exact bar labels. This is separate from over-refusal, whose preferred
+      direction is reversed; no score is inferred from a bar's height.
+
+  - id: cohere_over_refusal
+    name: Cohere Over-Refusal (internal)
+    aliases: ["Cohere Over-Refusal"]
+    domain: safety
+    caveat: >-
+      Vendor-internal over-refusal evaluation; lower is better in the release
+      chart. The release provides no tasks, scoring details or exact bar labels.
+      It measures refusal of valid requests, not the Absolute Safety score;
+      no score is inferred from a bar's height.
+
 # Model cards, technical reports and release posts.
 #
 # `organization` is the publisher of the document. `benchmarks` is the set of
 # canonical ids that document reports a result for. It is a set, not a ranking:
 # a card that reports AIME once and a card that reports it in four
 # configurations both contribute exactly one adoption.
+
 model_cards:
   - id: openai_gpt_5_system_card
     organization: OpenAI
@@ -2546,3 +2615,23 @@ model_cards:
       - matharena_apex_2025
       - brokenarxiv
 
+
+  # Public vendor release post; numeric labels read from its agentic chart.
+  # DeepResearch RACE has unlabelled bars: mention retained, no guessed values.
+  # Named private evaluations are retained without guessed task URLs or scores.
+  - id: cohere_command_a_reasoning_release
+    organization: Cohere
+    model: Command A Reasoning
+    document_type: release_post
+    published: '2025-08-21'
+    url: https://cohere.com/blog/command-a-reasoning
+    retrieved_at: '2026-10-10'
+    benchmarks:
+    - bfcl
+    - tau_bench
+    - deepresearch_bench
+    - cohere_m_tau_bench
+    - cohere_north_answer_satisfaction
+    - cohere_north_multihop_search
+    - cohere_absolute_safety
+    - cohere_over_refusal

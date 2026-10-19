@@ -1345,3 +1345,27 @@ def test_no_curated_layer_still_attributes_a_model_to_google_deepmind():
     for name in ("data/benchmark_scores.yml", "data/model_cards.yml"):
         text = Path(name).read_text(encoding="utf-8")
         assert "Google DeepMind" not in text, name
+
+
+def test_deepresearch_bench_pending_identity_does_not_inherit_metadata(full_records):
+    from benchmark_radar.catalog_identity import (
+        DEFAULT_IDENTITY_PATH,
+        apply_inherited_identity,
+        load_identity,
+    )
+
+    identity = load_identity(full_records, DEFAULT_IDENTITY_PATH)
+    recipient_key = "model-reports:deepresearch_bench"
+    donor_key = "opencompass:1987"
+    original = {record["key"]: record for record in full_records}
+    resolved = {
+        record["key"]: record for record in apply_inherited_identity(full_records, identity)
+    }
+    assert len(resolved) == len(original)
+    # AI-assisted source evidence is a proposal, not the independent human
+    # review warrant required to activate inheritance or equivalence.
+    assert not identity.siblings_for(recipient_key)
+    assert not identity.inheritance_for(recipient_key)
+    assert resolved[recipient_key] == original[recipient_key]
+    assert resolved[donor_key] == original[donor_key]
+    assert "identity_inheritance" not in resolved[recipient_key]
