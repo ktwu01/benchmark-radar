@@ -121,3 +121,5 @@ graphify-out/
 # The id is meaningful only to the machine that created it, so committing one
 # would hand every clone a stale pointer to someone else's session.
 /.context/
+# Daily top-4 share images, rendered by the Pages build (issue #671).
+/site/share/

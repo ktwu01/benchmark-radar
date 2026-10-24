@@ -34,6 +34,11 @@ _RECORDS_BADGE = (
     "(https://benchmark-radar.org/)"
 )
 
+# Issue #671: the Pages build renders each radar day's top new benchmarks as an
+# image (scripts/generate_daily_share_image.py). The dated URL is embedded, not
+# latest.png, so a checklist from earlier in the week still shows its own day.
+SHARE_IMAGE_URL = "https://benchmark-radar.org/share/top4/{date}.png"
+
 _CHECKBOX_RE = re.compile(r"^-\s+\[([ xX])\]\s+(.+)$")
 
 # Path prefixes that would otherwise read as "src", "data" etc. in a social
@@ -241,6 +246,7 @@ def render_social_section(
     channels: list[dict],
     post_sample: str | None = None,
     today: date | None = None,
+    share_image_date: str | None = None,
 ) -> str:
     """Render the "Daily social post" section for today's radar run."""
     lines = [
@@ -248,6 +254,18 @@ def render_social_section(
         "",
         _RECORDS_BADGE,
         "",
+    ]
+    if share_image_date:
+        url = SHARE_IMAGE_URL.format(date=share_image_date)
+        lines.extend(
+            [
+                f"**Today's image** for X, WeChat groups and Discord ([download]({url})):",
+                "",
+                f"![Top new benchmarks on {share_image_date}]({url})",
+                "",
+            ]
+        )
+    lines += [
         "Ready-to-post material for today. Rephrase per platform; the two "
         "sentences below are the factual core.",
         "",

@@ -47,6 +47,7 @@ on:
       # deploy. Without these, editing the share-card generator or the export
       # layer succeeds, merges, and changes nothing that anyone can see.
       - "scripts/generate_og_image.py"
+      - "scripts/generate_daily_share_image.py"
       - "src/benchmark_radar/export.py"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
@@ -74,6 +75,10 @@ jobs:
           python-version: "3.12"
           cache: pip
       - name: Build validated dashboard data
+        env:
+          # Read-only profile lookups for the daily share image; shared runner
+          # IPs exhaust GitHub's unauthenticated limit.
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           python -m pip install -e '.[dev]'
           # FIRST, because the rest of the build reads what it writes. The
@@ -111,6 +116,10 @@ jobs:
           # Regenerated rather than served from the commit, so a share card can
           # never advertise counts the registry has moved past.
           python scripts/generate_og_image.py
+          # The day's top new benchmarks as one image for X, WeChat groups and
+          # Discord (issue #671), embedded in the daily social checklist. Creator
+          # lookups that fail leave a fact off the image, never fail the build.
+          python scripts/generate_daily_share_image.py
           # Freeze IDs for any model or organization that appeared since the
           # last run. Never ran in CI before, which is how the registry drifted
           # to 357 models against models.json's 355 and nothing noticed.

@@ -13,6 +13,7 @@ import yaml
 from .authors import contacts_csv
 from .authors import survey as author_survey
 from .briefing import current_day_snapshot, daily_report_run, generate_daily_briefing
+from .daily_top import select_top_items
 from .export import DEFAULT_TABLE_LIMIT, write_exports
 from .findings import daily_findings
 from .kw_bench_store import STORE_FILENAME as KW_BENCH_STORE_FILENAME
@@ -23,6 +24,7 @@ from .query_cli import QUERY_COMMANDS, run_query_cli
 from .questions import QA_SCHEMA_VERSION, generate_daily_questions
 from .report import render_markdown
 from .snapshots import (
+    SnapshotError,
     load_snapshots,
     migrate_snapshot_history,
     rebuild_dashboard,
@@ -650,9 +652,30 @@ def main() -> None:
         # works against explicit --items/--repo/--channels paths outside the
         # repository without needing an unrelated radar config.yml.
         items: list[dict] = []
+        share_image_date = None
         if args.items.exists():
             payload = json.loads(args.items.read_text(encoding="utf-8"))
             items = payload.get("evidence_items") or []
+            # The image is named for the radar day, which is the UTC date of
+            # the run, not the wall clock of a rerun that crossed midnight.
+            if payload.get("generated_at"):
+                share_image_date = (
+                    datetime.fromisoformat(str(payload["generated_at"]).replace("Z", "+00:00"))
+                    .astimezone(UTC)
+                    .date()
+                    .isoformat()
+                )
+        # The Pages build writes no image for a day with no new benchmark, so
+        # the same selection over the same snapshots decides whether to embed
+        # one. History that cannot be read embeds nothing rather than a link
+        # that may 404, and never blocks the checklist itself.
+        if share_image_date:
+            try:
+                history = load_snapshots(args.snapshot_dir)
+            except SnapshotError:
+                history = []
+            if not select_top_items(history, share_image_date):
+                share_image_date = None
         now = datetime.now(UTC)
         until = args.until or now.isoformat()
         since = args.since or (now - timedelta(hours=24)).isoformat()
@@ -665,6 +688,7 @@ def main() -> None:
             load_channels(args.channels, daily_only=False),
             post_sample=load_post_sample(args.channels),
             today=now.date(),
+            share_image_date=share_image_date,
         )
         if args.existing_body and args.existing_body.exists():
             section = merge_checked(section, args.existing_body.read_text(encoding="utf-8"))
