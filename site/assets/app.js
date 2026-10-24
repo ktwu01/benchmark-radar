@@ -481,6 +481,14 @@ const I18N = {
     "Browse them in the Library": "在 Library 中查看",
     "Search models": "搜索模型",
     "Score details": "成绩详情",
+    "Contents": "包含内容",
+    "dataset": "数据集",
+    "evaluation code": "评测代码",
+    "checkpoints": "权重检查点",
+    "results": "评测结果",
+    "stars": "星标",
+    "likes": "点赞",
+    "Matches your search:": "匹配您的搜索：",
     "Model name": "模型名",
     "Lab": "实验室",
     "Previous": "上一页",
@@ -1163,6 +1171,8 @@ const I18N = {
     "Click the marker to pin these details": "点击标记以固定这些详情",
     "Click to pin record details": "点击固定记录详情",
     Comments: "评论",
+    Discovered: "发现于",
+    Discussed: "讨论于",
     "Discovery sources": "发现来源",
     "Each linked benchmark counts once for this document. Open its detail to inspect scores, protocols and citations.":
       "每个关联 benchmark 在这份文档中只计一次。打开详情可查看分数、评测条件和引用来源。",
@@ -1197,6 +1207,18 @@ const I18N = {
     Published: "发布",
     "Radar first observed": "雷达首次观察到",
     "Read full card ↗": "阅读完整模型卡 ↗",
+    "Open on Hugging Face ↗": "在 Hugging Face 打开 ↗",
+    "Project ↗": "项目 ↗",
+    "Paper ↗": "论文 ↗",
+    "Code ↗": "代码 ↗",
+    "Dataset ↗": "数据集 ↗",
+    "Discussion ↗": "讨论 ↗",
+    "Artifact ↗": "产物 ↗",
+    "Originally published": "最初发布于",
+    "Score breakdown": "得分明细",
+    "Activity breakdown": "活动明细",
+    "no likes or downloads yet": "暂无点赞或下载",
+    "in title and description": "在标题和描述中",
     Recency: "新鲜度",
     Released: "发布于",
     Relevance: "相关性",
@@ -4228,11 +4250,153 @@ function openRubric(item = null, versionOverride = null, updateUrl = true) {
   showModalDialog(dialog);
 }
 
+function meaningfulDateDifference(d1, d2) {
+  if (!d1 || !d2) return false;
+  const t1 = new Date(d1).getTime();
+  const t2 = new Date(d2).getTime();
+  if (Number.isNaN(t1) || Number.isNaN(t2)) return false;
+  return Math.abs(t2 - t1) > 24 * 60 * 60 * 1000;
+}
+
+function cleanCardSummary(summary, title) {
+  if (!summary) return "";
+  let text = summary.trim();
+  if (title) {
+    const cleanTitle = title.trim();
+    if (text.toLowerCase().startsWith(cleanTitle.toLowerCase())) {
+      text = text.slice(cleanTitle.length).replace(/^[:\s\-—]+/, "").trim();
+    }
+    const namePart = cleanTitle.split("/").pop().trim();
+    if (namePart && text.toLowerCase().startsWith(namePart.toLowerCase())) {
+      text = text.slice(namePart.length).replace(/^[:\s\-—]+/, "").trim();
+    }
+  }
+  text = text.replace(/See (?:the )?full description on the (?:dataset|model) page:\s*https?:\/\/\S+/gi, "").trim();
+  return text;
+}
+
+function formatCardRationale(rationaleList, item) {
+  if (!Array.isArray(rationaleList) || !rationaleList.length) return [];
+  const stemMap = {
+    evaluat: "evaluation",
+    bench: "benchmark",
+    reason: "reasoning",
+    dataset: "dataset",
+    model: "model",
+  };
+  const categories = new Set((item.categories || []).map((c) => String(c).toLowerCase()));
+  const formatted = [];
+
+  for (const reason of rationaleList) {
+    const str = String(reason || "").trim();
+    if (!str) continue;
+
+    if (str.startsWith("Primary record:")) {
+      const hasMultipleSources = (item.contributing_sources || []).length > 1;
+      if (!hasMultipleSources) continue;
+      formatted.push(str.replace("Primary record:", t("Primary record:")));
+      continue;
+    }
+
+    if (str.startsWith("Matched:")) {
+      const rawTerms = str
+        .slice("Matched:".length)
+        .split(",")
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean);
+      const nonCategoryTerms = rawTerms.filter((term) => !categories.has(term));
+      const cleanTerms = (nonCategoryTerms.length ? nonCategoryTerms : rawTerms).map(
+        (term) => stemMap[term] || term,
+      );
+      const uniqueTerms = [...new Set(cleanTerms)];
+      if (uniqueTerms.length) {
+        formatted.push(`${t("Matched")} "${uniqueTerms.join('", "')}" ${t("in title and description")}`);
+      }
+      continue;
+    }
+
+    formatted.push(str);
+  }
+  return formatted;
+}
+
+function extractAvailableContents(item) {
+  const categories = (item.categories || []).map((c) => String(c).toLowerCase());
+  const tags = (item.source_tags || []).map((t) => String(t).toLowerCase());
+  const combined = new Set([...categories, ...tags]);
+  const contents = [];
+
+  if (combined.has("dataset") || combined.has("datasets") || categories.some((c) => c.includes("data"))) {
+    contents.push(t("dataset"));
+  }
+  if (combined.has("evaluation") || combined.has("benchmark") || categories.some((c) => c.includes("eval") || c.includes("bench"))) {
+    contents.push(t("evaluation code"));
+  }
+  if (combined.has("checkpoints") || combined.has("weights") || combined.has("model") || categories.some((c) => c.includes("checkpoint") || c.includes("model"))) {
+    contents.push(t("checkpoints"));
+  }
+  if (combined.has("results") || combined.has("metrics") || categories.some((c) => c.includes("result") || c.includes("metric"))) {
+    contents.push(t("results"));
+  }
+
+  if (Array.isArray(item.contents) && item.contents.length) {
+    for (const c of item.contents) {
+      const label = t(String(c).toLowerCase());
+      if (!contents.includes(label)) contents.push(label);
+    }
+  }
+
+  return contents;
+}
+
+function extractSearchMatchLine(rationaleList) {
+  if (!Array.isArray(rationaleList) || !rationaleList.length) return "";
+  const stopWords = new Set([
+    "benchmark",
+    "bench",
+    "evaluation",
+    "evaluat",
+    "eval",
+    "model",
+    "dataset",
+    "reasoning",
+    "ai",
+    "test",
+  ]);
+  const stemMap = {
+    evaluat: "evaluation",
+    bench: "benchmark",
+    reason: "reasoning",
+    dataset: "dataset",
+    model: "model",
+  };
+  for (const reason of rationaleList) {
+    const str = String(reason || "").trim();
+    if (str.startsWith("Matched:")) {
+      const terms = str
+        .slice("Matched:".length)
+        .replace(/[~|/+]/g, " ")
+        .split(/[, ]+/)
+        .map((s) => s.replace(/[*?^$"']/g, "").trim().toLowerCase())
+        .filter(Boolean)
+        .map((term) => stemMap[term] || term)
+        .filter((term) => !stopWords.has(term));
+      const unique = [...new Set(terms)];
+      if (unique.length) {
+        return `${t("Matched keywords:")} ${unique.join(", ")}`;
+      }
+    }
+  }
+  return "";
+}
+
 function expandedRecord(item, teaser) {
   const isAttention = item.observation_kind === "attention";
   const primaryArtifact = item.primary_artifact_url || item.artifact_urls?.[0];
-  const sourceFacts = recordFactEntries(item);
-  const sourceDates = recordDateEntries(item);
+  const max = Number(scoreMax(item));
+  const precision = max > 10 ? 0 : 2;
+  const formatScore = (val) => Number(val || 0).toFixed(precision);
+
   const scoreEntries = isAttention
     ? [
         [
@@ -4241,24 +4405,19 @@ function expandedRecord(item, teaser) {
         ],
         [t("Comments"), Number(item.metrics?.comments || 0).toLocaleString()],
         [t("Submissions"), Number(item.metrics?.submissions ?? 1).toLocaleString()],
-        [t("Published"), formatDate(item.published_at, { dateStyle: "medium" })],
       ]
     : [
-        [t("Priority"), Number(item.total_score || 0).toFixed(2)],
-        [t("Relevance"), Number(item.relevance_score || 0).toFixed(2)],
-        [t("Evidence"), Number(item.evidence_score || 0).toFixed(2)],
-        [t("Recency"), Number(item.recency_score || 0).toFixed(2)],
-        // Adoption is weighted into the total, so hiding it here left the
-        // four shown components unable to explain the priority above them.
-        [t("Adoption"), Number(item.adoption_score || 0).toFixed(2)],
-        ...sourceDates,
-        ...sourceFacts,
+        [t("Priority"), Number(item.total_score || 0).toFixed(precision)],
+        [t("Relevance"), Number(item.relevance_score || 0).toFixed(precision)],
+        [t("Evidence"), Number(item.evidence_score || 0).toFixed(precision)],
+        [t("Recency"), Number(item.recency_score || 0).toFixed(precision)],
+        [t("Adoption"), Number(item.adoption_score || 0).toFixed(precision)],
       ];
-  const rationale = element(
-    "ul",
-    { className: "rationale-list" },
-    (item.rationale || []).map((reason) => element("li", { text: reason })),
-  );
+
+  if (meaningfulDateDifference(item.published_at, item.updated_at)) {
+    scoreEntries.push([t("Published"), formatDate(item.published_at, { dateStyle: "medium" })]);
+  }
+
   const attentionNotice = isAttention
     ? element("div", { className: "attention-notice" }, [
         element("strong", { text: t("Not quality-scored") }),
@@ -4267,6 +4426,7 @@ function expandedRecord(item, teaser) {
         }),
       ])
     : null;
+
   const supporting =
     isAttention && item.supporting_observations?.length
       ? element("section", { className: "supporting-signals" }, [
@@ -4292,56 +4452,58 @@ function expandedRecord(item, teaser) {
           ),
         ])
       : null;
-  const links = element("div", { className: "detail-links" }, [
-    ...(isAttention && safeHttpUrl(primaryArtifact)
-      ? [
-          element("a", {
-            className: "primary-link",
-            text: t("Open primary artifact ↗"),
-            attrs: {
-              href: safeHttpUrl(primaryArtifact),
-              target: "_blank",
-              rel: "noopener noreferrer",
-            },
-          }),
-        ]
-      : []),
-    element("a", {
-      className: isAttention ? "secondary-link" : "primary-link",
-      text: isAttention
-        ? t("Open public discussion ↗")
-        : item.source === "Hugging Face"
-          ? t("Read full card ↗")
-          : t("Open primary source ↗"),
-      attrs: { href: safeHttpUrl(item.url), target: "_blank", rel: "noopener noreferrer" },
-    }),
+
+  // Title is the primary source link; redundant bottom button is removed.
+  // We keep actionLabel for accessibility / compatibility.
+  const actionLabel = item.source === "Hugging Face"
+    ? t("Read full card ↗")
+    : t("Open primary source ↗");
+
+  const attentionLinks = isAttention && safeHttpUrl(primaryArtifact)
+    ? element("div", { className: "detail-links" }, [
+        element("a", {
+          className: "primary-link",
+          text: t("Open primary artifact ↗"),
+          attrs: {
+            href: safeHttpUrl(primaryArtifact),
+            target: "_blank",
+            rel: "noopener noreferrer",
+          },
+        }),
+      ])
+    : null;
+
+  const hasRawSummary = Boolean((item.summary || "").trim());
+  const remainder = summaryRemainder(item.summary, teaser);
+  const displaySummary = cleanCardSummary(remainder, item.title);
+  const summaryText = hasRawSummary
+    ? displaySummary || t("No further description beyond the preview above.")
+    : t("No description published at the source.");
+
+  const scoreAccordion = element("details", { className: "score-details" }, [
+    element("summary", { className: "score-details-toggle" }, [
+      element("span", { className: "score-details-title", text: t("Score details") }),
+    ]),
+    element("div", { className: "score-details-content" }, [
+      element("div", { className: "score-overall-section" }, [
+        isAttention ? attentionActivity(item) : scoreBlock(item),
+      ]),
+      element("h3", { text: t(isAttention ? "Activity breakdown" : "Score breakdown") }),
+      element(
+        "dl",
+        { className: "detail-grid" },
+        scoreEntries.map(([label, value]) => definition(label, value)),
+      ),
+    ]),
   ]);
-  const categoryLine = (item.categories || []).length
-    ? (item.categories || []).map(titleCase).join(" · ")
-    : t("uncategorized");
+
   return element("div", { className: "record-detail" }, [
     element("p", {
-      className: "detail-source",
-      text:
-        `${item.source} · ${eventVerb(item)} · ${categoryLine}` +
-        `${item.watchlist ? ` · ★ ${item.watchlist}` : ""} · ${item.snapshot_date}`,
-    }),
-    element("p", {
-      className: item.summary ? "detail-summary" : "detail-summary signal-nodesc",
-      text: item.summary
-        ? teaser
-          ? summaryRemainder(item.summary, teaser) || t("No further description beyond the preview above.")
-          : item.summary
-        : t("No description published at the source."),
+      className: hasRawSummary ? "detail-summary" : "detail-summary signal-nodesc",
+      text: summaryText,
     }),
     attentionNotice,
-    element(
-      "dl",
-      { className: "detail-grid" },
-      scoreEntries.map(([label, value]) => definition(label, value)),
-    ),
-    element("h3", { text: t("Why surfaced") }),
-    rationale,
+    scoreAccordion,
     supporting,
     isAttention
       ? element("p", {
@@ -4351,7 +4513,7 @@ function expandedRecord(item, teaser) {
             `${t("Radar first observed")} ${formatDate(item.observed_at, { dateStyle: "medium", timeStyle: "short" })} UTC`,
         })
       : null,
-    links,
+    attentionLinks,
   ]);
 }
 
@@ -10748,60 +10910,328 @@ function renderTrendMap() {
   }
 }
 
-function attentionActivity(item) {
-  return element("div", { className: "attention-activity" }, [
-    element("strong", { text: metricLabel(item.metrics?.points, "point") }),
-    element("span", { text: metricLabel(item.metrics?.comments, "comment") }),
-    element("span", { text: metricLabel(item.metrics?.submissions ?? 1, "submission") }),
-  ]);
+function readinessLabel(r) {
+  if (!r) return null;
+  const val = String(r).toLowerCase().trim();
+  if (val === "runnable") return t("Runnable");
+  if (val === "data-only" || val === "dataset") return t("Dataset");
+  if (val === "environment-only" || val === "environment") return t("Environment");
+  return String(r);
 }
 
 function observationCard(item, index) {
   const isAttention = item.observation_kind === "attention";
-  const metadata = isAttention
-    ? element("div", { className: "signal-meta" }, [
-        element("span", { className: "attention-badge", text: t("attention") }),
-        element("span", {
-          text: `${item.source} · ${eventVerb(item)}`,
-          // The relative time on the row carries the exact timestamp on
-          // hover, matching the evidence rows (issue #248).
+
+  // 1. Benchmark name: Large, bold, directly clickable title linking to the source.
+  let benchmarkName = String(item["benchmark-name"] || item.benchmark_name || item.title || "").trim();
+  if (benchmarkName.endsWith("/")) {
+    benchmarkName = benchmarkName.replace(/\/+$/, "");
+  }
+  const isZh = getLang() === "zh";
+  const actionLabel = isAttention
+    ? t("Open public discussion ↗")
+    : item.source === "Hugging Face"
+      ? t("Read full card ↗")
+      : item.source
+        ? (isZh ? `在 ${item.source} 打开 ↗` : `Open on ${item.source} ↗`)
+        : t("Open primary source ↗");
+
+  const titleLink = element("a", {
+    className: "benchmark-title-link",
+    text: benchmarkName,
+    attrs: {
+      href: safeHttpUrl(item.url),
+      target: "_blank",
+      rel: "noopener noreferrer",
+      "aria-label": `${benchmarkName} (${actionLabel})`,
+    },
+  });
+  titleLink.addEventListener("click", (event) => {
+    event.stopPropagation();
+  });
+  const headingTitle = element("h3", { className: "record-title" }, [titleLink]);
+
+  // 2. Author / affiliation: Show each author or organization once across the card.
+  const authorName = (compactNames(item.authors) || "").trim();
+  const orgName = (compactNames(item.organizations) || "").trim();
+  const affiliation = (item.affiliation || "").trim();
+
+  const lowerTitle = benchmarkName.toLowerCase();
+  const lowerAuthor = authorName.toLowerCase();
+  const lowerOrg = orgName.toLowerCase();
+
+  const isAuthorInTitle = Boolean(
+    lowerAuthor && (
+      lowerTitle === lowerAuthor ||
+      lowerTitle.startsWith(`${lowerAuthor}/`) ||
+      lowerTitle.startsWith(`${lowerAuthor}:`)
+    ),
+  );
+  const isOrgInTitle = Boolean(
+    lowerOrg && (
+      lowerTitle === lowerOrg ||
+      lowerTitle.startsWith(`${lowerOrg}/`) ||
+      lowerTitle.startsWith(`${lowerOrg}:`)
+    ),
+  );
+
+  const authorParts = [];
+  if (authorName && !isAuthorInTitle) {
+    authorParts.push(authorName);
+  }
+  if (orgName && !isOrgInTitle && orgName.toLowerCase() !== authorName.toLowerCase()) {
+    authorParts.push(orgName);
+  }
+  if (
+    affiliation &&
+    !lowerTitle.includes(affiliation.toLowerCase()) &&
+    !authorParts.some((p) => p.toLowerCase().includes(affiliation.toLowerCase()))
+  ) {
+    authorParts.push(`(${affiliation})`);
+  }
+
+  let authorLine = null;
+  if (authorParts.length) {
+    authorLine = element("div", { className: "record-author" }, [
+      element("strong", { text: authorParts.join(" · ") }),
+    ]);
+  }
+
+  // 3. Date rail (Left column of Version 1): strictly pair label with timestamp.
+  // Omit repeated date when the selected feed day already supplies that context.
+  const isArxiv = (item.source || "").toLowerCase().includes("arxiv");
+  let dateType = "";
+  let rawDate = null;
+
+  if (item.event_kind === "updated") {
+    dateType = t("Updated");
+    rawDate = item.updated_at || item.published_at;
+  } else if (item.event_kind === "released") {
+    dateType = t("Released");
+    rawDate = item.published_at || item.releasedAt || item.discovered_at;
+  } else if (item.event_kind === "discovered") {
+    dateType = t("Discovered");
+    rawDate = item.discovered_at || item.published_at;
+  } else if (item.event_kind === "discussed") {
+    dateType = t("Discussed");
+    rawDate = item.published_at || item.discovered_at;
+  } else if (isArxiv) {
+    dateType = item.version ? `v${item.version}` : t("Paper");
+    rawDate = item.published_at || item.releasedAt || item.discovered_at;
+  } else if (item.published_at || item.releasedAt) {
+    if (item.updated_at && meaningfulDateDifference(item.published_at, item.updated_at)) {
+      dateType = t("Updated");
+      rawDate = item.updated_at;
+    } else {
+      dateType = t("Released");
+      rawDate = item.published_at || item.releasedAt;
+    }
+  } else if (item.discovered_at) {
+    dateType = t("Discovered");
+    rawDate = item.discovered_at;
+  } else if (item.updated_at) {
+    dateType = t("Updated");
+    rawDate = item.updated_at;
+  } else {
+    dateType = t("Recent");
+    rawDate = null;
+  }
+
+  const rawDateDay = rawDate ? String(rawDate).slice(0, 10) : "";
+  const isSingleDayFeed = Boolean(state.todayDate && state.todayDate !== "all");
+  const isMatchingFeedDay = Boolean(isSingleDayFeed && rawDateDay && rawDateDay === state.todayDate);
+
+  const formattedShortDate = (rawDate && !isMatchingFeedDay)
+    ? formatDate(rawDate, { month: "short", day: "numeric" })
+    : "";
+
+  const dateChildren = [element("small", { text: dateType })];
+  if (formattedShortDate) {
+    dateChildren.push(element("span", { text: formattedShortDate }));
+  }
+  const dateRail = element("div", { className: "card-date" }, dateChildren);
+
+  // 4. Tags row (Top of center column in Version 1: classification topics & watchlist)
+  const categoryName = item.category || item.topic || item.domain || (isAttention ? item.event : null);
+  const tagNodes = [];
+  if (categoryName) {
+    tagNodes.push(element("span", { className: "record-tag record-tag-primary", text: categoryName }));
+  }
+  if (item.watchlist) {
+    tagNodes.push(element("span", { className: "record-tag record-tag-watch", text: t("Watchlist") }));
+  }
+  const tagsRow = tagNodes.length ? element("div", { className: "record-tags" }, tagNodes) : null;
+
+  // 5. Stars / likes, Platform & Readiness
+  const isGitHub = (item.source || "").toLowerCase().includes("github");
+  const isHF = (item.source || "").toLowerCase().includes("hugging face");
+
+  let engagementNode = null;
+  if (item.metrics?.stars !== undefined && item.metrics?.stars !== null && (isGitHub || !item.metrics?.likes)) {
+    engagementNode = element("strong", { className: "record-engagement" }, [
+      document.createTextNode(`★ ${Number(item.metrics.stars).toLocaleString()} ${t("stars")}`),
+    ]);
+  } else if (item.metrics?.likes !== undefined && item.metrics?.likes !== null) {
+    engagementNode = element("strong", { className: "record-engagement" }, [
+      document.createTextNode(`${Number(item.metrics.likes).toLocaleString()} ${t("likes")}`),
+    ]);
+  } else if (isAttention && item.metrics?.points !== undefined) {
+    engagementNode = element("strong", { className: "record-engagement" }, [
+      document.createTextNode(`${Number(item.metrics.points).toLocaleString()} ${t("points")}`),
+    ]);
+  }
+
+  // Unsupported readiness must be omitted, not defaulted to "Runnable".
+  let readinessText = null;
+  if (item.dataStatus === "catalog-listed-unverified") {
+    readinessText = t("Catalog indexed");
+  } else if (item.readiness) {
+    readinessText = readinessLabel(item.readiness);
+  } else if (item.format === "dataset") {
+    readinessText = t("Dataset");
+  } else if (item.format === "runnable" || item.format === "code") {
+    readinessText = t("Runnable");
+  } else if (item.format === "environment") {
+    readinessText = t("Environment");
+  }
+  const readinessNode = readinessText
+    ? element("span", { className: "readiness", text: readinessText })
+    : null;
+
+  const scoreLabel = isAttention ? t("Attention") : t("Priority");
+  let scoreNode = null;
+  if (item.total_score != null) {
+    const max = Number(scoreMax(item));
+    const precision = max > 10 ? 0 : 2;
+    const formattedScore = Number(item.total_score || 0).toFixed(precision);
+    if (!isAttention) {
+      scoreNode = element(
+        "button",
+        {
+          className: "attention-score rubric-trigger",
           attrs: {
-            title: eventTimestamp(item)
-              ? `${formatDate(eventTimestamp(item), { dateStyle: "medium", timeStyle: "short" })} UTC`
-              : "",
+            type: "button",
+            "aria-label": `${t("Priority score")} ${formattedScore}. ${t("How is this scored?")}`,
           },
-        }),
-      ])
-    : recordMeta(item);
-  const summary = (item.summary || "").trim()
+        },
+        [document.createTextNode(`${scoreLabel} ${formattedScore}`)],
+      );
+      scoreNode.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        openRubric(item);
+      });
+    } else {
+      scoreNode = element("span", {
+        className: "attention-score",
+        text: `${scoreLabel} ${formattedScore}`,
+      });
+    }
+  }
+
+  const platformName = item.source || (isGitHub ? "GitHub" : isHF ? "Hugging Face" : "");
+  const platformNode = platformName ? element("span", { className: "record-platform", text: platformName }) : null;
+
+  const metaParts = [];
+  if (readinessNode) metaParts.push(readinessNode);
+  if (scoreNode) metaParts.push(scoreNode);
+  if (engagementNode) metaParts.push(engagementNode);
+  if (platformNode) metaParts.push(platformNode);
+  const metaLine = metaParts.length
+    ? element("div", { className: "record-meta-line" }, metaParts)
+    : null;
+
+  // 6. What is inside:
+  const rawSummary = (item.summary || "").trim()
     ? shorten(item.summary)
     : t("No description published at the source.");
-  const header = element("summary", { className: "record-summary" }, [
-    element("span", {
-      className: "signal-rank",
-      text: String(index + 1).padStart(2, "0"),
+  const summary = cleanCardSummary(rawSummary, benchmarkName);
+
+  const availableContents = extractAvailableContents(item);
+  const contentsLine = availableContents.length
+    ? element("p", { className: "record-contents" }, [
+        element("strong", { text: `${t("Contents")}: ` }),
+        document.createTextNode(availableContents.join(", ")),
+      ])
+    : null;
+
+  // 7. Why surfaced search match: display only when user has entered a search query
+  const searchMatchText = state.q ? extractSearchMatchLine(item.rationale || []) : "";
+  const searchMatchLine = searchMatchText
+    ? element("p", { className: "record-search-match", text: searchMatchText })
+    : null;
+
+  // 8. Resource action links (Project ↗, Code ↗, Paper ↗, Dataset ↗)
+  const isPaperSource = isArxiv || (item.source || "").toLowerCase().includes("paper") || (item.source || "").toLowerCase().includes("crossref") || (item.source || "").toLowerCase().includes("datacite");
+  const isDatasetSource = (item.format === "dataset") || (item.source || "").toLowerCase().includes("dataset");
+
+  let primaryActionLabel = t("Project ↗");
+  if (isPaperSource) {
+    primaryActionLabel = t("Paper ↗");
+  } else if (isDatasetSource) {
+    primaryActionLabel = t("Dataset ↗");
+  } else if (isAttention) {
+    primaryActionLabel = t("Discussion ↗");
+  }
+
+  const resourceLinks = [
+    element("a", {
+      text: primaryActionLabel,
+      attrs: { href: safeHttpUrl(item.url), target: "_blank", rel: "noopener noreferrer" },
     }),
-    element("div", { className: "record-heading" }, [
-      // The benchmark title leads the row; the provenance line follows it
-      // instead of classifying the item before it is named (issue #248).
-      element("h3", { text: item.title }),
-      metadata,
-      // Attention rows already show their source-specific points, comments,
-      // and submissions in attentionActivity; the generic facts helper does
-      // not understand those counters and would incorrectly call them absent.
-      isAttention ? null : recordFacts(item),
-      ...(item.watchlist && item.watchlist_note
-        ? [element("p", { className: "signal-tldr", text: item.watchlist_note })]
-        : []),
-      element("p", {
-        className: item.summary ? "" : "signal-nodesc",
-        text: isAttention
-          ? `${summary} · ${metricLabel(item.metrics?.points, "point")}`
-          : summary,
+  ];
+  if (item.primary_artifact_url && item.primary_artifact_url !== item.url) {
+    const artifactUrl = safeHttpUrl(item.primary_artifact_url);
+    const isArtifactGithub = artifactUrl.includes("github.com") || artifactUrl.includes("gitlab.com");
+    const isArtifactPaper = isArxiv || artifactUrl.includes("arxiv.org") || artifactUrl.includes("doi.org");
+
+    let secondaryLabel = t("Artifact ↗");
+    if (isAttention) {
+      secondaryLabel = isArtifactGithub ? t("Code ↗") : isArtifactPaper ? t("Paper ↗") : t("Artifact ↗");
+    } else if (isArtifactPaper) {
+      secondaryLabel = t("Paper ↗");
+    } else if (isArtifactGithub || item.format === "runnable" || item.format === "code") {
+      secondaryLabel = t("Code ↗");
+    }
+
+    resourceLinks.push(
+      element("a", {
+        text: secondaryLabel,
+        attrs: { href: artifactUrl, target: "_blank", rel: "noopener noreferrer" },
+      }),
+    );
+  }
+  const resourcesRow = element("div", { className: "record-resources" }, resourceLinks);
+
+  // Center column content
+  const headingElements = [
+    tagsRow,
+    headingTitle,
+    authorLine,
+    element("p", {
+      className: (item.summary || "").trim() ? "record-description" : "record-description signal-nodesc",
+      text: isAttention ? `${summary} · ${metricLabel(item.metrics?.points, "point")}` : summary,
+    }),
+    metaLine,
+    contentsLine,
+    searchMatchLine,
+    resourcesRow,
+    ...(item.watchlist && item.watchlist_note
+      ? [element("p", { className: "signal-tldr", text: item.watchlist_note })]
+      : []),
+  ].filter(Boolean);
+
+  const header = element("summary", { className: "record-summary" }, [
+    dateRail,
+    element("div", { className: "record-heading" }, headingElements),
+    element("div", { className: "record-actions" }, [
+      element("span", {
+        className: "signal-rank",
+        text: String(index + 1).padStart(2, "0"),
       }),
     ]),
-    isAttention ? attentionActivity(item) : scoreBlock(item),
   ]);
+
   return element(
     "details",
     {
@@ -10809,6 +11239,14 @@ function observationCard(item, index) {
     },
     [header, expandedRecord(item, (item.summary || "").trim() ? summary : "")],
   );
+}
+
+function attentionActivity(item) {
+  return element("div", { className: "attention-activity" }, [
+    element("strong", { text: metricLabel(item.metrics?.points, "point") }),
+    element("span", { text: metricLabel(item.metrics?.comments, "comment") }),
+    element("span", { text: metricLabel(item.metrics?.submissions ?? 1, "submission") }),
+  ]);
 }
 
 const CONTACT_EMAIL = "ktwu01@gmail.com";

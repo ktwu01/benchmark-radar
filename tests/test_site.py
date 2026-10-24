@@ -1282,6 +1282,26 @@ def test_expanded_detail_continues_past_the_teaser_instead_of_repeating_it():
     assert 'expandedRecord(item, (item.summary || "").trim() ? summary : "")' in script
 
 
+def test_expanded_card_deduplication_issue_908():
+    """Issue #908: ensure expanded card avoids duplicate facts and respects single-zone rules."""
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+
+    # Rule 2: detail-source meta line removed from expanded record to prevent repeating header
+    assert "`${item.source} · ${eventVerb(item)} · ${categoryLine}`" not in script
+
+    # Rule 5: Score breakdown heading present without repeating total priority
+    assert 't(isAttention ? "Activity breakdown" : "Score breakdown")' in script
+
+    # Rule 3: Description clean helper strips redundant title and HF link boilerplate
+    assert "function cleanCardSummary(summary, title)" in script
+
+    # Rule 4: Retains original Published date when updated meaningfully differs
+    assert '[t("Published"), formatDate(item.published_at, { dateStyle: "medium" })]' in script
+
+    # Rule 6: Formatted rationale fixes stemmer leak and avoids duplicate metadata
+    assert "function formatCardRationale(rationaleList, item)" in script
+
+
 def test_trend_map_is_keyboard_accessible_and_coordinates_today_filters():
     html = Path("site/index.html").read_text(encoding="utf-8")
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
@@ -1401,6 +1421,8 @@ def test_static_html_references_existing_local_assets():
         "cli/",
         "cite/",
         "about/",
+        "library/",
+        "models/",
     }
     missing = []
     for reference in parser.local_refs:
@@ -3318,7 +3340,7 @@ def test_model_filter_controls_and_status_have_chinese_translations():
         + "console.log(JSON.stringify({zh, en: keys.map(key => t(key))}));"
     )
     result = subprocess.run(
-        [node, "-e", program], capture_output=True, text=True, timeout=60, check=True
+        [node], input=program, capture_output=True, text=True, timeout=60, check=True
     )
     translated = json.loads(result.stdout)
     assert translated["en"] == keys
@@ -3329,3 +3351,185 @@ def test_model_filter_controls_and_status_have_chinese_translations():
         "文档发布日期",
         "搜索全部 benchmark（暂不按分数筛选）",
     ]
+
+
+def test_observation_card_deterministic_layout_plan():
+    """Verify deterministic card layout matching Koutian Wu's design rules."""
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+    styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
+
+    # 1. Benchmark name directly clickable link
+    assert "benchmark-title-link" in script
+    assert ".benchmark-title-link" in styles
+
+    # 2. Author handle directly below title
+    assert "record-author" in script
+    assert ".record-author" in styles
+
+    # 3. Stars / likes, date, platform metadata line
+    assert "record-meta-line" in script
+    assert "record-engagement" in script
+    assert ".record-meta-line" in styles
+
+    # 4. What is inside: contents extractor & search match
+    assert "function extractAvailableContents(item)" in script
+    assert "function extractSearchMatchLine(rationaleList)" in script
+
+    # 5. Overall score and score breakdown collapsed behind Score details
+    assert "score-details" in script
+    assert ".score-details" in styles
+    assert 't("Score details")' in script
+
+    # 6. Version 1: 3-column radar layout (date rail, tags, readiness pill, resources)
+    assert "card-date" in script
+    assert ".card-date" in styles
+    assert "record-tags" in script
+    assert ".record-tags" in styles
+    assert "readiness" in script
+    assert ".readiness" in styles
+    assert "record-resources" in script
+    assert ".record-resources" in styles
+
+
+def test_observation_card_readiness_regression():
+    """Verify that absent readiness metadata does not default to 'Runnable'.
+
+    Addresses Toby Bridges' [P1] code review finding: all 772 latest cards
+    (including 119 arXiv papers and 17 HN threads) must omit the readiness
+    pill unless explicit metadata establishes readiness.
+    """
+    import json
+    import shutil
+    import subprocess
+
+    import pytest
+
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+    assert "function readinessLabel(r)" in script
+    assert 'if (!r) return "Runnable";' not in script
+    assert "if (!r) return null;" in script
+
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node is not installed")
+
+    start_r = script.index("function readinessLabel(r)")
+    end_r = script.index("\n}\n", start_r) + 2
+    readiness_fn = script[start_r:end_r]
+
+    program = f"""
+    function t(s) {{ return s; }}
+    {readiness_fn}
+
+    const res = {{
+      absent: readinessLabel(undefined),
+      nullVal: readinessLabel(null),
+      emptyStr: readinessLabel(""),
+      runnable: readinessLabel("runnable"),
+      dataOnly: readinessLabel("data-only"),
+      dataset: readinessLabel("dataset")
+    }};
+    console.log(JSON.stringify(res));
+    """
+    result = subprocess.run([node, "-e", program], capture_output=True, text=True, check=True)
+    res = json.loads(result.stdout)
+    assert res["absent"] is None
+    assert res["nullVal"] is None
+    assert res["emptyStr"] is None
+    assert res["runnable"] == "Runnable"
+    assert res["dataOnly"] == "Dataset"
+    assert res["dataset"] == "Dataset"
+
+
+def test_observation_card_date_pairing_regression():
+    """Verify that 'Updated' strictly pairs with updated_at and suppresses redundant feed dates.
+
+    Addresses Toby Bridges' [P2] finding (label must not prefer Updated while
+    timestamp prefers published_at) and Koutian Wu's finding (omitting repeated
+    day strings when the active feed day supplies that context).
+    """
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+    assert 'dateType = t("Updated");' in script
+    assert "rawDate = item.updated_at;" in script
+    assert "isMatchingFeedDay" in script
+    assert "isSingleDayFeed && rawDateDay && rawDateDay === state.todayDate" in script
+
+
+def test_observation_card_author_deduplication_regression():
+    """Verify that author/org is rendered only once across tags, title link, and author subtitle.
+
+    Addresses Koutian Wu's finding where RecoX and mohanvenkat1 were rendered three times.
+    """
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+    assert "isAuthorInTitle" in script
+    assert "record-tag-publisher" not in script
+    assert 'benchmarkName.replace(/\\/+$/, "")' in script
+
+
+def test_observation_card_search_match_sanitization_regression():
+    """Verify that search match rationale strips internal regex/tokens and omits obvious terms.
+
+    Addresses Koutian Wu's finding: "agent~benchmark", "benchmark*" such word is
+    obvious and should not appear in the UI. Also gates display to active search.
+    """
+    import json
+    import shutil
+    import subprocess
+
+    import pytest
+
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+    assert "extractSearchMatchLine" in script
+    assert "stopWords" in script
+    assert 'state.q ? extractSearchMatchLine(item.rationale || []) : ""' in script
+
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node is not installed")
+
+    start_s = script.index("function extractSearchMatchLine(rationaleList)")
+    end_s = script.index("\n}\n", start_s) + 2
+    search_fn = script[start_s:end_s]
+
+    program = f"""
+    function t(s) {{ return s; }}
+    {search_fn}
+
+    const testResults = {{
+      searchLeakCleaned: extractSearchMatchLine(["Matched: agent~benchmark, benchmark*"]),
+      searchObviousOnly: extractSearchMatchLine(["Matched: benchmark, evaluation"]),
+      searchMeaningful: extractSearchMatchLine(["Matched: reasoning, agent*"])
+    }};
+    console.log(JSON.stringify(testResults));
+    """
+    result = subprocess.run([node, "-e", program], capture_output=True, text=True, check=True)
+    res = json.loads(result.stdout)
+    assert res["searchLeakCleaned"] == "Matched keywords: agent"
+    assert res["searchObviousOnly"] == ""
+    assert "agent" in res["searchMeaningful"]
+
+
+def test_observation_card_priority_evidence_label_regression():
+    """Verify evidence items with total_score are labeled 'Priority' rather than 'Attention'."""
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+    assert 'const scoreLabel = isAttention ? t("Attention") : t("Priority");' in script
+    assert "`${scoreLabel} ${formattedScore}`" in script
+    assert "precision = max > 10 ? 0 : 2" in script
+    assert "openRubric(item)" in script
+
+
+def test_observation_card_event_kind_and_org_preservation_regression():
+    """Verify event_kind takes priority and organizations are preserved alongside authors."""
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+    assert 'if (item.event_kind === "updated") {' in script
+    assert '} else if (item.event_kind === "released") {' in script
+    assert '} else if (item.event_kind === "discovered") {' in script
+    assert '} else if (item.event_kind === "discussed") {' in script
+    assert "compactNames(item.organizations)" in script
+    assert "authorParts" in script
+
+
+def test_observation_card_mobile_rail_width_regression():
+    """Verify mobile grid rail provides adequate width for date labels."""
+    styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
+    assert "grid-template-columns: 24px 62px minmax(0, 1fr) 36px;" in styles

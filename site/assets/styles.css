@@ -1126,7 +1126,7 @@ a.briefing-chip-sources:focus-visible {
 
 .record-summary {
   display: grid;
-  grid-template-columns: 26px 38px minmax(0, 1fr) 150px;
+  grid-template-columns: 24px 74px minmax(0, 1fr) 44px;
   gap: 0.85rem;
   align-items: start;
   padding: 1.25rem 0;
@@ -1144,7 +1144,7 @@ a.briefing-chip-sources:focus-visible {
    selector, which restores exactly the one-character-per-line wrap it exists to
    prevent. A class degrades to "unstyled but readable" instead. */
 .record-summary.record-summary-unranked {
-  grid-template-columns: 26px minmax(0, 1fr) 150px;
+  grid-template-columns: 26px minmax(0, 1fr);
 }
 
 .record-summary::before {
@@ -1198,7 +1198,7 @@ a.briefing-chip-sources:focus-visible {
 }
 
 .record-detail {
-  margin: 0 186px 0 96px;
+  margin: 0 24px 0 72px;
   padding: 1.25rem 0 1.75rem;
 }
 
@@ -1242,11 +1242,195 @@ a.briefing-chip-sources:focus-visible {
 
 .record-card h3 {
   overflow-wrap: anywhere;
-  margin: 0.2rem 0 0.55rem;
+  margin: 0.2rem 0 0.25rem;
   font-family: var(--display);
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   line-height: 1.3;
+}
+
+.benchmark-title-link {
+  color: var(--navy);
+  text-decoration: none;
+  font-weight: 700;
+  transition: color 140ms ease;
+}
+
+.benchmark-title-link:hover,
+.benchmark-title-link:focus-visible {
+  color: var(--blue);
+  text-decoration: underline;
+}
+
+.record-author {
+  margin: 0.15rem 0 0.35rem;
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+
+.record-author strong {
+  font-weight: 600;
+}
+.card-date {
+  display: grid;
+  gap: 3px;
+  color: var(--ink);
+  font: 600 12px/1.2 ui-monospace, monospace;
+  align-content: start;
+  padding-top: 2px;
+}
+
+.card-date small {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+}
+
+.record-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.record-tag {
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.record-tag-primary {
+  background: var(--soft, #f1f5f9);
+  color: var(--ink, #0f172a);
+  font-weight: 600;
+}
+
+.record-tag-publisher {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.record-tag-watch {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.readiness {
+  padding: 2px 7px;
+  border: 1px solid #bbf7d0;
+  border-radius: 4px;
+  background: #f0fdf4;
+  color: #15803d;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.attention-score {
+  font-weight: 650;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+}
+
+button.attention-score {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+button.attention-score:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.record-resources {
+  display: flex;
+  gap: 14px;
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.record-resources a {
+  color: var(--blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.record-resources a:hover {
+  text-decoration: underline;
+}
+
+.record-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin-bottom: 0.55rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.record-engagement {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--orange-deep, #c2410c);
+}
+
+.record-date,
+.record-platform {
+  font-weight: 400;
+}
+
+.record-contents {
+  margin: 0.4rem 0 0;
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+
+.record-contents strong {
+  color: var(--ink);
+}
+
+.record-search-match {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--blue-deep);
+}
+
+.score-details {
+  margin-top: 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.85rem;
+  background: color-mix(in srgb, var(--panel) 50%, transparent);
+}
+
+.score-details-toggle {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--blue-deep);
+}
+
+.score-details-toggle:hover {
+  color: var(--blue);
+}
+
+.score-details-content {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px dashed var(--line);
+}
+
+.score-overall-section {
+  margin-bottom: 1rem;
 }
 
 #today-list {
@@ -4517,8 +4701,8 @@ footer {
   }
 
   .record-summary {
-    grid-template-columns: 24px 30px minmax(0, 1fr);
-    gap: 0.65rem;
+    grid-template-columns: 24px 62px minmax(0, 1fr) 36px;
+    gap: 0.55rem;
   }
 
   .record-summary::before {
