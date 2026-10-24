@@ -179,6 +179,84 @@ def fixture_queries() -> list[str]:
     return list(dict.fromkeys(queries))
 
 
+def _prefix_catalog() -> list[dict]:
+    """Records that separate a typed word-start from an exact token.
+
+    SafetyBench and Safe Harbor contain no standalone "saf" token. Humanity's
+    Last Exam only contains "human" inside a sentence, while fifty-five other
+    records repeat that word. A whole-word gate therefore returns nothing for
+    "saf" and "hu", and buries the exam name past the first page of "human".
+    """
+    records = [
+        record(
+            "safetybench",
+            "SafetyBench",
+            description="Refusal and harmful-content measurements.",
+            categories=["Safety"],
+        ),
+        record(
+            "safe-harbor",
+            "Safe Harbor",
+            description="A narrow protocol.",
+            categories=["Protocol"],
+        ),
+        record(
+            "translation",
+            "Translation Bench",
+            description="English to French quality.",
+            categories=["Language"],
+        ),
+        record(
+            "hle",
+            "Humanity's Last Exam",
+            description="A closed exam. The notes mention one human rater.",
+            categories=["Knowledge"],
+            has_paper=True,
+        ),
+        record(
+            "humaneval",
+            "HumanEval",
+            description="Docstring code generation.",
+            categories=["Code"],
+            has_repo=True,
+        ),
+    ]
+    records.extend(
+        record(
+            f"mention-{index:02d}",
+            f"Mention {index:02d}",
+            description="human " * 12,
+            categories=["General"],
+        )
+        for index in range(55)
+    )
+    return records
+
+
+def test_partial_words_find_records_whose_words_start_with_them():
+    # Issue #883: the search box searches as you type. A whole-word gate shows
+    # an empty catalog for "saf" and "hu", and ranks Humanity's Last Exam off
+    # the first page of "human" because the name token is "humanity".
+    records = _prefix_catalog()
+    queries = ["saf", "safe", "safety", "human", "hu"]
+    site = site_ranking(records, queries)
+    for query in queries:
+        assert site[query] == service_ranking(records, query), query
+
+    assert set(service_ranking(records, "saf")["keys"]) == {"safetybench", "safe-harbor"}
+    # "safe" is already a whole word, so it stays on Safe Harbor and does not
+    # recruit SafetyBench. "safety" is not a whole word here, so it does.
+    safe_keys = set(service_ranking(records, "safe")["keys"])
+    assert "safe-harbor" in safe_keys
+    assert "safetybench" not in safe_keys
+    assert "translation" not in safe_keys
+    assert service_ranking(records, "safety")["keys"] == ["safetybench"]
+    human = service_ranking(records, "human")["keys"]
+    assert human.index("hle") < 50
+    hu = service_ranking(records, "hu")["keys"]
+    assert {"hle", "humaneval"} <= set(hu)
+
+
 @pytest.mark.skipif(not INDEX.exists(), reason="build the data release first")
 def test_site_search_matches_queryservice_on_the_published_catalog():
     records = json.loads(INDEX.read_text(encoding="utf-8"))["benchmarks"]

@@ -16,7 +16,10 @@ health, across the CLI, the HTTP surface, and the public consumer Skill.
   artifacts fail visibly with machine-readable errors; they must not be replaced
   with guessed metadata.
 - Lexical search is a high-recall candidate retriever for agents, not a final
-  suitability judge. Any shared query token may produce a candidate. BM25F is
+  suitability judge. Any shared query token may produce a candidate. A query token
+  of at least two letters that is not already a whole word in the catalog also
+  matches a longer ASCII word that starts with it. A token that is already a word,
+  and a token with no letter, stay exact. BM25F is
   the primary retrieval score. Exact/prefix/token-sequence name matches and
   non-name contiguous phrases are bounded, query-IDF-scaled boosts; lexical
   coverage is only a tie-breaker and explanation because BM25F already rewards

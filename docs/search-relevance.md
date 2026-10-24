@@ -31,9 +31,16 @@ guessed from a name.
 
 Search has three explicit stages:
 
-1. Any shared token creates an observable candidate.
+1. Any shared token creates an observable candidate. A query token of at least two
+   letters that is not already a whole word in the catalog also matches a longer
+   ASCII word that starts with it, so typing `saf` or `hu` does not return an empty
+   page. A token that is already a word stays exact, so `agent` does not match
+   `agents`, and a token with no letter stays exact, so `10` does not match `100`.
 2. BM25F over weighted fields is the primary score. Exact, prefix, and contiguous
-   name matches receive bounded query-IDF-scaled boosts. A contiguous query phrase
+   name matches receive bounded query-IDF-scaled boosts. A name prefix includes a
+   name whose leading words start with the query words, so `human` ranks a
+   benchmark named Humanity's Last Exam with that boost even though `human` is
+   already a whole word elsewhere. A contiguous query phrase
    in a non-name field receives a smaller query-IDF-scaled boost. Name phrases are
    not counted twice.
 3. Candidates are returned with the evidence an agent needs to make the final

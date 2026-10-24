@@ -127,10 +127,36 @@ function containsTokens(haystack, needle) {
   return false;
 }
 
+function wordPrefix(queryToken, documentToken) {
+  // One letter, and a token with no letter, stay exact. Otherwise typing "a"
+  // matches every word and "10" matches "100", while "saf" and "hu" still
+  // return an empty catalog.
+  if (queryToken.length < 2 || !ASCII.test(queryToken) || !ASCII.test(documentToken)) return false;
+  if (!/[a-z]/.test(queryToken)) return false;
+  return documentToken.length > queryToken.length && documentToken.startsWith(queryToken);
+}
+
+function covers(tokens, queryToken, allowPrefix) {
+  for (const token of tokens) {
+    if (token === queryToken) return true;
+    // A finished catalog word stays exact. "agent" must not recruit "agents".
+    if (allowPrefix && wordPrefix(queryToken, token)) return true;
+  }
+  return false;
+}
+
+function leadingNameMatch(nameTokens, queryTokens) {
+  if (!queryTokens.length || queryTokens.length > nameTokens.length) return false;
+  return queryTokens.every((queryToken, index) => {
+    const nameToken = nameTokens[index];
+    return queryToken === nameToken || wordPrefix(queryToken, nameToken);
+  });
+}
+
 function nameMatchTier(nameTokens, queryTokens) {
   const same = (a, b) => a.length === b.length && a.every((token, index) => token === b[index]);
   if (same(nameTokens, queryTokens)) return 0;
-  if (same(nameTokens.slice(0, queryTokens.length), queryTokens)) return 1;
+  if (leadingNameMatch(nameTokens, queryTokens)) return 1;
   if (containsTokens(nameTokens, queryTokens)) return 2;
   return null;
 }
@@ -165,10 +191,16 @@ function present(value) {
 // completeness, name length, folded name, key. Also returns the query words the
 // record lacks, QueryService's `missing_tokens`.
 function sortKey(document, queryTokens, corpus) {
-  if (!queryTokens.some((token) => document.allTokens.has(token))) return null;
+  const unfinished = new Set(
+    queryTokens.filter((token) => !(corpus.documentFrequency.get(token) || 0)),
+  );
+  const allow = (token) => unfinished.has(token);
+  if (!queryTokens.some((token) => covers(document.allTokens, token, allow(token)))) return null;
   const matched = new Set();
   for (const field of FIELD_ORDER) {
-    for (const token of queryTokens) if (document.fieldCounts[field].has(token)) matched.add(token);
+    for (const token of queryTokens) {
+      if (covers(document.fieldTokens[field], token, allow(token))) matched.add(token);
+    }
   }
   const tier = nameMatchTier(document.fieldTokens.name, queryTokens);
   let queryWeight = 0;

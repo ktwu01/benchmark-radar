@@ -261,12 +261,50 @@ def _contains_tokens(haystack: tuple[str, ...], needle: tuple[str, ...]) -> bool
     )
 
 
+def _word_prefix(query_token: str, document_token: str) -> bool:
+    """A partially typed word matches the longer ASCII word it begins.
+
+    One letter, and a token with no letter, stay exact. Otherwise typing "a"
+    matches every word and "10" matches "100", while "saf" and "hu" still
+    return an empty catalog.
+    """
+    if len(query_token) < 2 or not query_token.isascii() or not document_token.isascii():
+        return False
+    if not any(character.isalpha() for character in query_token):
+        return False
+    return len(document_token) > len(query_token) and document_token.startswith(query_token)
+
+
+def _covers(
+    tokens: tuple[str, ...] | frozenset[str],
+    query_token: str,
+    *,
+    prefix: bool,
+) -> bool:
+    if query_token in tokens:
+        return True
+    # A finished catalog word stays exact. "agent" must not recruit "agents".
+    # An unfinished fragment such as "saf" has no whole-word hit to protect.
+    if not prefix:
+        return False
+    return any(_word_prefix(query_token, token) for token in tokens)
+
+
+def _leading_name_match(name_tokens: tuple[str, ...], query_tokens: tuple[str, ...]) -> bool:
+    if not query_tokens or len(query_tokens) > len(name_tokens):
+        return False
+    return all(
+        query_token == name_token or _word_prefix(query_token, name_token)
+        for query_token, name_token in zip(query_tokens, name_tokens, strict=False)
+    )
+
+
 def _name_match(
     name_tokens: tuple[str, ...], query_tokens: tuple[str, ...]
 ) -> tuple[int, str] | None:
     if name_tokens == query_tokens:
         return 0, "exact name match"
-    if name_tokens[: len(query_tokens)] == query_tokens:
+    if _leading_name_match(name_tokens, query_tokens):
         return 1, "name prefix match"
     if _contains_tokens(name_tokens, query_tokens):
         return 2, "name token-sequence match"
@@ -310,13 +348,20 @@ def _match(
     corpus: _SearchCorpus,
 ) -> tuple[tuple[Any, ...], dict[str, Any]] | None:
     query_token_set = set(query_tokens)
-    if document.all_tokens.isdisjoint(query_token_set):
+    unfinished = {token for token in query_tokens if corpus.document_frequency[token] == 0}
+    if not any(
+        _covers(document.all_tokens, token, prefix=token in unfinished) for token in query_tokens
+    ):
         return None
 
     matched_fields: list[str] = []
     matched_tokens: set[str] = set()
     for field in _FIELD_ORDER:
-        hits = query_token_set.intersection(document.field_counts[field])
+        hits = {
+            token
+            for token in query_token_set
+            if _covers(document.field_tokens[field], token, prefix=token in unfinished)
+        }
         if hits:
             matched_fields.append(field)
             matched_tokens.update(hits)
