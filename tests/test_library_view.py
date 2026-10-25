@@ -80,6 +80,24 @@ def test_no_taxonomy_publishes_no_library_page():
     assert _library_seed([{"slug": "a", "name": "A", "source": "x"}], None) == {}
 
 
+def test_library_sort_and_saved_controls_meet_the_touch_target():
+    """Issue #890: the sort menu and Saved toggles were 36px tall.
+
+    design.md asks for a 44px touch target on every button and form field.
+    `--control-height` is that size. `2.25rem` is 36px at the 16px root, so a
+    finger tap on a phone lands beside the control.
+    """
+    styles = (ROOT / "site" / "assets" / "styles.css").read_text(encoding="utf-8")
+    html = (ROOT / "site" / "index.html").read_text(encoding="utf-8")
+    rule = styles.split(".library-sort,\n.library-saved-toggle {", 1)[1].split("}", 1)[0]
+
+    assert 'id="library-sort"' in html
+    assert 'class="library-saved-toggle"' in html
+    assert "--control-height: 44px" in styles
+    assert "min-height: var(--control-height)" in rule
+    assert "2.25rem" not in rule
+
+
 def test_directions_are_kept_apart_from_searchable_categories():
     # The direction is a reviewed classification, so it must never feed the
     # source categories that search ranks on.

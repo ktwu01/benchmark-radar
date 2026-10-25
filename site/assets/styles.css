@@ -6133,7 +6133,7 @@ dialog {
 
 .library-sort,
 .library-saved-toggle {
-  min-height: 2.25rem;
+  min-height: var(--control-height);
   padding: 0.3rem 0.6rem;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
