@@ -5,10 +5,10 @@ type: dataset
 authors:
   - family-names: Wu
     given-names: Koutian
-  - family-names: Zhou
-    given-names: Junjie
   - family-names: Zhang
     given-names: Wenjun
+  - family-names: Zhou
+    given-names: Junjie
   - family-names: Han
     given-names: Pengqian
   - family-names: Shang
@@ -47,10 +47,10 @@ preferred-citation:
   authors:
     - family-names: Wu
       given-names: Koutian
-    - family-names: Zhou
-      given-names: Junjie
     - family-names: Zhang
       given-names: Wenjun
+    - family-names: Zhou
+      given-names: Junjie
     - family-names: Han
       given-names: Pengqian
     - family-names: Shang

@@ -148,7 +148,7 @@ def test_citation_metadata_prefers_the_technical_report():
 
 def test_public_bibtex_names_all_report_authors():
     author = (
-        "author={Koutian Wu and Junjie Zhou and Wenjun Zhang and Pengqian Han and "
+        "author={Koutian Wu and Wenjun Zhang and Junjie Zhou and Pengqian Han and "
         "Ergan Shang and Jiayu Wang and Junkai Wang and Wanghan Xu and "
         "Songyuanyi Lu and Yixuan Li and Rudy {Mizrahi Celekli} and "
         "Lazizbek Ravshanov and Yaoliang Bian and Xudong Han and Lin Shi}"

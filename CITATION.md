@@ -19,7 +19,7 @@ done.
 ## APA
 
 ```text
-Wu, K., Zhou, J., Zhang, W., Han, P., Shang, E., Wang, J., Wang, J., Xu, W., Lu, S., Li, Y., Mizrahi Celekli, R., Ravshanov, L., Bian, Y., Han, X., & Shi, L. (2026). Benchmark Radar: A living database and search engine for AI benchmarks and evaluation. arXiv:2609.11115. https://arxiv.org/abs/2609.11115
+Wu, K., Zhang, W., Zhou, J., Han, P., Shang, E., Wang, J., Wang, J., Xu, W., Lu, S., Li, Y., Mizrahi Celekli, R., Ravshanov, L., Bian, Y., Han, X., & Shi, L. (2026). Benchmark Radar: A living database and search engine for AI benchmarks and evaluation. arXiv:2609.11115. https://arxiv.org/abs/2609.11115
 ```
 
 Copy the lines above into your reference list.
@@ -29,7 +29,7 @@ Copy the lines above into your reference list.
 ```bibtex
 @misc{wu2026benchmarkradarlivingdatabase,
       title={Benchmark Radar: A Living Database and Search Engine for AI Benchmarks and Evaluation},
-      author={Koutian Wu and Junjie Zhou and Wenjun Zhang and Pengqian Han and Ergan Shang and Jiayu Wang and Junkai Wang and Wanghan Xu and Songyuanyi Lu and Yixuan Li and Rudy {Mizrahi Celekli} and Lazizbek Ravshanov and Yaoliang Bian and Xudong Han and Lin Shi},
+      author={Koutian Wu and Wenjun Zhang and Junjie Zhou and Pengqian Han and Ergan Shang and Jiayu Wang and Junkai Wang and Wanghan Xu and Songyuanyi Lu and Yixuan Li and Rudy {Mizrahi Celekli} and Lazizbek Ravshanov and Yaoliang Bian and Xudong Han and Lin Shi},
       year={2026},
       eprint={2609.11115},
       archivePrefix={arXiv},
