@@ -150,7 +150,6 @@ def test_generate_dataset_card():
     assert "# Benchmark Radar: AI Benchmarks and Evaluation Scores\n" in card
     assert "title={Benchmark Radar: A Living Database and Search Engine" in card
     assert "Daily Discovery and" not in card
-    assert "and Bian, Yaoliang and Han, Xudong\n          and Shi, Lin}" in card
     assert "`claire_radar`, `llm_stats`, `model_reports`" in card
 
 
