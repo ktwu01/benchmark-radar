@@ -2566,13 +2566,26 @@ function briefingMeta(parts, citations) {
             "aria-label": `${sourceText}: ${citation.title}`,
           },
         })
-      : element("span", {
-          className: "briefing-chip briefing-chip-sources",
-          text: sourceText,
-        }));
+      // Issue #919: a count of several sources is still the reader's way to the
+      // evidence, so it opens the list of those sources instead of reading as a
+      // dead label. A native disclosure gives keyboard support for free.
+      : element("details", { className: "briefing-sources-disclosure" }, [
+          element("summary", {
+            className: "briefing-chip briefing-chip-sources",
+            text: sourceText,
+          }),
+          element("ul", { className: "briefing-sources-list" },
+            citedSources.map((entry) => element("li", {}, [
+              element("a", {
+                text: entry.title,
+                attrs: { href: entry.href, target: "_blank", rel: "noopener noreferrer" },
+              }),
+            ])),
+          ),
+        ]));
   }
   if (!chips.length) return null;
-  return element("p", { className: "briefing-insight-meta" }, chips);
+  return element("div", { className: "briefing-insight-meta" }, chips);
 }
 
 function briefingInsight(line, citations) {

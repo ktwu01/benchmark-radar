@@ -1961,11 +1961,15 @@ def test_rendered_briefing_splits_each_bullet_into_head_body_and_meta():
     assert "Evidence:" not in subtext(body)
     assert "High confidence" in subtext(meta)
     assert "3 sources" in subtext(meta)
-    multi_source_chip = next(
-        node for node in meta["children"] if "briefing-chip-sources" in node["className"].split()
-    )
-    assert multi_source_chip["tag"] == "span"
-    assert multi_source_chip["href"] == ""
+    # Issue #919: several sources open the list of those sources rather than
+    # rendering as an unclickable label.
+    disclosure = next(node for node in meta["children"] if node["tag"] == "details")
+    summary = disclosure["children"][0]
+    assert summary["tag"] == "summary"
+    assert summary["text"] == "3 sources"
+    links = [node for node in _flatten(disclosure) if node["tag"] == "a"]
+    assert len(links) == 3
+    assert all(link["href"] for link in links)
 
     # An older bullet without the "Why it matters" structure degrades to a head
     # with no body, yet its evidence and confidence still move to the metadata.

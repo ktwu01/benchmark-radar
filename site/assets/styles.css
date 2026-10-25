@@ -809,6 +809,7 @@ select:focus-visible {
 .briefing-insight-meta {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-start;
   gap: 0.4rem;
   margin: 0;
 }
@@ -852,9 +853,27 @@ a.briefing-chip-sources {
 }
 
 a.briefing-chip-sources:hover,
-a.briefing-chip-sources:focus-visible {
+a.briefing-chip-sources:focus-visible,
+summary.briefing-chip-sources:hover,
+summary.briefing-chip-sources:focus-visible {
   background: var(--ink);
   color: white;
+}
+
+summary.briefing-chip-sources {
+  cursor: pointer;
+  list-style: none;
+}
+
+summary.briefing-chip-sources::-webkit-details-marker {
+  display: none;
+}
+
+.briefing-sources-list {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.8rem;
+  max-width: 60ch;
 }
 
 .briefing-evidence-link {
