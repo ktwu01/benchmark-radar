@@ -2768,6 +2768,47 @@ function answerCitations(answer) {
   return element("ul", { className: "answer-citations" }, [...stats, ...evidence]);
 }
 
+// The count sits in the metadata row, which is visible without opening View
+// analysis. One cited paper is the link. Several open a native disclosure, so
+// Tab and Enter/Space reach each paper without a click handler.
+function answerSourceControl(citations) {
+  if (!citations.length) return null;
+  const sourceText = `${citations.length} ${citations.length === 1 ? t("source") : t("sources")}`;
+  if (citations.length === 1) {
+    const citation = citations[0];
+    return element("a", {
+      className: "answer-source-count",
+      text: sourceText,
+      attrs: {
+        href: citation.href,
+        target: "_blank",
+        rel: "noopener noreferrer",
+        title: `Open evidence: ${citation.title}`,
+        "aria-label": `${sourceText}: ${citation.title}`,
+      },
+    });
+  }
+  return element("details", { className: "answer-sources" }, [
+    element("summary", {
+      className: "answer-source-count",
+      text: sourceText,
+    }),
+    element("ul", { className: "answer-sources-list" }, citations.map((entry) =>
+      element("li", {}, [
+        element("a", {
+          text: entry.title,
+          attrs: {
+            href: entry.href,
+            target: "_blank",
+            rel: "noopener noreferrer",
+          },
+        }),
+        element("span", { text: ` (${entry.source})` }),
+      ]),
+    )),
+  ]);
+}
+
 function answerBlock(answer) {
   const insufficient = answer?.sufficient_evidence === false;
   const confidence = String(answer?.confidence || "").trim();
@@ -2779,9 +2820,12 @@ function answerBlock(answer) {
   // <details>/<summary> gives the reversible expand/re-collapse and keyboard
   // support (Tab to focus, Enter/Space to toggle) for free and stays collapsed
   // on load because no `open` attribute is rendered.
+  const cited = validBriefingCitations(answer?.cited_evidence);
   const citations = answerCitations(answer);
-  const sourceCount = validBriefingCitations(answer?.cited_evidence).length;
-  const meta = element("p", { className: "answer-meta" }, [
+  // A div, not a p: the multi-source list is a <details>, and a paragraph
+  // cannot contain one. Browsers would move that list out of the metadata row.
+  const sourceControl = answerSourceControl(cited);
+  const meta = element("div", { className: "answer-meta" }, [
     ...(confidence
       ? [
           element("span", {
@@ -2790,14 +2834,7 @@ function answerBlock(answer) {
           }),
         ]
       : []),
-    ...(sourceCount
-      ? [
-          element("span", {
-            className: "answer-source-count",
-            text: `${sourceCount} ${sourceCount === 1 ? t("source") : t("sources")}`,
-          }),
-        ]
-      : []),
+    ...(sourceControl ? [sourceControl] : []),
   ]);
   const detail = element("div", { className: "answer-detail" }, [
     element("p", { className: "answer-plain" }, [

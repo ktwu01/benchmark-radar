@@ -2374,10 +2374,72 @@ def test_dashboard_and_markdown_format_statistics_identically():
 
 def test_rendered_questions_link_cited_evidence_to_its_source():
     nodes = list(_flatten(_rendered_questions()))
-    links = [node for node in nodes if node["href"]]
+    citations = next(node for node in nodes if node["className"] == "answer-citations")
+    links = [node for node in _flatten(citations) if node["href"]]
 
     assert [node["href"] for node in links] == ["https://arxiv.org/abs/2608.00001"]
     assert links[0]["text"] == "A harness for long-horizon agent tasks"
+
+
+def test_rendered_answer_source_count_opens_the_cited_sources(tmp_path):
+    """Issue #956: the source count on a question is a control, not plain text.
+
+    A reader reaches the cited papers from the metadata row, without first
+    expanding View analysis. One source is the link. Several sources open a
+    list with one link per paper.
+    """
+    nodes = list(_flatten(_rendered_questions()))
+    first = next(node for node in nodes if node["className"] == "answer")
+    meta = next(node for node in first["children"] if node["className"] == "answer-meta")
+    disclosure = next(
+        node for node in first["children"] if node["className"] == "answer-disclosure"
+    )
+    count = next(
+        node for node in _flatten(meta) if "answer-source-count" in node["className"].split()
+    )
+
+    assert count not in list(_flatten(disclosure))
+    assert count["tag"] == "a"
+    assert count["text"] == "1 source"
+    assert count["href"] == "https://arxiv.org/abs/2608.00001"
+    assert count["attributes"]["target"] == "_blank"
+    assert count["attributes"]["rel"] == "noopener noreferrer"
+
+    def add_second(fixture):
+        fixture["questions"]["groups"][0]["answers"][0]["cited_evidence"].append(
+            {
+                "id": "E002",
+                "title": "A second scoring note",
+                "url": "https://arxiv.org/abs/2608.00002",
+                "source": "arxiv",
+            }
+        )
+
+    rendered = _render_with(add_second, tmp_path)
+    multi = next(node for node in _flatten(rendered) if node["className"] == "answer")
+    meta = next(node for node in multi["children"] if node["className"] == "answer-meta")
+    disclosure = next(
+        node for node in multi["children"] if node["className"] == "answer-disclosure"
+    )
+    count = next(
+        node for node in _flatten(meta) if "answer-source-count" in node["className"].split()
+    )
+    sources = next(node for node in _flatten(meta) if node["className"] == "answer-sources")
+
+    assert sources not in list(_flatten(disclosure))
+    assert sources["tag"] == "details"
+    assert "open" not in sources["attributes"]
+    assert count["tag"] == "summary"
+    assert count["text"] == "2 sources"
+    links = [node for node in _flatten(sources) if node["tag"] == "a"]
+    assert [node["href"] for node in links] == [
+        "https://arxiv.org/abs/2608.00001",
+        "https://arxiv.org/abs/2608.00002",
+    ]
+    assert [node["text"] for node in links] == [
+        "A harness for long-horizon agent tasks",
+        "A second scoring note",
+    ]
 
 
 def _render_with(mutate, tmp_path):

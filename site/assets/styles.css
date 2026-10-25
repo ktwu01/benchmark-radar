@@ -1075,10 +1075,43 @@ a.briefing-chip-sources:focus-visible {
 
 .answer-source-count {
   align-self: center;
-  color: var(--muted);
+  color: var(--blue-deep);
   font-family: var(--utility);
   font-size: 0.7rem;
   letter-spacing: 0.06em;
+  text-decoration: underline;
+  text-underline-offset: 0.14em;
+}
+
+a.answer-source-count:hover,
+a.answer-source-count:focus-visible,
+.answer-sources summary:hover,
+.answer-sources summary:focus-visible {
+  color: var(--blue);
+}
+
+.answer-sources {
+  align-self: center;
+}
+
+.answer-sources summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.answer-sources summary::-webkit-details-marker {
+  display: none;
+}
+
+.answer-sources-list {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--ink);
+  font-size: 0.84rem;
+}
+
+.answer-sources-list a {
+  color: var(--blue-deep);
 }
 
 .answer-plain {
