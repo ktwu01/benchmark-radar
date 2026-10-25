@@ -19,10 +19,15 @@ TITLE = "Benchmark Radar: A living database and search engine for AI benchmarks 
 TITLE_ARXIV = (
     "Benchmark Radar: A Living Database and Search Engine for AI Benchmarks and Evaluation"
 )
-AUTHORS_APA = "Wu, K., Zhou, J., Shang, E., Wang, J., Han, P., Wang, J., & Xu, W."
+AUTHORS_APA = (
+    "Wu, K., Zhou, J., Zhang, W., Han, P., Shang, E., Wang, J., Wang, J., Xu, W., "
+    "Lu, S., Li, Y., Mizrahi Celekli, R., Ravshanov, L., Bian, Y., Han, X., & Shi, L."
+)
 AUTHORS_BIBTEX = (
-    "Koutian Wu and Junjie Zhou and Ergan Shang and Jiayu Wang and "
-    "Pengqian Han and Junkai Wang and Wanghan Xu"
+    "Koutian Wu and Junjie Zhou and Wenjun Zhang and Pengqian Han and "
+    "Ergan Shang and Jiayu Wang and Junkai Wang and Wanghan Xu and "
+    "Songyuanyi Lu and Yixuan Li and Rudy {Mizrahi Celekli} and "
+    "Lazizbek Ravshanov and Yaoliang Bian and Xudong Han and Lin Shi"
 )
 BIBTEX_KEY = "wu2026benchmarkradarlivingdatabase"
 ARXIV_ID = "2609.11115"

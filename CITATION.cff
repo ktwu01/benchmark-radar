@@ -7,16 +7,32 @@ authors:
     given-names: Koutian
   - family-names: Zhou
     given-names: Junjie
+  - family-names: Zhang
+    given-names: Wenjun
+  - family-names: Han
+    given-names: Pengqian
   - family-names: Shang
     given-names: Ergan
   - family-names: Wang
     given-names: Jiayu
-  - family-names: Han
-    given-names: Pengqian
   - family-names: Wang
     given-names: Junkai
   - family-names: Xu
     given-names: Wanghan
+  - family-names: Lu
+    given-names: Songyuanyi
+  - family-names: Li
+    given-names: Yixuan
+  - family-names: Mizrahi Celekli
+    given-names: Rudy
+  - family-names: Ravshanov
+    given-names: Lazizbek
+  - family-names: Bian
+    given-names: Yaoliang
+  - family-names: Han
+    given-names: Xudong
+  - family-names: Shi
+    given-names: Lin
 repository-code: "https://github.com/ktwu01/benchmark-radar"
 url: "https://benchmark-radar.org/"
 license: MIT
@@ -33,16 +49,32 @@ preferred-citation:
       given-names: Koutian
     - family-names: Zhou
       given-names: Junjie
+    - family-names: Zhang
+      given-names: Wenjun
+    - family-names: Han
+      given-names: Pengqian
     - family-names: Shang
       given-names: Ergan
     - family-names: Wang
       given-names: Jiayu
-    - family-names: Han
-      given-names: Pengqian
     - family-names: Wang
       given-names: Junkai
     - family-names: Xu
       given-names: Wanghan
+    - family-names: Lu
+      given-names: Songyuanyi
+    - family-names: Li
+      given-names: Yixuan
+    - family-names: Mizrahi Celekli
+      given-names: Rudy
+    - family-names: Ravshanov
+      given-names: Lazizbek
+    - family-names: Bian
+      given-names: Yaoliang
+    - family-names: Han
+      given-names: Xudong
+    - family-names: Shi
+      given-names: Lin
   doi: "10.48550/arXiv.2609.11115"
   month: 9
   year: 2026

@@ -175,12 +175,17 @@ def test_citation_formats_are_one_click_away_behind_a_short_link():
         assert fragment in cff
         assert fragment in script
     assert "given-names: Junjie" in cff
-    assert '"Wu, K., Zhou, J., Shang, E., Wang, J., Han, P., Wang, J., & Xu, W. (2026). "' in script
     assert (
-        '"      author={Koutian Wu and Junjie Zhou and Ergan Shang and Jiayu Wang and '
-        'Pengqian Han and Junkai Wang and Wanghan Xu},"'
+        '"Wu, K., Zhou, J., Zhang, W., Han, P., Shang, E., Wang, J., Wang, J., Xu, W., '
+        'Lu, S., Li, Y., Mizrahi Celekli, R., Ravshanov, L., Bian, Y., Han, X., & Shi, L. (2026). "'
     ) in script
-    assert html.count('name="citation_author"') == 7
+    assert (
+        '"      author={Koutian Wu and Junjie Zhou and Wenjun Zhang and Pengqian Han and '
+        "Ergan Shang and Jiayu Wang and Junkai Wang and Wanghan Xu and "
+        "Songyuanyi Lu and Yixuan Li and Rudy {Mizrahi Celekli} and "
+        'Lazizbek Ravshanov and Yaoliang Bian and Xudong Han and Lin Shi},"'
+    ) in script
+    assert html.count('name="citation_author"') == 15
     assert '<meta name="citation_author" content="Zhou, Junjie">' in html
 
 

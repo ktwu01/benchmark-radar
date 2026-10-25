@@ -148,8 +148,10 @@ def test_citation_metadata_prefers_the_technical_report():
 
 def test_public_bibtex_names_all_report_authors():
     author = (
-        "author={Koutian Wu and Junjie Zhou and Ergan Shang and Jiayu Wang and "
-        "Pengqian Han and Junkai Wang and Wanghan Xu}"
+        "author={Koutian Wu and Junjie Zhou and Wenjun Zhang and Pengqian Han and "
+        "Ergan Shang and Jiayu Wang and Junkai Wang and Wanghan Xu and "
+        "Songyuanyi Lu and Yixuan Li and Rudy {Mizrahi Celekli} and "
+        "Lazizbek Ravshanov and Yaoliang Bian and Xudong Han and Lin Shi}"
     )
     for readme in (README, README_ZH):
         assert author in readme.read_text(encoding="utf-8")
