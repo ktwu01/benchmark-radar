@@ -1,3 +1,4 @@
+import { starPrompt } from "./star-prompt.js";
 import { searchCatalog, searchCatalogMatches } from "./catalog-search.js";
 import { SKYLINE_DOMAINS, SKYLINE_START_DATE, benchmarkDateLabel, skylineModel, skylineGeometry, skylineDateLanes, skylineScoreLanes, skylineCapPositions, skylineFrontierSteps, scorePopulation, matchesScoreCutoff, scoreBrowserSummary } from "./skyline.js";
 import {
@@ -1146,10 +1147,6 @@ const I18N = {
       "完整数据集可以免费下载。如果它帮你节省了研究时间，请给仓库点个 Star，让更多评测开发者找到它。",
     Download: "下载",
     "Star the repository": "给仓库点 Star",
-    "Star on GitHub": "在 GitHub 上点 Star",
-    "Thanks for subscribing. A GitHub star helps other eval builders find Benchmark Radar.": "感谢订阅。在 GitHub 上点个 Star，能让更多做评测的人找到 Benchmark Radar。",
-    "Thanks for citing. A GitHub star helps other eval builders find Benchmark Radar.": "感谢引用。在 GitHub 上点个 Star，能让更多做评测的人找到 Benchmark Radar。",
-    "Saved benchmarks stay in this browser. Star the repository to find Benchmark Radar again anywhere.": "收藏的 benchmark 只保存在这个浏览器里。给仓库点个 Star，换台设备也能找回 Benchmark Radar。",
     "If this saved you research time, cite the work, star the repo and help other eval builders find it.":
       "如果它帮你节省了研究时间，请引用这项工作、给仓库点 Star，让更多评测开发者找到它。",
     Cite: "引用",
@@ -6093,58 +6090,6 @@ function librarySignalFact(record) {
       + (gain !== null && gain !== undefined ? ` · ${signedCount(gain)} ${t("in 30 days")}` : ""),
     attrs: { title: t("Stars of the linked GitHub repository, which several benchmarks can share; observed by benchmark-radar.com on {date}", { date: signals.as_of || "—" }) },
   });
-}
-
-// Readers star a repository right after it was useful to them, not from a
-// footer that only 9% of homepage visitors scroll to. One prompt per browser,
-// after the first subscribe, citation copy or save, so it never turns into a nag.
-const STAR_PROMPT_KEY = "benchmark-radar:star-prompt:v1";
-const STAR_PROMPT_COPY = {
-  subscribe: "Thanks for subscribing. A GitHub star helps other eval builders find Benchmark Radar.",
-  cite: "Thanks for citing. A GitHub star helps other eval builders find Benchmark Radar.",
-  save: "Saved benchmarks stay in this browser. Star the repository to find Benchmark Radar again anywhere.",
-};
-let starPromptShown = false;
-
-// Clarity exists only after the visitor consents, so without consent nothing is sent.
-function trackStarPrompt(name) {
-  window.clarity?.("event", name);
-}
-
-function starPrompt(trigger, onClose) {
-  if (starPromptShown) return null;
-  starPromptShown = true;
-  try {
-    if (window.localStorage.getItem(STAR_PROMPT_KEY)) return null;
-    window.localStorage.setItem(STAR_PROMPT_KEY, trigger);
-  } catch {
-    // Blocked storage: the in-memory flag still limits it to once per page.
-  }
-  trackStarPrompt(`star_prompt_shown_${trigger}`);
-  const prompt = element("p", { className: "star-prompt", attrs: { role: "status" } });
-  const close = () => {
-    prompt.remove();
-    onClose?.();
-  };
-  // No noreferrer: GitHub traffic then counts the site as the referrer, which
-  // works for readers who decline analytics.
-  const link = element("a", {
-    className: "star-prompt-link",
-    text: `★ ${t("Star on GitHub")}`,
-    attrs: { href: "https://github.com/ktwu01/benchmark-radar", target: "_blank", rel: "noopener" },
-  });
-  link.addEventListener("click", () => {
-    trackStarPrompt(`star_prompt_click_${trigger}`);
-    close();
-  });
-  const dismiss = element("button", {
-    className: "star-prompt-dismiss",
-    text: "×",
-    attrs: { type: "button", "aria-label": t("Close"), title: t("Close") },
-  });
-  dismiss.addEventListener("click", close);
-  prompt.append(element("span", { text: t(STAR_PROMPT_COPY[trigger]) }), link, dismiss);
-  return prompt;
 }
 
 // The Library list is rebuilt on every filter change, so the prompt is kept

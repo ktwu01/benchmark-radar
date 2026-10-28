@@ -1,72 +1,157 @@
-// Execute the production star prompt with a stub DOM: it appears once per
-// browser, survives blocked storage, and reports only through Clarity.
+// Exercise the actual prompt and share modules, with independent browser states.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-const source = readFileSync("site/assets/app.js", "utf8");
-function fn(name) {
-  const start = source.indexOf(`function ${name}(`);
-  assert(start >= 0, name);
-  return source.slice(start, source.indexOf("\n}\n", start) + 2);
-}
-const constants = [
-  source.match(/const STAR_PROMPT_KEY = .*;/)[0],
-  source.match(/const STAR_PROMPT_COPY = \{[\s\S]*?\n\};/)[0],
-].join("\n");
+const shareSource = readFileSync("site/assets/share-card.js", "utf8");
+const key = "benchmark-radar:star-prompt:v1";
+let sequence = 0;
 
 class Node {
-  constructor(tag) { this.tag = tag; this.children = []; this.attrs = {}; this.listeners = {}; this.removed = false; }
+  constructor(tag) {
+    this.tag = tag;
+    this.children = [];
+    this.attrs = {};
+    this.listeners = {};
+    this.isConnected = false;
+  }
   setAttribute(key, value) { this.attrs[key] = value; }
-  append(...nodes) { this.children.push(...nodes); }
+  append(...nodes) {
+    for (const node of nodes) { node.isConnected = true; this.children.push(node); }
+  }
+  replaceChildren(...nodes) { this.children = []; this.append(...nodes); }
   addEventListener(type, handler) { this.listeners[type] = handler; }
-  remove() { this.removed = true; }
+  remove() { this.removed = true; this.isConnected = false; }
+  showModal() { this.open = true; }
+  close() { this.open = false; }
+  click() { return this.listeners.click?.({ target: this }); }
+  find(predicate) {
+    if (predicate(this)) return this;
+    for (const child of this.children) {
+      const match = child.find?.(predicate);
+      if (match) return match;
+    }
+  }
 }
-const documentStub = { createElement: (tag) => new Node(tag) };
 
-function load(storage) {
+async function load({ store = {}, lang = "en", blocked = false, consent = true, failure = null } = {}) {
   const events = [];
-  const windowStub = { localStorage: storage, clarity: (kind, name) => events.push([kind, name]) };
-  const api = new Function("window", "document", "t", `${constants}\nlet starPromptShown = false;\n${["element", "trackStarPrompt", "starPrompt"].map(fn).join("\n")}\nreturn { starPrompt };`)(
-    windowStub, documentStub, (key) => key,
-  );
-  return { ...api, events };
+  const body = new Node("body");
+  const storage = {
+    getItem(name) { if (blocked) throw Error("blocked"); return store[name] ?? null; },
+    setItem(name, value) { if (blocked) throw Error("blocked"); store[name] = String(value); },
+  };
+  globalThis.document = {
+    body, documentElement: { lang },
+    createElement: (tag) => new Node(tag),
+    querySelectorAll: () => [],
+    querySelector: () => null,
+  };
+  globalThis.window = {
+    localStorage: storage, location: { origin: "https://benchmark-radar.org" },
+    ...(consent ? { clarity: (kind, name) => events.push([kind, name]) } : {}),
+    ClipboardItem: true,
+  };
+  globalThis.ClipboardItem = class { constructor(data) { this.data = data; } };
+  Object.defineProperty(globalThis, "navigator", { configurable: true, value: {
+    clipboard: {
+      async write(items) {
+        if (failure === "clipboard") throw Error("clipboard denied");
+        await Promise.all(Object.values(items[0].data));
+      },
+      async writeText() { if (failure === "clipboard") throw Error("clipboard denied"); },
+    },
+  } });
+  globalThis.fetch = async () => ({
+    ok: failure !== "fetch", status: failure === "fetch" ? 404 : 200,
+    blob: async () => new Blob(["card"], { type: "image/png" }),
+  });
+  const promptUrl = new URL(`../site/assets/star-prompt.js?case=${++sequence}`, import.meta.url).href;
+  const { starPrompt } = await import(promptUrl);
+  const shareModule = shareSource.replace('"./star-prompt.js"', JSON.stringify(promptUrl));
+  const { openBenchmarkShare } = await import(`data:text/javascript;base64,${Buffer.from(shareModule).toString("base64")}`);
+  return { starPrompt, openBenchmarkShare, events, store, body };
 }
 
-let store = {};
-const storage = {
-  getItem: (key) => (key in store ? store[key] : null),
-  setItem: (key, value) => { store[key] = String(value); },
-};
-
-// First trigger shows the prompt and records which action earned it.
-const first = load(storage);
+const first = await load();
 let closed = 0;
 const prompt = first.starPrompt("save", () => { closed += 1; });
 assert(prompt);
-assert.equal(store["benchmark-radar:star-prompt:v1"], "save");
+assert.equal(first.store[key], "save");
 const [, link, dismiss] = prompt.children;
 assert.equal(link.attrs.href, "https://github.com/ktwu01/benchmark-radar");
 assert.equal(link.attrs.rel, "noopener");
 assert.deepEqual(first.events, [["event", "star_prompt_shown_save"]]);
-link.listeners.click();
+link.click();
 assert(prompt.removed);
 assert.equal(closed, 1);
 assert.deepEqual(first.events.at(-1), ["event", "star_prompt_click_save"]);
-dismiss.listeners.click();
-assert.equal(closed, 2);
-
-// Later triggers, on this page or a later visit, show nothing.
 assert.equal(first.starPrompt("cite"), null);
-assert.equal(load(storage).starPrompt("subscribe"), null);
+assert.equal((await load({ store: first.store })).starPrompt("card_download"), null);
 
-// Blocked storage still limits the prompt to once per page.
-const blocked = { getItem() { throw new Error("blocked"); }, setItem() { throw new Error("blocked"); } };
-const page = load(blocked);
-assert(page.starPrompt("cite"));
-assert.equal(page.starPrompt("subscribe"), null);
+const blocked = await load({ blocked: true });
+assert(blocked.starPrompt("cite"));
+assert.equal(blocked.starPrompt("card_download"), null);
+const denied = await load({ consent: false });
+assert(denied.starPrompt("card_copy_link"));
+assert.deepEqual(denied.events, []);
 
-// Every trigger has copy, and every string has a Chinese translation.
-for (const text of Object.values(new Function(`${constants}\nreturn STAR_PROMPT_COPY;`)())) {
-  assert(source.includes(`    ${JSON.stringify(text)}: "`), text);
+const triggers = ["subscribe", "cite", "save", "card_copy_image", "card_copy_link", "card_download"];
+for (const trigger of triggers) {
+  const page = await load({ lang: "zh-CN" });
+  const translated = page.starPrompt(trigger);
+  assert.match(translated.children[0].textContent, /[\u4e00-\u9fff]/);
+  assert.equal(translated.children[1].textContent, "★ 在 GitHub 上点 Star");
+  assert.equal(translated.children[2].attrs["aria-label"], "关闭");
+  translated.children[2].click();
+  assert(translated.removed);
+  assert.equal(page.starPrompt("save"), null);
 }
-console.log("star prompt harness ok");
+
+const cases = [
+  ["Copy image", "card_copy_image"],
+  ["Copy link", "card_copy_link"],
+  ["Download", "card_download"],
+];
+for (const [label, trigger] of cases) {
+  const page = await load();
+  page.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
+  assert.equal(page.store[key], undefined, "opening Share never spends the prompt budget");
+  await page.body.find((node) => node.textContent === label).click();
+  assert.equal(page.store[key], trigger);
+  assert(page.body.find((node) => node.className === "star-prompt"));
+  assert.equal(page.starPrompt("save"), null, "card and app actions share the same module state");
+  assert.deepEqual(page.events, [["event", `star_prompt_shown_${trigger}`]]);
+}
+
+const earlier = await load();
+earlier.starPrompt("subscribe");
+earlier.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
+await earlier.body.find((node) => node.textContent === "Copy link").click();
+assert.equal(earlier.events.length, 1, "an earlier app prompt suppresses the card prompt");
+assert(!earlier.body.find((node) => node.className === "star-prompt"));
+
+const left = await load();
+let finishCopy;
+navigator.clipboard.writeText = () => new Promise((resolve) => { finishCopy = resolve; });
+left.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
+const copying = left.body.find((node) => node.textContent === "Copy link").click();
+left.body.find((node) => node.tag === "dialog").close();
+finishCopy();
+await copying;
+assert.equal(left.store[key], undefined, "a hidden dialog must not consume the prompt");
+
+// A denied clipboard or missing card must leave the budget for a later action.
+for (const [label, failure] of [["Copy link", "clipboard"], ["Copy image", "clipboard"], ["Download", "fetch"]]) {
+  const page = await load({ failure });
+  page.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
+  const originalError = console.error;
+  console.error = () => {};
+  try { await page.body.find((node) => node.textContent === label).click(); }
+  finally { console.error = originalError; }
+  assert.equal(page.store[key], undefined);
+  assert.deepEqual(page.events, []);
+  assert(page.starPrompt("save"));
+}
+
+assert.match(readFileSync("site/assets/app.js", "utf8"), /import \{ starPrompt \} from "\.\/star-prompt.js"/);
+console.log("star prompt and card actions harness ok");

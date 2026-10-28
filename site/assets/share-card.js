@@ -11,6 +11,8 @@
 // static /benchmarks/<slug>/ pages load it to wake their hidden Share button,
 // so nothing here runs or renders until a reader asks for it.
 
+import { starPrompt } from "./star-prompt.js";
+
 export const CARDS_URL = "/cards";
 
 const SAFE_SLUG = /^[a-z0-9][a-z0-9_-]*$/;
@@ -88,11 +90,16 @@ export function openBenchmarkShare({ slug, name, t = identity }) {
     },
   });
   const imageActions = [];
-  const action = (label, onClick, { needsImage = true } = {}) => {
+  const action = (label, onClick, { needsImage = true, promptTrigger } = {}) => {
     const button = node("button", { className: "secondary-link", text: label, attrs: { type: "button" } });
     button.addEventListener("click", async () => {
       try {
         await onClick(button);
+        // Failed copies/download fetches never spend the shared prompt budget.
+        if (promptTrigger && host.open) {
+          const prompt = starPrompt(promptTrigger);
+          if (prompt) host.append(prompt);
+        }
       } catch (error) {
         if (error?.name === "AbortError") return;
         console.error(error);
@@ -124,7 +131,7 @@ export function openBenchmarkShare({ slug, name, t = identity }) {
       // item takes the pending blob rather than waiting for it first.
       await navigator.clipboard.write([new ClipboardItem({ "image/png": blob() })]);
       flash(button, t("Copy image"), t("Copied"));
-    }));
+    }, { promptTrigger: "card_copy_image" }));
   }
   buttons.push(action(t("Download"), async () => {
     // A download attribute is ignored across origins, so save a local copy.
@@ -134,11 +141,11 @@ export function openBenchmarkShare({ slug, name, t = identity }) {
     link.click();
     link.remove();
     setTimeout(() => URL.revokeObjectURL(href), 1000);
-  }));
+  }, { promptTrigger: "card_download" }));
   buttons.push(action(t("Copy link"), async (button) => {
     await navigator.clipboard.writeText(pageUrl);
     flash(button, t("Copy link"), t("Copied"));
-  }, { needsImage: false }));
+  }, { needsImage: false, promptTrigger: "card_copy_link" }));
   const post = new URL("https://x.com/intent/post");
   post.searchParams.set("text", title);
   post.searchParams.set("url", pageUrl);
