@@ -84709,5 +84709,143 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "["
+        ],
+        "authors": [
+          "Mengyu Sun",
+          "Zunlong Zhou",
+          "Ziyuan Yang",
+          "Yi Zhang"
+        ],
+        "blurb": "The new SkillCT benchmark evaluates packaged agent skills before running them, examining nine dimensions that include instruction quality, resistance to behavioral variation, semantic fit, and responsibility boundaries.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-10-30T04:00:00+00:00",
+        "source": "arXiv",
+        "title": "SkillCT: A Multidimensional Benchmark and Execution-Free Baseline for Agent Skill Assessment",
+        "url": "https://arxiv.org/abs/2610.38147"
+      },
+      {
+        "affiliations": [
+          "College of Computer Science and Technology, Zhejiang University",
+          "State Key Laboratory of Blockchain and Data Security, Zhejiang University",
+          "Hangzhou High-Tech Zone (Binjiang) Institute of Blockchain and Data Security"
+        ],
+        "authors": [
+          "Zhonghao Jiang",
+          "Xuyang Zheng",
+          "Yanfu Yan",
+          "Zhongxin Liu",
+          "Lingfeng Bao",
+          "Shuiguang Deng"
+        ],
+        "blurb": "A new study uses a self-evolving agent to audit SWE-bench-style software-engineering datasets for task clarity and test coverage—the properties that determine whether a coding task is both solvable and verifiable.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-10-30T04:00:00+00:00",
+        "source": "arXiv",
+        "title": "Well-Specified and Well-Tested? Assessing SWE-bench-Style Datasets with a Self-Evolving Agent",
+        "url": "https://arxiv.org/abs/2610.39417"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Jiarui Yao",
+          "Ruida Wang",
+          "Tong Zhang"
+        ],
+        "blurb": "OpenFrontiers combines 12,151 documented open research problems with a 200-problem mathematics benchmark containing 110 problems resolved in 2026 and 90 still open.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-10-30T04:00:00+00:00",
+        "source": "arXiv",
+        "title": "OpenFrontiers: A Collection of Open Research Problems and a Benchmark for Scientific Rediscovery",
+        "url": "https://arxiv.org/abs/2610.37739"
+      },
+      {
+        "affiliations": [
+          "Arcanum Labs"
+        ],
+        "authors": [
+          "Daniel Rupawalla"
+        ],
+        "blurb": "Bank-World is a new executable benchmark for 50 banking workflows across two simulated institutions, including changing instructions, permissions, record reconciliation, and transactions.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-10-30T04:00:00+00:00",
+        "source": "arXiv",
+        "title": "Bank-World: A Benchmark for Evaluating Agents on Banking Workflows",
+        "url": "https://arxiv.org/abs/2610.39733"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Yehan Zhang",
+          "Qianqi Yan",
+          "Hang Yin",
+          "Ching-Chen Kuo",
+          "Shan Jiang",
+          "Ming Ouyang",
+          "Yijie Liu",
+          "Xin Eric Wang"
+        ],
+        "blurb": "The new AgentDecept benchmark pairs 477 pressure variants with pressure-free counterparts across stateful application workflows.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-10-30T04:00:00+00:00",
+        "source": "arXiv",
+        "title": "AgentDecept: Benchmarking Deceptive Behavior in Tool-Using LLM Agents under Pressure",
+        "url": "https://arxiv.org/abs/2610.39377"
+      },
+      {
+        "affiliations": [
+          "Texas A&M University – San Antonio"
+        ],
+        "authors": [
+          "Yuktha Priya Masupalli"
+        ],
+        "blurb": "A newly released Rust vulnerability-detection audit packages 1,074 source files, scripts for data-quality and similarity checks, a four-condition input ablation, per-fold predictions, and a separate 155-pair control benchmark.",
+        "categories": [
+          "benchmark",
+          "dataset",
+          "data_quality"
+        ],
+        "published_at": "2026-10-30T05:14:18+00:00",
+        "source": "DataCite",
+        "title": "Artifact for \"Benchmark Leakage in AI-Based Rust Vulnerability Detection: An Empirical Audit of Code Embeddings, Static Analysis, and Dataset Quality\" (IEEE AIxSE 2026)",
+        "url": "https://doi.org/10.5281/zenodo.23792099"
+      }
+    ],
+    "date": "2026-10-30",
+    "schema_version": 1,
+    "top": [
+      "https://arxiv.org/abs/2610.38147",
+      "https://arxiv.org/abs/2610.39417",
+      "https://arxiv.org/abs/2610.37739"
+    ]
+  },
   "since": "2026-10-28T11:05:07.605417+00:00"
 }
