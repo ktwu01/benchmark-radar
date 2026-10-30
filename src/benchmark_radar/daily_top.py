@@ -35,7 +35,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from .cards import CARDS_RAW_URL
+from .cards import CARDS_SITE_URL
 from .corpus import organizations_for_item
 from .http import RequestError, get_json, get_text
 from .snapshots import _write_json, load_snapshots, validate_snapshot
@@ -353,13 +353,13 @@ def build_share_block(
 
 
 def card_image_name(index: int) -> str:
-    """File name of the ``index``-th (1-based) card on the day's branch."""
+    """File name of the ``index``-th (1-based) card in the day's folder."""
     return f"card-{index:02d}.png"
 
 
 def daily_image_url(date: str, name: str) -> str:
-    """Public URL of an image on the day's branch in the cards repository."""
-    return f"{CARDS_RAW_URL}/daily/{date}/{name}"
+    """Public URL of one of the day's images on the cards site."""
+    return f"{CARDS_SITE_URL}/daily/{date}/{name}"
 
 
 def write_share_block(snapshot_dir: Path, date: str) -> dict[str, Any] | None:

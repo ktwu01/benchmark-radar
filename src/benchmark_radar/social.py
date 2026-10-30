@@ -36,8 +36,8 @@ _RECORDS_BADGE = (
     "(https://benchmark-radar.org/)"
 )
 
-# Issue #671: the day's share images live on that day's branch of the cards
-# repository, rendered from the snapshot's share block. Embedding a URL per day
+# Issue #671: the day's share images live in that day's folder on the cards
+# site, rendered from the snapshot's share block. Embedding a URL per day
 # keeps an older checklist showing its own day.
 _CHECKBOX_RE = re.compile(r"^-\s+\[([ xX])\]\s+(.+)$")
 

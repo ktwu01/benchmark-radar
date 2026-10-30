@@ -430,9 +430,7 @@ def test_cjk_the_image_font_cannot_draw_is_dropped_unless_nothing_remains():
 def test_social_checklist_embeds_the_days_images():
     block = _snapshot_with_cards(2)["share"]
     section = render_social_section("insight", "repo", [], [{"name": "X"}], share=block)
-    base = (
-        "https://raw.githubusercontent.com/ktwu01/benchmark-radar-cards/refs/heads/daily/2026-10-23"
-    )
+    base = "https://cards.benchmark-radar.org/daily/2026-10-23"
     assert f"[![Top benchmarks on 2026-10-23]({base}/top3.png)]({base}/top3.png)" in section
     # Every card is shown inline, so a card cannot be forgotten.
     for index in (1, 2):

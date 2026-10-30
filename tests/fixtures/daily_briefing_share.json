@@ -1,12 +1,12 @@
 {
   "date": "2026-10-25",
   "share": {
-    "top3_image": "https://raw.githubusercontent.com/ktwu01/benchmark-radar-cards/refs/heads/daily/2026-10-25/top3.png",
+    "top3_image": "https://cards.benchmark-radar.org/daily/2026-10-25/top3.png",
     "cards": [
       {
         "url": "https://github.com/example/carded-bench",
         "title": "example/carded-bench",
-        "image": "https://raw.githubusercontent.com/ktwu01/benchmark-radar-cards/refs/heads/daily/2026-10-25/card-01.png"
+        "image": "https://cards.benchmark-radar.org/daily/2026-10-25/card-01.png"
       }
     ]
   },
