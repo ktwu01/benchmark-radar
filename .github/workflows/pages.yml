@@ -290,7 +290,15 @@ jobs:
             exit 0
           fi
           git commit -q -m "Benchmark cards for ${GITHUB_SHA::7}"
-          git push -q "${remote}" "HEAD:refs/heads/${branch}"
+          # The daily run pushes its share images to the same branch, so a
+          # push can lose the race once; replay this commit on top and retry.
+          for attempt in 1 2 3; do
+            if git push -q "${remote}" "HEAD:refs/heads/${branch}"; then
+              break
+            fi
+            [[ "${attempt}" == 3 ]] && exit 1
+            git pull -q --rebase "${remote}" "${branch}"
+          done
 
   deploy:
     needs: [build, publish-cli-data, publish-hf-dataset]

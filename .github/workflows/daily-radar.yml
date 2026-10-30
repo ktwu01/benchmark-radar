@@ -196,15 +196,16 @@ jobs:
   # Issue #671: the day's share cards. Runs only after the snapshot is
   # persisted, so a slow or failed lookup can never cost the day its evidence.
   # It records the chosen cards and who made them in the snapshot once, then
-  # renders the images from that record alone and pushes them to their own
-  # branch in ktwu01/benchmark-radar-cards. Images in this repository would
-  # grow every clone; a branch per day keeps each day's images at a stable URL.
+  # renders the images from that record alone and pushes them to daily/<date>/
+  # on the cards branch of ktwu01/benchmark-radar-cards, which GitHub Pages
+  # serves at cards.benchmark-radar.org. Images in this repository would grow
+  # every clone; a folder per day keeps each day's images at a stable URL.
   publish-share-images:
     needs: [build-report, persist-snapshot]
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - name: Create snapshot and cards writer token
         id: app-token
@@ -249,7 +250,8 @@ jobs:
         run: |
           set -euo pipefail
           snapshot_date="$(cat generated/out/snapshot-date.txt)"
-          branch="daily/${snapshot_date}"
+          branch="cards"
+          folder="daily/${snapshot_date}"
           remote="https://x-access-token:${CARDS_TOKEN}@github.com/ktwu01/benchmark-radar-cards.git"
           python scripts/render_share_images.py \
             --snapshot "data/snapshots/${snapshot_date}.json" \
@@ -258,24 +260,41 @@ jobs:
             echo "No share cards for ${snapshot_date}"
             exit 0
           fi
-          # A same-day rerun adds a commit to the day's branch, so earlier
-          # images stay in its history.
-          if git ls-remote --exit-code --heads "${remote}" "${branch}" > /dev/null; then
-            git clone -q --depth 1 --branch "${branch}" "${remote}" cards
-          else
-            git init -q -b "${branch}" cards
-          fi
-          cp share-out/*.png cards/
+          # A same-day rerun adds a commit, so earlier images stay in history.
+          git clone -q --depth 1 --branch "${branch}" "${remote}" cards
+          mkdir -p "cards/${folder}"
+          cp share-out/*.png "cards/${folder}/"
           cd cards
           git config user.name "benchmark-radar[bot]"
           git config user.email "benchmark-radar[bot]@users.noreply.github.com"
-          git add .
+          git add "${folder}"
           if git diff --cached --quiet; then
             echo "Share images for ${snapshot_date} are already current"
             exit 0
           fi
           git commit -q -m "Share images for ${snapshot_date}"
-          git push -q "${remote}" "HEAD:refs/heads/${branch}"
+          # The Pages deploy pushes benchmark cards to the same branch, so a
+          # push can lose the race once; replay this commit on top and retry.
+          for attempt in 1 2 3; do
+            if git push -q "${remote}" "HEAD:refs/heads/${branch}"; then
+              break
+            fi
+            [[ "${attempt}" == 3 ]] && exit 1
+            git pull -q --rebase "${remote}" "${branch}"
+          done
+          # A push is not yet a served file. The next step records the share
+          # block, which is what makes the site and the checklist link these
+          # images, so wait until the cards site serves them.
+          url="https://cards.benchmark-radar.org/${folder}/top3.png"
+          for attempt in $(seq 1 60); do
+            if curl -fsS -o /dev/null "${url}"; then
+              echo "Published: ${url}"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::${url} was not served after 10 minutes"
+          exit 1
       - name: Record the day's share cards in the snapshot
         shell: bash
         run: |

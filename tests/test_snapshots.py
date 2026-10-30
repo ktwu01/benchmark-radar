@@ -1856,9 +1856,7 @@ def test_dashboard_day_maps_each_share_card_to_its_published_image(tmp_path):
 
     dashboard = rebuild_dashboard(snapshot_dir, tmp_path / "radar.json")
 
-    base = (
-        "https://raw.githubusercontent.com/ktwu01/benchmark-radar-cards/refs/heads/daily/2026-07-27"
-    )
+    base = "https://cards.benchmark-radar.org/daily/2026-07-27"
     share = dashboard["days"][1]["share"]
     assert share["top3_image"] == f"{base}/top3.png"
     assert [(c["url"], c["image"]) for c in share["cards"]] == [

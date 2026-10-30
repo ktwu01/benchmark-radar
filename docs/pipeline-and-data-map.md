@@ -15,9 +15,10 @@ sources below, run the generators in order, and measure the rebuilt outputs.
    snapshot. The block holds the benchmarks the daily briefing covers (or the
    radar-score top 3 when the day has no model briefing) and who made them.
    `scripts/render_share_images.py` renders the day's images from that block
-   only, and the daily workflow pushes them to the `daily/YYYY-MM-DD` branch of
-   `ktwu01/benchmark-radar-cards`. To change a card, fix the snapshot or the
-   lookup, not the image.
+   only, and the daily workflow pushes them to `daily/YYYY-MM-DD/` on the
+   `cards` branch of `ktwu01/benchmark-radar-cards`, which GitHub Pages serves
+   at `https://cards.benchmark-radar.org/daily/YYYY-MM-DD/`. To change a card,
+   fix the snapshot or the lookup, not the image.
 2. **Benchmark registry snapshots.** `data/leaderboard_snapshots.yml` registers
    immutable crawl inputs under `data/leaderboard_snapshots/`. The reviewed
    join rules are `data/catalog/identity.yml` and

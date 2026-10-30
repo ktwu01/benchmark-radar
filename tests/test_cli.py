@@ -590,6 +590,22 @@ def test_pages_build_deploys_each_benchmark_card_with_its_page():
     assert f'echo "{CARDS_DOMAIN}" > CNAME' in publish["run"]
 
 
+def test_daily_share_images_are_served_by_the_cards_site_before_they_are_linked():
+    """The day's images go to daily/<date>/ on the branch GitHub Pages serves
+    at CARDS_DOMAIN, and the share block that links them is recorded only once
+    they answer, so neither the site nor the checklist links a 404."""
+    workflow = yaml.safe_load(Path(".github/workflows/daily-radar.yml").read_text(encoding="utf-8"))
+    steps = workflow["jobs"]["publish-share-images"]["steps"]
+    names = [step.get("name") for step in steps]
+    publish = steps[names.index("Render and publish the day's share images")]["run"]
+    assert 'branch="cards"' in publish
+    assert 'folder="daily/${snapshot_date}"' in publish
+    assert f"https://{CARDS_DOMAIN}/${{folder}}/top3.png" in publish
+    assert names.index("Render and publish the day's share images") < names.index(
+        "Record the day's share cards in the snapshot"
+    )
+
+
 def test_daily_radar_persists_only_a_fresh_target_day_snapshot():
     """A queued run must not overlay its full, potentially stale history."""
     workflow_path = Path(".github/workflows/daily-radar.yml")
