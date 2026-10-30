@@ -269,32 +269,37 @@ jobs:
           git config user.email "benchmark-radar[bot]@users.noreply.github.com"
           git add "${folder}"
           if git diff --cached --quiet; then
-            echo "Share images for ${snapshot_date} are already current"
-            exit 0
+            echo "Share images for ${snapshot_date} are already pushed"
+          else
+            git commit -q -m "Share images for ${snapshot_date}"
+            # The Pages deploy pushes benchmark cards to the same branch, so a
+            # push can lose the race once; replay this commit on top and retry.
+            for attempt in 1 2 3; do
+              if git push -q "${remote}" "HEAD:refs/heads/${branch}"; then
+                break
+              fi
+              [[ "${attempt}" == 3 ]] && exit 1
+              git pull -q --rebase "${remote}" "${branch}"
+            done
           fi
-          git commit -q -m "Share images for ${snapshot_date}"
-          # The Pages deploy pushes benchmark cards to the same branch, so a
-          # push can lose the race once; replay this commit on top and retry.
-          for attempt in 1 2 3; do
-            if git push -q "${remote}" "HEAD:refs/heads/${branch}"; then
-              break
-            fi
-            [[ "${attempt}" == 3 ]] && exit 1
-            git pull -q --rebase "${remote}" "${branch}"
-          done
           # A push is not yet a served file. The next step records the share
           # block, which is what makes the site and the checklist link these
-          # images, so wait until the cards site serves them.
-          url="https://cards.benchmark-radar.org/${folder}/top3.png"
-          for attempt in $(seq 1 60); do
-            if curl -fsS -o /dev/null "${url}"; then
-              echo "Published: ${url}"
-              exit 0
-            fi
-            sleep 10
+          # images, so wait until the cards site serves every one of them. That
+          # holds even with nothing new to push (an earlier run may have pushed
+          # and then timed out here) and for a card a rerun appended, whose
+          # neighbours already answer.
+          deadline=$((SECONDS + 600))
+          for image in ../share-out/*.png; do
+            url="https://cards.benchmark-radar.org/${folder}/$(basename "${image}")"
+            until curl -fsS -o /dev/null "${url}"; do
+              if (( SECONDS >= deadline )); then
+                echo "::error::${url} was not served after 10 minutes"
+                exit 1
+              fi
+              sleep 10
+            done
+            echo "Published: ${url}"
           done
-          echo "::error::${url} was not served after 10 minutes"
-          exit 1
       - name: Record the day's share cards in the snapshot
         shell: bash
         run: |

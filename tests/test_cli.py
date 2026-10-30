@@ -600,7 +600,11 @@ def test_daily_share_images_are_served_by_the_cards_site_before_they_are_linked(
     publish = steps[names.index("Render and publish the day's share images")]["run"]
     assert 'branch="cards"' in publish
     assert 'folder="daily/${snapshot_date}"' in publish
-    assert f"https://{CARDS_DOMAIN}/${{folder}}/top3.png" in publish
+    # Every image the share block will link, not only top3.png: a rerun that
+    # appends a card finds its neighbours already served.
+    assert f"https://{CARDS_DOMAIN}/${{folder}}/$(basename" in publish
+    assert "for image in ../share-out/*.png" in publish
+    assert "exit 0" not in publish.split("already pushed")[1].split("fi")[0]
     assert names.index("Render and publish the day's share images") < names.index(
         "Record the day's share cards in the snapshot"
     )
