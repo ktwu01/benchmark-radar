@@ -76133,5 +76133,126 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "Conefia"
+        ],
+        "authors": [
+          "Yassen Eltayeb",
+          "Muaaz Abdelkarim",
+          "Monzir Hafez"
+        ],
+        "blurb": "The newly released SAFE-CARE Bench specifies a release-gate protocol for patient-facing healthcare agents across multi-turn conversations.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-10-31T02:58:29+00:00",
+        "source": "DataCite",
+        "title": "SAFE-CARE Bench: A Benchmark Specification and Evaluation Protocol for Safety, Guardrails, and User Experience in Multi-Turn Healthcare AI Agent Conversations",
+        "url": "https://doi.org/10.5281/zenodo.23827384"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Thomas Kim"
+        ],
+        "blurb": "The new MURPHY benchmark uses 1,500 multilingual and emoji prompts to audit whether inference servers report token identifiers and probability records correctly.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-10-31T01:56:07+00:00",
+        "source": "Hugging Face",
+        "title": "bytkim/MURPHY-BENCHMARK",
+        "url": "https://huggingface.co/datasets/bytkim/MURPHY-BENCHMARK"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "xie guiyuan"
+        ],
+        "blurb": "The newly released SecKB-Bench and PROVE reference implementation evaluates retrieval-augmented generation—systems that answer using retrieved documents—as one security channel spanning both document ingestion and answer disclosure.",
+        "categories": [
+          "benchmark",
+          "dataset"
+        ],
+        "published_at": "2026-10-30T23:58:17+00:00",
+        "source": "DataCite",
+        "title": "SecKB-Bench and PROVE Reference Implementation: Benchmark Generator, Reference Code and Measurement Artifacts for Provenance-Gated Retrieval and Egress Containment in LLM Knowledge Systems",
+        "url": "https://doi.org/10.5281/zenodo.23824399"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Divya Karotra"
+        ],
+        "blurb": "The new agent-firewall benchmark supplies categorized prompt-injection samples embedded in content an agent processes around sensitive tools, including reading and sending email, web search, and note storage.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-10-31T07:18:49+00:00",
+        "source": "Hugging Face",
+        "title": "DivyaKarotra/agent-firewall-benchmark",
+        "url": "https://huggingface.co/datasets/DivyaKarotra/agent-firewall-benchmark"
+      },
+      {
+        "affiliations": [
+          "State Grid Sichuan Electric Power Research Institute, Chengdu 610041, China",
+          "Power System Security and Operation Key Laboratory of Sichuan Province, Chengdu 610041, China"
+        ],
+        "authors": [
+          "Linghao Zhang",
+          "Siyu Xiang",
+          "Junwei Kuang",
+          "Peiyu Yi"
+        ],
+        "blurb": "The released ElecVQA-Bench study audits vision-language models for drone power-line inspection while controlling source-image dependence, input resolution, label space, evaluated items, and side information.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-10-30T00:00:00+00:00",
+        "source": "Crossref",
+        "title": "Trustworthy Evaluation of Vision–Language Models for UAV Power-Line Inspection: A Resolution- and Parity-Controlled Benchmark",
+        "url": "https://doi.org/10.3390/electronics15215049"
+      },
+      {
+        "affiliations": [
+          "University of Washington;",
+          "Yale University"
+        ],
+        "authors": [
+          "Zhongwei Huang",
+          "Ruohan Huang"
+        ],
+        "blurb": "A newly released synthetic-lethality prediction study shows that replacing random test negatives with degree-matched negatives moved reported area-under-the-curve scores substantially, sometimes downward and sometimes upward.",
+        "categories": [
+          "benchmark",
+          "evaluation"
+        ],
+        "published_at": "2026-10-30T00:00:00+00:00",
+        "source": "Crossref",
+        "title": "Separating benchmark discrimination from experimental retrieval in synthetic-lethality prediction",
+        "url": "https://doi.org/10.64898/2026.10.25.761509"
+      }
+    ],
+    "date": "2026-10-31",
+    "schema_version": 1,
+    "top": [
+      "https://doi.org/10.5281/zenodo.23827384",
+      "https://huggingface.co/datasets/bytkim/MURPHY-BENCHMARK",
+      "https://doi.org/10.5281/zenodo.23824399"
+    ]
+  },
   "since": "2026-10-29T10:39:25.772961+00:00"
 }
