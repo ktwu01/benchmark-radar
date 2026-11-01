@@ -68390,5 +68390,126 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [],
+        "authors": [
+          "Ida"
+        ],
+        "blurb": "The new Metagaming Evaluations dataset tests whether coding agents change behavior when they recognize an evaluation.",
+        "categories": [
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-01T02:36:14+00:00",
+        "source": "Hugging Face",
+        "title": "idacy/metagaming-evaluations",
+        "url": "https://huggingface.co/datasets/idacy/metagaming-evaluations"
+      },
+      {
+        "affiliations": [
+          "KORA",
+          "Microsoft",
+          "Florida Atlantic University"
+        ],
+        "authors": [
+          "Stéphie Herlin",
+          "Quentin Calvez",
+          "Hari Shrawgi",
+          "Eleni Pavlakis",
+          "Thibaut Fatus",
+          "Sameer Hinduja",
+          "Mathilde Collin"
+        ],
+        "blurb": "The new KORA Bench evaluates child safety through 737 scenarios spanning 25 risks and multiple age groups.",
+        "categories": [
+          "benchmark",
+          "evaluation"
+        ],
+        "published_at": "2026-10-31T23:06:55+00:00",
+        "source": "DataCite",
+        "title": "KORA Bench: An Open-Source Benchmark for Evaluating Large Language Model Safety in Child–AI Interactions",
+        "url": "https://doi.org/10.5281/zenodo.23840002"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Ahmad Omar Aljamal"
+        ],
+        "blurb": "The new NOHARM v2 reproducibility package exposes every instruction, model plan, physician verdict, and off-rubric action rating for 330 evaluations across 30 public clinical-safety cases.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-10-31T21:40:24+00:00",
+        "source": "DataCite",
+        "title": "Asking for the Whole Plan: Prompt Design Moves Language Models' Scores on a Clinical-Safety Benchmark More Than Model Choice. Data and code",
+        "url": "https://doi.org/10.5281/zenodo.23846123"
+      },
+      {
+        "affiliations": [
+          "University of Brawijaya"
+        ],
+        "authors": [
+          "Achmad Arwan",
+          "Bayu Priyambadha",
+          "Yoga Kurniawan",
+          "Rafael Deven Ang"
+        ],
+        "blurb": "Class Judge AI v2.0 introduces a controlled test of compressed, open-weight language models used to grade Unified Modeling Language class diagrams.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-01T02:50:14+00:00",
+        "source": "DataCite",
+        "title": "Class Judge AI v2.0: PlantUML Benchmark, LLM Run Logs, and Code for Evaluating Quantized Open-Weight LLMs as UML Class Diagram Graders",
+        "url": "https://doi.org/10.5281/zenodo.23851298"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Suphapitcha Pichienwong"
+        ],
+        "blurb": "A new ThaiSum audit found that all 11,000 validation records and all 11,000 test records duplicated entries in the training split, so the analysis excluded those splits.",
+        "categories": [
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-01T02:25:27+00:00",
+        "source": "DataCite",
+        "title": "Blame Attribution and Moral Evaluation Signals in Thai Political and Entertainment News: A Rule Based Content Analysis of the ThaiSum Dataset",
+        "url": "https://doi.org/10.5281/zenodo.23849943"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Raghuvar"
+        ],
+        "blurb": "The new OWASP agentic-security benchmark supplies 100 deterministic execution traces covering ten security-risk groups, split into 80 adversarial attacks and 20 benign controls.",
+        "categories": [
+          "benchmark",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-10-31T16:08:40+00:00",
+        "source": "Hugging Face",
+        "title": "drk-ram/owasp-asi-agentic-security-benchmark-100",
+        "url": "https://huggingface.co/datasets/drk-ram/owasp-asi-agentic-security-benchmark-100"
+      }
+    ],
+    "date": "2026-11-01",
+    "schema_version": 1,
+    "top": [
+      "https://huggingface.co/datasets/idacy/metagaming-evaluations",
+      "https://doi.org/10.5281/zenodo.23840002",
+      "https://doi.org/10.5281/zenodo.23846123"
+    ]
+  },
   "since": "2026-10-30T11:33:43.532602+00:00"
 }
