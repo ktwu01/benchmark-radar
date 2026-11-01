@@ -336,6 +336,7 @@ def render_page(
 {schema_blocks}
 {i18n_block}
 <script src="/assets/blog.js" defer></script>
+<script src="/assets/clarity.js" defer></script>
 </head>
 <body class="blog-page">
 <a class="skip-link" href="#main-content">Skip to content</a>
