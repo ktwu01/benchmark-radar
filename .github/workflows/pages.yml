@@ -132,21 +132,21 @@ jobs:
       - name: Minify the dashboard stylesheet
         run: python scripts/minify_css.py site/assets/styles.css
       - name: Upload CLI data release for publishing
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: cli-data-release
           path: site/data/cli/
           if-no-files-found: error
           retention-days: 1
       - name: Upload Hugging Face dataset release
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: hf-dataset-release
           path: site/data/hf_dataset/
           if-no-files-found: error
           retention-days: 1
       - name: Upload benchmark cards for the archive
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: benchmark-cards
           path: site/cards/
