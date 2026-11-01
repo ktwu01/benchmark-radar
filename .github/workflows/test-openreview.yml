@@ -11,7 +11,7 @@ jobs:
       OPENREVIEW_PASSWORD: ${{ secrets.OPENREVIEW_PASSWORD }}
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@v7.1.0
         with:
           python-version: "3.11"
       - run: pip install openreview-py
