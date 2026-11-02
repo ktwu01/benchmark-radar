@@ -650,6 +650,9 @@ def test_the_chrome_i18n_table_is_baked_from_app_js_for_chinese_readers(tmp_path
     table = json.loads(match.group(1))
     # Same reviewed strings the dashboard applies: the contact label, the
     # toggle states, and the badge aria templates.
+    assert table["Accept"] == "接受"
+    assert table["Decline"] == "拒绝"
+    assert "Microsoft" in table["analytics-consent-text"]
     assert table["Contact"] == "联系作者"
     assert table["Switch to English"] == "切换到英文"
     assert "{count}" in table["Star this repository on GitHub. {count} stars"]
@@ -763,3 +766,13 @@ def test_client_malformed_chrome_i18n_logs_error_without_throwing():
     res = _run_blog_language_harness("malformed-json", "zh")
     assert any("Failed to parse #chrome-i18n payload" in err for err in res["consoleErrors"])
     assert res["contactText"] == "Contact"
+
+
+@pytest.mark.parametrize("mode", ["consent-query", "consent-saved"])
+def test_deferred_consent_translates_and_preserves_privacy_link(mode):
+    result = _run_blog_language_harness(mode, "zh")["consentResult"]
+    assert result["labels"] == ["接受", "拒绝"]
+    assert '<a href="https://privacy.microsoft.com/privacystatement">' in result["markup"]
+    assert "隐私声明" in result["markup"]
+    assert result["englishLabels"] == ["Accept", "Decline"]
+    assert ">Privacy</a>" in result["englishMarkup"]
