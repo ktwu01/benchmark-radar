@@ -54,8 +54,18 @@ TWEETS_URL = "https://api.x.com/2/tweets"
 MAX_POST_CHARS = 4_000
 
 _MONTHS_EN = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
 ]
 
 _EVIDENCE_RE = re.compile(r"\s*Evidence:\s*[^.]*\.?")
@@ -83,9 +93,7 @@ def first_sentence_zh(text: str) -> str:
 def list_snapshots() -> list[str]:
     if not SNAPSHOT_DIR.is_dir():
         return []
-    return sorted(
-        path.stem for path in SNAPSHOT_DIR.glob("????-??-??.json")
-    )
+    return sorted(path.stem for path in SNAPSHOT_DIR.glob("????-??-??.json"))
 
 
 def pick_snapshot_date(lang: str, requested: str | None) -> str | None:
@@ -134,9 +142,7 @@ def _format_day_zh(iso_datetime: str) -> str:
 
 def _creators_line(card: dict[str, Any], lang: str) -> str | None:
     authors = [str(name) for name in card.get("authors") or [] if str(name).strip()]
-    affiliations = [
-        str(name) for name in card.get("affiliations") or [] if str(name).strip()
-    ]
+    affiliations = [str(name) for name in card.get("affiliations") or [] if str(name).strip()]
     if not authors and not affiliations:
         return None
     label = "By" if lang == "en" else "作者"
@@ -156,7 +162,8 @@ def build_post(snapshot: dict[str, Any], lang: str, total_records: int | None) -
     date = str(snapshot["date"])
     items = snapshot.get("evidence_items") or []
     sources = ", ".join(
-        source for source, _ in Counter(
+        source
+        for source, _ in Counter(
             str(item.get("source") or "unknown") for item in items
         ).most_common()
     )
@@ -175,9 +182,7 @@ def build_post(snapshot: dict[str, Any], lang: str, total_records: int | None) -
         ]
         for index, card in enumerate(top_cards):
             day = _format_day_zh(str(card.get("published_at") or ""))
-            lines.append(
-                f"{index + 1}. {card.get('title')}（{card.get('source')}，{day}）"
-            )
+            lines.append(f"{index + 1}. {card.get('title')}（{card.get('source')}，{day}）")
             blurb = (
                 first_sentence_zh(bullets_zh[index])
                 if index < len(bullets_zh)
@@ -202,8 +207,7 @@ def build_post(snapshot: dict[str, Any], lang: str, total_records: int | None) -
     lines = [
         f"📡 Benchmark Radar, {_format_date_en(date)}",
         "",
-        f"{len(items)} new benchmark items surfaced today across {sources}. "
-        "Three to open first:",
+        f"{len(items)} new benchmark items surfaced today across {sources}. Three to open first:",
         "",
     ]
     for index, card in enumerate(top_cards):
@@ -223,8 +227,7 @@ def build_post(snapshot: dict[str, Any], lang: str, total_records: int | None) -
         lines.append("")
     if total_records:
         lines.append(
-            f"Radar totals: {total_records:,} records, updated daily, "
-            "free and open source."
+            f"Radar totals: {total_records:,} records, updated daily, free and open source."
         )
     lines.append("Full data and search in the first reply 👇")
     return "\n".join(lines)
@@ -321,24 +324,17 @@ def oauth1_authorization_header(
     if extra_params:
         signature_params.update(extra_params)
     normalized = "&".join(
-        f"{_pct(key)}={_pct(value)}"
-        for key, value in sorted(signature_params.items())
+        f"{_pct(key)}={_pct(value)}" for key, value in sorted(signature_params.items())
     )
     base_url = f"{parts.scheme}://{parts.netloc}{parts.path}"
     base_string = "&".join((method.upper(), _pct(base_url), _pct(normalized)))
-    signing_key = (
-        f"{_pct(credentials['api_secret'])}"
-        f"&{_pct(credentials['access_token_secret'])}"
-    )
+    signing_key = f"{_pct(credentials['api_secret'])}&{_pct(credentials['access_token_secret'])}"
     signature = base64.b64encode(
-        hmac.new(
-            signing_key.encode("utf-8"), base_string.encode("utf-8"), hashlib.sha1
-        ).digest()
+        hmac.new(signing_key.encode("utf-8"), base_string.encode("utf-8"), hashlib.sha1).digest()
     ).decode("utf-8")
     header_params = {**oauth_params, "oauth_signature": signature}
     return "OAuth " + ", ".join(
-        f'{_pct(key)}="{_pct(value)}"'
-        for key, value in sorted(header_params.items())
+        f'{_pct(key)}="{_pct(value)}"' for key, value in sorted(header_params.items())
     )
 
 
@@ -354,9 +350,7 @@ def upload_media(image: bytes, credentials: dict[str, str]) -> str:
         ).encode("utf-8"),
         method="POST",
         headers={
-            "Authorization": oauth1_authorization_header(
-                "POST", MEDIA_UPLOAD_URL, credentials
-            ),
+            "Authorization": oauth1_authorization_header("POST", MEDIA_UPLOAD_URL, credentials),
             "Content-Type": "application/json",
         },
     )
@@ -376,9 +370,7 @@ def create_post(text: str, media_id: str | None, credentials: dict[str, str]) ->
         data=json.dumps(payload).encode("utf-8"),
         method="POST",
         headers={
-            "Authorization": oauth1_authorization_header(
-                "POST", TWEETS_URL, credentials
-            ),
+            "Authorization": oauth1_authorization_header("POST", TWEETS_URL, credentials),
             "Content-Type": "application/json",
         },
     )
