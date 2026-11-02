@@ -7,17 +7,17 @@ drives the day's cards. Nothing here writes new copy beyond fixed framing
 lines, and no count is hard-coded: the item count and source list come from
 the snapshot, the corpus total from the live records badge.
 
-Two scheduled workflows call this script:
+Two scheduled workflows call this script, one fixed UTC time each:
 
-- post-x-en.yml at 8:00 AM US Eastern (see ``in_eastern_window`` for the
-  daylight-saving gate), posting the English briefing;
-- post-x-zh.yml at 11:00 AM Beijing (03:00 UTC), posting the Chinese
-  briefing from ``briefing.bullets_zh`` for the latest committed snapshot.
+- post-x-en.yml at 13:00 UTC, posting the English briefing;
+- post-x-zh.yml at 03:00 UTC, posting the Chinese briefing from
+  ``briefing.bullets_zh`` for the latest committed snapshot.
 
 The post body never carries a link; the maintainer adds benchmark-radar.org
-as the first reply himself. Posting uses the official X API with OAuth 1.0a
-user context (secrets X_API_KEY, X_API_SECRET, X_ACCESS_TOKEN,
-X_ACCESS_TOKEN_SECRET). A ledger at data/x-posts.json records each
+as the first reply himself. Posting uses the official X API with OAuth 2.0
+user context: the workflow exchanges the stored refresh token (secrets
+X_CLIENT_ID, X_CLIENT_SECRET, X_REFRESH_TOKEN) for a short-lived access
+token, then posts as @ktwu01. A ledger at data/x-posts.json records each
 {date, lang, post id} so a re-run never posts the same briefing twice.
 There are no retries: one attempt, then the run fails loudly.
 """
@@ -27,12 +27,9 @@ from __future__ import annotations
 import argparse
 import base64
 import datetime as dt
-import hashlib
-import hmac
 import json
 import os
 import re
-import secrets
 import sys
 import urllib.error
 import urllib.parse
@@ -40,16 +37,15 @@ import urllib.request
 from collections import Counter
 from pathlib import Path
 from typing import Any
-from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent.parent
 SNAPSHOT_DIR = ROOT / "data" / "snapshots"
 LEDGER_PATH = ROOT / "data" / "x-posts.json"
 CARDS_IMAGE_URL = "https://cards.benchmark-radar.org/daily/{date}/top3.png"
 BADGE_URL = "https://benchmark-radar.org/data/records-badge.json"
-MEDIA_UPLOAD_URL = "https://upload.twitter.com/1.1/media/upload.json"
+TOKEN_URL = "https://api.x.com/2/oauth2/token"
+MEDIA_UPLOAD_URL = "https://api.x.com/2/media/upload"
 TWEETS_URL = "https://api.x.com/2/tweets"
-EASTERN = ZoneInfo("America/New_York")
 MAX_POST_CHARS = 4_000
 
 _MONTHS_EN = [
@@ -279,56 +275,6 @@ def record_post(ledger: dict[str, Any], date: str, lang: str, post_id: str) -> N
     )
 
 
-def in_eastern_window(now_utc: dt.datetime) -> bool:
-    """True while the US Eastern clock reads 8:00-9:59.
-
-    GitHub cron is UTC-only and ignores daylight saving, so the English
-    workflow fires at both 12:00 and 13:00 UTC and this gate lets exactly
-    one of them through: 12:00 in EDT (8:00 local), 13:00 in EST (8:00
-    local). The two-hour window also absorbs GitHub's scheduling delay, so
-    a late trigger still posts instead of skipping the day.
-    """
-    return now_utc.astimezone(EASTERN).hour in (8, 9)
-
-
-def _oauth_header(method: str, url: str, credentials: dict[str, str]) -> str:
-    """OAuth 1.0a HMAC-SHA1 Authorization header (body params excluded)."""
-    params = {
-        "oauth_consumer_key": credentials["api_key"],
-        "oauth_nonce": secrets.token_hex(16),
-        "oauth_signature_method": "HMAC-SHA1",
-        "oauth_timestamp": str(int(dt.datetime.now(dt.UTC).timestamp())),
-        "oauth_token": credentials["access_token"],
-        "oauth_version": "1.0",
-    }
-    base_url = url.split("?")[0]
-    param_string = "&".join(
-        f"{urllib.parse.quote(key, safe='')}={urllib.parse.quote(value, safe='')}"
-        for key, value in sorted(params.items())
-    )
-    base_string = "&".join(
-        [
-            method.upper(),
-            urllib.parse.quote(base_url, safe=""),
-            urllib.parse.quote(param_string, safe=""),
-        ]
-    )
-    signing_key = "&".join(
-        [
-            urllib.parse.quote(credentials["api_secret"], safe=""),
-            urllib.parse.quote(credentials["access_token_secret"], safe=""),
-        ]
-    )
-    signature = base64.b64encode(
-        hmac.new(signing_key.encode(), base_string.encode(), hashlib.sha1).digest()
-    ).decode()
-    params["oauth_signature"] = signature
-    return "OAuth " + ", ".join(
-        f'{key}="{urllib.parse.quote(value, safe="")}"'
-        for key, value in sorted(params.items())
-    )
-
-
 def _request_json(request: urllib.request.Request) -> dict[str, Any]:
     try:
         with urllib.request.urlopen(request, timeout=30) as response:
@@ -338,34 +284,56 @@ def _request_json(request: urllib.request.Request) -> dict[str, Any]:
         raise RuntimeError(f"X API {error.code}: {body}") from error
 
 
-def upload_media(image: bytes, credentials: dict[str, str]) -> str:
-    boundary = f"----benchmark-radar-{secrets.token_hex(8)}"
-    body = b"".join(
-        [
-            f"--{boundary}\r\n".encode(),
-            b'Content-Disposition: form-data; name="media"; filename="top3.png"\r\n',
-            b"Content-Type: image/png\r\n\r\n",
-            image,
-            f"\r\n--{boundary}--\r\n".encode(),
-        ]
-    )
+def fetch_access_token(credentials: dict[str, str]) -> str:
+    """Trade the stored OAuth 2.0 refresh token for a short-lived access token."""
+    basic = base64.b64encode(
+        f"{credentials['client_id']}:{credentials['client_secret']}".encode()
+    ).decode()
     request = urllib.request.Request(
-        MEDIA_UPLOAD_URL,
-        data=body,
+        TOKEN_URL,
+        data=urllib.parse.urlencode(
+            {
+                "grant_type": "refresh_token",
+                "refresh_token": credentials["refresh_token"],
+            }
+        ).encode(),
         method="POST",
         headers={
-            "Authorization": _oauth_header("POST", MEDIA_UPLOAD_URL, credentials),
-            "Content-Type": f"multipart/form-data; boundary={boundary}",
+            "Authorization": f"Basic {basic}",
+            "Content-Type": "application/x-www-form-urlencoded",
         },
     )
     payload = _request_json(request)
-    media_id = payload.get("media_id_string")
+    access_token = payload.get("access_token")
+    if not access_token:
+        raise RuntimeError(f"X token exchange returned no access token: {payload}")
+    return str(access_token)
+
+
+def upload_media(image: bytes, access_token: str) -> str:
+    request = urllib.request.Request(
+        MEDIA_UPLOAD_URL,
+        data=json.dumps(
+            {
+                "media_data": base64.b64encode(image).decode(),
+                "media_category": "tweet_image",
+                "media_type": "image/png",
+            }
+        ).encode("utf-8"),
+        method="POST",
+        headers={
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+        },
+    )
+    payload = _request_json(request)
+    media_id = (payload.get("data") or {}).get("id")
     if not media_id:
         raise RuntimeError(f"X media upload returned no media id: {payload}")
     return str(media_id)
 
 
-def create_post(text: str, media_id: str | None, credentials: dict[str, str]) -> str:
+def create_post(text: str, media_id: str | None, access_token: str) -> str:
     payload: dict[str, Any] = {"text": text}
     if media_id:
         payload["media"] = {"media_ids": [media_id]}
@@ -374,7 +342,7 @@ def create_post(text: str, media_id: str | None, credentials: dict[str, str]) ->
         data=json.dumps(payload).encode("utf-8"),
         method="POST",
         headers={
-            "Authorization": _oauth_header("POST", TWEETS_URL, credentials),
+            "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
         },
     )
@@ -400,24 +368,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--lang", choices=("en", "zh"), required=True)
     parser.add_argument("--date", help="Snapshot date (YYYY-MM-DD); default per language")
     parser.add_argument("--dry-run", action="store_true", help="Print, do not post")
-    parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Ignore the 8 AM Eastern gate (manual dispatch)",
-    )
     args = parser.parse_args(argv)
-
-    if (
-        args.lang == "en"
-        and not args.force
-        and not args.dry_run
-        and os.environ.get("X_POST_FORCE") != "1"
-        and not in_eastern_window(dt.datetime.now(dt.UTC))
-    ):
-        eastern_now = dt.datetime.now(EASTERN).strftime("%H:%M %Z")
-        print(f"Skipping: it is {eastern_now} in US Eastern, outside 8:00-9:59.")
-        _emit_output(posted="false")
-        return 0
 
     date = pick_snapshot_date(args.lang, args.date)
     if date is None:
@@ -447,23 +398,23 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     credentials = {
-        "api_key": os.environ.get("X_API_KEY") or "",
-        "api_secret": os.environ.get("X_API_SECRET") or "",
-        "access_token": os.environ.get("X_ACCESS_TOKEN") or "",
-        "access_token_secret": os.environ.get("X_ACCESS_TOKEN_SECRET") or "",
+        "client_id": os.environ.get("X_CLIENT_ID") or "",
+        "client_secret": os.environ.get("X_CLIENT_SECRET") or "",
+        "refresh_token": os.environ.get("X_REFRESH_TOKEN") or "",
     }
     if not all(credentials.values()):
         print(
             "::warning::X API secrets are not set yet; skipping the post. "
-            "Add X_API_KEY, X_API_SECRET, X_ACCESS_TOKEN and "
-            "X_ACCESS_TOKEN_SECRET as repository secrets to enable posting."
+            "Add X_CLIENT_ID, X_CLIENT_SECRET and X_REFRESH_TOKEN as "
+            "repository secrets to enable posting."
         )
         _emit_output(posted="false", snapshot_date=date)
         return 0
 
+    access_token = fetch_access_token(credentials)
     image = fetch_image(date)
-    media_id = upload_media(image, credentials) if image else None
-    post_id = create_post(text, media_id, credentials)
+    media_id = upload_media(image, access_token) if image else None
+    post_id = create_post(text, media_id, access_token)
     record_post(ledger, date, args.lang, post_id)
     print(f"Posted {date} ({args.lang}): https://x.com/ktwu01/status/{post_id}")
     _emit_output(posted="true", snapshot_date=date, post_id=post_id)
