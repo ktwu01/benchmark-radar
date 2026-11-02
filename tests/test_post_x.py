@@ -106,6 +106,32 @@ def test_oauth1_signature_matches_reference_implementation():
     assert 'oauth_signature="zYI1a1h%2BZl3NQweXz1HNi2NnkEk%3D"' in header
 
 
+def test_upload_media_sends_multipart_form(monkeypatch):
+    captured = {}
+
+    def fake_request_json(request):
+        captured["data"] = request.data
+        headers = {key.lower(): value for key, value in request.header_items()}
+        captured["content_type"] = headers.get("content-type", "")
+        return {"data": {"id": "1880028106020515840"}}
+
+    monkeypatch.setattr(post_x, "_request_json", fake_request_json)
+    credentials = {
+        "api_key": "key",
+        "api_secret": "secret",
+        "access_token": "token",
+        "access_token_secret": "token-secret",
+    }
+    image = b"\x89PNG\r\n\x1a\nfake-image-bytes"
+    assert post_x.upload_media(image, credentials) == "1880028106020515840"
+    assert captured["content_type"].startswith("multipart/form-data; boundary=")
+    body = captured["data"]
+    assert b'name="media"; filename="card.png"' in body
+    assert b'name="media_category"' in body and b"tweet_image" in body
+    assert image in body
+    assert b"media_data" not in body
+
+
 def test_ledger_round_trip(tmp_path, monkeypatch):
     monkeypatch.setattr(post_x, "LEDGER_PATH", tmp_path / "x-posts.json")
     ledger = post_x.load_ledger()

@@ -338,24 +338,56 @@ def oauth1_authorization_header(
     )
 
 
+def _multipart_form_body(
+    fields: dict[str, str],
+    file_field: str,
+    filename: str,
+    file_content_type: str,
+    file_bytes: bytes,
+) -> tuple[bytes, str]:
+    """Build a multipart/form-data body (the v2 one-shot upload format)."""
+    boundary = "----benchmark-radar-" + secrets.token_hex(12)
+    chunks: list[bytes] = []
+    for name, value in fields.items():
+        chunks.append(
+            (
+                f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"\r\n\r\n{value}\r\n'
+            ).encode()
+        )
+    chunks.append(
+        (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="{file_field}"; filename="{filename}"\r\n'
+            f"Content-Type: {file_content_type}\r\n\r\n"
+        ).encode()
+    )
+    chunks.append(file_bytes)
+    chunks.append(f"\r\n--{boundary}--\r\n".encode())
+    return b"".join(chunks), f"multipart/form-data; boundary={boundary}"
+
+
 def upload_media(image: bytes, credentials: dict[str, str]) -> str:
+    # The v2 one-shot upload takes multipart/form-data with the raw image in
+    # a "media" field. A JSON body with base64 "media_data" is the retired
+    # v1.1 shape; the v2 endpoint answers it with a bare 503.
+    body, content_type = _multipart_form_body(
+        {"media_category": "tweet_image", "media_type": "image/png"},
+        "media",
+        "card.png",
+        "image/png",
+        image,
+    )
     request = urllib.request.Request(
         MEDIA_UPLOAD_URL,
-        data=json.dumps(
-            {
-                "media_data": base64.b64encode(image).decode(),
-                "media_category": "tweet_image",
-                "media_type": "image/png",
-            }
-        ).encode("utf-8"),
+        data=body,
         method="POST",
         headers={
             "Authorization": oauth1_authorization_header("POST", MEDIA_UPLOAD_URL, credentials),
-            "Content-Type": "application/json",
+            "Content-Type": content_type,
         },
     )
     payload = _request_json(request)
-    media_id = (payload.get("data") or {}).get("id")
+    media_id = (payload.get("data") or {}).get("id") or payload.get("media_id_string")
     if not media_id:
         raise RuntimeError(f"X media upload returned no media id: {payload}")
     return str(media_id)
