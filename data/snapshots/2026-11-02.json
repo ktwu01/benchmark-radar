@@ -71389,5 +71389,138 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [],
+        "authors": [
+          "Mahmoud Abbasi",
+          "Juan M. Núñez V.",
+          "Amin Shahraki"
+        ],
+        "blurb": "A newly released audit of hijacked-agent detectors found that attacks represented 16%–86% of test samples across 11 evaluations, none varied that prevalence, and six did not test data from a second benchmark or source.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-02T05:01:58+00:00",
+        "source": "DataCite",
+        "title": "What Standard Evaluations Hide About Detectors of Hijacked LLM Agents: Rare Attacks, Unseen Tools and Benchmark Transfer",
+        "url": "https://doi.org/10.48550/arxiv.2610.41803"
+      },
+      {
+        "affiliations": [
+          "University of Virginia",
+          "University of California, San Diego"
+        ],
+        "authors": [
+          "Shubhrangshu Debsarkar",
+          "Valmik Nahata"
+        ],
+        "blurb": "The newly released “Simple Features Beat Most AI Control Monitors” reports that features requiring no code execution outranked 20 of 24 open-weight monitoring models on a standard backdoor-detection dataset.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-02T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Simple Features Beat Most AI Control Monitors",
+        "url": "https://arxiv.org/abs/2610.41713"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Xiangyu Kong",
+          "Ruirui Yang",
+          "Xia Hou"
+        ],
+        "blurb": "TradeWar is a new agent benchmark that turns negotiation dialogue into executable tariff and trade-share policies, applies capacity and network constraints during settlement, and scores the resulting economic outcomes rather than agreement alone.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-02T05:07:04+00:00",
+        "source": "DataCite",
+        "title": "TradeWar: A Benchmark for Execution-Grounded Trade Negotiation with Adaptive LLM Agents",
+        "url": "https://doi.org/10.48550/arxiv.2610.42004"
+      },
+      {
+        "affiliations": [
+          "California Institute of Technology"
+        ],
+        "authors": [
+          "Laure Delisle",
+          "Pietro Perona"
+        ],
+        "blurb": "CompoSET is a new vision-language benchmark built around controlled single edits.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-02T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "CompoSET: A Controlled Single-Edit Benchmark for Vision-Language Compositionality",
+        "url": "https://arxiv.org/abs/2610.41118"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Zongcai Huang",
+          "Yuying Miao",
+          "Zigeng Song",
+          "Xinchang Zhang",
+          "Wang Man"
+        ],
+        "blurb": "RS-SynAgent is a new expert-defined benchmark with 755 remote-sensing tasks: 455 require one tool and 300 require multiple tools.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-02T08:38:02+00:00",
+        "source": "DataCite",
+        "title": "\"RS-SynAgent Benchmark Dataset\"",
+        "url": "https://doi.org/10.21227/6d6s-ab31"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Mingrui Li",
+          "Minzhang Li",
+          "Weichen Qin",
+          "Yufan Xie",
+          "Zhangzhi Xiong",
+          "Sixian Shen",
+          "Jiakai Zhang",
+          "Yuan Pei",
+          "Jingyi Yu"
+        ],
+        "blurb": "CryoAtlas is a new curated resource for building atomic protein models from cryogenic electron microscopy maps.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-02T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "CryoAtlas: A Large Curated Dataset and Unified Benchmark for Cryo-EM Atomic Model Building",
+        "url": "https://arxiv.org/abs/2610.41411"
+      }
+    ],
+    "date": "2026-11-02",
+    "schema_version": 1,
+    "top": [
+      "https://doi.org/10.48550/arxiv.2610.41803",
+      "https://arxiv.org/abs/2610.41713",
+      "https://doi.org/10.48550/arxiv.2610.42004"
+    ]
+  },
   "since": "2026-10-31T12:56:51.080394+00:00"
 }
