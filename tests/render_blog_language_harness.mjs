@@ -29,6 +29,15 @@ class MockNode {
     this.children = [];
     this.listeners = {};
   }
+  querySelector() { return this.markup?.includes("<a") ? {} : null; }
+  cloneNode() {
+    const copy = new MockNode(this.tagName);
+    copy._text = this._text;
+    copy.markup = this.markup;
+    return copy;
+  }
+  replaceChildren(node) { this.markup = node?.markup || ""; this._text = node?._text || ""; }
+  insertAdjacentHTML(_, html) { this.markup = html; this._text = html.replace(/<[^>]*>/g, ""); }
   get textContent() {
     return this._text;
   }
@@ -87,6 +96,9 @@ if (mode === "malformed-json") {
     "Switch to Chinese (中文)": "Switch to Chinese (中文)",
     "Star this repository on GitHub. {count} stars": "在 GitHub 上给这个仓库点 Star。{count} 个 star",
     Blog: "博客",
+    Accept: "接受",
+    Decline: "拒绝",
+    "analytics-consent-text": '允许分析？ <a href="https://privacy.microsoft.com/privacystatement">隐私声明</a>',
   });
 }
 
@@ -116,8 +128,11 @@ if (mode === "translated") {
 const allNodes = [bakedI18n, langToggle, langToggleLabel, navContact, enContent];
 if (zhContent) allNodes.push(zhContent);
 
+const documentListeners = {};
+const consentNodes = [];
 globalThis.document = {
   documentElement: docElement,
+  addEventListener: (name, handler) => { documentListeners[name] = handler; },
   getElementById: (id) => {
     if (id === "chrome-i18n") return bakedI18n;
     if (id === "lang-toggle") return langToggle;
@@ -128,7 +143,7 @@ globalThis.document = {
     if (selector === "[data-lang-content]") {
       return zhContent ? [enContent, zhContent] : [enContent];
     }
-    if (selector === "[data-i18n]") return [navContact];
+    if (selector === "[data-i18n]") return [navContact, ...consentNodes];
     if (selector === "[data-i18n-title]") return [];
     if (selector === "[data-i18n-aria]") return [];
     if (selector === '.view-nav [aria-current="page"]') return [];
@@ -151,11 +166,14 @@ globalThis.window = {
 // are not coupled to badge rendering.
 globalThis.fetch = async () => ({ ok: false, json: async () => ({}) });
 
+if (mode === "consent-query") window.location.search = "?lang=zh";
+if (mode === "consent-saved") storage.set("benchmark-radar:lang", "zh");
+
 // Evaluate blog.js in this sandbox
 new Function(blogJsSource)();
 
 // Now perform the language switch
-if (targetLang) {
+if (targetLang && !mode.startsWith("consent-")) {
   // Can trigger either by clicking toggle or by calling showLanguage directly
   langToggle.click();
   // If the toggle flip didn't match targetLang (e.g. if targetLang was 'en' and initial was 'en'):
@@ -165,7 +183,23 @@ if (targetLang) {
   }
 }
 
+let consentResult = null;
+if (mode.startsWith("consent-")) {
+  for (const key of ["Accept", "Decline", "analytics-consent-text"]) {
+    const node = new MockNode("p");
+    node.setAttribute("data-i18n", key);
+    node.textContent = key;
+    if (key === "analytics-consent-text") node.markup = '<a href="https://privacy.microsoft.com/privacystatement">Privacy</a>';
+    consentNodes.push(node);
+  }
+  documentListeners["analytics-consent-shown"]?.();
+  consentResult = { labels: consentNodes.slice(0, 2).map(n => n.textContent), markup: consentNodes[2].markup };
+  langToggle.click();
+  consentResult.englishLabels = consentNodes.slice(0, 2).map(n => n.textContent);
+  consentResult.englishMarkup = consentNodes[2].markup;
+}
 const result = {
+  consentResult,
   mode,
   targetLang,
   htmlLang: docElement.lang,

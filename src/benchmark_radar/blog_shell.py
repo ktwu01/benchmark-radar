@@ -263,9 +263,11 @@ def parse_zh_table(app_js: str) -> dict[str, str]:
         )
     table: dict[str, str] = {}
     # Object keys are quoted or bare JS identifiers (both appear in the table).
-    pair = re.compile(r'(?:"((?:[^"\\]|\\.)*)"|([A-Za-z_$][\w$]*))\s*:\s*"((?:[^"\\]|\\.)*)"')
-    for quoted, bare, value in pair.findall(app_js[open_brace:end]):
-        table[quoted or bare] = value
+    pair = re.compile(
+        r"""(?:"((?:[^"\\]|\\.)*)"|([A-Za-z_$][\w$]*))\s*:\s*(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)')"""
+    )
+    for quoted, bare, double_value, single_value in pair.findall(app_js[open_brace:end]):
+        table[quoted or bare] = double_value or single_value
     return table
 
 
@@ -281,6 +283,8 @@ def chrome_i18n_table(chrome: SiteChrome, app_js: str) -> dict[str, str]:
     keys = set(re.findall(r'data-i18n(?:-title|-aria)?="([^"]+)"', chrome_html))
     keys.update(_TOGGLE_I18N_KEYS)
     keys.update(_BADGE_I18N_KEYS)
+    # clarity.js inserts these after the initial chrome translation.
+    keys.update({"Accept", "Decline", "analytics-consent-text"})
     table = parse_zh_table(app_js)
     # Keys the table does not carry (short nav labels like Blog and Trends)
     # stay English on the dashboard too — t() falls back to the key itself —

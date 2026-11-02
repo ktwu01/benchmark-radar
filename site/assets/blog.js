@@ -53,14 +53,30 @@ function t(key, params) {
 // The same three passes app.js applies, including the repo-badge tooltip
 // contract: a data-i18n-title on a badge becomes the CSS-rendered
 // data-tooltip instead of the browser's delayed native title.
+const chromeI18nMarkup = new WeakMap();
 function applyChromeI18n() {
   if (!chromeI18N) return;
   const zh = document.documentElement.lang === "zh-CN";
   document.querySelectorAll("[data-i18n]").forEach((node) => {
     if (node.dataset.i18nEn === undefined) {
       node.dataset.i18nEn = node.textContent;
+      if (node.querySelector("a,strong,em,code")) {
+        chromeI18nMarkup.set(node, node.cloneNode(true));
+      }
     }
-    node.textContent = zh ? (chromeI18N[node.dataset.i18n] ?? node.dataset.i18nEn) : node.dataset.i18nEn;
+    const text = zh ? chromeI18N[node.dataset.i18n] : undefined;
+    if (text !== undefined) {
+      if (text.includes("<")) {
+        node.replaceChildren();
+        node.insertAdjacentHTML("afterbegin", text);
+      } else {
+        node.textContent = text;
+      }
+    } else if (chromeI18nMarkup.has(node)) {
+      node.replaceChildren(chromeI18nMarkup.get(node).cloneNode(true));
+    } else {
+      node.textContent = node.dataset.i18nEn;
+    }
   });
   document.querySelectorAll("[data-i18n-title]").forEach((node) => {
     if (node.dataset.i18nTitleEn === undefined) {
@@ -130,6 +146,7 @@ if (langToggle) langToggle.addEventListener("click", flipLanguage);
 document.querySelectorAll("[data-lang-switch]").forEach((control) => {
   control.addEventListener("click", flipLanguage);
 });
+document.addEventListener("analytics-consent-shown", applyChromeI18n);
 showLanguage(savedLanguage());
 
 // Repository star count. Mirrors app.js's renderStarCount: a rate-limited API
