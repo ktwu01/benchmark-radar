@@ -17,7 +17,12 @@ The post body never carries a link; the maintainer adds benchmark-radar.org
 as the first reply himself. Posting uses the official X API with OAuth 2.0
 user context: the workflow exchanges the stored refresh token (secrets
 X_CLIENT_ID, X_CLIENT_SECRET, X_REFRESH_TOKEN) for a short-lived access
-token, then posts as @ktwu01. A ledger at data/x-posts.json records each
+token, then posts as @ktwu01. X rotates the refresh token on every
+exchange and kills the old one, so whenever X returns a new refresh token
+the script writes it back into the X_REFRESH_TOKEN secret (using the
+X_SECRETS_PAT secret, a fine-grained PAT allowed to write this repo's
+secrets); without that write-back the chain would break on the second run.
+A ledger at data/x-posts.json records each
 {date, lang, post id} so a re-run never posts the same briefing twice.
 There are no retries: one attempt, then the run fails loudly.
 """
@@ -284,8 +289,13 @@ def _request_json(request: urllib.request.Request) -> dict[str, Any]:
         raise RuntimeError(f"X API {error.code}: {body}") from error
 
 
-def fetch_access_token(credentials: dict[str, str]) -> str:
-    """Trade the stored OAuth 2.0 refresh token for a short-lived access token."""
+def fetch_access_token(credentials: dict[str, str]) -> tuple[str, str | None]:
+    """Trade the stored OAuth 2.0 refresh token for a short-lived access token.
+
+    Returns (access_token, new_refresh_token). X rotates the refresh token
+    on every exchange: the response carries a fresh one and the presented
+    token stops working, so the caller must persist the new one.
+    """
     basic = base64.b64encode(
         f"{credentials['client_id']}:{credentials['client_secret']}".encode()
     ).decode()
@@ -307,7 +317,54 @@ def fetch_access_token(credentials: dict[str, str]) -> str:
     access_token = payload.get("access_token")
     if not access_token:
         raise RuntimeError(f"X token exchange returned no access token: {payload}")
-    return str(access_token)
+    new_refresh = payload.get("refresh_token")
+    return str(access_token), (str(new_refresh) if new_refresh else None)
+
+
+def update_refresh_secret(new_refresh_token: str) -> None:
+    """Write the rotated refresh token back into the X_REFRESH_TOKEN secret.
+
+    Uses the GitHub actions-secrets API with X_SECRETS_PAT. The value is
+    sealed with the repo's public key (PyNaCl) and never printed.
+    """
+    pat = os.environ.get("X_SECRETS_PAT") or ""
+    repo = os.environ.get("GITHUB_REPOSITORY") or ""
+    if not pat or not repo:
+        print(
+            "::warning::X rotated the refresh token but X_SECRETS_PAT is not "
+            "set, so the new token could not be saved. The next run will "
+            "fail until X_REFRESH_TOKEN is updated by hand."
+        )
+        return
+    try:
+        from nacl.encoding import Base64Encoder
+        from nacl.public import PublicKey, SealedBox
+    except ImportError:
+        print("::warning::PyNaCl is missing; cannot update X_REFRESH_TOKEN.")
+        return
+    api = f"https://api.github.com/repos/{repo}/actions/secrets"
+    headers = {
+        "Authorization": f"Bearer {pat}",
+        "Accept": "application/vnd.github+json",
+    }
+    key_request = urllib.request.Request(
+        f"{api}/public-key", headers=headers, method="GET"
+    )
+    key_payload = _request_json(key_request)
+    box = SealedBox(PublicKey(key_payload["key"], encoder=Base64Encoder))
+    sealed = base64.b64encode(
+        box.encrypt(new_refresh_token.encode("utf-8"))
+    ).decode()
+    put_request = urllib.request.Request(
+        f"{api}/X_REFRESH_TOKEN",
+        data=json.dumps(
+            {"encrypted_value": sealed, "key_id": key_payload["key_id"]}
+        ).encode("utf-8"),
+        headers={**headers, "Content-Type": "application/json"},
+        method="PUT",
+    )
+    _request_json(put_request)
+    print("Saved the rotated refresh token to X_REFRESH_TOKEN.")
 
 
 def upload_media(image: bytes, access_token: str) -> str:
@@ -411,7 +468,9 @@ def main(argv: list[str] | None = None) -> int:
         _emit_output(posted="false", snapshot_date=date)
         return 0
 
-    access_token = fetch_access_token(credentials)
+    access_token, new_refresh_token = fetch_access_token(credentials)
+    if new_refresh_token and new_refresh_token != credentials["refresh_token"]:
+        update_refresh_secret(new_refresh_token)
     image = fetch_image(date)
     media_id = upload_media(image, access_token) if image else None
     post_id = create_post(text, media_id, access_token)
