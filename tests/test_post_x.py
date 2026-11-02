@@ -84,6 +84,29 @@ def test_chinese_post_uses_zh_bullets_and_carries_no_link():
     assert "http" not in text
 
 
+class _EmptyResponse:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def read(self):
+        return b""
+
+
+def test_no_content_request_accepts_empty_body(monkeypatch):
+    # GitHub returns 204 No Content (empty body) when an existing secret is
+    # updated; the secret-save PUT must accept that instead of parsing JSON.
+    monkeypatch.setattr(
+        post_x.urllib.request, "urlopen", lambda req: _EmptyResponse()
+    )
+    request = post_x.urllib.request.Request(
+        "https://api.github.com/repos/x/y/actions/secrets/Z", method="PUT"
+    )
+    post_x._request_no_content(request)
+
+
 def test_ledger_round_trip(tmp_path, monkeypatch):
     monkeypatch.setattr(post_x, "LEDGER_PATH", tmp_path / "x-posts.json")
     ledger = post_x.load_ledger()
