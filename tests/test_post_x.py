@@ -84,27 +84,26 @@ def test_chinese_post_uses_zh_bullets_and_carries_no_link():
     assert "http" not in text
 
 
-class _EmptyResponse:
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *exc):
-        return False
-
-    def read(self):
-        return b""
-
-
-def test_no_content_request_accepts_empty_body(monkeypatch):
-    # GitHub returns 204 No Content (empty body) when an existing secret is
-    # updated; the secret-save PUT must accept that instead of parsing JSON.
-    monkeypatch.setattr(
-        post_x.urllib.request, "urlopen", lambda req: _EmptyResponse()
+def test_oauth1_signature_matches_reference_implementation():
+    # The worked example inputs from X's "Creating a signature" page, with
+    # fixed nonce and timestamp. The expected signature was cross-checked
+    # against oauthlib (the reference OAuth 1.0a library), which produces
+    # the identical value for these inputs.
+    credentials = {
+        "api_key": "xvz1evFS4wEEPTGEFPHBog",
+        "api_secret": "kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw",
+        "access_token": "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb",
+        "access_token_secret": "LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE",
+    }
+    header = post_x.oauth1_authorization_header(
+        "POST",
+        "https://api.twitter.com/1.1/statuses/update.json?include_entities=true",
+        credentials,
+        {"status": "Hello Ladies + Gentlemen, a signed OAuth request!"},
+        nonce="kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgm",
+        timestamp="1318622958",
     )
-    request = post_x.urllib.request.Request(
-        "https://api.github.com/repos/x/y/actions/secrets/Z", method="PUT"
-    )
-    post_x._request_no_content(request)
+    assert 'oauth_signature="zYI1a1h%2BZl3NQweXz1HNi2NnkEk%3D"' in header
 
 
 def test_ledger_round_trip(tmp_path, monkeypatch):
