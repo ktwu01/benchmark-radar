@@ -1,26 +1,14 @@
 name: Post daily English briefing to X
 
-# Post the day's briefing to X at 8:00 AM US Eastern.
-#
-# GitHub cron is UTC-only and does not follow daylight saving, so this fires
-# at both 12:00 and 13:00 UTC and scripts/post_x.py only proceeds while the
-# America/New_York clock reads 8:00-9:59 (see in_eastern_window there):
-# 12:00 UTC posts in EDT, 13:00 UTC posts in EST, and the ledger in
-# data/x-posts.json keeps the second trigger from ever double-posting.
-#
+# Post the day's briefing to X every day at 13:00 UTC.
 # The day's snapshot and share cards are committed by daily-radar.yml hours
 # earlier (05:00 UTC run), so the material is always ready before this fires.
+# The ledger in data/x-posts.json keeps a re-run from ever double-posting.
 on:
   schedule:
-    - cron: "0 12 * * *"
     - cron: "0 13 * * *"
   workflow_dispatch:
     inputs:
-      force:
-        description: "Post even outside the 8 AM Eastern window"
-        required: false
-        type: boolean
-        default: false
       dry_run:
         description: "Print the post instead of sending it"
         required: false
@@ -62,11 +50,9 @@ jobs:
       - name: Post the English briefing to X
         id: post
         env:
-          X_API_KEY: ${{ secrets.X_API_KEY }}
-          X_API_SECRET: ${{ secrets.X_API_SECRET }}
-          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
-          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
-          X_POST_FORCE: ${{ inputs.force && '1' || '' }}
+          X_CLIENT_ID: ${{ secrets.X_CLIENT_ID }}
+          X_CLIENT_SECRET: ${{ secrets.X_CLIENT_SECRET }}
+          X_REFRESH_TOKEN: ${{ secrets.X_REFRESH_TOKEN }}
         run: >
           python scripts/post_x.py --lang en
           ${{ inputs.dry_run && '--dry-run' || '' }}
