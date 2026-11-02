@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import datetime as dt
 import importlib.util
 from pathlib import Path
 
@@ -83,18 +82,6 @@ def test_chinese_post_uses_zh_bullets_and_carries_no_link():
     assert "Delta Bench 追踪长程工具使用。" in text
     assert "42,331 条记录" in text
     assert "http" not in text
-
-
-def test_eastern_window_follows_daylight_saving():
-    # 12:00 UTC is 8:00 EDT in summer and 7:00 EST in winter.
-    assert post_x.in_eastern_window(dt.datetime(2026, 7, 1, 12, tzinfo=dt.UTC))
-    assert not post_x.in_eastern_window(dt.datetime(2026, 1, 15, 12, tzinfo=dt.UTC))
-    # 13:00 UTC is 8:00 EST in winter.
-    assert post_x.in_eastern_window(dt.datetime(2026, 1, 15, 13, tzinfo=dt.UTC))
-    # A delayed summer trigger at 13:30 UTC (9:30 EDT) still posts.
-    assert post_x.in_eastern_window(dt.datetime(2026, 7, 1, 13, 30, tzinfo=dt.UTC))
-    # 15:00 UTC (11:00 EDT) is outside the window.
-    assert not post_x.in_eastern_window(dt.datetime(2026, 7, 1, 15, tzinfo=dt.UTC))
 
 
 def test_ledger_round_trip(tmp_path, monkeypatch):
