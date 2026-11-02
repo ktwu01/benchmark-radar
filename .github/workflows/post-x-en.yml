@@ -47,16 +47,13 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install PyNaCl (only used to save the rotated refresh token)
-        run: python -m pip install --quiet pynacl
-
       - name: Post the English briefing to X
         id: post
         env:
-          X_CLIENT_ID: ${{ secrets.X_CLIENT_ID }}
-          X_CLIENT_SECRET: ${{ secrets.X_CLIENT_SECRET }}
-          X_REFRESH_TOKEN: ${{ secrets.X_REFRESH_TOKEN }}
-          X_SECRETS_PAT: ${{ secrets.X_SECRETS_PAT }}
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
         run: >
           python scripts/post_x.py --lang en
           ${{ inputs.dry_run && '--dry-run' || '' }}
