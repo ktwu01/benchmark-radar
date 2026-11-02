@@ -289,6 +289,22 @@ def _request_json(request: urllib.request.Request) -> dict[str, Any]:
         raise RuntimeError(f"X API {error.code}: {body}") from error
 
 
+def _request_no_content(request: urllib.request.Request) -> None:
+    """Run a request whose success response may have an empty body.
+
+    GitHub answers 204 No Content when an existing secret is updated, so
+    this path must not go through the JSON-only helper.
+    """
+    try:
+        with urllib.request.urlopen(request) as response:
+            response.read()
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(
+            f"{request.full_url} failed: HTTP {exc.code}: {detail}"
+        ) from exc
+
+
 def fetch_access_token(credentials: dict[str, str]) -> tuple[str, str | None]:
     """Trade the stored OAuth 2.0 refresh token for a short-lived access token.
 
@@ -363,7 +379,7 @@ def update_refresh_secret(new_refresh_token: str) -> None:
         headers={**headers, "Content-Type": "application/json"},
         method="PUT",
     )
-    _request_json(put_request)
+    _request_no_content(put_request)
     print("Saved the rotated refresh token to X_REFRESH_TOKEN.")
 
 
