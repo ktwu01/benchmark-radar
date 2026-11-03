@@ -620,11 +620,12 @@ main {
   padding-top: var(--space-4);
 }
 
-/* Each view is its own page (/, /leaderboard/, /trends/, /explore/) and
-   carries its own h1, but only one view is visible at a time so only one h1
-   ever renders. They keep the quiet leaderboard-heading scale rather than the
-   display scale, so promoting the heading changed the document outline and
-   not the design. */
+/* Each view is its own page (/, /leaderboard/, /trends/, /explore/). Its
+   heading is an h2 in the shared document and the build promotes it to the
+   page's one h1 on that view's own page (issue #945). They keep the quiet
+   leaderboard-heading scale rather than the display scale, and h1 and h2 are
+   styled alike, so retagging changes the document outline and not the
+   design. */
 .view-heading h1,
 .view-heading h2 {
   margin: 0;
@@ -680,6 +681,17 @@ h1 {
 h2 {
   font-size: 1.35rem;
   line-height: 1.1;
+}
+
+/* A view heading is an h2 on every page but its own, where the build makes it
+   the h1 (issue #945). This restates the h1 rule above at the same specificity
+   as a bare h2, so the tag never changes how the heading looks. */
+h2:where(.view-title) {
+  max-width: 800px;
+  margin-bottom: 0;
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.015em;
 }
 
 .heading-note {
@@ -4977,7 +4989,8 @@ footer {
     align-items: start;
   }
 
-  h1 {
+  h1,
+  h2:where(.view-title) {
     max-width: 100%;
     overflow-wrap: anywhere;
     font-size: clamp(1.7rem, 7vw, 2.3rem);
@@ -5819,7 +5832,8 @@ dialog {
   gap: 1rem;
   margin-bottom: 1rem;
 }
-.score-browse-header h1 {
+.score-browse-header h1,
+.score-browse-header h2 {
   margin: 0;
   font-size: clamp(1.25rem, 2vw, 1.5rem);
   max-width: none;

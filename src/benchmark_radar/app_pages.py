@@ -17,6 +17,7 @@ this module writes copies of it that differ in four ways:
   marker, so a result can show where the page sits;
 * the named view starts visible and Today starts hidden, or the named utility
   dialog starts open over Today;
+* the named view's heading is the page's one h1, and the homepage h1 is an h2;
 * the view or dialog's own containers arrive holding real content;
 * the link for the route arrives with its active state and ``aria-current``.
 
@@ -240,6 +241,28 @@ def _open_on(document: str, view: str) -> str:
     return opening.sub(rf'<section class="view" id="{view}-view"\1>', document, count=1)
 
 
+_HOME_H1 = re.compile(r'<h1 (class="visually-hidden"[^>]*)>(.*?)</h1>', re.DOTALL)
+
+
+def _promote_view_heading(document: str, view: str) -> str:
+    """Make the named view's heading the page's one h1.
+
+    Search engines read the whole document, hidden views included, so a page
+    with one h1 per view told Bing it had seven main topics (issue #945). The
+    shared document carries only the homepage h1; on a view's own page that
+    heading steps down to h2 and the view's heading steps up. Both tags are
+    styled alike, so nothing on screen moves.
+    """
+    document, demoted = _HOME_H1.subn(r"<h2 \1>\2</h2>", document, count=1)
+    if demoted != 1:
+        raise AppPageError("homepage h1 not found in site/index.html")
+    heading = re.compile(rf'<h2 (id="{view}-heading"[^>]*)>(.*?)</h2>', re.DOTALL)
+    document, promoted = heading.subn(r"<h1 \1>\2</h1>", document, count=1)
+    if promoted != 1:
+        raise AppPageError(f"{view}-heading h2 not found in site/index.html")
+    return document
+
+
 def _with_active_attributes(opening_tag: str) -> str:
     """Add the same active class and page-current state syncNavState applies."""
     class_match = re.search(r'\bclass="([^"]*)"', opening_tag)
@@ -318,6 +341,7 @@ def render_app_page(
         what="page JSON-LD marker",
     )
     document = _open_on(document, view)
+    document = _promote_view_heading(document, view)
     if view == "saturation":
         document = _saturation_card(document)
     document = _deactivate_home_navigation(document)

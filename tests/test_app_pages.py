@@ -394,6 +394,26 @@ def test_exactly_one_heading_is_visible_per_page(tmp_path):
         assert len(re.findall(r"<h1[ >]", open_section.group(1))) == 1
 
 
+def test_each_page_has_one_h1_naming_its_own_view(tmp_path):
+    """Crawlers count hidden headings too: Bing flagged seven h1s on every page
+    (issue #945). Each page keeps exactly one, and it is that view's heading."""
+    _write(tmp_path, _dashboard())
+    for path, heading in (
+        ("leaderboard", "leaderboard-heading"),
+        ("saturation", "saturation-heading"),
+        ("trends", "trends-heading"),
+        ("explore", "map-heading"),
+    ):
+        page = (tmp_path / path / "index.html").read_text(encoding="utf-8")
+        h1s = re.findall(r"<h1 ([^>]*)>", page)
+        assert len(h1s) == 1, (path, h1s)
+        assert f'id="{heading}"' in h1s[0], (path, h1s)
+        assert '<h2 class="visually-hidden"' in page
+    for path in ("cli", "cite"):
+        page = (tmp_path / path / "index.html").read_text(encoding="utf-8")
+        assert len(re.findall(r"<h1[ >]", page)) == 1, path
+
+
 def test_pages_carry_breadcrumb_and_webpage_schema(tmp_path):
     _write(tmp_path, _dashboard())
     page = (tmp_path / "leaderboard" / "index.html").read_text(encoding="utf-8")

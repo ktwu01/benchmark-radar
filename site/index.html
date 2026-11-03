@@ -379,7 +379,11 @@
 
     <main id="main-content" tabindex="-1">
       <section class="view" id="today-view" aria-label="Today">
-        <!-- The page's one H1. It names what the whole site is rather than
+        <!-- The homepage's one H1. Every view ships in this one document, so
+             the build demotes this heading on each view's own page and
+             promotes that view's heading instead (app_pages.py), leaving
+             every served page with exactly one H1 (issue #945). It names
+             what the whole site is rather than
              what the list below currently shows, because the heading over the
              results is rewritten as the reader changes the date range and a
              heading that says "Past 7 days" is not what this page is.
@@ -587,7 +591,7 @@
            crawlers; app.js replaces them with the live, filterable list. -->
       <section class="view" id="library-view" aria-labelledby="library-heading" hidden>
         <div class="library-toolbar">
-          <h1 id="library-heading" class="library-heading" data-i18n="Library">Library</h1>
+          <h2 id="library-heading" class="library-heading view-title" data-i18n="Library">Library</h2>
           <input id="library-search" type="search" autocomplete="off"
                  class="benchmark-search-input library-search"
                  aria-label="Search the library" data-i18n-aria="Search the library"
@@ -620,7 +624,7 @@
            side panel per cell and .com's shared-benchmark average. -->
       <section class="view" id="models-view" aria-labelledby="models-heading" hidden>
         <div class="library-toolbar">
-          <h1 id="models-heading" class="library-heading" data-i18n="Models">Models</h1>
+          <h2 id="models-heading" class="library-heading view-title" data-i18n="Models">Models</h2>
           <p class="models-note" data-i18n="models.note">Every model with a reported score in the catalog, side by side: models are columns, benchmarks are rows. Select a score to see its setting and source.</p>
           <p id="models-status" class="library-status" aria-live="polite"></p>
         </div>
@@ -665,7 +669,7 @@
 
       <section class="view" id="leaderboard-view" aria-labelledby="leaderboard-heading" hidden>
         <div class="score-browse-header">
-          <h1 id="leaderboard-heading" data-i18n="Landscape">Landscape</h1>
+          <h2 id="leaderboard-heading" class="view-title" data-i18n="Landscape">Landscape</h2>
         </div>
 
         <!-- Three modes, one page (issue #530). Latest releases opens by
@@ -889,7 +893,7 @@
         <header class="view-heading">
           <div>
             <p class="eyebrow" data-i18n="Big picture">Big picture</p>
-            <h1 id="map-heading" data-i18n="What we found">What we found</h1>
+            <h2 id="map-heading" class="view-title" data-i18n="What we found">What we found</h2>
           </div>
           <p class="heading-note" data-i18n="map.heading.note">
             See what shows up most often and where it came from. Open the connections view
@@ -931,7 +935,7 @@
 
       <section class="view" id="saturation-view" aria-labelledby="saturation-heading" hidden>
         <div class="score-browse-header">
-          <h1 id="saturation-heading" data-i18n="Saturation">Saturation</h1>
+          <h2 id="saturation-heading" class="view-title" data-i18n="Saturation">Saturation</h2>
           <label class="score-filter" for="saturation-score-filter">
             <span data-i18n="Show benchmarks with highest reported score below:">Show benchmarks with highest reported score below:</span>
             <input id="saturation-score-filter" name="lscore" type="range" min="10" max="100" step="10" value="70" list="score-filter-steps" data-score-filter aria-controls="benchmark-search-results">
@@ -1037,7 +1041,7 @@
 
       <section class="view" id="trends-view" aria-labelledby="trends-heading" hidden>
         <header class="view-heading">
-          <h1 id="trends-heading" data-i18n="Trend">Trend</h1>
+          <h2 id="trends-heading" class="view-title" data-i18n="Trend">Trend</h2>
         </header>
 
         <!-- Research directions, merged from benchmark-radar.com's Trends (#420).

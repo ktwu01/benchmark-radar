@@ -319,7 +319,7 @@ def test_primary_section_titles_share_compact_spacing_and_trends_uses_one_title(
     assert "align-items: flex-start" in score_header
     assert ".score-browse-header > .score-filter { margin-bottom: 0; }" in styles
     trends = html.split('id="trends-view"', 1)[1].split("</section>", 1)[0]
-    assert '<h1 id="trends-heading" data-i18n="Trend">Trend</h1>' in trends
+    assert '<h2 id="trends-heading" class="view-title" data-i18n="Trend">Trend</h2>' in trends
     assert "Recent activity" not in trends
     assert "Signals over time" not in trends
     assert "Counts describe discovery volume" not in trends
@@ -3016,20 +3016,21 @@ def _css_rule(styles: str, selector: str) -> str:
 
 
 def test_heading_outline_and_scale_stay_quiet():
-    """Regression guard for the per-view h1 outline and its typography.
+    """Regression guard for the per-view heading outline and its typography.
 
-    Each view is served at its own URL, so each one owns an h1 naming what that
-    page is. Only one view is on screen at a time, so only one h1 ever renders.
-    They keep the quiet leaderboard scale rather than the display scale, so
-    promoting them changed the document outline and not the design: before this
-    rule existed the headings carried the 3rem uppercase h1 treatment, which
-    drowned the content they named.
+    Each view is served at its own URL, and the build makes that view's heading
+    the page's one h1 (issue #945). The shared document therefore carries one
+    h1, Today's, and every other view heading as an h2. They keep the quiet
+    leaderboard scale rather than the display scale: before this rule existed
+    the headings carried the 3rem uppercase h1 treatment, which drowned the
+    content they named.
     """
     html = Path("site/index.html").read_text(encoding="utf-8")
     styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
 
-    # One h1 per view, and exactly one of them sits in a section the reader can
-    # see. The other three stay behind `hidden` until routing opens them.
+    # One h1 in the document, in Today, the one section the reader can see.
+    # The other views stay behind `hidden` until routing opens them, and each
+    # names itself with an h2 the build promotes on its own page.
     sections = re.findall(
         r'<section class="view" id="([a-z]+)-view"([^>]*)>(.*?)\n      </section>',
         html,
@@ -3044,8 +3045,9 @@ def test_heading_outline_and_scale_stay_quiet():
         "map",
         "trends",
     }
+    assert html.count("<h1") == 1
     for name, _, body in sections:
-        assert body.count("<h1") == 1, name
+        assert body.count("<h1") == (1 if name == "today" else 0), name
     visible = [name for name, attrs, _ in sections if " hidden" not in attrs]
     assert visible == ["today"], visible
 
@@ -3067,7 +3069,7 @@ def test_heading_outline_and_scale_stay_quiet():
         "map-heading",
         "trends-heading",
     ):
-        assert f'<h1 id="{heading_id}"' in html
+        assert f'<h2 id="{heading_id}" class="view-title"' in html
 
     # The today results caption renders exactly like the counts beside it: the shared
     # small-caps utility group supplies face/size/case, and this rule only
