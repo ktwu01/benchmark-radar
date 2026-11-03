@@ -3158,7 +3158,10 @@ def test_issue_332_a_release_outranks_a_same_day_update():
 
     # Issue #978: the visible feed now follows the explicit ordering control.
     assert 't("Sort: Newest")' in script
-    assert 't("Sort: Recorded stars + likes + downloads + points; missing signals last")' in script
+    assert (
+        't("Sort: Releases first, then recorded stars + likes + downloads + points; '
+        'missing signals last")'
+    ) in script
     assert 'state.todaySort === "newest"' in script
     assert 'return item.event_kind === "released";' in script
 

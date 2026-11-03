@@ -683,7 +683,7 @@ const I18N = {
     "Time window": "时间范围",
     "Sort by": "排序方式",
     "Sort: Newest": "排序：最新",
-    "Sort: Recorded stars + likes + downloads + points; missing signals last": "排序：已记录的星标、点赞、下载和积分总数；缺少数据的记录排在最后",
+    "Sort: Releases first, then recorded stars + likes + downloads + points; missing signals last": "排序：新发布的排在前面，其余按已记录的星标、点赞、下载和积分总数；缺少数据的记录排在最后",
     "Search benchmarks…": "搜索benchmark…",
     "Refresh data": "刷新数据",
     "Today's radar": "今日雷达",
@@ -3332,7 +3332,7 @@ function renderToday({ resultsOnly = false } = {}) {
     `${evidenceCount} ${t("normal")} · ${attentionCount} ${t("attention")}`;
   byId("today-sort").textContent = state.todaySort === "newest"
     ? t("Sort: Newest")
-    : t("Sort: Recorded stars + likes + downloads + points; missing signals last");
+    : t("Sort: Releases first, then recorded stars + likes + downloads + points; missing signals last");
   renderTopShare(day, !showingAllDates && !range);
   const listHost = byId("today-list");
   replaceChildren(
@@ -4275,6 +4275,12 @@ function filteredObservations() {
   const records = todayIsMultiDate() ? latestObservationsByRecord(matches) : matches;
   return records.sort((a, b) => {
     if (state.todaySort !== "newest") {
+      // Activity totals cover a repository's whole life, and any commit makes
+      // it an "updated" row for the day. Without this tier, old datasets with
+      // 250k downloads led Today on 138 of 140 top-10 slots over 14 days
+      // (issue #1056), burying every benchmark released that day (#332).
+      const releaseOrder = Number(isRelease(b)) - Number(isRelease(a));
+      if (releaseOrder) return releaseOrder;
       const attentionOrder = observationAttention(b) - observationAttention(a);
       if (attentionOrder) return attentionOrder;
     }

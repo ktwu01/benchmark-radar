@@ -18,7 +18,7 @@ const observation = (date, id = date) => ({
   title: 'agent benchmark', summary: '', categories: [],
 });
 let observations = [observation('2026-09-07'), observation('2026-09-06'), observation('2026-08-08', 'repeated'), observation('2026-08-09', 'repeated'), observation('2026-08-07'), observation('2026-07-09'), observation('2026-07-08')];
-const dateNames = ['todayDateRange', 'todayIsMultiDate', 'validTodayDate', 'filteredObservations', 'observationRecordKey', 'latestObservationsByRecord', 'observationAttention', 'eventTimestamp'];
+const dateNames = ['todayDateRange', 'todayIsMultiDate', 'validTodayDate', 'filteredObservations', 'observationRecordKey', 'latestObservationsByRecord', 'observationAttention', 'eventTimestamp', 'isRelease'];
 const dates = new Function('state', 'allObservations', `${source.match(/const TODAY_WINDOWS = .*;/)[0]}\n${dateNames.map(fn).join('\n')}\nreturn {${dateNames.join(',')}};`)(state, () => observations);
 assert.deepEqual(dates.todayDateRange(), {start:'2026-08-08',end:'2026-09-06'});
 assert.equal(dates.validTodayDate(), true);
@@ -74,6 +74,18 @@ observations = [
 assert.equal(dates.observationAttention(observations[0]), 70);
 assert.equal(dates.observationAttention(observations[3]), -1);
 assert.deepEqual(dates.filteredObservations().map(r=>r.source_id), ['robodojo','repo','openclaw/openclaw@v2026.8.34','tag-no-downloads']);
+
+// Issue #1056: a repository that only took a commit carries its lifetime
+// downloads. It stays listed, after every release of the day.
+observations = [
+  {...observation('2026-09-06', 'lmarena-ai/leaderboard-dataset'), event_kind:'updated', metrics:{downloads:251131}},
+  {...observation('2026-09-06', 'new-small'), event_kind:'released', metrics:{downloads:12}},
+  {...observation('2026-09-06', 'new-unmeasured'), event_kind:'released'},
+  {...observation('2026-09-06', 'kaggle'), event_kind:'discovered', metrics:{downloads:900}},
+];
+assert.deepEqual(dates.filteredObservations().map(r=>r.source_id), ['new-small','new-unmeasured','lmarena-ai/leaderboard-dataset','kaggle']);
+state.todaySort = 'newest';
+assert.equal(dates.filteredObservations().length, 4);
 
 state.todaySort = 'newest';
 observations = [
