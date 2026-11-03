@@ -82406,5 +82406,132 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [],
+        "authors": [
+          "Yu Jiang",
+          "Yue Huang",
+          "Hang Hua",
+          "Yuyang Wu",
+          "Zixuan Weng",
+          "Olexandr Isayev",
+          "Yue Zhao",
+          "Zinan Lin",
+          "Xiangliang Zhang"
+        ],
+        "blurb": "The new “Is Your Long-Horizon Benchmark Really Deep?” release separates task length from task structure.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-03T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Is Your Long-Horizon Benchmark Really Deep? Measuring and Synthesizing Depth in Terminal Tasks",
+        "url": "https://arxiv.org/abs/2611.01927"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Javad Mohammad Alizadeh",
+          "Huanmei Wu"
+        ],
+        "blurb": "The new THReD benchmark evaluates an agent that converts electronic health record extracts into analysis-ready datasets, alongside the preprocessing tools it invokes.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-03T09:53:21+00:00",
+        "source": "DataCite",
+        "title": "Benchmark of THReD: Evaluating an LLM Agent and Its Preprocessing Tools for Turning Electronic Health Records into AI-Ready Datasets",
+        "url": "https://doi.org/10.48550/arxiv.2611.02484"
+      },
+      {
+        "affiliations": [
+          "["
+        ],
+        "authors": [
+          "Zhihua Wang",
+          "Yunhao Feng",
+          "Yifeng Gao",
+          "Rui Pan",
+          "Baiheng Zhao",
+          "Zixing Chen",
+          "Xingjun Ma"
+        ],
+        "blurb": "The new MemHarmBench evaluates prompt injection that survives through an agent’s persistent memory and affects later, otherwise normal tasks after the original malicious content is gone.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-03T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "MemHarmBench: Evaluating Cross-Session Prompt Injection in Memory-Persistent AI Agents",
+        "url": "https://arxiv.org/abs/2611.01700"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Shuochen Chang",
+          "Qianli Ma",
+          "Yibo Miao",
+          "Qingyang Liu",
+          "Bingjie Gao",
+          "Haonan Zhao",
+          "Siyu Sun",
+          "Yulin Sun",
+          "Han Zhao",
+          "Jiangtong Li"
+        ],
+        "blurb": "The new Switch-SWE benchmark tests whether coding agents can resume an unfinished repository task after working on other unfinished tasks.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-03T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Switch-SWE: Do Coding Agents Hold Focus When Switching Between Unfinished Tasks?",
+        "url": "https://arxiv.org/abs/2611.02017"
+      },
+      {
+        "affiliations": [
+          "TechWolf, 9000 Gent, Belgium",
+          "Ghent University – imec, 9052 Gent, Belgium",
+          "Avature, Barcelona, Spain",
+          "workrb@techwolf.ai"
+        ],
+        "authors": [
+          "Warre Veys",
+          "Luis Gasco",
+          "Jens-Joris Decorte"
+        ],
+        "blurb": "The new WorkRB skill-extraction evaluation replaces the usual rule that every unannotated skill is fully wrong.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-03T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Grading the Unannotated: Insights from the WorkRB Skill Extraction Challenge at RecSys-HR 2026",
+        "url": "https://arxiv.org/abs/2611.03525"
+      }
+    ],
+    "date": "2026-11-03",
+    "schema_version": 1,
+    "top": [
+      "https://arxiv.org/abs/2611.01927",
+      "https://doi.org/10.48550/arxiv.2611.02484",
+      "https://arxiv.org/abs/2611.01700"
+    ]
+  },
   "since": "2026-11-01T12:28:55.742779+00:00"
 }
