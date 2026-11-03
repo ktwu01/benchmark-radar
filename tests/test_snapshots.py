@@ -1973,6 +1973,29 @@ def test_dashboard_window_drops_only_sightings_a_newer_one_repeats():
     assert "corpus" not in window
 
 
+def test_dashboard_window_keeps_each_days_published_share_cards():
+    """An older item shared from a window finds its own day's published card (#1019)."""
+    share = {
+        "top3_image": "https://cards.benchmark-radar.org/daily/2026-11-02/top3.png",
+        "cards": [
+            {
+                "url": "https://arxiv.org/abs/2611.00001",
+                "title": "CompoSET",
+                "image": "https://cards.benchmark-radar.org/daily/2026-11-02/card-01.png",
+            }
+        ],
+    }
+    days = [
+        {**_window_day("2026-11-02", [("arXiv", "2611.00001", "released")]), "share": share},
+        _window_day("2026-11-03", [("HF", "new/one", "released")]),
+    ]
+    dashboard = {"latest_date": "2026-11-03", "generated_at": "g", "days": days}
+
+    window = dashboard_window(dashboard, 30)
+
+    assert [day["share"] for day in window["days"]] == [share, {}]
+
+
 def test_dashboard_window_keeps_a_sighting_a_filter_can_still_see():
     days = [
         _window_day("2026-10-30", [("HF", "moved/on", "released")]),

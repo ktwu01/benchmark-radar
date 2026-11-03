@@ -11177,7 +11177,9 @@ function sourceChip(item, href) {
 function itemDay(item, day) {
   const date = item.snapshot_date;
   if (!date || date === day?.date) return day;
-  return (state.data?.days || []).find((entry) => entry.date === date) || day;
+  // observationDays() is what Today rendered from: a window file on a fresh
+  // visit, the full archive once loaded. Both carry each day's share block.
+  return observationDays().find((entry) => entry.date === date) || day;
 }
 
 function radarShareButton(item, day, title, image) {

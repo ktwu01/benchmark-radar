@@ -1574,6 +1574,9 @@ def dashboard_window(dashboard: dict[str, Any], window_days: int) -> dict[str, A
             "date": day["date"],
             "generated_at": day.get("generated_at"),
             "selection": day.get("selection"),
+            # A few image links per day: an older item shared from a window
+            # still finds the card its day published (#1019).
+            "share": day.get("share") or {},
             "evidence_items": evidence,
             "attention": {"observations": attention},
         }

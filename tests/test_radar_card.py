@@ -79,6 +79,7 @@ def test_a_past_window_item_uses_its_own_day():
     program = (
         "const state = {data: {days: [{date: '2026-10-25', share: {cards: [1]}}, "
         "{date: '2026-11-03'}]}};"
+        "const observationDays = () => state.data.days;"
         + helper
         + "const newest = state.data.days[1];"
         + "console.log(JSON.stringify(["
