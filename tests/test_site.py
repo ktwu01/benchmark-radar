@@ -418,7 +418,9 @@ def test_dashboard_bounds_work_before_and_during_filtering():
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
 
     assert "state.observations = [...evidence, ...attention].sort" in script
-    assert "if (state.observations) return state.observations" in script
+    # The sorted rows stay cached between keystrokes; the cache is reused only
+    # while it was built from the same days (a window file or the archive).
+    assert "state.observations && state.observationsSource === days" in script
     assert "const visibleObservations = observations.slice(pageStart, pageEnd)" in script
     assert "renderToday({ resultsOnly: true })" in script
     assert 'if (state.view === "today") renderToday()' in script
