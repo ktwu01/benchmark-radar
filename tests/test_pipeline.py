@@ -546,30 +546,35 @@ def test_sponsor_bait_resource_listing_is_suppressed():
     assert "sponsor-bait resource listing" in spam.suppression_reasons
 
 
-def test_paper_supplements_are_suppressed_by_title_only():
-    """Issue #936: a deposited supplement is not a benchmark, but a benchmark whose
-    summary mentions its own supplementary material still is."""
+def test_paper_supplements_are_demoted_never_removed():
+    """Issue #936: a deposited supplement ranks lower but stays listed, because some
+    carry the benchmark itself; a filtered benchmark is worse than a flagged
+    non-benchmark (principle.md). A benchmark whose summary mentions its own
+    supplementary material is not touched."""
     taxonomy = {"benchmark": ["benchmark"], "dataset": ["dataset"]}
     now = datetime(2026, 7, 27, 1, tzinfo=UTC)
+    summary = "Benchmark dataset tables."
+    plain = score_item(item(source="Zenodo", title="Tables", summary=summary), taxonomy, now)
     supplements = [
         "Supplementary Tables S1-S9 and Figure S1, with details of the dataset split",
         'Supporting data for "Agentic design of continuous flow processes"',
         "Supplementary Materials and Dataset for: Digital and AI Tool Adoption",
         "Supporting Information for: From Systematic Review to Framework",
+        # Zenodo 23422773, 2026-10-21: 66 clinical cases, prompts and metric code.
+        "Supplementary Material — Reliability Evaluation of Open-Weight Large Language "
+        "Models for Clinical Diagnosis Assistance",
     ]
     for title in supplements:
-        scored = score_item(
-            item(source="Zenodo", title=title, summary="Benchmark dataset tables."),
-            taxonomy,
-            now,
-        )
-        assert "paper supplement" in scored.suppression_reasons, title
-    for title, summary in (
+        scored = score_item(item(source="Zenodo", title=title, summary=summary), taxonomy, now)
+        assert scored.suppression_reasons == [], title
+        assert scored.relevance_score == plain.relevance_score - 30, title
+    for title, kept_summary in (
         ("TableBench: a benchmark dataset", "See the supplementary material for the full card."),
         ("A benchmark of supplementary data quality", "Benchmark dataset."),
     ):
-        kept = score_item(item(title=title, summary=summary), taxonomy, now)
-        assert "paper supplement" not in kept.suppression_reasons, title
+        kept = score_item(item(title=title, summary=kept_summary), taxonomy, now)
+        untouched = score_item(item(title=title, summary="Benchmark dataset."), taxonomy, now)
+        assert kept.relevance_score == untouched.relevance_score, title
 
 
 def test_structural_signals_demote_thin_provenance_without_semantic_guessing():

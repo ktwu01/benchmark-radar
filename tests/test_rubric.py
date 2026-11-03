@@ -243,7 +243,7 @@ def test_v5_reference_is_not_relabelled_with_the_v6_supplement_rule():
     assert any("paper supplement" in band for band in relevance(current))
     for frozen in (v5, v4, rubric.v3_rubric_reference(), rubric.v2_rubric_reference()):
         assert not any("paper supplement" in band for band in relevance(frozen))
-        assert not any("paper supplements" in limit for limit in frozen["limits"])
+        assert not any("paper supplements" in limit.lower() for limit in frozen["limits"])
     assert rubric.V6_SUPPRESSION_LIMIT in current["limits"]
     assert rubric.V5_SUPPRESSION_LIMIT in v5["limits"]
     # v5 keeps every v5 rule; only the v6 addition is removed.

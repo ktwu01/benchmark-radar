@@ -124,9 +124,13 @@ LOW_VALUE_SIGNALS: tuple[dict[str, Any], ...] = (
     {
         # Supplementary files deposited for a paper ("Supplementary Tables S1-S9
         # and Figure S1, with details of the dataset split...") match the
-        # benchmark terms of the paper they support, but a reader cannot evaluate
-        # anything with them (#936). Anchored at the start of the haystack, which
-        # is the title then the summary, so a real benchmark whose summary
+        # benchmark terms of the paper they support and mostly cannot be used to
+        # evaluate anything (#936). Demoted, never suppressed: across the
+        # committed snapshots some of them carry the benchmark itself (clinical
+        # LLM cases with prompts and metric code; query sets with ground truth
+        # and a judge prompt), and a filtered benchmark is worse than a flagged
+        # non-benchmark (principle.md). Anchored at the start of the haystack,
+        # which is the title then the summary, so a benchmark whose summary
         # mentions its own supplementary material is not affected.
         "label": "paper supplement",
         "pattern": (
@@ -134,7 +138,7 @@ LOW_VALUE_SIGNALS: tuple[dict[str, Any], ...] = (
             r"(?:materials?|files?|data|information|tables?|figures?|code)\b"
         ),
         "deduction": 30.0,
-        "action": "suppress",
+        "action": "demote",
     },
 )
 MAX_LOW_VALUE_DEDUCTION = 60.0
@@ -144,8 +148,9 @@ MAX_LOW_VALUE_DEDUCTION = 60.0
 V6_SIGNAL_LABELS = ("paper supplement",)
 V6_SUPPRESSION_LIMIT = (
     "Negative signals demote only named artifact patterns. Result indexes, "
-    "submission placeholders, visualization-only companions, and paper supplements "
-    "are suppressed; the selection funnel reports how many were removed."
+    "submission placeholders, and visualization-only companions are suppressed; "
+    "the selection funnel reports how many were removed. Paper supplements are "
+    "demoted, not removed, because some carry the benchmark itself."
 )
 V5_SUPPRESSION_LIMIT = (
     "Negative signals demote only named artifact patterns. Result indexes, "
