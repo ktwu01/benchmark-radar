@@ -9,7 +9,8 @@ fetches only papers not yet recorded; pass --refresh to re-read them all.
 The arXiv API asks for at most one request every three seconds. Each request
 carries up to 100 ids, failed requests back off exponentially (1 to 60
 seconds, up to five retries), and every finished batch is checkpointed so an
-interrupted run resumes where it stopped.
+interrupted run resumes where it stopped. The checkpoint is deleted once the
+file is written, and --refresh ignores it.
 """
 
 from __future__ import annotations
@@ -103,8 +104,10 @@ def main() -> None:
         existing = (yaml.safe_load(args.output.read_text(encoding="utf-8")) or {}).get(
             "benchmarks"
         ) or {}
+    # The checkpoint only resumes an interrupted run: a refresh re-reads every
+    # paper, and a finished run deletes it below.
     fetched: dict[str, list[str]] = {}
-    if args.checkpoint.exists():
+    if args.checkpoint.exists() and not args.refresh:
         fetched = json.loads(args.checkpoint.read_text(encoding="utf-8"))
     missing = sorted(
         {paper for key, paper in wanted.items() if key not in existing} - fetched.keys()
@@ -138,6 +141,7 @@ def main() -> None:
         width=100,
     )
     args.output.write_text(HEADER + body, encoding="utf-8")
+    args.checkpoint.unlink(missing_ok=True)
     print(f"wrote {len(benchmarks)} records to {args.output}; {len(absent)} not on arXiv API")
     for key in absent:
         print(f"  no arXiv metadata: {key} ({wanted[key]})")
