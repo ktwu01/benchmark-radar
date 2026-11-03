@@ -1180,6 +1180,8 @@ const I18N = {
     "Share Benchmark Radar": "分享 Benchmark Radar",
     "Share card": "分享卡片",
     "Share {name} as a card": "将 {name} 分享为卡片",
+    "This card could not be loaded. You can still share its link.": "这张卡片加载失败，你仍然可以分享它的链接。",
+    "This card could not be drawn here. You can still share its link.": "这里无法生成卡片，你仍然可以分享它的链接。",
     "Share {name}": "分享 {name}",
     "{name} on Benchmark Radar": "Benchmark Radar 上的 {name}",
     "Share card for {name}": "{name} 的分享卡片",
@@ -11166,6 +11168,29 @@ function sourceChip(item, href) {
     : element("span", { className: "radar-source", attrs }, children);
 }
 
+// Every Today's radar item can be shared as a card (issue #1019). An item the
+// daily briefing picked shares its published card; any other item gets one
+// drawn from the facts it holds. Both modules load on the first press.
+function radarShareButton(item, day, title, image) {
+  const button = element("button", {
+    className: "share-link radar-share",
+    text: t("Share card"),
+    attrs: { type: "button", "aria-label": t("Share {name} as a card", { name: title }) },
+  });
+  button.addEventListener("click", async () => {
+    const { openRadarShare } = await import("./share-card.js");
+    openRadarShare({
+      item,
+      day: day?.date || "",
+      title,
+      image,
+      pageUrl: safeHttpUrl(item.url) || window.location.href,
+      t,
+    });
+  });
+  return element("div", { className: "share-control" }, [button]);
+}
+
 function evidenceCard(item, day) {
   const shareCard = shareCardFor(day, item.url);
   const fullTitle = displayTitle(item);
@@ -11202,7 +11227,7 @@ function evidenceCard(item, day) {
         text: item.summary || t("No description published at the source."),
       }),
       artifactLinks(item),
-      shareCard ? shareControl(shareCard.image, fullTitle) : null,
+      radarShareButton(item, day, fullTitle, shareCard?.image || ""),
     ]),
     scoreBlock(item),
   ]);
