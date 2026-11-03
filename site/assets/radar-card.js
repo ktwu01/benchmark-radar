@@ -41,19 +41,12 @@ const HANDLE_SOURCES = new Set([
   "Kaggle Dataset",
 ]);
 
+// The caller passes text app.js already cleaned (plainSummary, displayTitle),
+// which removes only named HTML tags. Stripping any <...> again here would
+// delete reported results such as ">=2.0,<3 ... >1.2" along with the text
+// between them, so this only collapses whitespace.
 function plain(value) {
-  let text = String(value ?? "");
-  // DataCite descriptions arrive as escaped HTML, sometimes escaped twice.
-  for (let pass = 0; pass < 2; pass += 1) {
-    text = text
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/&quot;/g, '"')
-      .replace(/&#0?39;/g, "'")
-      .replace(/&nbsp;/g, " ")
-      .replace(/&amp;/g, "&");
-  }
-  return text.replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).join(" ");
+  return String(value ?? "").split(/\s+/).filter(Boolean).join(" ");
 }
 
 function unique(values) {

@@ -30,14 +30,17 @@ const full = {
   categories: ["benchmark", "evaluation", "agentic", "multi_modal", "coding"],
   authors: ["Ada Lovelace", "Alan Turing", "Ada Lovelace", "Grace Hopper", "Edsger Dijkstra"],
   organizations: ["MIT", "Stanford University", "CMU"],
-  summary: "We &amp;amp; colleagues <b>introduce</b> a benchmark. ".repeat(20),
+  summary: "We  introduce a\nbenchmark. ".repeat(20),
 };
 const facts = cardFacts(full, { day: "2026-11-03" });
 assert.equal(facts.label, "Benchmark Radar · Today's radar · Nov 3, 2026");
 assert.deepEqual(facts.authors, ["Ada Lovelace", "Alan Turing", "Grace Hopper", "Edsger Dijkstra"]);
 assert.deepEqual(facts.affiliations, ["MIT", "Stanford University", "CMU"]);
 assert.equal(facts.meta, "arXiv · Nov 3, 2026 · agentic · multi modal");
-assert(facts.blurb.startsWith("We & colleagues introduce a benchmark."));
+assert(facts.blurb.startsWith("We introduce a benchmark. We introduce"));
+// Reported results with angle brackets survive whole (SemVerBench, 2026-09-12).
+const semver = "Pins requests>=2.0,<3 and checks the resolver picks numpy>1.2 for every case.";
+assert.equal(cardFacts({ title: "SemVerBench", summary: semver }).blurb, semver);
 
 const drawn = context();
 drawCard(drawn.ctx, facts);
