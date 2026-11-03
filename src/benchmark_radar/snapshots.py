@@ -1501,47 +1501,70 @@ def dashboard_trends(dashboard: dict[str, Any]) -> dict[str, Any]:
 TODAY_WINDOW_DAYS = (30, 60, 90)
 
 
-def _record_key(kind: str, item: dict[str, Any]) -> tuple[str, ...]:
-    # The same identity app.js uses to show one row per record
-    # (observationRecordKey), so the browser's own dedup is a no-op on this file.
+def _sighting_key(kind: str, item: dict[str, Any]) -> str:
+    """Identify a record together with every field a Today filter reads.
+
+    app.js filters first and then keeps each record's latest matching sighting
+    (filteredObservations), so an older sighting is redundant only when a newer
+    one is identical in the record identity and in all filter inputs: event
+    kind, categories, organizations, producer, title, summary and source.
+    Otherwise a record released yesterday and updated today would vanish under
+    the Released filter.
+    """
     if kind == "attention":
         fallback = f"{item.get('source')}\0{item.get('source_id')}"
-        return (kind, str(item.get("observation_id") or fallback))
-    return (kind, str(item.get("source")), str(item.get("source_id")))
+        identity: Any = [kind, str(item.get("observation_id") or fallback)]
+    else:
+        identity = [kind, str(item.get("source")), str(item.get("source_id"))]
+    inputs = [
+        item.get("event_kind"),
+        item.get("categories"),
+        item.get("organizations"),
+        item.get("producer"),
+        item.get("title"),
+        item.get("summary"),
+    ]
+    return json.dumps([identity, inputs], sort_keys=True, ensure_ascii=False)
 
 
 def dashboard_window(dashboard: dict[str, Any], window_days: int) -> dict[str, Any]:
-    """Return what Today needs for a 30, 60 or 90 day window, one row per record.
+    """Return what Today needs for a 30, 60 or 90 day window, without repeat rows.
 
-    A window view lists each record once, at its latest sighting. radar.json
-    repeats a record on every day it was seen: the last 90 days hold 42,489
-    evidence rows for 23,932 distinct records, and the file is 324 MB in memory
-    because it also carries the corpus graph (issue #1058). Keeping only the
-    latest sighting drops no record; the sightings it removes are the ones the
-    window view already hides.
+    radar.json repeats a record on every day it was seen: the last 90 days hold
+    42,489 evidence rows for 23,932 distinct records, and the file is 324 MB in
+    memory because it also carries the corpus graph (issue #1058). A window view
+    shows each record once, so a sighting that a newer one repeats exactly adds
+    nothing. A sighting that differs from every newer one in anything a Today
+    filter reads stays (see ``_sighting_key``), so each filtered view lists the
+    rows it lists from radar.json.
     """
     days = dashboard.get("days") or []
     latest = str(dashboard.get("latest_date") or (days[-1]["date"] if days else ""))
     if not latest:
-        return {"schema_version": 2, "window_days": window_days, "days": []}
+        return {
+            "schema_version": 2,
+            "window_days": window_days,
+            "generated_at": dashboard.get("generated_at"),
+            "days": [],
+        }
     start = (date.fromisoformat(latest) - timedelta(days=window_days - 1)).isoformat()
     in_window = [day for day in days if start <= str(day["date"]) <= latest]
-    seen: set[tuple[str, ...]] = set()
+    seen: set[str] = set()
     kept: dict[str, dict[str, Any]] = {}
     for day in reversed(in_window):  # newest first, so the first sighting is the latest
         # Only a sighting on a newer day removes a row. Two rows for one record on
         # the same day both stay: app.js picks between them after sorting, and
         # picking here would choose differently.
-        today: set[tuple[str, ...]] = set()
+        today: set[str] = set()
         evidence = []
         for item in day.get("evidence_items") or []:
-            key = _record_key("evidence", item)
+            key = _sighting_key("evidence", item)
             if key not in seen:
                 today.add(key)
                 evidence.append(item)
         attention = []
         for item in (day.get("attention") or {}).get("observations") or []:
-            key = _record_key("attention", item)
+            key = _sighting_key("attention", item)
             if key not in seen:
                 today.add(key)
                 attention.append(item)
@@ -1556,6 +1579,9 @@ def dashboard_window(dashboard: dict[str, Any], window_days: int) -> dict[str, A
     return {
         "schema_version": 2,
         "window_days": window_days,
+        # The page compares this with the bootstrap's own, so a window file from
+        # another build is never mixed into the list.
+        "generated_at": dashboard.get("generated_at"),
         "start_date": start,
         "latest_date": latest,
         "days": [kept[str(day["date"])] for day in in_window],

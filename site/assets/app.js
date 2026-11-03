@@ -4094,8 +4094,16 @@ function isRelease(item) {
 // never needed (issue #1058). Once the full archive is loaded it serves every
 // window, as before.
 function observationDays() {
-  const windowData = TODAY_WINDOWS[state.todayDate] ? state.windowData[state.todayDate] : null;
+  const windowData = freshWindowData(state.todayDate);
   return !state.fullDataLoaded && windowData ? windowData.days : state.data.days;
+}
+
+// A window file belongs to one build. The bootstrap and the file carry the same
+// generated_at, so a file kept from before a refresh, or one from another crawl
+// of the same day, is not used and is fetched again.
+function freshWindowData(key) {
+  const windowData = TODAY_WINDOWS[key] ? state.windowData[key] : null;
+  return windowData && windowData.generated_at === state.data?.generated_at ? windowData : null;
 }
 
 function allObservations() {
@@ -12274,23 +12282,27 @@ function stateNeedsWindowData() {
     state.view === "today"
     && !state.fullDataLoaded
     && TODAY_WINDOWS[state.todayDate]
-    && !state.windowData[state.todayDate]
+    && !freshWindowData(state.todayDate)
   );
 }
 
 async function ensureWindowData(cache = "default") {
   const key = state.todayDate;
   if (!TODAY_WINDOWS[key] || state.fullDataLoaded) return state.data;
-  if (state.windowData[key] && cache === "default") return state.data;
+  if (freshWindowData(key) && cache === "default") return state.data;
   if (!state.windowPromises[key]) {
     state.windowPromises[key] = (async () => {
       try {
         const response = await fetch(`/data/radar-window-${key}.json`, { cache });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-        // A window file from another build than the page's own latest day would
-        // list a different range. Use the full archive rather than a mixed view.
-        if (data?.latest_date !== state.data.latest_date || !Array.isArray(data.days)) {
+        // A window file from another build than the page's own would list a
+        // different range. Use the full archive rather than a mixed view.
+        if (
+          data?.generated_at !== state.data.generated_at
+          || data?.latest_date !== state.data.latest_date
+          || !Array.isArray(data.days)
+        ) {
           throw new Error("Window file does not match the loaded snapshot");
         }
         state.windowData[key] = data;

@@ -98,23 +98,23 @@ assert.deepEqual(dates.filteredObservations().map(r=>r.source_id), ['utc','offse
 // record once. It must list exactly the rows the full archive lists, in the
 // same order, and the archive takes over once it has loaded.
 {
-  const names = ['todayDateRange', 'todayIsMultiDate', 'observationDays', 'allObservations', 'releaseAgeHours', 'releaseRank', 'isRelease', 'filteredObservations', 'observationRecordKey', 'latestObservationsByRecord', 'observationAttention', 'eventTimestamp', 'stateNeedsFullData', 'stateNeedsWindowData', 'latestReleasesPayload'];
+  const names = ['todayDateRange', 'todayIsMultiDate', 'observationDays', 'allObservations', 'releaseAgeHours', 'releaseRank', 'isRelease', 'filteredObservations', 'observationRecordKey', 'latestObservationsByRecord', 'observationAttention', 'eventTimestamp', 'stateNeedsFullData', 'stateNeedsWindowData', 'freshWindowData', 'latestReleasesPayload'];
   const consts = ['const TODAY_WINDOWS = .*;', 'const RELEASE_FRESH_HOURS = .*;', 'const RELEASE_RECENT_HOURS = .*;'].map((pattern) => source.match(new RegExp(pattern))[0]).join('\n');
   const row = (id, extra = {}) => ({source: 'Hugging Face', source_id: id, title: id, summary: '', categories: [], event_kind: 'released', total_score: 50, ...extra});
   const day = (date, evidence, attention = []) => ({date, generated_at: `${date}T06:00:00Z`, selection: {recommendation_score: 40, minimum_score: 20}, evidence_items: evidence, attention: {observations: attention}});
   const archive = [
     day('2026-08-01', [row('outside', {total_score: 99})]),
-    day('2026-09-20', [row('seen-twice'), row('only-old')]),
+    day('2026-09-20', [row('seen-twice'), row('only-old'), row('moved')]),
     day('2026-09-30', [row('seen-twice', {total_score: 60})], [{source: 'Hacker News', source_id: 'h1', observation_id: 'obs-1', title: 'h1', event_kind: 'discussed', metrics: {points: 5}}]),
-    day('2026-10-02', [row('seen-twice', {total_score: 61}), row('seen-twice', {total_score: 70}), row('fresh', {metrics: {downloads: 3}})], [{source: 'Hacker News', source_id: 'h1', observation_id: 'obs-1', title: 'h1', event_kind: 'discussed', metrics: {points: 9}}]),
+    day('2026-10-02', [row('seen-twice', {total_score: 61}), row('seen-twice', {total_score: 70}), row('fresh', {metrics: {downloads: 3}}), row('moved', {event_kind: 'updated'})], [{source: 'Hacker News', source_id: 'h1', observation_id: 'obs-1', title: 'h1', event_kind: 'discussed', metrics: {points: 9}}]),
   ];
   // What the build keeps: a record leaves every day older than its latest one.
-  const windowFile = {latest_date: '2026-10-02', days: [
-    day('2026-09-20', [row('only-old')]),
+  const windowFile = {generated_at: 'build-1', latest_date: '2026-10-02', days: [
+    day('2026-09-20', [row('only-old'), row('moved')]),
     day('2026-09-30', []),
-    day('2026-10-02', [row('seen-twice', {total_score: 61}), row('seen-twice', {total_score: 70}), row('fresh', {metrics: {downloads: 3}})], [{source: 'Hacker News', source_id: 'h1', observation_id: 'obs-1', title: 'h1', event_kind: 'discussed', metrics: {points: 9}}]),
+    day('2026-10-02', [row('seen-twice', {total_score: 61}), row('seen-twice', {total_score: 70}), row('fresh', {metrics: {downloads: 3}}), row('moved', {event_kind: 'updated'})], [{source: 'Hacker News', source_id: 'h1', observation_id: 'obs-1', title: 'h1', event_kind: 'discussed', metrics: {points: 9}}]),
   ]};
-  const windowState = {view: 'today', todayDate: '30d', todaySort: 'attention', q: '', source: '', kind: '', category: '', organization: '', event: '', fullDataLoaded: false, observations: null, observationsSource: null, windowData: {}, data: {latest_date: '2026-10-02', days: [archive[3]], facets: {dates: []}}};
+  const windowState = {view: 'today', todayDate: '30d', todaySort: 'attention', q: '', source: '', kind: '', category: '', organization: '', event: '', fullDataLoaded: false, observations: null, observationsSource: null, windowData: {}, data: {generated_at: 'build-1', latest_date: '2026-10-02', days: [archive[3]], facets: {dates: []}}};
   const windowApi = new Function('state', `${consts}\n${names.map(fn).join('\n')}\nreturn {${names.join(',')}};`)(windowState);
   const listed = () => windowApi.filteredObservations().map((r) => `${r.source_id}:${r.snapshot_date}:${r.total_score ?? ''}`);
   for (const sort of ['attention', 'newest']) {
@@ -125,6 +125,15 @@ assert.deepEqual(dates.filteredObservations().map(r=>r.source_id), ['utc','offse
     assert.deepEqual(listed(), fromArchive, `${sort}: the window file lists the archive's rows`);
   }
   assert.deepEqual(listed().filter((r) => r.startsWith('seen-twice')), ['seen-twice:2026-10-02:70'], 'the highest-ranked same-day row is the one shown');
+  // A filter runs before the latest sighting is chosen, so a record released
+  // earlier and updated since still lists under Released.
+  windowState.event = 'released';
+  windowState.fullDataLoaded = true; windowState.data.days = archive; windowState.observations = null;
+  const releasedFromArchive = listed();
+  windowState.fullDataLoaded = false; windowState.data.days = [archive[3]]; windowState.observations = null;
+  assert.deepEqual(listed(), releasedFromArchive, 'the Released filter lists the same rows from the window file');
+  assert.equal(listed().some((r) => r.startsWith('moved:2026-09-20')), true, 'a record released then updated stays under Released');
+  windowState.event = '';
   assert.equal(listed().some((r) => r.startsWith('outside')), false, 'a row outside the window stays out');
 
   // A window needs its own file, not the archive; every other date still needs the archive.
@@ -133,6 +142,13 @@ assert.deepEqual(dates.filteredObservations().map(r=>r.source_id), ['utc','offse
   assert.equal(windowApi.stateNeedsWindowData(), true);
   windowState.windowData = {'30d': windowFile};
   assert.equal(windowApi.stateNeedsWindowData(), false);
+  // A file from another build is not used, and is fetched again: after a
+  // refresh brings a newer crawl of the same day, and after another window loads.
+  windowState.data.generated_at = 'build-2';
+  assert.equal(windowApi.freshWindowData('30d'), null);
+  assert.equal(windowApi.stateNeedsWindowData(), true);
+  assert.equal(windowApi.observationDays(), windowState.data.days, 'a stale window file is not listed');
+  windowState.data.generated_at = 'build-1';
   windowState.todayDate = 'all';
   assert.equal(windowApi.stateNeedsFullData(), true);
   assert.equal(windowApi.stateNeedsWindowData(), false);
