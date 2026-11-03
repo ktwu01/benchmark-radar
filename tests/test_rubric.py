@@ -227,3 +227,25 @@ def test_v4_reference_is_not_relabelled_with_v5_bands_or_limits():
     assert "100 at publication or update time" in v4_recency["bands"]
     assert all(limit in current["limits"] for limit in rubric.V5_LIMITS)
     assert all(limit not in v4["limits"] for limit in rubric.V5_LIMITS)
+
+
+def test_v5_reference_is_not_relabelled_with_the_v6_supplement_rule():
+    """Issue #936: August to October snapshots scored under v5 keep v5's rules."""
+    current = rubric.rubric_reference()
+    v5 = rubric.v5_rubric_reference()
+    v4 = rubric.v4_rubric_reference()
+
+    def relevance(reference):
+        return next(c for c in reference["components"] if c["key"] == "relevance")["bands"]
+
+    assert current["scoring_version"] == rubric.SCORING_VERSION == 6
+    assert v5["scoring_version"] == 5
+    assert any("paper supplement" in band for band in relevance(current))
+    for frozen in (v5, v4, rubric.v3_rubric_reference(), rubric.v2_rubric_reference()):
+        assert not any("paper supplement" in band for band in relevance(frozen))
+        assert not any("paper supplements" in limit for limit in frozen["limits"])
+    assert rubric.V6_SUPPRESSION_LIMIT in current["limits"]
+    assert rubric.V5_SUPPRESSION_LIMIT in v5["limits"]
+    # v5 keeps every v5 rule; only the v6 addition is removed.
+    assert all(limit in v5["limits"] for limit in rubric.V5_LIMITS)
+    assert len(relevance(v5)) == len(relevance(current)) - len(rubric.V6_SIGNAL_LABELS)

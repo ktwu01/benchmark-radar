@@ -12,7 +12,7 @@ import hashlib
 import json
 from typing import Any
 
-SCORING_VERSION = 5
+SCORING_VERSION = 6
 SCORE_MAX = 100.0
 DEFAULT_LOOKBACK_HOURS = 48.0
 
@@ -121,8 +121,37 @@ LOW_VALUE_SIGNALS: tuple[dict[str, Any], ...] = (
         "deduction": 30.0,
         "action": "suppress",
     },
+    {
+        # Supplementary files deposited for a paper ("Supplementary Tables S1-S9
+        # and Figure S1, with details of the dataset split...") match the
+        # benchmark terms of the paper they support, but a reader cannot evaluate
+        # anything with them (#936). Anchored at the start of the haystack, which
+        # is the title then the summary, so a real benchmark whose summary
+        # mentions its own supplementary material is not affected.
+        "label": "paper supplement",
+        "pattern": (
+            r"^(?:supplementary|supporting)[\s_-]+"
+            r"(?:materials?|files?|data|information|tables?|figures?|code)\b"
+        ),
+        "deduction": 30.0,
+        "action": "suppress",
+    },
 )
 MAX_LOW_VALUE_DEDUCTION = 60.0
+
+# Rules added in v6. Earlier references must not list them: a v5 score was
+# produced without them, and explaining it with them would relabel history.
+V6_SIGNAL_LABELS = ("paper supplement",)
+V6_SUPPRESSION_LIMIT = (
+    "Negative signals demote only named artifact patterns. Result indexes, "
+    "submission placeholders, visualization-only companions, and paper supplements "
+    "are suppressed; the selection funnel reports how many were removed."
+)
+V5_SUPPRESSION_LIMIT = (
+    "Negative signals demote only named artifact patterns. Result indexes, "
+    "submission placeholders, and visualization-only companions are suppressed; "
+    "the selection funnel reports how many were removed."
+)
 
 # Field-only provenance checks stay separate from LOW_VALUE_SIGNALS, which are
 # regular expressions over title + summary. These rules deliberately make no
@@ -364,9 +393,7 @@ def rubric_reference(
             "review, a quality verdict, or an endorsement.",
             "Relevance reads only the title and source-published description. Nothing "
             "this project writes about a record can earn it points.",
-            "Negative signals demote only named artifact patterns. Result indexes, "
-            "submission placeholders, and visualization-only companions are suppressed; "
-            "the selection funnel reports how many were removed.",
+            V6_SUPPRESSION_LIMIT,
             "Adoption measures attention, not correctness. Counters that accumulate "
             "without a human decision (downloads, likes) are capped below the top of "
             "the adoption scale; stars and citations are not.",
@@ -381,9 +408,31 @@ def rubric_reference(
     return value
 
 
+def v5_rubric_reference(*, lookback_hours: float = DEFAULT_LOOKBACK_HOURS) -> dict[str, Any]:
+    """Describe v5 without retroactively applying v6's paper-supplement rule.
+
+    August to October snapshots scored under v5 contain unsuppressed paper
+    supplements; their scores must be explained by the rules that ran.
+    """
+    value = rubric_reference(lookback_hours=lookback_hours)
+    value["scoring_version"] = 5
+    for component in value["components"]:
+        if component["key"] == "relevance":
+            component["bands"] = [
+                band
+                for band in component["bands"]
+                if not any(f"for {label}" in band for label in V6_SIGNAL_LABELS)
+            ]
+    value["limits"] = [
+        V5_SUPPRESSION_LIMIT if limit == V6_SUPPRESSION_LIMIT else limit
+        for limit in value["limits"]
+    ]
+    return value
+
+
 def v4_rubric_reference(*, lookback_hours: float = DEFAULT_LOOKBACK_HOURS) -> dict[str, Any]:
     """Describe v4 without retroactively applying v5's event and structure rules."""
-    value = rubric_reference(lookback_hours=lookback_hours)
+    value = v5_rubric_reference(lookback_hours=lookback_hours)
     value["scoring_version"] = 4
     for component in value["components"]:
         if component["key"] == "relevance":

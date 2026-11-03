@@ -42,6 +42,7 @@ from .rubric import (
     v2_rubric_reference,
     v3_rubric_reference,
     v4_rubric_reference,
+    v5_rubric_reference,
 )
 from .science_domains import science_domains_for_record
 from .site_about import write_about
@@ -1338,6 +1339,11 @@ def dashboard_data(
                 ),
             ),
             "4": v4_rubric_reference(
+                lookback_hours=(
+                    (days[-1].get("selection") or {}).get("lookback_hours") or 48 if days else 48
+                ),
+            ),
+            "5": v5_rubric_reference(
                 lookback_hours=(
                     (days[-1].get("selection") or {}).get("lookback_hours") or 48 if days else 48
                 ),
