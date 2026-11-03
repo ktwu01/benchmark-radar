@@ -59,5 +59,37 @@ def test_every_radar_card_has_a_share_button():
     source = (ROOT / "site" / "assets" / "app.js").read_text(encoding="utf-8")
     start = source.index("function evidenceCard(")
     card = source[start : source.index("function observationCard(")]
-    assert 'radarShareButton(item, day, fullTitle, shareCard?.image || "")' in card
+    assert 'radarShareButton(item, ownDay, fullTitle, shareCard?.image || "")' in card
     assert "shareCard ?" not in card
+    # Attention items take their own branch in observationCard; it shares too.
+    start = source.index("function observationCard(")
+    attention = source[start : source.index("const CONTACT_EMAIL")]
+    assert "isAttention ? radarShareButton(item, itemDay(item, day)" in attention
+
+
+def test_a_past_window_item_uses_its_own_day():
+    """All dates and Past N days render with the newest day; an older item's card
+    is labelled with, and finds its published image in, the day it was found."""
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node is not installed")
+    source = (ROOT / "site" / "assets" / "app.js").read_text(encoding="utf-8")
+    start = source.index("function itemDay(")
+    helper = source[start : source.index("\n}\n", start) + 2]
+    program = (
+        "const state = {data: {days: [{date: '2026-10-25', share: {cards: [1]}}, "
+        "{date: '2026-11-03'}]}};"
+        + helper
+        + "const newest = state.data.days[1];"
+        + "console.log(JSON.stringify(["
+        + "itemDay({snapshot_date: '2026-10-25'}, newest).date,"
+        + "itemDay({snapshot_date: '2026-11-03'}, newest).date,"
+        + "itemDay({}, newest).date,"
+        + "itemDay({snapshot_date: '2026-01-01'}, newest).date]));"
+    )
+    result = subprocess.run(
+        [node, "-e", program], capture_output=True, text=True, check=True, timeout=60
+    )
+    assert result.stdout.strip() == '["2026-10-25","2026-11-03","2026-11-03","2026-11-03"]'
+    button = source[source.index("function radarShareButton(") :]
+    assert 'day: item.snapshot_date || day?.date || ""' in button[:1200]

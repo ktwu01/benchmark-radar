@@ -88,6 +88,18 @@ assert.deepEqual(
 const cut = thin.calls.find((call) => call.text.endsWith("…"));
 assert(cut, "a token wider than the card is cut with an ellipsis");
 
+// An attention item's organizations name the observing pipeline, not a maker.
+const attention = cardFacts({
+  title: "Show HN: I benchmarked a voice AI",
+  source: "Hacker News",
+  observation_kind: "attention",
+  organizations: ["benchmark-social-signal"],
+  published_at: "2026-10-31T09:18:05+00:00",
+}, { day: "2026-11-01" });
+assert.deepEqual(attention.affiliations, []);
+assert.equal(attention.meta, "Hacker News · Oct 31, 2026");
+assert.equal(attention.label, "Benchmark Radar · Today's radar · Nov 1, 2026");
+
 // The card keeps CJK text; the browser font has the glyphs DejaVu lacks.
 assert.equal(cardFacts({ title: "中文基准 Bench" }).title, "中文基准 Bench");
 console.log("radar card harness: ok");

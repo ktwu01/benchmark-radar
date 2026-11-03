@@ -11171,17 +11171,29 @@ function sourceChip(item, href) {
 // Every Today's radar item can be shared as a card (issue #1019). An item the
 // daily briefing picked shares its published card; any other item gets one
 // drawn from the facts it holds. Both modules load on the first press.
+// All dates and Past 30/60/90 days render with the newest day, while each item
+// keeps the day it was found in snapshot_date. A card names, and looks up its
+// published image in, the item's own day.
+function itemDay(item, day) {
+  const date = item.snapshot_date;
+  if (!date || date === day?.date) return day;
+  return (state.data?.days || []).find((entry) => entry.date === date) || day;
+}
+
 function radarShareButton(item, day, title, image) {
   const button = element("button", {
     className: "share-link radar-share",
     text: t("Share card"),
     attrs: { type: "button", "aria-label": t("Share {name} as a card", { name: title }) },
   });
-  button.addEventListener("click", async () => {
+  button.addEventListener("click", async (event) => {
+    // An attention card is a <details>; pressing Share must not also toggle it.
+    event.preventDefault();
+    event.stopPropagation();
     const { openRadarShare } = await import("./share-card.js");
     openRadarShare({
       item,
-      day: day?.date || "",
+      day: item.snapshot_date || day?.date || "",
       title,
       image,
       pageUrl: safeHttpUrl(item.url) || window.location.href,
@@ -11192,7 +11204,8 @@ function radarShareButton(item, day, title, image) {
 }
 
 function evidenceCard(item, day) {
-  const shareCard = shareCardFor(day, item.url);
+  const ownDay = itemDay(item, day);
+  const shareCard = shareCardFor(ownDay, item.url);
   const fullTitle = displayTitle(item);
   const { name, subtitle } = splitBenchmarkTitle(fullTitle);
   const categories = (item.categories || []).slice(0, 3).map(titleCase);
@@ -11227,7 +11240,7 @@ function evidenceCard(item, day) {
         text: item.summary || t("No description published at the source."),
       }),
       artifactLinks(item),
-      radarShareButton(item, day, fullTitle, shareCard?.image || ""),
+      radarShareButton(item, ownDay, fullTitle, shareCard?.image || ""),
     ]),
     scoreBlock(item),
   ]);
@@ -11281,6 +11294,7 @@ function observationCard(record, index, day) {
           ? `${summary} · ${metricLabel(item.metrics?.points, "point")}`
           : summary,
       }),
+      isAttention ? radarShareButton(item, itemDay(item, day), displayTitle(item), "") : null,
     ]),
     isAttention ? attentionActivity(item) : scoreBlock(item),
   ]);

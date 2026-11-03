@@ -87,7 +87,12 @@ export function cardFacts(item, { day = "", title = "" } = {}) {
     label: ["Benchmark Radar", "Today's radar", cardDay(day)].filter(Boolean).join(" · "),
     title: plain(title || item.title),
     authors: unique(item.authors),
-    affiliations: HANDLE_SOURCES.has(source) ? [] : unique(item.organizations),
+    // An attention item's organizations name the pipeline that observed it,
+    // not who made the benchmark.
+    affiliations:
+      HANDLE_SOURCES.has(source) || item.observation_kind === "attention"
+        ? []
+        : unique(item.organizations),
     blurb: plain(item.summary),
     meta: meta.join(" · "),
   };
