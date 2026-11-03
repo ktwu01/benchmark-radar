@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -412,6 +414,15 @@ def test_each_page_has_one_h1_naming_its_own_view(tmp_path):
     for path in ("cli", "cite"):
         page = (tmp_path / path / "index.html").read_text(encoding="utf-8")
         assert len(re.findall(r"<h1[ >]", page)) == 1, path
+
+
+def test_switching_views_moves_the_one_h1_to_the_open_view():
+    """Without a reload, the h1 must follow the reader to the view now on screen."""
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node is not installed")
+    root = Path(__file__).resolve().parents[1]
+    subprocess.run([node, "tests/page_heading_harness.mjs"], check=True, timeout=60, cwd=root)
 
 
 def test_pages_carry_breadcrumb_and_webpage_schema(tmp_path):

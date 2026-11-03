@@ -2192,6 +2192,35 @@ function syncNavState() {
 // `update` false is for restoring a view that is already in the URL (boot and
 // popstate), where writing history again would either duplicate the entry or
 // fight the entry being restored.
+// The page's one h1 belongs to the open view (issue #945). The build ships each
+// view's own page that way; switching views without a reload has to move it
+// too, or the only h1 is left inside a hidden section. h1 and h2 view headings
+// are styled alike, so the swap changes the outline and not the screen.
+function viewHeading(section) {
+  if (section.id === "today-view") {
+    return section.querySelector(":scope > h1.visually-hidden, :scope > h2.visually-hidden");
+  }
+  return section.querySelector(`#${section.id.replace(/-view$/, "-heading")}`);
+}
+
+function retagHeading(node, tag) {
+  if (!node || node.tagName === tag.toUpperCase()) return;
+  const copy = document.createElement(tag);
+  for (const { name, value } of Array.from(node.attributes)) copy.setAttribute(name, value);
+  copy.append(...node.childNodes);
+  node.replaceWith(copy);
+}
+
+function syncPageHeading() {
+  const sections = Array.from(document.querySelectorAll(".view"));
+  sections.forEach((section) => {
+    if (section.hidden) retagHeading(viewHeading(section), "h2");
+  });
+  sections.forEach((section) => {
+    if (!section.hidden) retagHeading(viewHeading(section), "h1");
+  });
+}
+
 function setView(view, update = true, mode = "push") {
   if (selectedFrontierPoint || describedFrontierPoint) {
     clearFrontierPointSelection();
@@ -2201,6 +2230,7 @@ function setView(view, update = true, mode = "push") {
   document.querySelectorAll(".view").forEach((section) => {
     section.hidden = section.id !== `${view}-view`;
   });
+  syncPageHeading();
   syncNavState();
   if (update) writeUrl(mode);
 }
