@@ -1993,6 +1993,7 @@ def test_dashboard_window_keeps_a_sighting_a_filter_can_still_see():
         ("summary", "Edited"),
         ("categories", ["agentic"]),
         ("organizations", ["Lab"]),
+        ("source", "GitHub"),
     ):
         changed = [
             _window_day("2026-10-30", [("HF", "x", "released")]),
@@ -2001,3 +2002,19 @@ def test_dashboard_window_keeps_a_sighting_a_filter_can_still_see():
         changed[1]["evidence_items"][0][field] = value
         kept = dashboard_window({"latest_date": "2026-11-03", "days": changed}, 30)["days"]
         assert [len(d["evidence_items"]) for d in kept] == [1, 1], field
+
+
+def test_dashboard_window_keeps_an_attention_row_whose_source_changed():
+    # An attention row is identified by observation_id alone, but a source filter
+    # or a search for the source name reads the source (Codex review of #1059).
+    older = _window_day("2026-10-30", [], ["obs-1"])
+    newer = _window_day("2026-11-03", [], ["obs-1"])
+    older["attention"]["observations"][0]["source"] = "Hacker News"
+    newer["attention"]["observations"][0]["source"] = "Reddit"
+
+    window = dashboard_window({"latest_date": "2026-11-03", "days": [older, newer]}, 30)
+
+    assert [o["source"] for d in window["days"] for o in d["attention"]["observations"]] == [
+        "Hacker News",
+        "Reddit",
+    ]

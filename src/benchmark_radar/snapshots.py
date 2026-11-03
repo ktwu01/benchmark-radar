@@ -1517,6 +1517,7 @@ def _sighting_key(kind: str, item: dict[str, Any]) -> str:
     else:
         identity = [kind, str(item.get("source")), str(item.get("source_id"))]
     inputs = [
+        item.get("source"),
         item.get("event_kind"),
         item.get("categories"),
         item.get("organizations"),
