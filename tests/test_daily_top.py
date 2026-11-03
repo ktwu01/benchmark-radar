@@ -398,6 +398,20 @@ def test_catalog_render_writes_one_card_per_benchmark_named_by_slug(tmp_path):
             assert image.size == (1200, 630)
 
 
+def test_catalog_card_names_authors_only_when_the_record_has_them(tmp_path):
+    # Issue #933: who made a benchmark is on its card when its paper says so.
+    plain = _index_record("gpqa", description="Graduate-level questions.")
+    named = {**plain, "authors": ["David Rein", "Betty Li Hou", "Asa Cooper Stickland", "X"]}
+    empty = {**plain, "authors": []}
+    paths = [
+        share.render_benchmark(record, tmp_path / f"{index}.png")
+        for index, record in enumerate((plain, named, empty))
+    ]
+    plain_bytes, named_bytes, empty_bytes = (path.read_bytes() for path in paths)
+    assert named_bytes != plain_bytes
+    assert empty_bytes == plain_bytes
+
+
 def test_catalog_render_is_deterministic(tmp_path):
     index = {"benchmarks": [_index_record("gpqa", description="Graduate-level questions.")]}
     first = share.render_catalog(index, tmp_path / "a", workers=1)

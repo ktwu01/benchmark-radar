@@ -25,7 +25,11 @@ sources below, run the generators in order, and measure the rebuilt outputs.
    `data/catalog/llm_stats_identity_overrides.yml`. Cited release and first-score
    dates missing from the crawls live in `data/catalog/benchmark_dates.yml`,
    keyed by exact source record. Numeric first-score evidence only verifies a
-   date; it does not supply a highest score or merge records. Other JSONL and
+   date; it does not supply a highest score or merge records. Benchmark authors
+   live in `data/catalog/benchmark_authors.yml`, also keyed by exact source
+   record. They are read from the arXiv metadata of the record's own
+   introducing paper by `scripts/fetch_arxiv_authors.py`; rerun the script
+   rather than editing names. Other JSONL and
    validation files under `data/catalog/` are normalization products; do not hand-edit or
    treat them as a separate corpus, even when Git currently tracks a generated
    copy.

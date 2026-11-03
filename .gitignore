@@ -73,6 +73,8 @@ graphify-out/
 !/data/catalog/library_direction_reviews.yml
 # Cited benchmark dates are reviewed source facts, not normalization outputs.
 !/data/catalog/benchmark_dates.yml
+# Benchmark authors read from each introducing arXiv paper are source facts too.
+!/data/catalog/benchmark_authors.yml
 
 # Written by the same `benchmark-radar normalize-catalog` run as the ignored
 # catalog above, from the same committed crawl CSVs, and rebuilt by pages.yml on
