@@ -4017,6 +4017,15 @@ dialog::backdrop {
   line-height: 1.2;
 }
 
+/* On /cli/, /cite/ and /rubric/ the open sheet's title is the page's h1
+   (issue #945). This restates the h2 values the global h1 rule changes, at the
+   same specificity as a bare h1, so the tag never changes how it looks. */
+h1:where(.detail-title) {
+  max-width: none;
+  margin-bottom: 0.83em;
+  letter-spacing: -0.025em;
+}
+
 .detail-summary {
   color: var(--muted);
 }
@@ -4994,6 +5003,11 @@ footer {
     max-width: 100%;
     overflow-wrap: anywhere;
     font-size: clamp(1.7rem, 7vw, 2.3rem);
+  }
+
+  h1:where(.detail-title) {
+    max-width: none;
+    overflow-wrap: normal;
   }
 
   .record-summary {

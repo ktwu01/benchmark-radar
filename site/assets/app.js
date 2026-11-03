@@ -2204,18 +2204,31 @@ function viewHeading(section) {
 }
 
 function retagHeading(node, tag) {
-  if (!node || node.tagName === tag.toUpperCase()) return;
+  // Only headings change level; a sheet whose title is not rendered yet is skipped.
+  if (!/^H[1-6]$/.test(node?.tagName || "") || node.tagName === tag.toUpperCase()) return;
   const copy = document.createElement(tag);
   for (const { name, value } of Array.from(node.attributes)) copy.setAttribute(name, value);
   copy.append(...node.childNodes);
   node.replaceWith(copy);
 }
 
+// /cli/, /cite/ and /rubric/ are pages too: while one of their sheets is open,
+// its title is the page's h1 and every view heading steps down.
+const UTILITY_TITLES = { "cli-dialog": "cli-title", "cite-dialog": "cite-title", "rubric-dialog": "rubric-title" };
+
 function syncPageHeading() {
   const sections = Array.from(document.querySelectorAll(".view"));
+  const openSheet = Object.keys(UTILITY_TITLES).find((id) => byId(id)?.open);
+  for (const [dialog, title] of Object.entries(UTILITY_TITLES)) {
+    if (dialog !== openSheet) retagHeading(byId(title), "h2");
+  }
   sections.forEach((section) => {
-    if (section.hidden) retagHeading(viewHeading(section), "h2");
+    if (openSheet || section.hidden) retagHeading(viewHeading(section), "h2");
   });
+  if (openSheet) {
+    retagHeading(byId(UTILITY_TITLES[openSheet]), "h1");
+    return;
+  }
   sections.forEach((section) => {
     if (!section.hidden) retagHeading(viewHeading(section), "h1");
   });
@@ -4360,6 +4373,7 @@ function promoteSeededDialog(dialog) {
 function showModalDialog(dialog) {
   promoteSeededDialog(dialog);
   if (!dialog.open) dialog.showModal();
+  syncPageHeading();
 }
 
 let rubricOwnsHistoryEntry = false;
@@ -12057,6 +12071,8 @@ function bindEvents() {
     if (event.key === "Escape") closeFiltersDrawer();
   });
   byId("refresh-button").addEventListener("click", refreshData);
+  // Every close path (button, backdrop, Esc) hands the h1 back to the view.
+  for (const id of Object.keys(UTILITY_TITLES)) byId(id).addEventListener("close", syncPageHeading);
   byId("rubric-close").addEventListener("click", () => byId("rubric-dialog").close());
   byId("rubric-dialog").addEventListener("click", (event) => {
     if (event.target === byId("rubric-dialog")) byId("rubric-dialog").close();

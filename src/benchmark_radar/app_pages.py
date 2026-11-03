@@ -17,7 +17,8 @@ this module writes copies of it that differ in four ways:
   marker, so a result can show where the page sits;
 * the named view starts visible and Today starts hidden, or the named utility
   dialog starts open over Today;
-* the named view's heading is the page's one h1, and the homepage h1 is an h2;
+* the named view's heading, or the open sheet's title, is the page's one h1,
+  and the homepage h1 is an h2;
 * the view or dialog's own containers arrive holding real content;
 * the link for the route arrives with its active state and ``aria-current``.
 
@@ -263,6 +264,22 @@ def _promote_view_heading(document: str, view: str) -> str:
     return document
 
 
+def _promote_utility_title(document: str, page: str) -> str:
+    """Make the open sheet's title the page's one h1 on /cli/, /cite/, /rubric/.
+
+    The sheet is what the page is about; the homepage h1 behind it describes
+    another page. The title keeps its look in either tag (styles.css).
+    """
+    document, demoted = _HOME_H1.subn(r"<h2 \1>\2</h2>", document, count=1)
+    if demoted != 1:
+        raise AppPageError("homepage h1 not found in site/index.html")
+    title = re.compile(rf'<h2 (class="[^"]*\b{page}-title"[^>]*)>(.*?)</h2>', re.DOTALL)
+    document, promoted = title.subn(r"<h1 \1>\2</h1>", document, count=1)
+    if promoted != 1:
+        raise AppPageError(f"{page}-title h2 not found in the {page} seed")
+    return document
+
+
 def _with_active_attributes(opening_tag: str) -> str:
     """Add the same active class and page-current state syncNavState applies."""
     class_match = re.search(r'\bclass="([^"]*)"', opening_tag)
@@ -372,7 +389,7 @@ def render_utility_page(
     document = _open_dialog(document, page)
     for anchor, replacement in seeds.items():
         document = _replace_once(document, anchor, replacement, what=f"{page} seed container")
-    return document
+    return _promote_utility_title(document, page)
 
 
 def write_app_pages(

@@ -64,19 +64,45 @@ const sections = [
   section("saturation-view", heading("h2", { id: "saturation-heading", class: "view-title" }, "Saturation"), true),
   section("map-view", heading("h2", { id: "map-heading", class: "view-title" }, "What we found"), true),
 ];
+// Each utility sheet: a dialog and the title its renderer writes as an h2.
+const sheets = {};
+for (const page of ["cli", "cite", "rubric"]) {
+  const holder = { heading: heading("h2", { class: `detail-title ${page}-title`, id: `${page}-title` }, page) };
+  holder.heading.section = holder;
+  sheets[page] = { dialog: { open: false }, holder };
+}
 globalThis.document = {
   querySelectorAll: (selector) => (selector === ".view" ? sections : []),
   createElement: (tag) => new El(tag),
+  getElementById(id) {
+    const page = id.replace(/-(dialog|title)$/, "");
+    if (!sheets[page]) return null;
+    return id.endsWith("-dialog") ? sheets[page].dialog : sheets[page].holder.heading;
+  },
 };
+const utilityTitles = source.match(/const UTILITY_TITLES = .*;/)[0];
 const { syncPageHeading } = new Function(
-  `${["viewHeading", "retagHeading", "syncPageHeading"].map(fn).join("\n")}\nreturn { syncPageHeading };`,
+  `const byId = (id) => document.getElementById(id);\n${utilityTitles}\n` +
+    `${["viewHeading", "retagHeading", "syncPageHeading"].map(fn).join("\n")}\nreturn { syncPageHeading };`,
 )();
+
+function h1s() {
+  return [
+    ...sections.filter((s) => s.heading.tagName === "H1").map((s) => s.id),
+    ...Object.entries(sheets).filter(([, s]) => s.holder.heading.tagName === "H1").map(([page]) => `${page}-title`),
+  ];
+}
 
 function open(id) {
   for (const s of sections) s.hidden = s.id !== id;
   syncPageHeading();
-  const h1s = sections.filter((s) => s.heading.tagName === "H1");
-  assert.deepEqual(h1s.map((s) => s.id), [id]);
+  assert.deepEqual(h1s(), [id]);
+}
+
+function openSheet(page) {
+  for (const [name, sheet] of Object.entries(sheets)) sheet.dialog.open = name === page;
+  syncPageHeading();
+  assert.deepEqual(h1s(), page ? [`${page}-title`] : h1s().slice(0, 1));
 }
 
 open("library-view");
@@ -91,4 +117,17 @@ open("map-view");
 open("saturation-view");
 open("today-view");
 assert.deepEqual(sections[0].heading.childNodes, ["Search"]);
+
+// /cli/, /cite/, /rubric/: the open sheet's title holds the h1, then hands it back.
+openSheet("cli");
+assert.equal(sheets.cli.holder.heading.getAttribute("class"), "detail-title cli-title");
+openSheet("cite");
+assert.equal(sheets.cli.holder.heading.tagName, "H2");
+openSheet("rubric");
+openSheet(null);
+assert.deepEqual(h1s(), ["today-view"]);
+open("library-view");
+openSheet("cli");
+openSheet(null);
+assert.deepEqual(h1s(), ["library-view"]);
 console.log("page heading harness: ok");

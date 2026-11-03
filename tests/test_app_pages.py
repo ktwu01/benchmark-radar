@@ -411,9 +411,13 @@ def test_each_page_has_one_h1_naming_its_own_view(tmp_path):
         assert len(h1s) == 1, (path, h1s)
         assert f'id="{heading}"' in h1s[0], (path, h1s)
         assert '<h2 class="visually-hidden"' in page
-    for path in ("cli", "cite"):
+    # The utility routes are pages too: their one h1 is the open sheet's title.
+    for path in ("cli", "cite", "rubric"):
         page = (tmp_path / path / "index.html").read_text(encoding="utf-8")
-        assert len(re.findall(r"<h1[ >]", page)) == 1, path
+        h1s = re.findall(r"<h1 ([^>]*)>", page)
+        assert len(h1s) == 1, (path, h1s)
+        assert f'id="{path}-title"' in h1s[0], (path, h1s)
+        assert '<h2 class="visually-hidden"' in page
 
 
 def test_switching_views_moves_the_one_h1_to_the_open_view():
