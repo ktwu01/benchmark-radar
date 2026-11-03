@@ -307,6 +307,15 @@ def render_benchmark(record: dict[str, Any], output: Path) -> Path:
         draw.text((inner, y), line, font=title_face, fill=SITE_INK)
         y += 58 * s
     y += 6 * s
+    # Who made it is what researchers ask first (#933); only records whose
+    # introducing paper names its authors carry them.
+    authors = [str(name) for name in record.get("authors") or [] if str(name).strip()]
+    if authors:
+        face = font(22 * s, bold=True)
+        draw.text(
+            (inner, y + 4 * s), _fit(_names(authors, 3), face, text_width), font=face, fill=SITE_INK
+        )
+        y += 36 * s
     meta = _benchmark_meta(record)
     if meta:
         face = font(22 * s)

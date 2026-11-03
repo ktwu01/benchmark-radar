@@ -757,6 +757,9 @@ def build_benchmark_index(
                 "languages": list(record.get("languages") or []),
                 "source": record["source"],
                 "publisher": publisher["name"] if publisher else None,
+                # Read from the record's own introducing paper (#933); empty
+                # when no cited document names them.
+                "authors": list(record.get("authors") or []),
                 "released": record.get("released"),
                 "released_reference": record.get("released_reference"),
                 # Collection is provenance, never benchmark introduction.

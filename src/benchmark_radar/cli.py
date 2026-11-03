@@ -362,6 +362,7 @@ def main() -> None:
             write_benchmark_index,
             write_catalog,
         )
+        from .catalog_authors import apply_benchmark_authors, load_benchmark_authors
         from .catalog_dates import apply_benchmark_dates, load_benchmark_dates
         from .catalog_evidence import attach_evidence, document_registry
         from .catalog_opencompass import normalize_opencompass
@@ -404,6 +405,7 @@ def main() -> None:
             item for result in normalized for item in result["source_records"]
         ] + opencompass["source_records"]
         date_facts = load_benchmark_dates(raw_records)
+        author_facts = load_benchmark_authors(raw_records)
         opencompass["source_records"] = apply_benchmark_dates(
             opencompass["source_records"], date_facts
         )
@@ -439,6 +441,9 @@ def main() -> None:
                 )
             enriched["source_records"] = apply_benchmark_dates(
                 enriched["source_records"], date_facts
+            )
+            enriched["source_records"] = apply_benchmark_authors(
+                enriched["source_records"], author_facts
             )
             enriched["source_records"] = attach_evidence(
                 enriched["source_records"], enriched["score_series"], enriched["score_observations"]
