@@ -18,6 +18,7 @@ from benchmark_radar.models import (
 from benchmark_radar.snapshots import (
     SnapshotError,
     dashboard_trends,
+    dashboard_window,
     load_snapshots,
     merge_snapshots,
     migrate_snapshot_history,
@@ -310,6 +311,15 @@ def test_rebuild_writes_a_small_latest_day_bootstrap(tmp_path):
     assert trends_path.stat().st_size <= bootstrap_path.stat().st_size or len(trends["days"]) > len(
         bootstrap["days"]
     )
+
+    # Issue #1058: each Today window reads its own file, never the full archive.
+    for window_days in (30, 60, 90):
+        window_path = output.with_name(f"radar-window-{window_days}d.json")
+        window = json.loads(window_path.read_text(encoding="utf-8"))
+        assert window["window_days"] == window_days
+        assert window["latest_date"] == dashboard["latest_date"]
+        assert "corpus" not in window
+        assert window_path.stat().st_size < output.stat().st_size
 
 
 def test_rebuild_can_publish_the_feed_from_the_same_snapshot_history(tmp_path, site_shell):
@@ -1865,3 +1875,62 @@ def test_dashboard_day_maps_each_share_card_to_its_published_image(tmp_path):
     ]
     # A day the share step never ran on has no images to offer.
     assert dashboard["days"][0]["share"] == {}
+
+
+def _window_day(date: str, evidence: list[tuple[str, str]], attention: list[str] = ()) -> dict:
+    return {
+        "date": date,
+        "generated_at": f"{date}T06:00:00+00:00",
+        "selection": {"recommendation_score": 40, "minimum_score": 20},
+        "evidence_items": [
+            {"source": source, "source_id": source_id, "title": f"{source_id}@{date}"}
+            for source, source_id in evidence
+        ],
+        "attention": {
+            "observations": [{"observation_id": oid, "title": f"{oid}@{date}"} for oid in attention]
+        },
+        "briefing": {"bullets": ["not needed by Today windows"]},
+    }
+
+
+def test_dashboard_window_keeps_each_record_once_at_its_latest_day():
+    """A window lists a record once, so repeat sightings are dead weight (issue #1058).
+
+    On 2026-11-03 the 90 day window held 42,489 evidence rows for 23,932 records.
+    The file must keep every record and drop only the older sightings.
+    """
+    days = [
+        _window_day("2026-08-01", [("HF", "outside/window")]),
+        _window_day("2026-10-20", [("HF", "old/only"), ("HF", "repeat/a")], ["obs-1"]),
+        _window_day("2026-10-28", [("HF", "repeat/a"), ("GitHub", "repeat/a")], ["obs-1"]),
+        _window_day("2026-11-03", [("HF", "repeat/a"), ("HF", "repeat/a"), ("HF", "new/one")]),
+    ]
+    dashboard = {"latest_date": "2026-11-03", "days": days, "corpus": {"huge": "graph"}}
+
+    window = dashboard_window(dashboard, 30)
+
+    assert window["window_days"] == 30
+    assert window["start_date"] == "2026-10-05"
+    assert window["latest_date"] == "2026-11-03"
+    # Both ends of the range are inclusive, and the day before the start is out.
+    assert [day["date"] for day in window["days"]] == ["2026-10-20", "2026-10-28", "2026-11-03"]
+    titles = {day["date"]: [i["title"] for i in day["evidence_items"]] for day in window["days"]}
+    assert titles["2026-10-20"] == ["old/only@2026-10-20"]
+    # A record seen on a newer day leaves the older day.
+    assert titles["2026-10-28"] == [
+        "repeat/a@2026-10-28"
+    ]  # GitHub's repeat/a is a different record
+    # Two rows for one record on the same day both stay; app.js chooses after sorting.
+    assert titles["2026-11-03"] == [
+        "repeat/a@2026-11-03",
+        "repeat/a@2026-11-03",
+        "new/one@2026-11-03",
+    ]
+    attention = {day["date"]: day["attention"]["observations"] for day in window["days"]}
+    assert attention["2026-10-20"] == []
+    assert [o["title"] for o in attention["2026-10-28"]] == ["obs-1@2026-10-28"]
+    # What a row needs to rank, and nothing the window never reads.
+    assert window["days"][0]["selection"] == {"recommendation_score": 40, "minimum_score": 20}
+    assert window["days"][0]["generated_at"] == "2026-10-20T06:00:00+00:00"
+    assert all("briefing" not in day for day in window["days"])
+    assert "corpus" not in window

@@ -94,6 +94,56 @@ observations = [
 ];
 assert.deepEqual(dates.filteredObservations().map(r=>r.source_id), ['utc','offset']);
 
+// Issue #1058: a 30, 60 or 90 day window reads its own file, which holds each
+// record once. It must list exactly the rows the full archive lists, in the
+// same order, and the archive takes over once it has loaded.
+{
+  const names = ['todayDateRange', 'todayIsMultiDate', 'observationDays', 'allObservations', 'releaseAgeHours', 'releaseRank', 'isRelease', 'filteredObservations', 'observationRecordKey', 'latestObservationsByRecord', 'observationAttention', 'eventTimestamp', 'stateNeedsFullData', 'stateNeedsWindowData', 'latestReleasesPayload'];
+  const consts = ['const TODAY_WINDOWS = .*;', 'const RELEASE_FRESH_HOURS = .*;', 'const RELEASE_RECENT_HOURS = .*;'].map((pattern) => source.match(new RegExp(pattern))[0]).join('\n');
+  const row = (id, extra = {}) => ({source: 'Hugging Face', source_id: id, title: id, summary: '', categories: [], event_kind: 'released', total_score: 50, ...extra});
+  const day = (date, evidence, attention = []) => ({date, generated_at: `${date}T06:00:00Z`, selection: {recommendation_score: 40, minimum_score: 20}, evidence_items: evidence, attention: {observations: attention}});
+  const archive = [
+    day('2026-08-01', [row('outside', {total_score: 99})]),
+    day('2026-09-20', [row('seen-twice'), row('only-old')]),
+    day('2026-09-30', [row('seen-twice', {total_score: 60})], [{source: 'Hacker News', source_id: 'h1', observation_id: 'obs-1', title: 'h1', event_kind: 'discussed', metrics: {points: 5}}]),
+    day('2026-10-02', [row('seen-twice', {total_score: 61}), row('seen-twice', {total_score: 70}), row('fresh', {metrics: {downloads: 3}})], [{source: 'Hacker News', source_id: 'h1', observation_id: 'obs-1', title: 'h1', event_kind: 'discussed', metrics: {points: 9}}]),
+  ];
+  // What the build keeps: a record leaves every day older than its latest one.
+  const windowFile = {latest_date: '2026-10-02', days: [
+    day('2026-09-20', [row('only-old')]),
+    day('2026-09-30', []),
+    day('2026-10-02', [row('seen-twice', {total_score: 61}), row('seen-twice', {total_score: 70}), row('fresh', {metrics: {downloads: 3}})], [{source: 'Hacker News', source_id: 'h1', observation_id: 'obs-1', title: 'h1', event_kind: 'discussed', metrics: {points: 9}}]),
+  ]};
+  const windowState = {view: 'today', todayDate: '30d', todaySort: 'attention', q: '', source: '', kind: '', category: '', organization: '', event: '', fullDataLoaded: false, observations: null, observationsSource: null, windowData: {}, data: {latest_date: '2026-10-02', days: [archive[3]], facets: {dates: []}}};
+  const windowApi = new Function('state', `${consts}\n${names.map(fn).join('\n')}\nreturn {${names.join(',')}};`)(windowState);
+  const listed = () => windowApi.filteredObservations().map((r) => `${r.source_id}:${r.snapshot_date}:${r.total_score ?? ''}`);
+  for (const sort of ['attention', 'newest']) {
+    windowState.todaySort = sort;
+    windowState.fullDataLoaded = true; windowState.data.days = archive; windowState.observations = null;
+    const fromArchive = listed();
+    windowState.fullDataLoaded = false; windowState.data.days = [archive[3]]; windowState.windowData = {'30d': windowFile}; windowState.observations = null;
+    assert.deepEqual(listed(), fromArchive, `${sort}: the window file lists the archive's rows`);
+  }
+  assert.deepEqual(listed().filter((r) => r.startsWith('seen-twice')), ['seen-twice:2026-10-02:70'], 'the highest-ranked same-day row is the one shown');
+  assert.equal(listed().some((r) => r.startsWith('outside')), false, 'a row outside the window stays out');
+
+  // A window needs its own file, not the archive; every other date still needs the archive.
+  windowState.windowData = {};
+  assert.equal(windowApi.stateNeedsFullData(), false);
+  assert.equal(windowApi.stateNeedsWindowData(), true);
+  windowState.windowData = {'30d': windowFile};
+  assert.equal(windowApi.stateNeedsWindowData(), false);
+  windowState.todayDate = 'all';
+  assert.equal(windowApi.stateNeedsFullData(), true);
+  assert.equal(windowApi.stateNeedsWindowData(), false);
+  windowState.todayDate = '2026-09-20';
+  assert.equal(windowApi.stateNeedsFullData(), true);
+  // Once the archive is loaded it serves the window, and the cached rows follow it.
+  windowState.todayDate = '30d'; windowState.fullDataLoaded = true; windowState.data.days = archive;
+  assert.equal(windowApi.stateNeedsWindowData(), false);
+  assert.equal(windowApi.observationDays(), archive);
+}
+
 const summary = (display_max, numeric_count=1) => ({display_max,numeric_count,display_multiplier:1,raw_min:display_max,raw_max:display_max});
 state.data.model_card_leaderboard = {entries:[{benchmark_id:'curated',name:'Curated'}]};
 state.data.benchmark_score_progression = {benchmarks:{curated:{score_summary:summary(60,2)}}};

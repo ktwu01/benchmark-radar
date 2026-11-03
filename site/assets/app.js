@@ -1521,6 +1521,11 @@ const state = {
   observations: null,
   fullDataLoaded: false,
   fullDataPromise: null,
+  // One entry per Today window ("30d"), holding the file for that window:
+  // each record once, at its latest sighting (issue #1058).
+  windowData: {},
+  windowPromises: {},
+  observationsSource: null,
   trendsDataLoaded: false,
   trendsDataPromise: null,
 };
@@ -4083,9 +4088,22 @@ function isRelease(item) {
   return item.event_kind === "released";
 }
 
+// The days Today builds its rows from. A 30, 60 or 90 day window reads its own
+// file instead of the 324 MB full archive: the window shows each record once,
+// at its latest sighting, so the archive's repeat sightings and corpus graph are
+// never needed (issue #1058). Once the full archive is loaded it serves every
+// window, as before.
+function observationDays() {
+  const windowData = TODAY_WINDOWS[state.todayDate] ? state.windowData[state.todayDate] : null;
+  return !state.fullDataLoaded && windowData ? windowData.days : state.data.days;
+}
+
 function allObservations() {
-  if (state.observations) return state.observations;
-  const evidence = state.data.days.flatMap((day) =>
+  const days = observationDays();
+  // The cache belongs to one source: a window file, or the days in state.data.
+  if (state.observations && state.observationsSource === days) return state.observations;
+  state.observationsSource = days;
+  const evidence = days.flatMap((day) =>
     (day.evidence_items || []).map((item) => ({
       ...item,
       recommended:
@@ -4104,7 +4122,7 @@ function allObservations() {
       observation_kind: "evidence",
     })),
   );
-  const attention = state.data.days.flatMap((day) =>
+  const attention = days.flatMap((day) =>
     day.attention.observations.map((item) => ({
       ...item,
       snapshot_date: day.date,
@@ -12244,8 +12262,50 @@ function stateNeedsFullData() {
   ) return true;
   return state.view === "today" && Boolean(
     state.todayDate === "all" ||
-    (state.todayDate && state.todayDate !== state.data?.latest_date)
+    (state.todayDate
+      && state.todayDate !== state.data?.latest_date
+      && !TODAY_WINDOWS[state.todayDate])
   );
+}
+
+// A 30, 60 or 90 day window needs only its own file, not the full archive.
+function stateNeedsWindowData() {
+  return Boolean(
+    state.view === "today"
+    && !state.fullDataLoaded
+    && TODAY_WINDOWS[state.todayDate]
+    && !state.windowData[state.todayDate]
+  );
+}
+
+async function ensureWindowData(cache = "default") {
+  const key = state.todayDate;
+  if (!TODAY_WINDOWS[key] || state.fullDataLoaded) return state.data;
+  if (state.windowData[key] && cache === "default") return state.data;
+  if (!state.windowPromises[key]) {
+    state.windowPromises[key] = (async () => {
+      try {
+        const response = await fetch(`/data/radar-window-${key}.json`, { cache });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        // A window file from another build than the page's own latest day would
+        // list a different range. Use the full archive rather than a mixed view.
+        if (data?.latest_date !== state.data.latest_date || !Array.isArray(data.days)) {
+          throw new Error("Window file does not match the loaded snapshot");
+        }
+        state.windowData[key] = data;
+        state.observations = null;
+      } catch (error) {
+        // An older deploy has no window file; the full archive still answers.
+        console.warn(error);
+        await ensureFullData(cache);
+      } finally {
+        delete state.windowPromises[key];
+      }
+    })();
+  }
+  await state.windowPromises[key];
+  return state.data;
 }
 
 function stateNeedsTrendsData() {
@@ -12303,6 +12363,7 @@ async function ensureFullData(cache = "default") {
 
 async function ensureDataForState() {
   if (stateNeedsFullData()) await ensureFullData();
+  else if (stateNeedsWindowData()) await ensureWindowData();
   else if (stateNeedsTrendsData()) await ensureTrendsData();
 }
 
@@ -12332,6 +12393,7 @@ async function refreshData() {
     // but guarantees the error is not retired if a future bootstrap shape lacks
     // data a URL-backed state needs.
     if (stateNeedsFullData()) await ensureFullData("reload");
+    else if (state.view === "today" && TODAY_WINDOWS[state.todayDate]) await ensureWindowData("reload");
     else if (stateNeedsTrendsData()) await ensureTrendsData("reload");
     // A catalog that failed, or arrived without what the Trends direction
     // table needs (taxonomy, crawl anchor), is fetched again on Refresh, so
@@ -12445,6 +12507,7 @@ async function initialize() {
       initializationWasSuperseded
       && compatibleDashboard(state.data)
       && !stateNeedsFullData()
+      && !stateNeedsWindowData()
     ) {
       syncLeaderboardNav();
       setView(state.view, false);

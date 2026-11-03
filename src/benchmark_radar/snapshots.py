@@ -5,7 +5,7 @@ import math
 import re
 from collections import Counter
 from copy import deepcopy
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -1496,6 +1496,72 @@ def dashboard_trends(dashboard: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# Calendar-day windows the Today time-window control offers. app.js keeps the
+# same table (TODAY_WINDOWS) and reads the file written for each one.
+TODAY_WINDOW_DAYS = (30, 60, 90)
+
+
+def _record_key(kind: str, item: dict[str, Any]) -> tuple[str, ...]:
+    # The same identity app.js uses to show one row per record
+    # (observationRecordKey), so the browser's own dedup is a no-op on this file.
+    if kind == "attention":
+        fallback = f"{item.get('source')}\0{item.get('source_id')}"
+        return (kind, str(item.get("observation_id") or fallback))
+    return (kind, str(item.get("source")), str(item.get("source_id")))
+
+
+def dashboard_window(dashboard: dict[str, Any], window_days: int) -> dict[str, Any]:
+    """Return what Today needs for a 30, 60 or 90 day window, one row per record.
+
+    A window view lists each record once, at its latest sighting. radar.json
+    repeats a record on every day it was seen: the last 90 days hold 42,489
+    evidence rows for 23,932 distinct records, and the file is 324 MB in memory
+    because it also carries the corpus graph (issue #1058). Keeping only the
+    latest sighting drops no record; the sightings it removes are the ones the
+    window view already hides.
+    """
+    days = dashboard.get("days") or []
+    latest = str(dashboard.get("latest_date") or (days[-1]["date"] if days else ""))
+    if not latest:
+        return {"schema_version": 2, "window_days": window_days, "days": []}
+    start = (date.fromisoformat(latest) - timedelta(days=window_days - 1)).isoformat()
+    in_window = [day for day in days if start <= str(day["date"]) <= latest]
+    seen: set[tuple[str, ...]] = set()
+    kept: dict[str, dict[str, Any]] = {}
+    for day in reversed(in_window):  # newest first, so the first sighting is the latest
+        # Only a sighting on a newer day removes a row. Two rows for one record on
+        # the same day both stay: app.js picks between them after sorting, and
+        # picking here would choose differently.
+        today: set[tuple[str, ...]] = set()
+        evidence = []
+        for item in day.get("evidence_items") or []:
+            key = _record_key("evidence", item)
+            if key not in seen:
+                today.add(key)
+                evidence.append(item)
+        attention = []
+        for item in (day.get("attention") or {}).get("observations") or []:
+            key = _record_key("attention", item)
+            if key not in seen:
+                today.add(key)
+                attention.append(item)
+        seen |= today
+        kept[str(day["date"])] = {
+            "date": day["date"],
+            "generated_at": day.get("generated_at"),
+            "selection": day.get("selection"),
+            "evidence_items": evidence,
+            "attention": {"observations": attention},
+        }
+    return {
+        "schema_version": 2,
+        "window_days": window_days,
+        "start_date": start,
+        "latest_date": latest,
+        "days": [kept[str(day["date"])] for day in in_window],
+    }
+
+
 def rebuild_dashboard(
     snapshot_dir: Path,
     output: Path,
@@ -1521,6 +1587,9 @@ def rebuild_dashboard(
     _write_json(bootstrap_path, dashboard_bootstrap(value))
     trends_path = output.with_name(f"{output.stem}-trends{output.suffix}")
     _write_json(trends_path, dashboard_trends(value))
+    for window_days in TODAY_WINDOW_DAYS:
+        window_path = output.with_name(f"{output.stem}-window-{window_days}d{output.suffix}")
+        _write_json(window_path, dashboard_window(value, window_days))
     # The record-count badge lives beside radar.json so it deploys with the same
     # dashboard build and can never report a corpus newer than the page it sits
     # on. It is the single self-describing "how much have we collected" signal
