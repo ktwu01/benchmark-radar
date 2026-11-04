@@ -75,6 +75,7 @@ const sparse = cardFacts(
   { day: "" },
 );
 assert.deepEqual(sparse.authors, []);
+assert.equal(sparse.byline, "By openai", "the owner is who made it (#1069)");
 assert.deepEqual(sparse.affiliations, [], "an owner handle is not an institution");
 assert.equal(sparse.blurb, "");
 assert.equal(sparse.meta, "Hugging Face");
@@ -83,7 +84,7 @@ const thin = context();
 drawCard(thin.ctx, sparse);
 assert.deepEqual(
   thin.calls.map((call) => call.text).filter((text) => !text.endsWith("…")),
-  [sparse.label, "Hugging Face", "benchmark-radar.org"],
+  [sparse.label, "By openai", "Hugging Face", "benchmark-radar.org"],
 );
 const cut = thin.calls.find((call) => call.text.endsWith("…"));
 assert(cut, "a token wider than the card is cut with an ellipsis");
@@ -97,6 +98,20 @@ const attention = cardFacts({
   published_at: "2026-10-31T09:18:05+00:00",
 }, { day: "2026-11-01" });
 assert.deepEqual(attention.affiliations, []);
+assert.equal(attention.byline, "", "an attention item names no maker");
+
+// MMLU Ai Benchmark (Hugging Face, 2026-11-03): no authors and no listed
+// organization; the owner comes from the "owner/name" title, as on Today.
+const slugOnly = cardFacts({ title: "golden-eaglet/mmlu-ai-benchmark", source: "Hugging Face" });
+assert.equal(slugOnly.byline, "By golden-eaglet");
+assert.deepEqual(slugOnly.affiliations, []);
+// Named authors win over the owner.
+assert.equal(
+  cardFacts({ title: "lab/x", source: "GitHub", authors: ["Ada Lovelace"], organizations: ["lab"] }).byline,
+  "Ada Lovelace",
+);
+// A paper's organizations stay institutions and do not become a byline.
+assert.equal(cardFacts({ title: "A Bench", source: "arXiv", organizations: ["MIT"] }).byline, "");
 assert.equal(attention.meta, "Hacker News · Oct 31, 2026");
 assert.equal(attention.label, "Benchmark Radar · Today's radar · Nov 1, 2026");
 
