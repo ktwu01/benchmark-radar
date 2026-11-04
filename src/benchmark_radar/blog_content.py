@@ -430,7 +430,8 @@ _LEAD_NAME_LIMIT = 60
 _MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
 
-_REPO_TITLE = re.compile(r"^[^\s/]+/([^\s/]+)$")
+# The Today card's SLUG_TITLE: "owner/name", optionally followed by a version.
+_REPO_TITLE = re.compile(r"^[^\s/]+/([^\s/]+)(\s+\S+)?$")
 _NATURAL_BREAK = re.compile(r"(?<=\?)\s|:\s|\s[-–—]\s")
 
 
@@ -439,7 +440,7 @@ def _lead_name(title: str) -> str:
     text = " ".join(str(title or "").split())
     repo = _REPO_TITLE.match(text)
     if repo:
-        return repo.group(1)
+        return repo.group(1) + (repo.group(2) or "")
     match = _NAMED_TITLE.match(text)
     if match and len(match.group(1).strip()) >= 4:
         return match.group(1).strip()

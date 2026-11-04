@@ -822,6 +822,9 @@ def test_a_day_is_titled_after_its_lead_benchmark():
     assert _lead_titles(day("chartact-benchmark/ChartAct", "x"), "2026-10-25")[0] == (
         "ChartAct and 1 more new AI benchmark · Oct 25, 2026"
     )
+    assert _lead_titles(day("EleutherAI/lm-evaluation-harness v0.4.13"), "2026-09-01")[0] == (
+        "New AI benchmark: lm-evaluation-harness v0.4.13 · Sep 1, 2026"
+    )
     # "T1: ..." is not a name a reader knows; the whole title is kept, then cut.
     assert _lead_titles(day("T1: Terminal Agent Learning"), "2026-11-03")[0] == (
         "New AI benchmark: T1: Terminal Agent Learning · Nov 3, 2026"
