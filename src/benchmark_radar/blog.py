@@ -77,9 +77,14 @@ def _post_page(post: BlogPost, chrome: SiteChrome, chrome_i18n: dict[str, str]) 
     def language_body(language: str, content: str, *, hidden: bool) -> str:
         title = post.title_zh if language == "zh" and post.title_zh else post.title
         hidden_attr = " hidden" if hidden else ""
+        # One h1 per page (#1066). Both languages ship in one document, so the
+        # hidden Chinese title is an h2 that looks the same; blog.js moves the
+        # h1 to whichever title the reader switches to.
+        tag = "h2" if hidden else "h1"
+        lang = ' lang="zh-Hans"' if language == "zh" else ""
         return f"""<div data-lang-content="{language}"{hidden_attr}>
 <header class="blog-hero">
-  <h1>{esc(title)}</h1>
+  <{tag} class="blog-title"{lang}>{esc(title)}</{tag}>
 </header>
 <div class="blog-prose">{content}</div>
 </div>"""
