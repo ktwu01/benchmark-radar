@@ -530,7 +530,7 @@ def test_language_toggle_and_contact_labels_are_translated():
     for key in (
         '"Site utilities": "网站工具"',
         '"Switch to Chinese (中文)": "切换到中文"',
-        'Contact: "联系"',
+        'Contact: "联系作者"',
     ):
         assert key in script
 
