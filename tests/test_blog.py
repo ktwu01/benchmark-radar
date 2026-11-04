@@ -785,3 +785,57 @@ def test_a_bilingual_brief_serves_one_h1(tmp_path):
     assert page.count("<h1") == 1
     assert '<h1 class="blog-title">' in page
     assert '<h2 class="blog-title" lang="zh-Hans">' in page
+
+
+def test_a_day_is_titled_after_its_lead_benchmark():
+    """#593: the title names the day's lead benchmark, the same pick as its top
+    share card; a day without a share block keeps its dated title."""
+    from benchmark_radar.blog_content import _lead_titles
+
+    def day(*titles):
+        return {"share": {"cards": [{"title": title} for title in titles]}}
+
+    lead = "MemHarmBench: Evaluating Cross-Session Prompt Injection in Memory-Persistent AI Agents"
+    assert _lead_titles(day(lead, "b", "c", "d", "e"), "2026-11-03") == (
+        "MemHarmBench and 4 more new AI benchmarks · Nov 3, 2026",
+        "MemHarmBench 等 5 个新 AI benchmark · 2026-11-03",
+    )
+    assert _lead_titles(day(lead, "b"), "2026-11-03")[0] == (
+        "MemHarmBench and 1 more new AI benchmark · Nov 3, 2026"
+    )
+    assert _lead_titles(day(lead), "2026-11-03")[0] == (
+        "MemHarmBench: a new AI benchmark · Nov 3, 2026"
+    )
+    # No name before a colon: the title is cut at a word near 60 characters.
+    long = (
+        "Is Your Long-Horizon Benchmark Really Deep? "
+        "Measuring and Synthesizing Depth in Terminal Tasks"
+    )
+    name = _lead_titles(day(long), "2026-11-03")[0].split(": a new")[0]
+    assert name.endswith("…") and len(name) <= 61 and long.startswith(name[:-1])
+    # "T1: ..." is not a name a reader knows; the whole title is kept, then cut.
+    assert _lead_titles(day("T1: Terminal Agent Learning"), "2026-11-03")[0].startswith(
+        "T1: Terminal Agent Learning:"
+    )
+    assert _lead_titles({"share": {}}, "2026-11-03") is None
+    assert _lead_titles({}, "2026-11-03") is None
+
+
+def test_a_cited_benchmark_links_to_its_page_only_by_exact_url():
+    """#593: a source that is exactly one catalog record links its benchmark page."""
+    from benchmark_radar.blog_content import _sources_section
+
+    sources = (
+        ("E001", "GPQA", "https://arxiv.org/abs/2311.12022"),
+        ("E002", "Other", "https://example.org/x"),
+    )
+    html = _sources_section(
+        sources,
+        "en",
+        {"https://arxiv.org/abs/2311.12022": "gpqa_diamond", "https://example.org/x": "../bad"},
+    )
+    assert html.count('class="blog-benchmark-link"') == 1
+    assert 'href="/benchmarks/gpqa_diamond/"' in html
+    assert "../bad" not in html
+    assert "blog-benchmark-link" not in _sources_section(sources, "en")
+    assert "Benchmark 页面" in _sources_section(sources, "zh", {sources[0][2]: "gpqa_diamond"})

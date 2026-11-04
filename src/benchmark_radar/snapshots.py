@@ -1598,6 +1598,23 @@ def dashboard_window(dashboard: dict[str, Any], window_days: int) -> dict[str, A
     }
 
 
+def catalog_pages_by_url(index_path: Path) -> dict[str, str]:
+    """Map each URL that exactly one catalog record cites as its source to that slug.
+
+    A URL two records share names neither, and nothing is matched by name.
+    """
+    if not index_path.exists():
+        return {}
+    records = json.loads(index_path.read_text(encoding="utf-8")).get("benchmarks") or []
+    slugs_by_url: dict[str, set[str]] = {}
+    for record in records:
+        url = str(record.get("source_url") or "")
+        slug = str(record.get("slug") or "")
+        if url and slug:
+            slugs_by_url.setdefault(url, set()).add(slug)
+    return {url: next(iter(slugs)) for url, slugs in slugs_by_url.items() if len(slugs) == 1}
+
+
 def attach_catalog_cards(dashboard: dict[str, Any], index_path: Path) -> int:
     """Name the catalog record a Today item is, by exact URL, so it shares that card.
 
@@ -1607,16 +1624,7 @@ def attach_catalog_cards(dashboard: dict[str, Any], index_path: Path) -> int:
     Only an exact, unique match counts: a URL two records share names neither,
     and nothing is matched by name. Returns how many items were tagged.
     """
-    if not index_path.exists():
-        return 0
-    records = json.loads(index_path.read_text(encoding="utf-8")).get("benchmarks") or []
-    slugs_by_url: dict[str, set[str]] = {}
-    for record in records:
-        url = str(record.get("source_url") or "")
-        slug = str(record.get("slug") or "")
-        if url and slug:
-            slugs_by_url.setdefault(url, set()).add(slug)
-    unique = {url: next(iter(slugs)) for url, slugs in slugs_by_url.items() if len(slugs) == 1}
+    unique = catalog_pages_by_url(index_path)
     tagged = 0
     for day in dashboard.get("days") or []:
         for item in day.get("evidence_items") or []:
@@ -1697,7 +1705,11 @@ def rebuild_dashboard(
         # One page per collection day, plus the blog's own feed. Built from the
         # same validated snapshots the dashboard is, in the same run, so a
         # brief can never describe a day the published corpus has moved past.
-        blog = write_blog(snapshots, sitemap_output.parent)
+        blog = write_blog(
+            snapshots,
+            sitemap_output.parent,
+            catalog_pages=catalog_pages_by_url(benchmark_shard_dir.parent / "benchmark-index.json"),
+        )
         blog_entries = blog["sitemap_entries"]
     write_sitemap(
         snapshots,

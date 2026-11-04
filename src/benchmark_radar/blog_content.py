@@ -26,6 +26,7 @@ which invents provenance for text nobody can trace.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 from urllib.parse import urlparse
 
@@ -43,6 +44,7 @@ KIND_EVIDENCE = "Evidence summary"
 _LABELS = {
     "en": {
         "briefing": "Daily briefing",
+        "benchmark_page": "Benchmark page",
         "evidence": "What the radar collected that day",
         "sources": "Evidence sources",
         "provenance": "Where this came from, and what it does not cover",
@@ -55,6 +57,7 @@ _LABELS = {
     },
     "zh": {
         "briefing": "每日简报",
+        "benchmark_page": "Benchmark 页面",
         "evidence": "当天雷达收集到的内容",
         "sources": "证据来源",
         "provenance": "内容来源与局限",
@@ -376,11 +379,28 @@ def _provenance_section(snapshot: dict[str, Any], language: str) -> str:
     )
 
 
-def _sources_section(sources: tuple[tuple[str, str, str], ...], language: str) -> str:
+def _benchmark_link(url: str, catalog_pages: dict[str, str], language: str) -> str:
+    """A link to the benchmark's own page when the source is exactly one record (#593)."""
+    slug = catalog_pages.get(url)
+    if not slug or not _CARD_SLUG.fullmatch(slug):
+        return ""
+    label = _LABELS[language]["benchmark_page"]
+    return f' <a class="blog-benchmark-link" href="/benchmarks/{esc(slug)}/">{esc(label)}</a>'
+
+
+_CARD_SLUG = re.compile(r"[a-z0-9][a-z0-9_-]*")
+
+
+def _sources_section(
+    sources: tuple[tuple[str, str, str], ...],
+    language: str,
+    catalog_pages: dict[str, str] | None = None,
+) -> str:
     if not sources:
         return ""
     links = "".join(
-        f'<li>{_cite_id(identifier)}<a href="{esc(url)}">{esc(title)}</a></li>'
+        f'<li>{_cite_id(identifier)}<a href="{esc(url)}">{esc(title)}</a>'
+        f"{_benchmark_link(url, catalog_pages or {}, language)}</li>"
         for identifier, title, url in sources
     )
     # Unnumbered on purpose: the stored ID is how the prose refers to a source,
@@ -402,8 +422,63 @@ def _kind(snapshot: dict[str, Any]) -> str:
     return KIND_BRIEF
 
 
-def build_post(snapshot: dict[str, Any]) -> BlogPost:
-    """Render one snapshot into a publishable brief."""
+# "AgentPhishing: A Benchmark of LLM Email Agents" leads with its name, as the
+# Today card does (splitBenchmarkTitle in app.js). A prefix under four
+# characters is not a name a reader knows, so the whole title stays.
+_NAMED_TITLE = re.compile(r"^(.{2,40}?):\s+(.{8,})$")
+_LEAD_NAME_LIMIT = 60
+_MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+
+def _lead_name(title: str) -> str:
+    text = " ".join(str(title or "").split())
+    match = _NAMED_TITLE.match(text)
+    if match and len(match.group(1).strip()) >= 4:
+        return match.group(1).strip()
+    if len(text) <= _LEAD_NAME_LIMIT:
+        return text
+    return text[:_LEAD_NAME_LIMIT].rsplit(" ", 1)[0].rstrip(" ,;:-") + "…"
+
+
+def _lead_titles(snapshot: dict[str, Any], day: str) -> tuple[str, str] | None:
+    """Title a day after its lead benchmark, the same pick as its top share card.
+
+    A search result titled "Daily AI benchmark brief: 2026-11-03" says nothing a
+    reader can search for; "MemHarmBench and 4 more new AI benchmarks" names
+    the day's lead benchmark (#593). The share block is the daily briefing's
+    benchmarks, or the radar-score top three on a day without a briefing.
+    A day without a share block keeps its dated title.
+    """
+    cards = (snapshot.get("share") or {}).get("cards") or []
+    name = _lead_name(cards[0].get("title") or "") if cards else ""
+    if not name:
+        return None
+    try:
+        year, month, date_of_month = (int(part) for part in day.split("-"))
+        when = f"{_MONTHS[month - 1]} {date_of_month}, {year}"
+    except (ValueError, IndexError):
+        when = day
+    more = len(cards) - 1
+    if more > 1:
+        english = f"{name} and {more} more new AI benchmarks · {when}"
+    elif more == 1:
+        english = f"{name} and 1 more new AI benchmark · {when}"
+    else:
+        english = f"{name}: a new AI benchmark · {when}"
+    chinese = (
+        f"{name} 等 {len(cards)} 个新 AI benchmark · {day}"
+        if more
+        else f"{name}：新 AI benchmark · {day}"
+    )
+    return english, chinese
+
+
+def build_post(snapshot: dict[str, Any], catalog_pages: dict[str, str] | None = None) -> BlogPost:
+    """Render one snapshot into a publishable brief.
+
+    ``catalog_pages`` maps a source URL to the slug of the one catalog record
+    with exactly that URL, so a cited benchmark links to its page here.
+    """
     day = str(snapshot["date"])
     kind = _kind(snapshot)
     sources = _citations(snapshot, allow_fallback=kind != KIND_EVIDENCE)
@@ -413,12 +488,15 @@ def build_post(snapshot: dict[str, Any]) -> BlogPost:
             f'<div class="blog-stats">{_stats(snapshot)}</div>'
             + _briefing_section(snapshot, language)
             + _questions_section(snapshot, language)
-            + _sources_section(sources, language)
+            + _sources_section(sources, language, catalog_pages or {})
             + _provenance_section(snapshot, language)
         )
 
     translated = has_translation(snapshot)
-    if kind == KIND_EVIDENCE:
+    lead = _lead_titles(snapshot, day)
+    if lead:
+        title, title_zh = lead
+    elif kind == KIND_EVIDENCE:
         title = f"Benchmark evidence summary: {day}"
         title_zh = f"Benchmark 证据汇总：{day}"
     else:
