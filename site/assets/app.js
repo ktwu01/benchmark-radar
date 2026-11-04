@@ -1189,6 +1189,8 @@ const I18N = {
     "Copy image": "复制图片",
     "Copy link": "复制链接",
     "Post on X ↗": "发布到 X ↗",
+    "Card copied. Paste it into your post (Ctrl+V or Cmd+V).": "卡片已复制。在帖子里粘贴即可（Ctrl+V 或 Cmd+V）。",
+    "Download the card and attach it to your post.": "请下载卡片，再添加到帖子里。",
     "That did not work here. Copy the link instead.": "此处无法完成，请改为复制链接。",
     "This benchmark's card is not ready yet. You can still share its link.": "这个 benchmark 的卡片还没生成，你仍然可以分享它的链接。",
     Share: "分享",

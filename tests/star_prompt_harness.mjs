@@ -153,5 +153,33 @@ for (const [label, failure] of [["Copy link", "clipboard"], ["Copy image", "clip
   assert(page.starPrompt("save"));
 }
 
+// #1068: X's post link cannot attach a file, so Post on X copies the card on the
+// same click and says to paste it; the link itself still opens X.
+{
+  const page = await load();
+  let written = null;
+  navigator.clipboard.write = async (items) => {
+    written = await Promise.all(Object.values(items[0].data));
+  };
+  page.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
+  const x = page.body.find((node) => node.textContent === "Post on X ↗");
+  assert.equal(x.tag, "a");
+  assert.match(x.attrs.href, /^https:\/\/x\.com\/intent\/post\?/);
+  assert.equal(x.attrs.target, "_blank");
+  x.click();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert(written && written[0] instanceof Blob, "the card image reaches the clipboard");
+  const status = page.body.find((node) => node.className === "share-card-status");
+  assert.equal(status.textContent, "Card copied. Paste it into your post (Ctrl+V or Cmd+V).");
+}
+{
+  const page = await load({ failure: "clipboard" });
+  page.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
+  page.body.find((node) => node.textContent === "Post on X ↗").click();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const status = page.body.find((node) => node.className === "share-card-status");
+  assert.equal(status.textContent, "Download the card and attach it to your post.");
+}
+
 assert.match(readFileSync("site/assets/app.js", "utf8"), /import \{ starPrompt \} from "\.\/star-prompt.js"/);
 console.log("star prompt and card actions harness ok");

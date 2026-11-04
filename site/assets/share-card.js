@@ -208,11 +208,30 @@ function openShareDialog({ name, pageUrl, imageSrc, getBlob: blob, fileName, mis
   const post = new URL("https://x.com/intent/post");
   post.searchParams.set("text", title);
   post.searchParams.set("url", pageUrl);
-  buttons.push(node("a", {
+  const postOnX = node("a", {
     className: "secondary-link",
     text: t("Post on X ↗"),
     attrs: { href: post.href, target: "_blank", rel: "noopener noreferrer" },
-  }));
+  });
+  // X's post link carries text and a URL but never a file (#1068). So the card
+  // goes to the clipboard on the same click, and the reader pastes it into the
+  // post. The write starts before the link opens X's tab: browsers allow it only
+  // while this page has focus and the click still counts as user activation.
+  postOnX.addEventListener("click", () => {
+    if (image.hidden || !navigator.clipboard?.write || !window.ClipboardItem) {
+      status.textContent = t("Download the card and attach it to your post.");
+      return;
+    }
+    navigator.clipboard
+      .write([new ClipboardItem({ "image/png": blob() })])
+      .then(() => {
+        status.textContent = t("Card copied. Paste it into your post (Ctrl+V or Cmd+V).");
+      })
+      .catch(() => {
+        status.textContent = t("Download the card and attach it to your post.");
+      });
+  });
+  buttons.push(postOnX);
 
   const unavailable = () => {
     image.hidden = true;
