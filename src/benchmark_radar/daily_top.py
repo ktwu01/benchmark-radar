@@ -144,8 +144,16 @@ def select_top_items(
     return selected
 
 
+# A name or institution has at least one letter. A paper whose LaTeX macro
+# broke renders its affiliation as "[" in arXiv HTML (arXiv:2611.01700), and a
+# card that prints "[" reads as broken (#1070); such a value stays unknown.
+_LETTER = re.compile(r"[^\W\d_]")
+
+
 def _unique(values: list[str]) -> list[str]:
-    return list(dict.fromkeys(value.strip() for value in values if value and value.strip()))
+    return list(
+        dict.fromkeys(value.strip() for value in values if value and _LETTER.search(value.strip()))
+    )
 
 
 def _unique_people(names: list[str]) -> list[str]:
@@ -155,6 +163,8 @@ def _unique_people(names: list[str]) -> list[str]:
     people: dict[str, str] = {}
     for raw in names:
         name = " ".join(str(raw).split())
+        if not _LETTER.search(name):
+            continue
         parts = name.split(",")
         if len(parts) == 2 and all(part.strip() for part in parts):
             name = f"{parts[1].strip()} {parts[0].strip()}"

@@ -1,5 +1,6 @@
 import http.client
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -202,6 +203,27 @@ def test_arxiv_html_affiliations_cover_a_paper_openalex_has_not_indexed():
     item = _item("k", 1, url="https://arxiv.org/abs/2610.31404")
     creators = resolve_creators(item, fetch=_fetcher({}), fetch_text=lambda url, **_: page)
     assert creators["affiliations"] == ["Carnegie Mellon University", "CMU & UNC"]
+
+
+def test_an_affiliation_without_a_letter_stays_unknown():
+    # arXiv:2611.01700 (MemHarmBench) renders every affiliation as "[" in its
+    # HTML, and the 2026-11-03 card printed it (#1070).
+    page = (
+        '<span class="ltx_contact ltx_role_affiliation">'
+        '<span class="ltx_contact_name">Affiliation: </span>[\n</span>'
+    ) * 3
+    item = _item("k", 1, url="https://arxiv.org/abs/2611.01700", authors=["Zhihua Wang", "-"])
+    creators = resolve_creators(item, fetch=_fetcher({}), fetch_text=lambda url, **_: page)
+    assert creators == {"authors": ["Zhihua Wang"], "affiliations": []}
+
+
+def test_committed_share_cards_name_no_letterless_creator():
+    letter = re.compile(r"[^\W\d_]")
+    for path in sorted(Path("data/snapshots").glob("*.json")):
+        share = json.loads(path.read_text(encoding="utf-8")).get("share") or {}
+        for card in share.get("cards") or []:
+            for value in [*(card.get("authors") or []), *(card.get("affiliations") or [])]:
+                assert letter.search(value), (path.name, card.get("url"), value)
 
 
 def test_paper_without_any_stated_affiliation_shows_authors_only():
