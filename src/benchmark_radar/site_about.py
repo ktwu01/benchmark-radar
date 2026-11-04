@@ -143,9 +143,9 @@ _STORY = (
         "OpenReview, Semantic Scholar, Hacker News, and the labs' own release feeds, and "
         "writes down the benchmark work that appeared that day. Separately, the scored "
         "catalog is built from registered leaderboards and model reports: OpenCompass Hub, "
-        "LLM Stats, Artificial Analysis, and the evaluation tables labs publish with a "
-        "model. Each benchmark in that catalog keeps its own page with the paper, code, "
-        "and dataset links it has, plus every score on record.",
+        "LLM Stats, Artificial Analysis, the Benchmark Saturation study, and the evaluation "
+        "tables labs publish with a model. Each benchmark in that catalog keeps its own page "
+        "with the paper, code, and dataset links it has, plus every score on record.",
     ),
     (
         "The rule the whole project follows",

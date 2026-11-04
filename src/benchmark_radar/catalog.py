@@ -47,6 +47,7 @@ SOURCES = {
     LLM_STATS_SNAPSHOT_ID: (LLM_STATS_SOURCE, LLM_STATS_KEY_PREFIX),
     ARTIFICIAL_ANALYSIS_SNAPSHOT_ID: (ARTIFICIAL_ANALYSIS_SOURCE, ARTIFICIAL_ANALYSIS_KEY_PREFIX),
     "claire_radar_2026-10-14": ("claire_radar", "claire-radar"),
+    "benchmark_saturation_2026-11-04": ("benchmark_saturation", "benchmark-saturation"),
 }
 
 _SLUG_STRIP = re.compile(r"[^a-z0-9]+")

@@ -1482,6 +1482,7 @@ SCORE_SOURCE_LINKS: tuple[tuple[str, str], ...] = (
     ("LLM Stats", "https://llm-stats.com"),
     ("Artificial Analysis", "https://artificialanalysis.ai"),
     ("OpenCompass Hub", "https://hub.opencompass.org.cn"),
+    ("Benchmark Saturation", "https://github.com/evaleval/benchmark-saturation"),
 )
 CITE_CREDIT_LEAD = "Benchmark score data comes from lab model reports and from"
 

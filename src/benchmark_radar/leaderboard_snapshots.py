@@ -190,8 +190,9 @@ def _load_snapshot_files(snapshot: dict[str, Any], base: Path) -> dict[str, Any]
             )
         # Row identity is (benchmark_id, model_id) when the source carries an
         # id, because distinct dated checkpoints can share a display name. The
-        # name is display vocabulary; the id is what a row actually is.
-        model_key = str(columns.get("model_id") or columns["model"])
+        # name is display vocabulary; the id is what a row actually is. A
+        # source with neither a model id nor unique names declares `row_id`.
+        model_key = str(columns.get("row_id") or columns.get("model_id") or columns["model"])
         pairs: set[tuple[str, str]] = set()
         for index, row in enumerate(score_rows):
             benchmark_id = row[str(columns["benchmark_id"])].strip()

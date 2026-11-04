@@ -216,7 +216,10 @@ remaining model scores come from [Artificial Analysis](https://artificialanalysi
 and [LLM Stats](https://llm-stats.com), and every score keeps a citation to the
 source it was read from. Thank you both for publishing that data openly. The
 wider benchmark catalog adds [OpenCompass Hub](https://hub.opencompass.org.cn)
-as a fourth source.
+as a fourth source. The [Benchmark Saturation](https://github.com/evaleval/benchmark-saturation)
+study (Akhtar et al., [arXiv:2602.16763](https://arxiv.org/abs/2602.16763), MIT)
+adds its hand-annotated top five model scores for 60 benchmarks. Thank you for
+releasing that table.
 
 A special thank you to [Xiaopai Liu](https://github.com/liuxiaopai-ai)
 ([@bourneliu66](https://x.com/bourneliu66)) for the shout-out on X, and to his

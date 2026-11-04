@@ -1,0 +1,300 @@
+benchmark_id,benchmark_name,rank,model_name,organization_name,benchmark_score,source_url
+1,Math (math 500),1,o3,,99.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+1,Math (math 500),2,Grok-4,,99.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+1,Math (math 500),3,DeepSeek R1,,98.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+1,Math (math 500),4,GLM-4.5,,98.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+1,Math (math 500),5,Claude Opus 4,,98.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+2,GPQA: A Graduate-Level Google-Proof Q&A Benchmark,1,Grok4,,87.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+2,GPQA: A Graduate-Level Google-Proof Q&A Benchmark,2,GPT-5,,85.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+2,GPQA: A Graduate-Level Google-Proof Q&A Benchmark,3,Gemini-2.5 Pro,,84.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+2,GPQA: A Graduate-Level Google-Proof Q&A Benchmark,4,Claude-4.5 Sonnet,,83.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+2,GPQA: A Graduate-Level Google-Proof Q&A Benchmark,5,GLM 4.6,,82.9,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+3,MMLU-Pro: A More Robust and Challenging Multi-Task Language Understanding Benchmark,1,GPT o1,,89.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+3,MMLU-Pro: A More Robust and Challenging Multi-Task Language Understanding Benchmark,2,Claude Opus 4.1,,87.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+3,MMLU-Pro: A More Robust and Challenging Multi-Task Language Understanding Benchmark,3,Claude Sonnet 4.5,,87.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+3,MMLU-Pro: A More Robust and Challenging Multi-Task Language Understanding Benchmark,4,GPT 5,,87.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+3,MMLU-Pro: A More Robust and Challenging Multi-Task Language Understanding Benchmark,5,Claude Opus 4,,86.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+4,Big Bench Hard (BBH),1,Claude 3.5 Sonnet,,93.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+4,Big Bench Hard (BBH),2,Gemini 1.5 Pro,,89.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+4,Big Bench Hard (BBH),3,Qwen 3,,88.87,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+4,Big Bench Hard (BBH),4,Kimi K2,,88.71,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+4,Big Bench Hard (BBH),5,Gemma 3 27B,,87.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+5,ARC-AGI,1,J. Berman,,79.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+5,ARC-AGI,2,E. Pang,,77.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+5,ARC-AGI,3,GPT-5 Pro,,70.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+5,ARC-AGI,4,Grok 4,,66.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+5,ARC-AGI,5,Claude Sonnet 4.5,,63.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+6,MMLU: Measuring Massive Multitask Language Understanding,1,Gpt-5-2025-08-07,,93.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+6,MMLU: Measuring Massive Multitask Language Understanding,2,Claude-Opus-4-1-20250805,,93.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+6,MMLU: Measuring Massive Multitask Language Understanding,3,Claude-Opus-4-20250514,,92.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+6,MMLU: Measuring Massive Multitask Language Understanding,4,Gemini-2.5-Pro-Preview-06-05,,92.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+6,MMLU: Measuring Massive Multitask Language Understanding,5,O3-2025-04-16,,92.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+7,Winogrande,1,GPT 4,,87.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+7,Winogrande,2,Command R,,85.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+7,Winogrande,3,KImi K2 - Base,,85.32,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+7,Winogrande,4,Qwen2 72B Instruct,,85.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+7,Winogrande,5,Llama 3.1,,84.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+8,HellaSwag,1,Claude 3 Opus,,95.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+8,HellaSwag,2,GPT-4,,95.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+8,HellaSwag,3,Kimi-k2-base,,94.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+8,HellaSwag,4,Gemini 1.5 Pro,,93.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+8,HellaSwag,5,Claude 3 Sonnet,,89.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+9,GSM8K,1,Kimi K2 Instruct,,97.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+9,GSM8K,2,o1,,97.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+9,GSM8K,3,GPT-4.5,,97.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+9,GSM8K,4,Llama 3.1 405B Instruct,,96.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+9,GSM8K,5,Claude 3.5 Sonnet,,96.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+10,TruthfulQA,1,Claude 3.5,,91.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+10,TruthfulQA,2,Gpt 4o,,88.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+10,TruthfulQA,3,grok 2,,87.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+10,TruthfulQA,4,llama 3.3 70b,,84.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+10,TruthfulQA,5,deepseek-chat,,84.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+11,LiveCodeBench: Holistic and Contamination Free Evaluation of Large Language Models for Code,1,Gemini 3 pro,,91.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+11,LiveCodeBench: Holistic and Contamination Free Evaluation of Large Language Models for Code,2,Gemini 3 flash,,90.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+11,LiveCodeBench: Holistic and Contamination Free Evaluation of Large Language Models for Code,3,GLM-4.7,,89.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+11,LiveCodeBench: Holistic and Contamination Free Evaluation of Large Language Models for Code,4,GPT5.2,,88.9,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+11,LiveCodeBench: Holistic and Contamination Free Evaluation of Large Language Models for Code,5,gpt-oss 12B,,87.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+12,"LiveBench: A Challenging, Contamination-Free LLM Benchmark",1,GPT-5 High,,79.33,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+12,"LiveBench: A Challenging, Contamination-Free LLM Benchmark",2,GPT-5 Medium,,78.85,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+12,"LiveBench: A Challenging, Contamination-Free LLM Benchmark",3,GPT-5 Pro,,78.73,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+12,"LiveBench: A Challenging, Contamination-Free LLM Benchmark",4,Claude Sonnet 4.5 Thinking,,78.26,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+12,"LiveBench: A Challenging, Contamination-Free LLM Benchmark",5,GPT-5 Codex,,78.24,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+13,LegalBench: A Collaboratively Built Benchmark for Measuring Legal Reasoning in Large Language Models,1,GPT 5,,84.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+13,LegalBench: A Collaboratively Built Benchmark for Measuring Legal Reasoning in Large Language Models,2,Gemini 2.5 Pro Exp,,83.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+13,LegalBench: A Collaboratively Built Benchmark for Measuring Legal Reasoning in Large Language Models,3,Grok 4,,83.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+13,LegalBench: A Collaboratively Built Benchmark for Measuring Legal Reasoning in Large Language Models,4,Claude Sonnet 4.5,,83.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+13,LegalBench: A Collaboratively Built Benchmark for Measuring Legal Reasoning in Large Language Models,5,Gemini 2.5 Flash Preview,,82.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+14,AIR-Bench 2024: A Safety Benchmark Based on Risk Categories from Regulations and Policies,1,Claude 3.5 Sonnet,,90.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+14,AIR-Bench 2024: A Safety Benchmark Based on Risk Categories from Regulations and Policies,2,Claude 4.5 Sonnet,,89.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+14,AIR-Bench 2024: A Safety Benchmark Based on Risk Categories from Regulations and Policies,3,Claude 4 Sonnet,,88.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+14,AIR-Bench 2024: A Safety Benchmark Based on Risk Categories from Regulations and Policies,4,gpt-oss-120b,,88.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+14,AIR-Bench 2024: A Safety Benchmark Based on Risk Categories from Regulations and Policies,5,GPT-5 nano,,87.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+15,SWE-bench: Can Language Models Resolve Real-World GitHub Issues?,1,Claude 4.5 Sonnet,,70.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+15,SWE-bench: Can Language Models Resolve Real-World GitHub Issues?,2,Claude 4 Opus,,67.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+15,SWE-bench: Can Language Models Resolve Real-World GitHub Issues?,3,GPT-5,,65.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+15,SWE-bench: Can Language Models Resolve Real-World GitHub Issues?,4,Claude 4 Sonnet,,64.93,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+15,SWE-bench: Can Language Models Resolve Real-World GitHub Issues?,5,GPT-5 mini,,59.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+16,RewardBench: Evaluating Reward Models for Language Modeling,1,infly/INF-ORM-Llama3.1-70B,,95.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+16,RewardBench: Evaluating Reward Models for Language Modeling,2,ShikaiChen/LDL-Reward-Gemma-2-27B-v0.1,,95.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+16,RewardBench: Evaluating Reward Models for Language Modeling,3,nicolinho/QRM-Gemma-2-27B,,94.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+16,RewardBench: Evaluating Reward Models for Language Modeling,4,Skywork/Skywork-Reward-Gemma-2-27B-v0.2,,94.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+16,RewardBench: Evaluating Reward Models for Language Modeling,5,nvidia/Llama-3.1-Nemotron-70B-Reward,,94.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+17,SQuaD v2,1,IE-Net (ensemble),,93.214,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+17,SQuaD v2,2,FPNet (ensemble),,93.183,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+17,SQuaD v2,3,IE-NetV2 (ensemble),,93.100,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+17,SQuaD v2,4,SA-Net on Albert,,93.011,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+17,SQuaD v2,5,SA-Net-V2 (ensemble),,92.948,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+18,GLUE,1,Turing ULR v6,,91.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+18,GLUE,2,Vega v1,,91.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+18,GLUE,3,Turing NLR v5,,91.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+18,GLUE,4,DeBERTa + CLEVER,,91.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+18,GLUE,5,ERNIE,,91.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+19,SuperGLUE,1,Hairuo,,91.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+19,SuperGLUE,2,Vega v2,,91.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+19,SuperGLUE,3,ST-MoE-32B,,91.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+19,SuperGLUE,4,Turing NLR v5,,90.9,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+19,SuperGLUE,5,ERNIE 3.0,,90.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+20,AIME 2025,1,GPT-5.2 (high),,99.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+20,AIME 2025,2,Gemini 3 Flash,,97.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+20,AIME 2025,3,MiMo-V2-Flash,,96.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+20,AIME 2025,4,Gemini 3 Preview (high),,95.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+20,AIME 2025,5,GLM-4.7,,95.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+21,SimpleQA,1,DeepSeek-V3.2-Exp,,97.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+21,SimpleQA,2,Grok 4 Fast,,95.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+21,SimpleQA,3,DeepSeek-V3.1,,93.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+21,SimpleQA,4,DeepSeek-R1-0528,,92.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+21,SimpleQA,5,Gemini 3 Pro,,72.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+22,Multilingual Massive Multitask Language Understanding (MMMLU),1,Gpt 5 thinking ~,,89.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+22,Multilingual Massive Multitask Language Understanding (MMMLU),2,GPT-4.5,,85.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+22,Multilingual Massive Multitask Language Understanding (MMMLU),3,Gpt-5-main ~,,84.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+22,Multilingual Massive Multitask Language Understanding (MMMLU),4,o3 mini,,81.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+22,Multilingual Massive Multitask Language Understanding (MMMLU),5,GPT-4o,,81.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+23,Global MMLU,1,Gemini-2.5-Pro,,94.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+23,Global MMLU,2,Grok-4-0709,,91.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+23,Global MMLU,3,Gemini-2.5-Flash,,90.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+23,Global MMLU,4,Gemini-2.5-Flash-Preview-05-20,,90.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+23,Global MMLU,5,Gpt-5-2025-08-07,,89.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+24,MGSM (Multilingual Grade School Math (MGSM) benchmark),1,Claude Opus 4.1,,94.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+24,MGSM (Multilingual Grade School Math (MGSM) benchmark),2,Claude Sonnet 4.5,,94.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+24,MGSM (Multilingual Grade School Math (MGSM) benchmark),3,Claude Opus 4,,93.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+24,MGSM (Multilingual Grade School Math (MGSM) benchmark),4,o4 Mini,,93.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+24,MGSM (Multilingual Grade School Math (MGSM) benchmark),5,Claude Sonnet 4,,93.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+25,Multilingual Competition Level Math (MCLM),1,Qwen3-235B,,80.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+25,Multilingual Competition Level Math (MCLM),2,Gemini-2.5 Pro,,76.9,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+25,Multilingual Competition Level Math (MCLM),3,DeepSeek r1,,73.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+25,Multilingual Competition Level Math (MCLM),4,OpenAI o1,,67.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+26,"SIB-200: A Simple, Inclusive, and Big Evaluation Dataset for Topic Classification in 200+ Languages and Dialects",1,XLM-R,,75.9,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+26,"SIB-200: A Simple, Inclusive, and Big Evaluation Dataset for Topic Classification in 200+ Languages and Dialects",2,XLM-R,,71.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+26,"SIB-200: A Simple, Inclusive, and Big Evaluation Dataset for Topic Classification in 200+ Languages and Dialects",3,Glot-500,,64.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+26,"SIB-200: A Simple, Inclusive, and Big Evaluation Dataset for Topic Classification in 200+ Languages and Dialects",4,MLP,,62.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+26,"SIB-200: A Simple, Inclusive, and Big Evaluation Dataset for Topic Classification in 200+ Languages and Dialects",5,GPT-3.5-Turbo,,43.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+27,MMLU-Indic,1,Sarvam-M,,79.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+27,MMLU-Indic,2,Llama 4 Scout,,77.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+27,MMLU-Indic,3,Gemma 3,,75.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+27,MMLU-Indic,4,Llama 3.3,,74.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+27,MMLU-Indic,5,Mistral Small,,64.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+28,GSM8k-Indic,1,Sarvam-M,,92.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+28,GSM8k-Indic,2,Gemma 3,,89.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+28,GSM8k-Indic,3,Llama 3.3,,86.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+28,GSM8k-Indic,4,Llama 4 Scout,,83.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+28,GSM8k-Indic,5,Mistral Small,,82.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+29,HEAD-QA: A Healthcare Dataset for Complex Reasoning,1,Claude 3.7 Sonnet (20250219),,91.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+29,HEAD-QA: A Healthcare Dataset for Complex Reasoning,2,Claude 3.5 Sonnet (20241022),,90.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+29,HEAD-QA: A Healthcare Dataset for Complex Reasoning,3,GPT-4o (2024-05-13),,90.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+29,HEAD-QA: A Healthcare Dataset for Complex Reasoning,4,o3-mini (2025-01-31),,89.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+29,HEAD-QA: A Healthcare Dataset for Complex Reasoning,5,Gemini 2.0 Flash,,88,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+30,BoolQ,1,T5-11B,,91.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+30,BoolQ,2,PaLM 2-L,,90.9,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+30,BoolQ,3,T5-3B,,89.9,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+30,BoolQ,4,Inflection-1,,89.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+30,BoolQ,5,Stable Beluga 2,,89.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+31,PIQA,1,Phi-3.5-MoE,,88.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+31,PIQA,2,Gemini 1.5 flash,,87.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+31,PIQA,3,GLM 4.5,,85.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+31,PIQA,4,Deepseek v3 base,,84.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+31,PIQA,5,Gemma 2,,83.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+32,SocialIQa,1,"GPT-4 Turbo (k-shot, CoT)",,84.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+32,SocialIQa,2,"GPT-4 Turbo (0-shot, SP)",,82.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+32,SocialIQa,3,"Gemini Pro (k-shot, CoT)",,78.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+32,SocialIQa,4,"GPT-3.5 Turbo (k-shot, CoT)",,78.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+32,SocialIQa,5,"Llama-2-70b (k-shot, CoT)",,77.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+33,OpenBookQA,1,Claude 3.5 Sonnet,,97.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+33,OpenBookQA,2,GPT-4 Turbo,,97.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+33,OpenBookQA,3,GPT-4o,,96.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+33,OpenBookQA,4,Claude 3.5 Sonnet,,96.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+33,OpenBookQA,5,GPT-4o,,96.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+34,RACE,1,ALBERT-SingleChoice + transfer learning,,91.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+34,RACE,2,Megatron-BERT,,90.9,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+34,RACE,3,ALBERT-SingleChoice + transfer learning,,90.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+34,RACE,4,ALBERT + DUMA,,89.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+34,RACE,5,Megatron-BERT,,89.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+35,HumanEval,1,Kimi K2 0905,,94.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+35,HumanEval,2,Claude 3.5 Sonnet,,93.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+35,HumanEval,3,GPT-5,,93.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+35,HumanEval,4,Kimi K2 Instruct,,93.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+35,HumanEval,5,Qwen2.5-Coder 32B Instruct,,92.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+36,MBPP,1,O1 Preview,,95.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+36,MBPP,2,O1 Mini,,93.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+36,MBPP,3,Llama-3.3 Nemotron Super 49B v1,,91.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+36,MBPP,4,Qwen2.5-Coder-32B-Instruct,,90.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+36,MBPP,5,Gemini 1.5 Pro 002,,89.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+37,DROP,1,Kimi k2 instruct,,93.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+37,DROP,2,DeepSeek-V3,,91.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+37,DROP,3,Claude 3.5 Sonnet,,87.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+37,DROP,4,GPT-4 Turbo,,86.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+37,DROP,5,Nova Pro,,85.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+38,TriviaQA,1,Kimi K2 Base,,85.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+38,TriviaQA,2,Gemma 2 27B,,83.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+38,TriviaQA,3,Mistral Small 3.1 24B Instruct,,80.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+38,TriviaQA,4,Mistral Small 3.1 24B Base,,80.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+38,TriviaQA,5,Mistral Small 3 24B Base,,80.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+39,Natural Questions,1,Amazon Nova Pro,,82.9,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+39,Natural Questions,2,Amazon Nova Lite,,81.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+39,Natural Questions,3,PaLM-2 (Bison),,81.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+39,Natural Questions,4,GPT-4o (2024-05-13),,80.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+39,Natural Questions,5,GPT-4 Turbo (2024-04-09),,79.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+40,LAMBADA,1,PaLM-540B,,89.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+40,LAMBADA,2,PaLM 2-L,,86.9,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+40,LAMBADA,3,GPT-3 175B,,86.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+40,LAMBADA,4,PaLM 2-M,,83.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+40,LAMBADA,5,PaLM-540B,,81.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+41,ANLI,1,T5-3B,,81.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+41,ANLI,2,T0-11B,,75.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+41,ANLI,3,InfoBERT,,75.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+41,ANLI,4,PaLM 2-L,,73.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+41,ANLI,5,RoBERTa,,72.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+42,Tydiqa,1,TuLRv6 - XXL,,84.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+42,Tydiqa,2,BLOOMA,,75.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+42,Tydiqa,3,gpt-4-32k,,71.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+42,Tydiqa,4,Phi-3.5-MoE-instruct,,67.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+42,Tydiqa,5,Phi-3.5-mini-instruct,,62.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+43,CommonsenseQA,1,DeBERTaV3-large+KEAR,,91.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+43,CommonsenseQA,2,Palm 2,,90.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+43,CommonsenseQA,3,Mistral NeMo Instruct,,70.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+43,CommonsenseQA,4,GPT,,45.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+43,CommonsenseQA,5,ESIM+ELMo,,34.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+44,Belebele,1,cogito-v1-preview-qwen-14B,,88.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+44,Belebele,2,"gemma-3-12b-it,bos",,88.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+44,Belebele,3,Qwen3-14B,,87.39,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+44,Belebele,4,gemma-2-9b-it,,87.31,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+44,Belebele,5,"GaMS3-12B-Instruct,bos",,86.29,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+45,QuAC,1,CKT-QA,,76.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+45,QuAC,2,CDQ-DeBERTa,,75.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+45,QuAC,3,AERmodel,,75.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+45,QuAC,4,RoR,,74.9,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+45,QuAC,5,EL-QA,,74.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+46,AGI Eval,1,Olmo 3,,88.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+46,AGI Eval,2,Kimi k2,,84.23,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+46,AGI Eval,3,Deepseek v3 base,,79.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+46,AGI Eval,4,GPT-4o,,71.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+46,AGI Eval,5,Llama 3 400B+,,69.9,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+47,C-Eval,1,Kimi K2,,92.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+47,C-Eval,2,Deepseek v3,,90.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+47,C-Eval,3,Qwen3-225B-A22B,,89.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+47,C-Eval,4,GLM 4.5,,86.9,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+47,C-Eval,5,Claude-3-Opus,,71.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+48,MultiPL-E,1,Claude opus 4,,89.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+48,MultiPL-E,2,Claude sonnet 4,,88.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+48,MultiPL-E,3,GPT 4.1,,86.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+48,MultiPL-E,4,Kimi k2 Instruct,,85.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+48,MultiPL-E,5,Gemini 2.5 flash,,85.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+49,Flores-101,1,GPT-4o,,83.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+49,Flores-101,2,Gemini 2.0 Flash,,82.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+49,Flores-101,3,Gemini 1.5 Pro,,82.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+49,Flores-101,4,Claude 3.7 Sonnet,,82.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+49,Flores-101,5,Command A,,81.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+50,QuALITY,1,Llama 3 405B,,95.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+50,QuALITY,2,Claude 3 opus,,90.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+50,QuALITY,3,Clustering and Decomposition using Qwen2.5-7b and chat using DeepSeek,,88.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+50,QuALITY,4,RAPTOR + GPT-4,,82.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+50,QuALITY,5,Long-context GPT3.5,,74.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+51,MMLU-Redux,1,Kimi K2-Thinking-0905,,94.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+51,MMLU-Redux,2,Claude opus 4,,94.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+51,MMLU-Redux,3,Qwen3-235B-A22B-Thinking-2507,,93.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+51,MMLU-Redux,4,Qwen3 VL 235B A22B Thinking,,93.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+51,MMLU-Redux,5,Claude sonnet 4,,93.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+52,Arena-Hard (Arena-Hard-Auto-v0.1),1,o3-2025-04-16,,85.9,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+52,Arena-Hard (Arena-Hard-Auto-v0.1),2,o4-mini-2025-04-16-high,,79.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+52,Arena-Hard (Arena-Hard-Auto-v0.1),3,gemini-2.5,,79.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+52,Arena-Hard (Arena-Hard-Auto-v0.1),4,o4-mini-2025-04-16,,74.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+52,Arena-Hard (Arena-Hard-Auto-v0.1),5,gemini-2.5-flash,,68.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+53,Humanity’s Last Exam,1,Gemini 3 pro preview,,37.72,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+53,Humanity’s Last Exam,2,gpt-5-pro-2025-10-06,,33.32,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+53,Humanity’s Last Exam,3,gpt-5.2-2025-12-11,,28.50,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+53,Humanity’s Last Exam,4,gpt-5-2025-08-07,,26.32,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+53,Humanity’s Last Exam,5,claude-opus-4-5-20251101-thinking,,26.32,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+54,IFEval,1,o3-mini,,93.9,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+54,IFEval,2,Claude 3.7 Sonnet,,93.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+54,IFEval,3,Nova Pro,,92.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+54,IFEval,4,Llama 3.3 70B Instruct,,92.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+54,IFEval,5,Gemma 3 27B,,90.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+55,Terminal Bench,1,Apex2,,64.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+55,Terminal Bench,2,Abacus AI Desktop,,62.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+55,Terminal Bench,3,Ante,,60.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+55,Terminal Bench,4,Droid (claude-opus-4-1),,58.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+55,Terminal Bench,5,Droid (claude-sonnet-4-5),,57.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+56,Terminal Bench 2.0,1,Droid (Claude Opus 4.5),,63.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+56,Terminal Bench 2.0,2,Warp,,61.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+56,Terminal Bench 2.0,3,Codex CLI,,60.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+56,Terminal Bench 2.0,4,Letta Code (Claude Opus 4.5),,59.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+56,Terminal Bench 2.0,5,Warp,,59.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+57,τ2-Bench,1,Gemini-3.0-Pro,,85.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+57,τ2-Bench,2,Claude-Sonnet-4.5,,84.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+57,τ2-Bench,3,Qwen3-Max-Thinking-Preview,,80.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+57,τ2-Bench,4,DeepSeek-V3.2,,80.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+57,τ2-Bench,5,gpt 5,,80.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+58,FrontierMath,1,GPT-5.2 (Pro),,29.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+58,FrontierMath,2,Gemini 3 Pro Preview,,18.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+58,FrontierMath,3,GPT-5.2 (xhigh),,16.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+58,FrontierMath,4,GPT-5.2 (high),,14.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+58,FrontierMath,5,GPT-5.2 (medium),,14.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+59,USMLE / MedQA,1,o1,,96.52,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+59,USMLE / MedQA,2,GPT 5.1,,96.38,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+59,USMLE / MedQA,3,GPT 5,,96.32,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+59,USMLE / MedQA,4,GPT 5 Mini,,96.06,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+59,USMLE / MedQA,5,o3,,96.06,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+60,FACTS Grounding,1,Gemini 1.5 Flash,,85.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+60,FACTS Grounding,2,Gemini 2.0 Flash Experimental,,85.6,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+60,FACTS Grounding,3,Gemini 1.5 Pro,,82.7,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+60,FACTS Grounding,4,Claude 3.5 Sonnet,,82.2,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
+60,FACTS Grounding,5,GPT-4o,,79.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
