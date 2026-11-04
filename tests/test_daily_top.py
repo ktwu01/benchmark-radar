@@ -508,22 +508,44 @@ def test_social_checklist_embeds_the_days_images():
     assert f"[![Top benchmarks on 2026-10-23]({base}/top3.png)]({base}/top3.png)" in section
     # Every card is shown inline, so a card cannot be forgotten.
     for index in (1, 2):
-        assert f"]({base}/card-0{index}.png)\n\n[![" in section
+        assert f"]({base}/card-0{index}.png)\n\n```text\n" in section
         assert f"]({base}/card-0{index}.png)]({base}/card-0{index}.png)" in section
 
 
-def test_checklist_title_cut_never_splits_an_escape():
+def test_each_card_carries_its_full_text_above_the_image():
+    # The drawn card cuts the title, authors and summary; the poster copies them here.
     block = _snapshot_with_cards(1)["share"]
-    block["cards"][0]["title"] = "a" * 59 + "|tail"
     section = render_social_section("insight", "repo", [], [{"name": "X"}], share=block)
-    assert "[1. " not in section and "\\]" not in section.split("1. ")[1].split("\n")[0]
+    title = "Bench 0: " + " ".join(["a long benchmark title"] * 4)
+    expected = "\n".join(
+        [
+            "```text",
+            title,
+            "Vivien Jiaqian Zhu 朱佳谦, B, C, D",
+            "Carnegie Mellon University",
+            "Tests agents.",
+            "arXiv · 2026-10-23",
+            "u0",
+            "```",
+        ]
+    )
+    assert f"1. [{title}](" in section
+    assert expected in section
+    assert section.index(expected) < section.index("[![Bench 0")
 
 
-def test_checklist_title_cut_on_a_backslash_keeps_its_brackets_closed():
+def test_card_text_fence_outlasts_backticks_in_the_text():
     block = _snapshot_with_cards(1)["share"]
-    block["cards"][0]["title"] = "a" * 59 + "\\tail"
+    block["cards"][0]["blurb"] = "Run ```make``` first."
     section = render_social_section("insight", "repo", [], [{"name": "X"}], share=block)
-    assert "\\](" not in section
+    assert "````text\n" in section and "\n````\n" in section
+
+
+def test_checklist_title_with_brackets_keeps_the_link_closed():
+    block = _snapshot_with_cards(1)["share"]
+    block["cards"][0]["title"] = "a]b[c\\d|e"
+    section = render_social_section("insight", "repo", [], [{"name": "X"}], share=block)
+    assert "1. [a\\]b\\[c\\\\d\\|e](" in section
 
 
 def test_spent_lookup_budget_fails_fast_without_calling_the_api(monkeypatch):
