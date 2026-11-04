@@ -343,21 +343,6 @@ benchmarks:
     caveat: >-
       Depends on a simulated user and policy; the simulator model is part of
       the measurement.
-    audits:
-      - auditor: June Kim
-        audit_date: 2026-07-06
-        audit_url: https://june.kim/reprice-contamination
-        finding: >-
-          Not an audit of tau-bench: this record is June Kim's methods paper
-          on generative-tau-bench, his own generative extension of tau-bench.
-          He reports that on the extension's regenerated instances a memorized
-          answer passes 0% while a leaked, state-general query passes 100%,
-          so regeneration re-prices contamination per adversary class rather
-          than defeating it; his generator audit covered 8,025 generated
-          instances with an invalid rate of zero. The 0% and 100% figures
-          describe the extension's instances, not tau-bench itself.
-        receipts:
-          - https://github.com/kimjune01/generative-tau-bench
 
   - id: browsecomp
     name: BrowseComp
