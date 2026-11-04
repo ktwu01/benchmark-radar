@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 import shutil
 import subprocess
@@ -59,7 +60,8 @@ def test_every_radar_card_has_a_share_button():
     source = (ROOT / "site" / "assets" / "app.js").read_text(encoding="utf-8")
     start = source.index("function evidenceCard(")
     card = source[start : source.index("function observationCard(")]
-    assert 'radarShareButton(item, ownDay, fullTitle, shareCard?.image || "")' in card
+    assert "radarShareButton(item, ownDay, fullTitle, shareCard.image)" in card
+    assert "radarShareButton(item, ownDay, fullTitle, catalog.image, catalog.page)" in card
     assert "shareCard ?" not in card
     # Attention items take their own branch in observationCard; it shares too.
     start = source.index("function observationCard(")
@@ -94,3 +96,29 @@ def test_a_past_window_item_uses_its_own_day():
     assert result.stdout.strip() == '["2026-10-25","2026-11-03","2026-11-03","2026-11-03"]'
     button = source[source.index("function radarShareButton(") :]
     assert 'day: item.snapshot_date || day?.date || ""' in button[:1200]
+
+
+def test_a_catalog_match_shares_the_catalog_card_and_page():
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node is not installed")
+    source = (ROOT / "site" / "assets" / "app.js").read_text(encoding="utf-8")
+    start = source.index("const CARD_SLUG")
+    helper = source[start : source.index("function evidenceCard(")]
+    program = (
+        "const window = {location: {origin: 'https://benchmark-radar.org'}};"
+        + helper
+        + "console.log(JSON.stringify([catalogCardFor({catalog_slug: 'gpqa_diamond'}),"
+        + "catalogCardFor({catalog_slug: '../x'}), catalogCardFor({})]));"
+    )
+    result = subprocess.run(
+        [node, "-e", program], capture_output=True, text=True, check=True, timeout=60
+    )
+    assert json.loads(result.stdout) == [
+        {
+            "image": "/cards/gpqa_diamond.png",
+            "page": "https://benchmark-radar.org/benchmarks/gpqa_diamond/",
+        },
+        {"image": "", "page": ""},
+        {"image": "", "page": ""},
+    ]
