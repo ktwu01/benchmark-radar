@@ -11300,7 +11300,7 @@ function evidenceCard(item, day) {
       }),
       artifactLinks(item),
       shareCard
-        ? radarShareButton(item, ownDay, fullTitle, shareCard.image)
+        ? radarShareButton(item, ownDay, fullTitle, shareCard.image, catalog.page)
         : radarShareButton(item, ownDay, fullTitle, catalog.image, catalog.page),
     ]),
     scoreBlock(item),

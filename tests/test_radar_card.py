@@ -60,7 +60,8 @@ def test_every_radar_card_has_a_share_button():
     source = (ROOT / "site" / "assets" / "app.js").read_text(encoding="utf-8")
     start = source.index("function evidenceCard(")
     card = source[start : source.index("function observationCard(")]
-    assert "radarShareButton(item, ownDay, fullTitle, shareCard.image)" in card
+    # A matched item links to its benchmark page whichever card it shares.
+    assert "radarShareButton(item, ownDay, fullTitle, shareCard.image, catalog.page)" in card
     assert "radarShareButton(item, ownDay, fullTitle, catalog.image, catalog.page)" in card
     assert "shareCard ?" not in card
     # Attention items take their own branch in observationCard; it shares too.
