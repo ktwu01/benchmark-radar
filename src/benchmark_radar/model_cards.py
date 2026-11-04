@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import re
 from collections import Counter
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
@@ -65,7 +65,31 @@ def _benchmark_summary(benchmark: dict[str, Any]) -> dict[str, Any]:
         "url": str(benchmark.get("url") or "") or None,
         "released": str(benchmark["released"]) if benchmark.get("released") else None,
         "caveat": (str(benchmark["caveat"]).strip() if benchmark.get("caveat") else None),
+        "audits": _benchmark_audits(benchmark) or None,
     }
+
+
+def _benchmark_audits(benchmark: dict[str, Any]) -> list[dict[str, Any]]:
+    """The benchmark's independent audit records, in publishable form.
+
+    The registry writes `audit_date` unquoted, which PyYAML reads as a date
+    object, and every surface these projections feed is JSON. Dates are
+    therefore stringified here, exactly as `released` and `published` are at
+    their projections. Nothing else is rewritten: auditor, finding, audit URL
+    and receipts travel as recorded, so a reader can check the audit against
+    its source rather than trusting a summary of it.
+    """
+    audits = []
+    for audit in benchmark.get("audits") or []:
+        published = {}
+        for field, value in audit.items():
+            if isinstance(value, datetime):
+                value = value.date().isoformat()
+            elif isinstance(value, date):
+                value = value.isoformat()
+            published[str(field)] = value
+        audits.append(published)
+    return audits
 
 
 class _descending:
@@ -376,6 +400,10 @@ def adoption_rank(registry: dict[str, Any]) -> dict[str, Any]:
                 # high and does not say "saturated and contaminated" invites
                 # exactly the reading issue #83 warns against.
                 "caveat": (str(benchmark["caveat"]).strip() if benchmark.get("caveat") else None),
+                # Independent audits travel with the row for the same reason:
+                # a benchmark an auditor has already questioned should not be
+                # publishable here with the question left behind in the YAML.
+                "audits": _benchmark_audits(benchmark),
                 "card_count": count,
                 "organization_count": len(organizations.get(benchmark_id, set())),
                 "organizations": sorted(organizations.get(benchmark_id, set())),

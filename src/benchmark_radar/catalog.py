@@ -741,6 +741,11 @@ def build_benchmark_index(
                 "key": record["key"],
                 "name": record["name"],
                 "aliases": list(record.get("aliases") or []),
+                # Independent audits, where the source recorded any: the
+                # compact form of the shard's evidence, so search results can
+                # show that a benchmark's numbers have been questioned
+                # without fetching its shard.
+                "audits": list(record.get("audits") or []),
                 # Search text stays source-derived. The normalizers carry
                 # descriptions by language; no generated prose or inferred
                 # category is introduced in this compact index.

@@ -84,6 +84,11 @@ def normalize_reports(registry: dict[str, Any], scores: dict[str, Any]) -> dict[
                 "source_benchmark_id": benchmark_id,
                 "name": entry["name"],
                 "aliases": entry["aliases"],
+                # The registry's audit records are catalog evidence like the
+                # documents below: dropping them here would leave them in the
+                # YAML and out of every shard, index and page built from this
+                # record.
+                "audits": entry["audits"],
                 "description": {"en": entry["caveat"]} if entry["caveat"] else {},
                 "publisher": None,
                 "artifacts": [{"kind": artifact_kind, "url": url}] if url else [],
