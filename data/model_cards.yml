@@ -126,6 +126,16 @@ source_documents:
 # Canonical benchmark records. `aliases` exist so a future extractor can map
 # vendor spellings ("SWE-bench-Verified", "SWE Bench Verified") onto one id
 # without changing the ids the leaderboard is built from.
+  - id: slopcodebench_leaderboard_2026_04_24
+    name: SlopCodeBench leaderboard (v1.0, best version by % checkpoints view)
+    publisher: SprocketLab
+    document_type: benchmark_leaderboard
+    url: https://www.scbench.ai/leaderboard
+    benchmarks: [slopcodebench]
+    # The leaderboard page's own "last updated" date, not a release date.
+    published: 2026-04-24
+    retrieved_at: 2026-11-04
+
 benchmarks:
   - id: gobench
     name: GoBench
@@ -175,24 +185,6 @@ benchmarks:
     caveat: >-
       Scaffold, tool permissions and time limit are part of the result; vendors
       run their own harnesses.
-    audits:
-      - auditor: June Kim
-        audit_date: 2026-05-24
-        audit_url: https://june.kim/swebench-verified
-        finding: >-
-          June Kim reports his own agent pipeline's run on this benchmark, not
-          an audit of it; he calls the entry "a leaderboard configuration rather
-          than a clean science claim." His run resolved 426 of 500 instances
-          (85.2%), and 426 of the 438 instances he could actually run (97.3%).
-          The 62-instance gap is 44 sphinx-doc instances (tox-based, cannot run
-          airgapped, so they score zero in his run rather than leaving the
-          denominator) plus 18 documented bad instances (broken Docker
-          environments, gold patches that fail to grade, or coverage too weak
-          to trust) that he excluded: 426 resolved + 12 attempted-but-unresolved
-          + 44 unrun + 18 excluded = 500.
-        receipts:
-          - https://github.com/kimjune01/swebench-verified
-          - https://doi.org/10.5281/zenodo.20383661
 
   - id: swe_bench_pro
     name: SWE-bench Pro

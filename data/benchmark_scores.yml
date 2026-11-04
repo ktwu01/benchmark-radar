@@ -550,6 +550,10 @@ benchmarks:
     direction: lower_is_better
     unit: ratio
 
+  - benchmark_id: slopcodebench
+    metric: isolated_solve
+    direction: higher_is_better
+    unit: percent
 results:
   # Brain-to-Text '24's official challenge summary names the top three final
   # submissions and the PyTorch baseline. The challenge used 1,200 held-out
@@ -6692,5 +6696,203 @@ results:
     source_id: gobench_llm_results_2026_10_19
     reported_at: '2026-10-19'
     value: 2341
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  # SlopCodeBench's official leaderboard publishes model-harness systems, not
+  # model-only measurements. The rows below are the leaderboard's displayed
+  # best-version-by-%-checkpoints rows (19 of its 24 runs), read from the
+  # leaderboard page, whose footer dates it 2026-04-24. The thinking level
+  # printed beside a model name is carried in the protocol. The leaderboard's
+  # erosion and verbosity columns are not recorded: a benchmark holds exactly
+  # one metric here, and isolated solve is the metric it ranks by.
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Codex; thinking: high"
+    model: GPT 5.5
+    organization: OpenAI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 28.06
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Codex; thinking: high"
+    model: GPT 5.3-Codex
+    organization: OpenAI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 26.02
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Codex; thinking: high"
+    model: GPT 5.4
+    organization: OpenAI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 23.47
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Codex; thinking: high"
+    model: GPT 5.2-Codex
+    organization: OpenAI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 21.94
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Claude Code; thinking: high"
+    model: Opus 4.6
+    organization: Anthropic
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 20.92
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Claude Code; thinking: high"
+    model: Opus 4.7
+    organization: Anthropic
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 20.92
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Kimi CLI; thinking: high"
+    model: Kimi K2.6
+    organization: Moonshot AI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 18.88
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Claude Code; thinking: high"
+    model: Opus 4.5
+    organization: Anthropic
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 17.35
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Claude Code; thinking: high"
+    model: Sonnet 4.6
+    organization: Anthropic
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 16.84
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Cursor CLI"
+    model: Composer 2
+    organization: Cursor
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 16.33
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Claude Code; thinking: high"
+    model: GLM 5.1
+    organization: Zhipu AI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 13.78
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Codex; thinking: high"
+    model: GPT 5.4-Mini
+    organization: OpenAI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 13.78
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Kimi CLI; thinking: high"
+    model: Kimi K2.5
+    organization: Moonshot AI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 9.69
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: OpenCode"
+    model: Kimi K2.5
+    organization: Moonshot AI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 8.67
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: OpenCode; thinking: high"
+    model: GLM 5.1
+    organization: Zhipu AI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 8.16
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Codex; thinking: high"
+    model: GPT 5.3-Codex-Spark
+    organization: OpenAI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 8.16
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Claude Code; thinking: high"
+    model: Kimi K2.5
+    organization: Moonshot AI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 7.14
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Claude Code; thinking: high"
+    model: MiniMax M2.7
+    organization: MiniMax
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 4.08
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: OpenCode"
+    model: MiniMax M2.7
+    organization: MiniMax
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 3.57
     read_from: html_text
     measurement_kind: benchmark_publisher_run
