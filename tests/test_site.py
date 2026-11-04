@@ -3649,7 +3649,7 @@ def test_share_control_is_only_a_link_with_a_named_label():
     assert block.count("aria-label") == 1
     assert "clipboard" not in block
     assert 'id="today-share"' in Path("site/index.html").read_text(encoding="utf-8")
-    assert "shareCardFor(day, item.url)" in source
+    assert "shareCardFor(ownDay, item.url)" in source
 
 
 def test_card_source_is_a_chip_with_the_organization_mark():

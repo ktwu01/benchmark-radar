@@ -1180,6 +1180,8 @@ const I18N = {
     "Share Benchmark Radar": "分享 Benchmark Radar",
     "Share card": "分享卡片",
     "Share {name} as a card": "将 {name} 分享为卡片",
+    "This card could not be loaded. You can still share its link.": "这张卡片加载失败，你仍然可以分享它的链接。",
+    "This card could not be drawn here. You can still share its link.": "这里无法生成卡片，你仍然可以分享它的链接。",
     "Share {name}": "分享 {name}",
     "{name} on Benchmark Radar": "Benchmark Radar 上的 {name}",
     "Share card for {name}": "{name} 的分享卡片",
@@ -11166,8 +11168,46 @@ function sourceChip(item, href) {
     : element("span", { className: "radar-source", attrs }, children);
 }
 
+// Every Today's radar item can be shared as a card (issue #1019). An item the
+// daily briefing picked shares its published card; any other item gets one
+// drawn from the facts it holds. Both modules load on the first press.
+// All dates and Past 30/60/90 days render with the newest day, while each item
+// keeps the day it was found in snapshot_date. A card names, and looks up its
+// published image in, the item's own day.
+function itemDay(item, day) {
+  const date = item.snapshot_date;
+  if (!date || date === day?.date) return day;
+  // observationDays() is what Today rendered from: a window file on a fresh
+  // visit, the full archive once loaded. Both carry each day's share block.
+  return observationDays().find((entry) => entry.date === date) || day;
+}
+
+function radarShareButton(item, day, title, image) {
+  const button = element("button", {
+    className: "share-link radar-share",
+    text: t("Share card"),
+    attrs: { type: "button", "aria-label": t("Share {name} as a card", { name: title }) },
+  });
+  button.addEventListener("click", async (event) => {
+    // An attention card is a <details>; pressing Share must not also toggle it.
+    event.preventDefault();
+    event.stopPropagation();
+    const { openRadarShare } = await import("./share-card.js");
+    openRadarShare({
+      item,
+      day: item.snapshot_date || day?.date || "",
+      title,
+      image,
+      pageUrl: safeHttpUrl(item.url) || window.location.href,
+      t,
+    });
+  });
+  return element("div", { className: "share-control" }, [button]);
+}
+
 function evidenceCard(item, day) {
-  const shareCard = shareCardFor(day, item.url);
+  const ownDay = itemDay(item, day);
+  const shareCard = shareCardFor(ownDay, item.url);
   const fullTitle = displayTitle(item);
   const { name, subtitle } = splitBenchmarkTitle(fullTitle);
   const categories = (item.categories || []).slice(0, 3).map(titleCase);
@@ -11202,7 +11242,7 @@ function evidenceCard(item, day) {
         text: item.summary || t("No description published at the source."),
       }),
       artifactLinks(item),
-      shareCard ? shareControl(shareCard.image, fullTitle) : null,
+      radarShareButton(item, ownDay, fullTitle, shareCard?.image || ""),
     ]),
     scoreBlock(item),
   ]);
@@ -11256,6 +11296,7 @@ function observationCard(record, index, day) {
           ? `${summary} · ${metricLabel(item.metrics?.points, "point")}`
           : summary,
       }),
+      isAttention ? radarShareButton(item, itemDay(item, day), displayTitle(item), "") : null,
     ]),
     isAttention ? attentionActivity(item) : scoreBlock(item),
   ]);

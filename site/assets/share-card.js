@@ -5,7 +5,9 @@
 // deploys with the page that names it. src/benchmark_radar/cards.py says why
 // it is served from the site's own host.
 // This module only fetches the card a reader asked for. A benchmark whose card
-// is missing still shares its link.
+// is missing still shares its link. A Today's radar item has no hosted card
+// unless the daily briefing picked it, so its card is drawn on demand by
+// radar-card.js (issue #1019).
 //
 // The dashboard imports this on demand when a reader presses Share, and the
 // static /benchmarks/<slug>/ pages load it to wake their hidden Share button,
@@ -73,16 +75,73 @@ function flash(button, label, done) {
 export function openBenchmarkShare({ slug, name, t = identity }) {
   const imageUrl = benchmarkCardUrl(slug);
   if (!imageUrl) return;
-  const pageUrl = benchmarkPageUrl(slug);
+  openShareDialog({
+    name,
+    pageUrl: benchmarkPageUrl(slug),
+    imageSrc: imageUrl,
+    getBlob: cardBlob(imageUrl),
+    fileName: `benchmark-radar-${slug}.png`,
+    missing: t("This benchmark's card is not ready yet. You can still share its link."),
+    t,
+  });
+}
+
+function fileSlug(text) {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60) || "card";
+}
+
+// A Today's radar item (issue #1019). An item the daily pipeline published a
+// card for shares that card; any other item gets one drawn in the browser from
+// the facts it holds. The link is the item's own source, because a radar item
+// has no page here.
+export function openRadarShare({ item, day = "", title, image = "", pageUrl, t = identity }) {
+  const name = title || item.title || "";
+  const fileName = `benchmark-radar-${day ? `${day}-` : ""}${fileSlug(name)}.png`;
+  if (image) {
+    openShareDialog({
+      name,
+      pageUrl,
+      imageSrc: image,
+      getBlob: cardBlob(image),
+      fileName,
+      missing: t("This card could not be loaded. You can still share its link."),
+      t,
+    });
+    return;
+  }
+  let pending = null;
+  const getBlob = () => {
+    pending ||= import("./radar-card.js").then(({ cardBlob: draw, cardFacts }) =>
+      draw(cardFacts(item, { day, title: name })),
+    );
+    return pending;
+  };
+  openShareDialog({
+    name,
+    pageUrl,
+    imageSrc: getBlob().then((blob) => URL.createObjectURL(blob)),
+    getBlob,
+    fileName,
+    missing: t("This card could not be drawn here. You can still share its link."),
+    t,
+  });
+}
+
+// The dialog behind every Share button: the card, then the ways to send it.
+// ``imageSrc`` is a URL or a promise of one; ``getBlob`` returns the same image
+// as a blob for Share, Copy image and Download.
+function openShareDialog({ name, pageUrl, imageSrc, getBlob: blob, fileName, missing, t = identity }) {
   const title = t("{name} on Benchmark Radar", { name });
-  const blob = cardBlob(imageUrl);
   const host = ensureDialog();
 
   const status = node("p", { className: "share-card-status", attrs: { role: "status" } });
   const image = node("img", {
     className: "share-card-image",
     attrs: {
-      src: imageUrl,
       alt: t("Share card for {name}", { name }),
       width: "1200",
       height: "630",
@@ -117,7 +176,7 @@ export function openBenchmarkShare({ slug, name, t = identity }) {
     // only once it is here; until then, or without file sharing, the link goes.
     let file = null;
     blob()
-      .then((data) => { file = new File([data], `${slug}.png`, { type: "image/png" }); })
+      .then((data) => { file = new File([data], fileName, { type: "image/png" }); })
       .catch(() => {});
     buttons.push(action(t("Share…"), async () => {
       const payload = { title, text: title, url: pageUrl };
@@ -136,7 +195,7 @@ export function openBenchmarkShare({ slug, name, t = identity }) {
   buttons.push(action(t("Download"), async () => {
     // A download attribute is ignored across origins, so save a local copy.
     const href = URL.createObjectURL(await blob());
-    const link = node("a", { attrs: { href, download: `benchmark-radar-${slug}.png` } });
+    const link = node("a", { attrs: { href, download: fileName } });
     document.body.append(link);
     link.click();
     link.remove();
@@ -155,11 +214,18 @@ export function openBenchmarkShare({ slug, name, t = identity }) {
     attrs: { href: post.href, target: "_blank", rel: "noopener noreferrer" },
   }));
 
-  image.addEventListener("error", () => {
+  const unavailable = () => {
     image.hidden = true;
     for (const button of imageActions) button.hidden = true;
-    status.textContent = t("This benchmark's card is not ready yet. You can still share its link.");
-  });
+    status.textContent = missing;
+  };
+  image.addEventListener("error", unavailable);
+  Promise.resolve(imageSrc).then((src) => {
+    image.src = src;
+    if (src.startsWith("blob:")) {
+      host.addEventListener("close", () => URL.revokeObjectURL(src), { once: true });
+    }
+  }, unavailable);
 
   const close = node("button", {
     className: "dialog-close",
