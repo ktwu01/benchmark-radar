@@ -1055,13 +1055,16 @@ def test_shipped_registry_publishes_every_recorded_audit():
         entry["benchmark_id"]: entry["audits"] for entry in board["entries"] if entry["audits"]
     }
 
-    # The eight benchmarks carrying June Kim's audit records, named so a
+    # The seven benchmarks carrying June Kim's audit records, named so a
     # future audit addition updates this test deliberately rather than
     # slipping into the published ranking unnoticed. Frontier-Bench has no
     # entry of its own: it is Terminal-Bench's next version, so its audit
     # rides on terminal_bench below. tau-bench carries none: the paper once
     # recorded there covers Kim's own generative-tau-bench extension, so it
     # is not an audit of tau-bench and stays out of the audits field.
+    # SWE-bench Verified carries none either: the record once filed there is
+    # Kim's own agent pipeline run, which he calls a leaderboard
+    # configuration rather than an audit, so it stays out too.
     assert sorted(audited) == [
         "deepswe",
         "frontiercode",
@@ -1069,7 +1072,6 @@ def test_shipped_registry_publishes_every_recorded_audit():
         "programbench",
         "slopcodebench",
         "swe_bench_pro",
-        "swe_bench_verified",
         "terminal_bench",
     ]
     # DeepSWE was audited twice: the original run and the v1.1 re-audit.

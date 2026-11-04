@@ -1376,11 +1376,11 @@ def test_registry_audits_reach_the_catalog_record_index_and_shard() -> None:
     )
     records = {record["key"]: record for record in normalized["source_records"]}
 
-    record = records["model-reports:swe_bench_verified"]
+    record = records["model-reports:programbench"]
     assert len(record["audits"]) == 1
     audit = record["audits"][0]
     assert audit["auditor"] == "June Kim"
-    assert audit["audit_date"] == "2026-05-24"
+    assert audit["audit_date"] == "2026-06-27"
     assert audit["receipts"]
 
     audited_keys = {
@@ -1390,7 +1390,6 @@ def test_registry_audits_reach_the_catalog_record_index_and_shard() -> None:
         "programbench",
         "slopcodebench",
         "swe_bench_pro",
-        "swe_bench_verified",
         "terminal_bench",
     }
     for key, item in records.items():
@@ -1406,7 +1405,7 @@ def test_registry_audits_reach_the_catalog_record_index_and_shard() -> None:
             assert item["audits"] == [], key
 
     index = {item["key"]: item for item in build_benchmark_index(normalized["source_records"])}
-    assert index["model-reports:swe_bench_verified"]["audits"] == record["audits"]
+    assert index["model-reports:programbench"]["audits"] == record["audits"]
 
     # A record from a source that records no audits still indexes, with the
     # field empty rather than missing.
