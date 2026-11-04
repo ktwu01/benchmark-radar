@@ -29,7 +29,11 @@ sources below, run the generators in order, and measure the rebuilt outputs.
    live in `data/catalog/benchmark_authors.yml`, also keyed by exact source
    record. They are read from the arXiv metadata of the record's own
    introducing paper by `scripts/fetch_arxiv_authors.py`; rerun the script
-   rather than editing names. Other JSONL and
+   rather than editing names. Benchmark institutions live in
+   `data/catalog/benchmark_institutions.yml`, keyed the same way. They are the
+   institutions OpenAlex links to that paper's authorships, read by
+   `scripts/fetch_openalex_institutions.py`, and never replace `publisher`.
+   Other JSONL and
    validation files under `data/catalog/` are normalization products; do not hand-edit or
    treat them as a separate corpus, even when Git currently tracks a generated
    copy.

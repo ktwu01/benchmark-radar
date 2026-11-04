@@ -49,7 +49,6 @@ from generate_og_image import (  # noqa: E402
     INK,
     LIGHT,
     MUTED,
-    ORANGE,
     PANEL,
     SCALE,
     SITE_INK,
@@ -115,12 +114,14 @@ def _wrap(text: str, face: Font, width: int, max_lines: int) -> list[str]:
         if face.getlength(trial) <= width:
             current = trial
             continue
+        # The last line takes the rest of the text, so _fit ends it in "…";
+        # appending first would cut a one-line description mid-sentence.
+        if len(lines) == max_lines - 1:
+            current = " ".join([current, *words[index:]]).strip()
+            break
         if current:
             lines.append(current)
         current = word
-        if len(lines) == max_lines - 1:
-            current = " ".join([current, *words[index + 1 :]])
-            break
     if current:
         lines.append(current)
     # Every line, not only the last: one Hugging Face "owner/repository" token
@@ -131,6 +132,14 @@ def _wrap(text: str, face: Font, width: int, max_lines: int) -> list[str]:
 def _names(values: list[str], limit: int) -> str:
     shown = ", ".join(values[:limit])
     return _plain(f"{shown} et al." if len(values) > limit else shown)
+
+
+def _institutions(values: list[str], face: Font, width: int) -> str:
+    # Institution names carry commas ("University of California, Berkeley").
+    # Long names are cut, never the "+N" that says the list goes on.
+    shown = _plain("; ".join(values[:2]))
+    more = f" +{len(values) - 2}" if len(values) > 2 else ""
+    return _fit(shown, face, width - round(face.getlength(more))) + more
 
 
 def _day(value: Any) -> str:
@@ -316,6 +325,18 @@ def render_benchmark(record: dict[str, Any], output: Path) -> Path:
             (inner, y + 4 * s), _fit(_names(authors, 3), face, text_width), font=face, fill=SITE_INK
         )
         y += 36 * s
+    # Where it came from, as OpenAlex links the same paper; the first two keep
+    # one line, and "+N" says the list goes on.
+    institutions = [str(name) for name in record.get("institutions") or [] if str(name).strip()]
+    if institutions:
+        face = font(20 * s)
+        draw.text(
+            (inner, y + 4 * s),
+            _institutions(institutions, face, text_width),
+            font=face,
+            fill=SITE_INK,
+        )
+        y += 32 * s
     meta = _benchmark_meta(record)
     if meta:
         face = font(22 * s)
@@ -336,7 +357,6 @@ def render_benchmark(record: dict[str, Any], output: Path) -> Path:
     if scores:
         _chip(draw, chip_x, chips_top, f"{scores:,} scores", s=s, strong=True)
 
-    draw.line([(left, 540 * s), (left + 64 * s, 540 * s)], fill=ORANGE, width=4 * s)
     draw.text((left, 562 * s), WATERMARK, font=mono(26 * s), fill=BLUE)
     image = image.resize(CARD_SIZE, Image.Resampling.LANCZOS)
     output.parent.mkdir(parents=True, exist_ok=True)

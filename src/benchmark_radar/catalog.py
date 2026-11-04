@@ -760,6 +760,9 @@ def build_benchmark_index(
                 # Read from the record's own introducing paper (#933); empty
                 # when no cited document names them.
                 "authors": list(record.get("authors") or []),
+                # OpenAlex's linked institutions for the same paper, in
+                # first-appearance order; separate from the cited publisher.
+                "institutions": list(record.get("institutions") or []),
                 "released": record.get("released"),
                 "released_reference": record.get("released_reference"),
                 # Collection is provenance, never benchmark introduction.

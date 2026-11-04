@@ -15,7 +15,10 @@ Adapters parse these inputs into the same record contract.
 
 Reviewed identity links, source corrections and cited dates live in
 `data/catalog/identity.yml`, `llm_stats_identity_overrides.yml` and
-`benchmark_dates.yml`. Other files in that directory are generated products.
+`benchmark_dates.yml`. Authors and institutions read from each benchmark's
+introducing paper live in `benchmark_authors.yml` and
+`benchmark_institutions.yml`; rerun their fetch scripts rather than editing
+them. Other files in that directory are generated products.
 Never repair a count by editing an index, shard or normalization output.
 
 Run, in order:

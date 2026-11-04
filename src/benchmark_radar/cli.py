@@ -365,6 +365,10 @@ def main() -> None:
         from .catalog_authors import apply_benchmark_authors, load_benchmark_authors
         from .catalog_dates import apply_benchmark_dates, load_benchmark_dates
         from .catalog_evidence import attach_evidence, document_registry
+        from .catalog_institutions import (
+            apply_benchmark_institutions,
+            load_benchmark_institutions,
+        )
         from .catalog_opencompass import normalize_opencompass
         from .catalog_reports import normalize_reports
         from .leaderboard_snapshots import DEFAULT_SNAPSHOTS_PATH
@@ -406,6 +410,7 @@ def main() -> None:
         ] + opencompass["source_records"]
         date_facts = load_benchmark_dates(raw_records)
         author_facts = load_benchmark_authors(raw_records)
+        institution_facts = load_benchmark_institutions(raw_records)
         opencompass["source_records"] = apply_benchmark_dates(
             opencompass["source_records"], date_facts
         )
@@ -444,6 +449,9 @@ def main() -> None:
             )
             enriched["source_records"] = apply_benchmark_authors(
                 enriched["source_records"], author_facts
+            )
+            enriched["source_records"] = apply_benchmark_institutions(
+                enriched["source_records"], institution_facts
             )
             enriched["source_records"] = attach_evidence(
                 enriched["source_records"], enriched["score_series"], enriched["score_observations"]
