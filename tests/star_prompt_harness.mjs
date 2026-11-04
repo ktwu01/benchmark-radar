@@ -162,7 +162,8 @@ for (const [label, failure] of [["Copy link", "clipboard"], ["Copy image", "clip
     written = await Promise.all(Object.values(items[0].data));
   };
   page.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
-  const x = page.body.find((node) => node.textContent === "Post on X ↗");
+  const x = page.body.find((node) => node.textContent === "Copy card and post on X ↗");
+  assert(x, "the label says the card is copied before X's tab covers the dialog");
   assert.equal(x.tag, "a");
   assert.match(x.attrs.href, /^https:\/\/x\.com\/intent\/post\?/);
   assert.equal(x.attrs.target, "_blank");
@@ -175,10 +176,25 @@ for (const [label, failure] of [["Copy link", "clipboard"], ["Copy image", "clip
 {
   const page = await load({ failure: "clipboard" });
   page.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
-  page.body.find((node) => node.textContent === "Post on X ↗").click();
+  page.body.find((node) => node.textContent === "Copy card and post on X ↗").click();
   await new Promise((resolve) => setTimeout(resolve, 0));
   const status = page.body.find((node) => node.className === "share-card-status");
   assert.equal(status.textContent, "Download the card and attach it to your post.");
+}
+{
+  // A card that failed to load keeps its notice and its plain label.
+  const page = await load();
+  page.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
+  const image = page.body.find((node) => node.className === "share-card-image");
+  image.listeners.error();
+  const status = page.body.find((node) => node.className === "share-card-status");
+  const notice = status.textContent;
+  const x = page.body.find((node) => node.textContent === "Post on X ↗");
+  assert(x, "a missing card does not promise to copy it");
+  x.click();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(status.textContent, notice);
+  assert.match(notice, /not ready yet/);
 }
 
 assert.match(readFileSync("site/assets/app.js", "utf8"), /import \{ starPrompt \} from "\.\/star-prompt.js"/);
