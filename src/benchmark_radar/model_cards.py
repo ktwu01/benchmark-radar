@@ -164,6 +164,22 @@ def _require_date(value: Any, *, label: str) -> None:
         raise ModelCardRegistryError(f"{label} is not a real calendar date") from error
 
 
+def _require_http_url(value: Any, *, label: str) -> None:
+    """Reject a link that is not an HTTP(S) URL naming a host.
+
+    A prefix check alone is not enough: `https:///path` and `http:foo` both
+    carry an HTTP scheme but no host, so the published href names no server
+    and renders as a dead link on every surface that publishes it. Parsing
+    the URL and requiring a non-empty netloc closes that gap.
+    """
+    try:
+        parsed = urlsplit(str(value))
+    except ValueError as error:
+        raise ModelCardRegistryError(f"{label} is not a parseable URL: {value}") from error
+    if parsed.scheme not in ("http", "https") or not parsed.netloc:
+        raise ModelCardRegistryError(f"{label} must be HTTP(S) with a host: {value}")
+
+
 def load_registry(path: Path = DEFAULT_REGISTRY_PATH) -> dict[str, Any]:
     """Read and validate the curated model card registry.
 
@@ -218,9 +234,9 @@ def load_registry(path: Path = DEFAULT_REGISTRY_PATH) -> dict[str, Any]:
         # date reaches the same browser formatter as `released`, so a
         # malformed one (a string `_require_date` would reject; a YAML date
         # object is the form in use and is accepted) would break the
-        # dashboard the same way, and a non-HTTP(S) audit or receipt link
-        # would render as a dead or unsafe href on every surface that
-        # publishes the audit.
+        # dashboard the same way, and an audit or receipt link that is not
+        # HTTP(S) with a host would render as a dead or unsafe href on
+        # every surface that publishes the audit.
         audits = benchmark.get("audits")
         if audits is not None:
             if not isinstance(audits, list):
@@ -234,17 +250,14 @@ def load_registry(path: Path = DEFAULT_REGISTRY_PATH) -> dict[str, Any]:
                 if audit.get("audit_date"):
                     _require_date(audit["audit_date"], label=f"{audit_label} audit_date")
                 audit_url = audit.get("audit_url")
-                if audit_url and not str(audit_url).startswith(("https://", "http://")):
-                    raise ModelCardRegistryError(f"{audit_label} audit_url must be HTTP(S)")
+                if audit_url:
+                    _require_http_url(audit_url, label=f"{audit_label} audit_url")
                 receipts = audit.get("receipts")
                 if receipts is not None:
                     if not isinstance(receipts, list):
                         raise ModelCardRegistryError(f"{audit_label} receipts must be a list")
                     for receipt in receipts:
-                        if not str(receipt).startswith(("https://", "http://")):
-                            raise ModelCardRegistryError(
-                                f"{audit_label} receipt must be HTTP(S): {receipt}"
-                            )
+                        _require_http_url(receipt, label=f"{audit_label} receipt")
         by_id[benchmark_id] = benchmark
 
     seen_cards: set[str] = set()
