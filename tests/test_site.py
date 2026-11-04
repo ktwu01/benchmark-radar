@@ -530,7 +530,7 @@ def test_language_toggle_and_contact_labels_are_translated():
     for key in (
         '"Site utilities": "网站工具"',
         '"Switch to Chinese (中文)": "切换到中文"',
-        'Contact: "联系"',
+        'Contact: "联系作者"',
     ):
         assert key in script
 
@@ -3422,6 +3422,21 @@ def test_footer_and_signup_strings_are_translated():
         "In the media",
     ):
         assert f'"{key}":' in table or f"    {key}:" in table, key
+
+
+def test_the_translation_table_has_no_repeated_keys():
+    """A repeated key silently drops its earlier translation (#1091)."""
+    app_js = Path("site/assets/app.js").read_text(encoding="utf-8")
+    table = app_js.split("const I18N = {", 1)[1].split("\nconst state = {", 1)[0]
+    keys = [
+        quoted or bare
+        for quoted, bare in re.findall(
+            r'^ {4}(?:"((?:[^"\\]|\\.)*)"|([A-Za-z_$][\w$]*))\s*:', table, re.M
+        )
+    ]
+    assert len(keys) > 900
+    repeated = sorted({key for key in keys if keys.count(key) > 1})
+    assert repeated == []
 
 
 def test_the_blog_link_is_not_a_client_route():
