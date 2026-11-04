@@ -232,7 +232,8 @@ function openShareDialog({ name, pageUrl, imageSrc, getBlob: blob, fileName, mis
         status.textContent = t("Card copied. Paste it into your post (Ctrl+V or Cmd+V).");
       })
       .catch(() => {
-        status.textContent = t("Download the card and attach it to your post.");
+        // The card may have failed while the copy was pending; keep its notice.
+        if (!image.hidden) status.textContent = t("Download the card and attach it to your post.");
       });
   });
   buttons.push(postOnX);

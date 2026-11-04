@@ -197,5 +197,20 @@ for (const [label, failure] of [["Copy link", "clipboard"], ["Copy image", "clip
   assert.match(notice, /not ready yet/);
 }
 
+{
+  // The card fails while the copy is still pending: its notice stays.
+  const page = await load();
+  let rejectCopy;
+  navigator.clipboard.write = () => new Promise((_, reject) => { rejectCopy = reject; });
+  page.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
+  page.body.find((node) => node.textContent === "Copy card and post on X ↗").click();
+  page.body.find((node) => node.className === "share-card-image").listeners.error();
+  const status = page.body.find((node) => node.className === "share-card-status");
+  const notice = status.textContent;
+  rejectCopy(new Error("card 404"));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(status.textContent, notice);
+}
+
 assert.match(readFileSync("site/assets/app.js", "utf8"), /import \{ starPrompt \} from "\.\/star-prompt.js"/);
 console.log("star prompt and card actions harness ok");
