@@ -141,6 +141,15 @@ def test_huggingface_user_gets_a_name_and_no_affiliation():
     assert resolve_creators(item, fetch=fetch) == {"authors": ["clsr"], "affiliations": []}
 
 
+def test_a_numeric_owner_handle_is_still_looked_up():
+    # 488315/DeafBench (2026-08-10): a handle without letters is a valid account;
+    # only displayed names need a letter (#1070 review).
+    fetch = _fetcher({"https://huggingface.co/api/users/488315/overview": {"fullname": "Deaf Lab"}})
+    item = _item("k", 1, source="Hugging Face", organizations=["488315"], authors=[])
+    assert resolve_creators(item, fetch=fetch) == {"authors": ["Deaf Lab"], "affiliations": []}
+    assert any("/488315/" in url for url in fetch.calls)
+
+
 def test_github_user_company_is_the_affiliation():
     fetch = _fetcher(
         {

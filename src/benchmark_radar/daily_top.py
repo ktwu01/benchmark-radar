@@ -144,16 +144,23 @@ def select_top_items(
     return selected
 
 
-# A name or institution has at least one letter. A paper whose LaTeX macro
-# broke renders its affiliation as "[" in arXiv HTML (arXiv:2611.01700), and a
-# card that prints "[" reads as broken (#1070); such a value stays unknown.
+# A displayed name or institution has at least one letter. A paper whose LaTeX
+# macro broke renders its affiliation as "[" in arXiv HTML (arXiv:2611.01700),
+# and a card that prints "[" reads as broken (#1070); such a value stays
+# unknown. Applied to what a card shows, never to lookup handles: an owner such
+# as "488315" is a valid account to look up.
 _LETTER = re.compile(r"[^\W\d_]")
 
 
+def _shown(creators: dict[str, list[str]]) -> dict[str, list[str]]:
+    return {
+        field: [value for value in values if _LETTER.search(value)]
+        for field, values in creators.items()
+    }
+
+
 def _unique(values: list[str]) -> list[str]:
-    return list(
-        dict.fromkeys(value.strip() for value in values if value and _LETTER.search(value.strip()))
-    )
+    return list(dict.fromkeys(value.strip() for value in values if value and value.strip()))
 
 
 def _unique_people(names: list[str]) -> list[str]:
@@ -163,8 +170,6 @@ def _unique_people(names: list[str]) -> list[str]:
     people: dict[str, str] = {}
     for raw in names:
         name = " ".join(str(raw).split())
-        if not _LETTER.search(name):
-            continue
         parts = name.split(",")
         if len(parts) == 2 and all(part.strip() for part in parts):
             name = f"{parts[1].strip()} {parts[0].strip()}"
@@ -233,6 +238,12 @@ def resolve_creators(
     A failed lookup keeps whatever the item already carried. The image then
     shows fewer facts, never a guessed one.
     """
+    return _shown(_lookup_creators(item, fetch=fetch, fetch_text=fetch_text))
+
+
+def _lookup_creators(
+    item: dict[str, Any], *, fetch: Fetch, fetch_text: Fetch
+) -> dict[str, list[str]]:
     authors = _unique_people([str(name) for name in item.get("authors") or []])
     organizations = _unique(organizations_for_item(item))
     source = str(item.get("source") or "")
