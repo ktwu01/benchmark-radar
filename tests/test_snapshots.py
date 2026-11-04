@@ -17,6 +17,7 @@ from benchmark_radar.models import (
 )
 from benchmark_radar.snapshots import (
     SnapshotError,
+    attach_catalog_cards,
     dashboard_trends,
     dashboard_window,
     load_snapshots,
@@ -2042,3 +2043,33 @@ def test_dashboard_window_keeps_an_attention_row_whose_source_changed():
         "Hacker News",
         "Reddit",
     ]
+
+
+def test_today_items_name_their_catalog_record_only_by_exact_unique_url(tmp_path):
+    """#1061: an item that is exactly one catalog record shares that record's card."""
+    index = tmp_path / "benchmark-index.json"
+    index.write_text(
+        json.dumps(
+            {
+                "benchmarks": [
+                    {"slug": "gpqa_diamond", "source_url": "https://arxiv.org/abs/2311.12022"},
+                    # Two records share one URL: neither is named.
+                    {"slug": "a-one", "source_url": "https://example.org/shared"},
+                    {"slug": "a-two", "source_url": "https://example.org/shared"},
+                    {"slug": "no-url", "source_url": None},
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    items = [
+        {"url": "https://arxiv.org/abs/2311.12022"},
+        {"url": "https://arxiv.org/abs/2311.12022v2"},  # not the same URL
+        {"url": "https://example.org/shared"},
+        {"url": ""},
+    ]
+    dashboard = {"days": [{"date": "2026-11-03", "evidence_items": items}]}
+
+    assert attach_catalog_cards(dashboard, index) == 1
+    assert [item.get("catalog_slug") for item in items] == ["gpqa_diamond", None, None, None]
+    assert attach_catalog_cards(dashboard, tmp_path / "missing.json") == 0

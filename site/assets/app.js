@@ -11226,7 +11226,7 @@ function itemDay(item, day) {
   return observationDays().find((entry) => entry.date === date) || day;
 }
 
-function radarShareButton(item, day, title, image) {
+function radarShareButton(item, day, title, image, pageUrl = "") {
   const button = element("button", {
     className: "share-link radar-share",
     text: t("Share card"),
@@ -11242,16 +11242,29 @@ function radarShareButton(item, day, title, image) {
       day: item.snapshot_date || day?.date || "",
       title,
       image,
-      pageUrl: safeHttpUrl(item.url) || window.location.href,
+      pageUrl: pageUrl || safeHttpUrl(item.url) || window.location.href,
       t,
     });
   });
   return element("div", { className: "share-control" }, [button]);
 }
 
+// A Today item that is exactly one catalog record (the build matched its URL,
+// #1061) shares that record's published card and links to its page, so the
+// item and the benchmark never show two different cards.
+const CARD_SLUG = /^[a-z0-9][a-z0-9_-]*$/;
+
+function catalogCardFor(item) {
+  const slug = CARD_SLUG.test(item.catalog_slug || "") ? item.catalog_slug : "";
+  return slug
+    ? { image: `/cards/${slug}.png`, page: `${window.location.origin}/benchmarks/${slug}/` }
+    : { image: "", page: "" };
+}
+
 function evidenceCard(item, day) {
   const ownDay = itemDay(item, day);
   const shareCard = shareCardFor(ownDay, item.url);
+  const catalog = catalogCardFor(item);
   const fullTitle = displayTitle(item);
   const { name, subtitle } = splitBenchmarkTitle(fullTitle);
   const categories = (item.categories || []).slice(0, 3).map(titleCase);
@@ -11286,7 +11299,9 @@ function evidenceCard(item, day) {
         text: item.summary || t("No description published at the source."),
       }),
       artifactLinks(item),
-      radarShareButton(item, ownDay, fullTitle, shareCard?.image || ""),
+      shareCard
+        ? radarShareButton(item, ownDay, fullTitle, shareCard.image, catalog.page)
+        : radarShareButton(item, ownDay, fullTitle, catalog.image, catalog.page),
     ]),
     scoreBlock(item),
   ]);

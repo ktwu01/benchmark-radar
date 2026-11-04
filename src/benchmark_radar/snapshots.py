@@ -1598,6 +1598,35 @@ def dashboard_window(dashboard: dict[str, Any], window_days: int) -> dict[str, A
     }
 
 
+def attach_catalog_cards(dashboard: dict[str, Any], index_path: Path) -> int:
+    """Name the catalog record a Today item is, by exact URL, so it shares that card.
+
+    A Today's radar item whose URL is exactly one catalog record's source URL
+    is that benchmark, and every catalog record has a published share card
+    (#1061). Sharing the record's card keeps the two cards from disagreeing.
+    Only an exact, unique match counts: a URL two records share names neither,
+    and nothing is matched by name. Returns how many items were tagged.
+    """
+    if not index_path.exists():
+        return 0
+    records = json.loads(index_path.read_text(encoding="utf-8")).get("benchmarks") or []
+    slugs_by_url: dict[str, set[str]] = {}
+    for record in records:
+        url = str(record.get("source_url") or "")
+        slug = str(record.get("slug") or "")
+        if url and slug:
+            slugs_by_url.setdefault(url, set()).add(slug)
+    unique = {url: next(iter(slugs)) for url, slugs in slugs_by_url.items() if len(slugs) == 1}
+    tagged = 0
+    for day in dashboard.get("days") or []:
+        for item in day.get("evidence_items") or []:
+            slug = unique.get(str(item.get("url") or ""))
+            if slug:
+                item["catalog_slug"] = slug
+                tagged += 1
+    return tagged
+
+
 def rebuild_dashboard(
     snapshot_dir: Path,
     output: Path,
@@ -1615,6 +1644,8 @@ def rebuild_dashboard(
         scores_path=scores_path,
         kw_bench_store_path=kw_bench_store_path,
     )
+    # normalize-catalog writes the index beside the shard directory.
+    attach_catalog_cards(value, benchmark_shard_dir.parent / "benchmark-index.json")
     _write_json(output, value)
     # The browser starts here.  Historical views lazily upgrade: Trends reads
     # the chart payload, Today-all-dates and Explore's canvas still use the
