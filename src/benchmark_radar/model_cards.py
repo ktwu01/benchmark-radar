@@ -214,6 +214,37 @@ def load_registry(path: Path = DEFAULT_REGISTRY_PATH) -> dict[str, Any]:
             _require_date(
                 benchmark["released"], label=f"{path}: benchmark {benchmark_id!r} released"
             )
+        # Audits get the same checks as the benchmark's own fields. An audit
+        # date reaches the same browser formatter as `released`, so a
+        # malformed one (a string `_require_date` would reject; a YAML date
+        # object is the form in use and is accepted) would break the
+        # dashboard the same way, and a non-HTTP(S) audit or receipt link
+        # would render as a dead or unsafe href on every surface that
+        # publishes the audit.
+        audits = benchmark.get("audits")
+        if audits is not None:
+            if not isinstance(audits, list):
+                raise ModelCardRegistryError(
+                    f"{path}: benchmark {benchmark_id!r} audits must be a list"
+                )
+            for audit_index, audit in enumerate(audits):
+                audit_label = f"{path}: benchmark {benchmark_id!r} audit {audit_index}"
+                if not isinstance(audit, dict):
+                    raise ModelCardRegistryError(f"{audit_label} must be a mapping")
+                if audit.get("audit_date"):
+                    _require_date(audit["audit_date"], label=f"{audit_label} audit_date")
+                audit_url = audit.get("audit_url")
+                if audit_url and not str(audit_url).startswith(("https://", "http://")):
+                    raise ModelCardRegistryError(f"{audit_label} audit_url must be HTTP(S)")
+                receipts = audit.get("receipts")
+                if receipts is not None:
+                    if not isinstance(receipts, list):
+                        raise ModelCardRegistryError(f"{audit_label} receipts must be a list")
+                    for receipt in receipts:
+                        if not str(receipt).startswith(("https://", "http://")):
+                            raise ModelCardRegistryError(
+                                f"{audit_label} receipt must be HTTP(S): {receipt}"
+                            )
         by_id[benchmark_id] = benchmark
 
     seen_cards: set[str] = set()
