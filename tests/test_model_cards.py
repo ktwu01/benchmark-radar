@@ -973,6 +973,60 @@ def test_audits_travel_with_the_entry_and_the_card_link(tmp_path):
     json.dumps(board)
 
 
+def _registry_with_audit(tmp_path, audit):
+    document = minimal_registry()
+    document["benchmarks"][0]["audits"] = [audit]
+    return write_registry(tmp_path, document)
+
+
+def test_a_malformed_audit_date_is_rejected(tmp_path):
+    # The projection stringifies a YAML date object, but a malformed string
+    # would pass straight through to the browser formatter that throws on
+    # it, so the loader rejects it like any other bad registry date. A real
+    # calendar date in either form loads: see the audits-travel test above,
+    # which uses a date object.
+    path = _registry_with_audit(
+        tmp_path,
+        {
+            "auditor": "June Kim",
+            "audit_date": "2026-13-40",
+            "audit_url": "https://example.com/audit",
+            "finding": "Some Alpha instances cannot run.",
+            "receipts": ["https://example.com/receipt"],
+        },
+    )
+    with pytest.raises(ModelCardRegistryError, match="audit_date"):
+        load_registry(path)
+
+
+def test_a_non_http_audit_link_is_rejected(tmp_path):
+    # Audit and receipt links are published as hrefs; anything that is not
+    # HTTP(S) would render as a dead or unsafe link on every surface.
+    audit = {
+        "auditor": "June Kim",
+        "audit_date": "2026-05-24",
+        "audit_url": "https://example.com/audit",
+        "finding": "Some Alpha instances cannot run.",
+        "receipts": ["https://example.com/receipt"],
+    }
+    path = _registry_with_audit(tmp_path, {**audit, "audit_url": "ftp://example.com/audit"})
+    with pytest.raises(ModelCardRegistryError, match="audit_url must be HTTP"):
+        load_registry(path)
+
+    path = _registry_with_audit(tmp_path, {**audit, "receipts": ["javascript:alert(1)"]})
+    with pytest.raises(ModelCardRegistryError, match="receipt must be HTTP"):
+        load_registry(path)
+
+
+def test_a_non_list_audits_field_is_rejected(tmp_path):
+    # A mapping in place of the list would otherwise be iterated by key at
+    # projection time and publish garbage audit records.
+    document = minimal_registry()
+    document["benchmarks"][0]["audits"] = {"auditor": "June Kim"}
+    with pytest.raises(ModelCardRegistryError, match="audits must be a list"):
+        load_registry(write_registry(tmp_path, document))
+
+
 def test_shipped_registry_publishes_every_recorded_audit():
     import json
 
@@ -981,12 +1035,13 @@ def test_shipped_registry_publishes_every_recorded_audit():
         entry["benchmark_id"]: entry["audits"] for entry in board["entries"] if entry["audits"]
     }
 
-    # The ten benchmarks June Kim's determinacy audits cover, named so a
+    # The nine benchmarks carrying June Kim's audit records, named so a
     # future audit addition updates this test deliberately rather than
-    # slipping into the published ranking unnoticed.
+    # slipping into the published ranking unnoticed. Frontier-Bench has no
+    # entry of its own: it is Terminal-Bench's next version, so its audit
+    # rides on terminal_bench below.
     assert sorted(audited) == [
         "deepswe",
-        "frontier_bench",
         "frontiercode",
         "mirrorcode",
         "programbench",
@@ -998,6 +1053,9 @@ def test_shipped_registry_publishes_every_recorded_audit():
     ]
     # DeepSWE was audited twice: the original run and the v1.1 re-audit.
     assert len(audited["deepswe"]) == 2
+    # Terminal-Bench carries its own 2.1 frame audit plus the Frontier-Bench
+    # frame audit.
+    assert len(audited["terminal_bench"]) == 2
     for audits in audited.values():
         for audit in audits:
             assert audit["auditor"] == "June Kim"

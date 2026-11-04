@@ -1385,7 +1385,6 @@ def test_registry_audits_reach_the_catalog_record_index_and_shard() -> None:
 
     audited_keys = {
         "deepswe",
-        "frontier_bench",
         "frontiercode",
         "mirrorcode",
         "programbench",
@@ -1396,7 +1395,10 @@ def test_registry_audits_reach_the_catalog_record_index_and_shard() -> None:
         "terminal_bench",
     }
     for key, item in records.items():
-        expected = 2 if key == "model-reports:deepswe" else 1
+        # DeepSWE carries two audit passes; Terminal-Bench carries its own
+        # 2.1 audit plus the Frontier-Bench audit, Frontier-Bench being this
+        # series' next version rather than a separate benchmark.
+        expected = 2 if key in {"model-reports:deepswe", "model-reports:terminal_bench"} else 1
         if key.removeprefix("model-reports:") in audited_keys:
             assert len(item["audits"]) == expected, key
         else:
