@@ -1391,7 +1391,6 @@ def test_registry_audits_reach_the_catalog_record_index_and_shard() -> None:
         "slopcodebench",
         "swe_bench_pro",
         "swe_bench_verified",
-        "tau_bench",
         "terminal_bench",
     }
     for key, item in records.items():

@@ -1018,6 +1018,26 @@ def test_a_non_http_audit_link_is_rejected(tmp_path):
         load_registry(path)
 
 
+def test_a_hostless_audit_link_is_rejected(tmp_path):
+    # A scheme alone is not a link: `https:///path` and `http:foo` carry an
+    # HTTP scheme but no host, so the published href would name no server.
+    # The scheme prefix check this replaces let both through.
+    audit = {
+        "auditor": "June Kim",
+        "audit_date": "2026-05-24",
+        "audit_url": "https://example.com/audit",
+        "finding": "Some Alpha instances cannot run.",
+        "receipts": ["https://example.com/receipt"],
+    }
+    path = _registry_with_audit(tmp_path, {**audit, "audit_url": "https:///no-host"})
+    with pytest.raises(ModelCardRegistryError, match="audit_url must be HTTP"):
+        load_registry(path)
+
+    path = _registry_with_audit(tmp_path, {**audit, "receipts": ["http:foo"]})
+    with pytest.raises(ModelCardRegistryError, match="receipt must be HTTP"):
+        load_registry(path)
+
+
 def test_a_non_list_audits_field_is_rejected(tmp_path):
     # A mapping in place of the list would otherwise be iterated by key at
     # projection time and publish garbage audit records.
@@ -1035,11 +1055,13 @@ def test_shipped_registry_publishes_every_recorded_audit():
         entry["benchmark_id"]: entry["audits"] for entry in board["entries"] if entry["audits"]
     }
 
-    # The nine benchmarks carrying June Kim's audit records, named so a
+    # The eight benchmarks carrying June Kim's audit records, named so a
     # future audit addition updates this test deliberately rather than
     # slipping into the published ranking unnoticed. Frontier-Bench has no
     # entry of its own: it is Terminal-Bench's next version, so its audit
-    # rides on terminal_bench below.
+    # rides on terminal_bench below. tau-bench carries none: the paper once
+    # recorded there covers Kim's own generative-tau-bench extension, so it
+    # is not an audit of tau-bench and stays out of the audits field.
     assert sorted(audited) == [
         "deepswe",
         "frontiercode",
@@ -1048,7 +1070,6 @@ def test_shipped_registry_publishes_every_recorded_audit():
         "slopcodebench",
         "swe_bench_pro",
         "swe_bench_verified",
-        "tau_bench",
         "terminal_bench",
     ]
     # DeepSWE was audited twice: the original run and the v1.1 re-audit.
