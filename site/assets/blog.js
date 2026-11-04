@@ -105,6 +105,23 @@ function applyChromeI18n() {
   });
 }
 
+// One h1 per page (#1066): the title of the language on screen holds it.
+function retagTitle(node, tag) {
+  if (!node?.tagName || node.tagName === tag.toUpperCase() || typeof node.replaceWith !== "function") {
+    return;
+  }
+  const copy = document.createElement(tag);
+  for (const { name, value } of Array.from(node.attributes)) copy.setAttribute(name, value);
+  copy.append(...node.childNodes);
+  node.replaceWith(copy);
+}
+
+function syncTitleHeading() {
+  document.querySelectorAll("[data-lang-content]").forEach((block) => {
+    retagTitle(block.querySelector(".blog-title"), block.hidden ? "h2" : "h1");
+  });
+}
+
 function showLanguage(language, { remember = false } = {}) {
   const hasZh = Boolean(document.querySelector('[data-lang-content="zh"]'));
   document.querySelectorAll("[data-lang-content]").forEach((node) => {
@@ -115,6 +132,7 @@ function showLanguage(language, { remember = false } = {}) {
     }
   });
   document.documentElement.lang = language === "zh" ? "zh-CN" : "en";
+  syncTitleHeading();
   applyChromeI18n();
   const toggle = document.getElementById("lang-toggle");
   if (toggle) {

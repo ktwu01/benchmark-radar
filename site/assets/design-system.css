@@ -9,7 +9,8 @@
 .view-heading h2,
 .score-browse-header h1,
 .score-browse-header h2,
-.blog-page .blog-hero h1 {
+.blog-page .blog-hero h1,
+.blog-page .blog-hero h2.blog-title {
   font-family: var(--body);
   font-size: clamp(1.25rem, 2vw, 1.5rem);
   line-height: 1.35;

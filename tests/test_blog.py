@@ -524,7 +524,7 @@ def test_a_brief_states_the_day_once_and_opens_on_its_own_text(tmp_path):
     write_blog_with_chrome([_briefed()], tmp_path)
     page = (tmp_path / "blog" / "2026-08-30" / "index.html").read_text(encoding="utf-8")
     hero = re.search(r'<header class="blog-hero">.*?</header>', page, re.S).group(0)
-    assert hero.count("<h1>") == 1
+    assert hero.count("<h1") == 1
     for echo in ('class="eyebrow"', 'class="blog-lede"', 'class="blog-meta"', "<time"):
         assert echo not in hero, echo
 
@@ -776,3 +776,12 @@ def test_deferred_consent_translates_and_preserves_privacy_link(mode):
     assert "隐私声明" in result["markup"]
     assert result["englishLabels"] == ["Accept", "Decline"]
     assert ">Privacy</a>" in result["englishMarkup"]
+
+
+def test_a_bilingual_brief_serves_one_h1(tmp_path):
+    """#1066: both languages ship in one page; only the shown title is the h1."""
+    write_blog_with_chrome([_briefed()], tmp_path)
+    page = (tmp_path / "blog" / "2026-08-30" / "index.html").read_text(encoding="utf-8")
+    assert page.count("<h1") == 1
+    assert '<h1 class="blog-title">' in page
+    assert '<h2 class="blog-title" lang="zh-Hans">' in page
