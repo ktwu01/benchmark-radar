@@ -797,14 +797,14 @@ def test_a_day_is_titled_after_its_lead_benchmark():
 
     lead = "MemHarmBench: Evaluating Cross-Session Prompt Injection in Memory-Persistent AI Agents"
     assert _lead_titles(day(lead, "b", "c", "d", "e"), "2026-11-03") == (
-        "MemHarmBench and 4 more new AI benchmarks · Nov 3, 2026",
-        "MemHarmBench 等 5 个新 AI benchmark · 2026-11-03",
+        "MemHarmBench and 4 more in AI benchmark news · Nov 3, 2026",
+        "MemHarmBench 等 5 条 AI benchmark 动态 · 2026-11-03",
     )
     assert _lead_titles(day(lead, "b"), "2026-11-03")[0] == (
-        "MemHarmBench and 1 more new AI benchmark · Nov 3, 2026"
+        "MemHarmBench and 1 more in AI benchmark news · Nov 3, 2026"
     )
     assert _lead_titles(day(lead), "2026-11-03")[0] == (
-        "New AI benchmark: MemHarmBench · Nov 3, 2026"
+        "AI benchmark news: MemHarmBench · Nov 3, 2026"
     )
     # A long title ends at its first natural break, never mid-phrase.
     long = (
@@ -812,22 +812,22 @@ def test_a_day_is_titled_after_its_lead_benchmark():
         "Measuring and Synthesizing Depth in Terminal Tasks"
     )
     assert _lead_titles(day(long), "2026-11-03")[0] == (
-        "New AI benchmark: Is Your Long-Horizon Benchmark Really Deep? · Nov 3, 2026"
+        "AI benchmark news: Is Your Long-Horizon Benchmark Really Deep? · Nov 3, 2026"
     )
     # With no break, it is cut at a word near 60 characters.
     plain = "A very long benchmark title without any clause break " * 2
-    cut = _lead_titles(day(plain), "2026-11-03")[0].split("benchmark: ", 1)[1].split(" · ")[0]
+    cut = _lead_titles(day(plain), "2026-11-03")[0].split("news: ", 1)[1].split(" · ")[0]
     assert cut.endswith("…") and len(cut) <= 61
     # A repository title names the repository, as the Today card does.
     assert _lead_titles(day("chartact-benchmark/ChartAct", "x"), "2026-10-25")[0] == (
-        "ChartAct and 1 more new AI benchmark · Oct 25, 2026"
+        "ChartAct and 1 more in AI benchmark news · Oct 25, 2026"
     )
     assert _lead_titles(day("EleutherAI/lm-evaluation-harness v0.4.13"), "2026-09-01")[0] == (
-        "New AI benchmark: lm-evaluation-harness v0.4.13 · Sep 1, 2026"
+        "AI benchmark news: lm-evaluation-harness v0.4.13 · Sep 1, 2026"
     )
     # "T1: ..." is not a name a reader knows; the whole title is kept, then cut.
     assert _lead_titles(day("T1: Terminal Agent Learning"), "2026-11-03")[0] == (
-        "New AI benchmark: T1: Terminal Agent Learning · Nov 3, 2026"
+        "AI benchmark news: T1: Terminal Agent Learning · Nov 3, 2026"
     )
     assert _lead_titles({"share": {}}, "2026-11-03") is None
     assert _lead_titles({}, "2026-11-03") is None
@@ -884,7 +884,7 @@ def test_a_day_before_share_blocks_is_titled_by_the_share_rule():
         ],
     }
     title = _lead_titles(day, "2026-09-01", [day])[0]
-    assert title == "TopBench and 1 more new AI benchmark · Sep 1, 2026"
+    assert title == "TopBench and 1 more in AI benchmark news · Sep 1, 2026"
     # Without the other days, a day with no briefing keeps its dated title.
     assert _lead_titles(day, "2026-09-01") is None
 
@@ -912,5 +912,5 @@ def test_the_headline_benchmark_appears_in_the_post_body():
     assert post.title.startswith("TopBench and ")
     body = _text(post.body_en)
     assert "TopBench: a benchmark release" in body
-    assert body.index("The day&#x27;s new benchmarks") < body.index("What the radar collected")
+    assert body.index("Featured on this day") < body.index("What the radar collected")
     assert 'href="/benchmarks/topbench/"' in post.body_en

@@ -81,7 +81,7 @@ def _lead_titles(
     """Title a day after its lead benchmark, the same pick as its top share card.
 
     A search result titled "Daily AI benchmark brief: 2026-11-03" says nothing a
-    reader can search for; "MemHarmBench and 4 more new AI benchmarks" names
+    reader can search for; "MemHarmBench and 4 more in AI benchmark news" names
     the day's lead benchmark (#593). The share block is the daily briefing's
     benchmarks, or the radar-score top three on a day without a briefing.
     A day with no pick keeps its dated title.
@@ -96,16 +96,17 @@ def _lead_titles(
         when = f"{_MONTHS[month - 1]} {date_of_month}, {year}"
     except (ValueError, IndexError):
         when = day
+    # Picks include tool updates and audits as well as releases, so the title
+    # says "AI benchmark news", never "new AI benchmarks".
     more = len(picks) - 1
-    if more > 1:
-        english = f"{name} and {more} more new AI benchmarks · {when}"
-    elif more == 1:
-        english = f"{name} and 1 more new AI benchmark · {when}"
-    else:
-        english = f"New AI benchmark: {name} · {when}"
-    chinese = (
-        f"{name} 等 {len(picks)} 个新 AI benchmark · {day}"
+    english = (
+        f"{name} and {more} more in AI benchmark news · {when}"
         if more
-        else f"新 AI benchmark：{name} · {day}"
+        else f"AI benchmark news: {name} · {when}"
+    )
+    chinese = (
+        f"{name} 等 {len(picks)} 条 AI benchmark 动态 · {day}"
+        if more
+        else f"AI benchmark 动态：{name} · {day}"
     )
     return english, chinese

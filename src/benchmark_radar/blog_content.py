@@ -45,7 +45,7 @@ KIND_EVIDENCE = "Evidence summary"
 _LABELS = {
     "en": {
         "briefing": "Daily briefing",
-        "picks": "The day's new benchmarks",
+        "picks": "Featured on this day",
         "benchmark_page": "Benchmark page",
         "evidence": "What the radar collected that day",
         "sources": "Evidence sources",
@@ -59,7 +59,7 @@ _LABELS = {
     },
     "zh": {
         "briefing": "每日简报",
-        "picks": "当天的新 benchmark",
+        "picks": "当天精选",
         "benchmark_page": "Benchmark 页面",
         "evidence": "当天雷达收集到的内容",
         "sources": "证据来源",
