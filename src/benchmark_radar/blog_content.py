@@ -30,6 +30,7 @@ import re
 from typing import Any
 from urllib.parse import urlparse
 
+from .blog_lead import _lead_picks, _lead_titles
 from .blog_shell import BlogPost
 from .site_shell import esc
 
@@ -44,6 +45,7 @@ KIND_EVIDENCE = "Evidence summary"
 _LABELS = {
     "en": {
         "briefing": "Daily briefing",
+        "picks": "The day's new benchmarks",
         "benchmark_page": "Benchmark page",
         "evidence": "What the radar collected that day",
         "sources": "Evidence sources",
@@ -57,6 +59,7 @@ _LABELS = {
     },
     "zh": {
         "briefing": "每日简报",
+        "picks": "当天的新 benchmark",
         "benchmark_page": "Benchmark 页面",
         "evidence": "当天雷达收集到的内容",
         "sources": "证据来源",
@@ -422,91 +425,24 @@ def _kind(snapshot: dict[str, Any]) -> str:
     return KIND_BRIEF
 
 
-# "AgentPhishing: A Benchmark of LLM Email Agents" leads with its name, as the
-# Today card does (splitBenchmarkTitle in app.js). A prefix under four
-# characters is not a name a reader knows, so the whole title stays.
-_NAMED_TITLE = re.compile(r"^(.{2,40}?):\s+(.{8,})$")
-_LEAD_NAME_LIMIT = 60
-_MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+def _picks_section(
+    picks: list[tuple[str, str]], language: str, catalog_pages: dict[str, str]
+) -> str:
+    """The benchmarks the title names, each shown in full.
 
-
-# The Today card's SLUG_TITLE: "owner/name", optionally followed by a version.
-_REPO_TITLE = re.compile(r"^[^\s/]+/([^\s/]+)(\s+\S+)?$")
-_NATURAL_BREAK = re.compile(r"(?<=\?)\s|:\s|\s[-–—]\s")
-
-
-def _lead_name(title: str) -> str:
-    """The shortest faithful name: a benchmark's own name, else its first clause."""
-    text = " ".join(str(title or "").split())
-    repo = _REPO_TITLE.match(text)
-    if repo:
-        return repo.group(1) + (repo.group(2) or "")
-    match = _NAMED_TITLE.match(text)
-    if match and len(match.group(1).strip()) >= 4:
-        return match.group(1).strip()
-    if len(text) <= _LEAD_NAME_LIMIT:
-        return text
-    # "Is Your Long-Horizon Benchmark Really Deep? Measuring ..." ends its
-    # question first; cutting mid-phrase reads as broken in a search result.
-    clause = _NATURAL_BREAK.search(text)
-    if clause and 8 <= clause.start() <= _LEAD_NAME_LIMIT:
-        return text[: clause.start()].rstrip(" :")
-    return text[:_LEAD_NAME_LIMIT].rsplit(" ", 1)[0].rstrip(" ,;:-") + "…"
-
-
-def _lead_picks(snapshot: dict[str, Any], days: list[dict[str, Any]] | None) -> list[str]:
-    """The day's picks: its share cards, else the rule the share step would apply.
-
-    Share blocks exist only from 2026-10-25. Older days get the same choice the
-    share step makes (``daily_top.build_share_block``): the daily briefing's
-    benchmarks, else the radar-score top new releases, one per owner.
+    The title says "X and 4 more"; the evidence list shows only the day's first
+    ten records and the briefing cites by ID, so without this list a reader can
+    land on a post that never shows the benchmark it is titled after.
     """
-    cards = (snapshot.get("share") or {}).get("cards") or []
-    if cards:
-        return [str(card.get("title") or "") for card in cards]
-    # Imported here: daily_top imports snapshots, which imports this module.
-    from .daily_top import DEFAULT_LIMIT, briefing_items, select_top_items
-
-    picked = [str(item.get("title") or "") for item, _ in briefing_items(snapshot)]
-    if not picked and days is not None:
-        top = select_top_items(days, str(snapshot.get("date") or ""), limit=DEFAULT_LIMIT)
-        picked = [str(item.get("title") or "") for item in top]
-    return picked
-
-
-def _lead_titles(
-    snapshot: dict[str, Any], day: str, days: list[dict[str, Any]] | None = None
-) -> tuple[str, str] | None:
-    """Title a day after its lead benchmark, the same pick as its top share card.
-
-    A search result titled "Daily AI benchmark brief: 2026-11-03" says nothing a
-    reader can search for; "MemHarmBench and 4 more new AI benchmarks" names
-    the day's lead benchmark (#593). The share block is the daily briefing's
-    benchmarks, or the radar-score top three on a day without a briefing.
-    A day with no pick keeps its dated title.
-    """
-    picks = [title for title in _lead_picks(snapshot, days) if title.strip()]
-    name = _lead_name(picks[0]) if picks else ""
-    if not name:
-        return None
-    try:
-        year, month, date_of_month = (int(part) for part in day.split("-"))
-        when = f"{_MONTHS[month - 1]} {date_of_month}, {year}"
-    except (ValueError, IndexError):
-        when = day
-    more = len(picks) - 1
-    if more > 1:
-        english = f"{name} and {more} more new AI benchmarks · {when}"
-    elif more == 1:
-        english = f"{name} and 1 more new AI benchmark · {when}"
-    else:
-        english = f"New AI benchmark: {name} · {when}"
-    chinese = (
-        f"{name} 等 {len(picks)} 个新 AI benchmark · {day}"
-        if more
-        else f"新 AI benchmark：{name} · {day}"
-    )
-    return english, chinese
+    if not picks:
+        return ""
+    rendered = []
+    for title, raw_url in picks:
+        url = _safe_url(raw_url)
+        heading = f'<a href="{esc(url)}">{esc(title)}</a>' if url else esc(title)
+        page = _benchmark_link(url, catalog_pages, language) if url else ""
+        rendered.append(f'<li class="blog-card">{heading}{page}</li>')
+    return _section(_LABELS[language]["picks"], f'<ol class="blog-index">{"".join(rendered)}</ol>')
 
 
 def build_post(
@@ -522,10 +458,12 @@ def build_post(
     day = str(snapshot["date"])
     kind = _kind(snapshot)
     sources = _citations(snapshot, allow_fallback=kind != KIND_EVIDENCE)
+    picks = _lead_picks(snapshot, days)
 
     def body(language: str) -> str:
         return (
             f'<div class="blog-stats">{_stats(snapshot)}</div>'
+            + _picks_section(picks, language, catalog_pages or {})
             + _briefing_section(snapshot, language)
             + _questions_section(snapshot, language)
             + _sources_section(sources, language, catalog_pages or {})
@@ -533,7 +471,7 @@ def build_post(
         )
 
     translated = has_translation(snapshot)
-    lead = _lead_titles(snapshot, day, days)
+    lead = _lead_titles(snapshot, day, picks=picks)
     if lead:
         title, title_zh = lead
     elif kind == KIND_EVIDENCE:

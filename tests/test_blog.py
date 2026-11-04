@@ -790,7 +790,7 @@ def test_a_bilingual_brief_serves_one_h1(tmp_path):
 def test_a_day_is_titled_after_its_lead_benchmark():
     """#593: the title names the day's lead benchmark, the same pick as its top
     share card; a day without a share block keeps its dated title."""
-    from benchmark_radar.blog_content import _lead_titles
+    from benchmark_radar.blog_lead import _lead_titles
 
     def day(*titles):
         return {"share": {"cards": [{"title": title} for title in titles]}}
@@ -856,7 +856,7 @@ def test_a_cited_benchmark_links_to_its_page_only_by_exact_url():
 def test_a_day_before_share_blocks_is_titled_by_the_share_rule():
     """Share blocks start on 2026-10-25; older days get the pick the share step
     would make, so their titles name a benchmark instead of a date (#593)."""
-    from benchmark_radar.blog_content import _lead_titles
+    from benchmark_radar.blog_lead import _lead_titles
 
     day = {
         "date": "2026-09-01",
@@ -887,3 +887,30 @@ def test_a_day_before_share_blocks_is_titled_by_the_share_rule():
     assert title == "TopBench and 1 more new AI benchmark · Sep 1, 2026"
     # Without the other days, a day with no briefing keeps its dated title.
     assert _lead_titles(day, "2026-09-01") is None
+
+
+def test_the_headline_benchmark_appears_in_the_post_body():
+    """A day without a briefing lists only its first ten evidence records, so a
+    top-scored release past them was named in the title and shown nowhere."""
+    from benchmark_radar.blog_content import build_post
+
+    def item(name, score):
+        return {
+            "title": f"{name}: a benchmark release",
+            "url": f"https://example.org/{name.lower()}",
+            "total_score": score,
+            "event_kind": "released",
+            "recommended": True,
+            "suppression_reasons": [],
+            "source": "arXiv",
+            "source_id": name,
+        }
+
+    filler = [item(f"Filler{n}", 10) for n in range(10)]
+    day = {"date": "2026-07-28", "evidence_items": [*filler, item("TopBench", 90)]}
+    post = build_post(day, {"https://example.org/topbench": "topbench"}, [day])
+    assert post.title.startswith("TopBench and ")
+    body = _text(post.body_en)
+    assert "TopBench: a benchmark release" in body
+    assert body.index("The day&#x27;s new benchmarks") < body.index("What the radar collected")
+    assert 'href="/benchmarks/topbench/"' in post.body_en
