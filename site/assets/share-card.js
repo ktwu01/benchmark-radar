@@ -208,15 +208,40 @@ function openShareDialog({ name, pageUrl, imageSrc, getBlob: blob, fileName, mis
   const post = new URL("https://x.com/intent/post");
   post.searchParams.set("text", title);
   post.searchParams.set("url", pageUrl);
-  buttons.push(node("a", {
+  // X's post link carries text and a URL but never a file (#1068). So the card
+  // goes to the clipboard on the same click, and the reader pastes it into the
+  // post. The write starts before the link opens X's tab: browsers allow it only
+  // while this page has focus and the click still counts as user activation.
+  // The label says so before the click, because X's tab covers this dialog.
+  const canCopyCard = Boolean(navigator.clipboard?.write && window.ClipboardItem);
+  const postOnX = node("a", {
     className: "secondary-link",
-    text: t("Post on X ↗"),
+    text: canCopyCard ? t("Copy card and post on X ↗") : t("Post on X ↗"),
     attrs: { href: post.href, target: "_blank", rel: "noopener noreferrer" },
-  }));
+  });
+  postOnX.addEventListener("click", () => {
+    // A missing card keeps its own notice; there is nothing to copy or download.
+    if (image.hidden) return;
+    if (!canCopyCard) {
+      status.textContent = t("Download the card and attach it to your post.");
+      return;
+    }
+    navigator.clipboard
+      .write([new ClipboardItem({ "image/png": blob() })])
+      .then(() => {
+        status.textContent = t("Card copied. Paste it into your post (Ctrl+V or Cmd+V).");
+      })
+      .catch(() => {
+        // The card may have failed while the copy was pending; keep its notice.
+        if (!image.hidden) status.textContent = t("Download the card and attach it to your post.");
+      });
+  });
+  buttons.push(postOnX);
 
   const unavailable = () => {
     image.hidden = true;
     for (const button of imageActions) button.hidden = true;
+    postOnX.textContent = t("Post on X ↗");
     status.textContent = missing;
   };
   image.addEventListener("error", unavailable);
