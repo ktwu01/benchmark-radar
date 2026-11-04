@@ -785,3 +785,132 @@ def test_a_bilingual_brief_serves_one_h1(tmp_path):
     assert page.count("<h1") == 1
     assert '<h1 class="blog-title">' in page
     assert '<h2 class="blog-title" lang="zh-Hans">' in page
+
+
+def test_a_day_is_titled_after_its_lead_benchmark():
+    """#593: the title names the day's lead benchmark, the same pick as its top
+    share card; a day without a share block keeps its dated title."""
+    from benchmark_radar.blog_lead import _lead_titles
+
+    def day(*titles):
+        return {"share": {"cards": [{"title": title} for title in titles]}}
+
+    lead = "MemHarmBench: Evaluating Cross-Session Prompt Injection in Memory-Persistent AI Agents"
+    assert _lead_titles(day(lead, "b", "c", "d", "e"), "2026-11-03") == (
+        "MemHarmBench and 4 more in AI benchmark news · Nov 3, 2026",
+        "MemHarmBench 等 5 条 AI benchmark 动态 · 2026-11-03",
+    )
+    assert _lead_titles(day(lead, "b"), "2026-11-03")[0] == (
+        "MemHarmBench and 1 more in AI benchmark news · Nov 3, 2026"
+    )
+    assert _lead_titles(day(lead), "2026-11-03")[0] == (
+        "AI benchmark news: MemHarmBench · Nov 3, 2026"
+    )
+    # A long title ends at its first natural break, never mid-phrase.
+    long = (
+        "Is Your Long-Horizon Benchmark Really Deep? "
+        "Measuring and Synthesizing Depth in Terminal Tasks"
+    )
+    assert _lead_titles(day(long), "2026-11-03")[0] == (
+        "AI benchmark news: Is Your Long-Horizon Benchmark Really Deep? · Nov 3, 2026"
+    )
+    # With no break, it is cut at a word near 60 characters.
+    plain = "A very long benchmark title without any clause break " * 2
+    cut = _lead_titles(day(plain), "2026-11-03")[0].split("news: ", 1)[1].split(" · ")[0]
+    assert cut.endswith("…") and len(cut) <= 61
+    # A repository title names the repository, as the Today card does.
+    assert _lead_titles(day("chartact-benchmark/ChartAct", "x"), "2026-10-25")[0] == (
+        "ChartAct and 1 more in AI benchmark news · Oct 25, 2026"
+    )
+    assert _lead_titles(day("EleutherAI/lm-evaluation-harness v0.4.13"), "2026-09-01")[0] == (
+        "AI benchmark news: lm-evaluation-harness v0.4.13 · Sep 1, 2026"
+    )
+    # "T1: ..." is not a name a reader knows; the whole title is kept, then cut.
+    assert _lead_titles(day("T1: Terminal Agent Learning"), "2026-11-03")[0] == (
+        "AI benchmark news: T1: Terminal Agent Learning · Nov 3, 2026"
+    )
+    assert _lead_titles({"share": {}}, "2026-11-03") is None
+    assert _lead_titles({}, "2026-11-03") is None
+
+
+def test_a_cited_benchmark_links_to_its_page_only_by_exact_url():
+    """#593: a source that is exactly one catalog record links its benchmark page."""
+    from benchmark_radar.blog_content import _sources_section
+
+    sources = (
+        ("E001", "GPQA", "https://arxiv.org/abs/2311.12022"),
+        ("E002", "Other", "https://example.org/x"),
+    )
+    html = _sources_section(
+        sources,
+        "en",
+        {"https://arxiv.org/abs/2311.12022": "gpqa_diamond", "https://example.org/x": "../bad"},
+    )
+    assert html.count('class="blog-benchmark-link"') == 1
+    assert 'href="/benchmarks/gpqa_diamond/"' in html
+    assert "../bad" not in html
+    assert "blog-benchmark-link" not in _sources_section(sources, "en")
+    assert "Benchmark 页面" in _sources_section(sources, "zh", {sources[0][2]: "gpqa_diamond"})
+
+
+def test_a_day_before_share_blocks_is_titled_by_the_share_rule():
+    """Share blocks start on 2026-10-25; older days get the pick the share step
+    would make, so their titles name a benchmark instead of a date (#593)."""
+    from benchmark_radar.blog_lead import _lead_titles
+
+    day = {
+        "date": "2026-09-01",
+        "evidence_items": [
+            {
+                "title": "Low: a lower-scored release",
+                "url": "https://example.org/low",
+                "total_score": 40,
+                "event_kind": "released",
+                "recommended": True,
+                "suppression_reasons": [],
+                "source": "arXiv",
+                "source_id": "low",
+            },
+            {
+                "title": "TopBench: the highest-scored release",
+                "url": "https://example.org/top",
+                "total_score": 90,
+                "event_kind": "released",
+                "recommended": True,
+                "suppression_reasons": [],
+                "source": "arXiv",
+                "source_id": "top",
+            },
+        ],
+    }
+    title = _lead_titles(day, "2026-09-01", [day])[0]
+    assert title == "TopBench and 1 more in AI benchmark news · Sep 1, 2026"
+    # Without the other days, a day with no briefing keeps its dated title.
+    assert _lead_titles(day, "2026-09-01") is None
+
+
+def test_the_headline_benchmark_appears_in_the_post_body():
+    """A day without a briefing lists only its first ten evidence records, so a
+    top-scored release past them was named in the title and shown nowhere."""
+    from benchmark_radar.blog_content import build_post
+
+    def item(name, score):
+        return {
+            "title": f"{name}: a benchmark release",
+            "url": f"https://example.org/{name.lower()}",
+            "total_score": score,
+            "event_kind": "released",
+            "recommended": True,
+            "suppression_reasons": [],
+            "source": "arXiv",
+            "source_id": name,
+        }
+
+    filler = [item(f"Filler{n}", 10) for n in range(10)]
+    day = {"date": "2026-07-28", "evidence_items": [*filler, item("TopBench", 90)]}
+    post = build_post(day, {"https://example.org/topbench": "topbench"}, [day])
+    assert post.title.startswith("TopBench and ")
+    body = _text(post.body_en)
+    assert "TopBench: a benchmark release" in body
+    assert body.index("Featured on this day") < body.index("What the radar collected")
+    assert 'href="/benchmarks/topbench/"' in post.body_en
