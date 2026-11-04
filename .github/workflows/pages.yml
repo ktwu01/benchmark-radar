@@ -27,6 +27,8 @@ on:
       - "data/leaderboard_snapshots.yml"
       - "data/catalog/identity.yml"
       - "data/catalog/benchmark_dates.yml"
+      - "data/catalog/benchmark_authors.yml"
+      - "data/catalog/benchmark_institutions.yml"
       - "data/catalog/llm_stats_identity_overrides.yml"
       - "data/catalog/claire_library_categories.json"
       - "data/catalog/claire_library_signals.json"
