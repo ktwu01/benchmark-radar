@@ -87,6 +87,6 @@ def test_every_record_is_one_upstream_row_keyed_by_its_own_id():
     ]
     assert all(row["model_id"] is None and row["organization"] is None for row in rows)
     assert shard["record"]["evidence_summary"]["model_count"] is None
-    assert shard["scores_by_source"]["benchmark_saturation"]["series"]["metric"] == "Accuracy"
+    assert shard["scores_by_source"]["benchmark_saturation"]["series"]["metric"] == "LLM-as-a-Judge"
     metadata = shard["record"]["source_metadata"]["benchmark_saturation"]
     assert metadata["saturation_index_interpreted"]
