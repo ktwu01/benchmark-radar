@@ -133,6 +133,12 @@ def _names(values: list[str], limit: int) -> str:
     return _plain(f"{shown} et al." if len(values) > limit else shown)
 
 
+def _institutions(values: list[str]) -> str:
+    # Institution names carry commas ("University of California, Berkeley").
+    shown = "; ".join(values[:2])
+    return _plain(f"{shown} +{len(values) - 2}" if len(values) > 2 else shown)
+
+
 def _day(value: Any) -> str:
     try:
         return date.fromisoformat(str(value or "")[:10]).strftime("%b %-d, %Y")
@@ -316,6 +322,18 @@ def render_benchmark(record: dict[str, Any], output: Path) -> Path:
             (inner, y + 4 * s), _fit(_names(authors, 3), face, text_width), font=face, fill=SITE_INK
         )
         y += 36 * s
+    # Where it came from, as OpenAlex links the same paper; the first two keep
+    # one line, and "+N" says the list goes on.
+    institutions = [str(name) for name in record.get("institutions") or [] if str(name).strip()]
+    if institutions:
+        face = font(20 * s)
+        draw.text(
+            (inner, y + 4 * s),
+            _fit(_institutions(institutions), face, text_width),
+            font=face,
+            fill=SITE_INK,
+        )
+        y += 32 * s
     meta = _benchmark_meta(record)
     if meta:
         face = font(22 * s)

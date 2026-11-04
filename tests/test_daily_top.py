@@ -443,6 +443,23 @@ def test_catalog_card_names_authors_only_when_the_record_has_them(tmp_path):
     assert empty_bytes == plain_bytes
 
 
+def test_catalog_card_names_the_first_two_institutions(tmp_path):
+    # Issue #933: where a benchmark came from, as OpenAlex links its paper.
+    plain = _index_record("gpqa", description="Graduate-level questions.")
+    three = ["New York University", "Cohere", "Anthropic"]
+    assert share._institutions(three) == "New York University; Cohere +1"
+    assert share._institutions(three[:2]) == "New York University; Cohere"
+    named = {**plain, "institutions": three}
+    empty = {**plain, "institutions": []}
+    paths = [
+        share.render_benchmark(record, tmp_path / f"{index}.png")
+        for index, record in enumerate((plain, named, empty))
+    ]
+    plain_bytes, named_bytes, empty_bytes = (path.read_bytes() for path in paths)
+    assert named_bytes != plain_bytes
+    assert empty_bytes == plain_bytes
+
+
 def test_catalog_render_is_deterministic(tmp_path):
     index = {"benchmarks": [_index_record("gpqa", description="Graduate-level questions.")]}
     first = share.render_catalog(index, tmp_path / "a", workers=1)
