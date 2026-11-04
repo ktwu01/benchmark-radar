@@ -6,7 +6,9 @@
 }
 
 .view-heading h1,
+.view-heading h2,
 .score-browse-header h1,
+.score-browse-header h2,
 .blog-page .blog-hero h1 {
   font-family: var(--body);
   font-size: clamp(1.25rem, 2vw, 1.5rem);

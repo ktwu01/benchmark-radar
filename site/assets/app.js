@@ -2194,6 +2194,48 @@ function syncNavState() {
 // `update` false is for restoring a view that is already in the URL (boot and
 // popstate), where writing history again would either duplicate the entry or
 // fight the entry being restored.
+// The page's one h1 belongs to the open view (issue #945). The build ships each
+// view's own page that way; switching views without a reload has to move it
+// too, or the only h1 is left inside a hidden section. h1 and h2 view headings
+// are styled alike, so the swap changes the outline and not the screen.
+function viewHeading(section) {
+  if (section.id === "today-view") {
+    return section.querySelector(":scope > h1.visually-hidden, :scope > h2.visually-hidden");
+  }
+  return section.querySelector(`#${section.id.replace(/-view$/, "-heading")}`);
+}
+
+function retagHeading(node, tag) {
+  // Only headings change level; a sheet whose title is not rendered yet is skipped.
+  if (!/^H[1-6]$/.test(node?.tagName || "") || node.tagName === tag.toUpperCase()) return;
+  const copy = document.createElement(tag);
+  for (const { name, value } of Array.from(node.attributes)) copy.setAttribute(name, value);
+  copy.append(...node.childNodes);
+  node.replaceWith(copy);
+}
+
+// /cli/, /cite/ and /rubric/ are pages too: while one of their sheets is open,
+// its title is the page's h1 and every view heading steps down.
+const UTILITY_TITLES = { "cli-dialog": "cli-title", "cite-dialog": "cite-title", "rubric-dialog": "rubric-title" };
+
+function syncPageHeading() {
+  const sections = Array.from(document.querySelectorAll(".view"));
+  const openSheet = Object.keys(UTILITY_TITLES).find((id) => byId(id)?.open);
+  for (const [dialog, title] of Object.entries(UTILITY_TITLES)) {
+    if (dialog !== openSheet) retagHeading(byId(title), "h2");
+  }
+  sections.forEach((section) => {
+    if (openSheet || section.hidden) retagHeading(viewHeading(section), "h2");
+  });
+  if (openSheet) {
+    retagHeading(byId(UTILITY_TITLES[openSheet]), "h1");
+    return;
+  }
+  sections.forEach((section) => {
+    if (!section.hidden) retagHeading(viewHeading(section), "h1");
+  });
+}
+
 function setView(view, update = true, mode = "push") {
   if (selectedFrontierPoint || describedFrontierPoint) {
     clearFrontierPointSelection();
@@ -2203,6 +2245,7 @@ function setView(view, update = true, mode = "push") {
   document.querySelectorAll(".view").forEach((section) => {
     section.hidden = section.id !== `${view}-view`;
   });
+  syncPageHeading();
   syncNavState();
   if (update) writeUrl(mode);
 }
@@ -4332,6 +4375,7 @@ function promoteSeededDialog(dialog) {
 function showModalDialog(dialog) {
   promoteSeededDialog(dialog);
   if (!dialog.open) dialog.showModal();
+  syncPageHeading();
 }
 
 let rubricOwnsHistoryEntry = false;
@@ -12068,6 +12112,8 @@ function bindEvents() {
     if (event.key === "Escape") closeFiltersDrawer();
   });
   byId("refresh-button").addEventListener("click", refreshData);
+  // Every close path (button, backdrop, Esc) hands the h1 back to the view.
+  for (const id of Object.keys(UTILITY_TITLES)) byId(id).addEventListener("close", syncPageHeading);
   byId("rubric-close").addEventListener("click", () => byId("rubric-dialog").close());
   byId("rubric-dialog").addEventListener("click", (event) => {
     if (event.target === byId("rubric-dialog")) byId("rubric-dialog").close();
