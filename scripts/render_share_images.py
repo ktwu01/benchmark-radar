@@ -49,7 +49,6 @@ from generate_og_image import (  # noqa: E402
     INK,
     LIGHT,
     MUTED,
-    ORANGE,
     PANEL,
     SCALE,
     SITE_INK,
@@ -354,7 +353,6 @@ def render_benchmark(record: dict[str, Any], output: Path) -> Path:
     if scores:
         _chip(draw, chip_x, chips_top, f"{scores:,} scores", s=s, strong=True)
 
-    draw.line([(left, 540 * s), (left + 64 * s, 540 * s)], fill=ORANGE, width=4 * s)
     draw.text((left, 562 * s), WATERMARK, font=mono(26 * s), fill=BLUE)
     image = image.resize(CARD_SIZE, Image.Resampling.LANCZOS)
     output.parent.mkdir(parents=True, exist_ok=True)
