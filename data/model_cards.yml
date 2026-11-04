@@ -180,9 +180,16 @@ benchmarks:
         audit_date: 2026-05-24
         audit_url: https://june.kim/swebench-verified
         finding: >-
-          44 of 500 instances (sphinx-doc) are unrunnable in the current
-          environment and score zero for every system; runnable pool is 438.
-          Auditor's own run: 426/500 (85.2%), 426/438 (97.3%) of runnable.
+          June Kim reports his own agent pipeline's run on this benchmark, not
+          an audit of it; he calls the entry "a leaderboard configuration rather
+          than a clean science claim." His run resolved 426 of 500 instances
+          (85.2%), and 426 of the 438 instances he could actually run (97.3%).
+          The 62-instance gap is 44 sphinx-doc instances (tox-based, cannot run
+          airgapped, so they score zero in his run rather than leaving the
+          denominator) plus 18 documented bad instances (broken Docker
+          environments, gold patches that fail to grade, or coverage too weak
+          to trust) that he excluded: 426 resolved + 12 attempted-but-unresolved
+          + 44 unrun + 18 excluded = 500.
         receipts:
           - https://github.com/kimjune01/swebench-verified
           - https://doi.org/10.5281/zenodo.20383661
@@ -199,8 +206,9 @@ benchmarks:
         audit_date: 2026-06-21
         audit_url: https://june.kim/a-determinacy-audit-of-swebench-pro
         finding: >-
-          Proven floor of 15.0% of the 728 public tasks underdetermined
-          (109/728); 3 gold patches fail the benchmark's own verifier.
+          June Kim's determinacy audit reports a proven floor of 15.0% of the
+          728 public tasks underdetermined (109/728), and that 3 gold patches
+          fail the benchmark's own verifier.
         receipts:
           - https://doi.org/10.5281/zenodo.20738219
           - https://doi.org/10.5281/zenodo.20738220
@@ -256,13 +264,31 @@ benchmarks:
         audit_date: 2026-07-09
         audit_url: https://june.kim/terminal-bench-frame
         finding: >-
-          Terminal-Bench 2.1 has no frame condition: 40 of 83 gold-passing
-          tasks (48%) still pass after a careless in-workspace deletion, and
-          83 of 83 pass after off-task user assets are wiped; 6 of 89 golds
-          fail their own grader on a clean rerun.
+          June Kim's audit of Terminal-Bench 2.1 reports that it has no frame
+          condition: 40 of 83 gold-passing tasks (48%) still pass after a
+          careless in-workspace deletion, and all 83 pass after off-task user
+          assets planted before the run are wiped. 6 of 89 reference solutions
+          fail their own grader on a clean rerun, which the audit quarantines
+          as unclassified rather than asserting as defects.
         receipts:
           - https://github.com/kimjune01/terminal-bench-audit
           - https://doi.org/10.5281/zenodo.21463236
+      - auditor: June Kim
+        audit_date: 2026-07-25
+        audit_url: https://github.com/kimjune01/frontier-bench-audit
+        finding: >-
+          June Kim's frame-validity audit of Frontier-Bench, the Terminal-Bench
+          series version now billed as Terminal-Bench 3.0, reports that
+          off-task destruction is invisible on every task tested:
+          Frontier-Bench grades only a declared allowlist of artifacts
+          transported out of the agent container before teardown, and every
+          gold-passing task probed still returned reward 1 after an SSH key, a
+          second repository, and a customer data file planted outside the task
+          were destroyed. The audit states no rate, only a floor over the
+          tasks that gold-passed on the auditor's host, and credits that
+          in-workspace deletion is caught on the majority of tasks tested.
+        receipts:
+          - https://github.com/kimjune01/frontier-bench-audit
 
   - id: livecodebench
     name: LiveCodeBench
@@ -322,10 +348,14 @@ benchmarks:
         audit_date: 2026-07-06
         audit_url: https://june.kim/reprice-contamination
         finding: >-
-          On regenerated worlds a memorized answer passes 0% while a leaked
-          state-general query passes 100%; regeneration re-prices
-          contamination per class rather than defeating it. Generator audit:
-          8,025 instances, invalid rate zero.
+          Not an audit of tau-bench: this record is June Kim's methods paper
+          on generative-tau-bench, his own generative extension of tau-bench.
+          He reports that on the extension's regenerated instances a memorized
+          answer passes 0% while a leaked, state-general query passes 100%,
+          so regeneration re-prices contamination per adversary class rather
+          than defeating it; his generator audit covered 8,025 generated
+          instances with an invalid rate of zero. The 0% and 100% figures
+          describe the extension's instances, not tau-bench itself.
         receipts:
           - https://github.com/kimjune01/generative-tau-bench
 
@@ -911,19 +941,31 @@ benchmarks:
         audit_date: 2026-05-27
         audit_url: https://june.kim/auditing-deepswe
         finding: >-
-          4 of 113 reference solutions fail their own verifiers; headline mean
-          divided by 111 while the footer said 113; 122 trials excluded, only
-          73 disclosed.
+          June Kim's audit reports that 4 of DeepSWE's 113 reference solutions
+          fail their own verifiers (langchain-request-coalescing,
+          narwhals-rolling-window-suite, prometheus-transactional-reload-status,
+          skrub-duration-encoding), each confirmed in isolated reruns with the
+          cause unresolved. Reviewing the published leaderboard artifacts, he
+          also reports that gpt-5.5's headline mean is computed over 111 tasks
+          while the leaderboard footer announces 113 (two tasks dropped from
+          that model's denominator under the documented error-exclusion
+          policy), and that the published trial records carry no retrievable
+          model patches, so the verdicts cannot be re-graded independently.
         receipts:
           - https://github.com/kimjune01/deepswe-run
       - auditor: June Kim
         audit_date: 2026-07-07
         audit_url: https://june.kim/auditing-deepswe-v1-1
         finding: >-
-          Re-audit of v1.1 (shipped 2026-06-14): the re-grade lifted exactly
-          the four flagged tasks by +10 to +65 points while the pooled pass
-          rate held nearly flat (0.509 to 0.518); 112 of 113 golds now pass;
-          determinacy floor about 2.7%.
+          June Kim's re-audit of DeepSWE v1.1 (shipped 2026-06-14) reports
+          that the re-grade lifted the four tasks his first audit flagged by
+          +10 to +65 points while the pooled pass rate held nearly flat (0.509
+          to 0.518), and that his independent gold rerun found 112 of 113
+          golds now passing their own verifiers, with
+          prometheus-transactional-reload-status still failing. He also
+          reports 122 trials excluded from the published v1.1 data with only
+          73 disclosed, and an adjudicated determinacy floor of 3 of 111
+          tasks, about 2.7%.
         receipts:
           - https://github.com/kimjune01/deepswe-run
 
@@ -1075,10 +1117,11 @@ benchmarks:
         audit_date: 2026-07-18
         audit_url: https://june.kim/auditing-frontiercode
         finding: >-
-          Marketed as mergeability, but of 59 confidently coded real
-          maintainer closures the patch decided only 3; in at least 52 the
-          deciding cause sat outside the rubric's six patch axes. No scored
-          trial artifact is publicly retrievable.
+          June Kim's audit reports that FrontierCode is marketed as
+          mergeability, but of 59 confidently coded real maintainer closures
+          the patch decided only 3; in at least 52 the deciding cause sat
+          outside the rubric's six patch axes. No scored trial artifact is
+          publicly retrievable.
         receipts:
           - https://github.com/kimjune01/frontiercode-audit
 
@@ -1310,9 +1353,14 @@ benchmarks:
         audit_date: 2026-06-27
         audit_url: https://june.kim/programbench-measures-recall
         finding: >-
-          At least 21 programs pin values only recall of a published algorithm
-          supplies, and at least 29 tests have self-capturing goldens; the
-          zero resolved floor measures recall, not reconstruction.
+          June Kim's audit reports that at least 21 programs pin a value that
+          only recall of a published algorithm supplies, and at least 29
+          programs ship graded tests whose expected value is captured from the
+          reference and then asserted against it (self-capturing goldens).
+          Because the primary metric is conjunctive, one such test puts a
+          whole program beyond reconstruction, and the reported floor of zero
+          resolved tasks is, in the audit's words, consistent with a recall
+          gate.
         receipts:
           - https://github.com/kimjune01/program-bench-audit
           - https://doi.org/10.5281/zenodo.21083756
@@ -1786,70 +1834,54 @@ benchmarks:
     name: MirrorCode
     aliases: ["MirrorCode"]
     domain: coding_agent
-    url: https://epoch.ai/MirrorCode
+    url: https://arxiv.org/abs/2606.30182
+    released: 2026-06-29
     caveat: >-
-      Grades byte-exact reimplementation of whole CLI programs from an
-      execute-only binary plus docs. Independent audit (Kim, 2026-07-17)
-      found the metric rewards scoped reimplementation from a live oracle
-      rather than autonomous whole-program reconstruction; the benchmark's
-      own memorization screen flags 17 of 25 targets.
+      25 target programs graded by exact output match against the reference
+      on end-to-end tests, including held-out tests. Attempts are
+      long-horizon and budget-sensitive: the paper reports $2,600 over 19
+      days for a single attempt on a large task, so two reported scores are
+      comparable only when the inference budgets behind them are similar.
     audits:
       - auditor: June Kim
         audit_date: 2026-07-17
         audit_url: https://github.com/kimjune01/mirrorcode-audit
         finding: >-
-          Claimed construct is autonomous reconstruction of whole programs;
-          the metric scores scoped reimplementation from a working oracle,
-          partly via recall. 17/25 targets screen-positive for
-          memorization; 2/25 recall-gated by construction (brotlid,
-          mailauth).
+          June Kim's audit reports that MirrorCode's claimed construct is
+          autonomous reconstruction of whole programs from behavior, while its
+          metric scores scoped reimplementation from a working oracle, partly
+          via recall: the benchmark's own memorization screen flags 17 of 25
+          targets, and 2 of 25 are recall by construction (brotlid,
+          mailauth). The audit discloses that Kim applied for a role at Epoch
+          AI, which co-produced MirrorCode.
         receipts:
           - https://github.com/kimjune01/mirrorcode-audit
 
-  - id: frontier_bench
-    name: Frontier-Bench
-    aliases: ["Frontier-Bench"]
-    domain: coding_agent
-    url: https://github.com/harbor-framework/frontier-bench
-    caveat: >-
-      Grades an allowlist of artifacts transported out of the agent
-      container before teardown, so nothing off the allowlist is observed.
-      Independent frame audit (Kim, 2026-07-25) found every gold-passing
-      task probed still scored reward 1 after planted off-task assets were
-      destroyed.
-    audits:
-      - auditor: June Kim
-        audit_date: 2026-07-25
-        audit_url: https://github.com/kimjune01/frontier-bench-audit
-        finding: >-
-          Off-task destruction is invisible on every task tested: the
-          verifier sees only declared artifacts, so deleting an SSH key, a
-          second repo, and a customer data file leaves reward at 1
-          (9 of 9 gold-passing tasks probed, per the auditor's checklist).
-        receipts:
-          - https://github.com/kimjune01/frontier-bench-audit
-
   - id: slopcodebench
     name: SlopCodeBench
-    aliases: ["SlopCodeBench", "SCBench"]
+    aliases: ["SlopCodeBench"]
     domain: coding
     url: https://www.scbench.ai
     caveat: >-
-      Claims iteration degrades agent code. Independent audit (Kim,
-      2026-08-09) found the erosion metric measures static code-shape
-      drift, not extension robustness (correlation with passing the next
-      checkpoint −0.018, worse than raw line count at −0.212), with
-      iteration confounded by expanding scope; 28 of 343 sampled core
-      tests assert values no visible spec determines.
+      36 problems run as checkpoint sequences (196 checkpoints in v1.0):
+      the agent extends its own earlier solution as new requirements
+      arrive, so a checkpoint score reflects the accumulated codebase
+      rather than a fresh attempt, and the headline erosion measures
+      (verbosity, dead branches, redundant structure) are not a plain
+      solve rate.
     audits:
       - auditor: June Kim
         audit_date: 2026-08-09
         audit_url: https://june.kim/auditing-slopcodebench
         finding: >-
-          Static code-shape drift sold as extension robustness; iteration
-          confounded with expanding scope. 28/343 sampled core tests assert
-          values no agent-visible spec determines; 4 of 196 answer keys
-          deterministically defective, 1 unstable.
+          June Kim's audit reports that the erosion metric measures static
+          code-shape drift, not yet extension robustness: its correlation
+          with passing the next checkpoint is −0.018, weaker than raw line
+          count at −0.212, and iteration is confounded because every
+          checkpoint adds requirements. In his 12-problem sample, 28 of 343
+          core tests assert exact values no visible spec determines, and of
+          all 196 answer keys run through the benchmark's own harness, 4 are
+          deterministically defective and 1 is unstable.
         receipts:
           - https://github.com/kimjune01/slopcodebench-audit
 
