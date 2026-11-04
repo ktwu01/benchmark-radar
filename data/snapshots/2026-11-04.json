@@ -94868,5 +94868,181 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "Shandong University"
+        ],
+        "authors": [
+          "Yangze Liu (Shandong University)",
+          "Yangze Liu"
+        ],
+        "blurb": "The newly released “Silent Instrument Errors Reorder Agent Leaderboards” audits published artifacts from the HAL and tau2-bench agent leaderboards.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-04T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Silent Instrument Errors Reorder Agent Leaderboards",
+        "url": "https://arxiv.org/abs/2611.04399"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Yang Chen",
+          "Bin Wen",
+          "Danyang Peng",
+          "Hong-Jie You",
+          "Zi-Qiao Shang",
+          "Lan-Zhe Guo"
+        ],
+        "blurb": "DualWorldBench is a new agent-planning benchmark built around shared pickup-and-delivery tasks.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-04T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "DualWorldBench: Can Agents Plan Deliveries across Symbolic and Grounded Worlds?",
+        "url": "https://arxiv.org/abs/2611.04228"
+      },
+      {
+        "affiliations": [
+          "NII LLMC",
+          "University of Amsterdam",
+          "The University of Tokyo"
+        ],
+        "authors": [
+          "Chen Zhang",
+          "Seth Aycock",
+          "Yusuke Miyao"
+        ],
+        "blurb": "The new Typological Feature Induction benchmark adds diagnostic controls for language-reasoning tests.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-04T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Typological Feature Induction as a Benchmark for Inductive Metalinguistic Reasoning",
+        "url": "https://arxiv.org/abs/2611.04421"
+      },
+      {
+        "affiliations": [
+          "Independent Researcher, Mountain View, CA, USA",
+          "Princeton University, Princeton, NJ, USA"
+        ],
+        "authors": [
+          "Bharath Sivaram Narasimhan",
+          "Karthik R. Narasimhan"
+        ],
+        "blurb": "The newly released τ-Rec-Books benchmark holds a book request constant while changing when requirements become available: volunteered initially, disclosed when asked, or left hidden and inferable only from acceptance and rejection feedback.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-04T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "$\\tau$-Rec-Books: A Disclosure-Controlled Benchmark for Requirement Elicitation in Agentic Recommender Systems",
+        "url": "https://arxiv.org/abs/2611.04459"
+      },
+      {
+        "affiliations": [
+          "Amazon",
+          "Georgia Institute of Technology"
+        ],
+        "authors": [
+          "Rongzhe Wei",
+          "Ge Shi",
+          "Min Cheng",
+          "Sarthak Ghosh",
+          "Vaibhav Gorde",
+          "Leman Akoglu",
+          "Pan Li",
+          "Na Zhang"
+        ],
+        "blurb": "SLATE is a new benchmark for selecting and composing Application Programming Interface (API) calls over long e-commerce workflows.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-04T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "SLATE: A Large-Scale Benchmark for Long-Horizon API Selection in E-commerce Tool Use",
+        "url": "https://arxiv.org/abs/2611.03982"
+      },
+      {
+        "affiliations": [
+          "University of Basel"
+        ],
+        "authors": [
+          "Maximilian Hindermann",
+          "Sorin Marti",
+          "Anthea Alberto",
+          "Alexandra Binnenkade",
+          "Arno Bosse",
+          "Sven Burkhardt",
+          "Eric Decker",
+          "Pema Frick",
+          "Lea Kasper",
+          "Ana-Maria Leonte",
+          "Sven Lienhard",
+          "José Luis Losada Palenzuela",
+          "Gabriel Müller",
+          "Ina Serif",
+          "Elena Spadini",
+          "Tabea Wullschleger",
+          "Franziska Zúñiga"
+        ],
+        "blurb": "The new RISE Humanities Data Benchmark deposit publishes joinable tables for 3,805 runs, 166,380 requests, and more than 3.9 million metric observations, including request cost and runtime, for historical-document transcription, interpretation, and structured extraction.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-04T10:40:41+00:00",
+        "source": "DataCite",
+        "title": "RISE Humanities Data Benchmark Dataset: Complete Stored Results",
+        "url": "https://doi.org/10.5281/zenodo.23944033"
+      },
+      {
+        "affiliations": [
+          "Beijing Union University"
+        ],
+        "authors": [
+          "Jinhui Shen",
+          "Yueqin Li",
+          "Fang Yang",
+          "Xiaofeng Li"
+        ],
+        "blurb": "A new reproducibility package for large language model vulnerability detection archives two collection rounds against four Chinese model services, later adding another vendor, a successor endpoint, a third snapshot, and a replication.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-04T06:00:28+00:00",
+        "source": "DataCite",
+        "title": "Data and code for \"Benchmark Reuse and Endpoint Drift in LLM-Based Vulnerability Detection: An Empirical Study of Four Chinese APIs\"",
+        "url": "https://doi.org/10.5281/zenodo.23938545"
+      }
+    ],
+    "date": "2026-11-04",
+    "schema_version": 1,
+    "top": [
+      "https://arxiv.org/abs/2611.04399",
+      "https://arxiv.org/abs/2611.04228",
+      "https://arxiv.org/abs/2611.04421"
+    ]
+  },
   "since": "2026-11-02T12:40:00.010886+00:00"
 }
