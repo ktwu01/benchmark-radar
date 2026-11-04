@@ -61,7 +61,6 @@ RESIDUE_COLUMN = "Time since benchmark release (in months)"
 STATED = {
     "saturation_index": "Saturation Index",
     "saturation_index_interpreted": "Saturation Index (interpreted) ",
-    "metric": "Metric",
     "test_samples": "Quantity of test samples",
     "dataset_issues": "Dataset-related issues",
 }
@@ -124,6 +123,9 @@ def reshape(source: Path) -> tuple[list[dict[str, str]], list[dict[str, str]], l
                 "benchmark_id": source_id,
                 "name": name,
                 "released": released,
+                # The metric belongs to the score series, so it is a column, not
+                # opaque metadata: a score without it cannot be read.
+                "metric": _text(row.get("Metric")),
                 "detail_source_url": SOURCE_URL,
                 "extra_json": json.dumps(
                     {key: value for key, value in stated.items() if value},

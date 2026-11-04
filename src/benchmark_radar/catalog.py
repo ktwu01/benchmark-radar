@@ -466,10 +466,12 @@ def _series(
     return {
         "series_id": f"{source}:{row['benchmark_id'].strip()}:default",
         "key": key,
-        # The API does not name the metric, so it stays null. Direction is not
-        # guessed from the scale: every scored series is source-ranked in
-        # descending numeric order, pinned by the snapshot invariant tests.
-        "metric": None,
+        # A source that states its metric (Benchmark Saturation: "Accuracy",
+        # "F1") names it on the row; the aggregator APIs do not, so theirs stays
+        # null. Direction is not guessed from the scale: every scored series is
+        # source-ranked in descending numeric order, pinned by the snapshot
+        # invariant tests.
+        "metric": str(row.get("metric") or "").strip() or None,
         "direction": "higher_is_better",
         "direction_basis": "source_rank_descending",
         "bounds": {"min": None, "max": declared_max, "basis": "aggregator_declared"},

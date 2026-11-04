@@ -348,7 +348,7 @@ snapshots:
       carried as source metadata and never used to rank. Reshaped by
       scripts/reshape_benchmark_saturation.py.
     benchmark_file: leaderboard_snapshots/benchmark_saturation_benchmarks_2026-11-04.csv
-    benchmark_sha256: 31823e53c235c4d98d186e0d4e9696684393b5a8659ad922798af52835bc60de
+    benchmark_sha256: 9713d1a9a302945acc3b616dc066b400c48e98fb8d4e1eb8c5c3438ab3e776dd
     benchmark_count: 60
     score_series_policy: preserve_empty
     benchmark_columns:
