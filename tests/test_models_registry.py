@@ -354,9 +354,11 @@ def test_immutable_scores_distinguish_command_a_and_command_a_plus(tmp_path):
     for path in Path("data/leaderboard_snapshots").glob("*scores*.csv"):
         with path.open() as stream:
             for row in csv.DictReader(stream):
-                # A source that names no organization (Benchmark Saturation)
-                # cannot say which Command A it means, so it is not evidence here.
-                if row["model_name"] in {"Command A", "Command A+"} and row["organization_name"]:
+                # Benchmark Saturation names no organization, so it cannot say
+                # which Command A it means and is not evidence here.
+                if path.name.startswith("benchmark_saturation_"):
+                    continue
+                if row["model_name"] in {"Command A", "Command A+"}:
                     identities.add((row["organization_name"], row["model_name"]))
     assert identities == {("Cohere", "Command A"), ("Cohere", "Command A+")}
     assert len(registry_for(tmp_path, sorted(identities))) == 2

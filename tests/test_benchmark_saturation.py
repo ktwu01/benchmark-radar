@@ -16,12 +16,18 @@ UPSTREAM = Path("data/leaderboard_snapshots/benchmark_saturation/manual_annotati
 
 
 def test_entries_read_each_model_and_score_as_written():
-    text = "GPT 4: 87.5; \nCommand R: 85.4;\nKImi K2 - Base 85.32;\nGPT-5.2 (Pro) 29.2%;\nno score"
+    text = (
+        "GPT 4: 87.5; \nCommand R: 85.4;\nKImi K2 - Base 85.32;\nGPT-5.2 (Pro) 29.2%;\n"
+        "no score; Gpt 5 thinking ~: 89.0; Gpt-5-main ~ 84.8%"
+    )
     assert reshape.entries(text) == [
         ("GPT 4", "87.5"),
         ("Command R", "85.4"),
         ("KImi K2 - Base", "85.32"),
         ("GPT-5.2 (Pro)", "29.2"),
+        None,
+        # Approximate values are not recorded as exact scores.
+        None,
         None,
     ]
 
@@ -54,7 +60,9 @@ def test_blank_rows_may_hold_only_spreadsheet_residue(tmp_path):
 
 def test_committed_snapshot_is_the_reshape_of_the_committed_upstream_file(tmp_path):
     benchmarks, scores, dropped = reshape.reshape(UPSTREAM)
-    assert len(benchmarks) == 60 and len(scores) == 299 and dropped == []
+    assert len(benchmarks) == 60 and len(scores) == 297
+    # MMMLU (ID 22) states two scores as approximate ("~ 89%").
+    assert [line.split(" ", 1)[0] for line in dropped] == ["22", "22"]
     for rows, path in ((benchmarks, reshape.BENCHMARKS), (scores, reshape.SCORES)):
         with path.open(encoding="utf-8", newline="") as handle:
             assert list(csv.DictReader(handle)) == rows

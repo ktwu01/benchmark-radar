@@ -164,7 +164,7 @@ histories. It retains source identities and citations so readers can inspect
 candidate benchmarks and their evaluation evidence.
 
 Daily discovery draws on 40 sources: 16 direct connectors and 24 first-party
-research and engineering feeds. The catalog collects source records from four
+research and engineering feeds. The catalog collects source records from five
 benchmark catalogs, with numeric score observations on the records that carry
 them. The project publishes the web dashboard with a benchmark leaderboard, a
 Pareto frontier view of score against measured use, saturation and trend views,

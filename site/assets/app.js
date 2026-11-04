@@ -7697,7 +7697,7 @@ const CATALOG_SOURCE_META = {
   benchmark_saturation: {
     name: "Benchmark Saturation",
     noteKey:
-      "The five top-performing models the Benchmark Saturation study (arXiv:2602.16763) reports for this benchmark, with scores as the study states them. No evaluation protocol or date is recorded. The study's saturation index is a stated value, not a ranking.",
+      "The top-performing models the Benchmark Saturation study (arXiv:2602.16763) reports for this benchmark, up to five, with scores as the study states them. No evaluation protocol or date is recorded.",
     emptyKey: "The Benchmark Saturation study recorded no scores for this benchmark.",
   },
 };

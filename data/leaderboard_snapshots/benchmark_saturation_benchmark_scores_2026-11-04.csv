@@ -104,9 +104,7 @@ benchmark_id,benchmark_name,rank,model_name,organization_name,benchmark_score,so
 21,SimpleQA,3,DeepSeek-V3.1,,93.4,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
 21,SimpleQA,4,DeepSeek-R1-0528,,92.3,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
 21,SimpleQA,5,Gemini 3 Pro,,72.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
-22,Multilingual Massive Multitask Language Understanding (MMMLU),1,Gpt 5 thinking ~,,89.0,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
 22,Multilingual Massive Multitask Language Understanding (MMMLU),2,GPT-4.5,,85.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
-22,Multilingual Massive Multitask Language Understanding (MMMLU),3,Gpt-5-main ~,,84.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
 22,Multilingual Massive Multitask Language Understanding (MMMLU),4,o3 mini,,81.1,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
 22,Multilingual Massive Multitask Language Understanding (MMMLU),5,GPT-4o,,81.5,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv
 23,Global MMLU,1,Gemini-2.5-Pro,,94.8,https://github.com/evaleval/benchmark-saturation/blob/6285e3dda145f575a0ccb3f7f4d70cd429832add/data/manual_annotation_data.csv

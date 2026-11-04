@@ -341,8 +341,9 @@ snapshots:
       a0b6b3e8dcb4e3a07690043b623468dfc4f9afeb6f3ea2c6d21def27b5d8d326,
       committed verbatim with its license under benchmark_saturation/). 60
       benchmarks keyed by the study's own IDs, each with its stated release
-      date and its five top-performing models as the study reports them: 299
-      score rows, one benchmark listing four. No protocol is recorded, so the
+      date and its five top-performing models as the study reports them: 297
+      score rows. One benchmark lists four, and two values the study marks
+      approximate ("~ 89%") are left out. No protocol is recorded, so the
       silence rule applies. The saturation index is the study's stated value,
       carried as source metadata and never used to rank. Reshaped by
       scripts/reshape_benchmark_saturation.py.
@@ -354,8 +355,8 @@ snapshots:
       benchmark_id: benchmark_id
       benchmark_name: name
     scores_file: leaderboard_snapshots/benchmark_saturation_benchmark_scores_2026-11-04.csv
-    scores_sha256: 03fcbfb0460ae8ed1635eba1edca32f2c1ee30e61b093435742a40e23f6f7a7c
-    score_row_count: 299
+    scores_sha256: 762eaf1170549df0eb40aacaf44cb327f7c45cea906fe853a1f169bb782bc0ca
+    score_row_count: 297
     columns:
       benchmark_id: benchmark_id
       benchmark_name: benchmark_name

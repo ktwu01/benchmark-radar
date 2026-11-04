@@ -21,8 +21,8 @@ The top five arrive twice: as "model: score" text (`top5_models_extracted`) and
 as five numeric columns. A score is kept only when both agree at the same
 position (the text value, rounded to the column's precision, equals the
 column). The text carries the model name, so its value is the one recorded. A
-position that disagrees or does not parse is dropped and listed when the script
-runs; it is never repaired by hand.
+position that disagrees, does not parse, or is marked approximate ("~ 89%") is
+dropped and listed when the script runs; it is never repaired by hand.
 
 The source names models, not model ids, and one name can fill two positions
 (two settings of one model). The row identity is therefore the position, and
@@ -65,7 +65,9 @@ STATED = {
     "test_samples": "Quantity of test samples",
     "dataset_issues": "Dataset-related issues",
 }
-_ENTRY = re.compile(r"^(?P<name>.+?)\s*(?::|\s-\s|\s)\s*(?P<value>-?\d+(?:\.\d+)?)\s*%?$")
+_ENTRY = re.compile(
+    r"^(?P<name>.+?)\s*(?::|\s-\s|\s)\s*(?P<approx>~\s*)?(?P<value>-?\d+(?:\.\d+)?)\s*%?$"
+)
 
 
 def _text(value: str | None) -> str:
@@ -80,8 +82,12 @@ def entries(text: str) -> list[tuple[str, str] | None]:
         if not piece:
             continue
         match = _ENTRY.match(piece)
-        name = match.group("name").strip(" :-") if match else ""
-        parsed.append((name, match.group("value")) if match and name else None)
+        raw = match.group("name") if match else ""
+        name = raw.strip(" :-~")
+        # "~ 89%" is the study saying it is not sure of the number; recording it
+        # would state an approximation as an exact score.
+        exact = bool(match) and not match.group("approx") and not raw.rstrip(" :-").endswith("~")
+        parsed.append((name, match.group("value")) if match and name and exact else None)
     return parsed
 
 

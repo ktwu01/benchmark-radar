@@ -135,7 +135,7 @@ benchmark 论文、代码仓库、数据集和 release 的每日发现，和一�
 来源标识和引用，方便你核对一个 benchmark 和它背后的评测证据。
 
 每日发现覆盖 40 个来源：16 个直接 connector 和 24 个机构自有的研究与工程 feed。
-目录汇集了来自 4 个 benchmark 目录的记录，并为其中有分数的记录保留数值观测。项目
+目录汇集了来自 5 个 benchmark 目录的记录，并为其中有分数的记录保留数值观测。项目
 提供 web dashboard，包含 benchmark 排行榜、分数与实际使用量的 Pareto 前沿视图、
 saturation 和趋势视图、每日 feed、可下载的证据数据，以及一个可离线查询的命令行
 工具（CLI）和可复现的分析流程。
