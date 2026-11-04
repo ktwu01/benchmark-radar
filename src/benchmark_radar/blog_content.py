@@ -430,27 +430,62 @@ _LEAD_NAME_LIMIT = 60
 _MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
 
+_REPO_TITLE = re.compile(r"^[^\s/]+/([^\s/]+)$")
+_NATURAL_BREAK = re.compile(r"(?<=\?)\s|:\s|\s[-–—]\s")
+
+
 def _lead_name(title: str) -> str:
+    """The shortest faithful name: a benchmark's own name, else its first clause."""
     text = " ".join(str(title or "").split())
+    repo = _REPO_TITLE.match(text)
+    if repo:
+        return repo.group(1)
     match = _NAMED_TITLE.match(text)
     if match and len(match.group(1).strip()) >= 4:
         return match.group(1).strip()
     if len(text) <= _LEAD_NAME_LIMIT:
         return text
+    # "Is Your Long-Horizon Benchmark Really Deep? Measuring ..." ends its
+    # question first; cutting mid-phrase reads as broken in a search result.
+    clause = _NATURAL_BREAK.search(text)
+    if clause and 8 <= clause.start() <= _LEAD_NAME_LIMIT:
+        return text[: clause.start()].rstrip(" :")
     return text[:_LEAD_NAME_LIMIT].rsplit(" ", 1)[0].rstrip(" ,;:-") + "…"
 
 
-def _lead_titles(snapshot: dict[str, Any], day: str) -> tuple[str, str] | None:
+def _lead_picks(snapshot: dict[str, Any], days: list[dict[str, Any]] | None) -> list[str]:
+    """The day's picks: its share cards, else the rule the share step would apply.
+
+    Share blocks exist only from 2026-10-25. Older days get the same choice the
+    share step makes (``daily_top.build_share_block``): the daily briefing's
+    benchmarks, else the radar-score top new releases, one per owner.
+    """
+    cards = (snapshot.get("share") or {}).get("cards") or []
+    if cards:
+        return [str(card.get("title") or "") for card in cards]
+    # Imported here: daily_top imports snapshots, which imports this module.
+    from .daily_top import DEFAULT_LIMIT, briefing_items, select_top_items
+
+    picked = [str(item.get("title") or "") for item, _ in briefing_items(snapshot)]
+    if not picked and days is not None:
+        top = select_top_items(days, str(snapshot.get("date") or ""), limit=DEFAULT_LIMIT)
+        picked = [str(item.get("title") or "") for item in top]
+    return picked
+
+
+def _lead_titles(
+    snapshot: dict[str, Any], day: str, days: list[dict[str, Any]] | None = None
+) -> tuple[str, str] | None:
     """Title a day after its lead benchmark, the same pick as its top share card.
 
     A search result titled "Daily AI benchmark brief: 2026-11-03" says nothing a
     reader can search for; "MemHarmBench and 4 more new AI benchmarks" names
     the day's lead benchmark (#593). The share block is the daily briefing's
     benchmarks, or the radar-score top three on a day without a briefing.
-    A day without a share block keeps its dated title.
+    A day with no pick keeps its dated title.
     """
-    cards = (snapshot.get("share") or {}).get("cards") or []
-    name = _lead_name(cards[0].get("title") or "") if cards else ""
+    picks = [title for title in _lead_picks(snapshot, days) if title.strip()]
+    name = _lead_name(picks[0]) if picks else ""
     if not name:
         return None
     try:
@@ -458,22 +493,26 @@ def _lead_titles(snapshot: dict[str, Any], day: str) -> tuple[str, str] | None:
         when = f"{_MONTHS[month - 1]} {date_of_month}, {year}"
     except (ValueError, IndexError):
         when = day
-    more = len(cards) - 1
+    more = len(picks) - 1
     if more > 1:
         english = f"{name} and {more} more new AI benchmarks · {when}"
     elif more == 1:
         english = f"{name} and 1 more new AI benchmark · {when}"
     else:
-        english = f"{name}: a new AI benchmark · {when}"
+        english = f"New AI benchmark: {name} · {when}"
     chinese = (
-        f"{name} 等 {len(cards)} 个新 AI benchmark · {day}"
+        f"{name} 等 {len(picks)} 个新 AI benchmark · {day}"
         if more
-        else f"{name}：新 AI benchmark · {day}"
+        else f"新 AI benchmark：{name} · {day}"
     )
     return english, chinese
 
 
-def build_post(snapshot: dict[str, Any], catalog_pages: dict[str, str] | None = None) -> BlogPost:
+def build_post(
+    snapshot: dict[str, Any],
+    catalog_pages: dict[str, str] | None = None,
+    days: list[dict[str, Any]] | None = None,
+) -> BlogPost:
     """Render one snapshot into a publishable brief.
 
     ``catalog_pages`` maps a source URL to the slug of the one catalog record
@@ -493,7 +532,7 @@ def build_post(snapshot: dict[str, Any], catalog_pages: dict[str, str] | None = 
         )
 
     translated = has_translation(snapshot)
-    lead = _lead_titles(snapshot, day)
+    lead = _lead_titles(snapshot, day, days)
     if lead:
         title, title_zh = lead
     elif kind == KIND_EVIDENCE:

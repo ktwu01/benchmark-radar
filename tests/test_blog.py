@@ -804,18 +804,27 @@ def test_a_day_is_titled_after_its_lead_benchmark():
         "MemHarmBench and 1 more new AI benchmark · Nov 3, 2026"
     )
     assert _lead_titles(day(lead), "2026-11-03")[0] == (
-        "MemHarmBench: a new AI benchmark · Nov 3, 2026"
+        "New AI benchmark: MemHarmBench · Nov 3, 2026"
     )
-    # No name before a colon: the title is cut at a word near 60 characters.
+    # A long title ends at its first natural break, never mid-phrase.
     long = (
         "Is Your Long-Horizon Benchmark Really Deep? "
         "Measuring and Synthesizing Depth in Terminal Tasks"
     )
-    name = _lead_titles(day(long), "2026-11-03")[0].split(": a new")[0]
-    assert name.endswith("…") and len(name) <= 61 and long.startswith(name[:-1])
+    assert _lead_titles(day(long), "2026-11-03")[0] == (
+        "New AI benchmark: Is Your Long-Horizon Benchmark Really Deep? · Nov 3, 2026"
+    )
+    # With no break, it is cut at a word near 60 characters.
+    plain = "A very long benchmark title without any clause break " * 2
+    cut = _lead_titles(day(plain), "2026-11-03")[0].split("benchmark: ", 1)[1].split(" · ")[0]
+    assert cut.endswith("…") and len(cut) <= 61
+    # A repository title names the repository, as the Today card does.
+    assert _lead_titles(day("chartact-benchmark/ChartAct", "x"), "2026-10-25")[0] == (
+        "ChartAct and 1 more new AI benchmark · Oct 25, 2026"
+    )
     # "T1: ..." is not a name a reader knows; the whole title is kept, then cut.
-    assert _lead_titles(day("T1: Terminal Agent Learning"), "2026-11-03")[0].startswith(
-        "T1: Terminal Agent Learning:"
+    assert _lead_titles(day("T1: Terminal Agent Learning"), "2026-11-03")[0] == (
+        "New AI benchmark: T1: Terminal Agent Learning · Nov 3, 2026"
     )
     assert _lead_titles({"share": {}}, "2026-11-03") is None
     assert _lead_titles({}, "2026-11-03") is None
@@ -839,3 +848,39 @@ def test_a_cited_benchmark_links_to_its_page_only_by_exact_url():
     assert "../bad" not in html
     assert "blog-benchmark-link" not in _sources_section(sources, "en")
     assert "Benchmark 页面" in _sources_section(sources, "zh", {sources[0][2]: "gpqa_diamond"})
+
+
+def test_a_day_before_share_blocks_is_titled_by_the_share_rule():
+    """Share blocks start on 2026-10-25; older days get the pick the share step
+    would make, so their titles name a benchmark instead of a date (#593)."""
+    from benchmark_radar.blog_content import _lead_titles
+
+    day = {
+        "date": "2026-09-01",
+        "evidence_items": [
+            {
+                "title": "Low: a lower-scored release",
+                "url": "https://example.org/low",
+                "total_score": 40,
+                "event_kind": "released",
+                "recommended": True,
+                "suppression_reasons": [],
+                "source": "arXiv",
+                "source_id": "low",
+            },
+            {
+                "title": "TopBench: the highest-scored release",
+                "url": "https://example.org/top",
+                "total_score": 90,
+                "event_kind": "released",
+                "recommended": True,
+                "suppression_reasons": [],
+                "source": "arXiv",
+                "source_id": "top",
+            },
+        ],
+    }
+    title = _lead_titles(day, "2026-09-01", [day])[0]
+    assert title == "TopBench and 1 more new AI benchmark · Sep 1, 2026"
+    # Without the other days, a day with no briefing keeps its dated title.
+    assert _lead_titles(day, "2026-09-01") is None

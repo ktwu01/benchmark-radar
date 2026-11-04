@@ -246,7 +246,7 @@ def build_posts(
     snapshots: list[dict[str, Any]], catalog_pages: dict[str, str] | None = None
 ) -> list[BlogPost]:
     """One post per snapshot, newest first, with duplicate days rejected."""
-    posts = [build_post(snapshot, catalog_pages) for snapshot in snapshots]
+    posts = [build_post(snapshot, catalog_pages, snapshots) for snapshot in snapshots]
     slugs = [post.slug for post in posts]
     duplicates = sorted({slug for slug in slugs if slugs.count(slug) > 1})
     if duplicates:
