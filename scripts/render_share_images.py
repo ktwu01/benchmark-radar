@@ -114,12 +114,14 @@ def _wrap(text: str, face: Font, width: int, max_lines: int) -> list[str]:
         if face.getlength(trial) <= width:
             current = trial
             continue
+        # The last line takes the rest of the text, so _fit ends it in "…";
+        # appending first would cut a one-line description mid-sentence.
+        if len(lines) == max_lines - 1:
+            current = " ".join([current, *words[index:]]).strip()
+            break
         if current:
             lines.append(current)
         current = word
-        if len(lines) == max_lines - 1:
-            current = " ".join([current, *words[index + 1 :]])
-            break
     if current:
         lines.append(current)
     # Every line, not only the last: one Hugging Face "owner/repository" token
@@ -132,10 +134,12 @@ def _names(values: list[str], limit: int) -> str:
     return _plain(f"{shown} et al." if len(values) > limit else shown)
 
 
-def _institutions(values: list[str]) -> str:
+def _institutions(values: list[str], face: Font, width: int) -> str:
     # Institution names carry commas ("University of California, Berkeley").
-    shown = "; ".join(values[:2])
-    return _plain(f"{shown} +{len(values) - 2}" if len(values) > 2 else shown)
+    # Long names are cut, never the "+N" that says the list goes on.
+    shown = _plain("; ".join(values[:2]))
+    more = f" +{len(values) - 2}" if len(values) > 2 else ""
+    return _fit(shown, face, width - round(face.getlength(more))) + more
 
 
 def _day(value: Any) -> str:
@@ -328,7 +332,7 @@ def render_benchmark(record: dict[str, Any], output: Path) -> Path:
         face = font(20 * s)
         draw.text(
             (inner, y + 4 * s),
-            _fit(_institutions(institutions), face, text_width),
+            _institutions(institutions, face, text_width),
             font=face,
             fill=SITE_INK,
         )

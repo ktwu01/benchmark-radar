@@ -447,8 +447,12 @@ def test_catalog_card_names_the_first_two_institutions(tmp_path):
     # Issue #933: where a benchmark came from, as OpenAlex links its paper.
     plain = _index_record("gpqa", description="Graduate-level questions.")
     three = ["New York University", "Cohere", "Anthropic"]
-    assert share._institutions(three) == "New York University; Cohere +1"
-    assert share._institutions(three[:2]) == "New York University; Cohere"
+    face = share.font(20)
+    assert share._institutions(three, face, 900) == "New York University; Cohere +1"
+    assert share._institutions(three[:2], face, 900) == "New York University; Cohere"
+    # A long pair is cut, and "+1" still says the list goes on.
+    cut = share._institutions(three, face, 200)
+    assert cut.endswith("… +1") and face.getlength(cut) <= 200
     named = {**plain, "institutions": three}
     empty = {**plain, "institutions": []}
     paths = [
@@ -471,6 +475,14 @@ def test_catalog_render_refuses_a_slug_that_is_not_a_file_name(tmp_path):
     index = {"benchmarks": [_index_record("../escape")]}
     with pytest.raises(ValueError, match="unsafe slug"):
         share.render_catalog(index, tmp_path, workers=1)
+
+
+def test_a_text_cut_to_one_line_ends_in_an_ellipsis():
+    face = share.font(22)
+    text = "Explanation stability across histopathology datasets and many more words " * 3
+    (line,) = share._wrap(text, face, 400, 1)
+    assert line.endswith("…") and face.getlength(line) <= 400
+    assert share._wrap("Short", face, 400, 1) == ["Short"]
 
 
 def test_no_wrapped_line_is_wider_than_the_text_area():

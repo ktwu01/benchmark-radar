@@ -80,7 +80,10 @@ def request(papers: list[str], *, retries: int = 5) -> dict[str, Any]:
             with urllib.request.urlopen(req, timeout=60) as response:
                 return json.loads(response.read())
         except (urllib.error.URLError, TimeoutError) as exc:
-            if attempt == retries:
+            # A 4xx other than 429 is a bad request; retrying spends the shared
+            # daily budget for nothing.
+            code = getattr(exc, "code", None)
+            if attempt == retries or (code is not None and code != 429 and code < 500):
                 raise
             print(f"retry in {delay:.0f}s after {exc}", file=sys.stderr)
             time.sleep(delay)
