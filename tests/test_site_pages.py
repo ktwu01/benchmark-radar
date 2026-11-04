@@ -726,3 +726,27 @@ def test_a_two_word_category_description_is_padded_with_real_evidence(tmp_path):
     description = description.split('"')[0]
     assert description.startswith("Coding.")
     assert "1 reported scores" in description
+
+
+def test_page_publishes_recorded_audits_with_receipts(tmp_path):
+    shard = _shard("alpha-bench", "Alpha Bench")
+    shard["record"]["audits"] = [
+        {
+            "auditor": "June Kim",
+            "audit_date": "2026-05-24",
+            "audit_url": "https://example.com/alpha-audit",
+            "finding": "Some Alpha instances cannot run.",
+            "receipts": ["https://example.com/alpha-receipt"],
+        }
+    ]
+    output = _generated_pages(tmp_path, shard)
+    page = _page_text(output, "alpha-bench")
+    assert "Independent audits of Alpha Bench" in page
+    assert "Some Alpha instances cannot run." in page
+    assert 'href="https://example.com/alpha-audit"' in page
+    assert 'href="https://example.com/alpha-receipt"' in page
+
+
+def test_page_without_audits_has_no_audits_section(tmp_path):
+    output = _generated_pages(tmp_path, _shard("alpha-bench", "Alpha Bench"))
+    assert "Independent audits" not in _page_text(output, "alpha-bench")

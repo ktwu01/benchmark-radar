@@ -922,3 +922,89 @@ def test_shipped_registry_tracks_brain_to_text_score_evidence():
         "Stanford NPTL",
         "UC Davis Neuroprosthetics Lab",
     }
+
+
+def test_audits_travel_with_the_entry_and_the_card_link(tmp_path):
+    # An audit recorded only in the YAML is evidence nobody downstream can
+    # see: the ranking entry and the card->benchmark link are the two
+    # projections every consumer reads, so both must carry it.
+    import json
+    from datetime import date
+
+    document = minimal_registry()
+    document["benchmarks"][0]["audits"] = [
+        {
+            "auditor": "June Kim",
+            # A real date object: the shipped registry writes audit dates
+            # unquoted, PyYAML hands back a date, and the published surfaces
+            # are JSON, which cannot carry one.
+            "audit_date": date(2026, 5, 24),
+            "audit_url": "https://example.com/alpha-audit",
+            "finding": "Some Alpha instances cannot run.",
+            "receipts": ["https://example.com/alpha-receipt"],
+        }
+    ]
+    board = adoption_rank(load_registry(write_registry(tmp_path, document)))
+
+    alpha = next(entry for entry in board["entries"] if entry["benchmark_id"] == "alpha")
+    assert alpha["audits"] == [
+        {
+            "auditor": "June Kim",
+            "audit_date": "2026-05-24",
+            "audit_url": "https://example.com/alpha-audit",
+            "finding": "Some Alpha instances cannot run.",
+            "receipts": ["https://example.com/alpha-receipt"],
+        }
+    ]
+    # No audit recorded: the entry still carries the field, empty, exactly
+    # as it carries an empty aliases list.
+    beta = next(entry for entry in board["entries"] if entry["benchmark_id"] == "beta")
+    assert beta["audits"] == []
+
+    # The Org One card is the one that reports both benchmarks; the roster
+    # is sorted newest first, so it is not model_cards[0].
+    card = next(item for item in board["model_cards"] if item["model_card_id"] == "org_one_card")
+    summaries = {item["benchmark_id"]: item for item in card["reported_benchmarks"]}
+    assert summaries["alpha"]["audits"] == alpha["audits"]
+    assert summaries["beta"]["audits"] is None
+
+    # The whole board is a published JSON document; a date object anywhere
+    # in it would fail the build at serialization time.
+    json.dumps(board)
+
+
+def test_shipped_registry_publishes_every_recorded_audit():
+    import json
+
+    board = build_adoption_rank(DEFAULT_REGISTRY_PATH)
+    audited = {
+        entry["benchmark_id"]: entry["audits"] for entry in board["entries"] if entry["audits"]
+    }
+
+    # The ten benchmarks June Kim's determinacy audits cover, named so a
+    # future audit addition updates this test deliberately rather than
+    # slipping into the published ranking unnoticed.
+    assert sorted(audited) == [
+        "deepswe",
+        "frontier_bench",
+        "frontiercode",
+        "mirrorcode",
+        "programbench",
+        "slopcodebench",
+        "swe_bench_pro",
+        "swe_bench_verified",
+        "tau_bench",
+        "terminal_bench",
+    ]
+    # DeepSWE was audited twice: the original run and the v1.1 re-audit.
+    assert len(audited["deepswe"]) == 2
+    for audits in audited.values():
+        for audit in audits:
+            assert audit["auditor"] == "June Kim"
+            # Stringified at the projection: a YAML date object here would
+            # break every JSON consumer of the ranking.
+            assert isinstance(audit["audit_date"], str)
+            assert audit["audit_url"].startswith("https://")
+            assert audit["finding"]
+            assert audit["receipts"]
+    json.dumps(board)
