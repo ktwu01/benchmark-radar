@@ -135,7 +135,7 @@ benchmark 论文、代码仓库、数据集和 release 的每日发现，和一�
 来源标识和引用，方便你核对一个 benchmark 和它背后的评测证据。
 
 每日发现覆盖 40 个来源：16 个直接 connector 和 24 个机构自有的研究与工程 feed。
-目录汇集了来自 4 个 benchmark 目录的记录，并为其中有分数的记录保留数值观测。项目
+目录汇集了来自 5 个 benchmark 目录的记录，并为其中有分数的记录保留数值观测。项目
 提供 web dashboard，包含 benchmark 排行榜、分数与实际使用量的 Pareto 前沿视图、
 saturation 和趋势视图、每日 feed、可下载的证据数据，以及一个可离线查询的命令行
 工具（CLI）和可复现的分析流程。
@@ -160,7 +160,7 @@ saturation 和趋势视图、每日 feed、可下载的证据数据，以及一�
 
 每日信息流也接入了 [Crossref](https://www.crossref.org) 和 [DataCite](https://datacite.org) 的公开 DOI 元数据，以及 [OpenAIRE](https://www.openaire.eu) 汇聚的公开研究成果记录。
 
-前沿模型分数综合了三类来源。上方的 SWE-bench Verified 时间线来自各家实验室的模型报告和 system card；其余的模型分数几乎都来自 [Artificial Analysis](https://artificialanalysis.ai) 和 [LLM Stats](https://llm-stats.com)，每条分数都保留了原始来源引用。感谢两家把数据公开出来。更大范围的 benchmark 目录还有第四类来源 [OpenCompass Hub](https://hub.opencompass.org.cn)。
+前沿模型分数综合了三类来源。上方的 SWE-bench Verified 时间线来自各家实验室的模型报告和 system card；其余的模型分数几乎都来自 [Artificial Analysis](https://artificialanalysis.ai) 和 [LLM Stats](https://llm-stats.com)，每条分数都保留了原始来源引用。感谢两家把数据公开出来。更大范围的 benchmark 目录还有第四类来源 [OpenCompass Hub](https://hub.opencompass.org.cn)。[Benchmark Saturation](https://github.com/evaleval/benchmark-saturation) 研究（Akhtar 等，[arXiv:2602.16763](https://arxiv.org/abs/2602.16763)，MIT 许可）人工标注了 60 个 benchmark 的前五名模型分数，也收进了目录。感谢他们公开这份数据。
 
 特别感谢 [Xiaopai Liu](https://github.com/liuxiaopai-ai)（[@bourneliu66](https://x.com/bourneliu66)）在 X 上为 Benchmark Radar 宣传，也感谢他的每日 builder 简报 [BuilderPulse](https://github.com/BuilderPulse/BuilderPulse)。
 

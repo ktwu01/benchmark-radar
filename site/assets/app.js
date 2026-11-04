@@ -7694,6 +7694,12 @@ const CATALOG_SOURCE_META = {
       "Scores measured by Artificial Analysis running the test itself, not numbers reported by the model makers. Higher values are better. The date shown is each model's own release date, not the day the test was run.",
     emptyKey: "Artificial Analysis recorded no scores for this benchmark.",
   },
+  benchmark_saturation: {
+    name: "Benchmark Saturation",
+    noteKey:
+      "The top-performing models the Benchmark Saturation study (arXiv:2602.16763) reports for this benchmark, up to five, with scores as the study states them. No evaluation protocol or date is recorded.",
+    emptyKey: "The Benchmark Saturation study recorded no scores for this benchmark.",
+  },
 };
 
 function catalogSourceMeta(source) {
@@ -11625,6 +11631,7 @@ const SCORE_SOURCE_LINKS = [
   ["LLM Stats", "https://llm-stats.com"],
   ["Artificial Analysis", "https://artificialanalysis.ai"],
   ["OpenCompass Hub", "https://hub.opencompass.org.cn"],
+  ["Benchmark Saturation", "https://github.com/evaleval/benchmark-saturation"],
 ];
 
 // Deliberately quiet: it closes the card as a footnote under the formats the

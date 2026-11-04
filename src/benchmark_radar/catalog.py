@@ -47,6 +47,7 @@ SOURCES = {
     LLM_STATS_SNAPSHOT_ID: (LLM_STATS_SOURCE, LLM_STATS_KEY_PREFIX),
     ARTIFICIAL_ANALYSIS_SNAPSHOT_ID: (ARTIFICIAL_ANALYSIS_SOURCE, ARTIFICIAL_ANALYSIS_KEY_PREFIX),
     "claire_radar_2026-10-14": ("claire_radar", "claire-radar"),
+    "benchmark_saturation_2026-11-04": ("benchmark_saturation", "benchmark-saturation"),
 }
 
 _SLUG_STRIP = re.compile(r"[^a-z0-9]+")
@@ -465,10 +466,12 @@ def _series(
     return {
         "series_id": f"{source}:{row['benchmark_id'].strip()}:default",
         "key": key,
-        # The API does not name the metric, so it stays null. Direction is not
-        # guessed from the scale: every scored series is source-ranked in
-        # descending numeric order, pinned by the snapshot invariant tests.
-        "metric": None,
+        # A source that states its metric (Benchmark Saturation: "Accuracy",
+        # "F1") names it on the row; the aggregator APIs do not, so theirs stays
+        # null. Direction is not guessed from the scale: every scored series is
+        # source-ranked in descending numeric order, pinned by the snapshot
+        # invariant tests.
+        "metric": str(row.get("metric") or "").strip() or None,
         "direction": "higher_is_better",
         "direction_basis": "source_rank_descending",
         "bounds": {"min": None, "max": declared_max, "basis": "aggregator_declared"},

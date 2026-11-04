@@ -327,3 +327,43 @@ snapshots:
     columns:
       benchmark_id: benchmark_id
       benchmark_name: name
+
+  - id: benchmark_saturation_2026-11-04
+    source: Benchmark Saturation
+    source_url: https://github.com/evaleval/benchmark-saturation
+    crawled_at: "2026-11-04T06:47:00Z"
+    description: >-
+      The hand-annotated benchmark table of the Benchmark Saturation study
+      (Akhtar et al., "When AI Benchmarks Plateau: A Systematic Study of
+      Benchmark Saturation", arXiv:2602.16763), MIT licensed, at upstream
+      commit 6285e3dda145f575a0ccb3f7f4d70cd429832add
+      (data/manual_annotation_data.csv, sha256
+      a0b6b3e8dcb4e3a07690043b623468dfc4f9afeb6f3ea2c6d21def27b5d8d326,
+      committed verbatim with its license under benchmark_saturation/). 60
+      benchmarks keyed by the study's own IDs, each with its stated release
+      date and its five top-performing models as the study reports them: 297
+      score rows. One benchmark lists four, and two values the study marks
+      approximate ("~ 89%") are left out. No protocol is recorded, so the
+      silence rule applies. The saturation index is the study's stated value,
+      carried as source metadata and never used to rank. Reshaped by
+      scripts/reshape_benchmark_saturation.py.
+    benchmark_file: leaderboard_snapshots/benchmark_saturation_benchmarks_2026-11-04.csv
+    benchmark_sha256: 9713d1a9a302945acc3b616dc066b400c48e98fb8d4e1eb8c5c3438ab3e776dd
+    benchmark_count: 60
+    score_series_policy: preserve_empty
+    benchmark_columns:
+      benchmark_id: benchmark_id
+      benchmark_name: name
+    scores_file: leaderboard_snapshots/benchmark_saturation_benchmark_scores_2026-11-04.csv
+    scores_sha256: 762eaf1170549df0eb40aacaf44cb327f7c45cea906fe853a1f169bb782bc0ca
+    score_row_count: 297
+    columns:
+      benchmark_id: benchmark_id
+      benchmark_name: benchmark_name
+      model: model_name
+      organization: organization_name
+      rank: rank
+      score: benchmark_score
+      # The study names models, not model ids, and one name can fill two
+      # positions (two settings of one model), so a row is its position.
+      row_id: rank

@@ -1,0 +1,879 @@
+ID,Name,Released Date,"Saturation Time Metadata
+(Top-Performing five Models: Performance and Rankings) ",top5_models_extracted,top model 1,top model 2,top model 3,top model 4,top model 5,num_top_models_extracted,Mean (top-5 models),Std Dev (top-5 models),Range of scores (s_max - s_min; top-5 models),SE_delta,R_norm,Saturation Index,Saturation Index (interpreted) ,Recent Models Evaluated (Yes / No),Time since benchmark release (in months),SOTA Performance at release,Dataset-related issues,"Dataset-related Issues Sources
+(Followup papers and other sources describing these issues)",Task Input,Task Output Format,Dataset curation tags,Dataset curation notes,Languages included,Quantity of test samples,Quantity of test samples Notes,Paper Citations,Publically v/s Privately available,Publically v/s Privately available Notes,Literal diversity,Literal diversity Notes,"Identifying which prompts/questions are ""solved"" by numerous models vs those that are consistently hard for different models Notes",Metric,Metric Notes
+1,Math (math 500),3/5/2021,"o3: 99.2
+Grok-4: 99
+DeepSeek R1: 98.3
+GLM-4.5: 98.2
+Claude Opus 4: 98.2
+
+source: https://arxiv.org/pdf/2508.06471",o3: 99.2; Grok-4: 99.0; DeepSeek R1: 98.3; GLM-4.5: 98.2; Claude Opus 4: 98.2,99.2,99,98.3,98.2,98.2,5,98.58,0.43,1,0.03384381,0.295475009,0.916397111,Very high,Yes,57,6.9 (GPT 2),"Contamination, Noisy data, Mislabeling, Other data-related issues","https://arxiv.org/pdf/2507.10532
+https://openreview.net/pdf?id=eWObAa0Uaw
+https://github.com/hendrycks/math/issues/24",Instruction/Open Ended,Free-form,Expert human created,Collected from aops.com/community/c3158_usa_contests.,English,500,"12500 - 7,500 training and 5,000 test; Math-500 is 500 Test ",2398,Public,,No,,No (problems are from human mathematics competitions) ,Accuracy,Exact match
+2,GPQA: A Graduate-Level Google-Proof Q&A Benchmark,11/21/2023,"Grok4: 87.7%
+GPT-5 (high): 85.4%
+Gemini-2.5 Pro: 84.4%
+Claude-4.5 Sonnet: 83.4%
+GLM 4.6: 82.9% (https://docs.z.ai/guides/llm/glm-4.6)
+
+source: https://artificialanalysis.ai/evaluations/gpqa-diamond",Grok4: 87.7; GPT-5: 85.4; Gemini-2.5 Pro: 84.4; Claude-4.5 Sonnet: 83.4; GLM 4.6: 82.9,87.7,85.4,84.4,83.4,82.9,5,84.76,1.7,4.8,0.1025247248,0.4681797496,0.803167272,High,Yes,25,38.8 (GPT 4),No known issues,"Very few in the github issues: https://github.com/idavidrein/gpqa/issues (but hard to verify)
+
+Also, they was a large-scale follow-up with SuperGPQA: https://arxiv.org/pdf/2502.14739 
+
+
+Should also note that we use GPQA Diamond subset majorly ((2/2 experts agree & ≤1/3 non-experts correct) )",QA /MCQ,MCQ,Expert human created,"solicit difficult questions from domain experts in subdomains of biology, physics, and chemistry,
+where we consider experts as individuals having or pursuing a PhD in the field",English,564,"564 questions with the procedure described in Section2.1. We remove 18 questions
+to form a small unreleased held-out set, leaving 546 questions.",1180,Public,,No,,No,Accuracy,
+3,MMLU-Pro: A More Robust and Challenging Multi-Task Language Understanding Benchmark,6/4/2024,"GPT o1: 89.3%
+Claude Opus 4.1: 87.8%
+Claude Sonnet 4.5: 87.3%
+GPT 5: 87.0%
+Claude Opus 4: 86.2%
+o3: 85.6%
+Grok 4: 85.3%
+
+
+https://www.vals.ai/benchmarks/mmlu_pro
+https://huggingface.co/spaces/TIGER-Lab/MMLU-Pro ",GPT o1: 89.3; Claude Opus 4.1: 87.8; Claude Sonnet 4.5: 87.3; GPT 5: 87.0; Claude Opus 4: 86.2,89.3,87.8,87.3,87,86.2,5,87.52,1.03,3.1,0.04422178601,0.7010119399,0.6117584647,Moderate,Yes,18,72.6 (GPT-4o),"Mislabeling, Other data-related issues","Not papers, but the authors are pretty responsibe on Github: https://github.com/TIGER-AI-Lab/MMLU-Pro/",QA /MCQ,MCQ,"Expert human created, LLM generated","tl;dr: combining, filtering, and extending existing, mostly public academic sources and applying LLM-assisted augmentation and expert review.
+
+Starting point: Human-curated data from MMLU, TheoremQA, STEM websites, SciBench; expert-reviewed and LLM-assisted filtering + LLMs for distractor generation
+
+Heuristic-based filtering of MMLU samples + generation of distractor answer options using GPT-4-Turbo
+
+",English,"12,032",,856,Public,,No,,"Yes: filtered out trivial Qs; error analysis revealed persistently hard Qs (due to reasoning, domain gaps)",Accuracy,Model is asked to picked one of the 10 options and then accuracy is calculated
+4,Big Bench Hard (BBH),10/18/2022," Claude 3.5 Sonnet (Anthropic): 0.931
+Gemini 1.5 Pro (Google): 0.892
+Qwen 3 235B- A22B 0.8887 -  Qwen3 Technical Report 
+Kimi K2: 0.8871 - Kimi K2: Open Agentic Intelligence 
+Gemma 3 27B (Google): 0.876 (Incorrect)
+Deepseek v3 base : 0.875 DeepSeek-V3 Technical Report 
+
+Source: https://llm-stats.com/benchmarks/big-bench-hard",Claude 3.5 Sonnet: 93.1; Gemini 1.5 Pro: 89.2; Qwen 3: 88.87; Kimi K2: 88.71; Gemma 3 27B: 87.6,93.1,89.2,88.87,88.71,87.6,5,89.5,1.88,5.5,0.04628488,1.188293141,0.2436455949,Low,Yes,38,73.9 (code-davinci-002),"Noisy data, Other data-related issues",Making BBH harder (BB Extreme): https://arxiv.org/abs/2502.19187,QA /MCQ,MCQ,Expert human created,"Filter out tasks with more than 3 sub tasks, and fewer than 103 examples. Then filter out tasks without human rater baselines, remove non-MCQ types and then clean multi choice and exact match tasks, finally filter out tasks where the best reported model beats average human rater score and then filter out extremely difficult tasks outside the scope of the work.
+",English,"6,511",,1066,Public,,No,,"Yes, filtered out tasks where the reported model was better than average human reported score",Accuracy,
+5,ARC-AGI,11/6/2019,"J. Berman (2025)        79.6%        
+E. Pang (2025)                77.1%        
+GPT-5 Pro                        70.2%        
+Grok 4 (Thinking)        xAI        66.7%        
+Claude Sonnet 4.5 (Thinking 32K)        63.7%",J. Berman: 79.6; E. Pang: 77.1; GPT-5 Pro: 70.2; Grok 4: 66.7; Claude Sonnet 4.5: 63.7,79.6,77.1,70.2,66.7,63.7,5,71.46,6.04,15.9,0.1115670167,1.425152386,0.1311964681,Low,Yes,73,N/A,Contamination,Possible contamination/ but not neccessarily there exists a private set for the leaderboard,Instruction/Open Ended,Free-form,Expert human created,,English,"1,000","Training Set - 400; Public Eval Set - 400; Semi-Private Eval Set 100 tasks (mid-2024); Private Eval Set  100 tasks        (Used as the basis of the ARC Prize competition. Determined final leaderboard in 2020, 2022, 2023, and 2024.)",1024,Private,,No,,,Accuracy,
+6,MMLU: Measuring Massive Multitask Language Understanding,9/8/2020,"Gpt-5-2025-08-07: 93.5%
+Claude-Opus-4-1-20250805: 93.4%
+Claude-Opus-4-20250514: 92.8%
+Gemini-2.5-Pro-Preview-06-05: 92.4%
+O3-2025-04-16: 92.3%
+
+Source: https://www.kaggle.com/benchmarks/open-benchmarks/mmlu",Gpt-5-2025-08-07: 93.5; Claude-Opus-4-1-20250805: 93.4; Claude-Opus-4-20250514: 92.8; Gemini-2.5-Pro-Preview-06-05: 92.4; O3-2025-04-16: 92.3,93.5,93.4,92.8,92.4,92.3,5,92.88,0.5,1.2,0.03233177767,0.371151878,0.8713132554,High,Yes,63,43.9 (GPT-3 X-Large),"Contamination, Mislabeling, Noisy data","MMLU Redux: https://arxiv.org/abs/2406.04127
+MMLU Pro: https://arxiv.org/abs/2406.01574
+MMLU Contamination: https://aclanthology.org/2025.acl-long.656.pdf 
+
+",QA /MCQ,MCQ,crowdsourced human created,Collected by Grad and Undergrad Students,English,"15,908","The few-shot development set has 5 questions per subject, the validation set
+ is made of 1540 questions, and the test set has 14079
+questions.",5221,Public,,No,,,Accuracy,
+7,Winogrande,7/25/2019,"GPT 4 - 87.5 
+Command R+ 85.4
+KImi K2 - Base 85.32 
+Qwen2 72B Instruct: 85.1
+Llama 3.1: 0.845
+GPT 3.5 - 81.6
+Gemma 3 - 78.8","GPT 4: 87.5; 
+Command R: 85.4;
+KImi K2 - Base 85.32;
+Qwen2 72B Instruct: 85.1;
+Llama 3.1: 84.5",87.5,85.4,85.32,85.1,84.5,5,85.56,1.02,3,0.07561587,0.3967421375,0.8543585516,High,Yes,77,79.3 (RoBERTa),No known issues,"Potential contamination, available since 2019",QA /MCQ,Free-form,crowdsourced human created,Crowdsourcing - Amazon Mechanical Turks,English,"1,767","43,972 (40,938 for
+training, 1,267 for development, and 1,767 for test)",1949,Public,,No,,,Accuracy,
+8,HellaSwag,5/20/2019,"Claude 3 Opus (Anthropic): 0.954
+GPT-4 (OpenAI): 0.953
+Kimi-k2-base: 0.946 - [2507.20534] Kimi K2: Open Agentic Intelligence 
+Gemini 1.5 Pro (Google): 0.933
+Claude 3 Sonnet (Anthropic): 0.890
+Deepseek v3 base: 0.889 - [2412.19437] DeepSeek-V3 Technical Report 
+
+https://llm-stats.com/benchmarks/hellaswag
+https://arxiv.org/pdf/2303.08774
+
+Since 38% of this dataset is reported to have errors, I think it's safe to say that this is contaminated (and would normally mark the within 3-5 years option). However, this doesn't meet the strict requirement in the Field Definitions (not all recent models have been tested, so we dont have the 1% rule) so I left it as ""Not Saturated Yet""",Claude 3 Opus: 95.4; GPT-4: 95.3; Kimi-k2-base: 94.6; Gemini 1.5 Pro: 93.3; Claude 3 Sonnet: 89.0,95.4,95.3,94.6,93.3,89,5,93.52,2.38,6.4,0.03765139,1.699804321,0.0556132,Low,Yes,79,47.3 (BERT-Large),Other data-related issues,"Answering HellaSwag without the question: https://arxiv.org/abs/2402.12483
+
+General issues: https://arxiv.org/abs/2504.07825 
+
+Blog post: https://www.surgehq.ai/blog/hellaswag-or-hellabad-36-of-this-popular-llm-benchmark-contains-errors
+
+Github Issues: https://github.com/rowanz/hellaswag/issues/8",QA /MCQ,MCQ,"crowdsourced human created, LLM generated",,English,"10,003","training:39905 validation:10042 test:10003
+https://huggingface.co/datasets/Rowan/hellaswag",2836,Public,,No,,,Accuracy,
+9,GSM8K,10/28/2021,"Kimi K2 Instruct: 0.973
+o1: 0.971
+GPT-4.5: 0.970
+Llama 3.1 405B Instruct: 0.968
+Claude 3.5 Sonnet: 0.964
+source: https://llm-stats.com/benchmarks/gsm8k
+",Kimi K2 Instruct: 97.3; o1: 97.1; GPT-4.5: 97.0; Llama 3.1 405B Instruct: 96.8; Claude 3.5 Sonnet: 96.4,97.3,97.1,97,96.8,96.4,5,96.92,0.31,0.9,0.0409746,0.2196482785,0.9528999489,Very high,Yes,50,55 (GPT-3),"Contamination, Mislabeling","potential contamination
+label noise
+https://gradientscience.org/gsm8k-platinum/",Instruction/Open Ended,Free-form,Expert human created,Couldn't find exact info.; OpenAI authors probably curated it based on textbooks + human annotations,English,"1,319","training:7473 test:1319
+https://huggingface.co/datasets/openai/gsm8k",4160,Public,,No,Problems are designed to be highly diverse in framing as well as concepts,No,Accuracy,
+10,TruthfulQA,9/9/2021,"Numbers are from: https://www.lesswrong.com/posts/Bunfwz6JsNd44kgLT/new-improved-multiple-choice-truthfulqa
+Claude 3.5 91.1
+Gpt 4o 88.5
+grok 2 87.2
+llama 3.3 70b 84.4
+deepseek-chat 84.4
+gemini 1.5 flash 83.9",Claude 3.5: 91.1; Gpt 4o: 88.5; grok 2: 87.2; llama 3.3 70b: 84.4; deepseek-chat: 84.4,91.1,88.5,87.2,84.4,84.4,5,87.12,2.55,6.7,0.08627245,0.7766094614,0.5471007782,Moderate,No,51,29.5 (GPT-3 175B),Contamination,Other Issues: https://turntrout.com/original-truthfulqa-weaknesses,QA /MCQ,"MCQ, Free-form",Expert human created,,English,817,"TruthfulQA consists of a test set of 817 questions
+and is intended only for the zero-shot setting.",2467,Public,,No,,,"Accuracy, LLM-as-a-Judge","Accuracy, LLM-judging score for OpenQAAcc for MCQ"
+11,LiveCodeBench: Holistic and Contamination Free Evaluation of Large Language Models for Code,3/13/2024,"
+source: https://artificialanalysis.ai/evaluations/livecodebench
+Gemini 3 pro: 91.7
+Gemini 3 flash: 90.8
+GLM-4.7: 89.4
+GPT5.2: 88.9
+gpt-oss 12B: 87.8
+GPT-5 (high): 84.6%
+GPT-5 Codex (high): 84.0%
+Grok 4 Fast: 83.2%
+Grok 4: 81.9%
+Gemini 2.5 Pro: 80.1%","Gemini 3 pro: 91.7;
+Gemini 3 flash: 90.8;
+GLM-4.7: 89.4;
+GPT5.2: 88.9;
+gpt-oss 12B: 87.8;",91.7,90.8,89.4,88.9,87.8,5,89.72,1.38,3.9,0.07611929,0.5123536938,0.7691215131,High,Yes,21,29.1 (GPT-4-Turbo),No known issues,"Parsing issues in eval: https://blog.collinear.ai/p/lcb-bug-fixes
+
+",Coding,Free-form,Programatically generated/Scraped,,English,"1,000",,545,Public,,No,,,Custom,"Code execution, Pass@1 measured"
+12,"LiveBench: A Challenging, Contamination-Free LLM Benchmark",6/28/2024,"GPT-5 High               79.33        
+GPT-5 Medium               78.85        
+GPT-5 Pro               78.73        
+Claude Sonnet 4.5 Thinking               78.26        
+GPT-5 Codex               78.24        
+GPT-5 Mini High               75.31        
+Claude 4.1 Opus Thinking               75.25        
+GPT-5 Low               74.65        
+Claude 4 Sonnet Thinking               73.82        
+Grok 4               72.84        
+Gemini 2.5 Pro               72.37   
+
+
+Added extra models if we need to remove other versions of same model like gpt5-medium etc     ",GPT-5 High: 79.33; GPT-5 Medium: 78.85; GPT-5 Pro: 78.73; Claude Sonnet 4.5 Thinking: 78.26; GPT-5 Codex: 78.24,79.33,78.85,78.73,78.26,78.24,5,78.68,0.41,1.09,0.1028062915,0.1060246395,0.9888217223,Very high,Yes,18,64.7 (O1 - preview),No known issues,,Instruction/Open Ended,Free-form,"Expert human created, Programatically generated/Scraped","Combination of recent real-world sources (arXiv, The Guardian, Kaggle, IMDb) and harder variants of existing tasks (e.g., BigBench Hard, AMPS); update questions regularly so that the benchmark completely refreshes every 6 months.",English,"1,000",Total: 1000 (Data analysis: 150; Instruction following: 200; Language: 140; Reasoning: 150; Math: 232; Coding: 128),17,Public,1/6 of the questions are private,Yes,"High: diverse formats, styles, and structures (e.g., XML-tagged outputs, math expressions, JSON tables)        ",Yes: benchmark includes breakdowns of easier vs harder questions and tracks per-model weakest/strongest categories,"Accuracy, Task-specific Metrics","Task-specific automatic scoring using ground-truth answers (e.g., exact match, instruction constraint satisfaction)"
+13,LegalBench: A Collaboratively Built Benchmark for Measuring Legal Reasoning in Large Language Models,8/21/2023,"GPT 5: 84.5%
+Gemini 2.5 Pro Exp: 83.6%
+Grok 4: 83.4%
+Claude Sonnet 4.5 (Thinking): 83.2%
+Gemini 2.5 Flash Preview: 82.8%
+
+https://www.vals.ai/benchmarks/legal_bench",GPT 5: 84.5; Gemini 2.5 Pro Exp: 83.6; Grok 4: 83.4; Claude Sonnet 4.5: 83.2; Gemini 2.5 Flash Preview: 82.8,84.5,83.6,83.4,83.2,82.8,5,83.5,0.57,1.7,0.02940303,0.5781716791,0.7158515324,High,Yes,28,78 (GPT-4),No known issues,None afaik,"QA /MCQ, Instruction/Open Ended","MCQ, Free-form","Expert human created, Programatically generated/Scraped",collected tasks designed and hand-crafted by legal professionals,English,"100,000",,390,Public,,No,,No,"Accuracy, BLEU4, Task-specific Metrics","Task-specific automatic scoring using ground-truth answers (e.g., exact match, instruction constraint satisfaction)"
+14,AIR-Bench 2024: A Safety Benchmark Based on Risk Categories from Regulations and Policies,7/12/2024,"Claude 3.5 Sonnet (20241022): 90.8%
+Claude 4.5 Sonnet (20250929): 89.8%
+Claude 4 Sonnet (20250514): 88.3%
+gpt-oss-120b: 88.0%
+GPT-5 nano (2025-08-07): 87.8%
+
+https://crfm.stanford.edu/helm/air-bench/latest/",Claude 3.5 Sonnet: 90.8; Claude 4.5 Sonnet: 89.8; Claude 4 Sonnet: 88.3; gpt-oss-120b: 88.0; GPT-5 nano: 87.8,90.8,89.8,88.3,88,87.8,5,88.94,1.17,3,0.05026507,0.5968358991,0.7003233721,High,Yes,17,89 (Claude 3 Sonnet),No known issues,"None afaik, the authors did a lot of quality control: https://arxiv.org/pdf/2407.17436",Instruction/Open Ended,Free-form,"Expert human created, LLM generated",LLM-based synthetic data generation with human review,English,"5,694",,38,Public,,Yes,,No,LLM-as-a-Judge,LLM-as-a-judge powered by GPT-4o
+15,SWE-bench: Can Language Models Resolve Real-World GitHub Issues?,10/11/2023,"Claude 4.5 Sonnet (20250929): 70.60%
+Claude 4 Opus (20250514): 67.60%
+GPT-5 (2025-08-07) (medium reasoning): 65.00%
+Claude 4 Sonnet (20250514): 64.93%
+GPT-5 mini (2025-08-07) (medium reasoning): 59.80%
+
+https://arxiv.org/abs/2310.06770
+https://www.swebench.com",Claude 4.5 Sonnet: 70.6; Claude 4 Opus: 67.6; GPT-5: 65.0; Claude 4 Sonnet: 64.93; GPT-5 mini: 59.8,70.6,67.6,65,64.93,59.8,5,65.59,3.56,10.8,0.09670997,1.116741077,0.2873338117,Low,Yes,26,3.79 (Cluade 3 Opus),Other data-related issues,"Patches in SWEBench appear correct, but are actually implausible: https://arxiv.org/pdf/2503.15223
+
+Solution leakage and noncomprehensive/weak test cases: https://arxiv.org/abs/2410.06992
+
+Human validation on 500 examples of SweBench for stricter quality control (SWEBench Verified): https://openai.com/index/introducing-swe-bench-verified/
+
+Memorization: https://arxiv.org/html/2411.13323v1,  https://arxiv.org/abs/2506.12286, https://arxiv.org/abs/2512.10218 
+
+
+
+",Coding,Free-form,Programatically generated/Scraped,Automatically scraped from Github repos and attribute-filtered by merged PRs and unit test results.,English,"2,294",,735,Public,,No,,No,Accuracy,Accuracy in terms of %age of tasks resolved
+16,RewardBench: Evaluating Reward Models for Language Modeling,3/21/2024,"infly/INF-ORM-Llama3.1-70B: 95.1
+ShikaiChen/LDL-Reward-Gemma-2-27B-v0.1: 95
+nicolinho/QRM-Gemma-2-27B: 94.4
+Skywork/Skywork-Reward-Gemma-2-27B-v0.2: 94.3
+nvidia/Llama-3.1-Nemotron-70B-Reward: 94.1
+source: https://huggingface.co/spaces/allenai/reward-bench / Gemini 2.5 pro was evaluated according to the leaderboard",infly/INF-ORM-Llama3.1-70B: 95.1; ShikaiChen/LDL-Reward-Gemma-2-27B-v0.1: 95.0; nicolinho/QRM-Gemma-2-27B: 94.4; Skywork/Skywork-Reward-Gemma-2-27B-v0.2: 94.3; nvidia/Llama-3.1-Nemotron-70B-Reward: 94.1,95.1,95,94.4,94.3,94.1,5,94.58,0.4,1,0.04333129,0.2307801186,0.9481339748,Very high,Yes,21,66.5 (RLHFlow/ArmoRM-Llama3-8B-v0.1),No known issues,,QA /MCQ,MCQ,crowdsourced human created,"dataset contains a combination of existing evaluation prompt-completion pairs (selected from existing benchmarks), and those curated for this project",English,"2,958","raw: 5123
+filter: 2985",378,Public,,No,,No,Accuracy,
+17,"
+SQuaD v2
+",6/12/2018,"For All Models on Squad2:
+
+EM / F1
+
+IE-Net (ensemble): 90.939 / 93.214
+FPNet (ensemble): 90.871 / 93.183
+IE-NetV2 (ensemble): 90.860 / 93.100
+SA-Net on Albert 90.724 / 93.011
+SA-Net-V2 (ensemble): 90.679 / 92.948
+
+https://rajpurkar.github.io/SQuAD-explorer/
+NOTE(oliver): SQuaD saturated before the era of LLM and for this one, i would recommnet put SQuaD and SQuaDv2 together
+=====================
+
+For LLMs on Squad2:
+
+EM / F1 / No Answer EM
+
+LLaMA-3.1-70B: 57.13 / 73.68 / 81.56
+GPT4-Turbo: 46.48 / 59.56 / 49.12
+LLaMA-3.2 3B: 45.68 / 52.72 / 31.34
+LLaMA-2-7B: 43.85 / 50.09 / 40.84
+LLaMA-3.1-8B: 41.01 / 47.22 / 13.71
+
+https://arxiv.org/pdf/2412.12893","IE-Net (ensemble): 93.214;
+FPNet (ensemble): 93.183;
+IE-NetV2 (ensemble): 93.100;
+SA-Net on Albert: 93.011;
+SA-Net-V2 (ensemble): 92.948
+",93.2,93.2,93.1,93,92.9,5,93.08,0.12,0.3,0.03706595,0.08093682,0.9934706401,Very high,No,90,51 (Logistic Regression),,"Squad v1: https://arxiv.org/abs/1806.03822 issues
+
+Artifacts:
+https://arxiv.org/html/2401.17498v1 
+https://arxiv.org/pdf/2310.18360 
+
+Contamination:
+https://arxiv.org/abs/2310.18018, https://arxiv.org/abs/2310.17589   ",Instruction/Open Ended,Free-form,crowdsourced human created,Human annotations via crowd-sourced workers,English,"8,862","SQuAD 1.1 
+train: 87,599 
+dev: 10,570 
+test: 9,533 
+
+SQuAD 2.0
+train: 130,319
+dev: 11,873 
+test: 8,862 ",3831,Public,,No,,No,F1,They do exact match and F1 token overlap for the words (Nishant)
+18,GLUE,4/21/2018,"For All Models:
+Turing ULR v6: 91.3
+Vega v1: 91.3
+Turing NLR v5: 91.2
+DeBERTa + CLEVER: 91.1
+ERNIE: 91.1
+https://gluebenchmark.com/leaderboard
+T5 had 90.3 on 18 Jan 2020, RoBERTa
+might have reached within 1% of running top 5 already after 18 Jul 2019
+with 88.1
+
+For LLMs (but this paper is sus):
+ChatGPT (assumed to be fintuned GPT-3.5) with 78.7%
+ChatGPT w/ 5-shot CoT: 86.2%
+ : https://ar5iv.labs.arxiv.org/html/2302.10198
+[Robert: I corrected the scores from 81.2 to 78.7 as that is the number given in the paper]",Turing ULR v6: 91.3; Vega v1: 91.3; Turing NLR v5: 91.2; DeBERTa + CLEVER: 91.1; ERNIE: 91.1,91.3,91.3,91.2,91.1,91.1,5,91.2,0.09,0.2,0.01569846184,0.1274010168,0.9838999941,Very high,No,92,"70 (BiLSTM + Attn, ELMo)",Other data-related issues,Contamination: https://arxiv.org/abs/2310.18018,QA /MCQ,MCQ,crowdsourced human created,,English,"424,205",,9064,Public,,No,,No,"Accuracy, F1, Correlation",acc
+19,SuperGLUE,5/3/2019,"
+For All Models:
+Hairuo: 91.4        
+Vega v2: 91.3
+ST-MoE-32B: 91.2
+Turing NLR v5: 90.9
+ERNIE 3.0: 90.6
+https://super.gluebenchmark.com/leaderboard
+T5 had 89.3 on 17 Jan 2020 (very likely in within 1% of the then the running top 5)
+human baselines are at 89.8
+
+
+For LLMs:
+The best I found is GPT-4 with 92% (but this paper is very sus): https://arxiv.org/pdf/2303.11436
+",Hairuo: 91.4; Vega v2: 91.3; ST-MoE-32B: 91.2; Turing NLR v5: 90.9; ERNIE 3.0: 90.6,91.4,91.3,91.2,90.9,90.6,5,91.08,0.29,0.8,0.03511428,0.2278275628,0.94941868,Very high,No,79,71.5 (Bert++),Other data-related issues,"Shortcuts: https://arxiv.org/abs/2105.01192
+
+Contamination: https://hitz-zentroa.github.io/lm-contamination/",QA /MCQ,MCQ,crowdsourced human created,"superglue is a mix out of many different tasks, but none synthetically generated, and unclear if human experts involved",English,"17,641",,2818,Public,,No,,No,"F1, Accuracy, Correlation",acc
+20,AIME 2025,2/8/2025,"GPT-5.2 (high) — 99.0%
+Gemini 3 Flash — 97.0%
+MiMo-V2-Flash — 96.3%
+Gemini 3 Preview (high) — 95.7%
+GLM-4.7 — 95.0%
+
+GPT-5 pro has supposedly 100% wiht tools on AIME-2025;
+https://artificialanalysis.ai/evaluations/aime-2025
+https://sparkco.ai/blog/gpt-5-aime-benchmark-100-accuracy-analysis
+https://intuitionlabs.ai/articles/aime-2025-ai-benchmark-explained
+https://llmdb.com/benchmarks/aime-2024
+https://llmdb.com/benchmarks/aime-2025","GPT-5.2 (high): 99.0; Gemini 3 Flash: 97.0; MiMo-V2-Flash: 96.3; Gemini 3 Preview (high): 95.7; GLM-4.7: 95.0
+",99,97,96.3,95.7,95,5,96.6,1.37,4,0.1023706905,0.390736839,0.8584084212,High,Yes,10,26 (Gemini 1.5),Contamination,https://arxiv.org/abs/2505.23281,Instruction/Open Ended,Free-form,Expert human created,Humans create the Exam ,English,30,https://huggingface.co/datasets/opencompass/AIME2025,N/A,Public,,No,,No,Accuracy,
+21,SimpleQA,11/8/2024,"DeepSeek-V3.2-Exp — 97.1%
+
+Grok 4 Fast — 95.0%
+
+DeepSeek-V3.1 — 93.4%
+
+DeepSeek-R1-0528 — 92.3%
+
+Gemini 3 Pro — 72.1%
+Source: https://llm-stats.com/benchmarks/simpleqa ","DeepSeek-V3.2-Exp: 97.1; 
+Grok 4 Fast: 95.0; 
+DeepSeek-V3.1: 93.4; 
+DeepSeek-R1-0528: 92.3; 
+Gemini 3 Pro: 72.1
+",97.1,95,93.4,92.3,72.1,5,89.98,9.08,25,0.05904695,4.233919191,0.0000000163985698,Very low,Yes,13,44.8 (o1-preview),"Noisy data, Mislabeling, Biases, Other data-related issues",https://arxiv.org/pdf/2509.07968 (issues mentioned here(; https://github.com/openai/simple-evals/issues ,Instruction/Open Ended,Free-form,Expert human created,Completely human written,English,"4,326","We present a benchmark called SimpleQA, which contains 4,326 short, fact-seeking ques-
+tions.",137,Public,,No,,,Accuracy,
+22,Multilingual Massive Multitask Language Understanding (MMMLU),9/13/2024,"Gpt 5 thinking ~ 89% 
+GPT-4.5: 85.1%
+Gpt-5-main ~ 84.8%
+o3 mini 81.1%
+GPT-4o: 81.5%
+Claude-3.5-Sonnet 77.39 
+GPT4-0125 70.78 
+GPT4o-mini 62.63
+
+Open-weight LLMs:
+Marco-72B: 76.1
+Llama-3.1-70B-Instruct 71.67 
+Qwen2-72B: 69.2
+Qwen2.5-72B: 69.0
+Llama-3-70B-Instruct: 64.3
+
+From: https://openai.com/index/introducing-gpt-4-5/; 
+https://arxiv.org/abs/2412.04003; 
+and https://cdn.openai.com/gpt-5-system-card.pdf",Gpt 5 thinking ~: 89.0; GPT-4.5: 85.1; Gpt-5-main ~: 84.8; o3 mini: 81.1; GPT-4o: 81.5,89,85.1,84.8,81.1,81.5,5,84.3,2.87,7.9,0.02368246,3.166900738,0.00004409076176,Very low,Yes,15,48.9 (UnifiedQA),"Contamination, Mislabeling, Noisy data","Robert: Likely carries most of the Issues as MMLU, i.e. Contamination, Mislabeling, Noisy data (see above), so i added them]
+
+Nishant: Automatic translation introduces cultural + linguistic bias: https://arxiv.org/pdf/2412.03304",QA /MCQ,MCQ,"Expert human created, crowdsourced human created","Translated from MMLU using professional translators (by openAI). MMLU itself was ""manually collected by graduate and undergraduate students from freely available sources online. These include practice questions for tests such as the GRU and the United States Medical Licensing examination. It also includes questions designed for undergraduate courses and questions designed for readers of Oxford University Press books.",14 languages,"196,588",https://huggingface.co/datasets/openai/MMMLU,N/A,Public,,No,"[unless high-school book test should be considered ""templated""/not diverse]",No,Accuracy,
+23,Global MMLU,12/5/2024,"Gemini-2.5-Pro: 94.8
+Grok-4-0709: 91.1
+Gemini-2.5-Flash:  90.6
+Gemini-2.5-Flash-Preview-05-20: 90.5
+Gpt-5-2025-08-07: 89.7
+source (recently updated): https://www.kaggle.com/benchmarks/cohere-labs/global-mmlu-lite",Gemini-2.5-Pro: 94.8; Grok-4-0709: 91.1; Gemini-2.5-Flash: 90.6; Gemini-2.5-Flash-Preview-05-20: 90.5; Gpt-5-2025-08-07: 89.7,94.8,91.1,90.6,90.5,89.7,5,91.34,1.79,5.1,0.01351493199,3.773603895,0.0000006540471754,Very low,Yes,12,(Gpt 4o),No known issues,Unrelated but Contamination is possible:  https://arxiv.org/abs/2406.13236       ,QA /MCQ,MCQ,"Expert human created, crowdsourced human created",Annotate Subset of english MMLU ,42 languages,"601,734",https://huggingface.co/datasets/CohereLabs/Global-MMLU,63,Public,,No,,,Accuracy,
+24,MGSM (Multilingual Grade School Math (MGSM) benchmark),10/7/2022,"Claude Opus 4.1: 94.4%
+Claude Sonnet 4.5: 94.3%
+Claude Opus 4: 93.8%
+o4 Mini: 93.4%
+Claude Sonnet 4: 93.0%
+Claude Sonnet 3.7: 93.0%
+GPT 5: 92.8%
+
+https://www.vals.ai/benchmarks/mgsm",Claude Opus 4.1: 94.4; Claude Sonnet 4.5: 94.3; Claude Opus 4: 93.8; o4 Mini: 93.4; Claude Sonnet 4: 93.0,94.4,94.3,93.8,93.4,93,5,93.78,0.53,1.4,0.04742874,0.2951796843,0.9165569766,Very high,Yes,38,55 (PaLM),"No known issues, Other data-related issues","Translational errors:  https://arxiv.org/abs/2511.05162   
+
+
+Could not verify ""3%"" number from the original comment, but based on the code from the paper: https://arxiv.org/pdf/2502.03461, around 8.3% (110 questions) were removed from original GSM*K dataset for mislabeled or ambiguous questions. Platinum-benchmark repo: https://huggingface.co/datasets/madrylab/gsm8k-platinum
+
+Original: [At least 3% of questions were found to have issues for regular GSM8k: https://gradientscience.org/gsm8k-platinum/?utm_source=chatgpt.com]
+
+",Instruction/Open Ended,"Free-form, MCQ",crowdsourced human created,Used paid professional translators to translate 250 selected English questions from GSM8K.,11 languages,"2,750",,467,Public,,No,,,Accuracy,
+25,Multilingual Competition Level Math (MCLM),2/25/2025,"Best I could find is an LLM eval on one task: MT-AIME:
+
+Qwen3-235B: 80.8
+Gemini-2.5 Pro: 76.9
+DeepSeek r1: 73.5
+OpenAI o1: 67.4
+
+Qwen3 technical report: https://arxiv.org/abs/2505.09388",Qwen3-235B: 80.8; Gemini-2.5 Pro: 76.9; DeepSeek r1: 73.5; OpenAI o1: 67.4,80.8,76.9,73.5,67.4,67.4,5,73.2,5.27,13.4,0.06361547,2.106405936,0.01183201879,Low,Yes,10,52.58 (o3-mini),No known issues,N/A,"QA /MCQ, Instruction/Open Ended",Free-form,"crowdsourced human created, LLM generated",LLM translation and then verified by humans,49 languages,"8,580","156 * 55
+https://huggingface.co/datasets/amphora/MCLM",9,Public,,No,,,Accuracy,
+26,"SIB-200: A Simple, Inclusive, and Big Evaluation Dataset for Topic Classification in 200+ Languages and Dialects ",9/15/2023,"Fully Supervised: 
+XLM-R: 75.9
+XLM-R (base): 71.0
+Glot-500: 64.2
+MLP: 62.8
+
+Zero-Shot Prompt:
+GPT-3.5-Turbo: 43.3
+GPT-4: 48.7
+
+LLMs (based on token prob):
+Llama 3 8B: 63.69
+Llama 3.1 8B: 61.42
+Gemma 7B: 58.21
+
+Paper: https://arxiv.org/pdf/2309.07445
+Third party paper: https://arxiv.org/pdf/2409.17892",XLM-R: 75.9; XLM-R: 71.0; Glot-500: 64.2; MLP: 62.8; GPT-3.5-Turbo: 43.3,75.9,71,64.2,62.8,43.3,5,63.44,11.13,32.6,0.04577137,7.122355882,0,Very low,No,27,75.9 (XLM-R),,Prompting variability: https://arxiv.org/pdf/2311.07978,QA /MCQ,Free-form,Expert human created,"based on Flores-200 (sentences from sources such as wikipedia, translated by professional human translators),  four annotators who are native speak-
+ers of English to label 2,009 to the 14 categories, final label assigned by majority voting",200 languages,"41,820","train: 701 dev: 99 test :204
+204 * 205
+https://huggingface.co/datasets/Davlan/sib200",98,Public,,No,,,Accuracy,
+27,MMLU-Indic,10/22/2024,"Sarvam-M (24B): 0.79
+Llama 4 Scout (17B/109B): 0.77
+Gemma 3 (27B): 0.75
+Llama 3.3 (70B): 0.74
+Mistral Small (24B): 0.64
+(Native, non-romanized sciprt evals)",Sarvam-M: 79.0; Llama 4 Scout: 77.0; Gemma 3: 75.0; Llama 3.3: 74.0; Mistral Small: 64.0,79,77,75,74,64,5,73.8,5.19,15,0.02698189996,5.559282342,0,Very low,Yes,14,79.0 (Sarvam-M (24B)),"Noisy data, Mislabeling, Biases, Other data-related issues","Cross lingual contamination is possible: https://arxiv.org/abs/2406.13236            
+
+Likely carries most of the Issues as MMLU, i.e. Contamination, Mislabeling, Noisy data (see above), see also for example: IndicMMLU-Pro , 
+
+in addition automatic translation introduces cultural + linguistic bias: https://arxiv.org/pdf/2412.03304
+
+Some additonal choice/answer labelling issues: https://huggingface.co/datasets/sarvamai/mmlu-indic/discussions/1",QA /MCQ,MCQ,Expert human created,Original data collected and annotated by humans; then automatically translated into indic languages using their translation and transliteration models.,"Bengali, Kannada, Telugu, Tamil, Oriya, Punjabi, Malayalam, Marathi, Hindi, Gujarati","296,318",https://huggingface.co/datasets/sarvamai/mmlu-indic,N/A (blog post),Public,,No,"[unless high-school book test should be considered ""templated""/not diverse]",,Accuracy,
+28,GSM8k-Indic ,5/23/2025,"Sarvam-M (24B): 0.92
+Gemma 3 (27B): 0.89
+Llama 3.3 (70B): 0.86
+Llama 4 Scout (17B/109B): 0.83
+Mistral Small (24B): 0.82
+(Native, non-romanized sciprt evals)
+",Sarvam-M: 92.0; Gemma 3: 89.0; Llama 3.3: 86.0; Llama 4 Scout: 83.0; Mistral Small: 82.0,92,89,86,83,82,5,86.4,3.72,10,0.03646618,2.742266943,0.00054212,Very low,Yes,7,92.0 (Sarvam-M (24B)),"Contamination, Mislabeling","Likely same issues as GSM8k: potential contamination
+label noise
+https://gradientscience.org/gsm8k-platinum/
+
+in addition automatic translation introduces cultural + linguistic bias: https://arxiv.org/pdf/2412.03304",Instruction/Open Ended,Free-form,Expert human created,"From general GSM8K: ""Couldn't find exact info.; OpenAI authors probably curated it based on textbooks + human annotations""
+
+ then automatically translated into indic languages using their translation and transliteration models.","Bengali, Kannada, Telugu, Tamil, Oriya, Punjabi, Malayalam, Marathi, Hindi, Gujarati","27,670",https://huggingface.co/datasets/sarvamai/gsm8k-indic,N/A (blog post),Public,,No,"[unless high-school book test should be considered ""templated""/not diverse]",,Accuracy,
+29,HEAD-QA: A Healthcare Dataset for Complex Reasoning,6/12/2019,"There seem to be new data in the MedHELM leaderboard (https://crfm.stanford.edu/helm/medhelm/latest/#/leaderboard):
+
+Claude 3.7 Sonnet (20250219): 0.912
+Claude 3.5 Sonnet (20241022): 0.906
+GPT-4o (2024-05-13): 0.906
+o3-mini (2025-01-31): 0.893
+Gemini 2.0 Flash: 0.88
+","Claude 3.7 Sonnet (20250219): 91.2; Claude 3.5 Sonnet (20241022): 90.6; GPT-4o (2024-05-13): 90.6; o3-mini (2025-01-31): 89.3; Gemini 2.0 Flash: 88
+",91.2,90.6,90.6,89.3,88,5,89.94,1.15,3.2,0.05957601,0.5371289345,0.7493811906,High,No,78,37.20 (EN IR),Noisy data,"[Not followup, but from paper itself - Possible errors as they used Google API (2019) for ES-EN translation of medical exams + relied on PDF-to-text conversions + questions included formulae. This is acknowledged in the paper. On the translation side, human evaluation on translation quality showed reasonable adequacy (4.35 or 4.71/5) and fluency (4/5).]",QA /MCQ,MCQ,Expert human created,Exams from the Spanish healthcare system (specialized position in public healthcare areas) from 2013 to 2019.,English; Spanish,"2,742",Divided into train-dev-test splits (2657 train - 1366 dev - 2742 test),101,Public,,No,,,Accuracy,"Also POINTS, used in the actual human exam scoring: (right answer +3 points, wrong answer -1)"
+30,BoolQ,5/28/2019,"T5-11B 91.2%
+PaLM 2-L 90.9%
+T5-3B 89.9%
+Inflection-1 89.7%
+Stable Beluga 2 89.4%
+
+From : https://epoch.ai/benchmarks/bool-q",T5-11B: 91.2; PaLM 2-L: 90.9; T5-3B: 89.9; Inflection-1: 89.7; Stable Beluga 2: 89.4,91.2,90.9,89.9,89.7,89.4,5,90.22,0.7,1.8,0.05532315,0.3253610819,0.899550726,High,No,79,82.2 (Pretrained Bert large + Multi NLI ),No known issues,N/A,QA /MCQ,MCQ,crowdsourced human created,"Questions are gathered from anonymized, aggregated queries to the Google search engine. Annotators label question/article pairs.",English,"3,270","train.jsonl: 9427 labeled training examples
+dev.jsonl: 3270 labeled development examples
+test.jsonl: 3245 unlabeled test examples
+https://github.com/google-research-datasets/boolean-questions",2076,Public,https://huggingface.co/datasets/google/boolq,No,,,Accuracy,
+31,PIQA,11/27/2019,"GPT 4o mini 88.7 [From https://epoch.ai/benchmarks/piqa]
+Phi-3.5-MoE 88.6 
+Gemini 1.5 flash 87.5
+GLM 4.5 85.3
+Deepseek v3 base: 84.7
+Gemma 2 83.5
+",Phi-3.5-MoE: 88.6; Gemini 1.5 flash: 87.5; GLM 4.5: 85.3; Deepseek v3 base: 84.7; Gemma 2: 83.5,88.6,87.5,85.3,84.7,83.5,5,85.92,1.87,5.1,0.06602642,0.7724180702,0.5506644301,Moderate,Yes,73, 77.1 (FAIR RoBERTa),Contamination,https://arxiv.org/abs/2411.03923,QA /MCQ,MCQ,crowdsourced human created,human collection using HIT,English,"3,000","The dataset contains 16,000 examples for training, 2,000 for development and 3,000 for testing.",2397,Public,https://huggingface.co/datasets/ybisk/piqa,No,,,Accuracy,
+32,SocialIQa ,4/23/2019,"Some new numbers can be found in this paper: https://arxiv.org/abs/2312.17661v1
+
+GPT-4 Turbo  (k-shot, CoT): 84.5
+GPT-4 Turbo (0-shot, SP): 82.0
+Gemini Pro (k-shot, CoT): 78.5
+GPT-3.5 Turbo (k-shot, CoT): 78.0
+Llama-2-70b  (k-shot, CoT): 77.5","GPT-4 Turbo (k-shot, CoT): 84.5; GPT-4 Turbo (0-shot, SP): 82.0; Gemini Pro (k-shot, CoT): 78.5; GPT-3.5 Turbo (k-shot, CoT): 78.0; Llama-2-70b  (k-shot, CoT): 77.5",84.5,82,78.5,78,77.5,5,80.1,2.71,7,0.08046653,0.8699269265,0.4691780911,Moderate,No,80,64.5 (BERT-large),"Noisy data, Mislabeling, Other data-related issues"," 28% of the items con-
+tain data-related flaws: https://arxiv.org/abs/2506.23864 ",QA /MCQ,MCQ,crowdsourced human created,"Questions and answers are gathered through three
+phases of crowdsourcing aimed to collect the context, the question, and a set of positive and negativeanswers.",English,"2,224","train 33,871
+dev 5,369
+test 5,571",1239,Public,https://huggingface.co/datasets/allenai/social_i_qa,No,,,Accuracy,
+33,OpenBookQA,9/10/2018,"Claude 3.5 Sonnet (20240620): 97.2
+GPT-4 Turbo (2024-04-09): 97
+GPT-4o (2024-08-06): 96.8
+Claude 3.5 Sonnet (20241022): 96.6
+GPT-4o (2024-05-13): 96.6
+Source: https://crfm.stanford.edu/helm/lite/latest/#/leaderboard",Claude 3.5 Sonnet: 97.2; GPT-4 Turbo: 97.0; GPT-4o: 96.8; Claude 3.5 Sonnet: 96.6; GPT-4o: 96.6,97.2,97,96.8,96.6,96.6,5,96.84,0.23,0.6,0.0518263,0.1157713473,0.9866864155,Very high,No,87,76.9 (BiLSTM max-out),"Biases, Contamination, Mislabeling","Biases: https://arxiv.org/abs/2505.15553, Contamination: https://hitz-zentroa.github.io/lm-contamination/, Mislabeling: https://arxiv.org/abs/2511.16842   ",QA /MCQ,MCQ,crowdsourced human created,Section 3 and 3.1 of paper (https://arxiv.org/pdf/1809.02789),English,500,"OpenBookQA consists of 5957 questions, with 4957/500/500 in the Train/Dev/Test splits.",2072,Public,,No,"Prompts are generated from WorldTree facts and simple logical rules, and are relatively short",,Accuracy,
+34,RACE,4/17/2017,"ALBERT-SingleChoice + transfer learning (ensemble): 91.4
+Megatron-BERT (ensemble): 90.9
+ALBERT-SingleChoice + transfer learning: 90.7
+ALBERT + DUMA (ensemble): 89.8
+Megatron-BERT: 89.5
+Source: https://web.archive.org/web/20220128031551/http://www.qizhexie.com/data/RACE_leaderboard.html",ALBERT-SingleChoice + transfer learning: 91.4; Megatron-BERT: 90.9; ALBERT-SingleChoice + transfer learning: 90.7; ALBERT + DUMA: 89.8; Megatron-BERT: 89.5,91.4,90.9,90.7,89.8,89.5,5,90.46,0.71,1.9,0.04956718,0.3833181762,0.8633519718,High,No,104,44.1 (Gated-Attention Reader),"Biases, Contamination, Noisy data","Biases and noise: https://proceedings.mlr.press/v101/liang19a/liang19a.pdf (anecdotal evidence), https://arxiv.org/pdf/1704.04683 (some questions are ambiguous), Contamination:  https://arxiv.org/pdf/2005.14165 (Table C.1)",QA /MCQ,MCQ,"Expert human created, Programatically generated/Scraped",Section 4 of paper (https://arxiv.org/pdf/1704.04683),English,"4,934","87,866 - 4,887 - 4,934 - 97,687 in the Train - Dev - Test - All splits",1762,Public,,No,Prompts are from English examinations created by teachers in China ,,Accuracy,
+35,HumanEval,7/8/2021,"
+Kimi K2 0905: 94.5
+Claude 3.5 Sonnet: 93.7
+GPT-5: 93.4
+Kimi K2 Instruct: 93.3
+Qwen2.5-Coder 32B Instruct: 92.7
+Source: https://llm-stats.com/benchmarks/humaneval",Kimi K2 0905: 94.5; Claude 3.5 Sonnet: 93.7; GPT-5: 93.4; Kimi K2 Instruct: 93.3; Qwen2.5-Coder 32B Instruct: 92.7,94.5,93.7,93.4,93.3,92.7,5,93.52,0.59,1.8,0.09665807,0.186223453,0.9659152568,Very high,Yes,53,28.81 (CODEX-12B),"Contamination, Mislabeling","Contamination: https://aclanthology.org/2024.findings-acl.716/, mislabeling: https://arxiv.org/pdf/2305.01210 (insufficient testing), Ground truth issues: https://proceedings.neurips.cc/paper_files/paper/2023/file/43e9d647ccd3e4b7b5baab53f0368686-Paper-Conference.pdf  ",Coding,Free-form,Expert human created,set of 164 handwritten programming problems,"Python, English",164,,7330,Public,,No,,,pass$k,
+36,MBPP,8/17/2021,"O1 Preview (Sept 2024)         95.5
+O1 Mini (Sept 2024) 93.1
+Llama-3.3 Nemotron Super 49B v1 91.3
+Qwen2.5-Coder-32B-Instruct 90.5
+Gemini 1.5 Pro 002: 89.7
+source: https://airank.dev/benchmarks/mbpp 
+https://evalplus.github.io/leaderboard.html",O1 Preview: 95.5; O1 Mini: 93.1; Llama-3.3 Nemotron Super 49B v1: 91.3; Qwen2.5-Coder-32B-Instruct: 90.5; Gemini 1.5 Pro 002: 89.7,95.5,93.1,91.3,90.5,89.7,5,92.02,2.07,5.8,0.06585899,0.8806694575,0.4604372519,Moderate,Yes,52,59.6 (GPT 3),"Contamination, Other data-related issues","https://arxiv.org/abs/2403.04811
+, https://arxiv.org/abs/2407.07565 ; ",Coding,Free-form,Expert human created,,"English, Python",974,,2706,Public,,No,,,pass$k,
+37,DROP,3/4/2019,"Kimi k2 instruct : 93.5
+DeepSeek-V3: 91.6
+Claude 3.5 Sonnet: 87.1
+GPT-4 Turbo: 86
+Nova Pro: 85.4
+Llama 3.1 405B Instruct: 84.8
+source: https://llm-stats.com/benchmarks/drop",Kimi k2 instruct: 93.5; DeepSeek-V3: 91.6; Claude 3.5 Sonnet: 87.1; GPT-4 Turbo: 86.0; Nova Pro: 85.4,93.5,91.6,87.1,86,85.4,5,88.72,3.23,8.1,0.08745399,0.9262013156,0.4240733358,Moderate,Yes,81,44.1 (NAQANet),Contamination,"
+https://huggingface.co/blog/open-llm-leaderboard-drop  (Normalization interrogations)
+build on wiki data -- contamination",Instruction/Open Ended,Free-form,Expert human created,"In addition,
+to further increase the difficulty of the questions
+in DROP, we employed a novel adverserial anno-
+tation setting, where workers were only allowed
+to submit questions which a real-time QA model
+BiDAF could not solve.",English,588,,1291,Public,,No,,,F1,exact match
+38,TriviaQA ,5/10/2017,"Kimi K2 Base 85.1
+Gemma 2 27B 0.837
+Mistral Small 3.1 24B Instruct: 80.5
+Mistral Small 3.1 24B Base: 80.5
+Mistral Small 3 24B Base: 80.3
+source: https://airank.dev/benchmarks/triviaqa",Kimi K2 Base: 85.1; Gemma 2 27B: 83.7; Mistral Small 3.1 24B Instruct: 80.5; Mistral Small 3.1 24B Base: 80.5; Mistral Small 3 24B Base: 80.3,85.1,83.7,80.5,80.5,80.3,5,82.02,1.99,4.8,0.04575763137,1.049005347,0.3327338962,Moderate,Yes,103,40 (BiDAF ),Contamination,"build on wiki data -- contamination
+https://arxiv.org/pdf/2312.12343v1",Instruction/Open Ended,Free-form,Expert human created,"we asked a human annotator to answer 986
+and 1345 (dev and test set) questions from the
+Wikipedia and Web domains respectively",English,"18,527",,3491,Public,,No,,,F1,exact match
+39,Natural Questions,7/1/2019,"HELM Lite (https://crfm.stanford.edu/helm/lite/latest/#/leaderboard):
+
+Amazon Nova Pro: 0.829
+Amazon Nova Lite: 0.815
+PaLM-2 (Bison): 0.813
+GPT-4o (2024-05-13): 0.803
+GPT-4 Turbo (2024-04-09): 0.795",Amazon Nova Pro: 82.9; Amazon Nova Lite: 81.5; PaLM-2 (Bison): 81.3; GPT-4o (2024-05-13): 80.3; GPT-4 Turbo (2024-04-09): 79.5,82.9,81.5,81.3,80.3,79.5,5,81.1,1.15,3.4,0.05866158,0.57959572,0.7146722739,High,No,78, 72.34 (CoRAG),Mislabeling,"Section 4 (""Long/short answers have 90%/84% precision respectively""), Contamination: https://arxiv.org/pdf/2411.03923",QA /MCQ,Free-form,crowdsourced human created,Annotators used a flowchart (Figure 2) to filter actual questions submitted to Google Search,English,"7,842","The public
+release consists of 307,373 training examples
+with single annotations; 7,830 examples with
+5-way annotations for development data; and
+a further 7,842 examples with 5-way annotated sequestered as test data. ",4401,Public,,No,,,F1,
+40,LAMBADA,6/21/2016,"PaLM-540B (Few-Shot) 89.7
+PaLM 2-L (one-shot) 86.9
+GPT-3 175B (Few-Shot) 86.4
+PaLM 2-M (one-shot) 83.7
+PaLM-540B (One-Shot) 81.8
+source: https://opencodepapers-b7572d.gitlab.io/benchmarks/language-modelling-on-lambada.html",PaLM-540B: 89.7; PaLM 2-L: 86.9; GPT-3 175B: 86.4; PaLM 2-M: 83.7; PaLM-540B: 81.8,89.7,86.9,86.4,83.7,81.8,5,85.7,2.73,7.9,0.05797409,1.36267775,0.1561574242,Low,No,114,21.9 (LSTM),Contamination,Book Corpus,Instruction/Open Ended,Free-form,crowdsourced human created,Book Corpus with easy passages filtered out,English,"5,153","train: 2'662 novels
+dev: 4'869 passages
+test: 5'153 passages
+https://huggingface.co/datasets/cimec/lambada",912,Public,,No,,,Accuracy,
+41,ANLI,11/1/2019,"A1:
+T5-3B (explanation prompting) 81.8
+T0-11B (explanation prompting) 75.6
+InfoBERT (RoBERTa) 75
+PaLM 2-L (one-shot) 73.1
+RoBERTa (Large) 72.4
+
+A2:
+T5-3B (explanation prompting) 72.5
+PaLM 540B (Self Improvement, Self Consistency) 66.5
+PaLM 540B (Self Improvement, CoT Prompting) 65.3
+PaLM 540B (Self Improvement, Standard-Prompting) 64.8
+PaLM 540B (Self Consistency) 64.5
+
+A3:
+T5-3B (explanation prompting) 74.8
+PaLM 540B (Self Improvement, Self Consistency) 67.9
+PaLM 540B (Self Improvement, CoT Prompting) 67.3
+PaLM 2-L (one-shot) 67.1
+PaLM 540B (Self Improvement, Standard-Prompting) 66.9
+
+Source: https://huggingface.co/datasets/pwc-archive/files/blob/main/jul-28-datasets.json.gz",T5-3B: 81.8; T0-11B: 75.6; InfoBERT: 75.0; PaLM 2-L: 73.1; RoBERTa: 72.4,81.8,75.6,75,73.1,72.4,5,75.58,3.33,9.4,0.07851244,1.197262485,0.2384877202,Low,No,74,53.7 (RoBERTa),,Texts written by human writers - https://aclanthology.org/2022.scil-1.3.pdf - maybe worth seeing this paper ,QA /MCQ,,crowdsourced human created,,English,"3,200","Train / Dev / Test
+162,865 / 3,200 / 3,200",1242,Public,,No,,,Accuracy,
+42,Tydiqa,3/11/2020,"TuLRv6 - XXL: 84.6
+BLOOMA: 75.2
+gpt-4-32k: 71.5
+Phi-3.5-MoE-instruct: 67.1
+Phi-3.5-mini-instruct: 62.2
+RoBERTa (Large): 72.4
+sources: 
+https://aclanthology.org/2023.emnlp-main.258.pdf
+https://llm-stats.com/benchmarks/mega-tydi-qa
+tps://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/discover-the-new-multi-lingual-high-quality-phi-3-5-slms/4225280",TuLRv6 - XXL: 84.6; BLOOMA: 75.2; gpt-4-32k: 71.5; Phi-3.5-MoE-instruct: 67.1; Phi-3.5-mini-instruct: 62.2,84.6,75.2,71.5,67.1,62.2,5,72.12,7.61,22.4,0.05165688,4.336305339,0.000000006819061429,Very low,No,69,"79.0 (mBERT)
+",Contamination,"""TyDiQA-GoldP for which the valida-
+tion data that we use for evaluation is also likely to
+be included in the fine-tuning data""
+
+source: https://aclanthology.org/2023.emnlp-main.258.pdf",QA (MCQ),Free-form,crowdsourced human created,"Human annotators are given short prompts consisting of the first 100 characters of Wikipedia articles and asked to write questions that (a) they are actually interested in knowing the answer to, and (b) that are not answered by the prompt.","English, Arabic, Bengali, Finnish, Indonesian, Japanese, Kiswahili, Korean, Russian, Telugu, Thai","18,751",,740,Public,,No,,,F1,
+43,CommonsenseQA,11/5/2018,"DeBERTaV3-large+KEAR 91.2
+Palm 2 90.4
+Mistral NeMo Instruct: 70.4
+GPT: 45.5
+ESIM+ELMo: 34.1
+ESIM+GLoVe: 32.8
+BiDAF++: 32
+
+source: 
+https://llm-stats.com/benchmarks/commonsenseqa
+https://aclanthology.org/N19-1421.pdf
+(Original leaderboard not available)",DeBERTaV3-large+KEAR: 91.2; Palm 2: 90.4; Mistral NeMo Instruct: 70.4; GPT: 45.5; ESIM+ELMo: 34.1,91.2,90.4,70.4,45.5,34.1,5,66.32,23.18,57.1,0.05249582,10.87705733,0,Very low,No,85,55.9 (BERT-Large),Other data-related issues,Non commonsense qs: https://arxiv.org/pdf/2411.03964,QA (MCQ),MCQ,"crowdsourced human created, Programatically generated/Scraped","Using subgraphs from ConceptNet, the paper extracts 1 source and 3 target concepts. MT workers use the source and target sets to formulate three questions related to the target concept. Then, workers add ""distractor"" target concepts to increase task difficulty. After verifying the questions with from a disjoint group of workers, the paper adds textual context using Google Search.",English,"12,247",,2300,Public,"Dataset available on HF: 
+https://huggingface.co/datasets/tau/commonsense_qa",Yes,"Although human annotators are used to formulate text questions, the question concepts are derived from ConceptNet which has ""relation"" between source and target concepts.",,Accuracy,
+44,Belebele,7/25/2024,"cogito-v1-preview-qwen-14B: 88.4
+gemma-3-12b-it,bos: 88.2
+Qwen3-14B: 87.39
+gemma-2-9b-it: 87.31
+GaMS3-12B-Instruct,bos: 86.29","cogito-v1-preview-qwen-14B: 88.4;
+gemma-3-12b-it,bos: 88.2;
+Qwen3-14B: 87.39;
+gemma-2-9b-it: 87.31;
+GaMS3-12B-Instruct,bos: 86.29",88.4,88.2,87.39,87.31,86.29,5,87.52,0.75,2.11,0.0258164,0.8173098033,0.5127354214,Moderate,Yes,17,60.2 (XLM-V),No known issues,,QA (MCQ),MCQ,"Expert human created, Programatically generated/Scraped","The translations (and proofreading) were done by experts, explicitly “without the use of machine translation.”
+
+The passages come directly from FLORES-200, whose English source passages were collected from sources like Wikinews, Wikijunior, and Wikivoyage (i.e., scraped/collected from the web as part of that benchmark).",Multilingual,"109,800","900 question per lanugage (122 lanugages): 900 x 122 = 109,800",192,Public,,Yes,,,Accuracy,
+45,QuAC,8/23/2018,"1) CKT-QA 76.3
+2) CDQ-DeBERTa 75.8
+3) AERmodel 75.2
+4) RoR 74.9
+5) EL-QA 74.6",CKT-QA: 76.3; CDQ-DeBERTa: 75.8; AERmodel: 75.2; RoR: 74.9; EL-QA: 74.6,76.3,75.8,75.2,74.9,74.6,5,75.36,0.62,1.7,0.06571576,0.258689863,0.9352696035,Very high,No,88,60.1 (BiDAF++ w/ 2-Context),Contamination,"Built from “hidden Wikipedia text”, source text likely present in many pretraining corpora.",Instruction/Open Ended,Free-form,Expert human created,Two crowd workers (“student” asks; “teacher” answers with excerpts) over a hidden Wikipedia passage; includes unanswerable/context-dependent questions,English,"7,353","train: 83,568
+dev: 7,354 
+test: 7353",1083,Private,Train/val downloadable; test set not released (submission required for official test scoring),No,Natural freeform questions; not template-instantiated,"HEQ-D is far lower than F1 on leaderboard, many dialogs remain hard even when overall F1 is high","F1, Human Expert, Custom, Accuracy",Span-level scoring; HEQ metrics capture per-question/per-dialog “human equivalence” style thresholds
+46,AGI Eval ,4/14/2023,"Kimi k2 - 84.23  
+Olmo 3 - agi eval english - 88.8 
+Deepseek v3 base - 79.6
+
+
+(AGIEval-all, few-shot leaderboard)
+1) GPT-4o 71.4
+2) Llama 3 400B+ 69.9
+3) Llama 3 70B 63.0
+4) Mixtral 8x22B 61.2
+5) GPT-3.5-Turbo 52.7",Olmo 3: 88.8; Kimi k2: 84.23; Deepseek v3 base: 79.6; GPT-4o: 71.4; Llama 3 400B+: 69.9,88.8,84.23,79.6,71.4,69.9,5,78.79,7.27,18.9,0.05874468182,3.217312515,0.00003195762281,Very low,Yes,32, 69 (GPT 4o),"Biases, Contamination","Contamination [table 4]: https://arxiv.org/pdf/2508.05452  , Derived from official, public standardized exams (US/China etc.), high likelihood of exposure in web text / prep materials; cultural/exam-region bias inherent in sources",QA (MCQ),MCQ,"Expert human created, Programatically generated/Scraped",Exam questions are created by exam setters (expert); benchmark compiled from official/public exam sources and organized into 20 tasks; bilingual,"English, Chinese","8,062","As a result, we construct a benchmark consisting of 8,062 questions for evaluation",655,Public,,No,"Real exam questions, not template-generated",Paper highlights gaps on “complex reasoning” and domain-specific knowledge tasks even for GPT-4,Accuracy,Typically aggregated over tasks; many results reported under zero-/few-shot and CoT prompting settings
+47,C-Eval,5/15/2023,"Kimi K2 92.5
+Deepseek v3 90.1 
+Qwen3-225B-A22B 89.6
+GLM 4.5 86.9
+
+----------------
+1) Claude-3-Opus 71.7
+2) GPT-4-0409 70.5
+3) GPT-4-1106 69.7
+4) Llama-3-70B-Instruct 66.9
+5) Mixtral-8x22B 58.7
+(https://opencompass.readthedocs.io/en/stable/user_guides/corebench.html)",Kimi K2: 92.5; Deepseek v3: 90.1; Qwen3-225B-A22B: 89.6; GLM 4.5: 86.9; Claude-3-Opus: 71.7,92.5,90.1,89.6,86.9,71.7,5,86.16,7.45,20.8,0.08614923,2.41441513,0.00293984,Very low,Yes,31,60 GPT-4),"Contamination, Other data-related issues","Contamination [table 4]: https://arxiv.org/pdf/2508.05452, https://arxiv.org/abs/2310.17589   Authors created C-Eval (and C-Eval Hard) and note test-label withholding to avoid leakage; public exam-style questions still pose contamination risk",QA (MCQ),MCQ,"Expert human created, Programatically generated/Scraped","13,948 multiple-choice exam questions across 52 disciplines and 4 difficulty levels (middle school → professional)",Chinese,"1,346","C-Eval Hard exists as a challenging subset; test label handling described separately by authors
+Dev: 260
+test: 1346
+val: 12342",700,Private,Repo states test labels not publicly released; provides validation split (1346 Qs) accuracy as reference,No,Exam questions are not template-instantiated in the benchmark description,C-Eval Hard explicitly targets harder subjects; paper notes “significant room for improvement,Accuracy,"Reported as average accuracy across subjects, often reported under different prompting (zero-/few-shot) in various evaluations"
+48,MultiPL-E,8/18/2022,"Claude opus 4 89.6
+Claude sonnet 4 88.6
+ GPT 4.1 86.7 
+Kimi k2 Instruct 85.7 
+Gemini 2.5 flash85.6
+Deepseek v3 0324 83.1 
+Mistral medium 3 81.4
+Qwen3-235B-A22B 78.2  ",Claude opus 4: 89.6; Claude sonnet 4: 88.6; GPT 4.1: 86.7; Kimi k2 Instruct: 85.7; Gemini 2.5 flash: 85.6,89.6,88.6,86.7,85.7,85.6,5,87.24,1.6,4,0.04385391253,0.9121193,0.4351947627,Moderate,Yes,40,45 (Codex - codex-davinci-002 ),"Other data-related issues, Contamination","Translated from MBPP/Human eval, some problems couldnt be changed.
+MultiPL-E is derived from HumanEval and MBPP, which are known to have partial overlap with public code repositories
+
+Could also be contamination available in public since 2022",Coding,Free-form,Programatically generated/Scraped,Translated from other benchmarks,19 Programming languages,"12,667","Converted from python to 22 programming languages; 
+https://huggingface.co/datasets/nuprl/MultiPL-E",117,Public,,No,,,"Task-specific Metrics, pass$k","pass@1 is the likelihood of the model producing a
+completion that passes all unit tests, pass@10 is the likelihood of any one of 10 completions passing all unit tests, and
+so on. We calculate pass@1 with temperature 0.2, and use
+temperature 0.8 for pass@10 and pass@100."
+49,Flores-101,6/7/2021,"
+
+GPT-4o 83.0
+Gemini 2.0 Flash 82.8
+Gemini 1.5 Pro  82.8
+Claude 3.7 Sonnet  82.7
+Command A 81.2
+DeepSeek V3 76.3",GPT-4o: 83.0; Gemini 2.0 Flash: 82.8; Gemini 1.5 Pro: 82.8; Claude 3.7 Sonnet: 82.7; Command A: 81.2,83,82.8,82.8,82.7,81.2,5,82.5,0.66,1.8,0.03031223,0.5938197034,0.7028429301,High,Yes,54,N/A,"Contamination, Other data-related issues","https://arxiv.org/abs/2508.20511 [Quality issues], African languages correction [https://arxiv.org/abs/2409.00626], ",Instruction/Open Ended,Free-form,crowdsourced human created,Translated 3001 sentences from wikipedia into 101 languages,101 languages,"102,212","3001 total, 2001 public, test set hidden
+dev: 997 devtest: 1012
+The devtest is meant to be used for testing
+purpose during the development phase. ",659,Private,,No,,,BLEU4,A variation of BLEU is proposed: SentencePiese BLEU
+50,QuALITY,12/17/2021,"Individual models
+Llama 3 405B - 95.2 
+Claude 3 opus - 90.2 (1 shot)/ 89.5 (0 shot) [More claude numbers available in 3 opus report]
+
+Leaderboard: https://nyu-mll.github.io/quality/
+Clustering and Decomposition using Qwen2.5-7b and chat using DeepSeek  88.0         
+Baseline model: RAPTOR + gpt-4o w/ query intent & entity understanding        83.1         
+RAPTOR (collapsed tree) + GPT-4 82.6         
+Baseline model: Long-context GPT-3.5 (gpt-3.5-turbo-16k) as of January 2024 74.7         
+LongMA: Fine-Tuning TechGPT-7B using QLoRA on QuALITY and RACE subset 73.0",Llama 3 405B: 95.2; Claude 3 opus: 90.2; Clustering and Decomposition using Qwen2.5-7b and chat using DeepSeek: 88.0; RAPTOR + GPT-4: 82.6; Long-context GPT3.5: 74.4,95.2,90.2,88,82.6,74.4,5,86.08,7.1,20.8,0.0715501,2.907053811,0.00021369,Very low,No,48,55.4 (Deberta v3 large ),,"N/A [Need someone that might know], will do another search",QA (MCQ),MCQ,crowdsourced human created,"Collect the dataset using a creative crowdsourcing pipeline that ensures the examples have unambiguous answers but are still challenging. Rxample writers carefully read the full source article before writing questions, and to then write questions that are unambiguous and require consolidating information from multiple parts of the text. ",English,"2,128"," 6,737 questions in total, of which 3,360 ques-
+tions are in the difficult subset, QuALITY-HARD
+train: 2523 dev: 2086 test: 2128",200,Public,,No,,,Accuracy,
+51,MMLU-Redux,6/7/2024,"Kimi K2-Thinking-0905 : 0.944
+Claude opus 4: 0.942 
+Qwen3-235B-A22B-Thinking-2507 : 0.938
+Qwen3 VL 235B A22B Thinking : 0.937
+Claude sonnet 4: 0.936
+DeepSeek-R1-0528 : 0.934
+Qwen3-235B-A22B-Instruct-2507 : 0.931
+
+Sources : https://llm-stats.com/benchmarks/mmlu-redux
+                 https://aclanthology.org/2025.naacl-long.262/",Kimi K2-Thinking-0905: 94.4; Claude opus 4: 94.2; Qwen3-235B-A22B-Thinking-2507: 93.8; Qwen3 VL 235B A22B Thinking: 93.7; Claude sonnet 4: 93.6,94.4,94.2,93.8,93.7,93.6,5,93.94,0.31,0.8,0.04537458,0.176310169,0.9693929039,Very high,Yes,18, 41.9% (Claude 3 Opus),No known issues,,QA (MCQ),MCQ,Expert human created,,English,"3,000","To this end, we introduce
+MMLU-Redux, a thoroughly reviewed subset of the MMLU dataset [11] comprising 3,000 questions
+spanning the 30 MMLU subjects we analysed.",,Public,Test set available,No,,,"Recall, F1",
+52,"Arena-Hard 
+(Arena-Hard-Auto-v0.1)",6/18/2024,"v2.0 https://github.com/lmarena/arena-hard-auto?tab=readme-ov-file#leaderboard
+ o3-2025-04-16        85.9  (-0.8 / +0.9)
+                   o4-mini-2025-04-16-high        79.1  (-1.4 / +1.2)
+                                gemini-2.5        79.0  (-2.1 / +1.8)
+                        o4-mini-2025-04-16        74.6  (-1.8 / +1.6)
+                          gemini-2.5-flash        68.6  (-1.6 / +1.6)
+
+
+
+Pits 2 models in competition to see which performs better on a generated prompt dataset
+
+Model win rate / Score /  95% CI 
+
+gpt-4-turbo-2024-04-09        82.63        (-1.88, +1.97)        
+claude-3-5-sonnet-20240620        79.35        (-2.10, +1.27)        
+gpt-4o-2024-05-13        79.21        (-1.79, +1.50)        
+gpt-4-0125-preview        77.96        (-2.02, +1.94)        
+athene-70b-0725        76.83        (-1.99, +1.91)", o3-2025-04-16: 85.9; o4-mini-2025-04-16-high: 79.1; gemini-2.5: 79.0; o4-mini-2025-04-16: 74.6; gemini-2.5-flash: 68.6,85.9,79.1,79,74.6,68.6,5,77.44,5.71,17.3,0.1226774881,1.410201682,0.1368775178,Low,Yes,18,     82.6    (gpt-4-turbo-2024-04-09) ,Biases,"GPT-4-turbo-2024-04-09 (highest scoring model) was also used as judge. in paper, authros exclude this model but it appears still on leaderboard results",Instruction/Open Ended,Free-form,"crowdsourced human created, LLM generated","BenchBuilder pipeline extracts high-quality user queries from vast datasets is simple: each prompt is evaluated using a quality score, and prompts with high scores are sampled evenly across diverse topics. these become the evaluation dataset (500 challenging prompts)",English,500,500 prompts sampled from BenchBuilder curated qualified list - 500 question vary from matchup to matchup,228,Public,,No,widely sampled from crowsourced prompts,,LLM-as-a-Judge,"We evaluate a model on a given prompt using a pairwise comparison against a strong baseline model (e.g.,GPT-4-0314). A judge model (e.g.,GPT-4-Turbo or Gemini-1.5-Pro) then scores each output by rating its preference between the pair on a 5-point Likert scale(Likert,1932)(1 indicates strong preference for model A, 5 indicates strong preference for model B). This scoring method penalizes models more heavily for large losses, effectively distinguishing performance across models. To ensure consistency, we utilize chain-of-thought (Wei et al., 2023) prompting, guiding the LLM judge to generate its own solution before issuing a judgment."
+53,Humanity’s Last Exam,1/27/2025,"HLE Text only
+Gemini 3 pro preview 37.72±2.04
+
+gpt-5-pro-2025-10-06 33.32±1.99
+
+gpt-5.2-2025-12-1128.50±1.90
+
+gpt-5-2025-08-07 26.32±1.86
+
+claude-opus-4-5-20251101-thinking 26.32±1.86
+
+
+
+
+
+
+gemini-3-pro-preview: 37.52 +/- 1.90 (CE: 57)
+gpt-5-pro-2025-10-06: 31.64 +/- 1.82 (CE: 49)
+gpt-5.2-2025-12-11: 27.80 +/- 1.76 (CE: 45)
+gpt-5-2025-08-07: 25.32 +/- 1.70 (CE: 50)
+claude-opus-4-5-20251101-thinking: 25.20 +/0 1.70 (CE:55)
+
+source: HLE leaderboard
+
+
+","Gemini 3 pro preview: 37.72 
+gpt-5-pro-2025-10-06: 33.32 
+gpt-5.2-2025-12-11: 28.50; 
+gpt-5-2025-08-07: 26.32; 
+claude-opus-4-5-20251101-thinking: 26.32",37.72,33.32,28.5,26.32,26.32,5,30.44,4.45,11.4,0.09261165,1.230946597,0.219757739,Low,Yes,11,13.4 (o3-mini-high),Contamination,"https://arxiv.org/abs/2508.13180 (search time data contamination), https://www.futurehouse.org/research-announcements/hle-exam (29% errors in bio/chem)   , Many models evaluated since release of benchmark, potentially allowing developers to access prompts and solutions; some models (GPT-4o, Gemini-1.5.Pro-002) used initially to filter data
+
+source: model notes on HLE leaderboard",QA (MCQ),"MCQ, Free-form",Expert human created,"HLE is developed by academics and domain experts.... Before submission, each question is tested against state-of-the-art LLMs to verify its difficulty- questions are rejected if LLMs can answer them correctly. Questions submitted then proceed through a two-stage reviewing process: (1) an initial feedback round with multiple graduatelevel reviewers and (2) organizer and expert reviewer approval, ensuring quality and adherence to our submission criteria. Following release, we conducted a public review period, welcoming community feedback to correct any points of concern in the dataset.
+
+(quoted from HLE paper p 4: https://arxiv.org/pdf/2501.14249)",English,"2,500",unkown number of samples in private test set,272,Private,,No,"multi-disciplinary, sample structure reflects disicplinary conventions, so highly diverse literally","questions are qualified by failure of then-frontier LLMs to correctly answer candidate question. if LLMs are able to answer correctly, question is disqualified",LLM-as-a-Judge,"uses structure evalaution metaprompt; uses O3-MINI as a judge to verify answer correctness against model predictions while accounting for  equivalent formats (e.g.,decimals vs. fractions or estimations)"
+54,IFEval,11/15/2023,"
+o3-mini 0.939	
+Claude 3.7 Sonnet 0.932	
+Nova Pro 0.921	
+Llama 3.3 70B Instruct 0.921	
+Gemma 3 27B 0.904	
+-----------------------
+
+meta-llama/Llama-3.3-70B-Instruct: 89.98
+meta-llama/Llama-3.1-70B-Instruct: 86.69
+MaziyarPanahi/calme-2.1-qwen2.5-72b 86.62
+VAGOsolutions/Llama-3.1-SauerkrautLM-70b-Instruct 86.56
+Qwen/Qwen2.5-72B-Instruct 86.38
+
+Source: OpenLLM Leaderboard",o3-mini: 93.9; Claude 3.7 Sonnet: 93.2; Nova Pro: 92.1; Llama 3.3 70B Instruct: 92.1; Gemma 3 27B: 90.4,93.9,93.2,92.1,92.1,90.4,5,92.34,1.19,3.5,0.07870039,0.4447245798,0.82055039,High,Yes,25,83.57 (GPT-4),Contamination,"dataset released in 2023, benchmark has had high uptake. developers have had access to prompts and solutions for a long time",Instruction/Open Ended,Free-form,LLM generated,"First, we generate a set of base prompts with one to three randomly selected verifiable instructions appended to the end of each prompt. Then, we use few-shot prompting to identify illogical prompts and remove them. As the third step, we apply another few-shot prompting based approach to rephrase each prompt, to increase the diversity of phrasing. Finally, we manually check and edit the rephrased prompts one by one.
+
+(quoted from IFEval paper p. 4: https://arxiv.org/pdf/2311.07911)",English,541,,699,Public,,Yes,see dataset curation notes,,Accuracy,"For a given response resp and a verifiable instruction inst, we define the function that verifies if the instruction is followed or not as: 
+
+is followed(resp,inst) = True, if instruction is followed. False, otherwise. 
+
+We use Equation 1 to compute the instruction following accuracy, and refer to it as the strict metric.
+
+We compute a loose accuracy score of instruction following, which is defined as: 
+
+is followedloose(resp, inst) = Any (is followed transformt(resp),inst for t = 1,2,... "
+55,Terminal Bench,5/19/2025,"The benchmark requires both an agentic system and a model. These are the top 5: 
+Apex2        claude-4-5-sonnet        2025-10-15        Tian Jian Wang        Anthropic        
+64.5%± 1.1
+
+
+Abacus AI Desktop        Multiple        2025-11-08        Abacus.AI        Multiple        
+62.3%± 1.8
+
+
+Ante        claude-sonnet-4-5        2025-10-10        Antigma Labs        Anthropic        
+60.3%± 2.1
+
+
+Droid        claude-opus-4-1        2025-09-24        Factory        Anthropic        
+58.8%± 1.7
+
+
+Droid        claude-sonnet-4-5        2025-09-29        Factory        Anthropic        
+57.5%± 1.5",Apex2: 64.5; Abacus AI Desktop: 62.3; Ante: 60.3; Droid (claude-opus-4-1): 58.8; Droid (claude-sonnet-4-5): 57.5,64.5,62.3,60.3,58.8,57.5,5,60.68,2.49,7,0.211488465,0.3309873189,0.8962350165,High,Yes,7,N/A,Other data-related issues,"Can't tell from a glance: https://huggingface.co/datasets/ia03/terminal-bench/viewer 
+
+From: https://www.tbench.ai/news/announcement-2-0 ""Additionally, we weren't satisfied with the level of verification in the original dataset. Our community discovered several problems with tasks from 1.0. For example, in download-youtube YouTube's constantly changing anti-bot protections meant that a solution that worked one day might not work the next.""",Agentic,Free-form,"Expert human created, crowdsourced human created",Crowdsourced from human experts,English,112,,,Private,,No,,,Accuracy,
+56,Terminal Bench 2.0,11/7/2025,"Rank	Agent	Model	Date	Agent Org	Model Org	
+Accuracy
+
+1
+Droid	Claude Opus 4.5	2025-12-11	Factory	Anthropic	
+63.1%± 2.7
+
+2
+Warp	Multiple	2025-12-12	Warp	Multiple	
+61.2%± 3.0
+
+3
+Codex CLI	GPT-5.1-Codex-Max	2025-11-24	OpenAI	OpenAI	
+60.4%± 2.7
+
+4
+Letta Code	Claude Opus 4.5	2025-12-17	Letta	Anthropic	
+59.1%± 2.4
+
+5
+Warp	Multiple	2025-11-20	Warp	Multiple	
+59.1%± 2.8",Droid (Claude Opus 4.5): 63.1; Warp: 61.2; Codex CLI: 60.4; Letta Code (Claude Opus 4.5): 59.1; Warp: 59.1,63.1,61.2,60.4,59.1,59.1,5,60.58,1.49,4,0.2289239266,0.1747305343,0.9699305969,Very high,Yes,1,N/A,No known issues,,Agentic,Free-form,"Expert human created, crowdsourced human created, LLM generated",,English,82,,,Private,,No,,,Accuracy,
+57,τ2-Bench,6/10/2025,"https://taubench.com/#leaderboard
+        Gemini-3.0-Pro        85.4%        
+Claude-Sonnet-4.5 84.7%        
+Qwen3-Max-Thinking-Preview 80.8%
+   DeepSeek-V3.2              80.4%        
+     gpt 5         80.0%        ",Gemini-3.0-Pro: 85.4; Claude-Sonnet-4.5: 84.7; Qwen3-Max-Thinking-Preview: 80.8; DeepSeek-V3.2: 80.4; gpt 5: 80.0,85.4,84.7,80.8,80.4,80,5,82.26,2.3,5.4,0.130551083,0.4136311915,0.8427450803,High,Yes,6,55 (gpt4.1),Other data-related issues,"task definitions, expected actions, and evaluation criteria did not properly align with the stated policies or database contents: https://github.com/amazon-agi/tau2-bench-verified  (task/policy misalignment)                       ",Agentic,Free-form,LLM generated,See paper,English,279,"retail: 115
+airline: 50
+telecom: 114",7,Public,,Yes,,,Accuracy,% of resolved tasks
+58,FrontierMath,8/11/2024,"from: https://epoch.ai/frontiermath 
+GPT-5.2 (Pro) 29.2% 
+Gemini 3 Pro Preview 18.8% 
+GPT-5.2 (xhigh) 16.7% 
+GPT-5.2 (high) 14.6% 
+GPT-5.2 (medium) 14.6% 
+GPT-5.1 (high) 12.5% 
+GPT-5 (high) 12.5% 
+
+","GPT-5.2 (Pro) 29.2; 
+Gemini 3 Pro Preview 18.8; 
+GPT-5.2 (xhigh) 16.7;
+GPT-5.2 (high) 14.6;
+GPT-5.2 (medium) 14.6",29.2,18.8,16.7,14.6,14.6,5,18.78,5.44,14.6,0.1969512046,0.7413003656,0.5772232155,Moderate,Yes,16,2 (gpt o1),No known issues,,Instruction/Open Ended,Free-form,Expert human created,,English,73,"350 problems, 50 (original) + 23 (T4) ",149,Private,,No,,,Accuracy,
+59,USMLE / MedQA,9/29/2020,"o1 96.52%
+GPT 5.1 96.38%
+GPT 5 96.32%
+GPT 5 Mini 96.06%
+o3 96.06%
+Gemini 3 Pro (11/25) 96.03%",o1: 96.52; GPT 5.1: 96.38; GPT 5: 96.32; GPT 5 Mini: 96.06; o3: 96.06,96.52,96.38,96.32,96.06,96.06,5,96.27,0.18,0.46,0.0447459,0.1028027055,0.989487253,Very high,Yes,63,36.7 (BIOBERT-LARGE),"Mislabeling, Other data-related issues", https://github.com/Google-Health/med-gemini-medqa-relabelling :various questions include label errors or reference missing information such as figures or lab results that are not included; https://arxiv.org/pdf/2404.18416 page 45 figure c1,QA (MCQ),MCQ,Expert human created,"1. Collected from National Medical Board Examination (USMLE, MCMLE, TWMLE), only use the problems that are publicly available/released to use
+2. Shuffle the order of answer options and randomly delete
+one of the wrong options for each question for USMLE and
+MCMLE datasets, which results in four options with one
+right option and three wrong options",English,"1,273","Detailed stats in paper
+Huggingface: https://huggingface.co/datasets/GBaker/MedQA-USMLE-4-options ",1253,Public,,No,"- In the paper, they have ""diversity of questions"" section -- where they say they have 2 categories of questions: 
+(1) question targeting single piece of knowledge => require one-hop reasoning
+(2) question first describe patient's condition, ask for appropriate outcome/treatment ... => require multi-hop reasoning",,Accuracy,
+60,FACTS Grounding,12/17/2024,"
+
+(1) Unadjusted factuality score (no disqualification)
+Gemini 1.5 Flash: 85.8
+Gemini 2.0 Flash Experimental: 85.6
+Gemini 1.5 Pro: 82.7
+Claude 3.5 Sonnet: 82.2
+GPT-4o: 79.8
+
+(2) Final facutality score (after disqualifying ineligible responses)
+Gemini 2.0 Flash Experimental: 83.6
+Gemini 1.5 Flash: 82.9
+Gemini 1.5 Pro: 80.0
+Claude 3.5 Sonnet: 79.4
+GPT-4o: 78.8
+
+
+Refer to: https://arxiv.org/abs/2512.10791 for Fact grounding v2, a leaderboard now exists at https://www.kaggle.com/benchmarks/google/facts ",Gemini 1.5 Flash: 85.8; Gemini 2.0 Flash Experimental: 85.6; Gemini 1.5 Pro: 82.7; Claude 3.5 Sonnet: 82.2; GPT-4o: 79.8,85.8,85.6,82.7,82.2,79.8,5,83.22,2.25,6,0.09824109,0.6107424305,0.688660883,Moderate,Yes,12,83.6 (Gemini 2.0 Flash Experimental),No known issues,"Explicitly acknowledge the issue of data contamination;
+Mitigation approaches:
+- user request to explicitly only follow the information in the provided context, which are not contaminated
+- generate responses only grounded in the provided context
+- parity is maintained for leaderboard purposes",Instruction/Open Ended,Free-form,crowdsourced human created,"1. Third-party human raters were instructed to design prompts tailored for long-form generation tasks
+2. Manually verified by the authors and discard the ones that don't align with the instructions
+(instructions need to rely on provided context, no creative-writing tasks, PDF-originated documents)",English,860,Huggingface: https://huggingface.co/datasets/google/FACTS-grounding-public ,37,Public,Open split publicly available while blind split not released ,No,"- diverse in a sense they are all human-generated
+- diversity is ensured by (1) length variation -- prompts are generated in various lengths (up to 32k tokens), (2) enterprise domains (e.g., finance, tech, retail ...)",,"Accuracy, F1, Unadjusted factuality score","Macro-F1, Acc., FPR, FNR, F1. A model response is marked with a positive label (“accurate”) if all the claims in the
+response are grounded in the contents of the prompt, or do not require grounding; the response is
+marked with a negative label (“not accurate”) if a single claim that bears information is deemed to be
+not grounded in the contents of the prompt.
+- use 3 judge LLMs (Gemini 1.5 Pro, GPT-4o, Claude 3.5 Sonnet) - Given the three judges, the individual factuality score for each judge is the percentage of accurate
+responses, and the unadjusted factuality score is the average of all judge models’ scores."
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,1512,,,,,,,,,,,,,,,,,,

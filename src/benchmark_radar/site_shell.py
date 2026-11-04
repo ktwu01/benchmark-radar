@@ -19,6 +19,7 @@ SOURCE_LABELS = {
     "artificial_analysis": "Artificial Analysis",
     "opencompass_hub": "OpenCompass Hub",
     "claire_radar": "Claire Radar",
+    "benchmark_saturation": "Benchmark Saturation",
 }
 
 
