@@ -572,6 +572,45 @@ def _documents_section(name: str, record: dict[str, Any]) -> str:
     )
 
 
+def _audits_section(name: str, record: dict[str, Any]) -> str:
+    """Independent audits of this benchmark, with the receipts to check them.
+
+    An audit is third-party evidence about what a benchmark's reported
+    numbers actually settle. It is recorded in the registry beside the
+    caveat; publishing the caveat without the audit would show the warning
+    and hide the evidence behind it.
+    """
+    audits = [item for item in (record.get("audits") or []) if isinstance(item, dict)]
+    if not audits:
+        return ""
+    items = []
+    for audit in audits:
+        auditor = _text(audit, "auditor") or "Independent audit"
+        url = _http_url(audit.get("audit_url"))
+        label = _esc(auditor)
+        if url:
+            label = f'<a href="{_esc(url)}" rel="nofollow noopener">{label}</a>'
+        audit_date = _text(audit, "audit_date")
+        suffix = f' <span class="caveat">{_esc(audit_date)}</span>' if audit_date else ""
+        finding = _text(audit, "finding")
+        finding_html = f"<p>{_esc(finding)}</p>" if finding else ""
+        receipts = [
+            clean for clean in (_http_url(item) for item in audit.get("receipts") or []) if clean
+        ]
+        receipts_html = ""
+        if receipts:
+            links = " · ".join(
+                f'<a href="{_esc(clean)}" rel="nofollow noopener">Receipt {index}</a>'
+                for index, clean in enumerate(receipts, start=1)
+            )
+            receipts_html = f'<p class="caveat">{links}</p>'
+        items.append(f"<li>{label}{suffix}{finding_html}{receipts_html}</li>")
+    return (
+        f"<section><h2>Independent audits of {_esc(name)}</h2>"
+        f'<ul class="links">{"".join(items)}</ul></section>'
+    )
+
+
 def _tie_break(slug: str, other: str) -> str:
     """A stable per-page order among equally related neighbours.
 
@@ -673,6 +712,7 @@ def _page_html(
         f"{_artifacts_section(name, artifacts)}"
         f"{scores_html}"
         f"{_documents_section(name, record)}"
+        f"{_audits_section(name, record)}"
         f"{_related_section(slug, record, context)}"
     )
     body = re.sub(

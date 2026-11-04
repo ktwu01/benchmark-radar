@@ -1405,6 +1405,9 @@ const I18N = {
     "introduced in the same paper": "出自同一篇论文",
     "has a related variant": "存在相关变体",
     "Related records": "相关记录",
+    "Independent audits": "独立审计",
+    "Independent audit": "独立审计",
+    "Receipt": "凭证",
     "Loading benchmark details…": "正在加载benchmark详情…",
     "Could not load details for this benchmark.": "无法加载该benchmark的详情。",
     "Ranked by how many curated model cards report each benchmark, which measures vendor reporting convention rather than benchmark quality. A crawled score count answers a different question: AIME 2025 carries 115 crawled scores and GPQA Diamond 26 model cards, and those are different measures rather than competing ones.":
@@ -8466,6 +8469,37 @@ function catalogDocumentsBlock(record) {
   ]);
 }
 
+// Independent audits are third-party evidence about what the benchmark's
+// reported numbers settle, recorded in the registry beside the caveat. The
+// block follows the documents pattern: the audit itself as the link, its
+// date as the meta line, the finding in full, and every receipt linked so
+// the reader can re-run the check rather than trust the summary.
+function catalogAuditsBlock(record) {
+  const audits = record.audits || [];
+  if (!audits.length) return null;
+  return element("section", { className: "catalog-block" }, [
+    element("h3", { text: t("Independent audits") }),
+    element("ul", { className: "catalog-artifacts" }, audits.map((audit) =>
+      element("li", {}, [
+        element("a", {
+          text: audit.auditor || t("Independent audit"),
+          attrs: { href: safeHttpUrl(audit.audit_url), target: "_blank", rel: "noopener noreferrer" },
+        }),
+        element("span", {
+          className: "catalog-sibling-meta",
+          text: audit.audit_date ? formatDate(audit.audit_date, { dateStyle: "medium" }) : "",
+        }),
+        audit.finding ? element("p", { text: audit.finding }) : null,
+        ...(audit.receipts || []).map((receipt, index) =>
+          element("a", {
+            text: `${t("Receipt")} ${index + 1}`,
+            attrs: { href: safeHttpUrl(receipt), target: "_blank", rel: "noopener noreferrer" },
+          })),
+      ])),
+    ),
+  ]);
+}
+
 function catalogBenchmarkDetail(shard) {
   const detail = shard.record || {};
   // Saturation's job is the score chart, so it leads. The explanation sits
@@ -8475,6 +8509,7 @@ function catalogBenchmarkDetail(shard) {
     catalogScoresBlock(shard),
     catalogIdentityBlock(detail),
     catalogDocumentsBlock(detail),
+    catalogAuditsBlock(detail),
     catalogOpennessBlock(detail),
     catalogSizesBlock(detail),
     catalogSiblingsBlock(shard),
