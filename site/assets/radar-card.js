@@ -75,6 +75,19 @@ function cardDay(value) {
   return month ? `${month} ${Number(match[3])}, ${match[1]}` : "";
 }
 
+const SLUG_TITLE = /^([^\s/]+)\/[^\s/]+(\s+\S+)?$/;
+
+// With no named authors, the account that published a Hugging Face or GitHub
+// item is who made it, and the Today card says so as "By <owner>" (#1069). The
+// same rule applies here so the card and the page agree: the owner the source
+// lists, else the owner in an "owner/name" title. It is never an institution.
+function ownerLine(item, source) {
+  if (item.observation_kind === "attention") return "";
+  const listed = HANDLE_SOURCES.has(source) ? unique(item.organizations)[0] : "";
+  const owner = listed || SLUG_TITLE.exec(String(item.title || "").trim())?.[1] || "";
+  return owner ? `By ${owner}` : "";
+}
+
 // The facts a card shows, each read from the item. A fact the item lacks is
 // left out; nothing is filled in.
 export function cardFacts(item, { day = "", title = "" } = {}) {
@@ -83,10 +96,12 @@ export function cardFacts(item, { day = "", title = "" } = {}) {
     .filter((name) => name && !GENERIC_CATEGORIES.has(name.toLowerCase()));
   const source = plain(item.source);
   const meta = [source, cardDay(item.published_at), ...topics.slice(0, 2)].filter(Boolean);
+  const authors = unique(item.authors);
   return {
     label: ["Benchmark Radar", "Today's radar", cardDay(day)].filter(Boolean).join(" · "),
     title: plain(title || item.title),
-    authors: unique(item.authors),
+    authors,
+    byline: authors.length ? names(authors, 3) : ownerLine(item, source),
     // An attention item's organizations name the pipeline that observed it,
     // not who made the benchmark.
     affiliations:
@@ -164,10 +179,10 @@ export function drawCard(ctx, facts) {
     y += Math.round(TITLE_SIZE * 1.27);
   }
   y += Math.round(6 * SCALE);
-  if (facts.authors.length) {
+  if (facts.byline) {
     font(ctx, body + 1);
     ctx.fillStyle = CARD.ink;
-    ctx.fillText(fit(ctx, names(facts.authors, 3), textWidth), margin, y);
+    ctx.fillText(fit(ctx, facts.byline, textWidth), margin, y);
     y += step + 2;
   }
   if (facts.affiliations.length) {
