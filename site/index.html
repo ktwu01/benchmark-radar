@@ -487,15 +487,30 @@
           <div>
             <div class="section-title">
               <h2 id="today-heading" class="today-heading" data-i18n="Today's radar">Today's radar</h2>
+              <!-- One picture of the day's top 3 benchmarks, rendered by the
+                   daily pipeline, offered as a share icon beside the heading.
+                   Filled only on days that have one. -->
+              <div id="today-share" class="today-share" hidden></div>
               <div class="results-meta" aria-live="polite">
                 <span id="today-breakdown"></span>
-                <span id="today-sort"></span>
+                <!-- How the list is ordered is method, not the answer
+                     (design.md, "Keep page titles close and quiet"): a closed
+                     (i) that opens on hover, keyboard focus or a tap. -->
+                <span class="info-tip sort-info" id="today-sort-info">
+                  <button
+                    type="button"
+                    class="info-tip-toggle"
+                    id="today-sort-toggle"
+                    aria-expanded="false"
+                    aria-controls="today-sort"
+                    aria-label="How this list is sorted"
+                    data-i18n-aria="How this list is sorted"
+                  ><span aria-hidden="true">i</span></button>
+                  <span id="today-sort" class="info-tip-body" role="note"></span>
+                </span>
               </div>
             </div>
             <p id="today-range" class="section-note" hidden></p>
-            <!-- One picture of the day's top 3 benchmarks, rendered by the
-                 daily pipeline. Filled only on days that have one. -->
-            <div id="today-share" class="today-share" hidden></div>
             <p id="today-load-error" class="empty-state" role="status" hidden></p>
             <!-- Search is archive-wide by default even though browsing opens
                  on the newest scan. This first result row makes that scope
@@ -625,7 +640,20 @@
       <section class="view" id="models-view" aria-labelledby="models-heading" hidden>
         <div class="library-toolbar">
           <h2 id="models-heading" class="library-heading view-title" data-i18n="Models">Models</h2>
-          <p class="models-note" data-i18n="models.note">Every model with a reported score in the catalog, side by side: models are columns, benchmarks are rows. Select a score to see its setting and source.</p>
+          <!-- How to read the matrix is method, not the answer, so it sits in
+               a closed (i) beside the title instead of a line of its own. -->
+          <span class="info-tip info-tip-start" id="models-info">
+            <button
+              type="button"
+              class="info-tip-toggle"
+              id="models-info-toggle"
+              aria-expanded="false"
+              aria-controls="models-note"
+              aria-label="How to read this table"
+              data-i18n-aria="How to read this table"
+            ><span aria-hidden="true">i</span></button>
+            <span class="info-tip-body" id="models-note" role="note" data-i18n="models.note">Every model with a reported score in the catalog, side by side: models are columns, benchmarks are rows. Select a score to see its setting and source.</span>
+          </span>
           <p id="models-status" class="library-status" aria-live="polite"></p>
         </div>
         <div class="library-layout">

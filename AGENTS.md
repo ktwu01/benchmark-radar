@@ -105,6 +105,8 @@ Applies to `README*`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `site/**`,
 
 - Run the full CI sequence locally and get it passing before opening a PR. Do
   not open one against a red local run.
+- When the contributor is `ktwu01`, skip the local CI run: open the PR and let
+  remote CI run.
 - Skip it for a docs-only PR, when this prints nothing:
 
       git diff --name-only origin/main... | xargs -n1 basename \
