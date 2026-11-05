@@ -505,12 +505,13 @@ def test_sitemap_includes_benchmark_pages_when_entries_are_passed(tmp_path):
     assert lastmods == ["2026-08-21"] * 11 + ["2025-05-22"]
 
 
-def test_benchmark_lastmod_comes_from_the_pages_own_evidence(tmp_path):
-    """A page is not modified by another benchmark's snapshot landing."""
+def test_benchmark_sitemap_omits_unverified_page_change_dates(tmp_path):
+    """Release/score dates describe evidence, not when the page changed (#987)."""
     shard_dir = _write_shards(
         tmp_path,
-        _shard("alpha-bench", "Alpha Bench", released="2024-02-01"),
         _shard("zeta-bench", "Zeta Bench", released=None),
+        _shard("release-only", "Release Only", released="2025-03-04"),
+        _shard("alpha-bench", "Alpha Bench", released="2024-02-01"),
     )
     alpha = json.loads((shard_dir / "alpha-bench.json").read_text(encoding="utf-8"))
     alpha["scores_by_source"] = {
@@ -526,11 +527,28 @@ def test_benchmark_lastmod_comes_from_the_pages_own_evidence(tmp_path):
     }
     (shard_dir / "alpha-bench.json").write_text(json.dumps(alpha), encoding="utf-8")
 
-    assert benchmark_sitemap_entries(shard_dir) == [
-        ("/benchmarks/alpha-bench/", "2026-01-09"),
+    entries = benchmark_sitemap_entries(shard_dir)
+    assert entries == [
+        ("/benchmarks/alpha-bench/", None),
+        ("/benchmarks/release-only/", None),
         ("/benchmarks/zeta-bench/", None),
     ]
+    # The serializer must not fill an unknown benchmark date with the global
+    # snapshot date. Keep every URL, including release-only and undated rows.
+    namespace = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+    tree = sitemap_tree([{"generated_at": "2026-10-26T00:00:00Z"}], entries)
+    expected_urls = {SITE_URL + path for path, _ in entries}
+    benchmark_nodes = [
+        node
+        for node in tree.getroot().findall("sm:url", namespace)
+        if node.findtext("sm:loc", namespaces=namespace) in expected_urls
+    ]
+    assert len(benchmark_nodes) == len(entries)
+    assert all(node.find("sm:lastmod", namespace) is None for node in benchmark_nodes)
     assert benchmark_sitemap_entries(tmp_path / "missing") == []
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    assert benchmark_sitemap_entries(empty) == []
 
 
 def test_write_benchmark_pages_fails_loudly_without_shards(tmp_path):
