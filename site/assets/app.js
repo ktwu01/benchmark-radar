@@ -2546,20 +2546,33 @@ function recordFacts(item, { quietUnreported = false } = {}) {
     ([label]) => !(quietUnreported && label === t("Activity counters")),
   );
   if (!facts.length) return null;
+  const metricIcons = Object.fromEntries(
+    RECORD_METRIC_ICONS.map((key) => [t(RECORD_METRIC_LABELS[key]), key]),
+  );
   return element(
     "div",
     {
       className: "record-facts",
       attrs: { role: "group", "aria-label": t("Source metadata") },
     },
-    facts.map(([label, value, emphasize]) =>
-      element("span", {}, [
-        document.createTextNode(`${label} `),
-        emphasize ? element("strong", { text: value }) : document.createTextNode(value),
-      ]),
-    ),
+    facts.map(([label, value, emphasize]) => {
+      const valueNode = emphasize ? element("strong", { text: value }) : document.createTextNode(value);
+      const icon = metricIcons[label];
+      if (!icon) return element("span", {}, [document.createTextNode(`${label} `), valueNode]);
+      // A count's label is an icon (issue #1097): "Likes 0  Downloads 591"
+      // repeated on every card. Hover shows the word; a screen reader reads it.
+      return element("span", { className: "record-fact-metric", attrs: { title: label } }, [
+        element("span", { className: `fact-icon fact-icon-${icon}`, attrs: { "aria-hidden": "true" } }),
+        element("span", { className: "visually-hidden", text: `${label} ` }),
+        valueNode,
+      ]);
+    }),
   );
 }
+
+// Counts with a widely read icon. "Influential citations" has none a reader
+// would recognise, so it keeps its words.
+const RECORD_METRIC_ICONS = ["stars", "forks", "likes", "downloads", "citations"];
 
 
 // A card is tinted gold by a count its source published (issue #994): the

@@ -492,3 +492,42 @@ a.benchmark-resource-link::after {
     grid-column: 1 / -1;
   }
 }
+
+/* Count labels as icons (issue #1097). Each glyph is a CSS mask filled with
+   the text colour, so it follows the theme and needs no markup beyond a span.
+   The label stays in the tooltip and in visually hidden text. */
+.record-fact-metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+}
+
+.fact-icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 1em;
+  height: 1em;
+  background: var(--muted);
+  -webkit-mask: var(--fact-icon) center / contain no-repeat;
+  mask: var(--fact-icon) center / contain no-repeat;
+}
+
+.fact-icon-stars {
+  --fact-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z%22/%3E%3C/svg%3E");
+}
+
+.fact-icon-forks {
+  --fact-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2212%22 cy=%2218%22 r=%223%22/%3E%3Ccircle cx=%226%22 cy=%226%22 r=%223%22/%3E%3Ccircle cx=%2218%22 cy=%226%22 r=%223%22/%3E%3Cpath d=%22M18 9v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9M12 12v3%22/%3E%3C/svg%3E");
+}
+
+.fact-icon-likes {
+  --fact-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z%22/%3E%3C/svg%3E");
+}
+
+.fact-icon-downloads {
+  --fact-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3%22/%3E%3C/svg%3E");
+}
+
+.fact-icon-citations {
+  --fact-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M7 7h3v4c0 2.5-1.5 4.5-4 5M15 7h3v4c0 2.5-1.5 4.5-4 5%22/%3E%3C/svg%3E");
+}
