@@ -85,8 +85,11 @@ Applies to `README*`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `site/**`,
 - Forbid only what must not happen and does real harm: legal risk (scraping
   behind authentication), silent data damage (fuzzy merges), or work the build
   overwrites (hand-edited generated files). Do not list what is allowed.
-- Benchmark Radar provides data and makes no quality judgements. Leave how to
-  rank or compare to the people who use the data.
+- Benchmark Radar makes no quality judgement about a benchmark's merit, but it
+  does triage: rank by disclosed signals, demote placeholders, never delete.
+  See "No quality judgement is not no judgement" in `principle.md`. The harm
+  of reading it as "no ranking": readers get an unsorted firehose, and empty
+  repositories with viral announcements rise to the top.
 
 ## Branches and pull requests
 

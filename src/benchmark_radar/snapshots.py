@@ -10,6 +10,11 @@ from pathlib import Path
 from typing import Any
 
 from . import kw_bench, rubric
+from .affiliation_rank import (
+    institution_counts,
+    institution_ranking,
+    paper_institutions,
+)
 from .app_pages import write_app_pages
 from .attention import fetch_attention_feeds
 from .benchmark_attention import merge_benchmark_attention
@@ -34,6 +39,7 @@ from .release_leaderboard import (
     canonical_metric_key,
     is_exact_attention_source_url,
 )
+from .release_signals import ReleaseSignals, load_release_signals
 from .rubric import (
     SCORING_VERSION,
     legacy_rubric_reference,
@@ -1144,6 +1150,7 @@ def dashboard_data(
     registry_path: Path | None = None,
     scores_path: Path | None = None,
     kw_bench_store_path: Path | None = None,
+    release_signals: ReleaseSignals | None = None,
 ) -> dict[str, Any]:
     days: list[dict[str, Any]] = []
     categories: set[str] = set()
@@ -1276,6 +1283,8 @@ def dashboard_data(
     last_successful = next(
         (day for day in reversed(days) if day["required_coverage_complete"]), None
     )
+    papers = paper_institutions(release_signals) if release_signals else {}
+    counts = institution_counts(papers)
     return {
         "schema_version": SCHEMA_VERSION,
         "latest_date": days[-1]["date"] if days else None,
@@ -1316,6 +1325,14 @@ def dashboard_data(
         "latest_releases_leaderboard": build_latest_releases_leaderboard(
             snapshots,
             registry_path=registry_path,
+            signals=release_signals,
+            institution_counts=counts if release_signals else None,
+        ),
+        # Issue #1120: institutions by the number of benchmark papers they
+        # appear on, OpenAlex names only. Triage by a disclosed count, not a
+        # grade of any institution.
+        "institution_ranking": (
+            institution_ranking(counts, paper_count=len(papers)) if release_signals else None
         ),
         # Curated and versioned in the repository rather than collected daily:
         # they answer "which benchmarks do vendors report", "how have the
@@ -1453,6 +1470,8 @@ def dashboard_bootstrap(dashboard: dict[str, Any]) -> dict[str, Any]:
                 def_win: lrl.get("windows", {}).get(def_win, {}),
             },
         }
+    if dashboard.get("institution_ranking"):
+        bootstrap["institution_ranking"] = dashboard["institution_ranking"]
     return bootstrap
 
 
@@ -1644,6 +1663,7 @@ def rebuild_dashboard(
     scores_path: Path | None = None,
     kw_bench_store_path: Path | None = None,
     benchmark_shard_dir: Path = DEFAULT_SHARD_DIR,
+    release_signals: ReleaseSignals | None = None,
 ) -> dict[str, Any]:
     snapshots = load_snapshots(snapshot_dir)
     value = dashboard_data(
@@ -1651,6 +1671,7 @@ def rebuild_dashboard(
         registry_path=registry_path,
         scores_path=scores_path,
         kw_bench_store_path=kw_bench_store_path,
+        release_signals=release_signals or load_release_signals(),
     )
     # normalize-catalog writes the index beside the shard directory.
     attach_catalog_cards(value, benchmark_shard_dir.parent / "benchmark-index.json")

@@ -609,3 +609,22 @@ def test_social_command_embeds_nothing_without_recorded_cards(monkeypatch, tmp_p
 def test_social_command_omits_images_that_were_not_published(monkeypatch, tmp_path):
     body = _run_social(monkeypatch, tmp_path, _snapshot_with_cards(1), "--skip-share-images")
     assert "benchmark-radar-cards" not in body
+
+
+def test_arxiv_papers_from_any_source_get_institutions():
+    # 2026-10-28: an XBsleepy card for arXiv:2610.37166v1 and DataCite cards
+    # for 10.48550/arxiv.* DOIs showed no institution, because only items
+    # sourced "arXiv" were looked up (#1120).
+    fetch = _fetcher(
+        {
+            "https://api.openalex.org/works/doi:10.48550/arXiv.2610.37166": {
+                "authorships": [{"institutions": [{"display_name": "Tsinghua University"}]}]
+            }
+        }
+    )
+    for source, url in (
+        ("XBsleepy", "https://arxiv.org/abs/2610.37166v1"),
+        ("DataCite", "https://doi.org/10.48550/arxiv.2610.37166"),
+    ):
+        item = _item("k", 1, source=source, url=url)
+        assert resolve_creators(item, fetch=fetch)["affiliations"] == ["Tsinghua University"]

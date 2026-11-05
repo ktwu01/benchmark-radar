@@ -6163,6 +6163,15 @@ dialog {
   letter-spacing: 0.04em;
 }
 
+/* Who is behind the release (#1120): the first three institutions, one line. */
+.latest-release-institutions {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
 /* A release the engine could not rank keeps its bar, muted: the score it has
    is real, the rank it lacks is the point. */
 .latest-release-bar-limited {

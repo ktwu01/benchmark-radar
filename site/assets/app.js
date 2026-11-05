@@ -1320,6 +1320,10 @@ const I18N = {
     "{value} · unverified": "{value} · 未经核验",
     "source ↗": "来源 ↗",
     "Coverage {coverage}": "覆盖率 {coverage}",
+    "Recently released benchmarks, ranked by the attention they are receiving now (GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days, together 80%) and by how often their institutions appear on benchmark papers in the corpus (20%). Repositories holding only a README, licence or images are listed but not ranked.":
+      "近期发布的benchmark，按当前获得的关注度（GitHub star、Hugging Face 论文点赞以及最近 30 天的 Hugging Face 数据集下载量，合计 80%）以及其机构在语料 benchmark 论文中出现的频次（20%）排序。只含 README、许可证或图片的仓库仅列出，不参与排名。",
+    "The number is the score, out of 100. The tag under it is a separate check: how much of the score is backed by observed data. A high tag means at least two signals were found and they cover 75% or more of the score; a low tag means fewer than two signals were found, or they cover less than 40% of the score. It says nothing about how good the benchmark is.":
+      "数字是得分（满分 100）。下方的标签是另一回事：得分有多少来自实际观察到的数据。“高”表示至少找到两类信号，且合计覆盖得分的 75% 以上；“低”表示找到的信号少于两类，或合计覆盖不到得分的 40%。它不代表 benchmark 本身的好坏。",
     "latest.legend":
       "数字是关注度得分（满分 100）。下方的标签是另一回事：得分有多少来自实际观察到的数据。“高”表示至少找到两类信号，且合计覆盖得分的 75% 以上；“低”表示找到的信号少于两类，或合计覆盖不到得分的 40%。它不代表 benchmark 本身的好坏。",
     "{level} data": "数据支撑：{level}",
@@ -1332,6 +1336,17 @@ const I18N = {
     "limited signals: not enough fresh durable signal to rank":
       "信号有限：缺少足够新鲜的持久信号，未纳入排名",
     "no score": "无得分",
+    "Institution frequency": "机构出现频次",
+    "limited signals: the repository has no code or data yet": "信号有限：仓库尚无代码或数据",
+    "as written in the paper": "按论文原文",
+    "Institutions linked by OpenAlex": "OpenAlex 关联的机构",
+    "Plus {weight}% institution frequency: how many benchmark papers in the whole corpus list the release's best-known institution among its first three, normalized as log1p(count) / log1p(the most frequent institution's count), not by the window. A release with no institution on file gets no affiliation credit. A repository holding only a README, licence or images is listed but not ranked.":
+      "另加 {weight}% 的机构出现频次：在整个语料中，该发布前三个机构里最常出现者被多少篇 benchmark 论文列出，按 log1p(该数) / log1p(出现最多的机构的篇数) 归一化，而非按时间窗口。没有机构记录的发布不获得机构分。只含 README、许可证或图片的仓库仅列出，不参与排名。",
+    "Top institutions": "机构排行",
+    "{count} papers": "{count} 篇论文",
+    "Institutions ranked by how many benchmark papers in the corpus list them, from OpenAlex's linked institutions for {papers} arXiv papers. A count of papers, not a grade.":
+      "按语料中列出该机构的 benchmark 论文数量排序，数据来自 OpenAlex 为 {papers} 篇 arXiv 论文关联的机构。这是论文计数，不是评级。",
+    Institutions: "机构",
     "No benchmark released in the last {days} days has a measurable attention signal yet.":
       "最近 {days} 天内发布的benchmark尚无可测量的关注度信号。",
     "Try {window}": "试试 {window}",
@@ -6260,6 +6275,14 @@ function libraryRow(record, names, saved) {
         + (direction.basis === "keyword-provisional" ? ` (${t("provisional")})` : ""),
     }) : null,
     record.released ? element("span", { text: formatDate(record.released, { dateStyle: "medium" }) }) : null,
+    // The first three institutions behind the record's own paper (#1120).
+    (record.institutions || []).length
+      ? element("span", {
+          className: "library-institutions",
+          text: record.institutions.slice(0, 3).join(" · "),
+          attrs: { title: t("Institutions linked by OpenAlex") },
+        })
+      : null,
     element("span", { text: scoreSourceLabel(record.source) }),
     ...libraryArtifactLinks(record),
     librarySignalFact(record),
@@ -10241,7 +10264,15 @@ const LATEST_SIGNALS = [
   { key: "github_stars", label: "GitHub stars" },
   { key: "hf_paper_upvotes", label: "Hugging Face paper upvotes" },
   { key: "hf_dataset_downloads", label: "Hugging Face dataset downloads, last 30 days" },
+  // attention-affiliation-v2 (#1120) only; a v1 payload has no such component.
+  { key: "affiliation", label: "Institution frequency", optional: true },
 ];
+
+function latestSignalsFor(entries) {
+  return LATEST_SIGNALS.filter(
+    ({ key, optional }) => !optional || entries.some((entry) => entry.components?.[key]),
+  );
+}
 // The adoption view's own filters. A permalink carrying one was written when
 // the page had no modes, and must keep opening the view it filtered.
 const LEADERBOARD_ADOPTION_PARAMS = ["lscore", "lheight", "lq", "ldomain", "lorg", "lera"];
@@ -10352,8 +10383,10 @@ function latestReleasesEmptyState(windowKey, payload) {
 
 function latestReleasesWeights(entries) {
   const weights = {};
-  for (const { key } of LATEST_SIGNALS) {
+  for (const { key, optional } of LATEST_SIGNALS) {
     const published = entries.find((entry) => entry.components?.[key]?.weight !== undefined);
+    // A signal outside this payload's method is absent, not "weight unknown".
+    if (optional && !published) continue;
     weights[key] = published ? Number(published.components[key].weight) : null;
   }
   return weights;
@@ -10361,18 +10394,87 @@ function latestReleasesWeights(entries) {
 
 function latestReleasesMethodNote(payload, windowData) {
   const weights = latestReleasesWeights(windowData.entries || []);
-  const signals = LATEST_SIGNALS.map(({ key, label }) =>
-    weights[key] === null ? t(label) : `${Math.round(weights[key] * 100)}% ${t(label)}`,
-  ).join(", ");
+  const attention = LATEST_SIGNALS.filter(({ optional }) => !optional)
+    .map(({ key, label }) =>
+      weights[key] === null ? t(label) : `${Math.round(weights[key] * 100)}% ${t(label)}`,
+    )
+    .join(", ");
+  // Affiliation is normalized over the corpus, not the window, so it gets its
+  // own sentence after the attention one.
+  const affiliation =
+    weights.affiliation === null || weights.affiliation === undefined
+      ? ""
+      : ` ${t("Plus {weight}% institution frequency: how many benchmark papers in the whole corpus list the release's best-known institution among its first three, normalized as log1p(count) / log1p(the most frequent institution's count), not by the window. A release with no institution on file gets no affiliation credit. A repository holding only a README, licence or images is listed but not ranked.", { weight: Math.round(weights.affiliation * 100) })}`;
   return t(
     "Ranking {method}: {signals}, each normalized as log1p(value) / log1p(window maximum) and summed to a 0 to 100 score. A release is ranked only when enough of its weight comes from fresh, durable signals; the rest are listed with limited signals. Dataset downloads are a rolling 30-day figure, never a cumulative total. Stars come from the benchmark's own repository, never a parent framework. Window {start} to {end}, UTC.",
     {
       method: payload.method_version || "",
-      signals,
+      signals: attention,
       start: formatDate(windowData.window_start, { dateStyle: "medium" }),
       end: formatDate(windowData.window_end, { dateStyle: "medium" }),
     },
+  ) + affiliation;
+}
+
+const DECK_V2 =
+  "Recently released benchmarks, ranked by the attention they are receiving now (GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days, together 80%) and by how often their institutions appear on benchmark papers in the corpus (20%). Repositories holding only a README, licence or images are listed but not ranked.";
+const LEGEND_V2 =
+  "The number is the score, out of 100. The tag under it is a separate check: how much of the score is backed by observed data. A high tag means at least two signals were found and they cover 75% or more of the score; a low tag means fewer than two signals were found, or they cover less than 40% of the score. It says nothing about how good the benchmark is.";
+
+// The first three institutions behind the release's paper (#1120). OpenAlex's
+// linked names are shown as they are; a paper OpenAlex has not indexed yet
+// shows its own printed affiliations, labelled as such.
+function latestReleaseInstitutions(entry) {
+  const names = (entry.institutions || []).filter(Boolean).slice(0, 3);
+  if (!names.length) return null;
+  const fromPaper = entry.institutions_basis === "arxiv_html_affiliations";
+  return element("small", {
+    className: "latest-release-institutions",
+    text: fromPaper ? `${names.join(" · ")} (${t("as written in the paper")})` : names.join(" · "),
+    attrs: { title: fromPaper ? t("as written in the paper") : t("Institutions linked by OpenAlex") },
+  });
+}
+
+// Institutions by the number of benchmark papers that list them (#1120): a
+// count a reader can check against OpenAlex, not a grade.
+function renderInstitutionRanking() {
+  const section = byId("institution-ranking");
+  const host = byId("institution-ranking-list");
+  if (!section || !host) return;
+  const ranking = state.data?.institution_ranking;
+  const entries = ranking?.entries || [];
+  section.hidden = !entries.length || state.lmode === "adoption";
+  if (!entries.length) {
+    replaceChildren(host, []);
+    return;
+  }
+  const max = Math.max(...entries.map((entry) => Number(entry.benchmark_count) || 0), 1);
+  replaceChildren(
+    host,
+    entries.map((entry) =>
+      element("li", { className: "leaderboard-top-row" }, [
+        element("span", { className: "leaderboard-top-rank", text: String(entry.rank).padStart(2, "0") }),
+        element("span", { className: "leaderboard-top-name", text: entry.name }),
+        element("span", { className: "leaderboard-top-bar" }, [
+          element("span", {
+            className: "leaderboard-top-bar-fill",
+            attrs: { style: `width:${((Number(entry.benchmark_count) / max) * 100).toFixed(1)}%` },
+          }),
+        ]),
+        element("span", {
+          className: "leaderboard-top-count",
+          text: t("{count} papers", { count: entry.benchmark_count }),
+        }),
+      ]),
+    ),
   );
+  const note = byId("institution-ranking-note");
+  if (note) {
+    note.textContent = t(
+      "Institutions ranked by how many benchmark papers in the corpus list them, from OpenAlex's linked institutions for {papers} arXiv papers. A count of papers, not a grade.",
+      { papers: Number(ranking.paper_count || 0).toLocaleString() },
+    );
+  }
 }
 
 // One row per release: the rank line, and behind it every input the rank was
@@ -10394,6 +10496,7 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
         ]),
     element("span", { className: "leaderboard-top-name" }, [
       element("span", { text: entry.name }),
+      latestReleaseInstitutions(entry),
       entry.release_date
         ? element("small", {
             className: "latest-release-date",
@@ -10425,13 +10528,22 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
   const signals = element(
     "dl",
     { className: "latest-release-signals" },
-    LATEST_SIGNALS.map(({ key, label }) => {
+    latestSignalsFor([entry]).map(({ key, label }) => {
       const component = entry.components?.[key] || {};
       const url = safeHttpUrl(component.source_url);
       return element("div", { className: "latest-release-signal" }, [
         element("dt", { text: t(label) }),
         element("dd", {}, [
-          element("span", { text: latestSignalText(component) }),
+          element("span", {
+            // The affiliation input is an institution and its paper count
+            // (#1120), not a counter: name both so the reader can check them.
+            text:
+              key === "affiliation" && component.institution
+                ? `${component.institution} · ${t("{count} papers", {
+                    count: Number(component.value).toLocaleString(),
+                  })}`
+                : latestSignalText(component),
+          }),
           element("small", {
             className: "latest-release-normalized",
             text: `${t("normalized")} ${latestNormalizedText(component)}`,
@@ -10456,7 +10568,11 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
   const meta = [
     t("Coverage {coverage}", { coverage: Number(entry.coverage || 0).toFixed(2) }),
     confidence ? `${t("confidence")} ${t(confidence)}` : "",
-    ranked ? "" : t("limited signals: not enough fresh durable signal to rank"),
+    ranked
+      ? ""
+      : entry.limited_reason === "placeholder_repository"
+        ? t("limited signals: the repository has no code or data yet")
+        : t("limited signals: not enough fresh durable signal to rank"),
   ]
     .filter(Boolean)
     .join(" · ");
@@ -10476,6 +10592,27 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
 }
 
 function renderLatestReleases() {
+  renderInstitutionRanking();
+  // attention-affiliation-v2 is no longer attention alone (#1120).
+  const scoreHeader = document.querySelector("#latest-releases .leaderboard-top-columns-count");
+  const method = String(latestReleasesPayload()?.method_version || "");
+  const combined = method.includes("affiliation");
+  // The header, deck and legend describe the method the payload carries.
+  [
+    [scoreHeader, "Attention score", "Score", "Score"],
+    [document.querySelector("#latest-about .latest-releases-deck"), "latest.deck", DECK_V2, DECK_V2],
+    [document.querySelector("#latest-about .latest-releases-legend"), "latest.legend", LEGEND_V2, LEGEND_V2],
+  ].forEach(([node, v1Key, v2Key, v2English]) => {
+    if (!node) return;
+    // applyStaticI18n caches the HTML's English in data-i18n-en; keep the v1
+    // copy so a v1 payload still reads as it always did.
+    if (node.dataset.i18nV1 === undefined) node.dataset.i18nV1 = node.dataset.i18nEn ?? node.textContent;
+    const key = combined ? v2Key : v1Key;
+    const english = combined ? v2English : node.dataset.i18nV1;
+    node.dataset.i18n = key;
+    node.dataset.i18nEn = english;
+    node.textContent = I18N[getLang()]?.[key] ?? english;
+  });
   const host = byId("latest-releases-list");
   if (!host) return;
   const payload = latestReleasesPayload();
@@ -10640,6 +10777,9 @@ function syncLeaderboardMode() {
   const adoption = byId("leaderboard-adoption");
   if (latestSection) latestSection.hidden = !latest;
   if (adoption) adoption.hidden = latest;
+  // Top institutions belongs to the Latest releases mode (#1120).
+  const institutions = byId("institution-ranking");
+  if (institutions && !latest) institutions.hidden = true;
   document.querySelectorAll("[data-lmode]").forEach((control) => {
     if (control.hasAttribute("aria-pressed")) {
       control.setAttribute("aria-pressed", String(control.dataset.lmode === state.lmode));

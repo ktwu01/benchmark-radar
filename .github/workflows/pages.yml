@@ -5,6 +5,10 @@ on:
     branches: [main]
     paths:
       - "data/snapshots/**"
+      # The Latest releases ranking reads these (#1120): institutions behind
+      # each paper and README-only placeholder repositories.
+      - "data/release_institutions.yml"
+      - "data/release_repos.yml"
       # Report documents and scores feed the same catalog as source snapshots.
       - "data/model_cards.yml"
       # benchmark_scores.yml feeds the score-progression and insights layers of
