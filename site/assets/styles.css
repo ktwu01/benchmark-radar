@@ -1,21 +1,21 @@
 :root {
   color-scheme: light;
-  --panel: #f9fbfc;
-  --canvas: #edf1f3;
-  --ink: #15242a;
-  --muted: #5f7078;
-  --line: #cbd5da;
+  --panel: #ffffff;
+  --canvas: #f4f6f7;
+  --ink: #172026;
+  --muted: #56636b;
+  --line: #e1e6e9;
   /* Borders and dividers, deliberately not `--ink`. The page used the text
      colour to draw every card edge and row separator, so a screen of data read
      as a grid of hard near-black boxes and the rules competed with the words
      inside them (issue #333). One step darker than `--line` so a card edge
      still reads as an edge against `--panel`, nowhere near the ink. */
-  --edge: #b8c5cc;
+  --edge: #d3dadf;
   /* One corner radius for every panel, card, table and control. */
   --radius: 10px;
   --radius-sm: 6px;
-  --blue: #255ea8;
-  --blue-deep: #173e71;
+  --blue: #2a7f8e;
+  --blue-deep: #165a66;
   --orange: #dc633f;
   --sea: #4c948b;
   --gold: #c99327;
@@ -66,13 +66,11 @@ body {
 
 body {
   margin: 0;
-  /* The graph-paper grid keeps the Radar identity without competing with the
-     row separators, card borders, and score tracks drawn over it: cut its
-     contrast in half (issue #248). */
-  background:
-    linear-gradient(90deg, rgb(37 94 168 / 1.5%) 1px, transparent 1px) 0 0 / 32px 32px,
-    linear-gradient(rgb(37 94 168 / 1.5%) 1px, transparent 1px) 0 0 / 32px 32px,
-    var(--canvas);
+  /* A white page (issue #1097). The grey page with a graph-paper grid made
+     every screen look dim and only existed so boxed panels could show. Text
+     reads best dark on white; `--canvas` is now the tint for a secondary area
+     (a sidebar, an inset), not the floor everything sits on. */
+  background: var(--panel);
   color: var(--ink);
   font-family: var(--body);
   line-height: 1.5;
@@ -130,7 +128,7 @@ footer {
   justify-content: space-between;
   gap: 1.25rem;
   min-height: 64px;
-  background: color-mix(in srgb, var(--canvas) 96%, transparent);
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
   backdrop-filter: blur(12px);
 }
 
@@ -6512,7 +6510,9 @@ dialog {
 
 .library-sort,
 .library-saved-toggle {
-  min-height: 2.25rem;
+  /* 44px, the shared control height (design.md #886): at 36px these were
+     below the touch-target rule and easy to mis-tap on a phone. */
+  min-height: var(--control-height);
   padding: 0.3rem 0.6rem;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
@@ -6548,12 +6548,25 @@ dialog {
 
 .library-directions {
   position: sticky;
-  top: 0.5rem;
-  max-height: calc(100vh - 1rem);
+  /* Clear the sticky masthead, which is 64px on a wide screen where it is
+     one row. At 1280px and below it wraps to two rows (108px); the override
+     below carries that height. Without the offset the masthead covered the
+     sidebar's first controls once the reader scrolled. */
+  top: calc(64px + 0.5rem);
+  max-height: calc(100vh - 64px - 1rem);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+}
+
+@media (max-width: 1280px) {
+  /* The masthead wraps to two rows here, so the sidebar needs the taller
+     offset or its first controls slide under the masthead while scrolling. */
+  .library-directions {
+    top: calc(108px + 0.5rem);
+    max-height: calc(100vh - 108px - 1rem);
+  }
 }
 
 .library-direction-group {
@@ -6712,13 +6725,6 @@ dialog {
 
 /* Models (#420): .com's model x benchmark matrix, its side panel, and each
    lab's own model documents. */
-.models-note {
-  flex: 1 1 20rem;
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.88rem;
-}
-
 .models-controls {
   display: flex;
   flex-wrap: wrap;
@@ -7099,10 +7105,6 @@ dialog {
 
   /* One row of menus under the search, then the page row, so the matrix
      starts on the first screen; the menus' own labels name them. */
-  #models-view .models-note {
-    display: none;
-  }
-
   .models-controls {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
