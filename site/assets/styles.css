@@ -6546,12 +6546,25 @@ dialog {
 
 .library-directions {
   position: sticky;
-  top: 0.5rem;
-  max-height: calc(100vh - 1rem);
+  /* Clear the sticky masthead, which is 64px on a wide screen where it is
+     one row. At 1280px and below it wraps to two rows (108px); the override
+     below carries that height. Without the offset the masthead covered the
+     sidebar's first controls once the reader scrolled. */
+  top: calc(64px + 0.5rem);
+  max-height: calc(100vh - 64px - 1rem);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+}
+
+@media (max-width: 1280px) {
+  /* The masthead wraps to two rows here, so the sidebar needs the taller
+     offset or its first controls slide under the masthead while scrolling. */
+  .library-directions {
+    top: calc(108px + 0.5rem);
+    max-height: calc(100vh - 108px - 1rem);
+  }
 }
 
 .library-direction-group {
