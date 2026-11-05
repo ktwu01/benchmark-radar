@@ -888,12 +888,19 @@ def fetch_github_requested_repositories(
         if _reject_future(config, canonical, created, changed):
             continue
         # GitHub answered, so the request is resolved whether or not the
-        # repository becomes a record below.
+        # repository becomes a record below. A renamed repository is resolved
+        # under both names, so editing the row to the new name does not fetch
+        # and publish it a second time.
         answered.append(full_name)
-        # A finished benchmark is often archived after release. The reader asked
-        # for this one by name, so archiving does not drop it; a fork or a
-        # disabled repository is not the benchmark itself.
-        if row.get("fork") or row.get("disabled"):
+        if canonical.casefold() != full_name.casefold():
+            answered.append(canonical)
+        # The reader asked for this exact repository, so neither archiving (a
+        # finished benchmark often is) nor fork status drops it. GitHub serves
+        # nothing for a disabled repository, so say why it published nothing.
+        if row.get("disabled"):
+            config.setdefault("_source_warnings", []).append(
+                f"{full_name}: GitHub reports the repository disabled; nothing published"
+            )
             continue
         found[canonical] = RadarItem(
             source="GitHub",

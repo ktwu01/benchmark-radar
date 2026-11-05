@@ -256,6 +256,8 @@ def test_renamed_repository_warns_that_the_alias_is_stale(tmp_path, monkeypatch)
     config = {"registry_path": str(registry), "_collection_now": datetime(2026, 11, 6, tzinfo=UTC)}
     [item] = fetch_github_requested_repositories(config, datetime(2026, 11, 4, tzinfo=UTC), 10)
     assert item.source_id == "new-lab/repo"
+    # Resolved under both names, so renaming the row does not requeue it.
+    assert config["_requested_resolved"] == ["old-lab/repo", "new-lab/repo"]
     assert config["_source_warnings"] == [
         "old-lab/repo: GitHub now names it new-lab/repo; update the registry row and its "
         "watchlist alias"
@@ -295,3 +297,27 @@ def test_future_dated_answer_stays_pending(tmp_path, monkeypatch):
     config = {"registry_path": str(registry), "_collection_now": datetime(2026, 11, 6, tzinfo=UTC)}
     assert fetch_github_requested_repositories(config, datetime(2026, 11, 4, tzinfo=UTC), 10) == []
     assert config.get("_requested_resolved") == []
+
+
+def test_requested_fork_is_kept_and_disabled_repository_is_reported(tmp_path, monkeypatch):
+    registry = _registry(
+        tmp_path,
+        [
+            {"full_name": "lab/fork", "issue": ISSUE, "requested_at": date(2026, 11, 5)},
+            {"full_name": "lab/disabled", "issue": ISSUE, "requested_at": date(2026, 11, 5)},
+        ],
+    )
+    rows = {
+        "lab/fork": {**_repository("lab/fork"), "fork": True},
+        "lab/disabled": {**_repository("lab/disabled"), "disabled": True},
+    }
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: rows[url.removeprefix("https://api.github.com/repos/")],
+    )
+    config = {"registry_path": str(registry), "_collection_now": datetime(2026, 11, 6, tzinfo=UTC)}
+    items = fetch_github_requested_repositories(config, datetime(2026, 11, 4, tzinfo=UTC), 10)
+    assert [item.source_id for item in items] == ["lab/fork"]
+    assert config["_source_warnings"] == [
+        "lab/disabled: GitHub reports the repository disabled; nothing published"
+    ]
