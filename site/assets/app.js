@@ -12077,7 +12077,7 @@ function bindEvents() {
   // pointer or focus is still on it (data-dismissed, which CSS honours), until
   // the pointer or focus leaves.
   const sortToggle = byId("today-sort-toggle");
-  const sortInfo = sortToggle?.closest(".sort-info");
+  const sortInfo = byId("today-sort-info");
   const setSortNote = (open) => {
     sortToggle?.setAttribute("aria-expanded", String(open));
     if (open) sortInfo?.removeAttribute("data-dismissed");
