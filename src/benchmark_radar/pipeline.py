@@ -123,6 +123,11 @@ def deduplicate(items: list[RadarItem]) -> list[RadarItem]:
         for rationale in duplicate.rationale:
             if rationale not in target.rationale:
                 target.rationale.append(rationale)
+        # A reader request names the repository it asked for; the watchlist
+        # matches that name, so it must survive whichever copy wins the merge.
+        request = (duplicate.raw or {}).get("request")
+        if request and not (target.raw or {}).get("request"):
+            target.raw = {**(target.raw or {}), "request": request}
         note = f"Also found via {duplicate.source}"
         if note not in target.rationale:
             target.rationale.append(note)

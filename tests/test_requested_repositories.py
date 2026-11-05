@@ -322,3 +322,26 @@ def test_requested_fork_is_kept_and_disabled_repository_is_reported(tmp_path, mo
     assert config["_source_warnings"] == [
         "lab/disabled: GitHub reports the repository disabled; nothing published"
     ]
+
+
+def test_request_survives_deduplication_against_a_search_hit():
+    from benchmark_radar.models import RadarItem
+    from benchmark_radar.pipeline import deduplicate
+
+    when = datetime(2026, 11, 5, tzinfo=UTC)
+    common = {
+        "source": "GitHub",
+        "source_id": "new-lab/repo",
+        "title": "new-lab/repo",
+        "url": "https://github.com/new-lab/repo",
+        "published_at": when,
+        "updated_at": when,
+    }
+    search_hit = RadarItem(**common, raw={"full_name": "new-lab/repo"})
+    requested = RadarItem(
+        **common,
+        raw={"repository": {}, "request": {"full_name": "old-lab/repo", "issue": ISSUE}},
+    )
+    [merged] = deduplicate([search_hit, requested])
+    apply_watchlist([merged], [{"name": "Old Repo", "aliases": ["old-lab/repo"]}])
+    assert merged.watchlist == "Old Repo"
