@@ -283,3 +283,15 @@ def test_every_pending_request_is_fetched_even_past_the_item_limit(tmp_path, mon
         10,
     )
     assert len(items) == 25
+
+
+def test_future_dated_answer_stays_pending(tmp_path, monkeypatch):
+    registry = _registry(
+        tmp_path,
+        [{"full_name": "lab/repo", "issue": ISSUE, "requested_at": date(2026, 11, 5)}],
+    )
+    future = {**_repository("lab/repo"), "pushed_at": "2027-01-01T00:00:00Z"}
+    monkeypatch.setattr("benchmark_radar.sources.get_json", lambda url, **kwargs: future)
+    config = {"registry_path": str(registry), "_collection_now": datetime(2026, 11, 6, tzinfo=UTC)}
+    assert fetch_github_requested_repositories(config, datetime(2026, 11, 4, tzinfo=UTC), 10) == []
+    assert config.get("_requested_resolved") == []

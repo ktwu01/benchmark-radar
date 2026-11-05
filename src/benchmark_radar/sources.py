@@ -874,9 +874,6 @@ def fetch_github_requested_repositories(
             )
             failures.append(error)
             continue
-        # GitHub answered, so the request is resolved whether or not the
-        # repository becomes a record below.
-        answered.append(full_name)
         # The API answers for the canonical name, so a renamed or transferred
         # repository is recorded under the name GitHub reports today. Its
         # watchlist alias still names the requested repository, so say so.
@@ -886,8 +883,13 @@ def fetch_github_requested_repositories(
                 f"{full_name}: GitHub now names it {canonical}; update the registry "
                 "row and its watchlist alias"
             )
+        # A future-dated answer is quarantined and stays pending, so a later run
+        # can publish it once its timestamps are valid.
         if _reject_future(config, canonical, created, changed):
             continue
+        # GitHub answered, so the request is resolved whether or not the
+        # repository becomes a record below.
+        answered.append(full_name)
         # A finished benchmark is often archived after release. The reader asked
         # for this one by name, so archiving does not drop it; a fork or a
         # disabled repository is not the benchmark itself.
