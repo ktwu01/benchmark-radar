@@ -673,6 +673,7 @@ const I18N = {
     "Sort: Newest": "排序：最新",
     "How this list is sorted": "列表如何排序",
     "How to read this table": "如何阅读此表",
+    "How this ranking works": "这个排名如何计算",
     "Sort: Releases first, then recorded stars + likes + downloads + points; missing signals last": "排序：新发布的排在前面，其余按已记录的星标、点赞、下载和积分总数；缺少数据的记录排在最后",
     "Search benchmarks…": "搜索benchmark…",
     "Refresh data": "刷新数据",
@@ -12113,6 +12114,7 @@ function bindEvents() {
   });
   bindInfoTip(byId("today-sort-info"), byId("today-sort-toggle"));
   bindInfoTip(byId("models-info"), byId("models-info-toggle"));
+  bindInfoTip(byId("latest-about"), byId("latest-about-toggle"));
   document.querySelectorAll("[data-today-sort]").forEach((button) => {
     button.addEventListener("click", () => {
       state.todaySort = button.dataset.todaySort;
