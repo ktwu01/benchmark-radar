@@ -607,8 +607,8 @@ a.benchmark-resource-link::after {
   transition: opacity 120ms ease;
 }
 
-#today-view .sort-info:hover #today-sort.sort-info-body,
-#today-view .sort-info:focus-within #today-sort.sort-info-body,
+#today-view .sort-info:not([data-dismissed]):hover #today-sort.sort-info-body,
+#today-view .sort-info:not([data-dismissed]):focus-within #today-sort.sort-info-body,
 #today-view .sort-info-toggle[aria-expanded="true"] + #today-sort.sort-info-body {
   visibility: visible;
   opacity: 1;

@@ -12073,16 +12073,26 @@ function bindEvents() {
     });
   });
   // The sort note opens on hover and focus in CSS; a tap toggles it for touch
-  // screens, and Escape or a tap elsewhere closes it.
+  // screens, and a tap elsewhere closes it. Escape dismisses it even while the
+  // pointer or focus is still on it (data-dismissed, which CSS honours), until
+  // the pointer or focus leaves.
   const sortToggle = byId("today-sort-toggle");
-  const setSortNote = (open) => sortToggle?.setAttribute("aria-expanded", String(open));
+  const sortInfo = sortToggle?.closest(".sort-info");
+  const setSortNote = (open) => {
+    sortToggle?.setAttribute("aria-expanded", String(open));
+    if (open) sortInfo?.removeAttribute("data-dismissed");
+  };
   sortToggle?.addEventListener("click", (event) => {
     event.stopPropagation();
     setSortNote(sortToggle.getAttribute("aria-expanded") !== "true");
   });
-  sortToggle?.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") setSortNote(false);
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || !sortInfo) return;
+    setSortNote(false);
+    sortInfo.setAttribute("data-dismissed", "");
   });
+  sortInfo?.addEventListener("mouseleave", () => sortInfo.removeAttribute("data-dismissed"));
+  sortInfo?.addEventListener("focusout", () => sortInfo.removeAttribute("data-dismissed"));
   document.addEventListener("click", () => setSortNote(false));
   document.querySelectorAll("[data-today-sort]").forEach((button) => {
     button.addEventListener("click", () => {
