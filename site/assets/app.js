@@ -1340,8 +1340,8 @@ const I18N = {
     "limited signals: the repository has no code or data yet": "信号有限：仓库尚无代码或数据",
     "as written in the paper": "按论文原文",
     "Institutions linked by OpenAlex": "OpenAlex 关联的机构",
-    "{signals}, plus {weight}% institution frequency: how many benchmark papers the release's best-known institution among its first three appears on, log-normalized. A release with no institution on file gets no affiliation credit. A repository holding only a README, licence or images is listed but not ranked.":
-      "{signals}，另加 {weight}% 的机构出现频次：该发布前三个机构中最常出现者在多少篇 benchmark 论文中出现，取对数归一化。没有机构记录的发布不获得机构分。只含 README、许可证或图片的仓库仅列出，不参与排名。",
+    "Plus {weight}% institution frequency: how many benchmark papers in the whole corpus list the release's best-known institution among its first three, normalized as log1p(count) / log1p(the most frequent institution's count), not by the window. A release with no institution on file gets no affiliation credit. A repository holding only a README, licence or images is listed but not ranked.":
+      "另加 {weight}% 的机构出现频次：在整个语料中，该发布前三个机构里最常出现者被多少篇 benchmark 论文列出，按 log1p(该数) / log1p(出现最多的机构的篇数) 归一化，而非按时间窗口。没有机构记录的发布不获得机构分。只含 README、许可证或图片的仓库仅列出，不参与排名。",
     "Top institutions": "机构排行",
     "{count} papers": "{count} 篇论文",
     "Institutions ranked by how many benchmark papers in the corpus list them, from OpenAlex's linked institutions for {papers} arXiv papers. A count of papers, not a grade.":
@@ -10399,22 +10399,21 @@ function latestReleasesMethodNote(payload, windowData) {
       weights[key] === null ? t(label) : `${Math.round(weights[key] * 100)}% ${t(label)}`,
     )
     .join(", ");
-  const signals =
+  // Affiliation is normalized over the corpus, not the window, so it gets its
+  // own sentence after the attention one.
+  const affiliation =
     weights.affiliation === null || weights.affiliation === undefined
-      ? attention
-      : t(
-          "{signals}, plus {weight}% institution frequency: how many benchmark papers the release's best-known institution among its first three appears on, log-normalized. A release with no institution on file gets no affiliation credit. A repository holding only a README, licence or images is listed but not ranked.",
-          { signals: attention, weight: Math.round(weights.affiliation * 100) },
-        );
+      ? ""
+      : ` ${t("Plus {weight}% institution frequency: how many benchmark papers in the whole corpus list the release's best-known institution among its first three, normalized as log1p(count) / log1p(the most frequent institution's count), not by the window. A release with no institution on file gets no affiliation credit. A repository holding only a README, licence or images is listed but not ranked.", { weight: Math.round(weights.affiliation * 100) })}`;
   return t(
     "Ranking {method}: {signals}, each normalized as log1p(value) / log1p(window maximum) and summed to a 0 to 100 score. A release is ranked only when enough of its weight comes from fresh, durable signals; the rest are listed with limited signals. Dataset downloads are a rolling 30-day figure, never a cumulative total. Stars come from the benchmark's own repository, never a parent framework. Window {start} to {end}, UTC.",
     {
       method: payload.method_version || "",
-      signals,
+      signals: attention,
       start: formatDate(windowData.window_start, { dateStyle: "medium" }),
       end: formatDate(windowData.window_end, { dateStyle: "medium" }),
     },
-  );
+  ) + affiliation;
 }
 
 const DECK_V2 =
