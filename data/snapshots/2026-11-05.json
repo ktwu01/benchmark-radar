@@ -92818,5 +92818,154 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [],
+        "authors": [
+          "Anonymous Author(s"
+        ],
+        "blurb": "FORMA-Bench is a new benchmark for testing whether a designated verifier in a multi-agent architecture can check declared constraints from different evidence arrangements.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-05T11:59:46+00:00",
+        "source": "DataCite",
+        "title": "Dataset for the paper \"Architectural Verifiability in Agent-to-Agent Systems: Design and Evaluation of FORMAW",
+        "url": "https://doi.org/10.5281/zenodo.23978302"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Mingxuan Li",
+          "Huanzhi Mao",
+          "Ruitao Zheng",
+          "Jarod Stanbury James",
+          "Yunze Li",
+          "Natanya Anderson",
+          "Joseph E. Gonzalez",
+          "Alex Dimakis"
+        ],
+        "blurb": "SlackBench anchors a recurring pressure in today’s captured releases to evaluate agents over evolving workflows rather than isolated prompts.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-05T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "SlackBench: Benchmarking Agents on Collaborative Projects Grounded in Real Code Repositories",
+        "url": "https://arxiv.org/abs/2611.05512"
+      },
+      {
+        "affiliations": [
+          "Nanjing University of Aeronautics and Astronautics",
+          "Zhejiang University"
+        ],
+        "authors": [
+          "Chiyu Zhang",
+          "Lu Zhou",
+          "Xiaogang Xu",
+          "Huiqin Yang",
+          "Bendong Jiang",
+          "Xiaolei Zhang",
+          "Yiran Zhao",
+          "Ruyi Chen",
+          "Jiafei Wu",
+          "Liming Fang",
+          "Zhe Liu"
+        ],
+        "blurb": "LITMUS is a new safety benchmark for behavior jailbreaks in real operating-system environments.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-05T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "LITMUS: Benchmarking Behavioral Jailbreaks of LLM Agents in Real OS Environments",
+        "url": "https://arxiv.org/abs/2605.10779"
+      },
+      {
+        "affiliations": [
+          "University of Warwick",
+          "University of California, Berkeley",
+          "University College London"
+        ],
+        "authors": [
+          "Kaihua Qin",
+          "Dawn Song",
+          "Arthur Gervais"
+        ],
+        "blurb": "SCDBench is a new benchmark for converting Ethereum Virtual Machine bytecode back into Solidity source code.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-05T11:05:09+00:00",
+        "source": "DataCite",
+        "title": "SCDBench: A Benchmark for LLM-Based Smart Contract Decompilers",
+        "url": "https://doi.org/10.7910/dvn/ipptix"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Haixin Wang",
+          "Jianheng Hou",
+          "Hongyu Shen",
+          "Wenzhe Fan",
+          "Wei-Chieh Huang",
+          "Qianyu Zhu",
+          "Weichen Li",
+          "Taoran Li",
+          "Yuhang Yao",
+          "Ruohan Wang",
+          "Zhejian Peng",
+          "Wanting Jiang",
+          "Yifan Chen",
+          "Shushu Liang",
+          "Haoming Li",
+          "Defu Cao",
+          "Xu Hu",
+          "Siyang Wu",
+          "Chen Yang",
+          "Haodi Hu",
+          "Haichao Zhang",
+          "Cong Wang",
+          "Zhiyuan Yu",
+          "Weizhi Zhang",
+          "Yifan Wang",
+          "Jintao Huang",
+          "Yizhou Sun",
+          "Yijun Wang",
+          "Yuexing Hao",
+          "Xiaomin Li"
+        ],
+        "blurb": "PersonaCodeBench is a new benchmark that turns user characteristics—such as expertise, interaction preferences, permissions, and working constraints—into verifiable requirements across multi-turn coding sessions.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-05T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "PersonaCodeBench: Evaluating Coding Agents in Persona-driven Human-Interactive Sessions",
+        "url": "https://arxiv.org/abs/2611.05739"
+      }
+    ],
+    "date": "2026-11-05",
+    "schema_version": 1,
+    "top": [
+      "https://doi.org/10.5281/zenodo.23978302",
+      "https://arxiv.org/abs/2611.05512",
+      "https://arxiv.org/abs/2605.10779"
+    ]
+  },
   "since": "2026-11-03T12:49:54.427930+00:00"
 }
