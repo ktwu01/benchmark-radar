@@ -254,8 +254,8 @@ sources:
     timeout_seconds: 30
 
   # Reader-reported repositories that every time-windowed path missed (issue
-  # #555). Each registry row is fetched by owner/name once, in the run whose
-  # window contains its requested_at date. A request grants discovery only.
+  # #555). Each registry row is fetched by owner/name once, in the daily run on
+  # the day after its requested_at date. A request grants discovery only.
   github_requested_repositories:
     enabled: true
     required: false

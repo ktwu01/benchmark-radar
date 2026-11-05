@@ -1,9 +1,8 @@
 # Reader-reported GitHub repositories that every time-windowed discovery path
 # missed (issue #555). The `github_requested_repositories` connector fetches
-# each row by owner/name once, in the run whose lookback window contains
-# `requested_at`, so the record enters the daily snapshot that day and is not
-# repeated afterwards. To retry a row whose fetch failed, move `requested_at`
-# to the current date.
+# each row by owner/name once, in the daily run on the day after `requested_at`,
+# so the record enters one daily snapshot and is not repeated afterwards. To
+# retry a row whose fetch failed, move `requested_at` to the current date.
 #
 # A row grants discovery only: the record is scored, suppressed and
 # deduplicated like any GitHub search hit. Add a row only for a request filed

@@ -829,19 +829,21 @@ def fetch_github_requested_repositories(
 
     Search and organization discovery only see repositories pushed or created
     inside the run's window, so a repository they dropped cannot come back
-    (issue #555). A reviewed request fetches it directly, once: a row is due in
-    the run whose window contains its `requested_at` date, which keeps the
-    record from repeating in every later daily snapshot.
+    (issue #555). A reviewed request fetches it directly, once: a row is due
+    only in the run on the day after its `requested_at` date. The lookback
+    window spans two daily runs, so testing the date against `since` would
+    publish an old repository as current activity twice.
 
     A request grants discovery only. The record is a plain GitHub record, so it
     is summarised, scored, suppressed and deduplicated exactly like a search
     hit, and a blank upstream description stays blank.
     """
     registry_path = Path(str(config.get("registry_path", "data/requested_github_repositories.yml")))
+    due_date = (_collection_clock(config) - timedelta(days=1)).date()
     due = [
         entry
         for entry in load_requested_github_repositories(registry_path)
-        if entry["requested_at"] >= since.date()
+        if entry["requested_at"] == due_date
     ]
     budget = max(1, int(config.get("max_requests", len(due) or 1)))
     headers = _github_headers()
@@ -872,11 +874,20 @@ def fetch_github_requested_repositories(
             failures.append(error)
             continue
         # The API answers for the canonical name, so a renamed or transferred
-        # repository is recorded under the name GitHub reports today.
+        # repository is recorded under the name GitHub reports today. Its
+        # watchlist alias still names the requested repository, so say so.
         canonical = str(row.get("full_name") or full_name).strip()
+        if canonical.casefold() != full_name.casefold():
+            config.setdefault("_source_warnings", []).append(
+                f"{full_name}: GitHub now names it {canonical}; update the registry "
+                "row and its watchlist alias"
+            )
         if _reject_future(config, canonical, created, changed):
             continue
-        if row.get("fork") or row.get("archived") or row.get("disabled"):
+        # A finished benchmark is often archived after release. The reader asked
+        # for this one by name, so archiving does not drop it; a fork or a
+        # disabled repository is not the benchmark itself.
+        if row.get("fork") or row.get("disabled"):
             continue
         found[canonical] = RadarItem(
             source="GitHub",

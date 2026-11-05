@@ -1,4 +1,4 @@
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -176,3 +176,59 @@ def test_no_due_request_makes_no_call(tmp_path, monkeypatch):
         )
         == []
     )
+
+
+def test_a_request_is_published_in_one_daily_run_only(tmp_path, monkeypatch):
+    """The 48 h window spans two daily runs; only the first may fetch the row."""
+    registry = _registry(
+        tmp_path,
+        [{"full_name": "lab/repo", "issue": ISSUE, "requested_at": date(2026, 11, 5)}],
+    )
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json", lambda url, **kwargs: _repository("lab/repo")
+    )
+    fetched = []
+    for run in (
+        datetime(2026, 11, 5, 5, tzinfo=UTC),
+        datetime(2026, 11, 6, 5, tzinfo=UTC),
+        datetime(2026, 11, 7, 5, tzinfo=UTC),
+    ):
+        items = fetch_github_requested_repositories(
+            {"registry_path": str(registry), "_collection_now": run},
+            run - timedelta(hours=48),
+            10,
+        )
+        fetched.append(len(items))
+    assert fetched == [0, 1, 0]
+
+
+def test_archived_requested_repository_is_kept(tmp_path, monkeypatch):
+    registry = _registry(
+        tmp_path,
+        [{"full_name": "lab/repo", "issue": ISSUE, "requested_at": date(2026, 11, 5)}],
+    )
+    archived = {**_repository("lab/repo"), "archived": True}
+    monkeypatch.setattr("benchmark_radar.sources.get_json", lambda url, **kwargs: archived)
+    items = fetch_github_requested_repositories(
+        {"registry_path": str(registry), "_collection_now": datetime(2026, 11, 6, tzinfo=UTC)},
+        datetime(2026, 11, 4, tzinfo=UTC),
+        10,
+    )
+    assert [item.source_id for item in items] == ["lab/repo"]
+
+
+def test_renamed_repository_warns_that_the_alias_is_stale(tmp_path, monkeypatch):
+    registry = _registry(
+        tmp_path,
+        [{"full_name": "old-lab/repo", "issue": ISSUE, "requested_at": date(2026, 11, 5)}],
+    )
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json", lambda url, **kwargs: _repository("new-lab/repo")
+    )
+    config = {"registry_path": str(registry), "_collection_now": datetime(2026, 11, 6, tzinfo=UTC)}
+    [item] = fetch_github_requested_repositories(config, datetime(2026, 11, 4, tzinfo=UTC), 10)
+    assert item.source_id == "new-lab/repo"
+    assert config["_source_warnings"] == [
+        "old-lab/repo: GitHub now names it new-lab/repo; update the registry row and its "
+        "watchlist alias"
+    ]
