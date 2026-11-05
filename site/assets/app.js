@@ -10444,7 +10444,7 @@ function renderInstitutionRanking() {
   if (!section || !host) return;
   const ranking = state.data?.institution_ranking;
   const entries = ranking?.entries || [];
-  section.hidden = !entries.length;
+  section.hidden = !entries.length || state.lmode === "adoption";
   if (!entries.length) {
     replaceChildren(host, []);
     return;
@@ -10769,6 +10769,9 @@ function syncLeaderboardMode() {
   const adoption = byId("leaderboard-adoption");
   if (latestSection) latestSection.hidden = !latest;
   if (adoption) adoption.hidden = latest;
+  // Top institutions belongs to the Latest releases mode (#1120).
+  const institutions = byId("institution-ranking");
+  if (institutions && !latest) institutions.hidden = true;
   document.querySelectorAll("[data-lmode]").forEach((control) => {
     if (control.hasAttribute("aria-pressed")) {
       control.setAttribute("aria-pressed", String(control.dataset.lmode === state.lmode));
