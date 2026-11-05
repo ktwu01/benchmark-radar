@@ -219,6 +219,18 @@
     <script src="/assets/clarity.js" defer></script>
     <script src="/assets/app.js" type="module"></script>
     <link rel="stylesheet" href="/assets/design-system.css">
+    <!-- Without script nothing sets aria-expanded, so each (i) note opens on
+         hover or focus instead, and a tap focuses the button. The
+         server-seeded Landscape ranking stays readable with its legend. -->
+    <noscript>
+      <style>
+        .info-tip:hover .info-tip-body,
+        .info-tip:focus-within .info-tip-body {
+          visibility: visible;
+          opacity: 1;
+        }
+      </style>
+    </noscript>
   </head>
   <body>
     <a class="skip-link" href="#main-content" data-i18n="Skip to content">Skip to content</a>
