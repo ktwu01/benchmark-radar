@@ -900,8 +900,8 @@ def _is_calendar_date(value: str) -> bool:
     """True only for a real `YYYY-MM-DD` day.
 
     Shape alone is not enough: `2023-02-29` matches the pattern and would reach
-    the sitemap as an invalid `lastmod`. The round trip also rejects the forms
-    `date.fromisoformat` accepts but the sitemap spec does not, such as
+    structured data as an invalid `datePublished`. The round trip also rejects the forms
+    `date.fromisoformat` accepts but our date fields do not, such as
     `20230101`.
     """
     try:
@@ -910,33 +910,13 @@ def _is_calendar_date(value: str) -> bool:
         return False
 
 
-def _shard_lastmod(shard: dict[str, Any]) -> str | None:
-    """Newest date the page's own evidence carries, or None when it carries none.
-
-    A page changes when a score lands on it or when the record itself is dated,
-    not when some other benchmark's snapshot arrives. Both fields are stored as
-    plain `YYYY-MM-DD`, so the newest one sorts lexically; anything a calendar
-    rejects is dropped rather than passed through to the sitemap.
-    """
-    dates = {
-        row.get("reported_date")
-        for source in (shard.get("scores_by_source") or {}).values()
-        for row in (source or {}).get("rows") or ()
-    }
-    dates.add((shard.get("record") or {}).get("released"))
-    dated = {value for value in dates if isinstance(value, str) and _is_calendar_date(value)}
-    return max(dated) if dated else None
-
-
 def benchmark_sitemap_entries(shard_dir: Path) -> list[tuple[str, str | None]]:
-    """Benchmark page paths in stable slug order, each with its own lastmod."""
-    if not shard_dir.is_dir():
-        return []
-    entries = []
-    for path in sorted(shard_dir.glob("*.json")):
-        shard = json.loads(path.read_text(encoding="utf-8"))
-        entries.append((f"/benchmarks/{path.stem}/", _shard_lastmod(shard)))
-    return entries
+    """Benchmark paths without lastmod until page-change dates are tracked.
+
+    Release and score dates describe the evidence, not the page's last
+    significant change. A rebuild timestamp does not establish that either.
+    """
+    return [(f"/benchmarks/{slug}/", None) for slug in benchmark_slugs(shard_dir)]
 
 
 def benchmark_page_urls(shard_dir: Path) -> list[str]:
