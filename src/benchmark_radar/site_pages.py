@@ -863,33 +863,21 @@ def _is_calendar_date(value: str) -> bool:
         return False
 
 
-def _shard_lastmod(shard: dict[str, Any]) -> str | None:
-    """Newest date the page's own evidence carries, or None when it carries none.
-
-    A page changes when a score lands on it or when the record itself is dated,
-    not when some other benchmark's snapshot arrives. Both fields are stored as
-    plain `YYYY-MM-DD`, so the newest one sorts lexically; anything a calendar
-    rejects is dropped rather than passed through to the sitemap.
-    """
-    dates = {
-        row.get("reported_date")
-        for source in (shard.get("scores_by_source") or {}).values()
-        for row in (source or {}).get("rows") or ()
-    }
-    dates.add((shard.get("record") or {}).get("released"))
-    dated = {value for value in dates if isinstance(value, str) and _is_calendar_date(value)}
-    return max(dated) if dated else None
-
-
 def benchmark_sitemap_entries(shard_dir: Path) -> list[tuple[str, str | None]]:
-    """Benchmark page paths in stable slug order, each with its own lastmod."""
+    """Benchmark page paths in stable slug order, with no lastmod.
+
+    No page-change date is known at build time. The newest score
+    `reported_date` or the record's `released` date used to stand in, but
+    neither is when the page changed (#983 removed the same value from the
+    page's own `dateModified`): a score with an old date can land today, or a
+    page can be corrected, and the sitemap would still report the old date.
+    The shards are regenerated on every build, so their file times are build
+    times rather than change times too. Omitting `lastmod` says "unknown"
+    instead of stating a date the page did not change on.
+    """
     if not shard_dir.is_dir():
         return []
-    entries = []
-    for path in sorted(shard_dir.glob("*.json")):
-        shard = json.loads(path.read_text(encoding="utf-8"))
-        entries.append((f"/benchmarks/{path.stem}/", _shard_lastmod(shard)))
-    return entries
+    return [(f"/benchmarks/{path.stem}/", None) for path in sorted(shard_dir.glob("*.json"))]
 
 
 def benchmark_page_urls(shard_dir: Path) -> list[str]:
