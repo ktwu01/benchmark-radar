@@ -395,6 +395,13 @@ a.benchmark-resource-link::after {
     right: 0;
     margin: 0;
   }
+
+  /* The rail shares the icon's row, so it leaves the icon's 44px free: a
+     long source name or a dated "3 Nov 2025" wraps instead of sliding under
+     the button. */
+  .radar-rail {
+    padding-right: calc(var(--control-height) + var(--space-2));
+  }
 }
 
 /* Results first on a phone (design.md, "Mobile layout"). The two segment
