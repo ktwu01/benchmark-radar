@@ -645,3 +645,39 @@ a.benchmark-resource-link::after {
   border-top-color: var(--edge);
   white-space: normal;
 }
+
+/* A note with more than one paragraph stacks them. */
+.info-tip-body > span {
+  display: block;
+}
+
+.info-tip-body > span + span {
+  margin-top: 0.5rem;
+}
+
+/* Landscape: the ranking note sits right after the "Attention score" header.
+   The header leaves room for the icon at its right end, and the note opens
+   leftward over the list. */
+.latest-releases-columns {
+  position: relative;
+}
+
+.latest-releases-columns .leaderboard-top-columns-count {
+  padding-right: 1.9rem;
+  white-space: nowrap;
+}
+
+.latest-releases-about {
+  position: absolute;
+  top: 50%;
+  right: 0.85rem;
+  transform: translateY(-50%);
+}
+
+.latest-releases-about .info-tip-toggle {
+  margin: -0.75rem -0.85rem -0.75rem -0.75rem;
+}
+
+.latest-releases-about .info-tip-body {
+  max-width: min(46ch, calc(100vw - 32px));
+}

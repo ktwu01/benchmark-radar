@@ -715,7 +715,6 @@
             <h2 id="latest-releases-heading"><span data-i18n="Latest releases">Latest releases</span> <span class="latest-releases-window" id="latest-releases-window">· 30 days</span></h2>
             <span id="latest-releases-info"></span>
           </div>
-          <p class="section-note latest-releases-deck" data-i18n="latest.deck">Recently released benchmarks, ranked by the attention they are receiving now: GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days.</p>
           <div class="latest-releases-windows" role="group" aria-label="Release window" data-i18n-aria="Release window">
             <button type="button" class="latest-releases-window-button" data-lwindow="7d" aria-pressed="false" data-i18n="7 days">7 days</button>
             <button type="button" class="latest-releases-window-button" data-lwindow="30d" aria-pressed="true" data-i18n="30 days">30 days</button>
@@ -733,15 +732,35 @@
               aria-controls="latest-releases-list"
             >
           </label>
-          <div class="leaderboard-top-columns" aria-hidden="true">
-            <span class="leaderboard-top-columns-rank" data-i18n="Rank">Rank</span>
-            <span class="leaderboard-top-columns-name" data-i18n="Benchmark">Benchmark</span>
-            <span class="leaderboard-top-columns-count" data-i18n="Attention score">Attention score</span>
+          <!-- What the ranking measures and how to read the score and its tag
+               is method, not the answer, so it sits in a closed (i) after the
+               "Attention score" header instead of two open paragraphs around
+               the list. -->
+          <div class="latest-releases-columns">
+            <div class="leaderboard-top-columns" aria-hidden="true">
+              <span class="leaderboard-top-columns-rank" data-i18n="Rank">Rank</span>
+              <span class="leaderboard-top-columns-name" data-i18n="Benchmark">Benchmark</span>
+              <span class="leaderboard-top-columns-count" data-i18n="Attention score">Attention score</span>
+            </div>
+            <span class="info-tip latest-releases-about" id="latest-about">
+              <button
+                type="button"
+                class="info-tip-toggle"
+                id="latest-about-toggle"
+                aria-expanded="false"
+                aria-controls="latest-about-note"
+                aria-label="How this ranking works"
+                data-i18n-aria="How this ranking works"
+              ><span aria-hidden="true">i</span></button>
+              <span class="info-tip-body" id="latest-about-note" role="note">
+                <span class="latest-releases-deck" data-i18n="latest.deck">Recently released benchmarks, ranked by the attention they are receiving now: GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days.</span>
+                <span class="latest-releases-legend" data-i18n="latest.legend">The number is the attention score, out of 100. The tag under it is a separate check: how much of the score is backed by observed data. A high tag means at least two signals were found and they cover 75% or more of the score; a low tag means fewer than two signals were found, or they cover less than 40% of the score. It says nothing about how good the benchmark is.</span>
+              </span>
+            </span>
           </div>
           <ol class="leaderboard-top-list latest-releases-list" id="latest-releases-list"></ol>
           <p class="empty-state latest-releases-empty" id="latest-releases-empty" aria-live="polite" hidden></p>
           <p class="section-note" id="latest-releases-note" aria-live="polite"></p>
-          <p class="section-note latest-releases-legend" data-i18n="latest.legend">The number is the attention score, out of 100. The tag under it is a separate check: how much of the score is backed by observed data. A high tag means at least two signals were found and they cover 75% or more of the score; a low tag means fewer than two signals were found, or they cover less than 40% of the score. It says nothing about how good the benchmark is.</p>
         </section>
 
         <!-- The adoption view, shown when the reader picks it or follows a
