@@ -671,6 +671,7 @@ const I18N = {
     "Time window": "时间范围",
     "Sort by": "排序方式",
     "Sort: Newest": "排序：最新",
+    "How this list is sorted": "列表如何排序",
     "Sort: Releases first, then recorded stars + likes + downloads + points; missing signals last": "排序：新发布的排在前面，其余按已记录的星标、点赞、下载和积分总数；缺少数据的记录排在最后",
     "Search benchmarks…": "搜索benchmark…",
     "Refresh data": "刷新数据",
@@ -12071,6 +12072,18 @@ function bindEvents() {
       select.dispatchEvent(new Event("change"));
     });
   });
+  // The sort note opens on hover and focus in CSS; a tap toggles it for touch
+  // screens, and Escape or a tap elsewhere closes it.
+  const sortToggle = byId("today-sort-toggle");
+  const setSortNote = (open) => sortToggle?.setAttribute("aria-expanded", String(open));
+  sortToggle?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    setSortNote(sortToggle.getAttribute("aria-expanded") !== "true");
+  });
+  sortToggle?.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") setSortNote(false);
+  });
+  document.addEventListener("click", () => setSortNote(false));
   document.querySelectorAll("[data-today-sort]").forEach((button) => {
     button.addEventListener("click", () => {
       state.todaySort = button.dataset.todaySort;

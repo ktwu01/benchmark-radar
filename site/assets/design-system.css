@@ -538,3 +538,84 @@ a.benchmark-resource-link::after {
 .fact-icon-citations {
   --fact-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M7 7h3v4c0 2.5-1.5 4.5-4 5M15 7h3v4c0 2.5-1.5 4.5-4 5%22/%3E%3C/svg%3E");
 }
+
+/* The sort note is a closed (i) after the counts (issue #1097). It opens on
+   hover, on keyboard focus, or when tapped (aria-expanded), and sits over the
+   list instead of pushing it down. */
+#today-view .section-title {
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+}
+
+#today-view .sort-info {
+  position: relative;
+  grid-column: 4;
+  grid-row: 1;
+  display: inline-flex;
+}
+
+#today-view .sort-info-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  margin: -0.75rem -0.75rem -0.75rem -0.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+#today-view .sort-info-toggle > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  font-family: Georgia, serif;
+  font-size: 12px;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+}
+
+#today-view .sort-info-toggle:hover,
+#today-view .sort-info-toggle[aria-expanded="true"] {
+  color: var(--blue-deep);
+}
+
+#today-view #today-sort.sort-info-body {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 0.6rem);
+  right: 0;
+  width: max-content;
+  max-width: min(34ch, calc(100vw - 32px));
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  box-shadow: 0 6px 20px rgb(23 32 38 / 12%);
+  color: var(--ink);
+  white-space: normal;
+  text-align: left;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+#today-view .sort-info:hover #today-sort.sort-info-body,
+#today-view .sort-info:focus-within #today-sort.sort-info-body,
+#today-view .sort-info-toggle[aria-expanded="true"] + #today-sort.sort-info-body {
+  visibility: visible;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #today-view #today-sort.sort-info-body {
+    transition: none;
+  }
+}
