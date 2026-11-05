@@ -136,6 +136,18 @@ def _text(record: dict[str, Any], key: str) -> str | None:
     return None
 
 
+def _publisher_name(record: dict[str, Any]) -> str | None:
+    """The publisher's name, whether the shard stores it as a string or an object.
+
+    Shards store the publisher as {"name", "role", "locator"}; a plain string
+    is accepted too so a hand-built record still says who published it.
+    """
+    raw_publisher = record.get("publisher")
+    if isinstance(raw_publisher, dict):
+        return _text(raw_publisher, "name")
+    return _text(record, "publisher")
+
+
 @dataclass(frozen=True)
 class CatalogContext:
     """What one page can only know by looking at the whole catalog.
@@ -267,7 +279,7 @@ def _evidence_sentence(
 def _summary_sentence(name: str, record: dict[str, Any]) -> str:
     """A first sentence for a record that carries no description of its own."""
     categories = _category_words(record)
-    publisher = _text(record, "publisher")
+    publisher = _publisher_name(record)
     if categories and publisher:
         return f"{name} is a {categories} benchmark published by {publisher}."
     if categories:
@@ -317,7 +329,7 @@ def _canonical(slug: str) -> str:
 
 def _facts(record: dict[str, Any]) -> list[tuple[str, str]]:
     facts: list[tuple[str, str]] = []
-    publisher = _text(record, "publisher")
+    publisher = _publisher_name(record)
     if publisher:
         facts.append(("Publisher", publisher))
     released = _text(record, "released")
@@ -386,14 +398,7 @@ def _benchmark_entity(
     same_as = [url for kind, _, url in artifacts if kind != "paper" and _http_url(url)]
     if same_as:
         entity["sameAs"] = same_as
-    # Shards store the publisher as {"name", "role", "locator"}; a plain string
-    # is accepted too so a hand-built record still says who published it.
-    raw_publisher = record.get("publisher")
-    publisher = (
-        _text(raw_publisher, "name")
-        if isinstance(raw_publisher, dict)
-        else _text(record, "publisher")
-    )
+    publisher = _publisher_name(record)
     if publisher:
         entity["publisher"] = {"@type": "Organization", "name": publisher}
     released = _text(record, "released")
