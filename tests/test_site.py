@@ -3745,6 +3745,16 @@ def test_top_share_label_follows_the_number_of_cards_in_the_image():
     ]
 
 
+def test_library_controls_meet_the_44px_touch_target():
+    styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
+
+    # #890: the sort select and Saved toggles were 36px, below the 44px
+    # touch-target rule design.md asks for (#886).
+    rule = styles.split(".library-sort,\n.library-saved-toggle {", 1)[1].split("}", 1)[0]
+    assert "min-height: var(--control-height);" in rule
+    assert "--control-height: 44px;" in styles
+
+
 def test_library_sidebar_clears_the_sticky_masthead():
     styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
 

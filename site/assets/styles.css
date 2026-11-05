@@ -6510,7 +6510,9 @@ dialog {
 
 .library-sort,
 .library-saved-toggle {
-  min-height: 2.25rem;
+  /* 44px, the shared control height (design.md #886): at 36px these were
+     below the touch-target rule and easy to mis-tap on a phone. */
+  min-height: var(--control-height);
   padding: 0.3rem 0.6rem;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
