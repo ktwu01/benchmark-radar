@@ -1344,7 +1344,6 @@ const I18N = {
       "{signals}，另加 {weight}% 的机构出现频次：该发布前三个机构中最常出现者在多少篇 benchmark 论文中出现，取对数归一化。没有机构记录的发布不获得机构分。只含 README、许可证或图片的仓库仅列出，不参与排名。",
     "Top institutions": "机构排行",
     "{count} papers": "{count} 篇论文",
-    Score: "得分",
     "Institutions ranked by how many benchmark papers in the corpus list them, from OpenAlex's linked institutions for {papers} arXiv papers. A count of papers, not a grade.":
       "按语料中列出该机构的 benchmark 论文数量排序，数据来自 OpenAlex 为 {papers} 篇 arXiv 论文关联的机构。这是论文计数，不是评级。",
     Institutions: "机构",
