@@ -83,3 +83,30 @@ def test_lookup_prefers_openalex_then_the_paper():
     assert found["basis"] == "arxiv_html_affiliations"
     assert found["source_url"] == "https://arxiv.org/html/2611.04228"
     assert lookup("2611.00000", fetch_json=missing, fetch_text=missing) is None
+
+
+def test_non_affiliation_rows_from_real_papers_are_dropped():
+    # Strings the arXiv HTML fallback produced on 2026-11-05 (#1098 review).
+    assert (
+        clean_affiliation("Cuicui Zhang, Dylan Joseph, Kewei Sha, Yunhe Feng and Heng Fan") is None
+    )
+    assert clean_affiliation("Project page: https://stuck-on-shuffle.github.io/") is None
+    assert clean_affiliation("Code: StarTrail-org/DRPixel Data: HughieHu/DRPixel-Bench") is None
+    assert clean_affiliation(r"N {}^{\hskip 0.81949pt} NYU Shanghai") is None
+    assert clean_affiliation(r"Dvir Samuel ÿ \filleddiamond Or Patashnik") is None
+    assert clean_affiliation("UTokyo † Equal contribution. * Corresponding authors") == "UTokyo"
+    assert clean_affiliation("JetBrains Research") == "JetBrains Research"
+
+
+def test_author_names_beside_institutions_are_dropped():
+    # arXiv:2610.35864 puts authors in the affiliation slots.
+    def contact(text):
+        return (
+            '<span class="ltx_contact ltx_role_affiliation">'
+            f'<span class="ltx_contact_name">Affiliation: </span>{text}</span>'
+        )
+
+    page = contact("Kaiyu Jiang") + contact("Peking University") + contact("Haonan Fan")
+    assert arxiv_html_affiliations(page) == ["Peking University"]
+    # A lone name cannot be told apart from a small company, so it is kept.
+    assert arxiv_html_affiliations(contact("Continker")) == ["Continker"]

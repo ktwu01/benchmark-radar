@@ -45,6 +45,32 @@ _LINE_BREAK = re.compile(
 )
 _MARKER = re.compile(r"[0-9]{1,2}|[a-z]")
 _LETTER = re.compile(r"[^\W\d_]")
+# Conversion debris and non-affiliation rows arXiv HTML puts beside the
+# affiliations: LaTeX left in the text, links, and "Code:" / "Project page:"
+# lines (arXiv:2610.22602, 2611.03097).
+_NOT_AN_AFFILIATION = re.compile(
+    r"\\|[{}]|https?://|www\.|^(?:code|data|project(?: page)?|homepage|github|website)\s*:",
+    re.IGNORECASE,
+)
+# A footnote that runs on after the last affiliation ("UTokyo † Equal
+# contribution. * Corresponding authors"): keep what precedes it.
+_FOOTNOTE_TAIL = re.compile(
+    r"\s*[†‡*∗]?\s*(?:equal contribution|corresponding author).*$", re.IGNORECASE
+)
+# "Cuicui Zhang, Dylan Joseph, Kewei Sha and Heng Fan": a list of people.
+_PERSON = r"[A-Z][\w'’.-]+(?: [A-Z][\w'’.-]+){1,2}"
+_PEOPLE_LIST = re.compile(rf"{_PERSON}(?:, {_PERSON})*,? and {_PERSON}")
+# Words an institution's name carries. A numbered row must have one, or be an
+# acronym ("HKUST"), because author rows are numbered the same way
+# (arXiv:2610.35864 numbers "Kaiyu Jiang").
+_INSTITUTION_HINT = re.compile(
+    r"universit|univ\.|institut|college|school|academ|laborator|\blab\b|labs?\b|research"
+    r"|center|centre|hospital|foundation|department|faculty|polytechnic|technolog"
+    r"|\binc\b|\bltd\b|\bllc\b|corp|company|group|team|\bai\b|ministry|council"
+    r"|universidad|universit[éä]|hochschule|大学|研究",
+    re.IGNORECASE,
+)
+_ACRONYM = re.compile(r"[A-Z][A-Z0-9&-]{1,9}")
 
 
 def arxiv_id(text: str | None) -> str | None:
@@ -61,9 +87,12 @@ def clean_affiliation(text: str) -> str | None:
     addresses, and fragments too short or too long to be an institution.
     """
     value = " ".join(html.unescape(str(text or "")).split())
+    value = _FOOTNOTE_TAIL.sub("", value)
     value = value.strip(" ,;:.·|-–—*†‡∗")
     value = re.sub(r"\s+,", ",", value)
     if not _LETTER.search(value) or "@" in value:
+        return None
+    if _NOT_AN_AFFILIATION.search(value) or _PEOPLE_LIST.fullmatch(value):
         return None
     if len(value) < 3 or len(value) > 160:
         return None
@@ -140,14 +169,31 @@ def _numbered_affiliations(page: str) -> list[str]:
         if not line.startswith("\x00"):
             continue
         for marker, body in re.findall(r"\x00([^\x01]*)\x01([^\x00]*)", line):
-            if _MARKER.fullmatch(marker.strip()):
-                found.append(clean_affiliation(body))
+            name = clean_affiliation(body) if _MARKER.fullmatch(marker.strip()) else None
+            if name and (_INSTITUTION_HINT.search(name) or _ACRONYM.fullmatch(name)):
+                found.append(name)
     return _unique(found)
 
 
 def arxiv_html_affiliations(page: str) -> list[str]:
-    """Affiliations an arXiv HTML page prints, in order, cleaned."""
-    return _contact_affiliations(page) or _numbered_affiliations(page)
+    """Affiliations an arXiv HTML page prints, in order, cleaned.
+
+    Some templates put author names in the affiliation slots too
+    (arXiv:2610.35864 lists "Kaiyu Jiang" beside "Peking University"). When a
+    paper names at least one institution, entries shaped like a person's name
+    are dropped; a lone name ("Continker") is kept, since it cannot be told
+    apart from a small company.
+    """
+    found = _contact_affiliations(page) or _numbered_affiliations(page)
+    if any(_INSTITUTION_HINT.search(name) for name in found):
+        found = [name for name in found if not _looks_like_a_person(name)]
+    return found
+
+
+def _looks_like_a_person(name: str) -> bool:
+    return bool(re.fullmatch(_PERSON, name)) and not (
+        _INSTITUTION_HINT.search(name) or _ACRONYM.fullmatch(name)
+    )
 
 
 def openalex_institutions(work: dict[str, Any]) -> list[str]:

@@ -390,11 +390,10 @@ papers:
     institutions:
     - Zhejiang University
   '2609.29028':
-    basis: arxiv_html_affiliations
-    source_url: https://arxiv.org/html/2609.29028
+    basis: null
+    source_url: null
     retrieved_at: '2026-11-05'
-    institutions:
-    - Cuicui Zhang, Dylan Joseph, Kewei Sha, Yunhe Feng and Heng Fan
+    institutions: []
   '2609.29142':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7214392544
@@ -499,7 +498,7 @@ papers:
     - HKUST
     - UCAS
     - ZJU
-    - UTokyo † Equal contribution. * Corresponding authors
+    - UTokyo
   '2609.35760':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7214776154
@@ -1226,13 +1225,10 @@ papers:
     - PetroChina Southwest Oil and Gas Field Company (China)
     - Cornell University
   '2610.22602':
-    basis: arxiv_html_affiliations
-    source_url: https://arxiv.org/html/2610.22602
+    basis: null
+    source_url: null
     retrieved_at: '2026-11-05'
-    institutions:
-    - Dvir Samuel ÿ \filleddiamond Or Patashnik þ \filledheart Rami Ben-Ari ♠ \spadesuit
-    - ♠ \spadesuit OriginAI ÿ \filleddiamond NVIDIA þ \filledheart Tel Aviv University
-    - 'Project page: https://stuck-on-shuffle.github.io/'
+    institutions: []
   '2610.22708':
     basis: null
     source_url: null
@@ -1483,9 +1479,6 @@ papers:
     source_url: https://arxiv.org/html/2610.35864
     retrieved_at: '2026-11-05'
     institutions:
-    - Kaiyu Jiang
-    - Haonan Fan
-    - Tingting Gao
     - Beijing University of Posts and Telecommunications Zhongguancun Academy
     - Peking University Jilin University Kling Team
   '2610.36384':
@@ -1536,7 +1529,6 @@ papers:
     - The University of Hong Kong
     - Hong Kong Polytechnic University
     - University of Cambridge
-    - Grace Investment Machine
     - Lanzhou University
   '2611.01927':
     basis: null
@@ -1551,14 +1543,10 @@ papers:
     - Shanghai Jiao Tong University
     - Tongji University
   '2611.03097':
-    basis: arxiv_html_affiliations
-    source_url: https://arxiv.org/html/2611.03097
+    basis: null
+    source_url: null
     retrieved_at: '2026-11-05'
-    institutions:
-    - N {}^{\hskip 0.81949pt\text{{\color[rgb]{0.5273,0.0039,0.6875}{N}}}} NYU Shanghai
-    - T {}^{\hskip 0.81949pt\text{{\color[rgb]{0.6914,0.1172,0.1758}{T}}}} Toyota Technological Institute
-      at Chicago
-    - 'Code: StarTrail-org/DRPixel Data: HughieHu/DRPixel-Bench'
+    institutions: []
   '2611.03233':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2611.03233
