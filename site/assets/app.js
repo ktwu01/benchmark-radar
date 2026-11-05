@@ -12072,28 +12072,42 @@ function bindEvents() {
       select.dispatchEvent(new Event("change"));
     });
   });
-  // The sort note opens on hover and focus in CSS; a tap toggles it for touch
-  // screens, and a tap elsewhere closes it. Escape dismisses it even while the
-  // pointer or focus is still on it (data-dismissed, which CSS honours), until
-  // the pointer or focus leaves.
+  // The sort note's only state is aria-expanded; CSS shows the note when it
+  // is "true" and never on its own, so what is shown and what assistive tech
+  // is told cannot disagree. Hover and focus open it and leaving closes it; a
+  // click or tap pins it open, a second one closes it; Escape closes it only
+  // while it is open; a click elsewhere closes it.
   const sortToggle = byId("today-sort-toggle");
   const sortInfo = byId("today-sort-info");
+  let sortPinned = false;
+  const sortOpen = () => sortToggle?.getAttribute("aria-expanded") === "true";
   const setSortNote = (open) => {
+    if (!open) sortPinned = false;
     sortToggle?.setAttribute("aria-expanded", String(open));
-    if (open) sortInfo?.removeAttribute("data-dismissed");
   };
+  sortInfo?.addEventListener("mouseenter", () => setSortNote(true));
+  sortInfo?.addEventListener("mouseleave", () => {
+    if (!sortPinned) setSortNote(false);
+  });
+  sortToggle?.addEventListener("focus", () => setSortNote(true));
+  sortToggle?.addEventListener("blur", () => {
+    if (!sortPinned) setSortNote(false);
+  });
   sortToggle?.addEventListener("click", (event) => {
     event.stopPropagation();
-    setSortNote(sortToggle.getAttribute("aria-expanded") !== "true");
+    if (sortPinned) {
+      setSortNote(false);
+    } else {
+      sortPinned = true;
+      setSortNote(true);
+    }
   });
   document.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape" || !sortInfo) return;
-    setSortNote(false);
-    sortInfo.setAttribute("data-dismissed", "");
+    if (event.key === "Escape" && sortOpen()) setSortNote(false);
   });
-  sortInfo?.addEventListener("mouseleave", () => sortInfo.removeAttribute("data-dismissed"));
-  sortInfo?.addEventListener("focusout", () => sortInfo.removeAttribute("data-dismissed"));
-  document.addEventListener("click", () => setSortNote(false));
+  document.addEventListener("click", () => {
+    if (sortOpen()) setSortNote(false);
+  });
   document.querySelectorAll("[data-today-sort]").forEach((button) => {
     button.addEventListener("click", () => {
       state.todaySort = button.dataset.todaySort;

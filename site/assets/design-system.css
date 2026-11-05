@@ -539,9 +539,9 @@ a.benchmark-resource-link::after {
   --fact-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M7 7h3v4c0 2.5-1.5 4.5-4 5M15 7h3v4c0 2.5-1.5 4.5-4 5%22/%3E%3C/svg%3E");
 }
 
-/* The sort note is a closed (i) after the counts (issue #1097). It opens on
-   hover, on keyboard focus, or when tapped (aria-expanded), and sits over the
-   list instead of pushing it down. */
+/* The sort note is a closed (i) after the counts (issue #1097). Script opens
+   it on hover, keyboard focus or a tap by setting aria-expanded, the only
+   state CSS reads, and it sits over the list instead of pushing it down. */
 #today-view .section-title {
   grid-template-columns: auto auto minmax(0, 1fr) auto;
 }
@@ -607,8 +607,6 @@ a.benchmark-resource-link::after {
   transition: opacity 120ms ease;
 }
 
-#today-view .sort-info:not([data-dismissed]):hover #today-sort.sort-info-body,
-#today-view .sort-info:not([data-dismissed]):focus-within #today-sort.sort-info-body,
 #today-view .sort-info-toggle[aria-expanded="true"] + #today-sort.sort-info-body {
   visibility: visible;
   opacity: 1;
