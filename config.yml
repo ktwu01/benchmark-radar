@@ -260,7 +260,6 @@ sources:
     enabled: true
     required: false
     registry_path: data/requested_github_repositories.yml
-    max_requests: 20
     attempts: 2
     timeout_seconds: 30
 

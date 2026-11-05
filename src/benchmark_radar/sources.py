@@ -845,13 +845,13 @@ def fetch_github_requested_repositories(
         for entry in load_requested_github_repositories(registry_path)
         if entry["requested_at"] == due_date
     ]
-    budget = max(1, int(config.get("max_requests", len(due) or 1)))
+    # Every due row is fetched. A cap would silently expire the rows past it,
+    # since a row is due on one day only; the registry is reviewed by hand, so
+    # its size is the bound.
     headers = _github_headers()
     found: dict[str, RadarItem] = {}
     failures: list[Exception] = []
-    for entry in due[:budget]:
-        if len(found) >= limit:
-            break
+    for entry in due:
         full_name = entry["full_name"]
         try:
             row = _payload_dict(
@@ -910,7 +910,7 @@ def fetch_github_requested_repositories(
         )
     if due and not found and failures:
         raise failures[0]
-    return list(found.values())[:limit]
+    return list(found.values())
 
 
 def _kaggle_summary(row: dict[str, Any]) -> str:

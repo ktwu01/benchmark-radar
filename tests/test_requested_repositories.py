@@ -232,3 +232,26 @@ def test_renamed_repository_warns_that_the_alias_is_stale(tmp_path, monkeypatch)
         "old-lab/repo: GitHub now names it new-lab/repo; update the registry row and its "
         "watchlist alias"
     ]
+
+
+def test_every_due_request_is_fetched_even_past_the_item_limit(tmp_path, monkeypatch):
+    """A row is due on one day only, so a cap would expire the rows past it."""
+    rows = [
+        {"full_name": f"lab/repo-{index}", "issue": ISSUE, "requested_at": date(2026, 11, 5)}
+        for index in range(25)
+    ]
+    registry = _registry(tmp_path, rows)
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, **kwargs: _repository(url.removeprefix("https://api.github.com/repos/")),
+    )
+    items = fetch_github_requested_repositories(
+        {
+            "registry_path": str(registry),
+            "max_requests": 1,
+            "_collection_now": datetime(2026, 11, 6, tzinfo=UTC),
+        },
+        datetime(2026, 11, 4, tzinfo=UTC),
+        10,
+    )
+    assert len(items) == 25
