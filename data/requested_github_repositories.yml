@@ -1,0 +1,18 @@
+# Reader-reported GitHub repositories that every time-windowed discovery path
+# missed (issue #555). The `github_requested_repositories` connector fetches
+# each row by owner/name once, in the run whose lookback window contains
+# `requested_at`, so the record enters the daily snapshot that day and is not
+# repeated afterwards. To retry a row whose fetch failed, move `requested_at`
+# to the current date.
+#
+# A row grants discovery only: the record is scored, suppressed and
+# deduplicated like any GitHub search hit. Add a row only for a request filed
+# as a Benchmark Radar issue, and cite that issue.
+schema_version: 1
+repositories:
+  - full_name: sunblaze-ucb/vero
+    issue: https://github.com/ktwu01/benchmark-radar/issues/555
+    requested_at: 2026-11-05
+  - full_name: arcainc/lifesci-diamond
+    issue: https://github.com/ktwu01/benchmark-radar/issues/1065
+    requested_at: 2026-11-05

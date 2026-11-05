@@ -127,6 +127,16 @@ watchlist:
   - name: Realtime-Bench
     aliases: [realtime-bench, "realtime bench"]
     note: Real-time interactive game and web tasks where delayed actions directly affect success (issue #1051).
+  # Issues #555 and #1065: reader-requested repositories fetched through
+  # data/requested_github_repositories.yml. Their titles are bare repo names,
+  # so the taxonomy may find no category in them; the reader asked for each by
+  # name. Aliases are the exact owner/name so no other record can match.
+  - name: Vero
+    aliases: [sunblaze-ucb/vero]
+    note: Repository-level implementation and proof synthesis benchmark for AI agents (issue #555).
+  - name: LifeSci Diamond
+    aliases: [arcainc/lifesci-diamond, "lifesci diamond"]
+    note: Regulatory-affairs tasks for drugs, biologics and devices; scores are publisher-reported and 45 of 55 tasks are held out (issue #1065).
 
 sources:
   arxiv:
@@ -240,6 +250,17 @@ sources:
     page_size: 30
     max_pages_per_organization: 1
     max_requests: 361
+    attempts: 2
+    timeout_seconds: 30
+
+  # Reader-reported repositories that every time-windowed path missed (issue
+  # #555). Each registry row is fetched by owner/name once, in the run whose
+  # window contains its requested_at date. A request grants discovery only.
+  github_requested_repositories:
+    enabled: true
+    required: false
+    registry_path: data/requested_github_repositories.yml
+    max_requests: 20
     attempts: 2
     timeout_seconds: 30
 

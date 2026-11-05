@@ -53,6 +53,8 @@ const SOURCE_DISPLAY_NAMES = {
   huggingface: "Hugging Face",
   github: "GitHub",
   github_organizations: "GitHub Organization",
+  // Requested repositories are recorded as plain GitHub records (issue #555).
+  github_requested_repositories: "GitHub",
   huggingface_papers: "Hugging Face Papers",
   kaggle_datasets: "Kaggle Dataset",
   zenodo: "Zenodo",

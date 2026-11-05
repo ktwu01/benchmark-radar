@@ -917,6 +917,7 @@ def simulate_backfill(
 SOURCE_LANES = {
     "github": "github",
     "github_organizations": "github",
+    "github_requested_repositories": "github",
     "github_releases": "github",
     "huggingface": "huggingface",
     "huggingface_papers": "huggingface",
