@@ -526,6 +526,9 @@ def compute_window_ranking(
                 for c in candidates
                 if c.get("signals", {}).get(signal, {}).get("value") is not None
                 and c.get("signals", {}).get(signal, {}).get("status") == "fresh"
+                # A placeholder is unranked; it must not set the scale the
+                # ranked releases are normalized against either.
+                and not c.get("placeholder_repository")
             ]
             or [0.0]
         )

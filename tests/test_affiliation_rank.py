@@ -292,3 +292,16 @@ def test_an_empty_repository_is_a_placeholder(monkeypatch):
     )
     assert rows["a/empty"]["placeholder"] is True
     assert "a/gone" not in rows
+
+
+def test_a_placeholder_does_not_set_the_window_maximum():
+    ranking = compute_window_ranking(
+        [_candidate("viral", 100000, placeholder=True), _candidate("ships", 100)],
+        window_days=30,
+        affiliation_weight=AFFILIATION_WEIGHT,
+    )
+    by_name = {entry["name"]: entry for entry in ranking["entries"]}
+    # The shipping release is the window's top star count, not a fraction of
+    # the placeholder's.
+    assert by_name["ships"]["components"]["github_stars"]["normalized"] == 1.0
+    assert by_name["viral"]["status"] == "limited_signals"
