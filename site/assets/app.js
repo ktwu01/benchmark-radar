@@ -671,6 +671,7 @@ const I18N = {
     "Time window": "时间范围",
     "Sort by": "排序方式",
     "Sort: Newest": "排序：最新",
+    "How this list is sorted": "列表如何排序",
     "Sort: Releases first, then recorded stars + likes + downloads + points; missing signals last": "排序：新发布的排在前面，其余按已记录的星标、点赞、下载和积分总数；缺少数据的记录排在最后",
     "Search benchmarks…": "搜索benchmark…",
     "Refresh data": "刷新数据",
@@ -2546,20 +2547,33 @@ function recordFacts(item, { quietUnreported = false } = {}) {
     ([label]) => !(quietUnreported && label === t("Activity counters")),
   );
   if (!facts.length) return null;
+  const metricIcons = Object.fromEntries(
+    RECORD_METRIC_ICONS.map((key) => [t(RECORD_METRIC_LABELS[key]), key]),
+  );
   return element(
     "div",
     {
       className: "record-facts",
       attrs: { role: "group", "aria-label": t("Source metadata") },
     },
-    facts.map(([label, value, emphasize]) =>
-      element("span", {}, [
-        document.createTextNode(`${label} `),
-        emphasize ? element("strong", { text: value }) : document.createTextNode(value),
-      ]),
-    ),
+    facts.map(([label, value, emphasize]) => {
+      const valueNode = emphasize ? element("strong", { text: value }) : document.createTextNode(value);
+      const icon = metricIcons[label];
+      if (!icon) return element("span", {}, [document.createTextNode(`${label} `), valueNode]);
+      // A count's label is an icon (issue #1097): "Likes 0  Downloads 591"
+      // repeated on every card. Hover shows the word; a screen reader reads it.
+      return element("span", { className: "record-fact-metric", attrs: { title: label } }, [
+        element("span", { className: `fact-icon fact-icon-${icon}`, attrs: { "aria-hidden": "true" } }),
+        element("span", { className: "visually-hidden", text: `${label} ` }),
+        valueNode,
+      ]);
+    }),
   );
 }
+
+// Counts with a widely read icon. "Influential citations" has none a reader
+// would recognise, so it keeps its words.
+const RECORD_METRIC_ICONS = ["stars", "forks", "likes", "downloads", "citations"];
 
 
 // A card is tinted gold by a count its source published (issue #994): the
@@ -2730,18 +2744,33 @@ function shareCardFor(day, url) {
   return image ? { image } : null;
 }
 
+// Share is an icon wherever it appears (issue #1097): "Share image" and
+// "Share card" repeated under every briefing item and every card, as loud as
+// the content they share. The tooltip and the accessible name keep the words.
+const SHARE_ICON_PATHS = [
+  "M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7",
+  "M16 6l-4-4-4 4",
+  "M12 2v13",
+];
+
+function shareIcon() {
+  const svg = svgElement("svg", { viewBox: "0 0 24 24", "aria-hidden": "true" });
+  SHARE_ICON_PATHS.forEach((d) => svg.append(svgElement("path", { d })));
+  return svg;
+}
+
 function shareControl(image, label, linkLabel = t("Share image")) {
   return element("div", { className: "share-control" }, [
     element("a", {
-      className: "share-link",
-      text: `${linkLabel} \u2197`,
+      className: "share-link share-icon",
       attrs: {
         href: image,
         target: "_blank",
         rel: "noopener noreferrer",
+        title: linkLabel,
         "aria-label": `${linkLabel === label ? linkLabel : `${linkLabel}: ${label}`} (${t("opens in a new tab")})`,
       },
-    }),
+    }, [shareIcon()]),
   ]);
 }
 
@@ -8265,14 +8294,24 @@ function catalogScoreChart(source, payload) {
     // fall strictly inside the observed span are drawn, and only where they
     // clear the endpoint labels: the extremes stay the real first and last
     // release date, never a rounded range.
-    const quarterGap = 46;
+    // A "Mon YYYY" label is about 64 units wide, so labels are spaced at
+    // least that far apart: every quarter when they fit, every second or
+    // fourth quarter on a long span or a narrow chart. Overlapping labels
+    // ("Mar 2023Jul 2023") read as nothing at all (issue #1097).
+    const quarterGap = 72;
+    const quarterWidth = (plotWidth * 91.3 * 86400000) / span;
+    const labelEvery = [1, 2, 4, 8].find((step) => step * quarterWidth >= quarterGap) || 8;
+    let quarterIndex = 0;
     const first = new Date(firstTime);
     const cursor = new Date(
       Date.UTC(first.getUTCFullYear(), Math.ceil((first.getUTCMonth() + 1) / 3) * 3, 1),
     );
     while (cursor.getTime() < lastTime) {
       const tickX = x(cursor.getTime());
+      const labelled = Number.isInteger(quarterIndex / labelEvery);
+      quarterIndex += 1;
       if (
+        labelled &&
         tickX - margin.left > quarterGap &&
         margin.left + plotWidth - tickX > quarterGap
       ) {
@@ -8595,11 +8634,18 @@ let catalogRenderSeq = 0;
 // Every catalog benchmark has a share card (issue #671). The module loads on
 // the first press, so a reader who never shares never downloads it.
 function benchmarkShareButton(record) {
-  const button = element("button", {
-    className: "secondary-link benchmark-share",
-    text: t("Share card"),
-    attrs: { type: "button", "aria-label": t("Share {name} as a card", { name: record.name }) },
-  });
+  const button = element(
+    "button",
+    {
+      className: "share-icon benchmark-share",
+      attrs: {
+        type: "button",
+        title: t("Share card"),
+        "aria-label": t("Share {name} as a card", { name: record.name }),
+      },
+    },
+    [shareIcon()],
+  );
   button.addEventListener("click", async () => {
     const { openBenchmarkShare } = await import("./share-card.js");
     openBenchmarkShare({ slug: record.slug, name: record.name, t });
@@ -11249,11 +11295,18 @@ function itemDay(item, day) {
 }
 
 function radarShareButton(item, day, title, image, pageUrl = "") {
-  const button = element("button", {
-    className: "share-link radar-share",
-    text: t("Share card"),
-    attrs: { type: "button", "aria-label": t("Share {name} as a card", { name: title }) },
-  });
+  const button = element(
+    "button",
+    {
+      className: "share-link share-icon radar-share",
+      attrs: {
+        type: "button",
+        "aria-label": t("Share {name} as a card", { name: title }),
+        title: t("Share card"),
+      },
+    },
+    [shareIcon()],
+  );
   button.addEventListener("click", async (event) => {
     // An attention card is a <details>; pressing Share must not also toggle it.
     event.preventDefault();
@@ -11283,6 +11336,21 @@ function catalogCardFor(item) {
     : { image: "", page: "" };
 }
 
+// The name is what a reader clicks (issue #1097). Before, only the small
+// source chip was a link, so the biggest words on the card led nowhere. A
+// catalog match opens its benchmark page on this site; anything else opens
+// the source, like the chip. No usable URL leaves the name as plain text.
+function radarTitleLink(name, catalogPage, sourceHref) {
+  if (catalogPage) return element("a", { text: name, attrs: { href: catalogPage } });
+  if (sourceHref) {
+    return element("a", {
+      text: name,
+      attrs: { href: sourceHref, target: "_blank", rel: "noopener noreferrer" },
+    });
+  }
+  return document.createTextNode(name);
+}
+
 function evidenceCard(item, day) {
   const ownDay = itemDay(item, day);
   const shareCard = shareCardFor(ownDay, item.url);
@@ -11306,11 +11374,14 @@ function evidenceCard(item, day) {
             ...(item.watchlist ? [element("span", { text: `★ ${item.watchlist}` })] : []),
           ])
         : null,
-      element("h3", {
-        className: "radar-title",
-        text: name,
-        attrs: name !== item.title ? { title: item.title } : {},
-      }),
+      element(
+        "h3",
+        {
+          className: "radar-title",
+          attrs: name !== item.title ? { title: item.title } : {},
+        },
+        [radarTitleLink(name, catalog.page, sourceHref)],
+      ),
       subtitle ? element("p", { className: "radar-subtitle", text: subtitle }) : null,
       recordFacts(item, { quietUnreported: true }),
       ...(item.watchlist && item.watchlist_note
@@ -11321,11 +11392,14 @@ function evidenceCard(item, day) {
         text: item.summary || t("No description published at the source."),
       }),
       artifactLinks(item),
+    ]),
+    // Share sits above the score in the right column, so it adds no line.
+    element("div", { className: "radar-aside" }, [
       shareCard
         ? radarShareButton(item, ownDay, fullTitle, shareCard.image, catalog.page)
         : radarShareButton(item, ownDay, fullTitle, catalog.image, catalog.page),
+      scoreBlock(item),
     ]),
-    scoreBlock(item),
   ]);
 }
 
@@ -11997,6 +12071,42 @@ function bindEvents() {
       select.value = button.dataset.todayWindow === "latest" ? state.data.latest_date : button.dataset.todayWindow;
       select.dispatchEvent(new Event("change"));
     });
+  });
+  // The sort note's only state is aria-expanded; CSS shows the note when it
+  // is "true" and never on its own, so what is shown and what assistive tech
+  // is told cannot disagree. Hover and focus open it and leaving closes it; a
+  // click or tap pins it open, a second one closes it; Escape closes it only
+  // while it is open; a click elsewhere closes it.
+  const sortToggle = byId("today-sort-toggle");
+  const sortInfo = byId("today-sort-info");
+  let sortPinned = false;
+  const sortOpen = () => sortToggle?.getAttribute("aria-expanded") === "true";
+  const setSortNote = (open) => {
+    if (!open) sortPinned = false;
+    sortToggle?.setAttribute("aria-expanded", String(open));
+  };
+  sortInfo?.addEventListener("mouseenter", () => setSortNote(true));
+  sortInfo?.addEventListener("mouseleave", () => {
+    if (!sortPinned) setSortNote(false);
+  });
+  sortToggle?.addEventListener("focus", () => setSortNote(true));
+  sortToggle?.addEventListener("blur", () => {
+    if (!sortPinned) setSortNote(false);
+  });
+  sortToggle?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (sortPinned) {
+      setSortNote(false);
+    } else {
+      sortPinned = true;
+      setSortNote(true);
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && sortOpen()) setSortNote(false);
+  });
+  document.addEventListener("click", () => {
+    if (sortOpen()) setSortNote(false);
   });
   document.querySelectorAll("[data-today-sort]").forEach((button) => {
     button.addEventListener("click", () => {

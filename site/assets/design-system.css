@@ -185,3 +185,435 @@ a.benchmark-resource-link::after {
     gap: var(--space-2) var(--space-4);
   }
 }
+
+/* Homepage readability (issue #1097). A reader opening the site saw the brand,
+   every nav item, the results heading, the card dates and the kind chips in the
+   monospace face, so the first screen read like a terminal log rather than a
+   page to explore. Words go back to the body face; the mono keeps the one job
+   it does well, figures that line up (the score). */
+/* The wordmark read wide and heavy in a bold face (issue #1097); a semibold
+   at body size with tighter tracking keeps it compact beside the nav. */
+.brand strong {
+  font-family: var(--body);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.view-nav button,
+.view-nav a {
+  font-family: var(--body);
+  font-size: 0.9rem;
+  letter-spacing: normal;
+}
+
+/* The results heading names the list, so it reads as a heading, and the counts
+   beside it stay one quiet caption in the same face. */
+#today-view .section-title h2,
+#today-view .section-title span {
+  font-family: var(--body);
+  letter-spacing: normal;
+}
+
+#today-view .section-title h2 {
+  color: var(--ink);
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+#today-view .section-title span {
+  font-size: 0.82rem;
+}
+
+.radar-rail,
+.radar-chips span {
+  font-family: var(--body);
+}
+
+.radar-rail {
+  font-size: 0.8rem;
+}
+
+.radar-date {
+  font-weight: 600;
+}
+
+.radar-chips span {
+  font-size: 0.75rem;
+}
+
+/* The name is the card's link and its one loud element. */
+.radar-card .radar-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.radar-card .radar-title a:hover {
+  color: var(--blue-deep);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.radar-card .radar-title a:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* A description longer than about 75 characters a line is hard to follow. */
+.radar-summary {
+  max-width: 75ch;
+}
+
+/* Share is an icon everywhere it appears: in a card's top-right corner above
+   the score, after a briefing item, beside the results heading and beside a
+   chart title. The button is a 44px target; the glyph is 18px. */
+.radar-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.radar-aside .share-control {
+  margin: -0.6rem -0.6rem 0 0;
+}
+
+.share-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  margin-block: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.share-icon svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.share-icon:hover,
+.share-icon:focus-visible {
+  background: color-mix(in srgb, var(--blue) 10%, var(--panel));
+  color: var(--blue-deep);
+}
+
+/* One accent (issue #1097). The palette is white surfaces on a near-neutral
+   page with a deep teal, the same teal the share cards use, so a shared card
+   and the page it opens look like one product. The accent marks where the
+   reader is: the open view and the pressed filter. */
+.view-nav .nav-active {
+  background: var(--blue-deep);
+}
+
+.today-segments > div {
+  background: var(--panel);
+}
+
+.today-segments button {
+  background: transparent;
+  color: var(--ink);
+}
+
+.today-segments button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--blue) 12%, var(--panel));
+  color: var(--blue-deep);
+  font-weight: 600;
+}
+
+.briefing-chip {
+  font-family: var(--body);
+  font-size: 0.75rem;
+}
+
+/* Homepage without boxes (issue #1097). The search row and the results sat in
+   two bordered boxes on a grey page, with each result a row inside; three
+   frames before a reader reached a benchmark name. The page is white now, so
+   the controls and the list sit on it directly: results are rows split by a
+   hairline. The sidebar keeps one faint tint, which says "secondary" instead
+   of drawing a frame. */
+#today-view .today-filters {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#today-view #today-list {
+  padding-inline: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+#today-view .radar-card {
+  padding-left: 0;
+}
+
+#today-view .email-signup-card,
+#today-view .daily-briefing,
+#today-view .daily-questions,
+#today-view .health-panel {
+  border: 0;
+  background: var(--canvas);
+}
+
+#today-view .daily-briefing-title,
+#today-view .daily-questions-title {
+  border-bottom-color: var(--line);
+}
+
+/* On a phone the card is one column, so the right column would drop the icon
+   to the bottom on a line of its own. It stays in the top-right corner, level
+   with the source and date, and the score keeps its place below. */
+@media (max-width: 720px) {
+  .radar-card {
+    position: relative;
+  }
+
+  .radar-aside {
+    display: contents;
+  }
+
+  .radar-aside .share-control {
+    position: absolute;
+    top: 0.75rem;
+    right: 0;
+    margin: 0;
+  }
+
+  /* The rail shares the icon's row, so it leaves the icon's 44px free: a
+     long source name or a dated "3 Nov 2025" wraps instead of sliding under
+     the button. */
+  .radar-rail {
+    padding-right: calc(var(--control-height) + var(--space-2));
+  }
+}
+
+/* Results first on a phone (design.md, "Mobile layout"). The two segment
+   groups stacked with a label each took four rows before the first result.
+   They share one row; their labels stay for screen readers, since "Latest /
+   30 days / 90 days" and "Attention / Newest" name themselves on screen. */
+@media (max-width: 760px) {
+  #today-view .today-filters {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) var(--control-height);
+    gap: var(--space-2);
+  }
+
+  #today-view .today-filters .search-field {
+    grid-column: 1 / -1;
+  }
+
+  #today-view #today-window {
+    grid-column: 1;
+  }
+
+  #today-view #today-order {
+    grid-column: 2 / -1;
+  }
+
+  #today-view .today-filters .filters-toggle {
+    grid-column: 1 / 3;
+  }
+
+  #today-view .today-segments legend {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  #today-view .today-segments button {
+    min-height: var(--control-height);
+    padding-inline: 4px;
+    font-size: 13px;
+  }
+
+  /* The nav scrolls sideways on a phone; a fade at its right edge shows
+     that more views sit past "Saturation". */
+  .view-nav {
+    mask-image: linear-gradient(to right, #000 85%, transparent);
+  }
+}
+
+/* The keyboard focus ring follows the accent instead of the logo orange. */
+:focus-visible {
+  outline-color: var(--blue);
+}
+
+/* On the dark chart panel the icon takes the panel's text colour. */
+.benchmark-share.share-icon {
+  margin-inline-start: var(--space-2);
+  color: inherit;
+  vertical-align: middle;
+}
+
+.benchmark-share.share-icon:hover,
+.benchmark-share.share-icon:focus-visible {
+  background: color-mix(in srgb, currentColor 15%, transparent);
+  color: inherit;
+}
+
+/* The day's top-3 picture is an icon beside the results heading, so it no
+   longer takes a line above the first result. */
+#today-view .section-title {
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+}
+
+#today-view .section-title .today-share {
+  grid-column: 2;
+  grid-row: 1;
+  margin: -0.75rem 0 -0.75rem -0.5rem;
+}
+
+#today-view #today-breakdown {
+  grid-column: 3;
+}
+
+.briefing-insight .share-control {
+  margin-left: -0.6rem;
+}
+
+/* Below 370px the two groups no longer fit side by side ("90 days" clips at
+   320px), so each takes the full row. */
+@media (max-width: 370px) {
+  #today-view #today-window,
+  #today-view #today-order {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Count labels as icons (issue #1097). Each glyph is a CSS mask filled with
+   the text colour, so it follows the theme and needs no markup beyond a span.
+   The label stays in the tooltip and in visually hidden text. */
+.record-fact-metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+}
+
+.fact-icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 1em;
+  height: 1em;
+  background: var(--muted);
+  -webkit-mask: var(--fact-icon) center / contain no-repeat;
+  mask: var(--fact-icon) center / contain no-repeat;
+}
+
+.fact-icon-stars {
+  --fact-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z%22/%3E%3C/svg%3E");
+}
+
+.fact-icon-forks {
+  --fact-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2212%22 cy=%2218%22 r=%223%22/%3E%3Ccircle cx=%226%22 cy=%226%22 r=%223%22/%3E%3Ccircle cx=%2218%22 cy=%226%22 r=%223%22/%3E%3Cpath d=%22M18 9v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9M12 12v3%22/%3E%3C/svg%3E");
+}
+
+.fact-icon-likes {
+  --fact-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z%22/%3E%3C/svg%3E");
+}
+
+.fact-icon-downloads {
+  --fact-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3%22/%3E%3C/svg%3E");
+}
+
+.fact-icon-citations {
+  --fact-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M7 7h3v4c0 2.5-1.5 4.5-4 5M15 7h3v4c0 2.5-1.5 4.5-4 5%22/%3E%3C/svg%3E");
+}
+
+/* The sort note is a closed (i) after the counts (issue #1097). Script opens
+   it on hover, keyboard focus or a tap by setting aria-expanded, the only
+   state CSS reads, and it sits over the list instead of pushing it down. */
+#today-view .section-title {
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+}
+
+#today-view .sort-info {
+  position: relative;
+  grid-column: 4;
+  grid-row: 1;
+  display: inline-flex;
+}
+
+#today-view .sort-info-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  margin: -0.75rem -0.75rem -0.75rem -0.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+#today-view .sort-info-toggle > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  font-family: Georgia, serif;
+  font-size: 12px;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+}
+
+#today-view .sort-info-toggle:hover,
+#today-view .sort-info-toggle[aria-expanded="true"] {
+  color: var(--blue-deep);
+}
+
+#today-view #today-sort.sort-info-body {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 0.6rem);
+  right: 0;
+  width: max-content;
+  max-width: min(34ch, calc(100vw - 32px));
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  box-shadow: 0 6px 20px rgb(23 32 38 / 12%);
+  color: var(--ink);
+  white-space: normal;
+  text-align: left;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+#today-view .sort-info-toggle[aria-expanded="true"] + #today-sort.sort-info-body {
+  visibility: visible;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #today-view #today-sort.sort-info-body {
+    transition: none;
+  }
+}

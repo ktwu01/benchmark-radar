@@ -3643,13 +3643,16 @@ def test_daily_briefing_share_control_appears_only_for_items_with_a_card():
     assert len(insights) == 2
 
     def share_links(insight):
-        return [n for n in _flatten(insight) if n["className"] == "share-link"]
+        return [n for n in _flatten(insight) if "share-link" in n["className"].split()]
 
     carded, uncarded = (share_links(i) for i in insights)
     assert len(carded) == 1
     assert carded[0]["tag"] == "a"
     assert carded[0]["href"].endswith("/daily/2026-10-25/card-01.png")
-    assert carded[0]["text"].startswith("Share image")
+    # An icon, not a repeated "Share image" line (issue #1097); the words live
+    # in its tooltip and accessible name.
+    assert carded[0]["text"] == ""
+    assert carded[0]["children"][0]["tag"] == "svg"
     # The item stays listed; it only has no image to offer, so no dead link.
     assert uncarded == []
     copy_buttons = [n for n in _flatten(insights[0]) if n["className"] == "share-copy"]
