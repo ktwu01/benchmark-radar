@@ -185,3 +185,121 @@ a.benchmark-resource-link::after {
     gap: var(--space-2) var(--space-4);
   }
 }
+
+/* Homepage readability (issue #1097). A reader opening the site saw the brand,
+   every nav item, the results heading, the card dates and the kind chips in the
+   monospace face, so the first screen read like a terminal log rather than a
+   page to explore. Words go back to the body face; the mono keeps the one job
+   it does well, figures that line up (the score). */
+.brand strong {
+  font-family: var(--body);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.view-nav button,
+.view-nav a {
+  font-family: var(--body);
+  font-size: 0.9rem;
+  letter-spacing: normal;
+}
+
+/* The results heading names the list, so it reads as a heading, and the counts
+   beside it stay one quiet caption in the same face. */
+#today-view .section-title h2,
+#today-view .section-title span {
+  font-family: var(--body);
+  letter-spacing: normal;
+}
+
+#today-view .section-title h2 {
+  color: var(--ink);
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+#today-view .section-title span {
+  font-size: 0.82rem;
+}
+
+.radar-rail,
+.radar-chips span {
+  font-family: var(--body);
+}
+
+.radar-rail {
+  font-size: 0.8rem;
+}
+
+.radar-date {
+  font-weight: 600;
+}
+
+.radar-chips span {
+  font-size: 0.75rem;
+}
+
+/* The name is the card's link and its one loud element. */
+.radar-card .radar-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.radar-card .radar-title a:hover {
+  color: var(--blue-deep);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.radar-card .radar-title a:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* A description longer than about 75 characters a line is hard to follow. */
+.radar-summary {
+  max-width: 75ch;
+}
+
+/* Every card offers Share; at full link weight it was as loud as the name
+   above it. It stays a 44px target, only quieter. */
+.radar-card .radar-share {
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.radar-card .radar-share:hover {
+  color: var(--blue-deep);
+}
+
+/* One accent (issue #1097). The palette is white surfaces on a near-neutral
+   page with a deep teal, the same teal the share cards use, so a shared card
+   and the page it opens look like one product. The accent marks where the
+   reader is: the open view and the pressed filter. */
+.view-nav .nav-active {
+  background: var(--blue-deep);
+}
+
+.today-segments > div {
+  background: var(--panel);
+}
+
+.today-segments button {
+  background: transparent;
+  color: var(--ink);
+}
+
+.today-segments button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--blue) 12%, var(--panel));
+  color: var(--blue-deep);
+  font-weight: 600;
+}
+
+.briefing-chip {
+  font-family: var(--body);
+  font-size: 0.75rem;
+}

@@ -1,21 +1,21 @@
 :root {
   color-scheme: light;
-  --panel: #f9fbfc;
-  --canvas: #edf1f3;
-  --ink: #15242a;
-  --muted: #5f7078;
-  --line: #cbd5da;
+  --panel: #ffffff;
+  --canvas: #f4f6f7;
+  --ink: #172026;
+  --muted: #56636b;
+  --line: #e1e6e9;
   /* Borders and dividers, deliberately not `--ink`. The page used the text
      colour to draw every card edge and row separator, so a screen of data read
      as a grid of hard near-black boxes and the rules competed with the words
      inside them (issue #333). One step darker than `--line` so a card edge
      still reads as an edge against `--panel`, nowhere near the ink. */
-  --edge: #b8c5cc;
+  --edge: #d3dadf;
   /* One corner radius for every panel, card, table and control. */
   --radius: 10px;
   --radius-sm: 6px;
-  --blue: #255ea8;
-  --blue-deep: #173e71;
+  --blue: #2a7f8e;
+  --blue-deep: #165a66;
   --orange: #dc633f;
   --sea: #4c948b;
   --gold: #c99327;
@@ -70,8 +70,8 @@ body {
      row separators, card borders, and score tracks drawn over it: cut its
      contrast in half (issue #248). */
   background:
-    linear-gradient(90deg, rgb(37 94 168 / 1.5%) 1px, transparent 1px) 0 0 / 32px 32px,
-    linear-gradient(rgb(37 94 168 / 1.5%) 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(90deg, rgb(42 127 142 / 3%) 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(rgb(42 127 142 / 3%) 1px, transparent 1px) 0 0 / 32px 32px,
     var(--canvas);
   color: var(--ink);
   font-family: var(--body);

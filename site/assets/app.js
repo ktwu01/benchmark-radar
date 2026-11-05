@@ -11283,6 +11283,21 @@ function catalogCardFor(item) {
     : { image: "", page: "" };
 }
 
+// The name is what a reader clicks (issue #1097). Before, only the small
+// source chip was a link, so the biggest words on the card led nowhere. A
+// catalog match opens its benchmark page on this site; anything else opens
+// the source, like the chip. No usable URL leaves the name as plain text.
+function radarTitleLink(name, catalogPage, sourceHref) {
+  if (catalogPage) return element("a", { text: name, attrs: { href: catalogPage } });
+  if (sourceHref) {
+    return element("a", {
+      text: name,
+      attrs: { href: sourceHref, target: "_blank", rel: "noopener noreferrer" },
+    });
+  }
+  return document.createTextNode(name);
+}
+
 function evidenceCard(item, day) {
   const ownDay = itemDay(item, day);
   const shareCard = shareCardFor(ownDay, item.url);
@@ -11306,11 +11321,14 @@ function evidenceCard(item, day) {
             ...(item.watchlist ? [element("span", { text: `★ ${item.watchlist}` })] : []),
           ])
         : null,
-      element("h3", {
-        className: "radar-title",
-        text: name,
-        attrs: name !== item.title ? { title: item.title } : {},
-      }),
+      element(
+        "h3",
+        {
+          className: "radar-title",
+          attrs: name !== item.title ? { title: item.title } : {},
+        },
+        [radarTitleLink(name, catalog.page, sourceHref)],
+      ),
       subtitle ? element("p", { className: "radar-subtitle", text: subtitle }) : null,
       recordFacts(item, { quietUnreported: true }),
       ...(item.watchlist && item.watchlist_note
