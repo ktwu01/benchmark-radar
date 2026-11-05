@@ -487,15 +487,16 @@
           <div>
             <div class="section-title">
               <h2 id="today-heading" class="today-heading" data-i18n="Today's radar">Today's radar</h2>
+              <!-- One picture of the day's top 3 benchmarks, rendered by the
+                   daily pipeline, offered as a share icon beside the heading.
+                   Filled only on days that have one. -->
+              <div id="today-share" class="today-share" hidden></div>
               <div class="results-meta" aria-live="polite">
                 <span id="today-breakdown"></span>
                 <span id="today-sort"></span>
               </div>
             </div>
             <p id="today-range" class="section-note" hidden></p>
-            <!-- One picture of the day's top 3 benchmarks, rendered by the
-                 daily pipeline. Filled only on days that have one. -->
-            <div id="today-share" class="today-share" hidden></div>
             <p id="today-load-error" class="empty-state" role="status" hidden></p>
             <!-- Search is archive-wide by default even though browsing opens
                  on the newest scan. This first result row makes that scope

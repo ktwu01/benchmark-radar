@@ -2730,18 +2730,33 @@ function shareCardFor(day, url) {
   return image ? { image } : null;
 }
 
+// Share is an icon wherever it appears (issue #1097): "Share image" and
+// "Share card" repeated under every briefing item and every card, as loud as
+// the content they share. The tooltip and the accessible name keep the words.
+const SHARE_ICON_PATHS = [
+  "M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7",
+  "M16 6l-4-4-4 4",
+  "M12 2v13",
+];
+
+function shareIcon() {
+  const svg = svgElement("svg", { viewBox: "0 0 24 24", "aria-hidden": "true" });
+  SHARE_ICON_PATHS.forEach((d) => svg.append(svgElement("path", { d })));
+  return svg;
+}
+
 function shareControl(image, label, linkLabel = t("Share image")) {
   return element("div", { className: "share-control" }, [
     element("a", {
-      className: "share-link",
-      text: `${linkLabel} \u2197`,
+      className: "share-link share-icon",
       attrs: {
         href: image,
         target: "_blank",
         rel: "noopener noreferrer",
+        title: linkLabel,
         "aria-label": `${linkLabel === label ? linkLabel : `${linkLabel}: ${label}`} (${t("opens in a new tab")})`,
       },
-    }),
+    }, [shareIcon()]),
   ]);
 }
 
@@ -8265,14 +8280,24 @@ function catalogScoreChart(source, payload) {
     // fall strictly inside the observed span are drawn, and only where they
     // clear the endpoint labels: the extremes stay the real first and last
     // release date, never a rounded range.
-    const quarterGap = 46;
+    // A "Mon YYYY" label is about 64 units wide, so labels are spaced at
+    // least that far apart: every quarter when they fit, every second or
+    // fourth quarter on a long span or a narrow chart. Overlapping labels
+    // ("Mar 2023Jul 2023") read as nothing at all (issue #1097).
+    const quarterGap = 72;
+    const quarterWidth = (plotWidth * 91.3 * 86400000) / span;
+    const labelEvery = [1, 2, 4, 8].find((step) => step * quarterWidth >= quarterGap) || 8;
+    let quarterIndex = 0;
     const first = new Date(firstTime);
     const cursor = new Date(
       Date.UTC(first.getUTCFullYear(), Math.ceil((first.getUTCMonth() + 1) / 3) * 3, 1),
     );
     while (cursor.getTime() < lastTime) {
       const tickX = x(cursor.getTime());
+      const labelled = Number.isInteger(quarterIndex / labelEvery);
+      quarterIndex += 1;
       if (
+        labelled &&
         tickX - margin.left > quarterGap &&
         margin.left + plotWidth - tickX > quarterGap
       ) {
@@ -8595,11 +8620,18 @@ let catalogRenderSeq = 0;
 // Every catalog benchmark has a share card (issue #671). The module loads on
 // the first press, so a reader who never shares never downloads it.
 function benchmarkShareButton(record) {
-  const button = element("button", {
-    className: "secondary-link benchmark-share",
-    text: t("Share card"),
-    attrs: { type: "button", "aria-label": t("Share {name} as a card", { name: record.name }) },
-  });
+  const button = element(
+    "button",
+    {
+      className: "share-icon benchmark-share",
+      attrs: {
+        type: "button",
+        title: t("Share card"),
+        "aria-label": t("Share {name} as a card", { name: record.name }),
+      },
+    },
+    [shareIcon()],
+  );
   button.addEventListener("click", async () => {
     const { openBenchmarkShare } = await import("./share-card.js");
     openBenchmarkShare({ slug: record.slug, name: record.name, t });
@@ -11248,26 +11280,11 @@ function itemDay(item, day) {
   return observationDays().find((entry) => entry.date === date) || day;
 }
 
-// The share action is an icon in the card's top-right corner (issue #1097):
-// as a text line under every description it took a row of its own and was
-// as loud as the benchmark name. The accessible name and tooltip keep words.
-const SHARE_ICON_PATHS = [
-  "M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7",
-  "M16 6l-4-4-4 4",
-  "M12 2v13",
-];
-
-function shareIcon() {
-  const svg = svgElement("svg", { viewBox: "0 0 24 24", "aria-hidden": "true" });
-  SHARE_ICON_PATHS.forEach((d) => svg.append(svgElement("path", { d })));
-  return svg;
-}
-
 function radarShareButton(item, day, title, image, pageUrl = "") {
   const button = element(
     "button",
     {
-      className: "share-link radar-share",
+      className: "share-link share-icon radar-share",
       attrs: {
         type: "button",
         "aria-label": t("Share {name} as a card", { name: title }),
