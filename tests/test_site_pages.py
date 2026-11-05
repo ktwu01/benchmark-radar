@@ -367,6 +367,24 @@ def test_benchmark_is_described_as_a_dataset_from_its_own_fields(tmp_path):
         assert missing not in beta["about"]
 
 
+def test_object_publisher_reaches_the_visible_facts(tmp_path):
+    """The Publisher fact reads publisher["name"]; an object is not a missing value (#982)."""
+    shard = _shard("alpha-bench", "Alpha Bench", categories=["math"])
+    shard["record"]["publisher"] = {
+        "name": "mbzuai",
+        "role": "hub_publisher",
+        "locator": "detail.basicInfo.publishOrg",
+    }
+    string_shard = _shard("beta-bench", "Beta Bench", publisher="Beta Lab")
+    output = _generated_pages(tmp_path, shard, string_shard)
+    alpha = _page_text(output, "alpha-bench")
+    # A hub card's publisher is often not the benchmark's creator (#982), so
+    # the page labels the role the way the dynamic site does.
+    assert "<dt>Publisher</dt><dd>mbzuai (published the hub card)</dd>" in alpha
+    assert "published by mbzuai" not in alpha
+    assert "<dt>Publisher</dt><dd>Beta Lab</dd>" in _page_text(output, "beta-bench")
+
+
 def test_node_references_carry_their_own_type_so_they_resolve_off_the_homepage(tmp_path):
     """A bare `@id` resolves nowhere but the homepage, which Search Console rejects."""
     output = _generated_pages(tmp_path, _shard("alpha-bench", "Alpha Bench"))
