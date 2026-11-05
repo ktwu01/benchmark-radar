@@ -136,6 +136,55 @@ def _text(record: dict[str, Any], key: str) -> str | None:
     return None
 
 
+# The same role labels the dynamic site prints (`publisherRoleLabel` in
+# site/assets/app.js). OpenCompass `publishOrg` names whoever published the hub
+# card, which is frequently not the benchmark's creator, so a hub publisher is
+# never written as "published by".
+_PUBLISHER_ROLE_LABELS = {
+    "hub_publisher": "published the hub card",
+    "paper_org": "organization behind the paper",
+    "maintainer": "maintainer",
+}
+
+
+def _publisher(record: dict[str, Any]) -> tuple[str, str | None] | None:
+    """The publisher's name and role, whether stored as an object or a string.
+
+    Shards store the publisher as {"name", "role", "locator"}; a plain string
+    is accepted too so a hand-built record still says who published it.
+    """
+    raw_publisher = record.get("publisher")
+    if isinstance(raw_publisher, dict):
+        name = _text(raw_publisher, "name")
+        role = raw_publisher.get("role")
+        return (name, role if isinstance(role, str) else None) if name else None
+    name = _text(record, "publisher")
+    return (name, None) if name else None
+
+
+def _publisher_name(record: dict[str, Any]) -> str | None:
+    publisher = _publisher(record)
+    return publisher[0] if publisher else None
+
+
+def _creator_publisher(record: dict[str, Any]) -> str | None:
+    """The publisher only when it can be read as who published the benchmark."""
+    publisher = _publisher(record)
+    if not publisher or publisher[1] == "hub_publisher":
+        return None
+    return publisher[0]
+
+
+def _publisher_fact(record: dict[str, Any]) -> str | None:
+    """`name (role)`, as the dynamic site shows it, so attribution never overstates."""
+    publisher = _publisher(record)
+    if not publisher:
+        return None
+    name, role = publisher
+    label = _PUBLISHER_ROLE_LABELS.get(role, role) if role else None
+    return f"{name} ({label})" if label else name
+
+
 @dataclass(frozen=True)
 class CatalogContext:
     """What one page can only know by looking at the whole catalog.
@@ -267,7 +316,7 @@ def _evidence_sentence(
 def _summary_sentence(name: str, record: dict[str, Any]) -> str:
     """A first sentence for a record that carries no description of its own."""
     categories = _category_words(record)
-    publisher = _text(record, "publisher")
+    publisher = _creator_publisher(record)
     if categories and publisher:
         return f"{name} is a {categories} benchmark published by {publisher}."
     if categories:
@@ -317,7 +366,7 @@ def _canonical(slug: str) -> str:
 
 def _facts(record: dict[str, Any]) -> list[tuple[str, str]]:
     facts: list[tuple[str, str]] = []
-    publisher = _text(record, "publisher")
+    publisher = _publisher_fact(record)
     if publisher:
         facts.append(("Publisher", publisher))
     released = _text(record, "released")
@@ -391,14 +440,7 @@ def _benchmark_entity(
     same_as = [url for kind, _, url in artifacts if kind != "paper" and _http_url(url)]
     if same_as:
         entity["sameAs"] = same_as
-    # Shards store the publisher as {"name", "role", "locator"}; a plain string
-    # is accepted too so a hand-built record still says who published it.
-    raw_publisher = record.get("publisher")
-    publisher = (
-        _text(raw_publisher, "name")
-        if isinstance(raw_publisher, dict)
-        else _text(record, "publisher")
-    )
+    publisher = _publisher_name(record)
     if publisher:
         entity["publisher"] = {"@type": "Organization", "name": publisher}
     released = _text(record, "released")
