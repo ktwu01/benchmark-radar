@@ -378,8 +378,10 @@ def test_object_publisher_reaches_the_visible_facts(tmp_path):
     string_shard = _shard("beta-bench", "Beta Bench", publisher="Beta Lab")
     output = _generated_pages(tmp_path, shard, string_shard)
     alpha = _page_text(output, "alpha-bench")
-    assert "<dt>Publisher</dt><dd>mbzuai</dd>" in alpha
-    assert "published by mbzuai" in alpha
+    # A hub card's publisher is often not the benchmark's creator (#982), so
+    # the page labels the role the way the dynamic site does.
+    assert "<dt>Publisher</dt><dd>mbzuai (published the hub card)</dd>" in alpha
+    assert "published by mbzuai" not in alpha
     assert "<dt>Publisher</dt><dd>Beta Lab</dd>" in _page_text(output, "beta-bench")
 
 
