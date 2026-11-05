@@ -85,12 +85,13 @@ def sitemap_tree(
     ``INDEXABLE_VIEWS`` is the set of pages app.js owns the metadata for, and a
     hand-written page has no entry in its SEO tables.
 
-    ``benchmark_entries`` and ``blog_entries`` each carry their own lastmod
-    rather than the site-wide one: a benchmark whose newest score is two years
-    old, and a brief for a day three weeks ago, did not change when today's
-    snapshot landed, and telling a crawler otherwise asks it to refetch the
-    whole catalog on every deploy. A build that writes no blog passes nothing
-    and lists nothing, the same rule the views follow.
+    ``blog_entries`` carry their own lastmod rather than the site-wide one: a
+    brief for a day three weeks ago did not change when today's snapshot
+    landed, and telling a crawler otherwise asks it to refetch the whole
+    catalog on every deploy. Benchmark pages carry no lastmod at all: no
+    page-change date is known at build time, and the evidence dates that used
+    to stand in are not change dates (issue #987). A build that writes no blog
+    passes nothing and lists nothing, the same rule the views follow.
     """
     root = ET.Element(_q("urlset"))
     lastmod = site_lastmod(snapshots)
