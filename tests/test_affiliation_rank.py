@@ -238,3 +238,57 @@ def test_affiliation_counts_as_an_observed_signal_for_confidence():
     entry = ranking["entries"][0]
     assert entry["coverage"] == 0.64
     assert entry["confidence"] == "Medium"
+
+
+def test_the_affiliation_input_names_its_institution_and_count(tmp_path):
+    from benchmark_radar.release_leaderboard import _attach_release_signals
+
+    signals = ReleaseSignals(
+        institutions={
+            "2610.00001": {
+                "basis": "openalex_linked_institutions",
+                "source_url": "https://openalex.org/W1",
+                "institutions": ["Small Lab", "Big University"],
+            }
+        }
+    )
+    counts = {"Big University": 9, "Small Lab": 1}
+    candidate = _candidate("2610.00001", 100)
+    _attach_release_signals(candidate, signals, counts, institution_weights(counts), {})
+    assert candidate["affiliation_institution"] == "Big University"
+    assert candidate["affiliation_paper_count"] == 9
+    ranking = compute_window_ranking(
+        [candidate], window_days=30, affiliation_weight=AFFILIATION_WEIGHT
+    )
+    component = ranking["entries"][0]["components"]["affiliation"]
+    assert component["value"] == 9
+    assert component["institution"] == "Big University"
+    assert component["normalized"] == 1.0
+
+
+def test_an_empty_repository_is_a_placeholder(monkeypatch):
+    import sys
+    from datetime import date
+
+    sys.path.insert(0, "scripts")
+    import fetch_release_signals as fetch
+
+    from benchmark_radar.http import RequestError
+
+    def get_json(url, **_kwargs):
+        if url.endswith("/contents/"):
+            raise RequestError(f"HTTP 404 from {url}")
+        if url.endswith("/repos/a/empty"):
+            return {"size": 0}
+        raise RequestError(f"HTTP 404 from {url}")
+
+    monkeypatch.setattr(fetch, "get_json", get_json)
+    rows = {}
+    fetch.refresh_repos(
+        ["https://github.com/a/empty", "https://github.com/a/gone"],
+        rows,
+        today=date(2026, 11, 5),
+        limit=10,
+    )
+    assert rows["a/empty"]["placeholder"] is True
+    assert "a/gone" not in rows

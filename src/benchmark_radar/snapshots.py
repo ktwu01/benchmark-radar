@@ -13,7 +13,6 @@ from . import kw_bench, rubric
 from .affiliation_rank import (
     institution_counts,
     institution_ranking,
-    institution_weights,
     paper_institutions,
 )
 from .app_pages import write_app_pages
@@ -1327,7 +1326,7 @@ def dashboard_data(
             snapshots,
             registry_path=registry_path,
             signals=release_signals,
-            institution_weights=institution_weights(counts) if release_signals else None,
+            institution_counts=counts if release_signals else None,
         ),
         # Issue #1120: institutions by the number of benchmark papers they
         # appear on, OpenAlex names only. Triage by a disclosed count, not a

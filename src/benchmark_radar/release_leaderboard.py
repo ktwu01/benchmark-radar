@@ -35,7 +35,7 @@ from urllib.parse import urlsplit
 
 import yaml
 
-from .affiliation_rank import affiliation_normalized
+from .affiliation_rank import affiliation_normalized, best_institution, institution_weights
 from .catalog_identity import DEFAULT_IDENTITY_PATH
 from .catalog_overrides import DEFAULT_LLM_STATS_IDENTITY_OVERRIDES_PATH
 from .corpus import artifact_alias_map, exact_artifact_key
@@ -572,7 +572,8 @@ def compute_window_ranking(
         if affiliation_weight is not None:
             affiliation = c.get("affiliation")
             components["affiliation"] = {
-                "value": affiliation,
+                "value": c.get("affiliation_paper_count"),
+                "institution": c.get("affiliation_institution"),
                 "normalized": affiliation,
                 "weight": affiliation_weight,
                 "status": "fresh" if affiliation is not None else "unknown",
@@ -677,7 +678,7 @@ def build_latest_releases_leaderboard(
     include_unconfirmed: bool = False,
     top_limit: int | None = DEFAULT_TOP_LIMIT,
     signals: ReleaseSignals | None = None,
-    institution_weights: dict[str, float] | None = None,
+    institution_counts: dict[str, int] | None = None,
 ) -> dict[str, Any]:
     """Build the full multi-window latest releases leaderboard for radar.json.
 
@@ -705,6 +706,8 @@ def build_latest_releases_leaderboard(
     all_evidence = [item for snap in snapshots for item in snap.get("evidence_items", [])]
     shared_aliases = artifact_alias_map(all_evidence)
     papers_by_canonical = _papers_by_canonical(shared_aliases) if signals is not None else {}
+    counts = dict(institution_counts or {})
+    weights = institution_weights(counts)
 
     windows_data: dict[str, Any] = {}
     for window_key, days in WINDOW_DAYS.items():
@@ -719,9 +722,7 @@ def build_latest_releases_leaderboard(
         )
         if signals is not None:
             for candidate in cohort:
-                _attach_release_signals(
-                    candidate, signals, institution_weights or {}, papers_by_canonical
-                )
+                _attach_release_signals(candidate, signals, counts, weights, papers_by_canonical)
         ranking = compute_window_ranking(
             cohort,
             window_days=days,
@@ -797,6 +798,7 @@ def release_signal_targets(
 def _attach_release_signals(
     candidate: dict[str, Any],
     signals: ReleaseSignals,
+    counts: dict[str, int],
     weights: dict[str, float],
     papers_by_canonical: dict[str, str],
 ) -> None:
@@ -812,6 +814,11 @@ def _attach_release_signals(
         # A paper OpenAlex has not indexed yet is scored on the names it
         # prints that exactly match a counted OpenAlex name; never fuzzily.
         candidate["affiliation"] = affiliation_normalized(names, weights)
+        best = best_institution(names, weights)
+        if best:
+            # The input a reader can check: which institution, on how many papers.
+            candidate["affiliation_institution"] = best
+            candidate["affiliation_paper_count"] = counts[best]
     stars_url = (candidate.get("signals", {}).get("github_stars") or {}).get("source_url")
     if signals.is_placeholder(stars_url):
         candidate["placeholder_repository"] = True

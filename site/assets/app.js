@@ -10535,7 +10535,16 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
       return element("div", { className: "latest-release-signal" }, [
         element("dt", { text: t(label) }),
         element("dd", {}, [
-          element("span", { text: latestSignalText(component) }),
+          element("span", {
+            // The affiliation input is an institution and its paper count
+            // (#1120), not a counter: name both so the reader can check them.
+            text:
+              key === "affiliation" && component.institution
+                ? `${component.institution} · ${t("{count} papers", {
+                    count: Number(component.value).toLocaleString(),
+                  })}`
+                : latestSignalText(component),
+          }),
           element("small", {
             className: "latest-release-normalized",
             text: `${t("normalized")} ${latestNormalizedText(component)}`,

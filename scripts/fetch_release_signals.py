@@ -75,6 +75,14 @@ def refresh_institutions(papers, rows, *, today, limit, delay):
     return looked_up, len(pending)
 
 
+def _is_empty_repository(repo: str) -> bool:
+    try:
+        meta = get_json(f"https://api.github.com/repos/{repo}", headers=_headers(github=True))
+    except RequestError:
+        return False
+    return int(meta.get("size") or 0) == 0
+
+
 def refresh_repos(urls, rows, *, today, limit):
     repos = sorted({repo for repo in map(github_repo, urls) if repo})
     pending = [repo for repo in repos if needs_repo_refresh(rows.get(repo), today)]
@@ -87,9 +95,13 @@ def refresh_repos(urls, rows, *, today, limit):
                 attempts=2,
             )
         except RequestError as error:
-            # A deleted, private or empty repository says nothing either way.
-            print(f"warning: {repo}: {error}", file=sys.stderr)
-            continue
+            # GitHub answers 404 both for a repository that is gone and for one
+            # that exists but is empty; the repository's own record tells them
+            # apart. An empty repository is the plainest placeholder.
+            if "404" not in str(error) or not _is_empty_repository(repo):
+                print(f"warning: {repo}: {error}", file=sys.stderr)
+                continue
+            listing = []
         names = sorted(str(entry.get("name") or "") for entry in listing or [])
         rows[repo] = {
             "placeholder": is_placeholder_root(names),

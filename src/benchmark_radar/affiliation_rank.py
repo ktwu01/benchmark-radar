@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import math
 from collections import Counter
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -76,7 +77,7 @@ def institution_counts(papers: dict[str, list[str]]) -> Counter[str]:
     return counts
 
 
-def institution_weights(counts: Counter[str]) -> dict[str, float]:
+def institution_weights(counts: Mapping[str, int]) -> dict[str, float]:
     """``log1p(count) / log1p(max)``, so the most frequent institution is 1.0."""
     if not counts:
         return {}
@@ -105,5 +106,11 @@ def institution_ranking(
 
 def affiliation_normalized(institutions: list[str], weights: dict[str, float]) -> float | None:
     """Highest weight among the first three institutions, or None if none is known."""
-    known = [weights[name] for name in institutions[:SHOWN_INSTITUTIONS] if name in weights]
-    return round(max(known), 4) if known else None
+    best = best_institution(institutions, weights)
+    return round(weights[best], 4) if best else None
+
+
+def best_institution(institutions: list[str], weights: dict[str, float]) -> str | None:
+    """The first-three institution the affiliation signal is read from, ties by order."""
+    known = [name for name in institutions[:SHOWN_INSTITUTIONS] if name in weights]
+    return max(known, key=lambda name: weights[name]) if known else None
