@@ -53,14 +53,17 @@ class EmailBrief:
     html: str
 
 
-def render_email(snapshot: dict[str, Any]) -> EmailBrief:
+def render_email(
+    snapshot: dict[str, Any], *, days: list[dict[str, Any]] | None = None
+) -> EmailBrief:
     """The day's briefing bullets, in English only, with a link to the full page.
 
     The blog page carries both languages and the site's stylesheet; neither
     survives an email client, so the email keeps the bullets and sends the
     reader to the page for questions, sources and provenance.
     """
-    post = build_post(snapshot)
+    # Match the blog's fallback lead selection on days without share cards.
+    post = build_post(snapshot, days=days)
     briefing = snapshot.get("briefing") or {}
     bullets = [str(bullet).strip() for bullet in briefing.get("bullets") or []]
     bullets = [bullet for bullet in bullets if bullet]
@@ -178,8 +181,8 @@ def create_broadcast(api_key: str, body: dict[str, Any]) -> dict[str, Any]:
     return broadcast
 
 
-def _snapshot_for(snapshot_dir: Path, day: str) -> dict[str, Any]:
-    for snapshot in load_snapshots(snapshot_dir):
+def _snapshot_for(snapshot_dir: Path, day: str, *, days: list[dict[str, Any]]) -> dict[str, Any]:
+    for snapshot in days:
         if str(snapshot["date"]) == day:
             return snapshot
     raise EmailError(f"no committed snapshot for {day} in {snapshot_dir}")
@@ -197,7 +200,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     day = args.date.isoformat()
     try:
-        brief = render_email(_snapshot_for(args.snapshots, day))
+        days = load_snapshots(args.snapshots)
+        brief = render_email(_snapshot_for(args.snapshots, day, days=days), days=days)
         args.out.write_text(brief.html, encoding="utf-8")
         print(f"rendered {brief.subject!r} to {args.out}")
         if args.mode == "preview":

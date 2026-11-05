@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import json
 import re
 from datetime import UTC, datetime
@@ -223,3 +224,68 @@ def test_the_live_check_does_not_pipe_curl_into_grep_q():
     workflow = WORKFLOW.read_text(encoding="utf-8")
     assert not re.search(r"curl[^\n|]*\|\s*grep -q", workflow)
     assert 'page="$(curl -fsS --max-time 30 "$url" || true)"' in workflow
+
+
+@pytest.mark.parametrize("case", ["no_share", "share", "no_candidates"])
+def test_email_and_blog_headings_share_the_committed_history(tmp_path, monkeypatch, case):
+    from benchmark_radar.blog import build_posts
+    from benchmark_radar.snapshots import load_snapshots
+
+    def item(name, score):
+        return {
+            "source": "arXiv",
+            "source_id": name,
+            "title": f"{name}: a benchmark release",
+            "url": f"https://example.org/{score}",
+            "published_at": "2026-10-25T00:00:00Z",
+            "event_kind": "released",
+            "categories": [],
+            "metrics": {},
+            "evidence_score": 0,
+            "relevance_score": 0,
+            "recency_score": 0,
+            "adoption_score": 0,
+            "total_score": score,
+            "rationale": [],
+        }
+
+    snapshots = tmp_path / "snapshots"
+    snapshots.mkdir()
+    old = item("OldBench", 99)
+    new = item("New & Safe Bench", 80)
+    for day, items in [("2026-10-25", [old]), ("2026-10-26", [old, new])]:
+        snapshot = _snapshot(day)
+        snapshot.update(
+            schema_version=2,
+            since=f"{day}T00:00:00Z",
+            evidence_items=[] if case == "no_candidates" else items,
+            attention={"observations": []},
+            ingest_health=[],
+            producer_health=[],
+            discovery_state={},
+        )
+        snapshot["briefing"]["date"] = day
+        if case == "share":
+            snapshot["share"] = {"cards": [{"title": "CardBench: a stored share pick"}]}
+        (snapshots / f"{day}.json").write_text(json.dumps(snapshot), encoding="utf-8")
+
+    days = load_snapshots(snapshots)
+    post = next(post for post in build_posts(days) if post.slug == "2026-10-26")
+    if case == "no_share":
+        assert post.title == "AI benchmark news: New & Safe Bench · Oct 26, 2026"
+    elif case == "share":
+        assert post.title == "AI benchmark news: CardBench · Oct 26, 2026"
+    else:
+        assert post.title == "Daily AI benchmark brief: 2026-10-26"
+
+    monkeypatch.setattr(email_brief, "_kit", lambda *a, **k: pytest.fail("Kit was called"))
+    out = tmp_path / "email.html"
+    assert (
+        email_brief.main(["--date", "2026-10-26", "--snapshots", str(snapshots), "--out", str(out)])
+        == 0
+    )
+    rendered = out.read_text(encoding="utf-8")
+    heading = re.search(r"<h1[^>]*>(.*?)</h1>", rendered).group(1)
+    assert html.unescape(heading) == post.title
+    assert heading == html.escape(post.title, quote=True)
+    assert 'href="https://benchmark-radar.org/blog/2026-10-26/"' in rendered
