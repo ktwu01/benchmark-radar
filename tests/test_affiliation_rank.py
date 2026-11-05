@@ -225,3 +225,16 @@ def test_committed_release_signals_load():
     for paper, row in signals.institutions.items():
         for name in row["institutions"]:
             assert any(ch.isalpha() for ch in name), (paper, name)
+
+
+def test_affiliation_counts_as_an_observed_signal_for_confidence():
+    # Stars (44%) plus a known affiliation (20%) are two observed signals
+    # covering 64% of the score: "Medium", not "Low".
+    ranking = compute_window_ranking(
+        [_candidate("known", 100, affiliation=0.5)],
+        window_days=30,
+        affiliation_weight=AFFILIATION_WEIGHT,
+    )
+    entry = ranking["entries"][0]
+    assert entry["coverage"] == 0.64
+    assert entry["confidence"] == "Medium"

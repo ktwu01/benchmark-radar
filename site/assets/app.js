@@ -1320,6 +1320,10 @@ const I18N = {
     "{value} · unverified": "{value} · 未经核验",
     "source ↗": "来源 ↗",
     "Coverage {coverage}": "覆盖率 {coverage}",
+    "Recently released benchmarks, ranked by the attention they are receiving now (GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days, together 80%) and by how often their institutions appear on benchmark papers in the corpus (20%). Repositories holding only a README, licence or images are listed but not ranked.":
+      "近期发布的benchmark，按当前获得的关注度（GitHub star、Hugging Face 论文点赞以及最近 30 天的 Hugging Face 数据集下载量，合计 80%）以及其机构在语料 benchmark 论文中出现的频次（20%）排序。只含 README、许可证或图片的仓库仅列出，不参与排名。",
+    "The number is the score, out of 100. The tag under it is a separate check: how much of the score is backed by observed data. A high tag means at least two signals were found and they cover 75% or more of the score; a low tag means fewer than two signals were found, or they cover less than 40% of the score. It says nothing about how good the benchmark is.":
+      "数字是得分（满分 100）。下方的标签是另一回事：得分有多少来自实际观察到的数据。“高”表示至少找到两类信号，且合计覆盖得分的 75% 以上；“低”表示找到的信号少于两类，或合计覆盖不到得分的 40%。它不代表 benchmark 本身的好坏。",
     "latest.legend":
       "数字是关注度得分（满分 100）。下方的标签是另一回事：得分有多少来自实际观察到的数据。“高”表示至少找到两类信号，且合计覆盖得分的 75% 以上；“低”表示找到的信号少于两类，或合计覆盖不到得分的 40%。它不代表 benchmark 本身的好坏。",
     "{level} data": "数据支撑：{level}",
@@ -10414,6 +10418,11 @@ function latestReleasesMethodNote(payload, windowData) {
   );
 }
 
+const DECK_V2 =
+  "Recently released benchmarks, ranked by the attention they are receiving now (GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days, together 80%) and by how often their institutions appear on benchmark papers in the corpus (20%). Repositories holding only a README, licence or images are listed but not ranked.";
+const LEGEND_V2 =
+  "The number is the score, out of 100. The tag under it is a separate check: how much of the score is backed by observed data. A high tag means at least two signals were found and they cover 75% or more of the score; a low tag means fewer than two signals were found, or they cover less than 40% of the score. It says nothing about how good the benchmark is.";
+
 // The first three institutions behind the release's paper (#1120). OpenAlex's
 // linked names are shown as they are; a paper OpenAlex has not indexed yet
 // shows its own printed affiliations, labelled as such.
@@ -10580,11 +10589,23 @@ function renderLatestReleases() {
   // attention-affiliation-v2 is no longer attention alone (#1120).
   const scoreHeader = document.querySelector("#latest-releases .leaderboard-top-columns-count");
   const method = String(latestReleasesPayload()?.method_version || "");
-  if (scoreHeader) {
-    const key = method.includes("affiliation") ? "Score" : "Attention score";
-    scoreHeader.dataset.i18n = key;
-    scoreHeader.textContent = t(key);
-  }
+  const combined = method.includes("affiliation");
+  // The header, deck and legend describe the method the payload carries.
+  [
+    [scoreHeader, "Attention score", "Score", "Score"],
+    [document.querySelector("#latest-about .latest-releases-deck"), "latest.deck", DECK_V2, DECK_V2],
+    [document.querySelector("#latest-about .latest-releases-legend"), "latest.legend", LEGEND_V2, LEGEND_V2],
+  ].forEach(([node, v1Key, v2Key, v2English]) => {
+    if (!node) return;
+    // applyStaticI18n caches the HTML's English in data-i18n-en; keep the v1
+    // copy so a v1 payload still reads as it always did.
+    if (node.dataset.i18nV1 === undefined) node.dataset.i18nV1 = node.dataset.i18nEn ?? node.textContent;
+    const key = combined ? v2Key : v1Key;
+    const english = combined ? v2English : node.dataset.i18nV1;
+    node.dataset.i18n = key;
+    node.dataset.i18nEn = english;
+    node.textContent = I18N[getLang()]?.[key] ?? english;
+  });
   const host = byId("latest-releases-list");
   if (!host) return;
   const payload = latestReleasesPayload();

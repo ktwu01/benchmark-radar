@@ -579,6 +579,8 @@ def compute_window_ranking(
                 "source_url": c.get("institutions_source_url"),
             }
             if affiliation is not None:
+                # An observed signal like any other for the confidence tag.
+                observed_count += 1
                 coverage += affiliation_weight
                 composite_score += affiliation_weight * affiliation
 
