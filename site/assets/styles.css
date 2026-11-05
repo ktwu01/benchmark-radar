@@ -6710,13 +6710,6 @@ dialog {
 
 /* Models (#420): .com's model x benchmark matrix, its side panel, and each
    lab's own model documents. */
-.models-note {
-  flex: 1 1 20rem;
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.88rem;
-}
-
 .models-controls {
   display: flex;
   flex-wrap: wrap;
@@ -7097,10 +7090,6 @@ dialog {
 
   /* One row of menus under the search, then the page row, so the matrix
      starts on the first screen; the menus' own labels name them. */
-  #models-view .models-note {
-    display: none;
-  }
-
   .models-controls {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));

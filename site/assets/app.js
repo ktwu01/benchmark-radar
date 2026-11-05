@@ -672,6 +672,7 @@ const I18N = {
     "Sort by": "排序方式",
     "Sort: Newest": "排序：最新",
     "How this list is sorted": "列表如何排序",
+    "How to read this table": "如何阅读此表",
     "Sort: Releases first, then recorded stars + likes + downloads + points; missing signals last": "排序：新发布的排在前面，其余按已记录的星标、点赞、下载和积分总数；缺少数据的记录排在最后",
     "Search benchmarks…": "搜索benchmark…",
     "Refresh data": "刷新数据",
@@ -1614,6 +1615,44 @@ function infoDisclosure(text) {
     }),
     element("p", { className: "info-disclosure-body", text }),
   ]);
+}
+
+// A closed (i) whose only state is the toggle's aria-expanded; CSS shows the
+// note when it is "true" and never on its own, so what is shown and what
+// assistive tech is told cannot disagree. Hover and focus open it and leaving
+// closes it; a click or tap pins it open, a second one closes it; Escape
+// closes it only while it is open; a click elsewhere closes it.
+function bindInfoTip(wrapper, toggle) {
+  if (!wrapper || !toggle) return;
+  let pinned = false;
+  const isOpen = () => toggle.getAttribute("aria-expanded") === "true";
+  const setOpen = (open) => {
+    if (!open) pinned = false;
+    toggle.setAttribute("aria-expanded", String(open));
+  };
+  wrapper.addEventListener("mouseenter", () => setOpen(true));
+  wrapper.addEventListener("mouseleave", () => {
+    if (!pinned) setOpen(false);
+  });
+  toggle.addEventListener("focus", () => setOpen(true));
+  toggle.addEventListener("blur", () => {
+    if (!pinned) setOpen(false);
+  });
+  toggle.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (pinned) {
+      setOpen(false);
+    } else {
+      pinned = true;
+      setOpen(true);
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && isOpen()) setOpen(false);
+  });
+  document.addEventListener("click", () => {
+    if (isOpen()) setOpen(false);
+  });
 }
 
 // Coalesce bursts of input (typing in a filter box) into a single trailing
@@ -12072,42 +12111,8 @@ function bindEvents() {
       select.dispatchEvent(new Event("change"));
     });
   });
-  // The sort note's only state is aria-expanded; CSS shows the note when it
-  // is "true" and never on its own, so what is shown and what assistive tech
-  // is told cannot disagree. Hover and focus open it and leaving closes it; a
-  // click or tap pins it open, a second one closes it; Escape closes it only
-  // while it is open; a click elsewhere closes it.
-  const sortToggle = byId("today-sort-toggle");
-  const sortInfo = byId("today-sort-info");
-  let sortPinned = false;
-  const sortOpen = () => sortToggle?.getAttribute("aria-expanded") === "true";
-  const setSortNote = (open) => {
-    if (!open) sortPinned = false;
-    sortToggle?.setAttribute("aria-expanded", String(open));
-  };
-  sortInfo?.addEventListener("mouseenter", () => setSortNote(true));
-  sortInfo?.addEventListener("mouseleave", () => {
-    if (!sortPinned) setSortNote(false);
-  });
-  sortToggle?.addEventListener("focus", () => setSortNote(true));
-  sortToggle?.addEventListener("blur", () => {
-    if (!sortPinned) setSortNote(false);
-  });
-  sortToggle?.addEventListener("click", (event) => {
-    event.stopPropagation();
-    if (sortPinned) {
-      setSortNote(false);
-    } else {
-      sortPinned = true;
-      setSortNote(true);
-    }
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && sortOpen()) setSortNote(false);
-  });
-  document.addEventListener("click", () => {
-    if (sortOpen()) setSortNote(false);
-  });
+  bindInfoTip(byId("today-sort-info"), byId("today-sort-toggle"));
+  bindInfoTip(byId("models-info"), byId("models-info-toggle"));
   document.querySelectorAll("[data-today-sort]").forEach((button) => {
     button.addEventListener("click", () => {
       state.todaySort = button.dataset.todaySort;

@@ -539,21 +539,18 @@ a.benchmark-resource-link::after {
   --fact-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M7 7h3v4c0 2.5-1.5 4.5-4 5M15 7h3v4c0 2.5-1.5 4.5-4 5%22/%3E%3C/svg%3E");
 }
 
-/* The sort note is a closed (i) after the counts (issue #1097). Script opens
-   it on hover, keyboard focus or a tap by setting aria-expanded, the only
-   state CSS reads, and it sits over the list instead of pushing it down. */
-#today-view .section-title {
-  grid-template-columns: auto auto minmax(0, 1fr) auto;
-}
-
-#today-view .sort-info {
+/* A closed (i) for method text (design.md, "Keep page titles close and
+   quiet"). Script opens it on hover, keyboard focus or a tap by setting
+   aria-expanded on the toggle, the only state CSS reads, and the note floats
+   over the content instead of pushing it down. bindInfoTip() in app.js wires
+   each one; used by the homepage sort note and the Models note. */
+.info-tip {
   position: relative;
-  grid-column: 4;
-  grid-row: 1;
   display: inline-flex;
+  align-items: center;
 }
 
-#today-view .sort-info-toggle {
+.info-tip-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -565,9 +562,10 @@ a.benchmark-resource-link::after {
   background: none;
   color: var(--muted);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-#today-view .sort-info-toggle > span {
+.info-tip-toggle > span {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -579,27 +577,34 @@ a.benchmark-resource-link::after {
   font-size: 12px;
   font-style: italic;
   font-weight: 700;
+  letter-spacing: normal;
   line-height: 1;
 }
 
-#today-view .sort-info-toggle:hover,
-#today-view .sort-info-toggle[aria-expanded="true"] {
+.info-tip-toggle:hover,
+.info-tip-toggle[aria-expanded="true"] {
   color: var(--blue-deep);
 }
 
-#today-view #today-sort.sort-info-body {
+.info-tip-body {
   position: absolute;
   z-index: 30;
   top: calc(100% + 0.6rem);
   right: 0;
   width: max-content;
   max-width: min(34ch, calc(100vw - 32px));
+  margin: 0;
   padding: 0.6rem 0.8rem;
   border: 1px solid var(--edge);
   border-radius: var(--radius-sm);
   background: var(--panel);
   box-shadow: 0 6px 20px rgb(23 32 38 / 12%);
   color: var(--ink);
+  font-family: var(--body);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.5;
   white-space: normal;
   text-align: left;
   visibility: hidden;
@@ -607,13 +612,36 @@ a.benchmark-resource-link::after {
   transition: opacity 120ms ease;
 }
 
-#today-view .sort-info-toggle[aria-expanded="true"] + #today-sort.sort-info-body {
+/* A tip near the left edge opens to the right. */
+.info-tip-start .info-tip-body {
+  right: auto;
+  left: 0;
+}
+
+.info-tip-toggle[aria-expanded="true"] + .info-tip-body {
   visibility: visible;
   opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #today-view #today-sort.sort-info-body {
+  .info-tip-body {
     transition: none;
   }
+}
+
+/* Homepage: the sort note sits after the counts. #today-sort keeps older
+   caption rules in styles.css (nowrap, a lighter top border), which an id
+   outranks, so they are reset here. */
+#today-view .section-title {
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+}
+
+#today-view .sort-info {
+  grid-column: 4;
+  grid-row: 1;
+}
+
+#today-view #today-sort {
+  border-top-color: var(--edge);
+  white-space: normal;
 }
