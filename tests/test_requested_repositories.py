@@ -245,7 +245,7 @@ def test_archived_requested_repository_is_kept(tmp_path, monkeypatch):
     assert [item.source_id for item in items] == ["lab/repo"]
 
 
-def test_renamed_repository_warns_that_the_alias_is_stale(tmp_path, monkeypatch):
+def test_renamed_repository_keeps_its_watchlist_match(tmp_path, monkeypatch):
     registry = _registry(
         tmp_path,
         [{"full_name": "old-lab/repo", "issue": ISSUE, "requested_at": date(2026, 11, 5)}],
@@ -258,10 +258,11 @@ def test_renamed_repository_warns_that_the_alias_is_stale(tmp_path, monkeypatch)
     assert item.source_id == "new-lab/repo"
     # Resolved under both names, so renaming the row does not requeue it.
     assert config["_requested_resolved"] == ["old-lab/repo", "new-lab/repo"]
-    assert config["_source_warnings"] == [
-        "old-lab/repo: GitHub now names it new-lab/repo; update the registry row and its "
-        "watchlist alias"
-    ]
+    assert config["_source_warnings"] == ["old-lab/repo: GitHub now names it new-lab/repo"]
+    # The watchlist entry naming the requested repository still matches, so a
+    # blank-description repository stays publishable after the rename.
+    apply_watchlist([item], [{"name": "Old Repo", "aliases": ["old-lab/repo"]}])
+    assert item.watchlist == "Old Repo"
 
 
 def test_every_pending_request_is_fetched_even_past_the_item_limit(tmp_path, monkeypatch):

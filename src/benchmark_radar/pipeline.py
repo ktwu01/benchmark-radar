@@ -422,7 +422,10 @@ def apply_watchlist(
     if not watchlist:
         return items
     for item in items:
-        haystack = f"{item.title} {item.source_id}".casefold()
+        # A reader-requested repository also matches by the name it was
+        # requested under, so a rename on GitHub keeps its watchlist entry.
+        requested = str(((item.raw or {}).get("request") or {}).get("full_name") or "")
+        haystack = f"{item.title} {item.source_id} {requested}".casefold()
         for entry in watchlist:
             name = str(entry.get("name") or "").strip()
             aliases = [str(alias).casefold() for alias in entry.get("aliases") or []]

@@ -875,13 +875,12 @@ def fetch_github_requested_repositories(
             failures.append(error)
             continue
         # The API answers for the canonical name, so a renamed or transferred
-        # repository is recorded under the name GitHub reports today. Its
-        # watchlist alias still names the requested repository, so say so.
+        # repository is recorded under the name GitHub reports today. The
+        # watchlist still matches the requested name kept in `raw["request"]`.
         canonical = str(row.get("full_name") or full_name).strip()
         if canonical.casefold() != full_name.casefold():
             config.setdefault("_source_warnings", []).append(
-                f"{full_name}: GitHub now names it {canonical}; update the registry "
-                "row and its watchlist alias"
+                f"{full_name}: GitHub now names it {canonical}"
             )
         # A future-dated answer is quarantined and stays pending, so a later run
         # can publish it once its timestamps are valid.
