@@ -11248,12 +11248,34 @@ function itemDay(item, day) {
   return observationDays().find((entry) => entry.date === date) || day;
 }
 
+// The share action is an icon in the card's top-right corner (issue #1097):
+// as a text line under every description it took a row of its own and was
+// as loud as the benchmark name. The accessible name and tooltip keep words.
+const SHARE_ICON_PATHS = [
+  "M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7",
+  "M16 6l-4-4-4 4",
+  "M12 2v13",
+];
+
+function shareIcon() {
+  const svg = svgElement("svg", { viewBox: "0 0 24 24", "aria-hidden": "true" });
+  SHARE_ICON_PATHS.forEach((d) => svg.append(svgElement("path", { d })));
+  return svg;
+}
+
 function radarShareButton(item, day, title, image, pageUrl = "") {
-  const button = element("button", {
-    className: "share-link radar-share",
-    text: t("Share card"),
-    attrs: { type: "button", "aria-label": t("Share {name} as a card", { name: title }) },
-  });
+  const button = element(
+    "button",
+    {
+      className: "share-link radar-share",
+      attrs: {
+        type: "button",
+        "aria-label": t("Share {name} as a card", { name: title }),
+        title: t("Share card"),
+      },
+    },
+    [shareIcon()],
+  );
   button.addEventListener("click", async (event) => {
     // An attention card is a <details>; pressing Share must not also toggle it.
     event.preventDefault();
@@ -11339,11 +11361,14 @@ function evidenceCard(item, day) {
         text: item.summary || t("No description published at the source."),
       }),
       artifactLinks(item),
+    ]),
+    // Share sits above the score in the right column, so it adds no line.
+    element("div", { className: "radar-aside" }, [
       shareCard
         ? radarShareButton(item, ownDay, fullTitle, shareCard.image, catalog.page)
         : radarShareButton(item, ownDay, fullTitle, catalog.image, catalog.page),
+      scoreBlock(item),
     ]),
-    scoreBlock(item),
   ]);
 }
 

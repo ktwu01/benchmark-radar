@@ -264,15 +264,41 @@ a.benchmark-resource-link::after {
   max-width: 75ch;
 }
 
-/* Every card offers Share; at full link weight it was as loud as the name
-   above it. It stays a 44px target, only quieter. */
-.radar-card .radar-share {
-  color: var(--muted);
-  font-size: 0.875rem;
-  font-weight: 500;
+/* Share is an icon in the card's top-right corner, above the score, so it
+   costs no line. The button is a 44px target; the glyph is 18px. */
+.radar-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
 }
 
-.radar-card .radar-share:hover {
+.radar-aside .share-control {
+  margin: -0.6rem -0.6rem 0 0;
+}
+
+.radar-share {
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-block: 0;
+  border-radius: 50%;
+  color: var(--muted);
+}
+
+.radar-share svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.radar-share:hover,
+.radar-share:focus-visible {
+  background: color-mix(in srgb, var(--blue) 10%, var(--panel));
   color: var(--blue-deep);
 }
 
