@@ -373,6 +373,8 @@ social:
       daily: false
     - name: "https://www.reddit.com/r/RagAI/"
       daily: false
+    - name: "https://www.reddit.com/r/UTAustin"
+      daily: false
     - name: "Hugging Face Forums"
       daily: false
     - name: "EleutherAI Discord"
@@ -415,6 +417,64 @@ social:
 
     # Targeted outreach is useful, but should not become bulk unsolicited mail.
     - name: "AI eval newsletter 投稿"
+      daily: false
+
+    # Launch and listing channels used in the November 2026 runs: the
+    # Benchmark Radar directory submissions, the paper showcase forums, and
+    # the ut01 launch. One-shot listings and launch posts, not recurring
+    # posting targets. Badge-required and paid-only directories stay off
+    # this list on purpose.
+    - name: "PeerPush"
+      daily: false
+    - name: "BetterLaunch"
+      daily: false
+    - name: "AlternativeTo"
+      daily: false
+    - name: "SaaSHub"
+      daily: false
+    - name: "SideProjectors"
+      daily: false
+    - name: "Trustpilot"
+      daily: false
+    - name: "G2"
+      daily: false
+    - name: "F6S"
+      daily: false
+    - name: "StackShare"
+      daily: false
+    - name: "Uneed"
+      daily: false
+    - name: "WhatLaunched"
+      daily: false
+    - name: "TinyLaunch"
+      daily: false
+    - name: "Nick Launches"
+      daily: false
+    - name: "Startup Buffer"
+      daily: false
+    - name: "SaaS Page"
+      daily: false
+    - name: "EpicTools"
+      daily: false
+    - name: "SoMuch"
+      daily: false
+    - name: "Microlaunch"
+      daily: false
+    - name: "Launching Next"
+      daily: false
+    - name: "Future Tools"
+      daily: false
+    - name: "OpenAI Developer Showcase"
+      daily: false
+    - name: "Google AI Developers Forum"
+      daily: false
+    - name: "Cohere Labs Open Science Community"
+      daily: false
+    - name: "alphaXiv"
+      daily: false
+    - name: "Hugging Face Papers"
+      daily: false
+    - name: "Manifund"
       daily: false
 
     # Low-frequency professional posting and paid experiments.
