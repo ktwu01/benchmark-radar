@@ -31,13 +31,13 @@ LIGHT = "#DDE3E8"
 
 # The site's own tokens (site/assets/styles.css), so a shared link looks like
 # the page it opens.
-PANEL = "#F9FBFC"
-CANVAS = "#EDF1F3"
-SITE_INK = "#15242A"
-MUTED = "#5F7078"
-EDGE = "#B8C5CC"
-LINE = "#CBD5DA"
-BLUE = "#255EA8"
+PANEL = "#FFFFFF"
+CANVAS = "#F4F6F7"
+SITE_INK = "#172026"
+MUTED = "#56636B"
+EDGE = "#D3DADF"
+LINE = "#E1E6E9"
+BLUE = "#2A7F8E"
 ORANGE = "#DC633F"
 
 MARGIN = 64

@@ -118,6 +118,15 @@ watchlist:
   - name: RSI-Exam
     aliases: [rsi-exam, "rsi exam"]
     note: Executable long-horizon research benchmark for recursive self-improvement.
+  # Issue #1051: Realtime-Bench was missed because its title
+  # ("Realtime-Bench: Can Frontier Models Solve Real-time Interactive
+  # Problems?") contains none of the rss_keywords phrases, and it is framed
+  # as interactive tasks rather than "we introduce a benchmark". A watchlist
+  # hit is a routing decision, not a quality claim: it pins the record to
+  # the top of the digest and labels why.
+  - name: Realtime-Bench
+    aliases: [realtime-bench, "realtime bench"]
+    note: Real-time interactive game and web tasks where delayed actions directly affect success (issue #1051).
 
 sources:
   arxiv:
@@ -177,6 +186,12 @@ sources:
       - agentic evaluation
       - multi-agent benchmark
       - benchmark for agent
+      # Issue #1051: named alias only — bare "realtime" or "interactive"
+      # would match most agent papers. These two substrings match the
+      # Realtime-Bench title and its "real-time interactive problems"
+      # framing without widening the generic keyword set.
+      - realtime-bench
+      - real-time interactive
     queries:
       - 'ti:"benchmark" AND (all:"we introduce" OR all:"we present" OR all:"we release")'
       - 'ti:"dataset" AND (all:"we introduce" OR all:"we present" OR all:"we release")'
