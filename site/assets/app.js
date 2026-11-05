@@ -3230,7 +3230,9 @@ function renderTodayBenchmarks() {
     : indexPending
       ? t("Still checking the benchmark registry\u2026")
       : "";
-  byId("today-benchmarks-note").textContent = [note, warning].filter(Boolean).join(" ");
+  byId("today-benchmarks-note").textContent = [
+    note, partialMatchNote(matches, query, (record) => record.slug), warning,
+  ].filter(Boolean).join(" ");
   replaceChildren(byId("today-benchmarks-results"), rows);
   return !total && indexPending ? "pending" : total;
 }
