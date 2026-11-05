@@ -829,25 +829,26 @@ def fetch_github_requested_repositories(
 
     Search and organization discovery only see repositories pushed or created
     inside the run's window, so a repository they dropped cannot come back
-    (issue #555). A reviewed request fetches it directly, once: a row is due
-    only in the run on the day after its `requested_at` date. The lookback
-    window spans two daily runs, so testing the date against `since` would
-    publish an old repository as current activity twice.
+    (issue #555). A reviewed request fetches it directly, once. A row stays
+    pending until a run gets an answer for it, so a row merged late or a fetch
+    that failed is picked up by the next run. The pipeline records each
+    answered row (`_requested_resolved`) in the snapshot's `discovery_state`,
+    passed back in as `_seen_state`, so the record is not repeated.
 
     A request grants discovery only. The record is a plain GitHub record, so it
     is summarised, scored, suppressed and deduplicated exactly like a search
     hit, and a blank upstream description stays blank.
     """
     registry_path = Path(str(config.get("registry_path", "data/requested_github_repositories.yml")))
-    due_date = (_collection_clock(config) - timedelta(days=1)).date()
+    resolved = {str(name).casefold() for name in config.get("_seen_state") or {}}
     due = [
         entry
         for entry in load_requested_github_repositories(registry_path)
-        if entry["requested_at"] == due_date
+        if entry["full_name"].casefold() not in resolved
     ]
-    # Every due row is fetched. A cap would silently expire the rows past it,
-    # since a row is due on one day only; the registry is reviewed by hand, so
-    # its size is the bound.
+    # Every pending row is fetched; the registry is reviewed by hand, so its
+    # size is the bound.
+    answered: list[str] = config.setdefault("_requested_resolved", [])
     headers = _github_headers()
     found: dict[str, RadarItem] = {}
     failures: list[Exception] = []
@@ -873,6 +874,9 @@ def fetch_github_requested_repositories(
             )
             failures.append(error)
             continue
+        # GitHub answered, so the request is resolved whether or not the
+        # repository becomes a record below.
+        answered.append(full_name)
         # The API answers for the canonical name, so a renamed or transferred
         # repository is recorded under the name GitHub reports today. Its
         # watchlist alias still names the requested repository, so say so.
@@ -902,13 +906,14 @@ def fetch_github_requested_repositories(
             raw={
                 "repository": row,
                 "request": {
+                    "full_name": full_name,
                     "issue": entry["issue"],
                     "requested_at": entry["requested_at"].isoformat(),
                 },
             },
             parser_version=GITHUB_REQUESTED_PARSER_VERSION,
         )
-    if due and not found and failures:
+    if due and not answered and failures:
         raise failures[0]
     return list(found.values())
 

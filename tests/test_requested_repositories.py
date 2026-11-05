@@ -1,11 +1,11 @@
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 import pytest
 import yaml
 
 from benchmark_radar.http import RequestError
-from benchmark_radar.pipeline import apply_watchlist, score_item
+from benchmark_radar.pipeline import apply_watchlist, run_pipeline, score_item
 from benchmark_radar.requested_repositories import (
     RequestedRepositoryRegistryError,
     load_requested_github_repositories,
@@ -68,7 +68,7 @@ def test_fetches_a_repository_created_long_before_the_window(tmp_path, monkeypat
         tmp_path,
         [
             {"full_name": "sunblaze-ucb/vero", "issue": ISSUE, "requested_at": date(2026, 11, 5)},
-            {"full_name": "lab/old-request", "issue": ISSUE, "requested_at": date(2026, 10, 1)},
+            {"full_name": "lab/answered", "issue": ISSUE, "requested_at": date(2026, 10, 1)},
         ],
     )
     calls = []
@@ -78,15 +78,16 @@ def test_fetches_a_repository_created_long_before_the_window(tmp_path, monkeypat
         return _repository(url.removeprefix("https://api.github.com/repos/"))
 
     monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
-    items = fetch_github_requested_repositories(
-        {"registry_path": str(registry), "_collection_now": datetime(2026, 11, 6, tzinfo=UTC)},
-        datetime(2026, 11, 4, tzinfo=UTC),
-        10,
-    )
+    config = {
+        "registry_path": str(registry),
+        "_collection_now": datetime(2026, 11, 6, tzinfo=UTC),
+        # A row an earlier run already answered is not fetched again.
+        "_seen_state": {"lab/answered": {"resolved_at": "2026-10-02T05:00:00+00:00"}},
+    }
+    items = fetch_github_requested_repositories(config, datetime(2026, 11, 4, tzinfo=UTC), 10)
 
-    # Only the row whose request date falls in this run's window is fetched,
-    # so a fulfilled request does not repeat in every later snapshot.
     assert calls == ["https://api.github.com/repos/sunblaze-ucb/vero"]
+    assert config["_requested_resolved"] == ["sunblaze-ucb/vero"]
     [item] = items
     assert item.source == "GitHub"
     assert item.source_id == "sunblaze-ucb/vero"
@@ -94,7 +95,11 @@ def test_fetches_a_repository_created_long_before_the_window(tmp_path, monkeypat
     assert item.event_kind == "updated"
     # A blank upstream description stays blank; the request adds no prose.
     assert item.summary == ""
-    assert item.raw["request"] == {"issue": ISSUE, "requested_at": "2026-11-05"}
+    assert item.raw["request"] == {
+        "full_name": "sunblaze-ucb/vero",
+        "issue": ISSUE,
+        "requested_at": "2026-11-05",
+    }
 
 
 def test_request_grants_discovery_not_relevance(tmp_path, monkeypatch):
@@ -160,46 +165,69 @@ def test_all_requests_failing_reports_the_source_unhealthy(tmp_path, monkeypatch
         )
 
 
-def test_no_due_request_makes_no_call(tmp_path, monkeypatch):
+def test_no_pending_request_makes_no_call(tmp_path, monkeypatch):
     registry = _registry(
         tmp_path,
-        [{"full_name": "lab/old", "issue": ISSUE, "requested_at": date(2026, 9, 1)}],
+        [{"full_name": "Lab/Old", "issue": ISSUE, "requested_at": date(2026, 9, 1)}],
     )
 
     def fail(*args, **kwargs):
-        raise AssertionError("no request is due")
+        raise AssertionError("no request is pending")
 
     monkeypatch.setattr("benchmark_radar.sources.get_json", fail)
-    assert (
-        fetch_github_requested_repositories(
-            {"registry_path": str(registry)}, datetime(2026, 11, 4, tzinfo=UTC), 10
-        )
-        == []
-    )
+    config = {"registry_path": str(registry), "_seen_state": {"lab/old": {}}}
+    assert fetch_github_requested_repositories(config, datetime(2026, 11, 4, tzinfo=UTC), 10) == []
 
 
-def test_a_request_is_published_in_one_daily_run_only(tmp_path, monkeypatch):
-    """The 48 h window spans two daily runs; only the first may fetch the row."""
+def _pipeline_config(registry):
+    return {
+        "radar": {
+            "lookback_hours": 48,
+            "max_items_per_source": 10,
+            "report_limit": 10,
+            "minimum_score": 0,
+        },
+        "taxonomy": {"benchmark": ["benchmark"]},
+        "sources": {
+            "github_requested_repositories": {"enabled": True, "registry_path": str(registry)}
+        },
+    }
+
+
+def test_a_request_is_published_once_even_when_merged_late(tmp_path, monkeypatch):
+    """Pending until a run answers it, then recorded so it never repeats."""
     registry = _registry(
         tmp_path,
-        [{"full_name": "lab/repo", "issue": ISSUE, "requested_at": date(2026, 11, 5)}],
+        # Dated well before the first run that sees it, as for a late merge.
+        [{"full_name": "lab/repo", "issue": ISSUE, "requested_at": date(2026, 10, 1)}],
     )
-    monkeypatch.setattr(
-        "benchmark_radar.sources.get_json", lambda url, **kwargs: _repository("lab/repo")
+    responses = iter(
+        [
+            RequestError("HTTP 502 from https://api.github.com/repos/lab/repo"),
+            _repository("lab/repo", description="A reasoning benchmark."),
+        ]
     )
-    fetched = []
-    for run in (
-        datetime(2026, 11, 5, 5, tzinfo=UTC),
-        datetime(2026, 11, 6, 5, tzinfo=UTC),
-        datetime(2026, 11, 7, 5, tzinfo=UTC),
-    ):
-        items = fetch_github_requested_repositories(
-            {"registry_path": str(registry), "_collection_now": run},
-            run - timedelta(hours=48),
-            10,
+
+    def fake_get_json(url, **kwargs):
+        response = next(responses)
+        if isinstance(response, Exception):
+            raise response
+        return response
+
+    monkeypatch.setattr("benchmark_radar.sources.get_json", fake_get_json)
+    previous = None
+    published = []
+    for day in (6, 7, 8):
+        run = run_pipeline(
+            _pipeline_config(registry),
+            datetime(2026, 11, day, 5, tzinfo=UTC),
+            previous_snapshot=previous,
         )
-        fetched.append(len(items))
-    assert fetched == [0, 1, 0]
+        published.append([item.source_id for item in run.items])
+        previous = {"discovery_state": run.discovery_state}
+    # Day 6 fails and stays pending, day 7 publishes it, day 8 makes no call.
+    assert published == [[], ["lab/repo"], []]
+    assert set(previous["discovery_state"]["github_requested_repositories"]) == {"lab/repo"}
 
 
 def test_archived_requested_repository_is_kept(tmp_path, monkeypatch):
@@ -234,8 +262,8 @@ def test_renamed_repository_warns_that_the_alias_is_stale(tmp_path, monkeypatch)
     ]
 
 
-def test_every_due_request_is_fetched_even_past_the_item_limit(tmp_path, monkeypatch):
-    """A row is due on one day only, so a cap would expire the rows past it."""
+def test_every_pending_request_is_fetched_even_past_the_item_limit(tmp_path, monkeypatch):
+    """The hand-reviewed registry is the bound; no cap leaves rows behind."""
     rows = [
         {"full_name": f"lab/repo-{index}", "issue": ISSUE, "requested_at": date(2026, 11, 5)}
         for index in range(25)
