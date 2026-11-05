@@ -326,6 +326,11 @@ def _facts(record: dict[str, Any]) -> list[tuple[str, str]]:
     modality = _text(record, "modality")
     if modality:
         facts.append(("Modality", modality))
+    # OpenAlex's linked institutions for the record's own paper (#933, #1120),
+    # the first three, the same as the Library card and the release ranking.
+    institutions = [str(name) for name in record.get("institutions") or [] if str(name).strip()]
+    if institutions:
+        facts.append(("Institutions", " · ".join(institutions[:3])))
     categories = _category_words(record)
     if categories:
         facts.append(("Evaluates", categories))

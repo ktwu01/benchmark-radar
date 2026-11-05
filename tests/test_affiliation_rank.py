@@ -1,122 +1,227 @@
-"""Affiliation signal: unknown handling, log1p normalization, weight preservation.
+"""Release ranking beyond attention (#1120): institutions, affiliation, placeholders.
 
-Opt-in signal only, not a quality judgement. See
-``benchmark_radar.affiliation_rank`` docstring.
+Fixtures are shaped like the real files: data/catalog/benchmark_institutions.yml
+keys benchmarks by catalog key with an arXiv DOI, and data/release_institutions.yml
+keys papers by arXiv id. #1098 counted records through score fields the catalog
+does not use, so every benchmark came out unknown; these tests read the files.
 """
 
 from __future__ import annotations
 
 import math
+from collections import Counter
+from pathlib import Path
+
+import yaml
 
 from benchmark_radar.affiliation_rank import (
-    AFFILIATION_WEIGHT,
-    MIN_OBSERVED_WEIGHT_RANK,
-    TOTAL_WEIGHT,
     affiliation_normalized,
-    build_affiliation_signal,
-    combine_with_attention,
-    count_scored_benchmarks_per_institution,
+    catalog_paper_institutions,
+    institution_counts,
+    institution_ranking,
     institution_weights,
-    normalize_log1p,
+    paper_institutions,
+)
+from benchmark_radar.release_leaderboard import AFFILIATION_WEIGHT, compute_window_ranking
+from benchmark_radar.release_signals import (
+    ReleaseSignals,
+    is_placeholder_root,
+    load_release_signals,
+    needs_institution_refresh,
+    write_release_institutions,
+    write_release_repos,
 )
 
 
-def _fresh(norm):
-    return {"value": 100, "normalized": norm, "status": "fresh"}
-
-
-def _unknown():
-    return {"value": None, "normalized": None, "status": "unknown"}
-
-
-def test_unknown_institutions_stay_unknown_not_zero():
-    # No institutions on file -> None, never 0.0, and the benchmark
-    # stays limited_signals even with a fresh durable attention signal
-    # if observed weight is below the threshold on its own.
-    assert affiliation_normalized([], {}) is None
-    assert affiliation_normalized(["No Such University"], {}) is None
-    result = combine_with_attention(
-        {"github_stars": _unknown(), "hf_paper_upvotes": _unknown()},
-        None,
+def _catalog_file(tmp_path: Path) -> Path:
+    path = tmp_path / "benchmark_institutions.yml"
+    path.write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": 1,
+                "benchmarks": {
+                    "claire-radar:2605.00001": {
+                        "doi": "10.48550/arxiv.2605.00001",
+                        "institutions": ["Tsinghua University", "Peking University"],
+                    },
+                    "model-reports:x": {
+                        "doi": "10.48550/arxiv.2605.00002",
+                        "institutions": ["Tsinghua University"],
+                    },
+                    # The same paper under a second catalog key counts once.
+                    "claire-radar:dup": {
+                        "doi": "10.48550/arxiv.2605.00002",
+                        "institutions": ["Tsinghua University"],
+                    },
+                },
+            }
+        ),
+        encoding="utf-8",
     )
-    assert result["score"] is None
-    assert result["status"] == "limited_signals"
-    assert result["affiliation"]["status"] == "unknown"
+    return path
 
 
-def test_log1p_normalization_matches_formula_and_is_monotonic():
-    assert normalize_log1p(None, 100) is None
-    assert normalize_log1p(100, 100) == 1.0
-    assert normalize_log1p(0, 100) == 0.0
-    expected = math.log1p(10) / math.log1p(100)
-    assert normalize_log1p(10, 100) == expected
-    weights = institution_weights({"A": 1, "B": 10, "C": 100})
-    assert weights["C"] == 1.0
-    assert weights["A"] < weights["B"] < weights["C"]
-    # Log compression: 10x the count is far less than 10x the weight.
-    assert weights["B"] > 0.4 and weights["B"] < 0.8
+def test_catalog_institutions_are_read_by_arxiv_id(tmp_path):
+    papers = catalog_paper_institutions(_catalog_file(tmp_path))
+    assert papers == {
+        "2605.00001": ["Tsinghua University", "Peking University"],
+        "2605.00002": ["Tsinghua University"],
+    }
 
 
-def test_missing_signals_are_not_redistributed():
-    # Stars-only, perfect, no affiliation: fixed denominator 1.20,
-    # not renormalized to 100. 100 * 0.55 / 1.20 = 45.83 -> 46.
-    result = combine_with_attention(
-        {
-            "github_stars": _fresh(1.0),
-            "hf_paper_upvotes": _unknown(),
-            "hf_dataset_downloads": _unknown(),
-        },
-        None,
+def test_only_openalex_names_are_counted(tmp_path):
+    signals = ReleaseSignals(
+        institutions={
+            "2610.00001": {"basis": "openalex_linked_institutions", "institutions": ["MIT"]},
+            # A paper's own spelling is shown, never counted.
+            "2610.00002": {"basis": "arxiv_html_affiliations", "institutions": ["Shanghai AI Lab"]},
+            # Already in the catalog: not counted twice.
+            "2605.00002": {
+                "basis": "openalex_linked_institutions",
+                "institutions": ["Tsinghua University"],
+            },
+        }
     )
-    assert result["score"] == 46
-    assert result["observed_weight"] == 0.55
-    assert result["status"] == "ranked"  # 0.55 >= 0.45 + durable stars
-
-    # Same stars plus a perfect affiliation signal: 100 * (0.55 + 0.20) / 1.20 = 62.5 -> 63.
-    # The affiliation adds, it does not rescale the stars weight.
-    with_affil = combine_with_attention(
-        {
-            "github_stars": _fresh(1.0),
-            "hf_paper_upvotes": _unknown(),
-            "hf_dataset_downloads": _unknown(),
-        },
-        1.0,
-    )
-    assert with_affil["score"] == 63
-    assert with_affil["observed_weight"] == 0.75
-
-
-def test_observed_weight_below_threshold_stays_limited():
-    # Upvotes only (0.30) + affiliation (0.20) = 0.50 would pass, so
-    # use upvotes alone: 0.30 < 0.45, and no durable signal either.
-    result = combine_with_attention(
-        {
-            "github_stars": _unknown(),
-            "hf_paper_upvotes": _fresh(1.0),
-            "hf_dataset_downloads": _unknown(),
-        },
-        None,
-    )
-    assert result["status"] == "limited_signals"
-    assert result["observed_weight"] == 0.30
-    assert MIN_OBSERVED_WEIGHT_RANK == 0.45
-    assert TOTAL_WEIGHT == 1.20
-    assert AFFILIATION_WEIGHT == 0.20
-
-
-def test_frequency_counts_only_scored_benchmarks_and_means_institutions():
-    records = [
-        {"key": "a", "has_score": True, "institutions": ["Tsinghua University", "MIT"]},
-        {"key": "b", "has_score": True, "institutions": ["Tsinghua University"]},
-        {"key": "c", "has_score": False, "institutions": ["Tsinghua University"]},
-        {"key": "d", "institutions": ["MIT"]},  # no score field -> not scored
+    papers = paper_institutions(signals, _catalog_file(tmp_path))
+    counts = institution_counts(papers)
+    assert counts == Counter({"Tsinghua University": 2, "Peking University": 1, "MIT": 1})
+    ranking = institution_ranking(counts, paper_count=len(papers))
+    assert ranking["paper_count"] == 3
+    assert [(e["rank"], e["name"]) for e in ranking["entries"]] == [
+        (1, "Tsinghua University"),
+        (2, "MIT"),
+        (2, "Peking University"),
     ]
-    counts = count_scored_benchmarks_per_institution(records)
-    assert counts == {"Tsinghua University": 2, "MIT": 1}
-    weights = institution_weights(counts)
-    signal = build_affiliation_signal(records)
-    # Mean of [1.0, log1p(1)/log1p(2)] for record a.
-    assert signal["a"]["affiliation_normalized"] == (1.0 + weights["MIT"]) / 2
-    assert signal["b"]["affiliation_normalized"] == 1.0
-    # Unscored record c still lists institutions but did not inflate counts.
-    assert signal["c"]["institutions"] == ["Tsinghua University"]
+
+
+def test_affiliation_is_the_best_known_of_the_first_three():
+    weights = institution_weights(Counter({"A": 9, "B": 1}))
+    assert weights["A"] == 1.0
+    assert math.isclose(weights["B"], math.log1p(1) / math.log1p(9))
+    # A collaboration is not averaged down by a smaller partner.
+    assert affiliation_normalized(["B", "A"], weights) == 1.0
+    # Only the first three count, the same three the card shows.
+    assert affiliation_normalized(["X", "Y", "Z", "A"], weights) is None
+    assert affiliation_normalized([], weights) is None
+
+
+def _candidate(name, stars, *, affiliation=None, placeholder=False):
+    candidate = {
+        "canonical_artifact_id": f"artifact:arxiv:{name}",
+        "name": name,
+        "release_date": "2026-11-01T00:00:00+00:00",
+        "has_dated_attention": True,
+        "signals": {
+            "github_stars": {
+                "value": stars,
+                "status": "fresh",
+                "source_url": "https://github.com/a/b",
+            }
+        },
+    }
+    if affiliation is not None:
+        candidate["affiliation"] = affiliation
+    if placeholder:
+        candidate["placeholder_repository"] = True
+    return candidate
+
+
+def test_v1_is_unchanged_without_an_affiliation_weight():
+    ranking = compute_window_ranking([_candidate("a", 100)], window_days=30)
+    entry = ranking["entries"][0]
+    assert entry["score"] == 55
+    assert entry["components"]["github_stars"]["weight"] == 0.55
+    assert "affiliation" not in entry["components"]
+
+
+def test_affiliation_adds_twenty_percent_and_unknown_adds_nothing():
+    ranking = compute_window_ranking(
+        [_candidate("known", 100, affiliation=1.0), _candidate("unknown", 100)],
+        window_days=30,
+        affiliation_weight=AFFILIATION_WEIGHT,
+    )
+    by_name = {entry["name"]: entry for entry in ranking["entries"]}
+    assert by_name["known"]["score"] == 64  # 0.55 * 0.8 + 0.20
+    assert by_name["unknown"]["score"] == 44  # not redistributed
+    assert by_name["unknown"]["components"]["affiliation"]["status"] == "unknown"
+    assert by_name["known"]["rank"] == 1
+    # Stars alone still qualify: the threshold reads attention, not affiliation.
+    assert by_name["unknown"]["status"] == "ranked"
+
+
+def test_affiliation_alone_never_ranks_a_release():
+    candidate = _candidate("quiet", None, affiliation=1.0)
+    ranking = compute_window_ranking(
+        [candidate], window_days=30, affiliation_weight=AFFILIATION_WEIGHT
+    )
+    assert ranking["entries"][0]["status"] == "limited_signals"
+    assert ranking["entries"][0]["score"] is None
+
+
+def test_placeholder_repository_is_listed_but_not_ranked():
+    ranking = compute_window_ranking(
+        [_candidate("empty", 5000, placeholder=True), _candidate("ships", 10)],
+        window_days=30,
+        affiliation_weight=AFFILIATION_WEIGHT,
+    )
+    by_name = {entry["name"]: entry for entry in ranking["entries"]}
+    assert by_name["empty"]["status"] == "limited_signals"
+    assert by_name["empty"]["limited_reason"] == "placeholder_repository"
+    assert by_name["ships"]["rank"] == 1
+    assert ranking["total_cohort_count"] == 2
+
+
+def test_placeholder_root_detection():
+    assert is_placeholder_root(["README.md", "LICENSE", ".gitignore", "assets", "teaser.png"])
+    assert is_placeholder_root(["readme.md", "CITATION.cff", ".github", "figures"])
+    assert not is_placeholder_root(["README.md", "data"])
+    assert not is_placeholder_root(["README.md", "eval.py"])
+    assert not is_placeholder_root(["README.md", "docs"])
+    # An empty listing is a placeholder too: nothing shipped.
+    assert is_placeholder_root([])
+
+
+def test_signal_files_round_trip(tmp_path):
+    institutions = tmp_path / "release_institutions.yml"
+    repos = tmp_path / "release_repos.yml"
+    write_release_institutions(
+        institutions,
+        {
+            "2610.22131": {
+                "basis": "arxiv_html_affiliations",
+                "source_url": "https://arxiv.org/html/2610.22131",
+                "retrieved_at": "2026-11-05",
+                "institutions": ["Shanghai AI Lab"],
+            }
+        },
+    )
+    write_release_repos(
+        repos,
+        {"a/b": {"placeholder": True, "root": ["README.md"], "retrieved_at": "2026-11-05"}},
+    )
+    signals = load_release_signals(institutions, repos)
+    assert signals.paper("2610.22131")["institutions"] == ["Shanghai AI Lab"]
+    assert signals.is_placeholder("https://github.com/A/B")
+    assert not signals.is_placeholder("https://github.com/c/d")
+    assert load_release_signals(tmp_path / "none.yml", tmp_path / "none2.yml") == ReleaseSignals()
+
+
+def test_papers_are_retried_until_openalex_has_them():
+    from datetime import date
+
+    today = date(2026, 11, 5)
+    assert needs_institution_refresh(None, today)
+    assert not needs_institution_refresh(
+        {"basis": "openalex_linked_institutions", "retrieved_at": "2026-01-01"}, today
+    )
+    assert not needs_institution_refresh(
+        {"basis": "arxiv_html_affiliations", "retrieved_at": "2026-11-04"}, today
+    )
+    assert needs_institution_refresh({"basis": None, "retrieved_at": "2026-11-01"}, today)
+
+
+def test_committed_release_signals_load():
+    signals = load_release_signals()
+    for paper, row in signals.institutions.items():
+        for name in row["institutions"]:
+            assert any(ch.isalpha() for ch in name), (paper, name)

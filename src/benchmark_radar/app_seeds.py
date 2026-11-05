@@ -910,6 +910,9 @@ def _library_seed(
         )
         if record.get("released"):
             facts.append(_medium_date(record["released"]))
+        # The first three institutions behind the record's paper (#1120).
+        if record.get("institutions"):
+            facts.append(" · ".join(str(name) for name in record["institutions"][:3]))
         facts.append(SOURCE_LABELS.get(record["source"], record["source"]))
         # The same artifact and star facts the live row shows.
         facts.extend(
