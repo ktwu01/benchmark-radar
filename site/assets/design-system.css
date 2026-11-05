@@ -329,3 +329,60 @@ a.benchmark-resource-link::after {
   font-family: var(--body);
   font-size: 0.75rem;
 }
+
+/* Homepage without boxes (issue #1097). The search row and the results sat in
+   two bordered boxes on a grey page, with each result a row inside; three
+   frames before a reader reached a benchmark name. The page is white now, so
+   the controls and the list sit on it directly: results are rows split by a
+   hairline. The sidebar keeps one faint tint, which says "secondary" instead
+   of drawing a frame. */
+#today-view .today-filters {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#today-view #today-list {
+  padding-inline: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+#today-view .radar-card {
+  padding-left: 0;
+}
+
+#today-view .email-signup-card,
+#today-view .daily-briefing,
+#today-view .daily-questions,
+#today-view .health-panel {
+  border: 0;
+  background: var(--canvas);
+}
+
+#today-view .daily-briefing-title,
+#today-view .daily-questions-title {
+  border-bottom-color: var(--line);
+}
+
+/* On a phone the card is one column, so the right column would drop the icon
+   to the bottom on a line of its own. It stays in the top-right corner, level
+   with the source and date, and the score keeps its place below. */
+@media (max-width: 720px) {
+  .radar-card {
+    position: relative;
+  }
+
+  .radar-aside {
+    display: contents;
+  }
+
+  .radar-aside .share-control {
+    position: absolute;
+    top: 0.75rem;
+    right: 0;
+    margin: 0;
+  }
+}

@@ -66,13 +66,11 @@ body {
 
 body {
   margin: 0;
-  /* The graph-paper grid keeps the Radar identity without competing with the
-     row separators, card borders, and score tracks drawn over it: cut its
-     contrast in half (issue #248). */
-  background:
-    linear-gradient(90deg, rgb(42 127 142 / 3%) 1px, transparent 1px) 0 0 / 32px 32px,
-    linear-gradient(rgb(42 127 142 / 3%) 1px, transparent 1px) 0 0 / 32px 32px,
-    var(--canvas);
+  /* A white page (issue #1097). The grey page with a graph-paper grid made
+     every screen look dim and only existed so boxed panels could show. Text
+     reads best dark on white; `--canvas` is now the tint for a secondary area
+     (a sidebar, an inset), not the floor everything sits on. */
+  background: var(--panel);
   color: var(--ink);
   font-family: var(--body);
   line-height: 1.5;
@@ -130,7 +128,7 @@ footer {
   justify-content: space-between;
   gap: 1.25rem;
   min-height: 64px;
-  background: color-mix(in srgb, var(--canvas) 96%, transparent);
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
   backdrop-filter: blur(12px);
 }
 
