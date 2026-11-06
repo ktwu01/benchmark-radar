@@ -100,6 +100,9 @@ def _fixture_catalog(tmp_path: Path) -> QueryPaths:
             "slug": bench["slug"],
             "key": bench["key"],
             "name": bench["name"],
+            # Registered aliases are indexed as name evidence; without them
+            # the alias test would pass on partial name matching alone.
+            "aliases": bench["aliases"],
             "source": bench["source"],
             "publisher": None,
             "released": None,
@@ -161,6 +164,17 @@ def test_backfilled_benchmark_is_searchable_by_alias(tmp_path: Path, bench: dict
     for alias in bench["aliases"]:
         result = service.search(alias, scope="catalog", limit=10)
         assert bench["key"] in {row["key"] for row in result["results"]}, alias
+        assert result["search_status"] == "full_matches_found", alias
+
+
+def test_an_alias_only_token_is_found_through_the_alias(tmp_path: Path) -> None:
+    """'sunblaze' appears only in Vero's registered alias, not its name or text."""
+    service = QueryService(_fixture_catalog(tmp_path))
+
+    result = service.search("sunblaze-ucb", scope="catalog", limit=10)
+
+    assert result["search_status"] == "full_matches_found"
+    assert result["results"][0]["key"] == "catalog:vero"
 
 
 def test_vero_watchlist_and_rss_keyword_close_the_ingestion_gap() -> None:
