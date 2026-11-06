@@ -18,7 +18,7 @@ connector, a first-party feed, or the Hacker News attention source. -->
 
 <p align="center">
   <a href="https://benchmark-radar.org/"><img alt="Benchmarks collected" src="https://img.shields.io/endpoint?url=https%3A%2F%2Fbenchmark-radar.org%2Fdata%2Frecords-badge.json&amp;style=for-the-badge"></a>
-  <a href="https://huggingface.co/datasets/ktwu01/benchmark-radar"><img alt="Hugging Face Dataset" src="https://img.shields.io/badge/Hugging%20Face-Dataset-FFD21E?style=for-the-badge&amp;logo=huggingface&amp;logoColor=000"></a>
+  <a href="https://huggingface.co/datasets/ktwu01/benchmark-radar"><img alt="Hugging Face Data" src="https://img.shields.io/badge/Hugging%20Face-Data-FFD21E?style=for-the-badge&amp;logo=huggingface&amp;logoColor=000"></a>
   <a href="https://arxiv.org/abs/2609.11115"><img src="https://img.shields.io/badge/arXiv-Paper-red?style=for-the-badge&logo=arxiv" alt="arXiv"></a>
   <a href="https://huggingface.co/papers/2609.11115"><img src="https://img.shields.io/badge/Hugging%20Face-Upvote%20us-FFD21E?style=for-the-badge&amp;logo=huggingface&amp;logoColor=000" alt="Upvote Benchmark Radar on Hugging Face"></a>
   <a href="https://github.com/sponsors/ktwu01"><img alt="Sponsor ktwu01 on GitHub" src="https://img.shields.io/badge/Sponsor-ea4aaa?style=for-the-badge&amp;logo=githubsponsors&amp;logoColor=white"></a>
@@ -69,7 +69,7 @@ catalog. Each record keeps its scores, test conditions and citations.
 - **[Open the dashboard](https://benchmark-radar.org/)** — today's findings, benchmark trends, scores and model coverage
 - **[Query it locally](https://benchmark-radar.org/cli/)** — install and use the offline CLI
 - **[Subscribe via RSS](https://benchmark-radar.org/feed.xml)** — get new benchmark signals every day
-- **[Download the complete dataset](https://huggingface.co/datasets/ktwu01/benchmark-radar)** — the benchmark catalog, scores and daily discovery records
+- **[Hugging Face Data](https://huggingface.co/datasets/ktwu01/benchmark-radar)** — the benchmark catalog, scores and daily discovery records
 - **[Contribute](CONTRIBUTING.md)** — add benchmarks, model cards, sources, or fixes
 
 If Benchmark Radar saves you research time, **[star the repository](https://github.com/ktwu01/benchmark-radar)**. It helps other eval builders find it.
