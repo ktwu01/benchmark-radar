@@ -31,7 +31,10 @@ guessed from a name.
 
 Search has three explicit stages:
 
-1. Any shared token creates an observable candidate. The last query word is also
+1. Any shared token creates an observable candidate, except that a multi-word
+   query drops a record matching a single token in description only (issue
+   #432): generic prose words must not fill every slot while the rarer query
+   words match nothing. The last query word is also
    treated as a word still being typed (at least two ASCII characters): a record
    whose words start with it is a candidate, so `saf` finds safety benchmarks
    instead of an empty page. Only the last word is expanded; CJK tokens are
@@ -49,7 +52,8 @@ Search has three explicit stages:
    explanation, never an eligibility gate or an additive score component.
 
 The response exposes `candidate_count`, `total_matches`, `full_match_count`,
-`partial_match_count`, `search_status`, policy identity, matched and missing tokens,
+`partial_match_count`, `search_status`, `decision`, `decision_reason`, policy
+identity, matched and missing tokens,
 lexical coverage, fields, phrase fields, the raw retrieval score, and its score
 components. Candidate count and total matches are equal because search no longer
 hides partial lexical evidence behind a service-side acceptance policy. The score
@@ -64,6 +68,12 @@ Status is a lexical decision separate from candidate retrieval:
 - `partial_candidates_only`: candidates exist, but all have missing query tokens;
 - `no_lexical_candidates`: no record shares any query token.
 
+`decision` states the same coverage in one word so a caller can abstain without
+parsing prose: `matches` when at least one candidate covers every query token,
+otherwise `no_confident_match`, with a `decision_reason` in plain words. It is a
+lexical coverage statement, not calibrated confidence and not a suitability
+judgment.
+
 Partial candidates remain in `results` for agent inspection. The status prevents
 them from being presented as confident answers without reintroducing an all-terms
 eligibility gate.
@@ -73,6 +83,8 @@ When no record shares even one token with the query, the result is:
 ```json
 {
   "search_status": "no_lexical_candidates",
+  "decision": "no_confident_match",
+  "decision_reason": "no record matched any query token",
   "candidate_count": 0,
   "total_matches": 0,
   "full_match_count": 0,
