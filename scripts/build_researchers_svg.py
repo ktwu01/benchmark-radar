@@ -4,7 +4,10 @@
 Each file in assets/researchers-logos/ is the official institution logo as
 downloaded from Wikimedia Commons / Wikipedia, or supplied by the organization
 where Commons has none (xtracta.svg: Xtracta's official full-colour RGB logo,
-unmodified). Run this script after adding, removing, or replacing a logo there:
+unmodified). zai.svg is the 2025 Z.ai logo from Wikimedia Commons
+(File:Z.ai (company logo).svg); antgroup.png is the Ant Group logo from the
+company's media library, via en.wikipedia File:Ant_Group_logo.png. Run this
+script after adding, removing, or replacing a logo there:
 
     python scripts/build_researchers_svg.py
 
@@ -27,7 +30,7 @@ OUT = REPO_ROOT / "assets" / "researchers.svg"
 ROWS = [
     ["google.svg", "amazon.svg", "aws.svg", "ibm.svg", "bytedance.svg"],
     ["cmu.svg", "harvard.svg", "mit.svg", "nus.svg", "auckland.svg", "xtracta.svg"],
-    ["alibaba.svg", "tencent.svg", "hunyuan.svg", "qwen.svg"],
+    ["alibaba.svg", "tencent.svg", "hunyuan.svg", "qwen.svg", "zai.svg", "antgroup.png"],
     ["stepfun.png", "kuaishou.png", "zhihu.svg", "tsinghua.svg", "sjtu.png"],
 ]
 
@@ -73,6 +76,29 @@ def prefix_ids(xml, prefix):
     return xml
 
 
+def prefix_classes(xml, prefix):
+    """Scope an SVG's CSS classes to one logo, as prefix_ids does for ids.
+
+    Illustrator exports name classes .st0, .st1, ...; two logos in one strip
+    can define the same class differently (Tsinghua's .st0 is purple, Z.ai's
+    is light grey), and the later <style> block would win for both. Rewrite
+    the selectors inside <style> blocks and the class attributes that use
+    them, so each logo keeps its own definitions.
+    """
+
+    def _prefix_style(match):
+        style = re.sub(r"\.([A-Za-z_][\w-]*)", f".{prefix}\\1", match.group(2))
+        return f"<style{match.group(1)}>{style}</style>"
+
+    xml = re.sub(r"<style([^>]*)>(.*?)</style>", _prefix_style, xml, flags=re.S)
+
+    def _prefix_attr(match):
+        names = " ".join(f"{prefix}{name}" for name in match.group(1).split())
+        return f'class="{names}"'
+
+    return re.sub(r'class="([^"]+)"', _prefix_attr, xml)
+
+
 def png_data_uri(path, max_w):
     im = Image.open(path)
     if im.mode not in ("RGBA", "RGB"):
@@ -102,6 +128,7 @@ def logo_item(filename, idx):
     inner, w, h = load_svg(path)
     s = H / h * LOGO_SCALE.get(filename, 1)
     inner = prefix_ids(inner, f"l{idx}_")
+    inner = prefix_classes(inner, f"l{idx}_")
     return f'<g transform="scale({s:.4f})">{inner}</g>', w * s, h * s
 
 
