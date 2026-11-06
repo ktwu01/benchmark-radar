@@ -364,6 +364,26 @@ def _canonical(slug: str) -> str:
     return f"{SITE_URL}/benchmarks/{slug}/"
 
 
+def _saturation_index_fact(record: dict[str, Any]) -> tuple[str, str] | None:
+    """The Benchmark Saturation study's stated index, as stated (#1085).
+
+    The value and its label come from the study's own annotation in
+    ``source_metadata``; nothing here recomputes, ranks, filters, or colours
+    by it, and it is labelled as the study's value.
+    """
+    metadata = record.get("source_metadata") or {}
+    stated = metadata.get("benchmark_saturation") or {}
+    index = _text(stated, "saturation_index")
+    if not index:
+        return None
+    label = _text(stated, "saturation_index_interpreted")
+    value = f"{index} ({label})" if label else index
+    return (
+        "Saturation index (study)",
+        f"{value} — Benchmark Saturation study (arXiv:2602.16763)",
+    )
+
+
 def _facts(record: dict[str, Any]) -> list[tuple[str, str]]:
     facts: list[tuple[str, str]] = []
     publisher = _publisher_fact(record)
@@ -372,6 +392,9 @@ def _facts(record: dict[str, Any]) -> list[tuple[str, str]]:
     released = _text(record, "released")
     if released:
         facts.append(("Released", released))
+    saturation = _saturation_index_fact(record)
+    if saturation:
+        facts.append(saturation)
     modality = _text(record, "modality")
     if modality:
         facts.append(("Modality", modality))

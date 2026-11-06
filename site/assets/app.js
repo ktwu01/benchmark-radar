@@ -8003,12 +8003,32 @@ function benchmarkResourceChip(resource) {
   return chip;
 }
 
+// The Benchmark Saturation study's stated saturation index, as stated, never
+// recomputed (#1085). A fact, not a rank, filter, or colour: the value and
+// its label are the study's own words from the record's source_metadata.
+function saturationIndexFact(detail) {
+  const stated = detail.source_metadata?.benchmark_saturation || {};
+  const index =
+    typeof stated.saturation_index === "string" ? stated.saturation_index.trim() : "";
+  if (!index) return null;
+  const label =
+    typeof stated.saturation_index_interpreted === "string"
+      ? stated.saturation_index_interpreted.trim()
+      : "";
+  const value = label ? `${index} (${label})` : index;
+  return [
+    t("Saturation index (study)"),
+    `${value} — Benchmark Saturation study (arXiv:2602.16763)`,
+  ];
+}
+
 function catalogIdentityBlock(detail) {
   const publisher = detail.publisher;
   const description = l10nProse(detail.description?.en, detail.description?.zh);
   const provenance = detail.provenance || {};
   const importer = catalogSourceMeta(detail.source).name;
   const resources = catalogResourceLinks(detail);
+  const saturation = saturationIndexFact(detail);
   return element("section", { className: "catalog-block" }, [
     element("h3", { text: t("About this benchmark") }),
     // Crawled descriptions are third-party text. They only ever go through
@@ -8031,6 +8051,7 @@ function catalogIdentityBlock(detail) {
           ? formatDate(detail.released, { dateStyle: "medium" })
           : t("release date not established"),
       ],
+      ...(saturation ? [saturation] : []),
       [t("Modality"), detail.modality || t("modality not established")],
       [t("Importer"), importer],
       ...(provenance.review_state
