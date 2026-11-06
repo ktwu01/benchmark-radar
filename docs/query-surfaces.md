@@ -16,17 +16,24 @@ health, across the CLI, the HTTP surface, and the public consumer Skill.
   artifacts fail visibly with machine-readable errors; they must not be replaced
   with guessed metadata.
 - Lexical search is a high-recall candidate retriever for agents, not a final
-  suitability judge. Any shared query token may produce a candidate. BM25F is
-  the primary retrieval score. Exact/prefix/token-sequence name matches and
+  suitability judge. Any shared query token may produce a candidate, except
+  that a multi-word query drops a record matching a single token in
+  description only (issue #432): generic prose words must not fill every
+  slot while the rarer query words match nothing. BM25F is the primary
+  retrieval score. Exact/prefix/token-sequence name matches and
   non-name contiguous phrases are bounded, query-IDF-scaled boosts; lexical
   coverage is only a tie-breaker and explanation because BM25F already rewards
   additional matched terms. Every result must expose matched and missing tokens,
   fields, coverage, `retrieval_score`, `idf_coverage`, and score components.
   `full_matches_found` means at least one candidate covers every query token,
   `partial_candidates_only` preserves weaker evidence without claiming an answer,
-  and zero token overlap uses `no_lexical_candidates`. Semantic acceptance belongs
-  to the consuming Agent/Skill, which may issue focused query variants and inspect
-  `show` details before making a suitability claim.
+  and zero token overlap uses `no_lexical_candidates`. The payload also carries
+  a top-level `decision` (`matches` when at least one candidate covers every
+  query token, otherwise `no_confident_match`) and a `decision_reason`, so a
+  caller can abstain without parsing prose; the raw retrieval score is never
+  called confidence. Semantic acceptance belongs to the consuming Agent/Skill,
+  which may issue focused query variants and inspect `show` details before
+  making a suitability claim.
 - Tokenization keeps existing ASCII words and numbers intact, indexes Han text
   as adjacent character pairs, and accepts other Unicode letter words. This
   makes Chinese descriptions in the full catalog searchable without turning a
