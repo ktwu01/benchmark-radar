@@ -251,7 +251,6 @@ const makeLoaders = new Function('fetch', `const state = {}; let benchmarkIndexP
   // The load-feedback pill is app-wide chrome; run each load straight through.
   const CATALOG_VIEWS = [];
   const trackLoad = (label, views, run) => run(null);
-  const readJson = (response) => response.json();
   ${fn('loadBenchmarkIndex')}
   ${fn('loadBenchmarkShard')}
   return {loadBenchmarkIndex,loadBenchmarkShard};`);

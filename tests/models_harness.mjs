@@ -149,7 +149,6 @@ const env = {
   // The load-feedback pill is app-wide chrome, not Models behaviour; run the
   // load straight through.
   trackLoad: (label, views, run) => run(null),
-  readJson: (response) => response.json(),
   urlWrites: 0,
   records: [],
 };

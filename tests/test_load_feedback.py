@@ -24,10 +24,15 @@ def test_every_site_data_fetch_goes_through_the_load_tracker():
 
 def test_the_full_archive_names_itself_while_it_downloads():
     assert '"/data/radar.json": ["Loading the full archive…"' in APP
-    loader = APP.split("async function readJson(", 1)[1].split("\n}\n", 1)[0]
-    # Megabytes are counted as they stream in, then parsing is announced.
-    assert "load.bytes += value.byteLength" in loader
-    assert 'load.phase = "parse"' in loader
+
+
+def test_loads_keep_the_browsers_own_json_reader():
+    # Streaming the body through JavaScript to count megabytes kept a second
+    # copy of the 344 MB archive: Chromium's peak renderer memory rose from
+    # 1.40 GB to 1.76-1.93 GB, enough to kill a phone tab (#1142 review).
+    assert "getReader()" not in APP
+    assert "pipeThrough(" not in APP
+    assert "JSON.parse(parts" not in APP
 
 
 def test_load_labels_have_chinese_translations():
@@ -37,8 +42,7 @@ def test_load_labels_have_chinese_translations():
         "Loading the benchmark catalog…",
         "Loading the latest scan…",
         "Loading trends…",
-        "Preparing results…",
-        "{mb} MB received",
+        "{s} s",
     ):
         assert f'"{key}":' in table, key
 

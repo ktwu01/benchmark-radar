@@ -7715,8 +7715,8 @@ a.radar-source::after {
 /* Data-load feedback (issue #1128). The full archive behind the first homepage
    search is tens of megabytes, and the benchmark catalog behind Library,
    Scores, Models and Ranking takes a moment on a slow line. A fixed pill says
-   what is loading and counts megabytes, and the waiting view's results dim so
-   a stale list is not read as the answer. */
+   what is loading and counts the seconds, and the waiting view's results dim
+   so a stale list is not read as the answer. */
 .data-loading {
   position: fixed;
   top: 12px;
@@ -7743,14 +7743,14 @@ a.radar-source::after {
   text-overflow: ellipsis;
 }
 
-.data-loading-bytes {
+.data-loading-elapsed {
   color: var(--muted);
   font-family: var(--utility);
   font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
 }
 
-.data-loading-bytes:empty {
+.data-loading-elapsed:empty {
   display: none;
 }
 
