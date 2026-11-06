@@ -56,10 +56,17 @@ sources below, run the generators in order, and measure the rebuilt outputs.
      the institution ranking) or `arxiv_html_affiliations` (the paper's own
      printed names, shown "as written in the paper" and never counted). A
      paper is retried every three days until OpenAlex has it.
-   - `data/release_repos.yml`: root listing of each GitHub repository the
-     cohort is ranked on, keyed by `owner/name`, with a `placeholder` flag
-     for README-only repositories. Placeholders are rechecked daily, others
-     weekly. A missing file or row means unknown, never "placeholder".
+   - `data/release_repos.yml`: each GitHub repository the cohort is ranked
+     on, keyed by `owner/name`: size, stars on the check date, archived flag,
+     creation and last-push dates (search API, six per call), plus
+     `placeholder` (README-only root, listed only for repositories up to
+     2 MB) and `unavailable` (404 on the repository endpoint, which follows
+     renames). A placeholder, archived or unavailable repository holds its
+     release back: listed, unranked, with the reason. Stars and size never
+     do. Placeholders and unknowns are rechecked daily, others weekly. A
+     missing row or a null field means unknown, never a hold-back.
+     `scripts/release_repo_findings.py` reproduces the cohort statistics from
+     these files without the network.
 
    `snapshots.rebuild_dashboard` reads both through
    `release_signals.load_release_signals`, then `affiliation_rank` counts

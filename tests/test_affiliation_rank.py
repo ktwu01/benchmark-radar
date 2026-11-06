@@ -266,32 +266,116 @@ def test_the_affiliation_input_names_its_institution_and_count(tmp_path):
     assert component["normalized"] == 1.0
 
 
-def test_an_empty_repository_is_a_placeholder(monkeypatch):
+def _fetch_module():
     import sys
-    from datetime import date
 
     sys.path.insert(0, "scripts")
     import fetch_release_signals as fetch
 
-    from benchmark_radar.http import RequestError
+    return fetch
 
-    def get_json(url, **_kwargs):
-        if url.endswith("/contents/"):
-            raise RequestError(f"HTTP 404 from {url}")
-        if url.endswith("/repos/a/empty"):
-            return {"size": 0}
-        raise RequestError(f"HTTP 404 from {url}")
 
-    monkeypatch.setattr(fetch, "get_json", get_json)
+def _meta(name, size, **extra):
+    return {
+        "full_name": name,
+        "size": size,
+        "stargazers_count": 3,
+        "archived": False,
+        "created_at": "2026-10-04T00:00:00Z",
+        "pushed_at": "2026-10-04T00:00:00Z",
+        **extra,
+    }
+
+
+def test_repository_checks_classify_every_case():
+    from datetime import date
+
+    fetch = _fetch_module()
+    found = {
+        "a/empty": _meta("a/empty", 0),
+        "a/readme": _meta("a/readme", 1),
+        "a/ships": _meta("a/ships", 40),
+        "a/large": _meta("a/large", 50_000),
+        "a/old": _meta("a/old", 900, archived=True),
+    }
+    listed = []
+
+    def list_root(repo):
+        listed.append(repo)
+        return {"a/readme": ["README.md", "teaser.png"], "a/ships": ["README.md", "eval.py"]}[repo]
+
+    def confirm(repo):
+        # a/renamed moved; the repository endpoint follows the rename.
+        return _meta("b/new-name", 40) if repo == "a/renamed" else None
+
     rows = {}
+    urls = [f"https://github.com/{r}" for r in [*found, "a/renamed", "a/gone"]]
     fetch.refresh_repos(
-        ["https://github.com/a/empty", "https://github.com/a/gone"],
+        urls,
         rows,
-        today=date(2026, 11, 5),
-        limit=10,
+        today=date(2026, 11, 6),
+        limit=50,
+        search=lambda repos: {r: found[r] for r in repos if r in found},
+        confirm=confirm,
+        list_root=lambda repo: list_root(repo) if repo != "b/new-name" else ["src"],
     )
     assert rows["a/empty"]["placeholder"] is True
-    assert "a/gone" not in rows
+    assert rows["a/readme"]["placeholder"] is True
+    assert rows["a/ships"]["placeholder"] is False
+    # Above LISTING_MAX_KB a repository is not README-only; no listing call.
+    assert rows["a/large"]["placeholder"] is False and "a/large" not in listed
+    assert rows["a/old"]["archived"] is True and "a/old" not in listed
+    assert rows["a/renamed"]["unavailable"] is False
+    assert rows["a/renamed"]["full_name"] == "b/new-name"
+    assert rows["a/gone"] == {
+        "unavailable": True,
+        "placeholder": None,
+        "retrieved_at": "2026-11-06",
+    }
+    assert rows["a/ships"]["stars_at_check"] == 3 and rows["a/ships"]["size_kb"] == 40
+
+
+def test_held_back_reasons_and_unknowns(tmp_path):
+    from benchmark_radar.release_signals import needs_repo_refresh
+
+    signals = ReleaseSignals(
+        repos={
+            "a/gone": {"unavailable": True},
+            "a/old": {"unavailable": False, "archived": True, "placeholder": None},
+            "a/readme": {"unavailable": False, "archived": False, "placeholder": True},
+            "a/ships": {"unavailable": False, "archived": False, "placeholder": False},
+            "a/unknown": {"unavailable": None, "placeholder": None},
+        }
+    )
+    reason = signals.held_back
+    assert reason("https://github.com/a/gone") == "repository_unavailable"
+    assert reason("https://github.com/a/old") == "repository_archived"
+    assert reason("https://github.com/a/readme") == "placeholder_repository"
+    assert reason("https://github.com/a/ships") is None
+    # Unknown is never a hold-back, and is checked again on the next run.
+    assert reason("https://github.com/a/unknown") is None
+    from datetime import date
+
+    today = date(2026, 11, 6)
+    fresh = {"retrieved_at": "2026-11-06"}
+    assert needs_repo_refresh({**fresh, "unavailable": None, "placeholder": None}, today)
+    assert needs_repo_refresh({**fresh, "unavailable": False, "placeholder": None}, today)
+    assert not needs_repo_refresh({**fresh, "unavailable": False, "placeholder": False}, today)
+    assert not needs_repo_refresh(
+        {**fresh, "unavailable": False, "archived": True, "placeholder": None}, today
+    )
+
+
+def test_held_back_releases_are_listed_unranked_and_off_the_scale():
+    viral = _candidate("archived-viral", 100000)
+    viral["held_back"] = "repository_archived"
+    ranking = compute_window_ranking(
+        [viral, _candidate("ships", 100)], window_days=30, affiliation_weight=AFFILIATION_WEIGHT
+    )
+    by_name = {entry["name"]: entry for entry in ranking["entries"]}
+    assert by_name["archived-viral"]["limited_reason"] == "repository_archived"
+    assert by_name["archived-viral"]["status"] == "limited_signals"
+    assert by_name["ships"]["components"]["github_stars"]["normalized"] == 1.0
 
 
 def test_a_placeholder_does_not_set_the_window_maximum():

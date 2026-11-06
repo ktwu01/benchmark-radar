@@ -515,7 +515,7 @@ def compute_window_ranking(
     weight is scaled by ``1 - affiliation_weight`` and a candidate's
     ``affiliation`` (0 to 1, or None for unknown) adds the rest. The rank
     threshold still reads attention alone: affiliation never qualifies a
-    release by itself. A placeholder repository keeps the release listed, but
+    release by itself. A placeholder, archived or gone repository keeps the release listed, but
     unranked.
     """
     scale = 1.0 - (affiliation_weight or 0.0)
@@ -526,9 +526,9 @@ def compute_window_ranking(
                 for c in candidates
                 if c.get("signals", {}).get(signal, {}).get("value") is not None
                 and c.get("signals", {}).get(signal, {}).get("status") == "fresh"
-                # A placeholder is unranked; it must not set the scale the
-                # ranked releases are normalized against either.
-                and not c.get("placeholder_repository")
+                # A held-back release is unranked; it must not set the scale
+                # the ranked releases are normalized against either.
+                and not _held_back(c)
             ]
             or [0.0]
         )
@@ -606,18 +606,18 @@ def compute_window_ranking(
         sufficient_weight = round(fresh_weight, 4) >= MIN_OBSERVED_WEIGHT_RANK or fresh_weight >= (
             MIN_OBSERVED_WEIGHT_RANK - 1e-9
         )
-        placeholder = bool(c.get("placeholder_repository"))
+        held_back = _held_back(c)
         qualifies = (
             is_eligible and has_durable and sufficient_weight and score is not None
-        ) and not placeholder
+        ) and not held_back
 
         extra: dict[str, Any] = {}
         if c.get("institutions"):
             extra["institutions"] = c["institutions"]
             extra["institutions_basis"] = c.get("institutions_basis")
             extra["institutions_source_url"] = c.get("institutions_source_url")
-        if placeholder:
-            extra["limited_reason"] = "placeholder_repository"
+        if held_back:
+            extra["limited_reason"] = held_back
 
         scored_entries.append(
             {
@@ -687,7 +687,7 @@ def build_latest_releases_leaderboard(
 
     ``signals`` (release_signals.py) switches the ranking to
     ``attention-affiliation-v2``, attaches each paper's first three
-    institutions, and marks placeholder repositories. Without it the payload
+    institutions, and holds back placeholder, archived and gone repositories. Without it the payload
     is Ranking v1 exactly.
     """
     if not snapshots:
@@ -748,6 +748,13 @@ def build_latest_releases_leaderboard(
     }
 
 
+def _held_back(candidate: dict[str, Any]) -> str | None:
+    """Why a candidate is listed but not ranked: placeholder, archived or gone."""
+    if candidate.get("held_back"):
+        return str(candidate["held_back"])
+    return "placeholder_repository" if candidate.get("placeholder_repository") else None
+
+
 def _papers_by_canonical(aliases: dict[str, str]) -> dict[str, str]:
     """The arXiv paper each canonical release is linked to through its aliases."""
     papers: dict[str, str] = {}
@@ -805,7 +812,7 @@ def _attach_release_signals(
     weights: dict[str, float],
     papers_by_canonical: dict[str, str],
 ) -> None:
-    """Add institutions, affiliation and the placeholder flag to one candidate."""
+    """Add institutions, affiliation and the hold-back reason to one candidate."""
     canonical = candidate["canonical_artifact_id"]
     paper = papers_by_canonical.get(canonical) or arxiv_id(canonical)
     row = signals.paper(paper)
@@ -823,5 +830,6 @@ def _attach_release_signals(
             candidate["affiliation_institution"] = best
             candidate["affiliation_paper_count"] = counts[best]
     stars_url = (candidate.get("signals", {}).get("github_stars") or {}).get("source_url")
-    if signals.is_placeholder(stars_url):
-        candidate["placeholder_repository"] = True
+    reason = signals.held_back(stars_url)
+    if reason:
+        candidate["held_back"] = reason
