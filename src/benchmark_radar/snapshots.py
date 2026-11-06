@@ -172,6 +172,20 @@ def _validate_evidence_items(items: Any, *, source: str) -> None:
             raise SnapshotError(
                 f"{source}: evidence item {index} contributing_sources must be names"
             )
+        if "metrics_by_source" in item:
+            by_source = item["metrics_by_source"]
+            if not isinstance(by_source, dict) or any(
+                not isinstance(metrics, dict)
+                or any(
+                    isinstance(value, bool) or not isinstance(value, (int, float))
+                    for value in metrics.values()
+                )
+                for metrics in by_source.values()
+            ):
+                raise SnapshotError(
+                    f"{source}: evidence item {index} metrics_by_source must map "
+                    "sources to numeric metrics"
+                )
         if "recommended" in item and not isinstance(item["recommended"], bool):
             raise SnapshotError(f"{source}: evidence item {index} recommended must be a boolean")
         item_missing = sorted(item_fields - item.keys())
@@ -667,6 +681,36 @@ def _evidence_rank(record):
     )
 
 
+def _metrics_by_source(record: dict[str, Any]) -> dict[str, dict[str, float]]:
+    """This record's metrics, split by the source that reported each value.
+
+    A merged record already carries its per-source map; a plain record's
+    metrics all belong to its own source. The maps are copied, so merging
+    never mutates a record another snapshot still holds.
+    """
+    stored = record.get("metrics_by_source")
+    if isinstance(stored, dict) and stored:
+        return {str(source): dict(metrics or {}) for source, metrics in sorted(stored.items())}
+    return {record["source"]: dict(record.get("metrics") or {})}
+
+
+def _combined_metrics(by_source: dict[str, dict[str, float]]) -> dict[str, float]:
+    """One value per metric, combined from the contributing sources (#841).
+
+    Within a source the newer record already replaced that source's map, so
+    the only merge left is across sources, where the combined value is the
+    highest any source reported — the rule the old cross-source branch used.
+    Max is commutative, so the result no longer depends on arrival order.
+    """
+    combined: dict[str, float] = {}
+    for source in sorted(by_source):
+        for metric in sorted(by_source[source]):
+            value = by_source[source][metric]
+            if metric not in combined or value > combined[metric]:
+                combined[metric] = value
+    return combined
+
+
 def merge_snapshots(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[str, Any]:
     """Union two passes over the same UTC day into one snapshot.
 
@@ -687,6 +731,9 @@ def merge_snapshots(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[
     (newer) record wins within a source. Cross-source copies compare artifact
     activity and prefer primary release evidence when that activity is tied.
     Supplementary evidence is merged before affected scores are recomputed.
+    Metrics are stored per contributing source and combined when the record is
+    displayed or scored (#841), so a newer revision from one source cannot
+    overwrite another source's measurement.
     """
     # A delayed retry can arrive after a newer pass. All "incoming wins"
     # decisions below must mean chronologically newer, not merely whichever
@@ -742,21 +789,28 @@ def merge_snapshots(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[
                 if cross_source and _evidence_rank(previous) > _evidence_rank(item)
                 else (item, previous)
             )
+            # Metrics are stored per contributing source and combined when the
+            # record is displayed or scored (#841). A flat dict cannot tell
+            # which source supplied a value, so a newer same-source revision
+            # overwrote another source's measurement: a digest's citations of
+            # 5000 was lost to a later arXiv revision reporting 12. Within a
+            # source the newer record replaces that source's map; across
+            # sources the combined value is the highest reported. This removes
+            # the cross_source special case the old loop below used.
+            by_source = _metrics_by_source(previous)
+            by_source[item["source"]] = dict(item.get("metrics") or {})
+            by_source = dict(sorted(by_source.items()))
             merged = {
                 **selected,
                 "source_tags": item.get("source_tags") or [],
                 "contributing_sources": item["contributing_sources"],
-                "metrics": dict(selected.get("metrics") or {}),
+                "metrics": _combined_metrics(by_source),
+                "metrics_by_source": by_source,
             }
             for field in ("authors", "organizations", "artifact_urls"):
                 merged[field] = sorted(set(selected.get(field) or []) | set(other.get(field) or []))
             if other["url"] != selected["url"] and other["url"] not in merged["artifact_urls"]:
                 merged["artifact_urls"].append(other["url"])
-            for metric, measurement in (other.get("metrics") or {}).items():
-                if metric not in merged["metrics"]:
-                    merged["metrics"][metric] = measurement
-                elif cross_source:
-                    merged["metrics"][metric] = max(measurement, merged["metrics"][metric])
             merged["rationale"] = list(selected.get("rationale") or [])
             for source in merged["contributing_sources"]:
                 note = f"Also found via {source}"
