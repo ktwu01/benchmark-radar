@@ -507,6 +507,35 @@ def test_top_right_utilities_use_shared_icon_geometry_and_contact_control():
     assert ".repo-badge svg," in styles
 
 
+def test_trends_table_stays_inside_the_320px_viewport():
+    """Issue #1002: the table scrolls inside its frame; the page must not.
+
+    The sparkline cells carry an absolutely positioned .visually-hidden text.
+    Unless the frame is its containing block, the frame's overflow cannot clip
+    it and its place at the table's far right widens documentElement past the
+    viewport. All seven columns stay: the frame scrolls, the page does not.
+    """
+    html = Path("site/index.html").read_text(encoding="utf-8")
+    styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
+    frame = styles.split(".direction-trends-frame {", 1)[1].split("}", 1)[0]
+    assert "position: relative" in frame
+    assert "overflow-x: auto" in frame
+    assert (
+        '<div class="direction-trends-frame" tabindex="0" role="region" '
+        'aria-labelledby="direction-trends-heading">'
+    ) in html
+    for heading in (
+        "Research direction",
+        "New",
+        "Previous period",
+        "Change",
+        "Undated",
+        "Stars gained, 30 days",
+        "16-week trend",
+    ):
+        assert heading in html
+
+
 def test_top_right_utilities_have_immediate_visible_feedback():
     """Issue #228: feedback includes a fast high-contrast state and label."""
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
