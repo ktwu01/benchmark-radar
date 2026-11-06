@@ -49,6 +49,48 @@ def test_report_distinguishes_release_and_update_dates():
     assert "Published/updated" not in report
 
 
+def test_report_labels_a_record_dated_by_deposition_created():
+    # Issue #1016: a Zenodo record dated by fallback shows its created date
+    # labelled as such, with the uploader's publication_date visible next to it.
+    record = _record(
+        1,
+        source="Zenodo",
+        source_id="23680549",
+        title="Depositor dated record",
+        url="https://zenodo.org/records/23680549",
+        published_at=datetime(2026, 10, 27, 2, 1, 3, tzinfo=UTC),
+        published_basis="created",
+        published_source_value="2026-10-31",
+    )
+
+    report = render_markdown(_run([record]))
+
+    assert (
+        "Published: `2026-10-27` (dated by deposition created; "
+        "source publication_date was `2026-10-31`)" in report
+    )
+
+
+def test_report_labels_a_created_fallback_with_no_source_date():
+    record = _record(
+        1,
+        source="Zenodo",
+        source_id="23680550",
+        title="Depositor dated record without a date",
+        url="https://zenodo.org/records/23680550",
+        published_at=datetime(2026, 10, 27, 2, 1, 3, tzinfo=UTC),
+        published_basis="created",
+        published_source_value=None,
+    )
+
+    report = render_markdown(_run([record]))
+
+    assert (
+        "Published: `2026-10-27` (dated by deposition created; "
+        "no publication_date supplied)" in report
+    )
+
+
 def test_source_health_names_each_connectors_collection_method():
     # Issue #174: every row of the Source health table looked the same at a
     # glance, so a stalled RSS feed and a broken search API read as identical
