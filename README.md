@@ -27,6 +27,14 @@ connector, a first-party feed, or the Hacker News attention source. -->
   <a href="https://scholar.google.com/citations?user=s9w1k-cAAAAJ&amp;hl=en"><img alt="Google Scholar" src="https://img.shields.io/badge/Google%20Scholar-4285F4?style=for-the-badge&amp;logo=googlescholar&amp;logoColor=white"></a>
 </p>
 
+<!-- Trust row (issue #553): only badges whose target page works. The OpenSSF
+Scorecard badge stays out until the Scorecard API publishes a result for this
+repository, and the Best Practices badge until the project is registered. -->
+<p align="center">
+  <a href="https://github.com/ktwu01/benchmark-radar/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/ktwu01/benchmark-radar/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://doi.org/10.5281/zenodo.22167102"><img alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.22167102.svg"></a>
+</p>
+
 Researchers and evaluation engineers from these institutions use Benchmark
 Radar for benchmark discovery and score tracking:
 
@@ -36,7 +44,7 @@ Radar for benchmark discovery and score tracking:
 
 I kept running into new benchmarks while doing benchmark research, so I built a
 crawler that continuously collects benchmark-related signals from across the
-web. It pulls evidence from 41 public sources every day, and keeps updating.
+web. It pulls evidence from 40 public sources every day, and keeps updating.
 
 **Find a benchmark in seconds, then see how model scores change over time. Click
 the GIF below to watch SWE-bench Verified move toward saturation.**
@@ -163,7 +171,7 @@ benchmark catalog, mentions in model cards and technical reports, and score
 histories. It retains source identities and citations so readers can inspect
 candidate benchmarks and their evaluation evidence.
 
-Daily discovery draws on 41 sources: 17 direct connectors and 24 first-party
+Daily discovery draws on 40 sources: 16 direct connectors and 24 first-party
 research and engineering feeds. The catalog collects source records from five
 benchmark catalogs, with numeric score observations on the records that carry
 them. The project publishes the web dashboard with a benchmark leaderboard, a
