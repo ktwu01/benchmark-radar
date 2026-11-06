@@ -227,6 +227,12 @@ sources:
       # framing without widening the generic keyword set.
       - realtime-bench
       - real-time interactive
+      # Named-alias keyword: the Vero paper is titled "Vero: Can AI Agents
+      # Build Formally Verified Software Repositories?" and its abstract says
+      # "we introduce Vero, the first benchmark", which no generic phrase
+      # above matches (#555). The colon keeps this from matching words that
+      # merely contain "vero" (Verona, Veronica).
+      - "vero:"
     queries:
       - 'ti:"benchmark" AND (all:"we introduce" OR all:"we present" OR all:"we release")'
       - 'ti:"dataset" AND (all:"we introduce" OR all:"we present" OR all:"we release")'
