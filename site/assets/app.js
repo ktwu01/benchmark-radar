@@ -1322,8 +1322,8 @@ const I18N = {
     "{value} · unverified": "{value} · 未经核验",
     "source ↗": "来源 ↗",
     "Coverage {coverage}": "覆盖率 {coverage}",
-    "Recently released benchmarks, ranked by the attention they are receiving now (GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days, together 80%) and by how often their institutions appear on benchmark papers in the corpus (20%). Repositories holding only a README, licence or images are listed but not ranked.":
-      "近期发布的benchmark，按当前获得的关注度（GitHub star、Hugging Face 论文点赞以及最近 30 天的 Hugging Face 数据集下载量，合计 80%）以及其机构在语料 benchmark 论文中出现的频次（20%）排序。只含 README、许可证或图片的仓库仅列出，不参与排名。",
+    "Recently released benchmarks, ranked by the attention they are receiving now (GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days, together 80%) and by how often their institutions appear on benchmark papers in the corpus (20%). Repositories holding only a README, licence or images, and archived or deleted repositories, are listed but not ranked.":
+      "近期发布的benchmark，按当前获得的关注度（GitHub star、Hugging Face 论文点赞以及最近 30 天的 Hugging Face 数据集下载量，合计 80%）以及其机构在语料 benchmark 论文中出现的频次（20%）排序。只含 README、许可证或图片的仓库，以及已归档或已删除的仓库，仅列出，不参与排名。",
     "The number is the score, out of 100. The tag under it is a separate check: how much of the score is backed by observed data. A high tag means at least two signals were found and they cover 75% or more of the score; a low tag means fewer than two signals were found, or they cover less than 40% of the score. It says nothing about how good the benchmark is.":
       "数字是得分（满分 100）。下方的标签是另一回事：得分有多少来自实际观察到的数据。“高”表示至少找到两类信号，且合计覆盖得分的 75% 以上；“低”表示找到的信号少于两类，或合计覆盖不到得分的 40%。它不代表 benchmark 本身的好坏。",
     "latest.legend":
@@ -1340,10 +1340,12 @@ const I18N = {
     "no score": "无得分",
     "Institution frequency": "机构出现频次",
     "limited signals: the repository has no code or data yet": "信号有限：仓库尚无代码或数据",
+    "limited signals: the repository is archived": "信号有限：仓库已归档",
+    "limited signals: the repository is no longer available": "信号有限：仓库已不可访问",
     "as written in the paper": "按论文原文",
     "Institutions linked by OpenAlex": "OpenAlex 关联的机构",
-    "Plus {weight}% institution frequency: how many benchmark papers in the whole corpus list the release's best-known institution among its first three, normalized as log1p(count) / log1p(the most frequent institution's count), not by the window. A release with no institution on file gets no affiliation credit. A repository holding only a README, licence or images is listed but not ranked.":
-      "另加 {weight}% 的机构出现频次：在整个语料中，该发布前三个机构里最常出现者被多少篇 benchmark 论文列出，按 log1p(该数) / log1p(出现最多的机构的篇数) 归一化，而非按时间窗口。没有机构记录的发布不获得机构分。只含 README、许可证或图片的仓库仅列出，不参与排名。",
+    "Plus {weight}% institution frequency: how many benchmark papers in the whole corpus list the release's best-known institution among its first three, normalized as log1p(count) / log1p(the most frequent institution's count), not by the window. A release with no institution on file gets no affiliation credit. A repository holding only a README, licence or images, or one that is archived or deleted, is listed but not ranked.":
+      "另加 {weight}% 的机构出现频次：在整个语料中，该发布前三个机构里最常出现者被多少篇 benchmark 论文列出，按 log1p(该数) / log1p(出现最多的机构的篇数) 归一化，而非按时间窗口。没有机构记录的发布不获得机构分。只含 README、许可证或图片的仓库，以及已归档或已删除的仓库，仅列出，不参与排名。",
     "Top institutions": "机构排行",
     "{count} papers": "{count} 篇论文",
     "Institutions ranked by how many benchmark papers in the corpus list them, from OpenAlex's linked institutions for {papers} arXiv papers. A count of papers, not a grade.":
@@ -10408,7 +10410,7 @@ function latestReleasesMethodNote(payload, windowData) {
   const affiliation =
     weights.affiliation === null || weights.affiliation === undefined
       ? ""
-      : ` ${t("Plus {weight}% institution frequency: how many benchmark papers in the whole corpus list the release's best-known institution among its first three, normalized as log1p(count) / log1p(the most frequent institution's count), not by the window. A release with no institution on file gets no affiliation credit. A repository holding only a README, licence or images is listed but not ranked.", { weight: Math.round(weights.affiliation * 100) })}`;
+      : ` ${t("Plus {weight}% institution frequency: how many benchmark papers in the whole corpus list the release's best-known institution among its first three, normalized as log1p(count) / log1p(the most frequent institution's count), not by the window. A release with no institution on file gets no affiliation credit. A repository holding only a README, licence or images, or one that is archived or deleted, is listed but not ranked.", { weight: Math.round(weights.affiliation * 100) })}`;
   return t(
     "Ranking {method}: {signals}, each normalized as log1p(value) / log1p(window maximum) and summed to a 0 to 100 score. A release is ranked only when enough of its weight comes from fresh, durable signals; the rest are listed with limited signals. Dataset downloads are a rolling 30-day figure, never a cumulative total. Stars come from the benchmark's own repository, never a parent framework. Window {start} to {end}, UTC.",
     {
@@ -10421,9 +10423,18 @@ function latestReleasesMethodNote(payload, windowData) {
 }
 
 const DECK_V2 =
-  "Recently released benchmarks, ranked by the attention they are receiving now (GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days, together 80%) and by how often their institutions appear on benchmark papers in the corpus (20%). Repositories holding only a README, licence or images are listed but not ranked.";
+  "Recently released benchmarks, ranked by the attention they are receiving now (GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days, together 80%) and by how often their institutions appear on benchmark papers in the corpus (20%). Repositories holding only a README, licence or images, and archived or deleted repositories, are listed but not ranked.";
 const LEGEND_V2 =
   "The number is the score, out of 100. The tag under it is a separate check: how much of the score is backed by observed data. A high tag means at least two signals were found and they cover 75% or more of the score; a low tag means fewer than two signals were found, or they cover less than 40% of the score. It says nothing about how good the benchmark is.";
+
+// Why a release is listed but not ranked (#1120): the repository holds no
+// code or data yet, is archived, or is gone; otherwise too little signal.
+const LIMITED_REASONS = {
+  placeholder_repository: "limited signals: the repository has no code or data yet",
+  repository_archived: "limited signals: the repository is archived",
+  repository_unavailable: "limited signals: the repository is no longer available",
+  default: "limited signals: not enough fresh durable signal to rank",
+};
 
 // The first three institutions behind the release's paper (#1120). OpenAlex's
 // linked names are shown as they are; a paper OpenAlex has not indexed yet
@@ -10572,11 +10583,7 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
   const meta = [
     t("Coverage {coverage}", { coverage: Number(entry.coverage || 0).toFixed(2) }),
     confidence ? `${t("confidence")} ${t(confidence)}` : "",
-    ranked
-      ? ""
-      : entry.limited_reason === "placeholder_repository"
-        ? t("limited signals: the repository has no code or data yet")
-        : t("limited signals: not enough fresh durable signal to rank"),
+    ranked ? "" : t(LIMITED_REASONS[entry.limited_reason] || LIMITED_REASONS.default),
   ]
     .filter(Boolean)
     .join(" · ");
