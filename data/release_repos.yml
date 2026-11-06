@@ -2853,10 +2853,11 @@ repos:
     created_at: '2026-10-06'
     pushed_at: '2026-10-08'
     unavailable: false
-    placeholder: true
+    placeholder: false
     retrieved_at: '2026-11-06'
     root:
     - README.md
+    data_link: drive.google.com
   bytedance-seed/sae-interprets-moe:
     full_name: ByteDance-Seed/SAE-interprets-MoE
     size_kb: 28247
@@ -9482,12 +9483,13 @@ repos:
     created_at: '2026-09-12'
     pushed_at: '2026-09-12'
     unavailable: false
-    placeholder: true
+    placeholder: false
     retrieved_at: '2026-11-06'
     root:
     - IDS_Article_Mariyam_Hafsah.pdf
     - LICENSE
     - README.md
+    data_link: kaggle.com/datasets
   marthalayash1threddy/prompt-bench:
     unavailable: true
     placeholder: null
@@ -12511,10 +12513,11 @@ repos:
     created_at: '2026-10-31'
     pushed_at: '2026-11-06'
     unavailable: false
-    placeholder: true
+    placeholder: false
     retrieved_at: '2026-11-06'
     root:
     - README.md
+    data_link: kaggle.com/datasets
   rishabhvenketeshnist/industrial-context-aware-agent-benchmark:
     unavailable: true
     placeholder: null
@@ -12649,11 +12652,12 @@ repos:
     created_at: '2026-11-03'
     pushed_at: '2026-11-03'
     unavailable: false
-    placeholder: true
+    placeholder: false
     retrieved_at: '2026-11-06'
     root:
     - LICENSE
     - README.md
+    data_link: huggingface.co/datasets
   roboco-io/language-benchmark:
     size_kb: 40731
     stars_at_check: 1
@@ -13672,10 +13676,11 @@ repos:
     created_at: '2026-09-24'
     pushed_at: '2026-09-29'
     unavailable: false
-    placeholder: true
+    placeholder: false
     retrieved_at: '2026-11-06'
     root:
     - README.md
+    data_link: drive.google.com
   sharif-gpt/persian-ai-evaluation-prompts:
     full_name: Sharif-GPT/persian-ai-evaluation-prompts
     size_kb: 33

@@ -60,7 +60,8 @@ sources below, run the generators in order, and measure the rebuilt outputs.
      on, keyed by `owner/name`: size, stars on the check date, archived flag,
      creation and last-push dates (search API, six per call), plus
      `placeholder` (README-only root, listed only for repositories up to
-     2 MB) and `unavailable` (404 on the repository endpoint, which follows
+     2 MB; a README that links a dataset host such as Hugging Face datasets,
+     Google Drive or Zenodo is not a placeholder, recorded as `data_link`) and `unavailable` (404 on the repository endpoint, which follows
      renames). A placeholder, archived or unavailable repository holds its
      release back: listed, unranked, with the reason. Stars and size never
      do. Placeholders and unknowns are rechecked daily, others weekly. A
