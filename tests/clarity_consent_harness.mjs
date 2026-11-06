@@ -6,7 +6,7 @@ import { test } from "node:test";
 const source = readFileSync("site/assets/clarity.js", "utf8");
 const key = "benchmark-radar:analytics-consent";
 
-function page({ storage = new Map(), blocked = false, writeBlocked = false, cookies = new Map(), reset = true } = {}) {
+function page({ storage = new Map(), blocked = false, writeBlocked = false, cookies = new Map(), reset = true, hostname = "benchmark-radar.org", search = "" } = {}) {
   const nodes = new Map();
   const listeners = {};
   const scripts = [];
@@ -39,10 +39,10 @@ function page({ storage = new Map(), blocked = false, writeBlocked = false, cook
     },
   };
   const window = {
-    localStorage, location: { hostname: "radar.example.com", reload() { recording = false; reloads += 1; } },
+    localStorage, location: { hostname, search, reload() { recording = false; reloads += 1; } },
     addEventListener(type, fn) { listeners[type] = fn; },
   };
-  runInNewContext(source, { window, document, Event: class { constructor(type) { this.type = type; } } });
+  runInNewContext(source, { window, document, URLSearchParams, Event: class { constructor(type) { this.type = type; } } });
   function loadSdk() {
     const queued = [...(window.clarity.q ?? [])];
     window.clarity = (...args) => {
@@ -82,6 +82,25 @@ test("fresh and declined visits never request the tag", () => {
   assert.ok(!denied.nodes.has("analytics-consent"));
 });
 
+test("local previews and copied deployments never send production analytics", () => {
+  for (const hostname of ["localhost", "127.0.0.1", "::1", "fork.github.io", "benchmark-radar.org.example.com"]) {
+    const tab = page({ hostname, storage: new Map([[key, "granted"]]) });
+    assert.equal(tab.scripts.length, 0, hostname);
+    assert.ok(!tab.nodes.has("analytics-consent"), hostname);
+  }
+});
+
+test("the maintainer opt-out overrides an old grant and persists on later visits", () => {
+  const storage = new Map([[key, "granted"]]);
+  const tab = page({ storage, search: "?analytics=off" });
+  assert.equal(tab.scripts.length, 0);
+  assert.equal(storage.get(key), "denied");
+  assert.ok(!tab.nodes.has("analytics-consent"));
+  const later = page({ storage });
+  assert.equal(later.scripts.length, 0);
+  assert.ok(!later.nodes.has("analytics-consent"));
+});
+
 test("accept loads one tag and grants analytics only; withdrawal stops; reaccept restarts", () => {
   const storage = new Map();
   const tab = page({ storage });
@@ -114,13 +133,13 @@ test("stored opt-in starts without another prompt", () => {
 test("decline clears legacy cookies at host and parent domains without loading Clarity", () => {
   const cookies = new Map();
   for (const name of ["_clck", "_clsk", "unrelated"]) {
-    for (const domain of ["host", "radar.example.com", "example.com"]) {
+    for (const domain of ["host", "benchmark-radar.org", "org"]) {
       cookies.set(`${name}:${domain}`, "old");
     }
   }
   const tab = page({ cookies });
   tab.choose("denied");
-  assert.deepEqual([...cookies.keys()], ["unrelated:host", "unrelated:radar.example.com", "unrelated:example.com"]);
+  assert.deepEqual([...cookies.keys()], ["unrelated:host", "unrelated:benchmark-radar.org", "unrelated:org"]);
   assert.equal(tab.scripts.length, 0);
 });
 

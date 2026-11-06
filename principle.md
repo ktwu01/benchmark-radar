@@ -177,6 +177,45 @@ full population and account for the visible records, pre-2024 records, records
 excluded for missing scores, and records hidden by score. Count each
 record once so the categories reconcile.
 
+## A filtered benchmark is worse than a flagged non-benchmark
+
+**We cannot tolerate a benchmark being filtered out. A non-benchmark being
+flagged is tolerable.** A benchmark that an admission, taxonomy, or suppression
+rule removes never reaches any surface, and nobody can see that it is missing.
+A non-benchmark that gets in stays visible, so a reader can report it, as with
+the OpenClaw release in #1001.
+
+Before adding or tightening such a rule, run it against every record in the
+committed snapshots and list each record it would remove. If one of them is a
+benchmark, a benchmark paper, or an evaluation tool, reject the rule or narrow
+it. Say which inputs the test could not cover. #1011 is an example.
+
+## No quality judgement is not no judgement
+
+Benchmark Radar does not grade a benchmark's merit. It never says a benchmark
+is good or bad, and it leaves comparing scores to the people who use the data.
+
+That is not permission to hand readers hundreds of unsorted releases a day. A
+reader who opens the Leaderboard needs a short, defensible list. Benchmark
+Radar therefore triages:
+
+- **Rank by disclosed signals.** Attention (stars, upvotes, downloads) and the
+  institutions behind the paper are signals a reader can check. Print every
+  input, its weight and its source next to the rank, so the order can be
+  disputed, not just trusted.
+- **Demote placeholders.** A repository that holds only a README, a licence or
+  images has announced a benchmark, not shipped one. Keep it listed and
+  unranked, with the reason, below the releases that ship code or data.
+- **Demote, never delete.** Triage moves a record down or flags it. It does
+  not remove it from the corpus, search or exports (see the rule above).
+- **Missing stays unknown.** A release with no institution on file gets no
+  affiliation credit; it is not given an average and its weight is not
+  redistributed.
+
+The harm this prevents: an unranked firehose pushes the sorting onto every
+reader, and an attention-only ranking lets an empty repository with a viral
+announcement outrank a benchmark that ships its data.
+
 ## Calculate only what the evidence supports
 
 Represent every record, but compute a statistic only from records with the
@@ -262,6 +301,34 @@ Do not arrange them alphabetically inside year bins. Separate overlapping marks
 without changing their dates; explain any stacking or alternate layout. A mass
 of benchmarks landing on one collection day is a date-provenance defect to
 investigate, not evidence that they were all introduced that day.
+
+## Diagnose from real records, not from a plausible story
+
+Before fixing a bug or designing a feature, pull the actual records it affects
+and read them. A cause that sounds right is still a guess until the data shows
+it. Fixing a guessed cause can leave the real defect in place and still pass the
+tests written for the guess.
+
+Example: ingest discarded "future-dated" records. The first fix assumed time-zone
+skew on Hugging Face and widened the tolerance to one day. The run snapshots
+showed 53 of 56 discards since 2026-08-31 came from Zenodo. A live Zenodo record
+created on 2026-10-27 carried an uploader-entered publication date of
+`2026-10-31`, four days ahead, which a one-day tolerance still drops. Another
+carried `2027`, which the parser could not read, so the record was skipped
+without being counted. Zenodo's API documentation settles the cause:
+`publication_date` is "Date of publication ... Defaults to current date", set by
+the depositor with no range check, while `created` and `modified` are the
+deposition's own timestamps (https://developers.zenodo.org/#deposit-metadata).
+Count the cases by source, open a few, read the source's API documentation for
+the field, then fix.
+
+The fix follows from those cases. An uploader-entered date can be in the future
+or unreadable; the platform's own creation timestamp (`created`, the date the
+upload or repository was opened) cannot. When the source date is in the future
+or unreadable, keep the record, keep the source value as given, and date it by
+`created`, labelled as that basis. Quarantine with a warning only when `created`
+is also in the future, as with a record dated 2050. If a source has no creation
+timestamp, keep the record with an unknown date; never substitute the crawl time.
 
 ## Verify coverage before delivery
 

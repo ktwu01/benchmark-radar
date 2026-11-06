@@ -26,9 +26,11 @@ which invents provenance for text nobody can trace.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 from urllib.parse import urlparse
 
+from .blog_lead import _lead_picks, _lead_titles
 from .blog_shell import BlogPost
 from .site_shell import esc
 
@@ -43,6 +45,8 @@ KIND_EVIDENCE = "Evidence summary"
 _LABELS = {
     "en": {
         "briefing": "Daily briefing",
+        "picks": "Featured on this day",
+        "benchmark_page": "Benchmark page",
         "evidence": "What the radar collected that day",
         "sources": "Evidence sources",
         "provenance": "Where this came from, and what it does not cover",
@@ -55,6 +59,8 @@ _LABELS = {
     },
     "zh": {
         "briefing": "每日简报",
+        "picks": "当天精选",
+        "benchmark_page": "Benchmark 页面",
         "evidence": "当天雷达收集到的内容",
         "sources": "证据来源",
         "provenance": "内容来源与局限",
@@ -156,7 +162,7 @@ def _description(snapshot: dict[str, Any]) -> str:
     sources = {str(item.get("source") or "") for item in evidence if item.get("source")}
     return (
         f"Benchmark Radar collected {len(evidence)} evidence observations from "
-        f"{len(sources)} sources on {snapshot.get('date')}."
+        f"{len(sources)} source{'' if len(sources) == 1 else 's'} on {snapshot.get('date')}."
     )
 
 
@@ -376,11 +382,28 @@ def _provenance_section(snapshot: dict[str, Any], language: str) -> str:
     )
 
 
-def _sources_section(sources: tuple[tuple[str, str, str], ...], language: str) -> str:
+def _benchmark_link(url: str, catalog_pages: dict[str, str], language: str) -> str:
+    """A link to the benchmark's own page when the source is exactly one record (#593)."""
+    slug = catalog_pages.get(url)
+    if not slug or not _CARD_SLUG.fullmatch(slug):
+        return ""
+    label = _LABELS[language]["benchmark_page"]
+    return f' <a class="blog-benchmark-link" href="/benchmarks/{esc(slug)}/">{esc(label)}</a>'
+
+
+_CARD_SLUG = re.compile(r"[a-z0-9][a-z0-9_-]*")
+
+
+def _sources_section(
+    sources: tuple[tuple[str, str, str], ...],
+    language: str,
+    catalog_pages: dict[str, str] | None = None,
+) -> str:
     if not sources:
         return ""
     links = "".join(
-        f'<li>{_cite_id(identifier)}<a href="{esc(url)}">{esc(title)}</a></li>'
+        f'<li>{_cite_id(identifier)}<a href="{esc(url)}">{esc(title)}</a>'
+        f"{_benchmark_link(url, catalog_pages or {}, language)}</li>"
         for identifier, title, url in sources
     )
     # Unnumbered on purpose: the stored ID is how the prose refers to a source,
@@ -402,23 +425,56 @@ def _kind(snapshot: dict[str, Any]) -> str:
     return KIND_BRIEF
 
 
-def build_post(snapshot: dict[str, Any]) -> BlogPost:
-    """Render one snapshot into a publishable brief."""
+def _picks_section(
+    picks: list[tuple[str, str]], language: str, catalog_pages: dict[str, str]
+) -> str:
+    """The benchmarks the title names, each shown in full.
+
+    The title says "X and 4 more"; the evidence list shows only the day's first
+    ten records and the briefing cites by ID, so without this list a reader can
+    land on a post that never shows the benchmark it is titled after.
+    """
+    if not picks:
+        return ""
+    rendered = []
+    for title, raw_url in picks:
+        url = _safe_url(raw_url)
+        heading = f'<a href="{esc(url)}">{esc(title)}</a>' if url else esc(title)
+        page = _benchmark_link(url, catalog_pages, language) if url else ""
+        rendered.append(f'<li class="blog-card">{heading}{page}</li>')
+    return _section(_LABELS[language]["picks"], f'<ol class="blog-index">{"".join(rendered)}</ol>')
+
+
+def build_post(
+    snapshot: dict[str, Any],
+    catalog_pages: dict[str, str] | None = None,
+    days: list[dict[str, Any]] | None = None,
+) -> BlogPost:
+    """Render one snapshot into a publishable brief.
+
+    ``catalog_pages`` maps a source URL to the slug of the one catalog record
+    with exactly that URL, so a cited benchmark links to its page here.
+    """
     day = str(snapshot["date"])
     kind = _kind(snapshot)
     sources = _citations(snapshot, allow_fallback=kind != KIND_EVIDENCE)
+    picks = _lead_picks(snapshot, days)
 
     def body(language: str) -> str:
         return (
             f'<div class="blog-stats">{_stats(snapshot)}</div>'
+            + _picks_section(picks, language, catalog_pages or {})
             + _briefing_section(snapshot, language)
             + _questions_section(snapshot, language)
-            + _sources_section(sources, language)
+            + _sources_section(sources, language, catalog_pages or {})
             + _provenance_section(snapshot, language)
         )
 
     translated = has_translation(snapshot)
-    if kind == KIND_EVIDENCE:
+    lead = _lead_titles(snapshot, day, picks=picks)
+    if lead:
+        title, title_zh = lead
+    elif kind == KIND_EVIDENCE:
         title = f"Benchmark evidence summary: {day}"
         title_zh = f"Benchmark 证据汇总：{day}"
     else:

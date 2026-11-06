@@ -546,6 +546,37 @@ def test_sponsor_bait_resource_listing_is_suppressed():
     assert "sponsor-bait resource listing" in spam.suppression_reasons
 
 
+def test_paper_supplements_are_demoted_never_removed():
+    """Issue #936: a deposited supplement ranks lower but stays listed, because some
+    carry the benchmark itself; a filtered benchmark is worse than a flagged
+    non-benchmark (principle.md). A benchmark whose summary mentions its own
+    supplementary material is not touched."""
+    taxonomy = {"benchmark": ["benchmark"], "dataset": ["dataset"]}
+    now = datetime(2026, 7, 27, 1, tzinfo=UTC)
+    summary = "Benchmark dataset tables."
+    plain = score_item(item(source="Zenodo", title="Tables", summary=summary), taxonomy, now)
+    supplements = [
+        "Supplementary Tables S1-S9 and Figure S1, with details of the dataset split",
+        'Supporting data for "Agentic design of continuous flow processes"',
+        "Supplementary Materials and Dataset for: Digital and AI Tool Adoption",
+        "Supporting Information for: From Systematic Review to Framework",
+        # Zenodo 23422773, 2026-10-21: 66 clinical cases, prompts and metric code.
+        "Supplementary Material — Reliability Evaluation of Open-Weight Large Language "
+        "Models for Clinical Diagnosis Assistance",
+    ]
+    for title in supplements:
+        scored = score_item(item(source="Zenodo", title=title, summary=summary), taxonomy, now)
+        assert scored.suppression_reasons == [], title
+        assert scored.relevance_score == plain.relevance_score - 30, title
+    for title, kept_summary in (
+        ("TableBench: a benchmark dataset", "See the supplementary material for the full card."),
+        ("A benchmark of supplementary data quality", "Benchmark dataset."),
+    ):
+        kept = score_item(item(title=title, summary=kept_summary), taxonomy, now)
+        untouched = score_item(item(title=title, summary="Benchmark dataset."), taxonomy, now)
+        assert kept.relevance_score == untouched.relevance_score, title
+
+
 def test_structural_signals_demote_thin_provenance_without_semantic_guessing():
     taxonomy = {"benchmark": ["benchmark"], "evaluation": ["evaluation"]}
     thin = score_item(
@@ -806,6 +837,35 @@ def test_pipeline_quarantines_future_dated_records_before_scoring(monkeypatch):
     assert run.health[0].error == "Discarded 1 future-dated record(s)"
     assert run.selection["fetched"] == 2
     assert run.selection["suppressed_future_dated"] == 1
+
+
+def test_pipeline_keeps_a_record_one_local_day_ahead_in_utc_plus_eight(monkeypatch):
+    # #907: a record carrying its uploader's next calendar day in UTC+8 is
+    # current, not future-dated, and must not leave the corpus.
+    ahead = item(
+        source="Hugging Face",
+        source_id="org/ahead",
+        url="https://huggingface.co/datasets/org/ahead",
+        published_at=datetime(2026, 10, 21, 0, tzinfo=UTC),
+    )
+    pipeline = __import__("benchmark_radar.pipeline", fromlist=["SOURCE_FETCHERS"])
+    monkeypatch.setitem(pipeline.SOURCE_FETCHERS, "huggingface", lambda c, s, n: [ahead])
+    config = {
+        "radar": {
+            "lookback_hours": 48,
+            "max_items_per_source": 10,
+            "report_limit": 10,
+            "minimum_score": 0,
+        },
+        "taxonomy": {"benchmark": ["benchmark"]},
+        "sources": {"huggingface": {"enabled": True, "required": True}},
+    }
+
+    run = run_pipeline(config, datetime(2026, 10, 20, 17, tzinfo=UTC))
+
+    assert [record.source_id for record in run.items] == ["org/ahead"]
+    assert run.health[0].error is None
+    assert run.selection["suppressed_future_dated"] == 0
 
 
 def test_pipeline_accounts_for_future_records_rejected_inside_a_connector(monkeypatch):

@@ -1,21 +1,21 @@
 :root {
   color-scheme: light;
-  --panel: #f9fbfc;
-  --canvas: #edf1f3;
-  --ink: #15242a;
-  --muted: #5f7078;
-  --line: #cbd5da;
+  --panel: #ffffff;
+  --canvas: #f4f6f7;
+  --ink: #172026;
+  --muted: #56636b;
+  --line: #e1e6e9;
   /* Borders and dividers, deliberately not `--ink`. The page used the text
      colour to draw every card edge and row separator, so a screen of data read
      as a grid of hard near-black boxes and the rules competed with the words
      inside them (issue #333). One step darker than `--line` so a card edge
      still reads as an edge against `--panel`, nowhere near the ink. */
-  --edge: #b8c5cc;
+  --edge: #d3dadf;
   /* One corner radius for every panel, card, table and control. */
   --radius: 10px;
   --radius-sm: 6px;
-  --blue: #255ea8;
-  --blue-deep: #173e71;
+  --blue: #2a7f8e;
+  --blue-deep: #165a66;
   --orange: #dc633f;
   --sea: #4c948b;
   --gold: #c99327;
@@ -66,13 +66,11 @@ body {
 
 body {
   margin: 0;
-  /* The graph-paper grid keeps the Radar identity without competing with the
-     row separators, card borders, and score tracks drawn over it: cut its
-     contrast in half (issue #248). */
-  background:
-    linear-gradient(90deg, rgb(37 94 168 / 1.5%) 1px, transparent 1px) 0 0 / 32px 32px,
-    linear-gradient(rgb(37 94 168 / 1.5%) 1px, transparent 1px) 0 0 / 32px 32px,
-    var(--canvas);
+  /* A white page (issue #1097). The grey page with a graph-paper grid made
+     every screen look dim and only existed so boxed panels could show. Text
+     reads best dark on white; `--canvas` is now the tint for a secondary area
+     (a sidebar, an inset), not the floor everything sits on. */
+  background: var(--panel);
   color: var(--ink);
   font-family: var(--body);
   line-height: 1.5;
@@ -129,8 +127,8 @@ footer {
   align-items: center;
   justify-content: space-between;
   gap: 1.25rem;
-  min-height: 80px;
-  background: color-mix(in srgb, var(--canvas) 96%, transparent);
+  min-height: 64px;
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
   backdrop-filter: blur(12px);
 }
 
@@ -607,7 +605,7 @@ main {
 }
 
 .view {
-  padding: clamp(2.25rem, 4vw, 3.75rem) 0 6rem;
+  padding: var(--space-4) 0 3rem;
 }
 
 /* Primary page titles stay close to the shared masthead so switching sections
@@ -617,14 +615,15 @@ main {
 #leaderboard-view,
 #saturation-view,
 #trends-view {
-  padding-top: clamp(1.25rem, 2vw, 1.75rem);
+  padding-top: var(--space-4);
 }
 
-/* Each view is its own page (/, /leaderboard/, /trends/, /explore/) and
-   carries its own h1, but only one view is visible at a time so only one h1
-   ever renders. They keep the quiet leaderboard-heading scale rather than the
-   display scale, so promoting the heading changed the document outline and
-   not the design. */
+/* Each view is its own page (/, /leaderboard/, /trends/, /explore/). Its
+   heading is an h2 in the shared document and the build promotes it to the
+   page's one h1 on that view's own page (issue #945). They keep the quiet
+   leaderboard-heading scale rather than the display scale, and h1 and h2 are
+   styled alike, so retagging changes the document outline and not the
+   design. */
 .view-heading h1,
 .view-heading h2 {
   margin: 0;
@@ -638,7 +637,7 @@ main {
   gap: 2rem;
   align-items: end;
   justify-content: space-between;
-  margin-bottom: clamp(1.5rem, 2.5vw, 2.25rem);
+  margin-bottom: var(--space-4);
 }
 
 .eyebrow {
@@ -680,6 +679,17 @@ h1 {
 h2 {
   font-size: 1.35rem;
   line-height: 1.1;
+}
+
+/* A view heading is an h2 on every page but its own, where the build makes it
+   the h1 (issue #945). This restates the h1 rule above at the same specificity
+   as a bare h2, so the tag never changes how the heading looks. */
+h2:where(.view-title) {
+  max-width: 800px;
+  margin-bottom: 0;
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.015em;
 }
 
 .heading-note {
@@ -1079,6 +1089,16 @@ a.briefing-chip-sources:focus-visible {
   font-family: var(--utility);
   font-size: 0.7rem;
   letter-spacing: 0.06em;
+}
+
+a.answer-source-count,
+.briefing-sources summary.answer-source-count {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.answer-meta .briefing-sources-list {
+  position: static;
 }
 
 .answer-plain {
@@ -2904,7 +2924,7 @@ td a {
   grid-template-columns: minmax(230px, 280px) minmax(0, 1fr);
   gap: 1rem;
   align-items: start;
-  margin: 1.75rem 0 2.5rem;
+  margin: 1rem 0 1.5rem;
 }
 
 /* A slate search rail connects the light page to the dark score chart. The
@@ -2918,6 +2938,10 @@ td a {
   border: 1px solid var(--edge);
   background: #e0e7eb;
   box-shadow: var(--shadow);
+}
+
+.benchmark-browser-toggle {
+  display: none;
 }
 
 /* Muted greys chosen against a near-white surface do not carry on the darker
@@ -2974,24 +2998,6 @@ td a {
   font-size: clamp(1.55rem, 3vw, 2.35rem);
 }
 
-.frontier-stage {
-  display: block;
-  width: 100%;
-  padding: 0.45rem 0.65rem;
-  border: 1px solid #536168;
-  color: #d8e2e5;
-  font-family: var(--utility);
-  font-size: 0.64rem;
-  letter-spacing: 0.06em;
-  text-align: right;
-}
-
-.frontier-controls {
-  display: grid;
-  flex: 0 0 270px;
-  gap: 0.65rem;
-}
-
 .frontier-panel .eyebrow {
   color: #7fc7bc;
 }
@@ -3000,24 +3006,6 @@ td a {
   max-width: 900px;
   margin: 1rem 0 1.25rem;
   color: #aebcc1;
-}
-
-.frontier-picker {
-  display: grid;
-  gap: 0.35rem;
-  color: #aebcc1;
-  font-family: var(--utility);
-  font-size: 0.68rem;
-  letter-spacing: 0.07em;
-}
-
-.frontier-picker select {
-  width: 100%;
-  padding: 0.7rem 2.2rem 0.7rem 0.75rem;
-  border: 1px solid #536168;
-  border-radius: var(--radius-sm);
-  background: #162228;
-  color: #f3f6f7;
 }
 
 .frontier-chart {
@@ -4027,6 +4015,15 @@ dialog::backdrop {
   line-height: 1.2;
 }
 
+/* On /cli/, /cite/ and /rubric/ the open sheet's title is the page's h1
+   (issue #945). This restates the h2 values the global h1 rule changes, at the
+   same specificity as a bare h1, so the tag never changes how it looks. */
+h1:where(.detail-title) {
+  max-width: none;
+  margin-bottom: 0.83em;
+  letter-spacing: -0.025em;
+}
+
 .detail-summary {
   color: var(--muted);
 }
@@ -4161,6 +4158,36 @@ dialog::backdrop {
 .cite-credit a {
   color: inherit;
   text-decoration: underline;
+}
+
+.cite-media {
+  margin-top: 1.6rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--line);
+}
+
+.cite-media-title {
+  margin: 0 0 0.7rem;
+  font-size: 0.95rem;
+}
+
+.cite-media-list {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.cite-media-list a {
+  color: var(--ink);
+}
+
+.cite-media-note {
+  color: var(--muted);
+  font-size: 0.78rem;
 }
 
 .copy-label {
@@ -4344,8 +4371,7 @@ dialog::backdrop {
   font-size: 1.05rem;
 }
 
-.adoption-actions,
-.footer-dataset-actions {
+.adoption-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.65rem;
@@ -4355,25 +4381,6 @@ dialog::backdrop {
 .adoption-actions button {
   background: transparent;
   cursor: pointer;
-}
-
-.footer-dataset {
-  display: grid;
-  gap: 0.55rem;
-  margin: 0.7rem 0 0;
-  padding: 0.9rem;
-  border-left: 3px solid var(--orange);
-  background: #fff4d6;
-  color: var(--ink);
-  font-family: var(--utility);
-  font-size: 0.75rem;
-}
-
-.footer-dataset a {
-  color: var(--ink);
-  font: inherit;
-  text-decoration: underline;
-  text-underline-offset: 2px;
 }
 
 .stale-banner {
@@ -4448,39 +4455,373 @@ button.stale-banner-action {
 }
 
 footer {
-  /* One left-aligned column: document links, updated stamp, then the dataset
-     card underneath them. */
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.9rem;
-  padding: 1.5rem 0 3rem;
+  /* Three bands, read top to bottom: the email signup, the link columns,
+     then legal and contact. */
+  display: grid;
+  gap: 2rem;
+  padding: 2rem 0 3rem;
   border-top: 1px solid var(--edge);
   color: var(--muted);
 }
 
 .copyright {
+  margin: 0;
   font-size: 0.72rem;
 }
 
-.footer-nav {
+.email-signup {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.25rem 1.4rem;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.email-signup-card {
+  margin-bottom: 1.25rem;
+}
+
+.email-signup-title {
+  margin: 0;
+  font-family: var(--body);
+  font-size: 1rem;
+  letter-spacing: normal;
+}
+
+.email-signup-form {
+  display: grid;
+}
+
+.email-signup-row {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.email-signup-row label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.email-signup-row input {
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 0.9rem;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 15px;
+}
+
+.email-signup-row button {
+  flex: 0 0 auto;
+  min-height: var(--control-height);
+  padding: 0 1.2rem;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-sm);
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--body);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.email-signup-row button:hover,
+.email-signup-row button:focus-visible {
+  background: var(--blue-deep);
+  border-color: var(--blue-deep);
+}
+
+.email-signup-form input:focus-visible,
+.email-signup-row button:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* Collapsed until the reader types an address. Animating the row track from
+   0fr to 1fr opens the panel to its natural height; visibility keeps the
+   hidden checkbox and radios out of the tab order while it is closed. */
+.email-signup-more {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    grid-template-rows 0.3s ease,
+    opacity 0.2s ease,
+    visibility 0s linear 0.3s;
+}
+
+.email-signup-form:has(input[type="email"]:not(:placeholder-shown)) .email-signup-more {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    grid-template-rows 0.3s ease,
+    opacity 0.25s ease 0.05s,
+    visibility 0s;
+}
+
+/* Without :has() the panel could never open, and its required checkbox would
+   block every submission, so those browsers get it open. */
+@supports not selector(:has(*)) {
+  .email-signup-more {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .email-signup-more,
+  .email-signup-form:has(input[type="email"]:not(:placeholder-shown)) .email-signup-more {
+    transition: none;
+  }
+}
+
+.email-signup-more-inner {
+  display: grid;
+  gap: 0.65rem;
+  min-height: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-family: var(--body);
+  font-size: 13px;
+  letter-spacing: normal;
+  line-height: 1.5;
+}
+
+/* Spacing sits on the first child, not as padding on the clipped wrapper,
+   because padding would keep the closed panel 0.85rem tall. */
+.email-signup-consent {
+  margin-top: 0.85rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.15rem 0.55rem;
+  align-items: start;
+  cursor: pointer;
+}
+
+.email-signup-consent input {
+  width: 1rem;
+  height: 1rem;
+  min-height: 0;
+  margin: 0.15rem 0 0;
+  padding: 0;
+}
+
+.email-signup-consent a {
+  grid-column: 2;
+  justify-self: start;
+}
+
+.email-signup-consent a,
+.email-signup-frequency {
+  color: var(--ink);
+}
+
+.email-signup-frequency {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 1.25rem;
-  font-family: var(--utility);
-  font-size: 0.72rem;
-  letter-spacing: 0.05em;
+  gap: 0.4rem 1.1rem;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
-.footer-nav a {
+.email-signup-frequency legend {
+  float: left;
+  margin-right: 0.2rem;
+  padding: 0;
+  color: var(--muted);
+}
+
+.email-signup-frequency input {
+  width: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.email-signup-hint {
+  color: var(--muted);
+}
+
+.email-signup-frequency label {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* The footer copy is wide, so the band puts the pitch beside the form;
+   the sidebar card above the briefing keeps the stacked layout. */
+.footer-signup {
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 30rem);
+  align-items: start;
+  padding: 1.75rem 2rem;
+}
+
+.footer-signup .email-signup-title {
+  /* Centred on the input row, which is one control-height tall. */
+  display: flex;
+  align-items: center;
+  min-height: var(--control-height);
+  font-size: 1.35rem;
+}
+
+.footer-columns {
+  display: grid;
+  grid-template-columns: minmax(16rem, 1.4fr) repeat(4, minmax(9rem, 1fr));
+  gap: 2rem;
+  align-items: start;
+}
+
+.footer-columns .adoption-cta {
+  margin-top: 0;
+}
+
+.footer-links {
+  display: grid;
+  gap: 0.55rem;
+  font-family: var(--body);
+  font-size: 14px;
+  letter-spacing: normal;
+}
+
+.footer-links h2 {
+  margin: 0 0 0.25rem;
   color: var(--ink);
+  font-family: var(--utility);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+}
+
+.footer-links a {
+  color: var(--muted);
   text-decoration: none;
 }
 
-.footer-nav a:hover,
-.footer-nav .nav-active {
+.footer-links a:hover,
+.footer-links a:focus-visible,
+.footer-links .nav-active {
+  color: var(--ink);
   text-decoration: underline;
   text-underline-offset: 0.25em;
+}
+
+.footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.footer-legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  align-items: baseline;
+}
+
+.footer-lang {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.footer-lang:hover,
+.footer-lang:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.footer-contact {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin: 0;
+  font-size: 0.72rem;
+}
+
+.footer-contact a {
+  color: var(--ink);
+}
+
+.footer-contact svg.brand-icon {
+  width: 1rem;
+  height: 1rem;
+  fill: currentColor;
+  fill-rule: evenodd;
+  vertical-align: middle;
+}
+
+.footer-wechat {
+  position: relative;
+}
+
+.footer-wechat summary {
+  display: flex;
+  cursor: pointer;
+  list-style: none;
+}
+
+.footer-wechat summary::-webkit-details-marker {
+  display: none;
+}
+
+/* The ID is a popover, so opening it never moves the other contact icons. */
+.footer-wechat-id {
+  position: absolute;
+  right: 0;
+  bottom: 1.5rem;
+  display: none;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  white-space: nowrap;
+  user-select: all;
+}
+
+.footer-wechat:hover .footer-wechat-id,
+.footer-wechat[open] .footer-wechat-id {
+  display: block;
+}
+
+@media (max-width: 1050px) {
+  .footer-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .footer-columns .adoption-cta {
+    grid-column: 1 / -1;
+  }
+
+  .footer-signup {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .email-signup-row {
+    flex-direction: column;
+  }
+
+  .footer-signup {
+    padding: 1.25rem;
+  }
 }
 
 @media (max-width: 1050px) {
@@ -4502,7 +4843,24 @@ footer {
 
   .benchmark-navigator {
     position: static;
+    max-height: none;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .benchmark-browser-toggle {
+    display: list-item;
+    min-height: var(--control-height);
+    align-content: center;
+    cursor: pointer;
+  }
+
+  .benchmark-navigator[open] > summary {
+    margin-bottom: var(--space-3);
+  }
+
+  .benchmark-navigator .benchmark-search {
     max-height: min(50vh, 24rem);
+    overflow-y: auto;
   }
 
   .health-panel {
@@ -4638,18 +4996,16 @@ footer {
     align-items: start;
   }
 
-  .frontier-stage {
-    text-align: left;
-  }
-
-  .frontier-controls {
-    width: 100%;
-  }
-
-  h1 {
+  h1,
+  h2:where(.view-title) {
     max-width: 100%;
     overflow-wrap: anywhere;
     font-size: clamp(1.7rem, 7vw, 2.3rem);
+  }
+
+  h1:where(.detail-title) {
+    max-width: none;
+    overflow-wrap: normal;
   }
 
   .record-summary {
@@ -5111,6 +5467,12 @@ footer {
   font-size: 0.85rem;
 }
 
+.catalog-description {
+  color: inherit;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
 /* The #262 inheritance note: a borrowed identity is flagged, never silent. A
    left rule and muted panel set it apart from the record's own description. */
 .catalog-inherited {
@@ -5170,6 +5532,17 @@ footer {
 .catalog-artifacts a:hover,
 .catalog-artifacts a:focus-visible {
   text-decoration: underline;
+}
+
+.catalog-resources {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 0.8rem;
+}
+
+.catalog-artifacts .benchmark-resource-link {
+  color: var(--blue-deep);
 }
 
 .catalog-sizes li {
@@ -5274,9 +5647,19 @@ footer {
   margin-top: 1.5rem;
 }
 
-.catalog-result-section h3 {
-  margin-bottom: 0.75rem;
+.catalog-result-section > summary {
+  padding: 0.5rem 0;
   font-size: 1rem;
+  cursor: pointer;
+}
+
+.catalog-result-section[open] > summary {
+  margin-bottom: 0.75rem;
+}
+
+.catalog-result-section > summary h3 {
+  display: inline;
+  font-size: inherit;
 }
 
 .catalog-result-list {
@@ -5461,7 +5844,8 @@ dialog {
   gap: 1rem;
   margin-bottom: 1rem;
 }
-.score-browse-header h1 {
+.score-browse-header h1,
+.score-browse-header h2 {
   margin: 0;
   font-size: clamp(1.25rem, 2vw, 1.5rem);
   max-width: none;
@@ -5649,8 +6033,6 @@ dialog {
 .score-browse-result { align-items: flex-start; flex-direction: column; gap: .25rem; }
 .score-browse-result .benchmark-result-facts { white-space: normal; }
 #benchmark-search-results { max-height: 62vh; overflow-y: auto; }
-#frontier-highest-score { font-weight: 600; }
-#frontier-filter-note { color: var(--muted); }
 @media (max-width: 640px) {
   .score-filter { width: 100%; }
   .score-filter input[type="range"] { max-width: none; }
@@ -5781,6 +6163,15 @@ dialog {
   letter-spacing: 0.04em;
 }
 
+/* Who is behind the release (#1120): the first three institutions, one line. */
+.latest-release-institutions {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
 /* A release the engine could not rank keeps its bar, muted: the score it has
    is real, the rank it lacks is the point. */
 .latest-release-bar-limited {
@@ -5894,12 +6285,13 @@ dialog {
 }
 
 /* Responsive navigation and Today controls share the canonical site chrome. */
-/* Keep every destination visible when the wordmark and utilities compete for space. */
+/* Keep navigation in one scrollable row when the header runs out of space. */
 .view-nav {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 4px;
-  overflow: visible;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .view-nav button,
@@ -5913,6 +6305,10 @@ dialog {
   padding: 0 var(--space-3);
   white-space: nowrap;
   letter-spacing: normal;
+}
+
+.view-nav :is(button, a):focus-visible {
+  outline-offset: -3px;
 }
 
 .brand-mark {
@@ -6015,8 +6411,8 @@ dialog {
   .masthead {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--space-2) var(--space-3);
-    padding-block: var(--space-3);
+    gap: 4px var(--space-3);
+    padding-block: var(--space-2);
   }
 
   .masthead-main {
@@ -6095,18 +6491,8 @@ dialog {
 }
 
 @media (max-width: 360px) {
-  .brand {
-    grid-column: 1 / -1;
-  }
-
-  .masthead-end {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    justify-content: start;
-  }
-
-  .view-nav {
-    grid-row: 3;
+  .brand strong {
+    display: none;
   }
 }
 
@@ -6133,7 +6519,9 @@ dialog {
 
 .library-sort,
 .library-saved-toggle {
-  min-height: 2.25rem;
+  /* 44px, the shared control height (design.md #886): at 36px these were
+     below the touch-target rule and easy to mis-tap on a phone. */
+  min-height: var(--control-height);
   padding: 0.3rem 0.6rem;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
@@ -6169,12 +6557,25 @@ dialog {
 
 .library-directions {
   position: sticky;
-  top: 0.5rem;
-  max-height: calc(100vh - 1rem);
+  /* Clear the sticky masthead, which is 64px on a wide screen where it is
+     one row. At 1280px and below it wraps to two rows (108px); the override
+     below carries that height. Without the offset the masthead covered the
+     sidebar's first controls once the reader scrolled. */
+  top: calc(64px + 0.5rem);
+  max-height: calc(100vh - 64px - 1rem);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+}
+
+@media (max-width: 1280px) {
+  /* The masthead wraps to two rows here, so the sidebar needs the taller
+     offset or its first controls slide under the masthead while scrolling. */
+  .library-directions {
+    top: calc(108px + 0.5rem);
+    max-height: calc(100vh - 108px - 1rem);
+  }
 }
 
 .library-direction-group {
@@ -6333,13 +6734,6 @@ dialog {
 
 /* Models (#420): .com's model x benchmark matrix, its side panel, and each
    lab's own model documents. */
-.models-note {
-  flex: 1 1 20rem;
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.88rem;
-}
-
 .models-controls {
   display: flex;
   flex-wrap: wrap;
@@ -6720,10 +7114,6 @@ dialog {
 
   /* One row of menus under the search, then the page row, so the matrix
      starts on the first screen; the menus' own labels name them. */
-  #models-view .models-note {
-    display: none;
-  }
-
   .models-controls {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -7015,9 +7405,14 @@ dialog {
    rail, then the name, what it is, who made it, and its links. */
 .radar-card {
   display: grid;
-  grid-template-columns: 88px minmax(0, 1fr) 150px;
+  grid-template-columns: 84px minmax(0, 1fr) 56px;
   gap: 1rem;
   padding: 1.1rem 0 1.1rem 0.75rem;
+}
+
+/* Nobody reads the score first, so it is a short number and a short bar. */
+.radar-card .score {
+  width: 56px;
 }
 
 .radar-rail {
@@ -7029,14 +7424,31 @@ dialog {
   font-size: 0.72rem;
 }
 
+/* The source is a chip with the organization's mark, so a reader sees where a
+   record came from before reading a word (issue #971). */
 .radar-source {
+  align-self: flex-start;
+  gap: 0.35rem;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
   color: var(--blue-deep);
+  font-weight: 600;
+  line-height: 1.2;
   text-decoration: none;
   overflow-wrap: anywhere;
 }
 
-.radar-source:hover {
-  text-decoration: underline;
+a.radar-source:hover {
+  border-color: var(--blue-deep);
+}
+
+.radar-source svg.brand-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: 0 0 0.95rem;
+  fill: currentColor;
 }
 
 .radar-event {
@@ -7048,7 +7460,7 @@ dialog {
   color: var(--ink);
 }
 
-/* GitHub stars above 100 and above 1,000 (see evidenceCard). */
+/* Light and strong gold tiers by published counts (see CARD_TIER_THRESHOLDS). */
 .radar-card.stars-100 {
   border-left: 3px solid #e2c56b;
   background: #fdf8e9;
@@ -7136,7 +7548,6 @@ dialog {
 
 /* Touch targets (design.md, "Controls and theme"): the source and card links
    are 44px tall to a finger, while negative margins keep the row compact. */
-.radar-source,
 .radar-links a {
   display: inline-flex;
   align-items: center;
@@ -7144,6 +7555,159 @@ dialog {
   margin-block: -12px;
 }
 
+/* The chip keeps its compact look; an invisible layer extends the tap area to
+   44px. */
+.radar-source {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+a.radar-source::after {
+  content: "";
+  position: absolute;
+  inset: -9px 0;
+}
+
 .radar-links {
   margin-top: 0.4rem;
+}
+
+/* Share control (issue #671): opens the day's pre-rendered image for
+   one benchmark. It reads as a quiet text action like the card links, with 44px
+   touch targets and negative margins so the card does not grow. */
+.share-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+  font-size: 0.98rem;
+}
+
+.share-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-block: -12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--blue-deep);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.share-link:hover {
+  text-decoration: underline;
+}
+
+.briefing-insight .share-control {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.today-share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1rem;
+  margin: 0 0 0.75rem;
+}
+
+.today-share[hidden] {
+  display: none;
+}
+
+/* Primary discovery controls remain visible at every viewport width. */
+.today-filters { align-items: end; }
+.today-segments { border: 0; padding: 0; margin: 0; min-width: 0; }
+.today-segments legend { color: var(--muted); font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.today-segments > div { display: flex; padding: 3px; border: 1px solid var(--line); border-radius: 8px; background: white; }
+.today-segments button { min-height: 36px; padding: 6px 12px; border: 0; border-radius: 5px; background: white; color: #171717; white-space: nowrap; font: inherit; font-size: 14px; }
+.today-segments button[aria-pressed="true"] { background: #e2e6e9; color: #171717; }
+.today-segments button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+@media (max-width: 760px) {
+  .today-filters { grid-template-columns: minmax(0, 1fr) auto; }
+  .today-segments { grid-column: 1 / -1; }
+  .today-segments button { flex: 1; min-height: 40px; }
+}
+
+/* Share card dialog (issue #671): the card a reader is about to send, then the
+   ways to send it. The image keeps its 1200x630 shape at any width. */
+.share-card-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: var(--space-4) 0;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-sm);
+}
+
+.share-card-status:empty {
+  display: none;
+}
+
+.share-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.share-card-actions .secondary-link,
+.benchmark-share {
+  min-height: var(--control-height);
+  background: var(--panel);
+  cursor: pointer;
+}
+
+/* Beside the title it sits on the dark chart panel or the light record page,
+   so it takes that surface's text colour instead of a white fill. */
+.benchmark-share {
+  margin-inline-start: var(--space-2);
+  border-color: color-mix(in srgb, currentColor 45%, transparent);
+  background: transparent;
+  color: inherit;
+  vertical-align: middle;
+}
+
+/* One inline thank-you line with a star link; it sits beside the action that
+   triggered it, so it needs no overlay. */
+.star-prompt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.75rem;
+  margin: 0.6rem 0;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  font-family: var(--body);
+  font-size: 0.85rem;
+}
+
+/* Under the form, not under the pitch beside it. Counting from the end keeps
+   the stacked mobile layout at one column. */
+.footer-signup .star-prompt {
+  grid-column: -2 / -1;
+  margin: 0;
+}
+
+.star-prompt-link {
+  color: var(--blue-deep);
+  font-weight: 600;
+}
+
+.star-prompt-dismiss {
+  margin-left: auto;
+  padding: 0 0.35rem;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
 }

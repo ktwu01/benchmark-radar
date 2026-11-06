@@ -23,17 +23,17 @@
     <!-- No data-i18n here. applyViewSeo in app.js owns the title, so a
          translation key on this element fought it: switching language
          replaced the leaderboard's title with the homepage's. -->
-    <title>AI Benchmark Search Engine &amp; Database | Benchmark Radar</title>
+    <title>Benchmark Radar: Search Engine for AI Benchmarks &amp; Evals</title>
     <meta
       property="og:title"
-      content="AI Benchmark Search Engine &amp; Database | Benchmark Radar"
+      content="Benchmark Radar: Search Engine for AI Benchmarks &amp; Evals"
     >
     <meta
       property="og:description"
       content="Search an open database of AI, LLM, agent, multimodal and AI-for-science benchmarks, each with its own page carrying the paper, code, dataset and scores."
     >
     <meta property="og:url" content="https://benchmark-radar.org/">
-    <meta name="twitter:title" content="AI Benchmark Search Engine &amp; Database | Benchmark Radar">
+    <meta name="twitter:title" content="Benchmark Radar: Search Engine for AI Benchmarks &amp; Evals">
     <meta
       name="twitter:description"
       content="Search an open database of AI, LLM, agent, multimodal and AI-for-science benchmarks, each with its paper, code, dataset and reported scores."
@@ -42,9 +42,11 @@
     <!-- /br:head-seo -->
 
     <!-- Without these, every share of this dashboard renders as a grey
-         placeholder with a URL under it. The card is generated from the same
-         score-frontier data as the saturation view (scripts/generate_og_image.py),
-         so a share shows reported scores over time rather than a leaderboard. -->
+         placeholder with a URL under it. The card shows what the site does,
+         a search box over catalog records, and reads its counts from the
+         built catalog at deploy time (scripts/generate_og_image.py). The
+         /saturation/ page swaps in its own score-plateau card
+         (app_pages.SATURATION_CARD). -->
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Benchmark Radar">
     <meta property="og:locale" content="en_US">
@@ -54,7 +56,7 @@
     <meta property="og:image:height" content="630">
     <meta
       property="og:image:alt"
-      content="Benchmark Radar: see where reported AI benchmark scores start to plateau, with cited score frontiers across GPQA Diamond, HLE, Terminal-Bench, and SWE-bench Verified."
+      content="Benchmark Radar: find any AI benchmark. A search box over catalog records such as SWE-bench Verified, Humanity's Last Exam and MMLU-Pro, each with its paper, code, dataset and reported scores."
     >
     <meta name="twitter:card" content="summary_large_image">
     <!-- Mirrors og:image for consumers that read the Twitter namespace only
@@ -142,7 +144,6 @@
           "url": "https://github.com/ktwu01"
         },
         "publisher": { "@id": "https://benchmark-radar.org/#organization" },
-        "isPartOf": { "@id": "https://benchmark-radar.org/#website" },
         "includedInDataCatalog": {
           "@type": "DataCatalog",
           "name": "Benchmark Radar",
@@ -218,6 +219,18 @@
     <script src="/assets/clarity.js" defer></script>
     <script src="/assets/app.js" type="module"></script>
     <link rel="stylesheet" href="/assets/design-system.css">
+    <!-- Without script nothing sets aria-expanded, so each (i) note opens on
+         hover or focus instead, and a tap focuses the button. The
+         server-seeded Landscape ranking stays readable with its legend. -->
+    <noscript>
+      <style>
+        .info-tip:hover .info-tip-body,
+        .info-tip:focus-within .info-tip-body {
+          visibility: visible;
+          opacity: 1;
+        }
+      </style>
+    </noscript>
   </head>
   <body>
     <a class="skip-link" href="#main-content" data-i18n="Skip to content">Skip to content</a>
@@ -271,6 +284,8 @@
           >
             Publications
           </a>
+          <a href="/media/" data-i18n="Media">Media</a>
+          <a href="/blog/" data-i18n="Blog">Blog</a>
           <a href="/about/" data-i18n="About">About</a>
         </nav>
       </div>
@@ -376,7 +391,11 @@
 
     <main id="main-content" tabindex="-1">
       <section class="view" id="today-view" aria-label="Today">
-        <!-- The page's one H1. It names what the whole site is rather than
+        <!-- The homepage's one H1. Every view ships in this one document, so
+             the build demotes this heading on each view's own page and
+             promotes that view's heading instead (app_pages.py), leaving
+             every served page with exactly one H1 (issue #945). It names
+             what the whole site is rather than
              what the list below currently shows, because the heading over the
              results is rewritten as the reader changes the date range and a
              heading that says "Past 7 days" is not what this page is.
@@ -389,10 +408,6 @@
         <h1 class="visually-hidden" data-i18n="Search AI, LLM, agent, multimodal, and AI-for-science benchmarks">
           Search AI, LLM, agent, multimodal, and AI-for-science benchmarks
         </h1>
-        <!-- The toolbar stays one compact row so the results below stay
-             above the fold: search, the scan date, a trigger that opens the
-             secondary filters, and a refresh control. The badge on the
-             trigger counts how many secondary filters are active. -->
         <form class="filter-panel today-filters" id="filters">
           <label class="search-field">
             <span class="visually-hidden" data-i18n="Search">Search</span>
@@ -404,10 +419,21 @@
               data-i18n-placeholder="Search benchmarks…"
             >
           </label>
-          <label class="date-field">
-            <span data-i18n="Date:">Date:</span>
-            <select id="today-date" name="date"></select>
-          </label>
+          <fieldset class="today-segments" id="today-window">
+            <legend data-i18n="Time window">Time window</legend>
+            <div>
+              <button type="button" data-today-window="latest" aria-pressed="true" data-i18n="Latest">Latest</button>
+              <button type="button" data-today-window="30d" aria-pressed="false" data-i18n="30 days">30 days</button>
+              <button type="button" data-today-window="90d" aria-pressed="false" data-i18n="90 days">90 days</button>
+            </div>
+          </fieldset>
+          <fieldset class="today-segments" id="today-order">
+            <legend data-i18n="Sort by">Sort by</legend>
+            <div>
+              <button type="button" data-today-sort="attention" aria-pressed="true" data-i18n="Attention">Attention</button>
+              <button type="button" data-today-sort="newest" aria-pressed="false" data-i18n="Newest">Newest</button>
+            </div>
+          </fieldset>
           <button
             type="button"
             class="filters-toggle"
@@ -441,6 +467,10 @@
             aria-label="More filters"
             data-i18n-aria="More filters"
           >
+            <label class="date-field">
+              <span data-i18n="Date:">Date:</span>
+              <select id="today-date" name="date"></select>
+            </label>
             <label>
               <span data-i18n="Kind">Kind</span>
               <select id="kind-filter" name="kind"></select>
@@ -469,9 +499,27 @@
           <div>
             <div class="section-title">
               <h2 id="today-heading" class="today-heading" data-i18n="Today's radar">Today's radar</h2>
+              <!-- One picture of the day's top 3 benchmarks, rendered by the
+                   daily pipeline, offered as a share icon beside the heading.
+                   Filled only on days that have one. -->
+              <div id="today-share" class="today-share" hidden></div>
               <div class="results-meta" aria-live="polite">
                 <span id="today-breakdown"></span>
-                <span id="today-sort"></span>
+                <!-- How the list is ordered is method, not the answer
+                     (design.md, "Keep page titles close and quiet"): a closed
+                     (i) that opens on hover, keyboard focus or a tap. -->
+                <span class="info-tip sort-info" id="today-sort-info">
+                  <button
+                    type="button"
+                    class="info-tip-toggle"
+                    id="today-sort-toggle"
+                    aria-expanded="false"
+                    aria-controls="today-sort"
+                    aria-label="How this list is sorted"
+                    data-i18n-aria="How this list is sorted"
+                  ><span aria-hidden="true">i</span></button>
+                  <span id="today-sort" class="info-tip-body" role="note"></span>
+                </span>
               </div>
             </div>
             <p id="today-range" class="section-note" hidden></p>
@@ -491,12 +539,6 @@
               <p id="today-page-status" role="status"></p>
               <button type="button" id="today-page-next" data-i18n="Next">Next</button>
             </nav>
-            <div class="footer-dataset">
-              <strong data-i18n="Free dataset. No crawler needed.">Free dataset. No crawler needed.</strong>
-              <span class="footer-dataset-actions">
-                <a href="https://huggingface.co/datasets/ktwu01/benchmark-radar" data-i18n="Hugging Face Data">Hugging Face Data</a>
-              </span>
-            </div>
           </div>
           <div>
             <!-- The day's narrative and Q&A describe the whole scan date
@@ -504,6 +546,38 @@
                  above the health and corpus cards (issue #248). The briefing
                  says what changed, the Q&A answers what a reader would ask
                  about it. -->
+            <!-- The signup sits above the briefing because that card is what
+                 the weekly email repeats, so a reader decides with the sample
+                 in view (issue #906). -->
+            <section class="email-signup email-signup-card" aria-labelledby="briefing-signup-heading">
+              <h2 class="email-signup-title" id="briefing-signup-heading" data-i18n="Get benchmark updates by email">Get benchmark updates by email</h2>
+              <form class="email-signup-form" action="https://app.kit.com/forms/10097391/subscriptions" method="post" target="_blank">
+                <div class="email-signup-row">
+                  <label>
+                    <span class="visually-hidden" data-i18n="Email address">Email address</span>
+                    <input type="email" name="email_address" required autocomplete="email" placeholder="you@lab.org">
+                  </label>
+                  <button type="submit" data-i18n="Subscribe">Subscribe</button>
+                </div>
+                <!-- Consent and cadence open only once an address is typed, so the
+                     resting form is a title, a field and a button. -->
+                <div class="email-signup-more">
+                  <div class="email-signup-more-inner">
+                    <label class="email-signup-consent">
+                      <input type="checkbox" required>
+                      <span data-i18n="email.signup.consent">I agree to receive Benchmark Radar emails and can unsubscribe anytime.</span>
+                      <a href="#privacy-notice" data-i18n="Privacy notice">Privacy notice</a>
+                    </label>
+                    <fieldset class="email-signup-frequency">
+                      <legend data-i18n="How often?">How often?</legend>
+                      <!-- No default: the reader picks, and the group is required. -->
+                      <label><input type="radio" name="fields[frequency]" value="daily" required> <span data-i18n="Daily">Daily</span> <span class="email-signup-hint" data-i18n="the latest each day">the latest each day</span></label>
+                      <label><input type="radio" name="fields[frequency]" value="weekly"> <span data-i18n="Weekly">Weekly</span> <span class="email-signup-hint" data-i18n="every Monday">every Monday</span></label>
+                    </fieldset>
+                  </div>
+                </div>
+              </form>
+            </section>
             <section class="daily-briefing" id="daily-briefing" aria-labelledby="daily-briefing-heading">
               <h2 class="daily-briefing-title" id="daily-briefing-heading" data-i18n="Daily briefing">Daily briefing</h2>
               <div id="daily-briefing-body"></div>
@@ -544,7 +618,7 @@
            crawlers; app.js replaces them with the live, filterable list. -->
       <section class="view" id="library-view" aria-labelledby="library-heading" hidden>
         <div class="library-toolbar">
-          <h1 id="library-heading" class="library-heading" data-i18n="Library">Library</h1>
+          <h2 id="library-heading" class="library-heading view-title" data-i18n="Library">Library</h2>
           <input id="library-search" type="search" autocomplete="off"
                  class="benchmark-search-input library-search"
                  aria-label="Search the library" data-i18n-aria="Search the library"
@@ -577,8 +651,21 @@
            side panel per cell and .com's shared-benchmark average. -->
       <section class="view" id="models-view" aria-labelledby="models-heading" hidden>
         <div class="library-toolbar">
-          <h1 id="models-heading" class="library-heading" data-i18n="Models">Models</h1>
-          <p class="models-note" data-i18n="models.note">Every model with a reported score in the catalog, side by side: models are columns, benchmarks are rows. Select a score to see its setting and source.</p>
+          <h2 id="models-heading" class="library-heading view-title" data-i18n="Models">Models</h2>
+          <!-- How to read the matrix is method, not the answer, so it sits in
+               a closed (i) beside the title instead of a line of its own. -->
+          <span class="info-tip info-tip-start" id="models-info">
+            <button
+              type="button"
+              class="info-tip-toggle"
+              id="models-info-toggle"
+              aria-expanded="false"
+              aria-controls="models-note"
+              aria-label="How to read this table"
+              data-i18n-aria="How to read this table"
+            ><span aria-hidden="true">i</span></button>
+            <span class="info-tip-body" id="models-note" role="note" data-i18n="models.note">Every model with a reported score in the catalog, side by side: models are columns, benchmarks are rows. Select a score to see its setting and source.</span>
+          </span>
           <p id="models-status" class="library-status" aria-live="polite"></p>
         </div>
         <div class="library-layout">
@@ -622,7 +709,7 @@
 
       <section class="view" id="leaderboard-view" aria-labelledby="leaderboard-heading" hidden>
         <div class="score-browse-header">
-          <h1 id="leaderboard-heading" data-i18n="Landscape">Landscape</h1>
+          <h2 id="leaderboard-heading" class="view-title" data-i18n="Landscape">Landscape</h2>
         </div>
 
         <!-- Three modes, one page (issue #530). Latest releases opens by
@@ -640,7 +727,6 @@
             <h2 id="latest-releases-heading"><span data-i18n="Latest releases">Latest releases</span> <span class="latest-releases-window" id="latest-releases-window">· 30 days</span></h2>
             <span id="latest-releases-info"></span>
           </div>
-          <p class="section-note latest-releases-deck" data-i18n="latest.deck">Recently released benchmarks, ranked by the attention they are receiving now: GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days.</p>
           <div class="latest-releases-windows" role="group" aria-label="Release window" data-i18n-aria="Release window">
             <button type="button" class="latest-releases-window-button" data-lwindow="7d" aria-pressed="false" data-i18n="7 days">7 days</button>
             <button type="button" class="latest-releases-window-button" data-lwindow="30d" aria-pressed="true" data-i18n="30 days">30 days</button>
@@ -658,15 +744,43 @@
               aria-controls="latest-releases-list"
             >
           </label>
-          <div class="leaderboard-top-columns" aria-hidden="true">
-            <span class="leaderboard-top-columns-rank" data-i18n="Rank">Rank</span>
-            <span class="leaderboard-top-columns-name" data-i18n="Benchmark">Benchmark</span>
-            <span class="leaderboard-top-columns-count" data-i18n="Attention score">Attention score</span>
+          <!-- What the ranking measures and how to read the score and its tag
+               is method, not the answer, so it sits in a closed (i) after the
+               "Attention score" header instead of two open paragraphs around
+               the list. -->
+          <div class="latest-releases-columns">
+            <div class="leaderboard-top-columns" aria-hidden="true">
+              <span class="leaderboard-top-columns-rank" data-i18n="Rank">Rank</span>
+              <span class="leaderboard-top-columns-name" data-i18n="Benchmark">Benchmark</span>
+              <span class="leaderboard-top-columns-count" data-i18n="Attention score">Attention score</span>
+            </div>
+            <span class="info-tip latest-releases-about" id="latest-about">
+              <button
+                type="button"
+                class="info-tip-toggle"
+                id="latest-about-toggle"
+                aria-expanded="false"
+                aria-controls="latest-about-note"
+                aria-label="How this ranking works"
+                data-i18n-aria="How this ranking works"
+              ><span aria-hidden="true">i</span></button>
+              <span class="info-tip-body" id="latest-about-note" role="note">
+                <span class="latest-releases-deck" data-i18n="latest.deck">Recently released benchmarks, ranked by the attention they are receiving now: GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days.</span>
+                <span class="latest-releases-legend" data-i18n="latest.legend">The number is the attention score, out of 100. The tag under it is a separate check: how much of the score is backed by observed data. A high tag means at least two signals were found and they cover 75% or more of the score; a low tag means fewer than two signals were found, or they cover less than 40% of the score. It says nothing about how good the benchmark is.</span>
+              </span>
+            </span>
           </div>
           <ol class="leaderboard-top-list latest-releases-list" id="latest-releases-list"></ol>
           <p class="empty-state latest-releases-empty" id="latest-releases-empty" aria-live="polite" hidden></p>
           <p class="section-note" id="latest-releases-note" aria-live="polite"></p>
-          <p class="section-note latest-releases-legend" data-i18n="latest.legend">The number is the attention score, out of 100. The tag under it is a separate check: how much of the score is backed by observed data. A high tag means at least two signals were found and they cover 75% or more of the score; a low tag means fewer than two signals were found, or they cover less than 40% of the score. It says nothing about how good the benchmark is.</p>
+        </section>
+
+        <section class="leaderboard-top institution-ranking" id="institution-ranking" aria-labelledby="institution-ranking-heading" hidden>
+          <div class="leaderboard-top-heading">
+            <h2 id="institution-ranking-heading" data-i18n="Top institutions">Top institutions</h2>
+          </div>
+          <ol class="leaderboard-top-list" id="institution-ranking-list"></ol>
+          <p class="section-note" id="institution-ranking-note"></p>
         </section>
 
         <!-- The adoption view, shown when the reader picks it or follows a
@@ -846,7 +960,7 @@
         <header class="view-heading">
           <div>
             <p class="eyebrow" data-i18n="Big picture">Big picture</p>
-            <h1 id="map-heading" data-i18n="What we found">What we found</h1>
+            <h2 id="map-heading" class="view-title" data-i18n="What we found">What we found</h2>
           </div>
           <p class="heading-note" data-i18n="map.heading.note">
             See what shows up most often and where it came from. Open the connections view
@@ -888,10 +1002,10 @@
 
       <section class="view" id="saturation-view" aria-labelledby="saturation-heading" hidden>
         <div class="score-browse-header">
-          <h1 id="saturation-heading" data-i18n="Saturation">Saturation</h1>
+          <h2 id="saturation-heading" class="view-title" data-i18n="Saturation">Saturation</h2>
           <label class="score-filter" for="saturation-score-filter">
             <span data-i18n="Show benchmarks with highest reported score below:">Show benchmarks with highest reported score below:</span>
-            <input id="saturation-score-filter" name="lscore" type="range" min="10" max="100" step="10" value="70" list="score-filter-steps" data-score-filter aria-controls="benchmark-search-results frontier-benchmark">
+            <input id="saturation-score-filter" name="lscore" type="range" min="10" max="100" step="10" value="70" list="score-filter-steps" data-score-filter aria-controls="benchmark-search-results">
             <output id="saturation-score-value" for="saturation-score-filter">70</output>
           </label>
         </div>
@@ -901,7 +1015,8 @@
                titled block with two subheadings and eight cards, which outranked
                the search box it was meant to support; they are now one line of
                chips for a reader who has nothing in mind to type. -->
-          <aside class="benchmark-navigator" aria-labelledby="benchmark-search-heading">
+          <details class="benchmark-navigator" id="benchmark-browser" open>
+            <summary class="benchmark-browser-toggle" data-i18n="Change benchmark">Change benchmark</summary>
             <div class="benchmark-search">
               <h2 class="benchmark-search-label" id="benchmark-search-heading">
                 <label for="benchmark-search-input"
@@ -917,7 +1032,7 @@
                      class="benchmark-search-input benchmark-model-input"
                      data-i18n-placeholder="Filter by model, e.g. GPT-6 Sol"
                      placeholder="Filter by model, e.g. GPT-6 Sol"
-                     aria-controls="benchmark-search-results frontier-benchmark" />
+                     aria-controls="benchmark-search-results" />
               <p id="benchmark-search-status" class="benchmark-search-status"></p>
               <div id="benchmark-search-results"></div>
               <button id="benchmark-search-more" class="clear-button" type="button" data-i18n="Show more" hidden>Show more</button>
@@ -927,7 +1042,7 @@
               </div>
               <div id="benchmark-shortlist" class="benchmark-shortlist" hidden></div>
             </div>
-          </aside>
+          </details>
 
           <section class="frontier-panel" id="adoption-frontier" aria-labelledby="frontier-heading">
             <div class="frontier-heading-row">
@@ -955,16 +1070,7 @@
                 </div>
                 <p class="frontier-subline" id="frontier-subline" hidden></p>
               </div>
-              <div class="frontier-controls">
-                <span class="frontier-stage" id="frontier-stage"></span>
-                <label class="frontier-picker">
-                  All tracked benchmarks
-                  <select id="frontier-benchmark" name="lfrontier"></select>
-                </label>
-              </div>
             </div>
-            <p id="frontier-filter-note" class="section-note" role="status" hidden></p>
-            <p id="frontier-highest-score" class="section-note" hidden></p>
             <div class="frontier-catalog" id="frontier-catalog" hidden></div>
             <div class="frontier-chart" id="frontier-chart"></div>
             <!-- Legend below the figure it explains: above it, it pushed the
@@ -1002,7 +1108,7 @@
 
       <section class="view" id="trends-view" aria-labelledby="trends-heading" hidden>
         <header class="view-heading">
-          <h1 id="trends-heading" data-i18n="Trend">Trend</h1>
+          <h2 id="trends-heading" class="view-title" data-i18n="Trend">Trend</h2>
         </header>
 
         <!-- Research directions, merged from benchmark-radar.com's Trends (#420).
@@ -1165,52 +1271,131 @@
     </dialog>
 
     <footer>
-      <!-- These documents keep real links so readers and crawlers can reach them. -->
-      <nav class="footer-nav" aria-label="About this site" data-i18n-aria="About this site">
-        <a href="/blog/" data-i18n="Blog">Blog</a>
-      </nav>
-      <p id="build-meta">Updated —</p>
-      <aside class="adoption-cta" aria-label="Support Benchmark Radar">
-        <p data-i18n="If this saved you research time, cite the work, star the repo and help other eval builders find it.">
-          If this saved you research time, cite the work, star the repo and help other eval builders find it.
-        </p>
-        <span class="adoption-actions">
-          <!-- A real path, so the citation panel is useful before JavaScript
-               and can be indexed as its own page. -->
-          <a
-            class="primary-link"
-            id="cite-open"
-            href="/cite/"
-            aria-haspopup="dialog"
-            aria-controls="cite-dialog"
-            aria-expanded="false"
-            data-i18n="Cite"
-          >Cite</a>
-          <a
-            class="primary-link"
-            href="https://github.com/ktwu01/benchmark-radar"
-            target="_blank"
-            rel="noopener noreferrer"
-            data-i18n="Star the repository"
-          >Star the repository</a>
-          <button type="button" class="secondary-link" id="share-radar" data-i18n="Share">
-            Share
-          </button>
-        </span>
-      </aside>
-      <details class="privacy-note">
-        <summary data-i18n="Privacy notice">Privacy notice</summary>
-        <p>
-          If you accept, we use Microsoft Clarity cookies, session replays and heatmaps to understand
-          how people use this site and improve its navigation and content. Nothing loads until you
-          accept, and sensitive content is masked by default. See the
-          <a href="https://privacy.microsoft.com/privacystatement">Microsoft Privacy Statement</a>.
-        </p>
-        <p>
-          <button type="button" class="privacy-choice" data-analytics-consent-reset data-i18n="Change analytics choice">Change analytics choice</button>
-        </p>
-      </details>
-      <p class="copyright">© 2026 Koutian Wu and contributors</p>
+      <!-- Every page reuses this footer, so the signup reaches readers who
+           never open Today (issue #906). The form posts straight to Kit, with
+           no script, so it works on the blog and benchmark pages too. -->
+      <section class="email-signup footer-signup" aria-labelledby="footer-signup-heading">
+        <h2 class="email-signup-title" id="footer-signup-heading" data-i18n="Get benchmark updates by email">Get benchmark updates by email</h2>
+        <form class="email-signup-form" action="https://app.kit.com/forms/10097391/subscriptions" method="post" target="_blank">
+          <div class="email-signup-row">
+            <label>
+              <span class="visually-hidden" data-i18n="Email address">Email address</span>
+              <input type="email" name="email_address" required autocomplete="email" placeholder="you@lab.org">
+            </label>
+            <button type="submit" data-i18n="Subscribe">Subscribe</button>
+          </div>
+          <!-- Consent and cadence open only once an address is typed, so the
+               resting form is a title, a field and a button. -->
+          <div class="email-signup-more">
+            <div class="email-signup-more-inner">
+              <label class="email-signup-consent">
+                <input type="checkbox" required>
+                <span data-i18n="email.signup.consent">I agree to receive Benchmark Radar emails and can unsubscribe anytime.</span>
+                <a href="#privacy-notice" data-i18n="Privacy notice">Privacy notice</a>
+              </label>
+              <fieldset class="email-signup-frequency">
+                <legend data-i18n="How often?">How often?</legend>
+                <!-- No default: the reader picks, and the group is required. -->
+                <label><input type="radio" name="fields[frequency]" value="daily" required> <span data-i18n="Daily">Daily</span> <span class="email-signup-hint" data-i18n="the latest each day">the latest each day</span></label>
+                <label><input type="radio" name="fields[frequency]" value="weekly"> <span data-i18n="Weekly">Weekly</span> <span class="email-signup-hint" data-i18n="every Monday">every Monday</span></label>
+              </fieldset>
+            </div>
+          </div>
+        </form>
+      </section>
+      <div class="footer-columns">
+        <aside class="adoption-cta" aria-label="Support Benchmark Radar">
+          <p data-i18n="If this saved you research time, cite the work, star the repo and help other eval builders find it.">
+            If this saved you research time, cite the work, star the repo and help other eval builders find it.
+          </p>
+          <span class="adoption-actions">
+            <!-- A real path, so the citation panel is useful before JavaScript
+                 and can be indexed as its own page. -->
+            <a
+              class="primary-link"
+              id="cite-open"
+              href="/cite/"
+              aria-haspopup="dialog"
+              aria-controls="cite-dialog"
+              aria-expanded="false"
+              data-i18n="Cite"
+            >Cite</a>
+            <a
+              class="primary-link"
+              href="https://github.com/ktwu01/benchmark-radar"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-i18n="Star the repository"
+            >Star the repository</a>
+            <button type="button" class="secondary-link" id="share-radar" data-i18n="Share">
+              Share
+            </button>
+          </span>
+        </aside>
+        <nav class="footer-links" aria-label="Explore" data-i18n-aria="Explore">
+          <h2 data-i18n="Explore">Explore</h2>
+          <a href="/" data-i18n="Today">Today</a>
+          <a href="/benchmarks/" data-i18n="All benchmarks">All benchmarks</a>
+          <a href="/library/" data-i18n="Library">Library</a>
+          <a href="/models/" data-i18n="Models">Models</a>
+          <a href="/trends/" data-i18n="Trends">Trends</a>
+          <a href="/saturation/" data-i18n="Saturation">Saturation</a>
+          <a href="/leaderboard/" data-i18n="Landscape">Landscape</a>
+        </nav>
+        <nav class="footer-links" aria-label="Data" data-i18n-aria="Data">
+          <h2 data-i18n="Data">Data</h2>
+          <a href="https://huggingface.co/datasets/ktwu01/benchmark-radar" data-i18n="Download the dataset">Download the dataset</a>
+          <a href="/cli/" data-i18n="Command-line tool">Command-line tool</a>
+          <a href="/feed.xml" data-i18n="RSS feed">RSS feed</a>
+          <a href="https://github.com/ktwu01/benchmark-radar" data-i18n="Source code">Source code</a>
+        </nav>
+        <nav class="footer-links" aria-label="Project" data-i18n-aria="Project">
+          <h2 data-i18n="Project">Project</h2>
+          <a href="/about/" data-i18n="About">About</a>
+          <a href="/cite/" data-i18n="Publications">Publications</a>
+          <a href="/media/" data-i18n="Media">Media</a>
+          <a href="/blog/" data-i18n="Blog">Blog</a>
+        </nav>
+        <nav class="footer-links" aria-label="Contribute" data-i18n-aria="Contribute">
+          <h2 data-i18n="Contribute">Contribute</h2>
+          <a href="https://github.com/ktwu01/benchmark-radar/issues/new?template=feature-request.yml" data-i18n="Suggest a benchmark or source">Suggest a benchmark or source</a>
+          <a href="https://github.com/ktwu01/benchmark-radar/issues/new?template=report.yml" data-i18n="Report a mistake">Report a mistake</a>
+          <a href="https://github.com/ktwu01/benchmark-radar/issues/new?template=use-case.yml" data-i18n="Share how you use it">Share how you use it</a>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <div class="footer-legal">
+          <p class="copyright">© 2026 Benchmark Radar contributors</p>
+          <details class="privacy-note" id="privacy-notice">
+            <summary data-i18n="Privacy notice">Privacy notice</summary>
+            <p>
+              If you accept, we use Microsoft Clarity cookies, session replays and heatmaps to understand
+              how people use this site and improve its navigation and content. Nothing loads until you
+              accept, and sensitive content is masked by default. See the
+              <a href="https://privacy.microsoft.com/privacystatement">Microsoft Privacy Statement</a>.
+            </p>
+            <p>
+              If you subscribe to the weekly email, Kit stores your email address to send it. Every email
+              has an unsubscribe link. To delete your address, write to
+              <a href="mailto:ktwu@utexas.edu">ktwu@utexas.edu</a>.
+            </p>
+            <p>
+              <button type="button" class="privacy-choice" data-analytics-consent-reset data-i18n="Change analytics choice">Change analytics choice</button>
+            </p>
+          </details>
+          <button type="button" class="footer-lang" data-lang-switch>English · 中文</button>
+        </div>
+        <div class="footer-contact">
+          <span data-i18n="Contact">Contact</span>
+          <a href="mailto:ktwu@utexas.edu" aria-label="ktwu@utexas.edu" title="ktwu@utexas.edu"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm9 6.9L4.2 6h15.6L12 11.9Zm-8 6.6V8.9l8 5.9 8-5.9v9.6H4Z"/></svg></a>
+          <a href="https://discord.com/invite/JX9Caj4fMF" target="_blank" rel="noopener noreferrer" aria-label="Discord" title="Discord"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 0 0-4.8851-1.5152.0741.0741 0 0 0-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 0 0-.0785-.037 19.7363 19.7363 0 0 0-4.8852 1.515.0699.0699 0 0 0-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 0 0 .0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 0 0 .0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 0 0-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 0 1-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 0 1 .0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 0 1 .0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 0 1-.0066.1276 12.2986 12.2986 0 0 1-1.873.8914.0766.0766 0 0 0-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 0 0 .0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 0 0 .0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 0 0-.0312-.0286ZM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0957 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189Zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0957 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg></a>
+          <a href="https://x.com/ktwu01" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg></a>
+          <details class="footer-wechat">
+            <summary aria-label="WeChat" title="WeChat"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05a6.127 6.127 0 0 1-.253-1.72c0-3.571 3.437-6.467 7.678-6.467.233 0 .463.013.694.031C17.02 4.792 13.205 2.188 8.69 2.188Zm-2.6 4.408c.654 0 1.184.517 1.184 1.154 0 .637-.53 1.154-1.184 1.154-.654 0-1.184-.517-1.184-1.154 0-.637.53-1.154 1.184-1.154Zm5.51 0c.654 0 1.184.517 1.184 1.154 0 .637-.53 1.154-1.184 1.154-.654 0-1.184-.517-1.184-1.154 0-.637.53-1.154 1.184-1.154Zm7.835 3.124c-3.858 0-6.984 2.667-6.984 5.957 0 3.29 3.126 5.957 6.984 5.957.848 0 1.663-.146 2.418-.408a.622.622 0 0 1 .516.07l1.371.802a.235.235 0 0 0 .12.039.213.213 0 0 0 .208-.213c0-.052-.02-.102-.035-.153l-.28-1.067a.426.426 0 0 1 .153-.479c1.359-1.111 2.2-2.707 2.2-4.548 0-3.29-3.126-5.957-6.984-5.957Zm-3.865 3.594c.55 0 .996.435.996.971 0 .537-.446.972-.996.972-.55 0-.996-.435-.996-.972 0-.536.446-.971.996-.971Zm7.729 0c.55 0 .996.435.996.971 0 .537-.446.972-.996.972-.55 0-.996-.435-.996-.972 0-.536.446-.971.996-.971Z"/></svg></summary>
+            <span class="footer-wechat-id">ktwu001</span>
+          </details>
+        </div>
+      </div>
     </footer>
   </body>
 </html>

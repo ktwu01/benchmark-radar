@@ -922,3 +922,170 @@ def test_shipped_registry_tracks_brain_to_text_score_evidence():
         "Stanford NPTL",
         "UC Davis Neuroprosthetics Lab",
     }
+
+
+def test_audits_travel_with_the_entry_and_the_card_link(tmp_path):
+    # An audit recorded only in the YAML is evidence nobody downstream can
+    # see: the ranking entry and the card->benchmark link are the two
+    # projections every consumer reads, so both must carry it.
+    import json
+    from datetime import date
+
+    document = minimal_registry()
+    document["benchmarks"][0]["audits"] = [
+        {
+            "auditor": "June Kim",
+            # A real date object: the shipped registry writes audit dates
+            # unquoted, PyYAML hands back a date, and the published surfaces
+            # are JSON, which cannot carry one.
+            "audit_date": date(2026, 5, 24),
+            "audit_url": "https://example.com/alpha-audit",
+            "finding": "Some Alpha instances cannot run.",
+            "receipts": ["https://example.com/alpha-receipt"],
+        }
+    ]
+    board = adoption_rank(load_registry(write_registry(tmp_path, document)))
+
+    alpha = next(entry for entry in board["entries"] if entry["benchmark_id"] == "alpha")
+    assert alpha["audits"] == [
+        {
+            "auditor": "June Kim",
+            "audit_date": "2026-05-24",
+            "audit_url": "https://example.com/alpha-audit",
+            "finding": "Some Alpha instances cannot run.",
+            "receipts": ["https://example.com/alpha-receipt"],
+        }
+    ]
+    # No audit recorded: the entry still carries the field, empty, exactly
+    # as it carries an empty aliases list.
+    beta = next(entry for entry in board["entries"] if entry["benchmark_id"] == "beta")
+    assert beta["audits"] == []
+
+    # The Org One card is the one that reports both benchmarks; the roster
+    # is sorted newest first, so it is not model_cards[0].
+    card = next(item for item in board["model_cards"] if item["model_card_id"] == "org_one_card")
+    summaries = {item["benchmark_id"]: item for item in card["reported_benchmarks"]}
+    assert summaries["alpha"]["audits"] == alpha["audits"]
+    assert summaries["beta"]["audits"] is None
+
+    # The whole board is a published JSON document; a date object anywhere
+    # in it would fail the build at serialization time.
+    json.dumps(board)
+
+
+def _registry_with_audit(tmp_path, audit):
+    document = minimal_registry()
+    document["benchmarks"][0]["audits"] = [audit]
+    return write_registry(tmp_path, document)
+
+
+def test_a_malformed_audit_date_is_rejected(tmp_path):
+    # The projection stringifies a YAML date object, but a malformed string
+    # would pass straight through to the browser formatter that throws on
+    # it, so the loader rejects it like any other bad registry date. A real
+    # calendar date in either form loads: see the audits-travel test above,
+    # which uses a date object.
+    path = _registry_with_audit(
+        tmp_path,
+        {
+            "auditor": "June Kim",
+            "audit_date": "2026-13-40",
+            "audit_url": "https://example.com/audit",
+            "finding": "Some Alpha instances cannot run.",
+            "receipts": ["https://example.com/receipt"],
+        },
+    )
+    with pytest.raises(ModelCardRegistryError, match="audit_date"):
+        load_registry(path)
+
+
+def test_a_non_http_audit_link_is_rejected(tmp_path):
+    # Audit and receipt links are published as hrefs; anything that is not
+    # HTTP(S) would render as a dead or unsafe link on every surface.
+    audit = {
+        "auditor": "June Kim",
+        "audit_date": "2026-05-24",
+        "audit_url": "https://example.com/audit",
+        "finding": "Some Alpha instances cannot run.",
+        "receipts": ["https://example.com/receipt"],
+    }
+    path = _registry_with_audit(tmp_path, {**audit, "audit_url": "ftp://example.com/audit"})
+    with pytest.raises(ModelCardRegistryError, match="audit_url must be HTTP"):
+        load_registry(path)
+
+    path = _registry_with_audit(tmp_path, {**audit, "receipts": ["javascript:alert(1)"]})
+    with pytest.raises(ModelCardRegistryError, match="receipt must be HTTP"):
+        load_registry(path)
+
+
+def test_a_hostless_audit_link_is_rejected(tmp_path):
+    # A scheme alone is not a link: `https:///path` and `http:foo` carry an
+    # HTTP scheme but no host, so the published href would name no server.
+    # The scheme prefix check this replaces let both through.
+    audit = {
+        "auditor": "June Kim",
+        "audit_date": "2026-05-24",
+        "audit_url": "https://example.com/audit",
+        "finding": "Some Alpha instances cannot run.",
+        "receipts": ["https://example.com/receipt"],
+    }
+    path = _registry_with_audit(tmp_path, {**audit, "audit_url": "https:///no-host"})
+    with pytest.raises(ModelCardRegistryError, match="audit_url must be HTTP"):
+        load_registry(path)
+
+    path = _registry_with_audit(tmp_path, {**audit, "receipts": ["http:foo"]})
+    with pytest.raises(ModelCardRegistryError, match="receipt must be HTTP"):
+        load_registry(path)
+
+
+def test_a_non_list_audits_field_is_rejected(tmp_path):
+    # A mapping in place of the list would otherwise be iterated by key at
+    # projection time and publish garbage audit records.
+    document = minimal_registry()
+    document["benchmarks"][0]["audits"] = {"auditor": "June Kim"}
+    with pytest.raises(ModelCardRegistryError, match="audits must be a list"):
+        load_registry(write_registry(tmp_path, document))
+
+
+def test_shipped_registry_publishes_every_recorded_audit():
+    import json
+
+    board = build_adoption_rank(DEFAULT_REGISTRY_PATH)
+    audited = {
+        entry["benchmark_id"]: entry["audits"] for entry in board["entries"] if entry["audits"]
+    }
+
+    # The seven benchmarks carrying June Kim's audit records, named so a
+    # future audit addition updates this test deliberately rather than
+    # slipping into the published ranking unnoticed. Frontier-Bench has no
+    # entry of its own: it is Terminal-Bench's next version, so its audit
+    # rides on terminal_bench below. tau-bench carries none: the paper once
+    # recorded there covers Kim's own generative-tau-bench extension, so it
+    # is not an audit of tau-bench and stays out of the audits field.
+    # SWE-bench Verified carries none either: the record once filed there is
+    # Kim's own agent pipeline run, which he calls a leaderboard
+    # configuration rather than an audit, so it stays out too.
+    assert sorted(audited) == [
+        "deepswe",
+        "frontiercode",
+        "mirrorcode",
+        "programbench",
+        "slopcodebench",
+        "swe_bench_pro",
+        "terminal_bench",
+    ]
+    # DeepSWE was audited twice: the original run and the v1.1 re-audit.
+    assert len(audited["deepswe"]) == 2
+    # Terminal-Bench carries its own 2.1 frame audit plus the Frontier-Bench
+    # frame audit.
+    assert len(audited["terminal_bench"]) == 2
+    for audits in audited.values():
+        for audit in audits:
+            assert audit["auditor"] == "June Kim"
+            # Stringified at the projection: a YAML date object here would
+            # break every JSON consumer of the ranking.
+            assert isinstance(audit["audit_date"], str)
+            assert audit["audit_url"].startswith("https://")
+            assert audit["finding"]
+            assert audit["receipts"]
+    json.dumps(board)

@@ -22,7 +22,7 @@
   <a href="https://scholar.google.com/citations?user=s9w1k-cAAAAJ&amp;hl=en"><img alt="Google Scholar" src="https://img.shields.io/badge/Google%20Scholar-4285F4?style=for-the-badge&amp;logo=googlescholar&amp;logoColor=white"></a>
 </p>
 
-做 benchmark 研究的时候发现新东西太多了，所以我搞了这个持续爬虫，每天自动从全网抓新的 benchmark 相关信息。它目前每天从 40 个公开来源采集，并持续更新。你如果需要寻找 related work 或找到适合eval自己的agent 的 bench 或者关注最新的 eval 进展，可以看这里哈哈哈：
+做 benchmark 研究的时候发现新东西太多了，所以我搞了这个持续爬虫，每天自动从全网抓新的 benchmark 相关信息。它目前每天从 41 个公开来源采集，并持续更新。你如果需要寻找 related work 或找到适合eval自己的agent 的 bench 或者关注最新的 eval 进展，可以看这里哈哈哈：
 github.com/ktwu01/benchmark-radar，每天更新，并支持一键导出数据
 
 **几秒找到一个 benchmark，再看模型成绩如何随时间变化。点击下面的动图，查看
@@ -134,8 +134,8 @@ benchmark 论文、代码仓库、数据集和 release 的每日发现，和一�
 目录、模型卡与技术报告中的引用、以及分数变化历史放在一起。每条记录都保留自己的
 来源标识和引用，方便你核对一个 benchmark 和它背后的评测证据。
 
-每日发现覆盖 40 个来源：16 个直接 connector 和 24 个机构自有的研究与工程 feed。
-目录汇集了来自 4 个 benchmark 目录的记录，并为其中有分数的记录保留数值观测。项目
+每日发现覆盖 41 个来源：17 个直接 connector 和 24 个机构自有的研究与工程 feed。
+目录汇集了来自 5 个 benchmark 目录的记录，并为其中有分数的记录保留数值观测。项目
 提供 web dashboard，包含 benchmark 排行榜、分数与实际使用量的 Pareto 前沿视图、
 saturation 和趋势视图、每日 feed、可下载的证据数据，以及一个可离线查询的命令行
 工具（CLI）和可复现的分析流程。
@@ -160,7 +160,7 @@ saturation 和趋势视图、每日 feed、可下载的证据数据，以及一�
 
 每日信息流也接入了 [Crossref](https://www.crossref.org) 和 [DataCite](https://datacite.org) 的公开 DOI 元数据，以及 [OpenAIRE](https://www.openaire.eu) 汇聚的公开研究成果记录。
 
-前沿模型分数综合了三类来源。上方的 SWE-bench Verified 时间线来自各家实验室的模型报告和 system card；其余的模型分数几乎都来自 [Artificial Analysis](https://artificialanalysis.ai) 和 [LLM Stats](https://llm-stats.com)，每条分数都保留了原始来源引用。感谢两家把数据公开出来。更大范围的 benchmark 目录还有第四类来源 [OpenCompass Hub](https://hub.opencompass.org.cn)。
+前沿模型分数综合了三类来源。上方的 SWE-bench Verified 时间线来自各家实验室的模型报告和 system card；其余的模型分数几乎都来自 [Artificial Analysis](https://artificialanalysis.ai) 和 [LLM Stats](https://llm-stats.com)，每条分数都保留了原始来源引用。感谢两家把数据公开出来。更大范围的 benchmark 目录还有第四类来源 [OpenCompass Hub](https://hub.opencompass.org.cn)。[Benchmark Saturation](https://github.com/evaleval/benchmark-saturation) 研究（Akhtar 等，[arXiv:2602.16763](https://arxiv.org/abs/2602.16763)，MIT 许可）人工标注了 60 个 benchmark 的前五名模型分数，也收进了目录。感谢他们公开这份数据。
 
 特别感谢 [Xiaopai Liu](https://github.com/liuxiaopai-ai)（[@bourneliu66](https://x.com/bourneliu66)）在 X 上为 Benchmark Radar 宣传，也感谢他的每日 builder 简报 [BuilderPulse](https://github.com/BuilderPulse/BuilderPulse)。
 
@@ -172,4 +172,4 @@ saturation 和趋势视图、每日 feed、可下载的证据数据，以及一�
 
 </details>
 
-© 2026 Koutian Wu and contributors
+© 2026 Benchmark Radar contributors

@@ -36,7 +36,7 @@ Radar for benchmark discovery and score tracking:
 
 I kept running into new benchmarks while doing benchmark research, so I built a
 crawler that continuously collects benchmark-related signals from across the
-web. It pulls evidence from 40 public sources every day, and keeps updating.
+web. It pulls evidence from 41 public sources every day, and keeps updating.
 
 **Find a benchmark in seconds, then see how model scores change over time. Click
 the GIF below to watch SWE-bench Verified move toward saturation.**
@@ -163,8 +163,8 @@ benchmark catalog, mentions in model cards and technical reports, and score
 histories. It retains source identities and citations so readers can inspect
 candidate benchmarks and their evaluation evidence.
 
-Daily discovery draws on 40 sources: 16 direct connectors and 24 first-party
-research and engineering feeds. The catalog collects source records from four
+Daily discovery draws on 41 sources: 17 direct connectors and 24 first-party
+research and engineering feeds. The catalog collects source records from five
 benchmark catalogs, with numeric score observations on the records that carry
 them. The project publishes the web dashboard with a benchmark leaderboard, a
 Pareto frontier view of score against measured use, saturation and trend views,
@@ -216,7 +216,10 @@ remaining model scores come from [Artificial Analysis](https://artificialanalysi
 and [LLM Stats](https://llm-stats.com), and every score keeps a citation to the
 source it was read from. Thank you both for publishing that data openly. The
 wider benchmark catalog adds [OpenCompass Hub](https://hub.opencompass.org.cn)
-as a fourth source.
+as a fourth source. The [Benchmark Saturation](https://github.com/evaleval/benchmark-saturation)
+study (Akhtar et al., [arXiv:2602.16763](https://arxiv.org/abs/2602.16763), MIT)
+adds its hand-annotated top five model scores for 60 benchmarks. Thank you for
+releasing that table.
 
 A special thank you to [Xiaopai Liu](https://github.com/liuxiaopai-ai)
 ([@bourneliu66](https://x.com/bourneliu66)) for the shout-out on X, and to his
@@ -237,4 +240,4 @@ daily builder brief, [BuilderPulse](https://github.com/BuilderPulse/BuilderPulse
 
 </details>
 
-© 2026 Koutian Wu and contributors
+© 2026 Benchmark Radar contributors

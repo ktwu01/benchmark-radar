@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
-  "model_count": 946,
+  "model_count": 974,
   "source_counts": {
     "artificial_analysis": 595,
     "llm_stats": 339,
-    "model_reports": 109
+    "model_reports": 141
   },
-  "multiple_sources": 94,
+  "multiple_sources": 97,
   "organizations": [
     "AI21 Labs",
     "AI9Stars",
@@ -17,8 +17,10 @@
     "Anthropic",
     "ApodexAI",
     "Arcee AI",
+    "BIT",
     "Baichuan AI",
     "Baidu",
+    "Bespoke Labs",
     "ByteDance",
     "ByteDance Seed",
     "Celeris",
@@ -27,11 +29,13 @@
     "Databricks",
     "Deep Cogito",
     "DeepSeek",
+    "EPFL-INL",
     "Google",
     "HumanOmni",
     "IBM",
     "Inception",
     "InclusionAI",
+    "Infera-Neuro",
     "Korea Telecom",
     "KwaiKAT",
     "LG AI Research",
@@ -52,11 +56,13 @@
     "Nex",
     "Nex AGI",
     "Nous Research",
+    "Okubo Lab at CIBR",
     "OmniVinci",
     "OpenAI",
     "OpenBMB",
     "OpenChat",
     "OpenGVLab",
+    "OpenThoughts",
     "Perplexity",
     "Poolside",
     "Prime Intellect",
@@ -69,6 +75,8 @@
     "Sarvam AI",
     "ServiceNow",
     "Shanghai Jiao Tong University",
+    "Shlizerman Lab",
+    "Stanford NPTL",
     "StepFun",
     "Swiss AI Initiative",
     "TII UAE",
@@ -76,6 +84,8 @@
     "Thinking Machines",
     "Thinking Machines Lab",
     "Trillion Labs",
+    "Tyler Benster et al.",
+    "UC Davis Neuroprosthetics Lab",
     "University of Rochester",
     "Upstage",
     "VITA",
@@ -931,6 +941,17 @@
       }
     },
     {
+      "key": "anthropic-claude-fable-5-1",
+      "model": "Claude Fable 5.1",
+      "organization": "Anthropic",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 2
+      }
+    },
+    {
       "key": "anthropic-claude-fable-5-adaptive-reasoning-max-effort-opus-4-8-fallback",
       "model": "Claude Fable 5 (Adaptive Reasoning, Max Effort, Opus 4.8 Fallback)",
       "organization": "Anthropic",
@@ -1153,7 +1174,18 @@
       ],
       "source_counts": {
         "llm_stats": 12,
-        "model_reports": 9
+        "model_reports": 11
+      }
+    },
+    {
+      "key": "anthropic-claude-opus-5-5",
+      "model": "Claude Opus 5.5",
+      "organization": "Anthropic",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 3
       }
     },
     {
@@ -1302,6 +1334,17 @@
       }
     },
     {
+      "key": "anthropic-claude-sonnet-5-5",
+      "model": "Claude Sonnet 5.5",
+      "organization": "Anthropic",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "anthropic-claude-sonnet-5-adaptive-reasoning-high-effort",
       "model": "Claude Sonnet 5 (Adaptive Reasoning, High Effort)",
       "organization": "Anthropic",
@@ -1442,6 +1485,28 @@
       ],
       "source_counts": {
         "artificial_analysis": 13
+      }
+    },
+    {
+      "key": "bespoke-labs-bespoke-stratos-7b",
+      "model": "Bespoke-Stratos-7B",
+      "organization": "Bespoke Labs",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 3
+      }
+    },
+    {
+      "key": "bit-bit-submission",
+      "model": "BIT submission",
+      "organization": "BIT",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -1801,7 +1866,18 @@
       }
     },
     {
-      "key": "deepseek-deepseek-r1-distill-llama-8b",
+      "key": "deepseek-deepseek-r1-distill-llama-8b-9c58c0e5349a96a55b545594906d0e68d659152e14a30680d3b2f8ba39cb5162",
+      "model": "DeepSeek-R1-Distill-Llama-8B",
+      "organization": "DeepSeek",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 3
+      }
+    },
+    {
+      "key": "deepseek-deepseek-r1-distill-llama-8b-f7af3e54cf8778b41d710ff62cffcf0a4cc7c48d8e9d36b1b9a00ee53fdda0d3",
       "model": "DeepSeek R1 Distill Llama 8B",
       "organization": "DeepSeek",
       "provenance_sources": [
@@ -1853,7 +1929,7 @@
       }
     },
     {
-      "key": "deepseek-deepseek-r1-distill-qwen-7b",
+      "key": "deepseek-deepseek-r1-distill-qwen-7b-5c1de7007d96d2426963590842edf42b1adeb56d8b6eb0c485f4e417c1a62f09",
       "model": "DeepSeek R1 Distill Qwen 7B",
       "organization": "DeepSeek",
       "provenance_sources": [
@@ -1861,6 +1937,17 @@
       ],
       "source_counts": {
         "llm_stats": 4
+      }
+    },
+    {
+      "key": "deepseek-deepseek-r1-distill-qwen-7b-f54640213c2a150431bde30d39e2253f87ac5f43e5b47d185312426a5eb8e18c",
+      "model": "DeepSeek-R1-Distill-Qwen-7B",
+      "organization": "DeepSeek",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 3
       }
     },
     {
@@ -2128,7 +2215,18 @@
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 19
+        "model_reports": 21
+      }
+    },
+    {
+      "key": "deepseek-deepseek-v4-1-flash-1017",
+      "model": "DeepSeek-V4.1-Flash-1017",
+      "organization": "DeepSeek",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -2169,10 +2267,12 @@
       "model": "DeepSeek-V4-Flash-0731",
       "organization": "DeepSeek",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 9
+        "llm_stats": 9,
+        "model_reports": 2
       }
     },
     {
@@ -2366,6 +2466,17 @@
       ],
       "source_counts": {
         "llm_stats": 14
+      }
+    },
+    {
+      "key": "epfl-inl-epfl-inl-submission",
+      "model": "EPFL-INL submission",
+      "organization": "EPFL-INL",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -2863,7 +2974,7 @@
       ],
       "source_counts": {
         "llm_stats": 20,
-        "model_reports": 19
+        "model_reports": 20
       }
     },
     {
@@ -2950,10 +3061,12 @@
       "model": "Gemini 3.6 Flash",
       "organization": "Google",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 7
+        "llm_stats": 7,
+        "model_reports": 1
       }
     },
     {
@@ -3011,6 +3124,17 @@
       ],
       "source_counts": {
         "artificial_analysis": 12
+      }
+    },
+    {
+      "key": "google-gemini-3-8-flash",
+      "model": "Gemini 3.8 Flash",
+      "organization": "Google",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -3088,6 +3212,17 @@
       ],
       "source_counts": {
         "artificial_analysis": 12
+      }
+    },
+    {
+      "key": "google-gemini-4-argon",
+      "model": "gemini-4-argon",
+      "organization": "Google",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -3786,6 +3921,17 @@
       }
     },
     {
+      "key": "infera-neuro-infera-neuro-submission",
+      "model": "Infera-Neuro submission",
+      "organization": "Infera-Neuro",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "korea-telecom-mi-dm-k-2-5-pro",
       "model": "Mi:dm K 2.5 Pro",
       "organization": "Korea Telecom",
@@ -4283,7 +4429,18 @@
       }
     },
     {
-      "key": "meta-llama-3-2-3b-instruct",
+      "key": "meta-llama-3-2-3b-instruct-0b51e7b39551c0eca217ad9422fab96960e2199380aeb15ea79db957e01c6dd8",
+      "model": "Llama-3.2-3B-Instruct",
+      "organization": "Meta",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 3
+      }
+    },
+    {
+      "key": "meta-llama-3-2-3b-instruct-9f0afa5d6e2108e23739a7968c207fc233d18c671164d872838fb673ac0f1346",
       "model": "Llama 3.2 3B Instruct",
       "organization": "Meta",
       "provenance_sources": [
@@ -4509,6 +4666,17 @@
       }
     },
     {
+      "key": "meta-muse-spark-1-3-contributor",
+      "model": "Muse Spark 1.3 Contributor",
+      "organization": "Meta",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 2
+      }
+    },
+    {
       "key": "microsoft-mai-code-1-1-flash",
       "model": "MAI-Code-1.1-Flash",
       "organization": "Microsoft",
@@ -4619,6 +4787,17 @@
       }
     },
     {
+      "key": "microsoft-phi-4-mini-base-model-3-8b",
+      "model": "Phi-4-Mini (base model, 3.8B)",
+      "organization": "Microsoft",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 3
+      }
+    },
+    {
       "key": "microsoft-phi-4-mini-instruct",
       "model": "Phi-4 Mini Instruct",
       "organization": "Microsoft",
@@ -4638,6 +4817,17 @@
       ],
       "source_counts": {
         "llm_stats": 3
+      }
+    },
+    {
+      "key": "microsoft-phi-4-mini-reasoning-3-8b",
+      "model": "Phi-4-mini-reasoning (3.8B)",
+      "organization": "Microsoft",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 4
       }
     },
     {
@@ -6229,6 +6419,17 @@
       }
     },
     {
+      "key": "okubo-lab-at-cibr-teamcyber-submission",
+      "model": "TeamCyber submission",
+      "organization": "Okubo Lab at CIBR",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "omnivinci-omnivinci-9b",
       "model": "OmniVinci-9B",
       "organization": "OmniVinci",
@@ -6959,10 +7160,12 @@
       "model": "GPT-5.6 Luna",
       "organization": "OpenAI",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 44
+        "llm_stats": 44,
+        "model_reports": 2
       }
     },
     {
@@ -7041,7 +7244,7 @@
       ],
       "source_counts": {
         "llm_stats": 44,
-        "model_reports": 1
+        "model_reports": 7
       }
     },
     {
@@ -7412,6 +7615,50 @@
       }
     },
     {
+      "key": "openai-gpt-6-1-sol",
+      "model": "GPT-6.1 Sol",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 2
+      }
+    },
+    {
+      "key": "openai-gpt-6-astra",
+      "model": "GPT-6 Astra",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 12
+      }
+    },
+    {
+      "key": "openai-gpt-6-luna",
+      "model": "GPT-6 Luna",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 2
+      }
+    },
+    {
+      "key": "openai-gpt-6-sol",
+      "model": "GPT-6 Sol",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 2
+      }
+    },
+    {
       "key": "openai-gpt-oss-120b",
       "model": "GPT OSS 120B",
       "organization": "OpenAI",
@@ -7518,11 +7765,13 @@
       "organization": "OpenAI",
       "provenance_sources": [
         "artificial_analysis",
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
         "artificial_analysis": 4,
-        "llm_stats": 6
+        "llm_stats": 6,
+        "model_reports": 3
       }
     },
     {
@@ -7716,6 +7965,17 @@
       ],
       "source_counts": {
         "model_reports": 1
+      }
+    },
+    {
+      "key": "openthoughts-openthinker-7b",
+      "model": "OpenThinker-7B",
+      "organization": "OpenThoughts",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 3
       }
     },
     {
@@ -9391,6 +9651,17 @@
       }
     },
     {
+      "key": "shlizerman-lab-dcond-lift",
+      "model": "DCoND-LIFT",
+      "organization": "Shlizerman Lab",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "sk-telecom-a-x-k2",
       "model": "A.X-K2",
       "organization": "SK Telecom",
@@ -9399,6 +9670,39 @@
       ],
       "source_counts": {
         "artificial_analysis": 11
+      }
+    },
+    {
+      "key": "stanford-nptl-pytorch-baseline",
+      "model": "PyTorch baseline",
+      "organization": "Stanford NPTL",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "stanford-nptl-stanford-nptl-causal-rnn-ensemble-5gram",
+      "model": "Stanford-NPTL causal RNN Ensemble + 5gram",
+      "organization": "Stanford NPTL",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "stanford-nptl-stanford-nptl-causal-rnn-tta-ensemble-5gram",
+      "model": "Stanford-NPTL causal RNN TTA-Ensemble + 5gram",
+      "organization": "Stanford NPTL",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -9610,6 +9914,28 @@
       ],
       "source_counts": {
         "artificial_analysis": 10
+      }
+    },
+    {
+      "key": "tyler-benster-et-al-tyler-benster-et-al-submission",
+      "model": "Tyler Benster et al. submission",
+      "organization": "Tyler Benster et al.",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "uc-davis-neuroprosthetics-lab-ucd-npl-causal-rnn-5gram",
+      "model": "UCD-NPL causal RNN + 5gram",
+      "organization": "UC Davis Neuroprosthetics Lab",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -10033,7 +10359,7 @@
       ],
       "source_counts": {
         "llm_stats": 10,
-        "model_reports": 1
+        "model_reports": 3
       }
     },
     {

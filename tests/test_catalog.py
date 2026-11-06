@@ -17,6 +17,7 @@ import yaml
 from benchmark_radar.catalog import (
     CatalogError,
     assign_slugs,
+    https_url,
     normalize_snapshot,
     slugify,
     write_catalog,
@@ -1345,3 +1346,77 @@ def test_no_curated_layer_still_attributes_a_model_to_google_deepmind():
     for name in ("data/benchmark_scores.yml", "data/model_cards.yml"):
         text = Path(name).read_text(encoding="utf-8")
         assert "Google DeepMind" not in text, name
+
+
+def test_https_url_upgrades_only_hosts_that_redirect_to_https():
+    assert https_url("http://arxiv.org/abs/2608.23390v1") == "https://arxiv.org/abs/2608.23390v1"
+    assert https_url("HTTP://github.com/a/b") == "https://github.com/a/b"
+    assert https_url("https://arxiv.org/abs/1") == "https://arxiv.org/abs/1"
+    # A host not known to serve https keeps its scheme: rewriting it could break the link.
+    assert https_url("http://example.org/bench") == "http://example.org/bench"
+    assert https_url("http://arxiv.org.evil.example/x") == "http://arxiv.org.evil.example/x"
+    assert https_url("") == ""
+
+
+def test_registry_audits_reach_the_catalog_record_index_and_shard() -> None:
+    """The catalog is built from normalized records, so an audit the
+    normalizer drops never reaches the index, the shard, or any page or
+    client built from them, however faithfully the ranking carries it."""
+    import json
+
+    from benchmark_radar.benchmark_scores import DEFAULT_SCORES_PATH, load_scores
+    from benchmark_radar.catalog import build_benchmark_index
+    from benchmark_radar.catalog_identity import IdentityIndex
+    from benchmark_radar.catalog_reports import normalize_reports
+    from benchmark_radar.catalog_shards import build_shard
+    from benchmark_radar.model_cards import DEFAULT_REGISTRY_PATH, load_registry
+
+    normalized = normalize_reports(
+        load_registry(DEFAULT_REGISTRY_PATH), load_scores(DEFAULT_SCORES_PATH)
+    )
+    records = {record["key"]: record for record in normalized["source_records"]}
+
+    record = records["model-reports:programbench"]
+    assert len(record["audits"]) == 1
+    audit = record["audits"][0]
+    assert audit["auditor"] == "June Kim"
+    assert audit["audit_date"] == "2026-06-27"
+    assert audit["receipts"]
+
+    audited_keys = {
+        "deepswe",
+        "frontiercode",
+        "mirrorcode",
+        "programbench",
+        "slopcodebench",
+        "swe_bench_pro",
+        "terminal_bench",
+    }
+    for key, item in records.items():
+        # DeepSWE carries two audit passes; Terminal-Bench carries its own
+        # 2.1 audit plus the Frontier-Bench audit, Frontier-Bench being this
+        # series' next version rather than a separate benchmark.
+        expected = 2 if key in {"model-reports:deepswe", "model-reports:terminal_bench"} else 1
+        if key.removeprefix("model-reports:") in audited_keys:
+            assert len(item["audits"]) == expected, key
+        else:
+            # Present and empty, like the record's other list fields, so a
+            # consumer never has to guess whether the field exists.
+            assert item["audits"] == [], key
+
+    index = {item["key"]: item for item in build_benchmark_index(normalized["source_records"])}
+    assert index["model-reports:programbench"]["audits"] == record["audits"]
+
+    # A record from a source that records no audits still indexes, with the
+    # field empty rather than missing.
+    bare = {"key": "other:x", "slug": "x", "name": "X", "source": "other"}
+    assert build_benchmark_index([bare])[0]["audits"] == []
+
+    shard = build_shard(
+        record,
+        identity=IdentityIndex(),
+        series_by_key={},
+        observations_by_key={},
+    )
+    assert shard["record"]["audits"] == record["audits"]
+    json.dumps(shard)

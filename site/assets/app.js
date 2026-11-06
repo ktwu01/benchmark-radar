@@ -1,3 +1,4 @@
+import { starPrompt } from "./star-prompt.js";
 import { searchCatalog, searchCatalogMatches } from "./catalog-search.js";
 import { SKYLINE_DOMAINS, SKYLINE_START_DATE, benchmarkDateLabel, skylineModel, skylineGeometry, skylineDateLanes, skylineScoreLanes, skylineCapPositions, skylineFrontierSteps, scorePopulation, matchesScoreCutoff, scoreBrowserSummary } from "./skyline.js";
 import {
@@ -52,6 +53,8 @@ const SOURCE_DISPLAY_NAMES = {
   huggingface: "Hugging Face",
   github: "GitHub",
   github_organizations: "GitHub Organization",
+  // Requested repositories are recorded as plain GitHub records (issue #555).
+  github_requested_repositories: "GitHub",
   huggingface_papers: "Hugging Face Papers",
   kaggle_datasets: "Kaggle Dataset",
   zenodo: "Zenodo",
@@ -360,7 +363,6 @@ function rerenderCurrentView() {
   if (state.view === "trends") renderTrends();
   if (state.view === "map") renderTrendMap();
   renderStaleBanner();
-  renderBuildMeta();
 }
 
 function toggleLang() {
@@ -400,7 +402,6 @@ const I18N = {
     "No source documents recorded": "尚未记录来源文档",
     "Open the source-document list below to trace each count to its citations.": "打开下方来源文档列表，可核对每个计数对应的引用。",
     "No source documents recorded yet.": "尚未记录来源文档。",
-    "Each linked benchmark counts once for this document. Open its detail to inspect scores, protocols and citations.": "每条 benchmark 记录在这份文档中只计一次。打开详情可查看成绩、测试条件和引用。",
     "Scores and citations from model reports. Each score keeps its document, test version, protocol and publication date.": "这些成绩和引用来自模型报告。每条成绩都保留来源文档、测试版本、测试条件和发布日期。",
     "No numeric scores recorded for this benchmark.": "这条 benchmark 尚未记录数值成绩。",
     "Benchmark Frontier: {n} individual benchmarks from all sources. Dated benchmarks run left to right from 2024. Undated benchmarks remain visible by score. Gold rings mark the measured Pareto frontier.": "Benchmark 前沿：全部来源的 {n} 个独立标记。日期从 2024 年起向右排列，日期未知的仍按分数显示。金色环标出有测量依据的 Pareto 前沿。",
@@ -427,9 +428,6 @@ const I18N = {
     "Save benchmark": "收藏这个 benchmark",
     "Remove from saved": "取消收藏",
     "{shown} of {total} benchmarks": "{total} 个 benchmark 中显示 {shown} 个",
-    "Paper": "论文",
-    "Code": "代码",
-    "Data": "数据",
     "Sort": "排序",
     "Models": "模型",
     "models.note": "目录中所有有报告成绩的模型，并排比较：列是模型，行是 benchmark。点一个分数，查看它的设置和来源。",
@@ -473,7 +471,6 @@ const I18N = {
     "System card": "系统卡",
     "Technical report": "技术报告",
     "Release post": "发布文章",
-    "{n} benchmarks": "{n} 个 benchmark",
     "{n} new for this lab": "其中 {n} 个是该实验室首次报告",
     "First reported by this lab here": "该实验室在这份文档中首次报告",
     "In this lab's own model documents ({n})": "该实验室自己的模型文档（{n} 份）",
@@ -485,15 +482,12 @@ const I18N = {
     "Score details": "成绩详情",
     "Model name": "模型名",
     "Lab": "实验室",
-    "Previous": "上一页",
-    "Next": "下一页",
     "Same setting only: {setting}": "只比较相同设置：{setting}",
     "Lower is better: the longest bar is the lowest score.": "越低越好：最长的条是最低的分数。",
     "Only benchmarks all shown models share": "只看这些模型共有的 benchmark",
     "{from}–{to} of {n} models, newest first; a model's configurations stay together": "{n} 个模型中的第 {from}–{to} 个，从新到旧；同一模型的各配置排在一起",
     "{from}–{to} of {n} models, most benchmarks first": "{n} 个模型中的第 {from}–{to} 个，按有成绩的 benchmark 数从多到少",
     "Most benchmarks": "benchmark 最多",
-    "Source": "来源",
     "All sources": "全部来源",
     "these models share no benchmark on a 0–100 scale. Pick one source to compare them on the same records.": "这些模型没有共同的 0–100 刻度 benchmark。选择一个来源，就能在相同的记录上比较。",
     "0 models": "0 个模型",
@@ -544,7 +538,6 @@ const I18N = {
     "Incomplete measurements": "测量信息不完整",
     "Other score scales": "其他分数刻度",
     "Date unknown": "日期未知",
-    "Reported score": "报告分数",
     "Height": "柱高",
     "Models with reported scores": "有成绩的独立模型数",
     "Height recorded for {measured} of {visible} shown benchmarks": "显示的 {visible} 个 benchmark 中，{measured} 个有柱高数据",
@@ -555,6 +548,7 @@ const I18N = {
     "Count or score scale unverified": "数量或分数刻度未核实",
     "{visible} of {n} benchmarks shown · {s} sources in total": "显示 {visible} / {n} 个 benchmark · 全部数据来自 {s} 个来源",
     "Browse all benchmarks": "查找全部 benchmark",
+    "Change benchmark": "切换 benchmark",
     "Benchmark Frontier": "Benchmark 前沿",
     "Benchmark Frontier chart": "Benchmark 前沿图",
     "Which difficult benchmarks have been tested most": "哪些难题，已有更多模型参加测试",
@@ -590,7 +584,6 @@ const I18N = {
     "Instrument": "评测版本",
     "Protocol": "测试条件",
     "Score reported": "成绩报告日期",
-    "Code": "代码",
     "Science": "科学",
     "Agent": "智能体",
     "Multimodal": "多模态",
@@ -600,14 +593,12 @@ const I18N = {
     "3D skyline of {n} benchmarks. Time runs left to right from 2022. Earlier dates have a separate segment. Stems show recorded model-card adoption; hollow marks show unknown adoption or score scales. Gold rings mark the measured Pareto frontier.": "{n} 个 benchmark 的三维天际线。时间从 2022 年起向右延伸，更早的日期单独保留。细柱表示已记录的模型卡采用量；空心点表示采用量或分数刻度未知。金色圆环标出有测量依据的 Pareto 前沿。",
     // --- Brackets and chrome -------------------------------------------------
     "Skip to content": "跳到主要内容",
-    "Benchmark Radar": "Benchmark 雷达日报",
     "Subscribe to Benchmark Radar via RSS": "通过 RSS 订阅 Benchmark Radar",
     "Site utilities": "网站工具",
     "Switch to Chinese (中文)": "切换到中文",
     "Switch to English": "切换到英文",
     "Get in touch · Email, WeChat, Discord": "联系我 · 邮件、微信、Discord",
     Data: "数据",
-    Contact: "联系",
     "Privacy notice": "隐私声明",
     "Change analytics choice": "更改分析设置",
     Accept: "接受",
@@ -623,6 +614,26 @@ const I18N = {
     Trend: "趋势",
     Explore: "探索",
     Blog: "博客",
+    Media: "媒体报道",
+    "Get benchmark updates by email": "通过邮件获取 benchmark 更新",
+    "Email address": "邮箱地址",
+    Subscribe: "订阅",
+    "email.signup.consent": "我同意接收 Benchmark Radar 的邮件，并可随时退订。",
+    "How often?": "多久一封？",
+    Daily: "每天",
+    "the latest each day": "每天最新动态",
+    Weekly: "每周",
+    "every Monday": "每周一",
+    "Download the dataset": "下载数据集",
+    "Command-line tool": "命令行工具",
+    "RSS feed": "RSS 订阅",
+    "Source code": "源代码",
+    Project: "项目",
+    Contribute: "参与贡献",
+    "Suggest a benchmark or source": "推荐 benchmark 或数据源",
+    "Report a mistake": "报告错误",
+    "Share how you use it": "分享你的使用场景",
+    "In the media": "媒体报道",
     Rubric: "评分标准",
     "Daily briefing": "每日简报",
     "Questions for today": "今日问答",
@@ -657,6 +668,15 @@ const I18N = {
     Filters: "筛选",
     "More filters": "更多筛选",
     "Date:": "日期:",
+    "Latest": "最新",
+    "Past 90 days": "近 90 天",
+    "Time window": "时间范围",
+    "Sort by": "排序方式",
+    "Sort: Newest": "排序：最新",
+    "How this list is sorted": "列表如何排序",
+    "How to read this table": "如何阅读此表",
+    "How this ranking works": "这个排名如何计算",
+    "Sort: Releases first, then recorded stars + likes + downloads + points; missing signals last": "排序：新发布的排在前面，其余按已记录的星标、点赞、下载和积分总数；缺少数据的记录排在最后",
     "Search benchmarks…": "搜索benchmark…",
     "Refresh data": "刷新数据",
     "Today's radar": "今日雷达",
@@ -673,11 +693,8 @@ const I18N = {
     "data point": "条成绩记录",
     "data points": "条成绩记录",
     "Data points": "成绩记录数",
-    "Benchmark": "Benchmark",
     "Highest score": "最高分",
-    "Reported by": "报告来源",
     "First reported": "首次报告",
-    "Domain": "领域",
     "{n} reports": "{n} 次报告",
     "Click to pin benchmark details": "点击以固定该 benchmark 详情",
     "No benchmarks match this cutoff.": "没有 benchmark 符合该上限。",
@@ -688,7 +705,6 @@ const I18N = {
     "Knowledge": "知识",
     "Language": "语言",
     "Other": "其他",
-    "Benchmarks": "benchmark 数",
     "Jan": "1月",
     "Feb": "2月",
     "Mar": "3月",
@@ -713,8 +729,6 @@ const I18N = {
     "All-time totals": "全部统计",
     All: "全部",
     // --- Today view row and metrics -----------------------------------------
-    "Updated": "更新于",
-    "Released": "发布于",
     "Just now": "刚刚",
     "{n}m ago": "{n} 分钟前",
     "{n}h ago": "{n} 小时前",
@@ -749,7 +763,6 @@ const I18N = {
     "Stated findings": "明确结论",
     "Scores over time": "分数随时间变化",
     "Benchmark reported scores over time": "benchmark报告分数随时间的变化",
-    "All tracked benchmarks": "所有追踪的benchmark",
     "Search every benchmark": "搜索全部benchmark",
     "Most documented benchmarks": "来源文档最多的 benchmark",
     Rank: "排名",
@@ -836,7 +849,6 @@ const I18N = {
     "scores read from a document": "个从文档读到的分数",
     organization: "个机构",
     benchmark: "个benchmark",
-    benchmarks: "个benchmark",
     value: "个值",
     values: "个值",
     date: "个日期",
@@ -853,10 +865,13 @@ const I18N = {
     topics: "个主题",
     // --- Today / health ------------------------------------------------------
     "Evidence cited by GPT": "GPT 引用的证据",
+    "Share image": "分享图片",
+    "Share the top 3 benchmark of the day": "分享今日前三个 benchmark",
+    "Share the top 2 benchmarks of the day": "分享今日前两个 benchmark",
+    "Share the top benchmark of the day": "分享今日第一 benchmark",
+    "opens in a new tab": "在新标签页打开",
     "Caveat: ": "注意: ",
     "No briefing was recorded for this day.": "这一天没有记录简报。",
-    "No observations match these filters. Clear one or more filters to widen the view.":
-      "没有符合条件的记录。清除一个或多个筛选条件以扩大范围。",
     "No observations match these filters.": "没有符合这些筛选条件的记录。",
     "Clear one or more filters to widen the view.": "清除一个或多个筛选条件以扩大范围。",
     "Try:": "试试:",
@@ -1116,12 +1131,12 @@ const I18N = {
       "完整数据集可以免费下载。如果它帮你节省了研究时间，请给仓库点个 Star，让更多评测开发者找到它。",
     "Hugging Face Data": "Hugging Face 数据",
     "Star the repository": "给仓库点 Star",
-    "Free dataset. No crawler needed.": "免费数据集，无需爬虫。",
     "If this saved you research time, cite the work, star the repo and help other eval builders find it.":
       "如果它帮你节省了研究时间，请引用这项工作、给仓库点 Star，让更多评测开发者找到它。",
     Cite: "引用",
     About: "关于",
     "About this site": "关于本站",
+    "About this benchmark": "关于这个 benchmark",
     Publications: "论文与引用",
     "Search AI, LLM, agent, multimodal, and AI-for-science benchmarks":
       "搜索 AI、大模型、智能体、多模态与科学智能 benchmark",
@@ -1147,6 +1162,22 @@ const I18N = {
     "Agent prompt": "给编程智能体的提示词",
     "Read the setup guide": "查看安装指南",
     "Share Benchmark Radar": "分享 Benchmark Radar",
+    "Share card": "分享卡片",
+    "Share {name} as a card": "将 {name} 分享为卡片",
+    "This card could not be loaded. You can still share its link.": "这张卡片加载失败，你仍然可以分享它的链接。",
+    "This card could not be drawn here. You can still share its link.": "这里无法生成卡片，你仍然可以分享它的链接。",
+    "Share {name}": "分享 {name}",
+    "{name} on Benchmark Radar": "Benchmark Radar 上的 {name}",
+    "Share card for {name}": "{name} 的分享卡片",
+    "Share…": "分享…",
+    "Copy image": "复制图片",
+    "Copy link": "复制链接",
+    "Post on X ↗": "发布到 X ↗",
+    "Copy card and post on X ↗": "复制卡片并发布到 X ↗",
+    "Card copied. Paste it into your post (Ctrl+V or Cmd+V).": "卡片已复制。在帖子里粘贴即可（Ctrl+V 或 Cmd+V）。",
+    "Download the card and attach it to your post.": "请下载卡片，再添加到帖子里。",
+    "That did not work here. Copy the link instead.": "此处无法完成，请改为复制链接。",
+    "This benchmark's card is not ready yet. You can still share its link.": "这个 benchmark 的卡片还没生成，你仍然可以分享它的链接。",
     Share: "分享",
     Copied: "已复制",
     Contact: "联系作者",
@@ -1291,6 +1322,10 @@ const I18N = {
     "{value} · unverified": "{value} · 未经核验",
     "source ↗": "来源 ↗",
     "Coverage {coverage}": "覆盖率 {coverage}",
+    "Recently released benchmarks, ranked by the attention they are receiving now (GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days, together 80%) and by how often their institutions appear on benchmark papers in the corpus (20%). Repositories holding only a README, licence or images, and archived or deleted repositories, are listed but not ranked.":
+      "近期发布的benchmark，按当前获得的关注度（GitHub star、Hugging Face 论文点赞以及最近 30 天的 Hugging Face 数据集下载量，合计 80%）以及其机构在语料 benchmark 论文中出现的频次（20%）排序。只含 README、许可证或图片的仓库，以及已归档或已删除的仓库，仅列出，不参与排名。",
+    "The number is the score, out of 100. The tag under it is a separate check: how much of the score is backed by observed data. A high tag means at least two signals were found and they cover 75% or more of the score; a low tag means fewer than two signals were found, or they cover less than 40% of the score. It says nothing about how good the benchmark is.":
+      "数字是得分（满分 100）。下方的标签是另一回事：得分有多少来自实际观察到的数据。“高”表示至少找到两类信号，且合计覆盖得分的 75% 以上；“低”表示找到的信号少于两类，或合计覆盖不到得分的 40%。它不代表 benchmark 本身的好坏。",
     "latest.legend":
       "数字是关注度得分（满分 100）。下方的标签是另一回事：得分有多少来自实际观察到的数据。“高”表示至少找到两类信号，且合计覆盖得分的 75% 以上；“低”表示找到的信号少于两类，或合计覆盖不到得分的 40%。它不代表 benchmark 本身的好坏。",
     "{level} data": "数据支撑：{level}",
@@ -1303,6 +1338,19 @@ const I18N = {
     "limited signals: not enough fresh durable signal to rank":
       "信号有限：缺少足够新鲜的持久信号，未纳入排名",
     "no score": "无得分",
+    "Institution frequency": "机构出现频次",
+    "limited signals: the repository has no code or data yet": "信号有限：仓库尚无代码或数据",
+    "limited signals: the repository is archived": "信号有限：仓库已归档",
+    "limited signals: the repository is no longer available": "信号有限：仓库已不可访问",
+    "as written in the paper": "按论文原文",
+    "Institutions linked by OpenAlex": "OpenAlex 关联的机构",
+    "Plus {weight}% institution frequency: how many benchmark papers in the whole corpus list the release's best-known institution among its first three, normalized as log1p(count) / log1p(the most frequent institution's count), not by the window. A release with no institution on file gets no affiliation credit. A repository holding only a README, licence or images, or one that is archived or deleted, is listed but not ranked.":
+      "另加 {weight}% 的机构出现频次：在整个语料中，该发布前三个机构里最常出现者被多少篇 benchmark 论文列出，按 log1p(该数) / log1p(出现最多的机构的篇数) 归一化，而非按时间窗口。没有机构记录的发布不获得机构分。只含 README、许可证或图片的仓库，以及已归档或已删除的仓库，仅列出，不参与排名。",
+    "Top institutions": "机构排行",
+    "{count} papers": "{count} 篇论文",
+    "Institutions ranked by how many benchmark papers in the corpus list them, from OpenAlex's linked institutions for {papers} arXiv papers. A count of papers, not a grade.":
+      "按语料中列出该机构的 benchmark 论文数量排序，数据来自 OpenAlex 为 {papers} 篇 arXiv 论文关联的机构。这是论文计数，不是评级。",
+    Institutions: "机构",
     "No benchmark released in the last {days} days has a measurable attention signal yet.":
       "最近 {days} 天内发布的benchmark尚无可测量的关注度信号。",
     "Try {window}": "试试 {window}",
@@ -1321,7 +1369,6 @@ const I18N = {
     "Clear the search": "清除搜索",
     "Showing {shown} that match “{query}”.": "显示与“{query}”匹配的 {shown} 个。",
     normalized: "归一化",
-    "not scored": "未计分",
     "Ranking {method}: {signals}, each normalized as log1p(value) / log1p(window maximum) and summed to a 0 to 100 score. A release is ranked only when enough of its weight comes from fresh, durable signals; the rest are listed with limited signals. Dataset downloads are a rolling 30-day figure, never a cumulative total. Stars come from the benchmark's own repository, never a parent framework. Window {start} to {end}, UTC.":
       "排名方法 {method}：{signals}，各信号按 log1p(值) / log1p(窗口最大值) 归一化后加权求和为 0 到 100 的得分。只有当足够权重来自新鲜且持久的信号时才纳入排名，其余因信号有限仅列出。数据集下载量为滚动 30 天数字，绝非累计总量。star 数来自该benchmark自己的仓库，绝非上级框架。时间窗口 {start} 至 {end}（UTC）。",
     "scale. Every number below is read from the same definition the pipeline applies.":
@@ -1380,6 +1427,9 @@ const I18N = {
     "introduced in the same paper": "出自同一篇论文",
     "has a related variant": "存在相关变体",
     "Related records": "相关记录",
+    "Independent audits": "独立审计",
+    "Independent audit": "独立审计",
+    "Receipt": "凭证",
     "Loading benchmark details…": "正在加载benchmark详情…",
     "Could not load details for this benchmark.": "无法加载该benchmark的详情。",
     "Ranked by how many curated model cards report each benchmark, which measures vendor reporting convention rather than benchmark quality. A crawled score count answers a different question: AIME 2025 carries 115 crawled scores and GPQA Diamond 26 model cards, and those are different measures rather than competing ones.":
@@ -1400,6 +1450,7 @@ const state = {
   data: null,
   view: "today",
   todayDate: "",
+  todaySort: "attention",
   q: "",
   kind: "",
   category: "",
@@ -1478,6 +1529,11 @@ const state = {
   observations: null,
   fullDataLoaded: false,
   fullDataPromise: null,
+  // One entry per Today window ("30d"), holding the file for that window:
+  // each record once, at its latest sighting (issue #1058).
+  windowData: {},
+  windowPromises: {},
+  observationsSource: null,
   trendsDataLoaded: false,
   trendsDataPromise: null,
 };
@@ -1579,6 +1635,44 @@ function infoDisclosure(text) {
     }),
     element("p", { className: "info-disclosure-body", text }),
   ]);
+}
+
+// A closed (i) whose only state is the toggle's aria-expanded; CSS shows the
+// note when it is "true" and never on its own, so what is shown and what
+// assistive tech is told cannot disagree. Hover and focus open it and leaving
+// closes it; a click or tap pins it open, a second one closes it; Escape
+// closes it only while it is open; a click elsewhere closes it.
+function bindInfoTip(wrapper, toggle) {
+  if (!wrapper || !toggle) return;
+  let pinned = false;
+  const isOpen = () => toggle.getAttribute("aria-expanded") === "true";
+  const setOpen = (open) => {
+    if (!open) pinned = false;
+    toggle.setAttribute("aria-expanded", String(open));
+  };
+  wrapper.addEventListener("mouseenter", () => setOpen(true));
+  wrapper.addEventListener("mouseleave", () => {
+    if (!pinned) setOpen(false);
+  });
+  toggle.addEventListener("focus", () => setOpen(true));
+  toggle.addEventListener("blur", () => {
+    if (!pinned) setOpen(false);
+  });
+  toggle.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (pinned) {
+      setOpen(false);
+    } else {
+      pinned = true;
+      setOpen(true);
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && isOpen()) setOpen(false);
+  });
+  document.addEventListener("click", () => {
+    if (isOpen()) setOpen(false);
+  });
 }
 
 // Coalesce bursts of input (typing in a filter box) into a single trailing
@@ -1695,6 +1789,7 @@ function readUrl() {
   // A bare search permalink has archive-wide intent. An explicit date remains
   // a deliberate narrow search, including the "today" link in the scope banner.
   state.todayDate = params.get("date") || (state.q ? "all" : "");
+  state.todaySort = params.get("sort") === "newest" ? "newest" : "attention";
   state.kind = params.get("kind") || "";
   state.category = params.get("category") || "";
   state.source = params.get("source") || "";
@@ -1796,6 +1891,7 @@ function writeUrl(mode = "replace") {
       // on reload after the reader clicked "Search today" in the scope banner.
       params.set("date", state.todayDate);
     }
+    if (state.todaySort === "newest") params.set("sort", "newest");
     if (state.q) params.set("q", state.q);
     if (state.kind) params.set("kind", state.kind);
     if (state.category) params.set("category", state.category);
@@ -1978,7 +2074,7 @@ async function onPopState() {
 // translates through data-i18n.
 const VIEW_SEO = {
   today: {
-    title: "AI Benchmark Search Engine & Database | Benchmark Radar",
+    title: "Benchmark Radar: Search Engine for AI Benchmarks & Evals",
     description:
       "Search an open database of AI, LLM, agent, multimodal and AI-for-science benchmarks, each with its own page carrying the paper, code, dataset and scores.",
     canonical: "/",
@@ -2106,6 +2202,8 @@ function applyCurrentSeo() {
 // a false current item.
 function syncNavState() {
   const utility = activeUtility();
+  const award = document.querySelector(".hf-upvote-banner");
+  if (award) award.hidden = state.view !== "today" || Boolean(utility);
   document.querySelectorAll("[data-view]").forEach((item) => {
     const active = !utility && item.dataset.view === state.view;
     item.classList.toggle("nav-active", active);
@@ -2133,11 +2231,55 @@ function syncNavState() {
   citeOpen?.setAttribute("aria-expanded", String(utility === "cite"));
   if (utility === "cite") citeOpen?.setAttribute("aria-current", "page");
   else citeOpen?.removeAttribute("aria-current");
+  const activeNav = document.querySelector('.view-nav [aria-current="page"]');
+  activeNav?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
 }
 
 // `update` false is for restoring a view that is already in the URL (boot and
 // popstate), where writing history again would either duplicate the entry or
 // fight the entry being restored.
+// The page's one h1 belongs to the open view (issue #945). The build ships each
+// view's own page that way; switching views without a reload has to move it
+// too, or the only h1 is left inside a hidden section. h1 and h2 view headings
+// are styled alike, so the swap changes the outline and not the screen.
+function viewHeading(section) {
+  if (section.id === "today-view") {
+    return section.querySelector(":scope > h1.visually-hidden, :scope > h2.visually-hidden");
+  }
+  return section.querySelector(`#${section.id.replace(/-view$/, "-heading")}`);
+}
+
+function retagHeading(node, tag) {
+  // Only headings change level; a sheet whose title is not rendered yet is skipped.
+  if (!/^H[1-6]$/.test(node?.tagName || "") || node.tagName === tag.toUpperCase()) return;
+  const copy = document.createElement(tag);
+  for (const { name, value } of Array.from(node.attributes)) copy.setAttribute(name, value);
+  copy.append(...node.childNodes);
+  node.replaceWith(copy);
+}
+
+// /cli/, /cite/ and /rubric/ are pages too: while one of their sheets is open,
+// its title is the page's h1 and every view heading steps down.
+const UTILITY_TITLES = { "cli-dialog": "cli-title", "cite-dialog": "cite-title", "rubric-dialog": "rubric-title" };
+
+function syncPageHeading() {
+  const sections = Array.from(document.querySelectorAll(".view"));
+  const openSheet = Object.keys(UTILITY_TITLES).find((id) => byId(id)?.open);
+  for (const [dialog, title] of Object.entries(UTILITY_TITLES)) {
+    if (dialog !== openSheet) retagHeading(byId(title), "h2");
+  }
+  sections.forEach((section) => {
+    if (openSheet || section.hidden) retagHeading(viewHeading(section), "h2");
+  });
+  if (openSheet) {
+    retagHeading(byId(UTILITY_TITLES[openSheet]), "h1");
+    return;
+  }
+  sections.forEach((section) => {
+    if (!section.hidden) retagHeading(viewHeading(section), "h1");
+  });
+}
+
 function setView(view, update = true, mode = "push") {
   if (selectedFrontierPoint || describedFrontierPoint) {
     clearFrontierPointSelection();
@@ -2147,6 +2289,7 @@ function setView(view, update = true, mode = "push") {
   document.querySelectorAll(".view").forEach((section) => {
     section.hidden = section.id !== `${view}-view`;
   });
+  syncPageHeading();
   syncNavState();
   if (update) writeUrl(mode);
 }
@@ -2154,6 +2297,14 @@ function setView(view, update = true, mode = "push") {
 function selectFrontier(benchmarkId) {
   state.lfrontier = benchmarkId;
   state.lfrontierExplicit = true;
+  if (window.matchMedia?.("(max-width: 1050px)")?.matches) {
+    const browser = byId("benchmark-browser");
+    if (browser) {
+      const restoreFocus = browser.contains(document.activeElement);
+      browser.open = false;
+      if (restoreFocus) browser.querySelector("summary").focus({ preventScroll: true });
+    }
+  }
 }
 
 function openSaturation(benchmarkId) {
@@ -2455,19 +2606,57 @@ function recordFacts(item, { quietUnreported = false } = {}) {
     ([label]) => !(quietUnreported && label === t("Activity counters")),
   );
   if (!facts.length) return null;
+  const metricIcons = Object.fromEntries(
+    RECORD_METRIC_ICONS.map((key) => [t(RECORD_METRIC_LABELS[key]), key]),
+  );
   return element(
     "div",
     {
       className: "record-facts",
       attrs: { role: "group", "aria-label": t("Source metadata") },
     },
-    facts.map(([label, value, emphasize]) =>
-      element("span", {}, [
-        document.createTextNode(`${label} `),
-        emphasize ? element("strong", { text: value }) : document.createTextNode(value),
-      ]),
-    ),
+    facts.map(([label, value, emphasize]) => {
+      const valueNode = emphasize ? element("strong", { text: value }) : document.createTextNode(value);
+      const icon = metricIcons[label];
+      if (!icon) return element("span", {}, [document.createTextNode(`${label} `), valueNode]);
+      // A count's label is an icon (issue #1097): "Likes 0  Downloads 591"
+      // repeated on every card. Hover shows the word; a screen reader reads it.
+      return element("span", { className: "record-fact-metric", attrs: { title: label } }, [
+        element("span", { className: `fact-icon fact-icon-${icon}`, attrs: { "aria-hidden": "true" } }),
+        element("span", { className: "visually-hidden", text: `${label} ` }),
+        valueNode,
+      ]);
+    }),
   );
+}
+
+// Counts with a widely read icon. "Influential citations" has none a reader
+// would recognise, so it keeps its words.
+const RECORD_METRIC_ICONS = ["stars", "forks", "likes", "downloads", "citations"];
+
+
+// A card is tinted gold by a count its source published (issue #994): the
+// light tint at the first threshold, the strong tint at the second. Downloads
+// need ten times the count, since any script that pulls a dataset adds one
+// (rubric.py saturates downloads at 10x stars for the same reason). The tint
+// reports a count; it is not a quality judgement.
+const CARD_TIER_THRESHOLDS = {
+  stars: [100, 1000],
+  likes: [100, 1000],
+  upvotes: [100, 1000],
+  votes: [100, 1000],
+  citations: [100, 1000],
+  downloads: [1000, 10000],
+};
+
+function cardTierClass(item) {
+  let tier = 0;
+  for (const [key, [light, strong]] of Object.entries(CARD_TIER_THRESHOLDS)) {
+    const value = Number(item.metrics?.[key]);
+    if (value > strong) return " stars-1000";
+    if (value > light) tier = 1;
+  }
+  return tier ? " stars-100" : "";
 }
 
 function safeHttpUrl(value) {
@@ -2549,6 +2738,40 @@ function briefingParts(line) {
   return { head, body, confidence, evidenceIds };
 }
 
+// One source stays a direct link; several open as a native disclosure listing a
+// link to each, so the count a reader sees is never a dead end. Shared by the
+// briefing chips and the question answers.
+function sourcesControl(citedSources, chipClass) {
+  const sourceText = `${citedSources.length} ${
+    citedSources.length === 1 ? t("source") : t("sources")
+  }`;
+  if (citedSources.length === 1) {
+    const citation = citedSources[0];
+    return element("a", {
+      className: chipClass,
+      text: sourceText,
+      attrs: {
+        href: citation.href,
+        target: "_blank",
+        rel: "noopener noreferrer",
+        title: `Open evidence: ${citation.title}`,
+        "aria-label": `${sourceText}: ${citation.title}`,
+      },
+    });
+  }
+  return element("details", { className: "briefing-sources" }, [
+    element("summary", { className: chipClass, text: sourceText }),
+    element("ul", { className: "briefing-sources-list" }, citedSources.map((entry) =>
+      element("li", {}, [
+        element("a", {
+          text: entry.title,
+          attrs: { href: entry.href, target: "_blank", rel: "noopener noreferrer" },
+        }),
+        element("span", { text: ` (${entry.source})` }),
+      ]))),
+  ]);
+}
+
 function briefingMeta(parts, citations) {
   const chips = [];
   if (parts.confidence) {
@@ -2562,46 +2785,84 @@ function briefingMeta(parts, citations) {
     return citation ? [citation] : [];
   });
   if (citedSources.length > 0) {
-    const sourceText = `${citedSources.length} ${
-      citedSources.length === 1 ? t("source") : t("sources")
-    }`;
-    const citation = citedSources.length === 1 ? citedSources[0] : null;
-    chips.push(citation
-      ? element("a", {
-          className: "briefing-chip briefing-chip-sources",
-          text: sourceText,
-          attrs: {
-            href: citation.href,
-            target: "_blank",
-            rel: "noopener noreferrer",
-            title: `Open evidence: ${citation.title}`,
-            "aria-label": `${sourceText}: ${citation.title}`,
-          },
-        })
-      : element("details", { className: "briefing-sources" }, [
-          element("summary", {
-            className: "briefing-chip briefing-chip-sources",
-            text: sourceText,
-          }),
-          element("ul", { className: "briefing-sources-list" }, citedSources.map((entry) =>
-            element("li", {}, [
-              element("a", {
-                text: entry.title,
-                attrs: {
-                  href: entry.href,
-                  target: "_blank",
-                  rel: "noopener noreferrer",
-                },
-              }),
-              element("span", { text: ` (${entry.source})` }),
-            ]))),
-        ]));
+    chips.push(sourcesControl(citedSources, "briefing-chip briefing-chip-sources"));
   }
   if (!chips.length) return null;
   return element("p", { className: "briefing-insight-meta" }, chips);
 }
 
-function briefingInsight(line, citations) {
+// Share images (issue #671) are rendered by the daily pipeline and published
+// per day, so the page only links to one. An item the day did not make a card
+// for gets no control: a link to an image that was never rendered would be a
+// dead end, and the item stays listed either way.
+function shareCardFor(day, url) {
+  const href = safeHttpUrl(url);
+  if (!href) return null;
+  const card = (day?.share?.cards || []).find((entry) => safeHttpUrl(entry.url) === href);
+  const image = card ? safeHttpUrl(card.image) : "";
+  return image ? { image } : null;
+}
+
+// Share is an icon wherever it appears (issue #1097): "Share image" and
+// "Share card" repeated under every briefing item and every card, as loud as
+// the content they share. The tooltip and the accessible name keep the words.
+const SHARE_ICON_PATHS = [
+  "M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7",
+  "M16 6l-4-4-4 4",
+  "M12 2v13",
+];
+
+function shareIcon() {
+  const svg = svgElement("svg", { viewBox: "0 0 24 24", "aria-hidden": "true" });
+  SHARE_ICON_PATHS.forEach((d) => svg.append(svgElement("path", { d })));
+  return svg;
+}
+
+function shareControl(image, label, linkLabel = t("Share image")) {
+  return element("div", { className: "share-control" }, [
+    element("a", {
+      className: "share-link share-icon",
+      attrs: {
+        href: image,
+        target: "_blank",
+        rel: "noopener noreferrer",
+        title: linkLabel,
+        "aria-label": `${linkLabel === label ? linkLabel : `${linkLabel}: ${label}`} (${t("opens in a new tab")})`,
+      },
+    }, [shareIcon()]),
+  ]);
+}
+
+function briefingShare(parts, citations, day) {
+  const citation = parts.evidenceIds
+    .map((id) => citations.find((entry) => entry.id === id))
+    .find(Boolean);
+  const card = citation ? shareCardFor(day, citation.href) : null;
+  return card ? shareControl(card.image, citation.title) : null;
+}
+
+// top3.png holds the first three cards, or fewer when the day has fewer, so
+// the label follows the number of cards the picture really shows.
+function topShareLabel(count) {
+  if (count >= 3) return t("Share the top 3 benchmark of the day");
+  return count === 2 ? t("Share the top 2 benchmarks of the day") : t("Share the top benchmark of the day");
+}
+
+function renderTopShare(day, visible) {
+  const host = byId("today-share");
+  if (!host) return;
+  const count = Math.min((day?.share?.cards || []).length, 3);
+  const image = visible ? safeHttpUrl(day?.share?.top3_image) : "";
+  host.hidden = !image;
+  replaceChildren(
+    host,
+    image
+      ? [shareControl(image, topShareLabel(count), topShareLabel(count))]
+      : [],
+  );
+}
+
+function briefingInsight(line, citations, day) {
   const parts = briefingParts(line);
   const head = element("h3", { className: "briefing-insight-head" },
     briefingContent(parts.head || line, citations));
@@ -2614,6 +2875,7 @@ function briefingInsight(line, citations) {
     head,
     body,
     briefingMeta(parts, citations),
+    briefingShare(parts, citations, day),
   ]);
 }
 
@@ -2699,7 +2961,7 @@ function renderDailyBriefing(day) {
           // head (the takeaway), the "why it matters" support beneath it, and a
           // metadata line carrying confidence and source count instead of
           // paragraph-wide prose and mid-sentence evidence IDs.
-          ...usable.map((line) => briefingInsight(line, citations)),
+          ...usable.map((line) => briefingInsight(line, citations, day)),
           briefingDetails(briefing, citations),
         ]
       : [
@@ -2780,7 +3042,7 @@ function answerBlock(answer) {
   // support (Tab to focus, Enter/Space to toggle) for free and stays collapsed
   // on load because no `open` attribute is rendered.
   const citations = answerCitations(answer);
-  const sourceCount = validBriefingCitations(answer?.cited_evidence).length;
+  const citedSources = validBriefingCitations(answer?.cited_evidence);
   const meta = element("p", { className: "answer-meta" }, [
     ...(confidence
       ? [
@@ -2790,13 +3052,8 @@ function answerBlock(answer) {
           }),
         ]
       : []),
-    ...(sourceCount
-      ? [
-          element("span", {
-            className: "answer-source-count",
-            text: `${sourceCount} ${sourceCount === 1 ? t("source") : t("sources")}`,
-          }),
-        ]
+    ...(citedSources.length
+      ? [sourcesControl(citedSources, "answer-source-count")]
       : []),
   ]);
   const detail = element("div", { className: "answer-detail" }, [
@@ -2917,7 +3174,7 @@ function renderDailyQuestions(day) {
   );
 }
 
-const TODAY_WINDOWS = { "30d": 30, "60d": 60 };
+const TODAY_WINDOWS = { "30d": 30, "60d": 60, "90d": 90 };
 
 function todayDateRange(date = state.todayDate) {
   const days = TODAY_WINDOWS[date];
@@ -2944,22 +3201,12 @@ function renderTodayDateOptions() {
       option("all", t("All dates"), state.todayDate === "all"),
       option("30d", t("Past 30 days"), state.todayDate === "30d"),
       option("60d", t("Past 60 days"), state.todayDate === "60d"),
+      option("90d", t("Past 90 days"), state.todayDate === "90d"),
       ...[...state.data.facets.dates].reverse().map((date) =>
         option(date, formatDate(date, { dateStyle: "medium" }), date === state.todayDate),
       ),
     ],
   );
-}
-
-function renderBuildMeta() {
-  if (!state.data) return;
-  byId("build-meta").textContent = `${t("Updated")} ${formatDate(
-    state.data.generated_at,
-    {
-      dateStyle: "medium",
-      timeStyle: "short",
-    },
-  )} UTC`;
 }
 
 // The search box reads the daily feed: titles, summaries and source names of
@@ -3042,7 +3289,9 @@ function renderTodayBenchmarks() {
     : indexPending
       ? t("Still checking the benchmark registry\u2026")
       : "";
-  byId("today-benchmarks-note").textContent = [note, warning].filter(Boolean).join(" ");
+  byId("today-benchmarks-note").textContent = [
+    note, partialMatchNote(matches, query, (record) => record.slug), warning,
+  ].filter(Boolean).join(" ");
   replaceChildren(byId("today-benchmarks-results"), rows);
   return !total && indexPending ? "pending" : total;
 }
@@ -3138,6 +3387,13 @@ function renderToday({ resultsOnly = false } = {}) {
   }
   state.todayRenderedDate = state.todayDate;
   byId("today-date").value = state.todayDate;
+  document.querySelectorAll("[data-today-window]").forEach((button) => {
+    const value = button.dataset.todayWindow === "latest" ? state.data.latest_date : button.dataset.todayWindow;
+    button.setAttribute("aria-pressed", String(value === state.todayDate));
+  });
+  document.querySelectorAll("[data-today-sort]").forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.dataset.todaySort === state.todaySort));
+  });
   const range = todayDateRange();
   const heading = range ? `Past ${TODAY_WINDOWS[state.todayDate]} days`
     : showingAllDates ? "All dates" : "Today's radar";
@@ -3168,6 +3424,7 @@ function renderToday({ resultsOnly = false } = {}) {
   renderSearchScopeBanner(observations.length, benchmarkMatches);
   const resultsKey = [
     state.todayDate,
+    state.todaySort,
     state.q,
     state.kind,
     state.category,
@@ -3197,40 +3454,15 @@ function renderToday({ resultsOnly = false } = {}) {
   const attentionCount = observations.length - evidenceCount;
   byId("today-breakdown").textContent =
     `${evidenceCount} ${t("normal")} · ${attentionCount} ${t("attention")}`;
-  // The list is sorted by priority within a day; say so at the point of use
-  // rather than making the reader infer it. Attention rows carry no priority,
-  // so a kind-filtered attention set falls back to date order, and in All
-  // dates mode the archive is ordered by date first and priority second
-  // (issue #248).
-  //
-  // Releases lead each day ahead of priority (issue #332), so the caption says
-  // that too whenever the result set actually mixes releases with anything
-  // else. A set that is all releases, or has none, is ordered by priority
-  // alone, and naming a tie-break that changed nothing would misdescribe it.
-  // Read off the whole result set rather than the current page: the caption
-  // describes the ordering the reader is paging through, and page one of a
-  // release-led day is all releases even when later pages are not.
-  //
-  // The caption stops at "new releases first" rather than claiming a strict
-  // timestamp order across release tiers. Inside each tier, scored recency now
-  // leads priority so v5's event-kind discount changes the visible order.
-  const priorityScored = visibleObservations.some((item) => Number(item.total_score) > 0);
-  const releases = observations.filter(isRelease).length;
-  const releasesLead = releases > 0 && releases < observations.length;
-  byId("today-sort").textContent = !priorityScored
-    ? t("Sort: Date ↓")
-    : showingAllDates
-      ? releasesLead
-        ? t("Sort: Date, then new releases, then Recency ↓, then Priority ↓")
-        : t("Sort: Date, then Recency ↓, then Priority ↓")
-      : releasesLead
-        ? t("Sort: New releases first, then Recency ↓, then Priority ↓")
-        : t("Sort: Recency ↓, then Priority ↓");
+  byId("today-sort").textContent = state.todaySort === "newest"
+    ? t("Sort: Newest")
+    : t("Sort: Releases first, then recorded stars + likes + downloads + points; missing signals last");
+  renderTopShare(day, !showingAllDates && !range);
   const listHost = byId("today-list");
   replaceChildren(
     listHost,
     visibleObservations.length
-      ? visibleObservations.map((item, offset) => observationCard(item, pageStart + offset))
+      ? visibleObservations.map((item, offset) => observationCard(item, pageStart + offset, day))
       : emptyTodayNodes(day, benchmarkMatches),
   );
   byId("today-page-status").textContent = t(
@@ -3975,9 +4207,30 @@ function isRelease(item) {
   return item.event_kind === "released";
 }
 
+// The days Today builds its rows from. A 30, 60 or 90 day window reads its own
+// file instead of the 324 MB full archive: the window shows each record once,
+// at its latest sighting, so the archive's repeat sightings and corpus graph are
+// never needed (issue #1058). Once the full archive is loaded it serves every
+// window, as before.
+function observationDays() {
+  const windowData = freshWindowData(state.todayDate);
+  return !state.fullDataLoaded && windowData ? windowData.days : state.data.days;
+}
+
+// A window file belongs to one build. The bootstrap and the file carry the same
+// generated_at, so a file kept from before a refresh, or one from another crawl
+// of the same day, is not used and is fetched again.
+function freshWindowData(key) {
+  const windowData = TODAY_WINDOWS[key] ? state.windowData[key] : null;
+  return windowData && windowData.generated_at === state.data?.generated_at ? windowData : null;
+}
+
 function allObservations() {
-  if (state.observations) return state.observations;
-  const evidence = state.data.days.flatMap((day) =>
+  const days = observationDays();
+  // The cache belongs to one source: a window file, or the days in state.data.
+  if (state.observations && state.observationsSource === days) return state.observations;
+  state.observationsSource = days;
+  const evidence = days.flatMap((day) =>
     (day.evidence_items || []).map((item) => ({
       ...item,
       recommended:
@@ -3996,7 +4249,7 @@ function allObservations() {
       observation_kind: "evidence",
     })),
   );
-  const attention = state.data.days.flatMap((day) =>
+  const attention = days.flatMap((day) =>
     day.attention.observations.map((item) => ({
       ...item,
       snapshot_date: day.date,
@@ -4113,6 +4366,8 @@ function updateFiltersCount() {
     state.source,
     state.organization,
     state.event,
+    state.todayDate && state.todayDate !== state.data?.latest_date
+      && !["30d", "90d"].includes(state.todayDate),
   ].filter(Boolean).length;
   byId("filters-count").textContent = `(${active})`;
 }
@@ -4123,6 +4378,25 @@ function closeFiltersDrawer() {
     drawer.hidden = true;
     byId("filters-toggle").setAttribute("aria-expanded", "false");
   }
+}
+
+// Missing activity stays inspectable, after records with measured signals.
+//
+// A GitHub Release record carries its repository's star count, copied onto
+// every version tag (sources.py fetches it from the repository endpoint). Those
+// stars measure the repository, not the release, so they do not rank the
+// release: summing them put an OpenClaw version tag with 391,191 repository
+// stars and 70 downloads above every benchmark in Past 30 days (issue #1001).
+// The release still ranks by its own downloads, and the card still shows the
+// repository's stars.
+function observationAttention(item) {
+  const repositoryStars =
+    item.source === "GitHub Release" || String(item.parser_version || "").startsWith("github-releases/");
+  const keys = repositoryStars ? ["likes", "downloads", "points"] : ["stars", "likes", "downloads", "points"];
+  const values = keys
+    .map((key) => item.metrics?.[key])
+    .filter((value) => typeof value === "number" && Number.isFinite(value) && value >= 0);
+  return values.length ? values.reduce((sum, value) => sum + value, 0) : -1;
 }
 
 function filteredObservations() {
@@ -4143,7 +4417,21 @@ function filteredObservations() {
       (!query || haystack.includes(query))
     );
   });
-  return todayIsMultiDate() ? latestObservationsByRecord(matches) : matches;
+  const records = todayIsMultiDate() ? latestObservationsByRecord(matches) : matches;
+  return records.sort((a, b) => {
+    if (state.todaySort !== "newest") {
+      // Activity totals cover a repository's whole life, and any commit makes
+      // it an "updated" row for the day. Without this tier, old datasets with
+      // 250k downloads led Today on 138 of 140 top-10 slots over 14 days
+      // (issue #1056), burying every benchmark released that day (#332).
+      const releaseOrder = Number(isRelease(b)) - Number(isRelease(a));
+      if (releaseOrder) return releaseOrder;
+      const attentionOrder = observationAttention(b) - observationAttention(a);
+      if (attentionOrder) return attentionOrder;
+    }
+    const timestamp = (item) => Date.parse(eventTimestamp(item)) || Date.parse(item.snapshot_date) || 0;
+    return timestamp(b) - timestamp(a);
+  });
 }
 
 // Generated utility pages ship their sheet already open so it is useful before
@@ -4161,6 +4449,7 @@ function promoteSeededDialog(dialog) {
 function showModalDialog(dialog) {
   promoteSeededDialog(dialog);
   if (!dialog.open) dialog.showModal();
+  syncPageHeading();
 }
 
 let rubricOwnsHistoryEntry = false;
@@ -5208,17 +5497,13 @@ function syncScoreFilters(value = state.lscore) {
   }
 }
 
-function renderScoreSelectionNote() {
-  const item = scorePopulation(state.benchmarkIndex || []).find((row) => row.id === state.lfrontier);
-  const summary = item?.summary;
-  const outside = Boolean(state.lfrontierExplicit && item
+// A record opened by link can sit above the score cutoff, so the left list
+// does not show it. The subline says so in the same line as its source,
+// rather than in a row of its own above the chart.
+function outsideScoreFilter(slug) {
+  const item = scorePopulation(state.benchmarkIndex || []).find((row) => row.id === slug);
+  return Boolean(state.lfrontierExplicit && item
     && !saturationRows().some((row) => row.id === item.id));
-  const note = byId("frontier-filter-note");
-  note.hidden = !outside;
-  note.textContent = outside ? t("Outside current filter") : "";
-  const highest = byId("frontier-highest-score");
-  highest.hidden = !summary?.numeric_count;
-  highest.textContent = summary?.numeric_count ? scoreSummaryLabel(summary) : "";
 }
 
 function renderScoreRanking(rows) {
@@ -5959,6 +6244,10 @@ function librarySignalFact(record) {
   });
 }
 
+// The Library list is rebuilt on every filter change, so the prompt is kept
+// here and re-inserted under the row that was saved until it is closed.
+let libraryStarPrompt = null;
+
 function libraryRow(record, names, saved) {
   const isSaved = saved.has(record.key);
   const star = element("button", {
@@ -5972,7 +6261,12 @@ function libraryRow(record, names, saved) {
     },
   });
   star.addEventListener("click", () => {
-    setLibrarySaved(record.key, !librarySavedSlugs().has(record.key));
+    const nowSaved = !librarySavedSlugs().has(record.key);
+    setLibrarySaved(record.key, nowSaved);
+    if (nowSaved && !libraryStarPrompt) {
+      const node = starPrompt("save", () => { libraryStarPrompt = null; });
+      if (node) libraryStarPrompt = { key: record.key, node };
+    }
     renderLibrary();
   });
   const direction = record.library_direction;
@@ -5987,6 +6281,14 @@ function libraryRow(record, names, saved) {
         + (direction.basis === "keyword-provisional" ? ` (${t("provisional")})` : ""),
     }) : null,
     record.released ? element("span", { text: formatDate(record.released, { dateStyle: "medium" }) }) : null,
+    // The first three institutions behind the record's own paper (#1120).
+    (record.institutions || []).length
+      ? element("span", {
+          className: "library-institutions",
+          text: record.institutions.slice(0, 3).join(" · "),
+          attrs: { title: t("Institutions linked by OpenAlex") },
+        })
+      : null,
     element("span", { text: scoreSourceLabel(record.source) }),
     ...libraryArtifactLinks(record),
     librarySignalFact(record),
@@ -6055,7 +6357,10 @@ function renderLibrary() {
     partialMatchNote(rows, state.libraryQuery, (record) => record.slug),
   ].filter(Boolean).join(" · ");
   replaceChildren(list, shown.length
-    ? shown.map((record) => libraryRow(record, names, saved))
+    ? shown.flatMap((record) => [
+      libraryRow(record, names, saved),
+      libraryStarPrompt?.key === record.key ? libraryStarPrompt.node : null,
+    ])
     : [element("p", { className: "empty-state", text: t("No benchmarks match these filters.") })]);
   byId("library-more").hidden = rows.length <= shown.length;
 }
@@ -7468,6 +7773,12 @@ const CATALOG_SOURCE_META = {
       "Scores measured by Artificial Analysis running the test itself, not numbers reported by the model makers. Higher values are better. The date shown is each model's own release date, not the day the test was run.",
     emptyKey: "Artificial Analysis recorded no scores for this benchmark.",
   },
+  benchmark_saturation: {
+    name: "Benchmark Saturation",
+    noteKey:
+      "The top-performing models the Benchmark Saturation study (arXiv:2602.16763) reports for this benchmark, up to five, with scores as the study states them. No evaluation protocol or date is recorded.",
+    emptyKey: "The Benchmark Saturation study recorded no scores for this benchmark.",
+  },
 };
 
 function catalogSourceMeta(source) {
@@ -7540,17 +7851,55 @@ function catalogInheritanceNote(detail) {
   });
 }
 
+function catalogResourceLinks(detail) {
+  const links = new Map();
+  for (const artifact of detail.artifacts || []) {
+    const href = safeHttpUrl(artifact.url);
+    if (href && !links.has(href)) {
+      links.set(href, { href, label: artifactKindLabel(artifact.kind), kind: artifact.kind });
+    }
+  }
+  const original = safeHttpUrl(detail.provenance?.source_url);
+  if (original && !links.has(original)) {
+    links.set(original, { href: original, label: t("Original evidence") });
+  }
+  const resources = [...links.values()];
+  const group = (resource) => JSON.stringify([resource.label, linkHost(resource.href)]);
+  const counts = new Map();
+  for (const resource of resources) {
+    counts.set(group(resource), (counts.get(group(resource)) || 0) + 1);
+  }
+  return resources.map((resource) => {
+    if (counts.get(group(resource)) < 2) return resource;
+    return { ...resource, label: `${resource.label} · ${resource.href}` };
+  });
+}
+
+function benchmarkResourceChip(resource) {
+  const host = linkHost(resource.href);
+  const provider = {
+    "github.com": "GitHub",
+    "huggingface.co": "Hugging Face",
+    "arxiv.org": "arXiv",
+    "news.ycombinator.com": "Hacker News",
+    "semanticscholar.org": "Semantic Scholar",
+  }[host] || host;
+  const chip = sourceChip({ source: provider }, resource.href);
+  chip.classList.add("benchmark-resource-link");
+  chip.prepend(element("span", { text: resource.label }));
+  chip.setAttribute("aria-label", `${resource.label} · ${provider}`);
+  chip.setAttribute("title", resource.href);
+  return chip;
+}
+
 function catalogIdentityBlock(detail) {
   const publisher = detail.publisher;
   const description = l10nProse(detail.description?.en, detail.description?.zh);
   const provenance = detail.provenance || {};
   const importer = catalogSourceMeta(detail.source).name;
-  const originalEvidence = safeHttpUrl(provenance.source_url);
-  const artifacts = (detail.artifacts || []).filter((artifact) =>
-    safeHttpUrl(artifact.url),
-  );
+  const resources = catalogResourceLinks(detail);
   return element("section", { className: "catalog-block" }, [
-    element("h3", { text: t("Identity") }),
+    element("h3", { text: t("About this benchmark") }),
     // Crawled descriptions are third-party text. They only ever go through
     // text(), which sets textContent, so markup in the crawl can never execute.
     element("p", {
@@ -7577,40 +7926,21 @@ function catalogIdentityBlock(detail) {
         ? [[t("Review status"), provenance.review_state]]
         : []),
     ]),
-    originalEvidence
-      ? element("p", { className: "catalog-basis" }, [
-          element("span", { text: `${t("Original evidence")}: ` }),
-          element("a", {
-            text: provenance.source_url,
-            attrs: {
-              href: originalEvidence,
-              target: "_blank",
-              rel: "noopener noreferrer",
-            },
-          }),
-        ])
-      : null,
-    artifacts.length
+    resources.length
       ? element(
           "ul",
-          { className: "catalog-artifacts" },
-          artifacts.map((artifact) =>
-            element("li", {}, [
-              element("a", {
-                text: `${artifactKindLabel(artifact.kind)} · ${artifact.id || artifact.url}`,
-                attrs: {
-                  href: safeHttpUrl(artifact.url),
-                  target: "_blank",
-                  rel: "noopener noreferrer",
-                },
-              }),
-            ]),
+          { className: "catalog-artifacts catalog-resources" },
+          resources.map((resource) =>
+            element("li", {}, [benchmarkResourceChip(resource)]),
           ),
         )
-      : element("p", {
+      : null,
+    !resources.some((resource) => resource.kind)
+      ? element("p", {
           className: "catalog-empty",
           text: t("No paper, repository, dataset or site link established."),
-        }),
+        })
+      : null,
   ]);
 }
 
@@ -7699,10 +8029,8 @@ function catalogSizesBlock(detail) {
 function catalogScoresBlock(shard) {
   const bySource = shard.scores_by_source || {};
   const sources = Object.keys(bySource).sort();
-  // No "Scores" heading: the panel title names the benchmark and the subline
-  // names the source and the count, so this said nothing the reader had not
-  // just read, and it was the top half of ~150px of dead space above the
-  // chart (issue #298).
+  // The panel title and source subline already identify the chart; a second
+  // heading would add empty space above it (issue #298).
   return element("section", { className: "catalog-block" }, [
     // Spread, not nesting: element() appends children verbatim, so a mapped
     // array passed as one child would stringify into "[object HTMLDivElement]".
@@ -7795,8 +8123,8 @@ function catalogScoreChart(source, payload) {
   const pad = Math.max((high - low) * 0.18, Math.abs(high) * 0.05, Number.EPSILON);
   const band = { low: low - pad, high: high + pad };
 
-  // Same viewBox and margins as scoreTrackChart, so the two charts sit at the
-  // same visual scale wherever a reader compares them.
+  // Keep the same point spacing as scoreTrackChart. Crop only the unused
+  // band above the highest observation; do not change the score scale.
   const narrow = typeof window !== "undefined" && window.innerWidth <= 760;
   const width = narrow ? 520 : 920;
   const scoreHeight = 480;
@@ -7818,8 +8146,9 @@ function catalogScoreChart(source, payload) {
     return scoreTop + scoreHeight - ((value - band.low) / (band.high - band.low)) * scoreHeight;
   };
 
+  const topInset = Math.max(0, scoreY(high) - margin.top);
   const svg = svgElement("svg", {
-    viewBox: `0 0 ${width} ${height}`,
+    viewBox: `0 ${topInset} ${width} ${height - topInset}`,
     role: "group",
     "aria-label": t(
       plotted.every((row) => row.date_precision === "model_announcement")
@@ -8034,14 +8363,24 @@ function catalogScoreChart(source, payload) {
     // fall strictly inside the observed span are drawn, and only where they
     // clear the endpoint labels: the extremes stay the real first and last
     // release date, never a rounded range.
-    const quarterGap = 46;
+    // A "Mon YYYY" label is about 64 units wide, so labels are spaced at
+    // least that far apart: every quarter when they fit, every second or
+    // fourth quarter on a long span or a narrow chart. Overlapping labels
+    // ("Mar 2023Jul 2023") read as nothing at all (issue #1097).
+    const quarterGap = 72;
+    const quarterWidth = (plotWidth * 91.3 * 86400000) / span;
+    const labelEvery = [1, 2, 4, 8].find((step) => step * quarterWidth >= quarterGap) || 8;
+    let quarterIndex = 0;
     const first = new Date(firstTime);
     const cursor = new Date(
       Date.UTC(first.getUTCFullYear(), Math.ceil((first.getUTCMonth() + 1) / 3) * 3, 1),
     );
     while (cursor.getTime() < lastTime) {
       const tickX = x(cursor.getTime());
+      const labelled = Number.isInteger(quarterIndex / labelEvery);
+      quarterIndex += 1;
       if (
+        labelled &&
         tickX - margin.left > quarterGap &&
         margin.left + plotWidth - tickX > quarterGap
       ) {
@@ -8095,7 +8434,7 @@ function catalogSourceTable(source, payload) {
   const meta = catalogSourceMeta(source);
   const rows = payload.rows || [];
   const series = payload.series || {};
-  const notes = [t(meta.noteKey)];
+  const notes = [`${t("Reported scores")}: ${rows.length.toLocaleString()}.`, t(meta.noteKey)];
   // A declared maximum that observed values exceed is a fact about the source,
   // not a scale. Printed as a claim, used as nothing.
   if (series.max_score_contradicted) {
@@ -8160,8 +8499,10 @@ function catalogScoreResults(source, rows) {
     String(b.reported_date || "").localeCompare(String(a.reported_date || "")) ||
     String(a.model_name || "").localeCompare(String(b.model_name || "")) ||
     String(a.obs_id || "").localeCompare(String(b.obs_id || "")));
-  return element("section", { className: "catalog-result-section" }, [
-    element("h3", { text: `${t("Reported benchmark scores")} · ${t(meta.name)} (${ordered.length.toLocaleString()})` }),
+  return element("details", { className: "catalog-result-section" }, [
+    element("summary", {}, [
+      element("h3", { text: `${t("Reported benchmark scores")} · ${t(meta.name)}` }),
+    ]),
     element("ol", { className: "catalog-result-list" }, ordered.map((row) =>
       element("li", { className: "catalog-result" }, [
         element("div", { className: "catalog-result-main" }, [
@@ -8236,16 +8577,47 @@ function catalogDocumentsBlock(record) {
   ]);
 }
 
+// Independent audits are third-party evidence about what the benchmark's
+// reported numbers settle, recorded in the registry beside the caveat. The
+// block follows the documents pattern: the audit itself as the link, its
+// date as the meta line, the finding in full, and every receipt linked so
+// the reader can re-run the check rather than trust the summary.
+function catalogAuditsBlock(record) {
+  const audits = record.audits || [];
+  if (!audits.length) return null;
+  return element("section", { className: "catalog-block" }, [
+    element("h3", { text: t("Independent audits") }),
+    element("ul", { className: "catalog-artifacts" }, audits.map((audit) =>
+      element("li", {}, [
+        element("a", {
+          text: audit.auditor || t("Independent audit"),
+          attrs: { href: safeHttpUrl(audit.audit_url), target: "_blank", rel: "noopener noreferrer" },
+        }),
+        element("span", {
+          className: "catalog-sibling-meta",
+          text: audit.audit_date ? formatDate(audit.audit_date, { dateStyle: "medium" }) : "",
+        }),
+        audit.finding ? element("p", { text: audit.finding }) : null,
+        ...(audit.receipts || []).map((receipt, index) =>
+          element("a", {
+            text: `${t("Receipt")} ${index + 1}`,
+            attrs: { href: safeHttpUrl(receipt), target: "_blank", rel: "noopener noreferrer" },
+          })),
+      ])),
+    ),
+  ]);
+}
+
 function catalogBenchmarkDetail(shard) {
   const detail = shard.record || {};
-  // Scores first: it is the one block a reader came for on this panel (the
-  // adjacent curated chart is a saturation-over-time view, and this is its
-  // catalog-record counterpart), and it is the block most likely to have
-  // content -- identity, openness and size are frequently "not established".
+  // Saturation's job is the score chart, so it leads. The explanation sits
+  // directly under it, ahead of documents and the facts that are often
+  // "not established" (design.md, "A shared block follows the surface's job").
   return [
     catalogScoresBlock(shard),
-    catalogDocumentsBlock(detail),
     catalogIdentityBlock(detail),
+    catalogDocumentsBlock(detail),
+    catalogAuditsBlock(detail),
     catalogOpennessBlock(detail),
     catalogSizesBlock(detail),
     catalogSiblingsBlock(shard),
@@ -8281,7 +8653,7 @@ function setCanonicalFrontierChrome(visible) {
     if (visible) replaceChildren(external, []);
   }
   // Catalog records replace the eyebrow with a source subline. Restore both
-  // pieces of title chrome when the picker returns to curated data; otherwise
+  // pieces of title chrome when the selection returns to curated data; otherwise
   // AIME kept saying "115 reported scores · LLM Stats" and "Scores over time"
   // stayed hidden even though the chart and heading had switched layers.
   if (visible) {
@@ -8295,50 +8667,7 @@ function setCanonicalFrontierChrome(visible) {
   }
 }
 
-// The picker follows Saturation's browser, including the full-catalog search.
-function frontierPickerGroups(scored) {
-  return [[t("Browse all benchmarks"), scored.map((row) => [
-    row.id, `${row.name} · ${scoreSourceLabel(row.source)}`,
-  ])]];
-}
-
-function renderFrontierPicker(scored, selectedValue) {
-  replaceChildren(
-    byId("frontier-benchmark"),
-    frontierPickerGroups(scored).map(([label, rows]) =>
-      element(
-        "optgroup",
-        // The count is on the label because the groups are wildly uneven (59
-        // curated against several hundred crawled) and a reader scrolling a
-        // long list deserves to know how far the group runs.
-        { attrs: { label: `${label} (${rows.length.toLocaleString()})` } },
-        rows.map(([value, name]) => option(value, name, value === selectedValue)),
-      ),
-    ),
-  );
-  const picker = byId("frontier-benchmark");
-  if (selectedValue && ![...picker.options].some((row) => row.value === selectedValue)) {
-    const record = (state.benchmarkIndex || []).find((row) => row.slug === selectedValue);
-    picker.prepend(option(selectedValue, record?.name || selectedValue, true));
-  }
-  renderScoreSelectionNote();
-}
-
-// State the source and numeric observation count once, under the benchmark name.
-function catalogSubline(record, meta) {
-  const parts = [];
-  if (record.score_count) {
-    parts.push(metricLabel(record.score_count, "reported score", "reported scores"));
-  }
-  parts.push(meta.name);
-  return parts.join(" \u00b7 ");
-}
-
-function renderCatalogShell(
-  board,
-  scored,
-  { eyebrow, heading, badge, message, prependOption, subline },
-) {
+function renderCatalogShell(board, { eyebrow, heading, message, subline }) {
   clearFrontierPointSelection();
   setCanonicalFrontierChrome(false);
   // A shell replaces whatever chart was on screen, so no completion timer may
@@ -8351,25 +8680,15 @@ function renderCatalogShell(
   eyebrowNode.textContent = eyebrow || "";
   eyebrowNode.hidden = !eyebrow;
   byId("frontier-heading").textContent = heading;
-  const stage = byId("frontier-stage");
-  stage.className = "frontier-stage";
-  stage.hidden = !badge;
-  stage.textContent = badge || "";
   const sublineNode = byId("frontier-subline");
   if (sublineNode) {
-    sublineNode.textContent = subline || "";
-    sublineNode.hidden = !subline;
+    const text = [subline, outsideScoreFilter(state.lfrontier) ? t("Outside current filter") : ""]
+      .filter(Boolean).join(" · ");
+    sublineNode.textContent = text;
+    sublineNode.hidden = !text;
   }
   const infoHost = byId("frontier-heading-info");
   if (infoHost) replaceChildren(infoHost, []);
-  renderFrontierPicker(scored, state.lfrontier);
-  if (prependOption) {
-    const picker = byId("frontier-benchmark");
-    const [value, label] = prependOption;
-    const existing = [...picker.options].find((candidate) => candidate.value === value);
-    if (existing) existing.selected = true;
-    else picker.prepend(option(value, label, true));
-  }
   replaceChildren(byId("frontier-catalog"), [
     element("p", { className: "empty-state", text: message }),
   ]);
@@ -8381,26 +8700,41 @@ function renderCatalogShell(
 // drew the first frame.
 let catalogRenderSeq = 0;
 
-function renderCatalogBenchmark(board, scored, record) {
+// Every catalog benchmark has a share card (issue #671). The module loads on
+// the first press, so a reader who never shares never downloads it.
+function benchmarkShareButton(record) {
+  const button = element(
+    "button",
+    {
+      className: "share-icon benchmark-share",
+      attrs: {
+        type: "button",
+        title: t("Share card"),
+        "aria-label": t("Share {name} as a card", { name: record.name }),
+      },
+    },
+    [shareIcon()],
+  );
+  button.addEventListener("click", async () => {
+    const { openBenchmarkShare } = await import("./share-card.js");
+    openBenchmarkShare({ slug: record.slug, name: record.name, t });
+  });
+  return button;
+}
+
+function renderCatalogBenchmark(board, record) {
   const meta = catalogSourceMeta(record.source);
   // One title, one metadata line. The eyebrow ("Catalog catalog record") and
   // the source badge both said what this line says, and the reader had to read
   // three elements to learn one fact (issue #298).
-  renderCatalogShell(board, scored, {
+  renderCatalogShell(board, {
     eyebrow: "",
     heading: record.name,
-    badge: "",
-    subline: catalogSubline(record, meta),
+    subline: meta.name,
     message: t("Loading benchmark details…"),
   });
-  // Scored crawled records are in the picker already. An unscored one is not,
-  // and it is still reachable by search, so it is prepended as its own option:
-  // a <select> displaying a different benchmark than the one rendered would be
-  // lying about the state.
-  const picker = byId("frontier-benchmark");
-  const existing = [...picker.options].find((candidate) => candidate.value === record.slug);
-  if (existing) existing.selected = true;
-  else picker.prepend(option(record.slug, `${record.name} · ${meta.name}`, true));
+  const infoHost = byId("frontier-heading-info");
+  if (infoHost) replaceChildren(infoHost, [benchmarkShareButton(record)]);
   const container = byId("frontier-catalog");
   const renderToken = ++catalogRenderSeq;
   loadBenchmarkShard(record.slug).then((shard) => {
@@ -8439,7 +8773,7 @@ function renderCatalogBenchmark(board, scored, record) {
 // Every row is a curated benchmark, because `card_count` is a curated fact:
 // the crawled catalog records scores, not who chose to report them. The
 // crawled layer is not hidden by this, it is reached from the search box and
-// the picker, both of which cover all 679 scored crawled records alongside
+// the benchmark browser, both of which cover all 679 scored crawled records alongside
 // these.
 const BENCHMARK_EXAMPLE_LIMIT = 20;
 
@@ -8688,7 +9022,7 @@ function renderScoreReadout(entry) {
   const host = byId("frontier-score-readout");
   if (!host) return;
   const record = scoreRecord(entry.benchmark_id);
-  // Unreachable on the canonical path (the picker only lists scored benchmarks),
+  // Unreachable on the canonical path (the browser only lists scored benchmarks),
   // but the message stays honest rather than naming a chart that does not draw.
   if (!record) {
     replaceChildren(host, [
@@ -9545,11 +9879,6 @@ function clearAdoptionFrontier(message) {
   // timer must not spend its reveal.
   drawnFrontierEntranceKey = null;
   byId("frontier-eyebrow").textContent = t("Scores over time");
-  const stage = byId("frontier-stage");
-  stage.textContent = "";
-  // The badge only carries the source name on the catalog path; an empty one
-  // would render as a bare outline beside the picker.
-  stage.hidden = true;
   replaceChildren(byId("frontier-task-preview"), []);
   replaceChildren(byId("frontier-score-readout"), []);
   replaceChildren(byId("frontier-legend"), []);
@@ -9563,35 +9892,33 @@ function clearAdoptionFrontier(message) {
 }
 
 function renderAdoptionFrontier(board) {
-  const scored = saturationRows();
   const defaultEntry = frontierDefaultEntry(board);
   if (!state.lfrontierExplicit) state.lfrontier = defaultEntry?.id || "";
   renderBenchmarkNavigator(board);
   if (!state.benchmarkIndex) {
-    renderCatalogShell(board, scored, {
-      eyebrow: "", heading: state.lfrontier || t("Reported benchmark scores"), badge: "",
+    renderCatalogShell(board, {
+      eyebrow: "", heading: state.lfrontier || t("Reported benchmark scores"),
       message: t(state.benchmarkIndexLoaded
         ? "Full benchmark catalog could not be loaded." : "Loading benchmark details…"),
     });
     return;
   }
   if (!state.lfrontier) {
-    renderCatalogShell(board, scored, {
-      eyebrow: "", heading: t("Reported benchmark scores"), badge: "",
+    renderCatalogShell(board, {
+      eyebrow: "", heading: t("Reported benchmark scores"),
       message: t("No benchmarks match these filters."),
     });
     return;
   }
   const record = state.benchmarkIndex.find((row) => row.slug === state.lfrontier);
   if (record) {
-    renderCatalogBenchmark(board, scored, record);
+    renderCatalogBenchmark(board, record);
     return;
   }
   // Preserve unresolved links and say what failed. Never paint a different
   // benchmark or fall back to a source-specific shortlist under this URL.
-  renderCatalogShell(board, scored, {
-    eyebrow: "", heading: state.lfrontier, badge: "",
-    prependOption: [state.lfrontier, state.lfrontier],
+  renderCatalogShell(board, {
+    eyebrow: "", heading: state.lfrontier,
     message: t("This benchmark is not in the loaded catalog."),
   });
 }
@@ -9943,7 +10270,15 @@ const LATEST_SIGNALS = [
   { key: "github_stars", label: "GitHub stars" },
   { key: "hf_paper_upvotes", label: "Hugging Face paper upvotes" },
   { key: "hf_dataset_downloads", label: "Hugging Face dataset downloads, last 30 days" },
+  // attention-affiliation-v2 (#1120) only; a v1 payload has no such component.
+  { key: "affiliation", label: "Institution frequency", optional: true },
 ];
+
+function latestSignalsFor(entries) {
+  return LATEST_SIGNALS.filter(
+    ({ key, optional }) => !optional || entries.some((entry) => entry.components?.[key]),
+  );
+}
 // The adoption view's own filters. A permalink carrying one was written when
 // the page had no modes, and must keep opening the view it filtered.
 const LEADERBOARD_ADOPTION_PARAMS = ["lscore", "lheight", "lq", "ldomain", "lorg", "lera"];
@@ -10054,8 +10389,10 @@ function latestReleasesEmptyState(windowKey, payload) {
 
 function latestReleasesWeights(entries) {
   const weights = {};
-  for (const { key } of LATEST_SIGNALS) {
+  for (const { key, optional } of LATEST_SIGNALS) {
     const published = entries.find((entry) => entry.components?.[key]?.weight !== undefined);
+    // A signal outside this payload's method is absent, not "weight unknown".
+    if (optional && !published) continue;
     weights[key] = published ? Number(published.components[key].weight) : null;
   }
   return weights;
@@ -10063,18 +10400,96 @@ function latestReleasesWeights(entries) {
 
 function latestReleasesMethodNote(payload, windowData) {
   const weights = latestReleasesWeights(windowData.entries || []);
-  const signals = LATEST_SIGNALS.map(({ key, label }) =>
-    weights[key] === null ? t(label) : `${Math.round(weights[key] * 100)}% ${t(label)}`,
-  ).join(", ");
+  const attention = LATEST_SIGNALS.filter(({ optional }) => !optional)
+    .map(({ key, label }) =>
+      weights[key] === null ? t(label) : `${Math.round(weights[key] * 100)}% ${t(label)}`,
+    )
+    .join(", ");
+  // Affiliation is normalized over the corpus, not the window, so it gets its
+  // own sentence after the attention one.
+  const affiliation =
+    weights.affiliation === null || weights.affiliation === undefined
+      ? ""
+      : ` ${t("Plus {weight}% institution frequency: how many benchmark papers in the whole corpus list the release's best-known institution among its first three, normalized as log1p(count) / log1p(the most frequent institution's count), not by the window. A release with no institution on file gets no affiliation credit. A repository holding only a README, licence or images, or one that is archived or deleted, is listed but not ranked.", { weight: Math.round(weights.affiliation * 100) })}`;
   return t(
     "Ranking {method}: {signals}, each normalized as log1p(value) / log1p(window maximum) and summed to a 0 to 100 score. A release is ranked only when enough of its weight comes from fresh, durable signals; the rest are listed with limited signals. Dataset downloads are a rolling 30-day figure, never a cumulative total. Stars come from the benchmark's own repository, never a parent framework. Window {start} to {end}, UTC.",
     {
       method: payload.method_version || "",
-      signals,
+      signals: attention,
       start: formatDate(windowData.window_start, { dateStyle: "medium" }),
       end: formatDate(windowData.window_end, { dateStyle: "medium" }),
     },
+  ) + affiliation;
+}
+
+const DECK_V2 =
+  "Recently released benchmarks, ranked by the attention they are receiving now (GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days, together 80%) and by how often their institutions appear on benchmark papers in the corpus (20%). Repositories holding only a README, licence or images, and archived or deleted repositories, are listed but not ranked.";
+const LEGEND_V2 =
+  "The number is the score, out of 100. The tag under it is a separate check: how much of the score is backed by observed data. A high tag means at least two signals were found and they cover 75% or more of the score; a low tag means fewer than two signals were found, or they cover less than 40% of the score. It says nothing about how good the benchmark is.";
+
+// Why a release is listed but not ranked (#1120): the repository holds no
+// code or data yet, is archived, or is gone; otherwise too little signal.
+const LIMITED_REASONS = {
+  placeholder_repository: "limited signals: the repository has no code or data yet",
+  repository_archived: "limited signals: the repository is archived",
+  repository_unavailable: "limited signals: the repository is no longer available",
+  default: "limited signals: not enough fresh durable signal to rank",
+};
+
+// The first three institutions behind the release's paper (#1120). OpenAlex's
+// linked names are shown as they are; a paper OpenAlex has not indexed yet
+// shows its own printed affiliations, labelled as such.
+function latestReleaseInstitutions(entry) {
+  const names = (entry.institutions || []).filter(Boolean).slice(0, 3);
+  if (!names.length) return null;
+  const fromPaper = entry.institutions_basis === "arxiv_html_affiliations";
+  return element("small", {
+    className: "latest-release-institutions",
+    text: fromPaper ? `${names.join(" · ")} (${t("as written in the paper")})` : names.join(" · "),
+    attrs: { title: fromPaper ? t("as written in the paper") : t("Institutions linked by OpenAlex") },
+  });
+}
+
+// Institutions by the number of benchmark papers that list them (#1120): a
+// count a reader can check against OpenAlex, not a grade.
+function renderInstitutionRanking() {
+  const section = byId("institution-ranking");
+  const host = byId("institution-ranking-list");
+  if (!section || !host) return;
+  const ranking = state.data?.institution_ranking;
+  const entries = ranking?.entries || [];
+  section.hidden = !entries.length || state.lmode === "adoption";
+  if (!entries.length) {
+    replaceChildren(host, []);
+    return;
+  }
+  const max = Math.max(...entries.map((entry) => Number(entry.benchmark_count) || 0), 1);
+  replaceChildren(
+    host,
+    entries.map((entry) =>
+      element("li", { className: "leaderboard-top-row" }, [
+        element("span", { className: "leaderboard-top-rank", text: String(entry.rank).padStart(2, "0") }),
+        element("span", { className: "leaderboard-top-name", text: entry.name }),
+        element("span", { className: "leaderboard-top-bar" }, [
+          element("span", {
+            className: "leaderboard-top-bar-fill",
+            attrs: { style: `width:${((Number(entry.benchmark_count) / max) * 100).toFixed(1)}%` },
+          }),
+        ]),
+        element("span", {
+          className: "leaderboard-top-count",
+          text: t("{count} papers", { count: entry.benchmark_count }),
+        }),
+      ]),
+    ),
   );
+  const note = byId("institution-ranking-note");
+  if (note) {
+    note.textContent = t(
+      "Institutions ranked by how many benchmark papers in the corpus list them, from OpenAlex's linked institutions for {papers} arXiv papers. A count of papers, not a grade.",
+      { papers: Number(ranking.paper_count || 0).toLocaleString() },
+    );
+  }
 }
 
 // One row per release: the rank line, and behind it every input the rank was
@@ -10096,6 +10511,7 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
         ]),
     element("span", { className: "leaderboard-top-name" }, [
       element("span", { text: entry.name }),
+      latestReleaseInstitutions(entry),
       entry.release_date
         ? element("small", {
             className: "latest-release-date",
@@ -10127,13 +10543,22 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
   const signals = element(
     "dl",
     { className: "latest-release-signals" },
-    LATEST_SIGNALS.map(({ key, label }) => {
+    latestSignalsFor([entry]).map(({ key, label }) => {
       const component = entry.components?.[key] || {};
       const url = safeHttpUrl(component.source_url);
       return element("div", { className: "latest-release-signal" }, [
         element("dt", { text: t(label) }),
         element("dd", {}, [
-          element("span", { text: latestSignalText(component) }),
+          element("span", {
+            // The affiliation input is an institution and its paper count
+            // (#1120), not a counter: name both so the reader can check them.
+            text:
+              key === "affiliation" && component.institution
+                ? `${component.institution} · ${t("{count} papers", {
+                    count: Number(component.value).toLocaleString(),
+                  })}`
+                : latestSignalText(component),
+          }),
           element("small", {
             className: "latest-release-normalized",
             text: `${t("normalized")} ${latestNormalizedText(component)}`,
@@ -10158,7 +10583,7 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
   const meta = [
     t("Coverage {coverage}", { coverage: Number(entry.coverage || 0).toFixed(2) }),
     confidence ? `${t("confidence")} ${t(confidence)}` : "",
-    ranked ? "" : t("limited signals: not enough fresh durable signal to rank"),
+    ranked ? "" : t(LIMITED_REASONS[entry.limited_reason] || LIMITED_REASONS.default),
   ]
     .filter(Boolean)
     .join(" · ");
@@ -10178,6 +10603,27 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
 }
 
 function renderLatestReleases() {
+  renderInstitutionRanking();
+  // attention-affiliation-v2 is no longer attention alone (#1120).
+  const scoreHeader = document.querySelector("#latest-releases .leaderboard-top-columns-count");
+  const method = String(latestReleasesPayload()?.method_version || "");
+  const combined = method.includes("affiliation");
+  // The header, deck and legend describe the method the payload carries.
+  [
+    [scoreHeader, "Attention score", "Score", "Score"],
+    [document.querySelector("#latest-about .latest-releases-deck"), "latest.deck", DECK_V2, DECK_V2],
+    [document.querySelector("#latest-about .latest-releases-legend"), "latest.legend", LEGEND_V2, LEGEND_V2],
+  ].forEach(([node, v1Key, v2Key, v2English]) => {
+    if (!node) return;
+    // applyStaticI18n caches the HTML's English in data-i18n-en; keep the v1
+    // copy so a v1 payload still reads as it always did.
+    if (node.dataset.i18nV1 === undefined) node.dataset.i18nV1 = node.dataset.i18nEn ?? node.textContent;
+    const key = combined ? v2Key : v1Key;
+    const english = combined ? v2English : node.dataset.i18nV1;
+    node.dataset.i18n = key;
+    node.dataset.i18nEn = english;
+    node.textContent = I18N[getLang()]?.[key] ?? english;
+  });
   const host = byId("latest-releases-list");
   if (!host) return;
   const payload = latestReleasesPayload();
@@ -10342,6 +10788,9 @@ function syncLeaderboardMode() {
   const adoption = byId("leaderboard-adoption");
   if (latestSection) latestSection.hidden = !latest;
   if (adoption) adoption.hidden = latest;
+  // Top institutions belongs to the Latest releases mode (#1120).
+  const institutions = byId("institution-ranking");
+  if (institutions && !latest) institutions.hidden = true;
   document.querySelectorAll("[data-lmode]").forEach((control) => {
     if (control.hasAttribute("aria-pressed")) {
       control.setAttribute("aria-pressed", String(control.dataset.lmode === state.lmode));
@@ -10988,25 +11437,122 @@ function railDate(value) {
   });
 }
 
-function evidenceCard(item) {
+// The source is the first thing a reader checks on a card, so it is a chip
+// (issue #971): the organization's mark and an arrow, nothing else. The name
+// stays in the label for screen readers, and "Release" is not part of a logo:
+// the rail already says "Released". A source without a mark shows its name.
+const SOURCE_BRAND = {
+  GitHub: "github",
+  "GitHub Release": "github",
+  "GitHub Organization": "github",
+  "Hugging Face": "huggingface",
+  "Hugging Face Papers": "huggingface",
+  arXiv: "arxiv",
+  "Hacker News": "hackernews",
+  "Semantic Scholar": "semanticscholar",
+};
+
+function sourceChip(item, href) {
+  const brand = SOURCE_BRAND[item.source];
+  const children = [
+    brand ? brandIcon(brand) : element("span", { className: "radar-source-name", text: item.source }),
+    element("span", { className: "radar-source-arrow", text: "↗", attrs: { "aria-hidden": "true" } }),
+  ];
+  const attrs = brand ? { "aria-label": item.source, title: item.source } : {};
+  return href
+    ? element(
+        "a",
+        {
+          className: "radar-source",
+          attrs: { ...attrs, href, target: "_blank", rel: "noopener noreferrer" },
+        },
+        children,
+      )
+    : element("span", { className: "radar-source", attrs }, children);
+}
+
+// Every Today's radar item can be shared as a card (issue #1019). An item the
+// daily briefing picked shares its published card; any other item gets one
+// drawn from the facts it holds. Both modules load on the first press.
+// All dates and Past 30/60/90 days render with the newest day, while each item
+// keeps the day it was found in snapshot_date. A card names, and looks up its
+// published image in, the item's own day.
+function itemDay(item, day) {
+  const date = item.snapshot_date;
+  if (!date || date === day?.date) return day;
+  // observationDays() is what Today rendered from: a window file on a fresh
+  // visit, the full archive once loaded. Both carry each day's share block.
+  return observationDays().find((entry) => entry.date === date) || day;
+}
+
+function radarShareButton(item, day, title, image, pageUrl = "") {
+  const button = element(
+    "button",
+    {
+      className: "share-link share-icon radar-share",
+      attrs: {
+        type: "button",
+        "aria-label": t("Share {name} as a card", { name: title }),
+        title: t("Share card"),
+      },
+    },
+    [shareIcon()],
+  );
+  button.addEventListener("click", async (event) => {
+    // An attention card is a <details>; pressing Share must not also toggle it.
+    event.preventDefault();
+    event.stopPropagation();
+    const { openRadarShare } = await import("./share-card.js");
+    openRadarShare({
+      item,
+      day: item.snapshot_date || day?.date || "",
+      title,
+      image,
+      pageUrl: pageUrl || safeHttpUrl(item.url) || window.location.href,
+      t,
+    });
+  });
+  return element("div", { className: "share-control" }, [button]);
+}
+
+// A Today item that is exactly one catalog record (the build matched its URL,
+// #1061) shares that record's published card and links to its page, so the
+// item and the benchmark never show two different cards.
+const CARD_SLUG = /^[a-z0-9][a-z0-9_-]*$/;
+
+function catalogCardFor(item) {
+  const slug = CARD_SLUG.test(item.catalog_slug || "") ? item.catalog_slug : "";
+  return slug
+    ? { image: `/cards/${slug}.png`, page: `${window.location.origin}/benchmarks/${slug}/` }
+    : { image: "", page: "" };
+}
+
+// The name is what a reader clicks (issue #1097). Before, only the small
+// source chip was a link, so the biggest words on the card led nowhere. A
+// catalog match opens its benchmark page on this site; anything else opens
+// the source, like the chip. No usable URL leaves the name as plain text.
+function radarTitleLink(name, catalogPage, sourceHref) {
+  if (catalogPage) return element("a", { text: name, attrs: { href: catalogPage } });
+  if (sourceHref) {
+    return element("a", {
+      text: name,
+      attrs: { href: sourceHref, target: "_blank", rel: "noopener noreferrer" },
+    });
+  }
+  return document.createTextNode(name);
+}
+
+function evidenceCard(item, day) {
+  const ownDay = itemDay(item, day);
+  const shareCard = shareCardFor(ownDay, item.url);
+  const catalog = catalogCardFor(item);
   const fullTitle = displayTitle(item);
   const { name, subtitle } = splitBenchmarkTitle(fullTitle);
   const categories = (item.categories || []).slice(0, 3).map(titleCase);
   const sourceHref = safeHttpUrl(item.url);
-  const sourceLabel = `${item.source} ↗`;
-  // A repository past 100 or 1,000 GitHub stars is tinted gold. The tint
-  // reports a count the source published; it is not a quality judgement.
-  const stars = Number(item.metrics?.stars);
-  const tier = stars > 1000 ? " stars-1000" : stars > 100 ? " stars-100" : "";
-  return element("article", { className: `record-card radar-card${tier}` }, [
+  return element("article", { className: `record-card radar-card${cardTierClass(item)}` }, [
     element("div", { className: "radar-rail" }, [
-      sourceHref
-        ? element("a", {
-            className: "radar-source",
-            text: sourceLabel,
-            attrs: { href: sourceHref, target: "_blank", rel: "noopener noreferrer" },
-          })
-        : element("span", { className: "radar-source", text: item.source }),
+      sourceChip(item, sourceHref),
       railEvent(item).verb
         ? element("span", { className: "radar-event", text: railEvent(item).verb })
         : null,
@@ -11019,11 +11565,14 @@ function evidenceCard(item) {
             ...(item.watchlist ? [element("span", { text: `★ ${item.watchlist}` })] : []),
           ])
         : null,
-      element("h3", {
-        className: "radar-title",
-        text: name,
-        attrs: name !== item.title ? { title: item.title } : {},
-      }),
+      element(
+        "h3",
+        {
+          className: "radar-title",
+          attrs: name !== item.title ? { title: item.title } : {},
+        },
+        [radarTitleLink(name, catalog.page, sourceHref)],
+      ),
       subtitle ? element("p", { className: "radar-subtitle", text: subtitle }) : null,
       recordFacts(item, { quietUnreported: true }),
       ...(item.watchlist && item.watchlist_note
@@ -11035,14 +11584,20 @@ function evidenceCard(item) {
       }),
       artifactLinks(item),
     ]),
-    scoreBlock(item),
+    // Share sits above the score in the right column, so it adds no line.
+    element("div", { className: "radar-aside" }, [
+      shareCard
+        ? radarShareButton(item, ownDay, fullTitle, shareCard.image, catalog.page)
+        : radarShareButton(item, ownDay, fullTitle, catalog.image, catalog.page),
+      scoreBlock(item),
+    ]),
   ]);
 }
 
-function observationCard(record, index) {
+function observationCard(record, index, day) {
   const item = { ...record, summary: plainSummary(record.summary) };
   const isAttention = item.observation_kind === "attention";
-  if (!isAttention) return evidenceCard(item);
+  if (!isAttention) return evidenceCard(item, day);
   const metadata = isAttention
     ? element("div", { className: "signal-meta" }, [
         element("span", { className: "attention-badge", text: t("attention") }),
@@ -11087,6 +11642,7 @@ function observationCard(record, index) {
           ? `${summary} · ${metricLabel(item.metrics?.points, "point")}`
           : summary,
       }),
+      isAttention ? radarShareButton(item, itemDay(item, day), displayTitle(item), "") : null,
     ]),
     isAttention ? attentionActivity(item) : scoreBlock(item),
   ]);
@@ -11117,7 +11673,11 @@ function brandIcon(name) {
     class: "brand-icon",
     "aria-hidden": "true",
   });
-  svg.appendChild(svgElement("path", { d: BRAND_ICON_PATHS[name] }));
+  svg.appendChild(
+    ["github", "huggingface", "arxiv", "hackernews", "semanticscholar"].includes(name)
+      ? svgElement("use", { href: `/assets/source-icons.svg#${name}` })
+      : svgElement("path", { d: BRAND_ICON_PATHS[name] }),
+  );
   return svg;
 }
 
@@ -11349,6 +11909,7 @@ const SCORE_SOURCE_LINKS = [
   ["LLM Stats", "https://llm-stats.com"],
   ["Artificial Analysis", "https://artificialanalysis.ai"],
   ["OpenCompass Hub", "https://hub.opencompass.org.cn"],
+  ["Benchmark Saturation", "https://github.com/evaleval/benchmark-saturation"],
 ];
 
 // Deliberately quiet: it closes the card as a footnote under the formats the
@@ -11377,6 +11938,50 @@ function citeCredit() {
   });
   node.append(document.createTextNode("."));
   return node;
+}
+
+// Coverage under the citation formats. This mirrors MEDIA_COVERAGE in
+// media.py, which also feeds the seeded card and the /media/ page.
+const MEDIA_COVERAGE = [
+  ["Daily AI Wire News", "https://dailyaiwire.news/article/benchmark-radar-ai-evaluation-database-search-engine", "Article"],
+  ["Moonlight", "https://www.themoonlight.io/en/review/benchmark-radar-a-living-database-and-search-engine-for-ai-benchmarks-and-evaluation", "Paper summary"],
+  ["Papers with Code", "https://paperswithcode.co/paper/2609.11115", "Paper listing"],
+  ["alphaXiv", "https://www.alphaxiv.org/abs/2609.11115", "Paper discussion"],
+  ["Hugging Face Papers", "https://huggingface.co/papers/2609.11115", "Paper discussion"],
+  ["arXivDaily", "https://www.arxivdaily.com/universities/sjtu", "Shanghai Jiao Tong University paper feed (rolling)"],
+  ["Geepity", "https://geepity.com/2609.11115/", "Paper page"],
+  ["Isfahan AI", "https://isfahan-ai.ir/news/1248", "News post"],
+  ["Collected", "https://collected.ga/typesafe-ai-daily-benchmark-radar-a-living-database-and-search-engine-for-ai-benchmarks-and-eval/", "Typesafe AI Daily"],
+  ["Alexy Khrabrov on LinkedIn", "https://www.linkedin.com/posts/chiefscientist_typesafe-ai-daily-benchmark-radar-a-living-share-7504531089483309056-9uO7/", "Community post"],
+  ["Daily AI Wire News on LinkedIn", "https://www.linkedin.com/posts/benchmark-radar-launches-as-centralized-ai-share-7504478957413527552-jdN_/", "Article announcement"],
+  ["@SciFi on X", "https://x.com/SciFi/status/2098817718036127993", "Community post"],
+  ["@HuggingPapers on X", "https://x.com/HuggingPapers/status/2099412410264060340", "Community post"],
+  ["@marcel_butucea on X", "https://x.com/marcel_butucea/status/2098914581204680765", "Community post"],
+  ["Moltbook", "https://www.moltbook.com/post/a65591a2-d28d-4f3d-b381-fe2836c4e4c3", "Community post"],
+];
+
+function citeMedia() {
+  return element("section", { className: "cite-media", attrs: { "aria-labelledby": "cite-media-title" } }, [
+    element("h3", {
+      className: "cite-media-title",
+      text: t("In the media"),
+      attrs: { id: "cite-media-title" },
+    }),
+    element(
+      "ul",
+      { className: "cite-media-list" },
+      MEDIA_COVERAGE.map(([label, url, note]) =>
+        element("li", {}, [
+          element("a", {
+            text: label,
+            attrs: { href: url, target: "_blank", rel: "noopener noreferrer" },
+          }),
+          document.createTextNode(" "),
+          element("span", { className: "cite-media-note", text: note }),
+        ]),
+      ),
+    ),
+  ]);
 }
 
 // Reachable at /cite/, so the card has a short link that can be pasted into a
@@ -11415,6 +12020,7 @@ function openCite(updateUrl = true) {
       attrs: { href: CITE_CFF_URL, target: "_blank", rel: "noopener noreferrer" },
     }),
     citeCredit(),
+    citeMedia(),
   ]);
   showModalDialog(dialog);
 }
@@ -11491,12 +12097,26 @@ const scheduleLeaderboardRender = debounce(() => {
 });
 
 function bindEvents() {
+  const compactBrowser = window.matchMedia?.("(max-width: 1050px)");
+  if (compactBrowser) {
+    const syncBrowser = () => {
+      const browser = byId("benchmark-browser");
+      if (browser) browser.open = !compactBrowser.matches;
+    };
+    syncBrowser();
+    compactBrowser.addEventListener("change", syncBrowser);
+  }
   // Without this a pushed entry would change the URL on Back and leave the
   // page showing the previous view, silently disagreeing with its own address
   // bar (issue #286).
   window.addEventListener("popstate", onPopState);
   const langToggle = byId("lang-toggle");
   if (langToggle) langToggle.addEventListener("click", toggleLang);
+  // The footer switch is a second door to the masthead toggle, so both stay
+  // one control with one state.
+  document.querySelectorAll("[data-lang-switch]").forEach((item) => {
+    item.addEventListener("click", toggleLang);
+  });
   document.querySelectorAll("[data-view]").forEach((item) => {
     item.addEventListener("click", async (event) => {
       // View nav entries are anchors so crawlers can follow them; keep the
@@ -11635,10 +12255,22 @@ function bindEvents() {
     state.benchmarkVisibleLimit += BENCHMARK_SEARCH_LIMIT;
     renderBenchmarkSearch();
   });
-  byId("frontier-benchmark").addEventListener("change", (event) => {
-    selectFrontier(event.target.value);
-    renderAdoptionFrontier(catalogDocumentBoard());
-    writeUrl("push");
+  document.querySelectorAll("[data-today-window]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (!state.data) return;
+      const select = byId("today-date");
+      select.value = button.dataset.todayWindow === "latest" ? state.data.latest_date : button.dataset.todayWindow;
+      select.dispatchEvent(new Event("change"));
+    });
+  });
+  bindInfoTip(byId("today-sort-info"), byId("today-sort-toggle"));
+  bindInfoTip(byId("models-info"), byId("models-info-toggle"));
+  bindInfoTip(byId("latest-about"), byId("latest-about-toggle"));
+  document.querySelectorAll("[data-today-sort]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.todaySort = button.dataset.todaySort;
+      renderToday({ resultsOnly: true });
+    });
   });
   byId("today-date").addEventListener("change", async (event) => {
     // A newer date or range must also supersede a pending Trends-day load.
@@ -11786,6 +12418,8 @@ function bindEvents() {
     if (event.key === "Escape") closeFiltersDrawer();
   });
   byId("refresh-button").addEventListener("click", refreshData);
+  // Every close path (button, backdrop, Esc) hands the h1 back to the view.
+  for (const id of Object.keys(UTILITY_TITLES)) byId(id).addEventListener("close", syncPageHeading);
   byId("rubric-close").addEventListener("click", () => byId("rubric-dialog").close());
   byId("rubric-dialog").addEventListener("click", (event) => {
     if (event.target === byId("rubric-dialog")) byId("rubric-dialog").close();
@@ -11824,6 +12458,19 @@ function bindEvents() {
     openCite();
   });
   byId("cite-close").addEventListener("click", () => byId("cite-dialog").close());
+  byId("cite-content").addEventListener("click", (event) => {
+    if (!event.target.closest(".copy-target")) return;
+    const prompt = starPrompt("cite");
+    if (prompt) byId("cite-content").querySelector(".copy-blocks")?.after(prompt);
+  });
+  // Kit opens in a new tab, so this tab can still thank the reader. The
+  // submit event fires only once the browser has validated the form.
+  document.querySelectorAll(".email-signup-form").forEach((form) => {
+    form.addEventListener("submit", () => {
+      const prompt = starPrompt("subscribe");
+      if (prompt) form.after(prompt);
+    });
+  });
   byId("cite-dialog").addEventListener("click", (event) => {
     if (event.target === byId("cite-dialog")) byId("cite-dialog").close();
   });
@@ -12016,8 +12663,54 @@ function stateNeedsFullData() {
   ) return true;
   return state.view === "today" && Boolean(
     state.todayDate === "all" ||
-    (state.todayDate && state.todayDate !== state.data?.latest_date)
+    (state.todayDate
+      && state.todayDate !== state.data?.latest_date
+      && !TODAY_WINDOWS[state.todayDate])
   );
+}
+
+// A 30, 60 or 90 day window needs only its own file, not the full archive.
+function stateNeedsWindowData() {
+  return Boolean(
+    state.view === "today"
+    && !state.fullDataLoaded
+    && TODAY_WINDOWS[state.todayDate]
+    && !freshWindowData(state.todayDate)
+  );
+}
+
+async function ensureWindowData(cache = "default") {
+  const key = state.todayDate;
+  if (!TODAY_WINDOWS[key] || state.fullDataLoaded) return state.data;
+  if (freshWindowData(key) && cache === "default") return state.data;
+  if (!state.windowPromises[key]) {
+    state.windowPromises[key] = (async () => {
+      try {
+        const response = await fetch(`/data/radar-window-${key}.json`, { cache });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        // A window file from another build than the page's own would list a
+        // different range. Use the full archive rather than a mixed view.
+        if (
+          data?.generated_at !== state.data.generated_at
+          || data?.latest_date !== state.data.latest_date
+          || !Array.isArray(data.days)
+        ) {
+          throw new Error("Window file does not match the loaded snapshot");
+        }
+        state.windowData[key] = data;
+        state.observations = null;
+      } catch (error) {
+        // An older deploy has no window file; the full archive still answers.
+        console.warn(error);
+        await ensureFullData(cache);
+      } finally {
+        delete state.windowPromises[key];
+      }
+    })();
+  }
+  await state.windowPromises[key];
+  return state.data;
 }
 
 function stateNeedsTrendsData() {
@@ -12075,6 +12768,7 @@ async function ensureFullData(cache = "default") {
 
 async function ensureDataForState() {
   if (stateNeedsFullData()) await ensureFullData();
+  else if (stateNeedsWindowData()) await ensureWindowData();
   else if (stateNeedsTrendsData()) await ensureTrendsData();
 }
 
@@ -12104,6 +12798,7 @@ async function refreshData() {
     // but guarantees the error is not retired if a future bootstrap shape lacks
     // data a URL-backed state needs.
     if (stateNeedsFullData()) await ensureFullData("reload");
+    else if (state.view === "today" && TODAY_WINDOWS[state.todayDate]) await ensureWindowData("reload");
     else if (stateNeedsTrendsData()) await ensureTrendsData("reload");
     // A catalog that failed, or arrived without what the Trends direction
     // table needs (taxonomy, crawl anchor), is fetched again on Refresh, so
@@ -12199,7 +12894,6 @@ async function initialize() {
     if (state.view === "trends") renderTrends();
     if (state.view === "map") renderTrendMap();
 
-    renderBuildMeta();
     renderStaleBanner();
     if (state.rubric) {
       openRubric(null, state.rubric === "current" ? null : state.rubric, false);
@@ -12218,11 +12912,11 @@ async function initialize() {
       initializationWasSuperseded
       && compatibleDashboard(state.data)
       && !stateNeedsFullData()
+      && !stateNeedsWindowData()
     ) {
       syncLeaderboardNav();
       setView(state.view, false);
       rerenderCurrentView();
-      renderBuildMeta();
       renderStaleBanner();
       return;
     }

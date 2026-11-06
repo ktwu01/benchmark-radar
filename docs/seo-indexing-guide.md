@@ -249,6 +249,23 @@ Google references:
 
 ## What to monitor
 
+### Keep test visits out of Clarity
+
+Open `https://benchmark-radar.org/?analytics=off` in each browser used for maintenance.
+This saves an analytics refusal for later visits in that browser.
+The URL also stops recording when an older acceptance is saved.
+Clearing browser storage removes the saved refusal.
+The footer's **Change analytics choice** control can enable analytics again.
+
+The shared loader sends analytics only from `benchmark-radar.org`.
+Local previews and copied deployments do not load the production recorder.
+Use the consent behavior tests to check local changes without recording visits.
+
+For production reports, filter **Entry URL → starts with → `https://benchmark-radar.org/`**.
+Use the same dates before comparing results.
+Old visits remain in historical reports; these controls do not erase them.
+Record when maintainers applied the opt-out before starting a fresh baseline.
+
 Check Search Console weekly for the first month after migration:
 
 - **Page indexing:** the homepage is indexed under the HTTPS custom domain.

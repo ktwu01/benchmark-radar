@@ -1,0 +1,77 @@
+name: Post daily Chinese briefing to X
+
+# Post the day's briefing to X in Chinese at 11:00 AM Beijing time.
+#
+# 03:00 UTC is 11:00 in Beijing every day of the year (China has no daylight
+# saving), which is 22:00 EST / 23:00 EDT the previous US evening. The day's
+# 05:00 UTC radar run has not happened yet at 03:00 UTC, so the script posts
+# the latest committed snapshot and dates the post by that snapshot. The
+# poster script itself is added by the English change (post-x-en.yml); this
+# workflow only adds the Chinese schedule.
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Print the post instead of sending it"
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: post-x-zh
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  post:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Create ledger-writer token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ vars.RADAR_APP_ID }}
+          private-key: ${{ secrets.RADAR_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: benchmark-radar
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          token: ${{ steps.app-token.outputs.token }}
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Post the Chinese briefing to X
+        id: post
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+        run: >
+          python scripts/post_x.py --lang zh
+          ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: Record the post in the ledger
+        if: steps.post.outputs.posted == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "benchmark-radar[bot]"
+          git config user.email "benchmark-radar[bot]@users.noreply.github.com"
+          git add data/x-posts.json
+          git commit -m "Record X post (zh) ${{ steps.post.outputs.snapshot_date }}"
+          git push origin HEAD:main || {
+            git pull --rebase origin main
+            git push origin HEAD:main
+          }

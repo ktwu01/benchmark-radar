@@ -7,7 +7,8 @@ method, and a GitHub version tag all arrive as `event_kind == "released"` with a
 asks this module what the record's headline contribution is.
 
 Only a positive finding excludes a record: a software version tag, or a paper
-whose own introduction sentence names a model or a method before any benchmark.
+whose own introduction sentence names a model, a method, an agent, or a harness
+before any benchmark.
 A record with no clear headline stays eligible, so an unfamiliar benchmark is
 never dropped for lack of a recognised phrase. This type is read at display
 time only. The record stays in the corpus, in search, and in every count.
@@ -22,9 +23,11 @@ BENCHMARK = "benchmark"
 MODEL = "model"
 METHOD = "method"
 SOFTWARE_RELEASE = "software_release"
+AGENT = "agent"
+HARNESS = "harness"
 UNCLEAR = "unclear"
 
-NON_BENCHMARK_KINDS: frozenset[str] = frozenset({MODEL, METHOD, SOFTWARE_RELEASE})
+NON_BENCHMARK_KINDS: frozenset[str] = frozenset({MODEL, METHOD, SOFTWARE_RELEASE, AGENT, HARNESS})
 
 # A version tag of a followed repository (OpenClaw 2026.8.34, an mteb patch
 # release) says the software shipped, not that a new benchmark exists.
@@ -35,9 +38,11 @@ _TITLE_BENCHMARK = re.compile(
     re.IGNORECASE,
 )
 
-# Benchmark nouns and model or method nouns share one pattern so that the
-# first one in the introduction sentence decides: "a benchmark framework" is a
-# benchmark, "a general training framework" is a method.
+# The first contribution noun decides: "a benchmark framework" is a benchmark,
+# "a general training framework" is a method, and "a unified agent" is an agent.
+# Agent/harness matches are limited to the descriptor, before its elaboration.
+# A benchmark noun anywhere in the coordinated descriptor still wins, so
+# "an agent benchmark" stays a benchmark.
 _BENCHMARK_NOUN = (
     r"evaluation (?:suite|framework|protocol|platform|harness)|benchmark\w*|dataset|corpus"
     r"|testbed|test suite|test set|leaderboard|\bgym\b|\barena\b"
@@ -50,8 +55,14 @@ _METHOD_NOUN = (
     r"framework|method|approach|network|architecture|algorithm|training|pipeline|recipe"
     r"|paradigm|technique|mechanism|module|objective|optimi[sz]\w*|system"
 )
+_AGENT_NOUN = r"\bagents?\b"
+_HARNESS_NOUN = r"\bharness(?:es)?\b"
 _HEADLINE_NOUN = re.compile(
     rf"(?P<benchmark>{_BENCHMARK_NOUN})|(?P<model>{_MODEL_NOUN})|(?P<method>{_METHOD_NOUN})",
+    re.IGNORECASE,
+)
+_AGENT_OR_HARNESS = re.compile(
+    rf"(?P<agent>{_AGENT_NOUN})|(?P<harness>{_HARNESS_NOUN})",
     re.IGNORECASE,
 )
 _INTRODUCES = re.compile(
@@ -86,16 +97,21 @@ def _headline_kind(summary: str) -> str | None:
     if re.search(_BENCHMARK_NOUN, head, re.IGNORECASE):
         return BENCHMARK
     noun = _HEADLINE_NOUN.search(rest)
+    # Only the descriptor can identify an agent/harness contribution. Mentions
+    # in elaboration can instead name evaluation targets (e.g. CABRA).
+    introduced_agent = _AGENT_OR_HARNESS.search(head)
+    if introduced_agent is not None and (noun is None or introduced_agent.start() < noun.start()):
+        noun = introduced_agent
     if noun is None:
         return None
-    for kind in (BENCHMARK, MODEL, METHOD):
-        if noun.group(kind):
+    for kind in (BENCHMARK, MODEL, METHOD, AGENT, HARNESS):
+        if noun.lastgroup == kind:
             return kind
     return None
 
 
 def classify_release_record(item: dict[str, Any]) -> str:
-    """Return benchmark, model, method, software_release, or unclear."""
+    """Return benchmark, model, method, agent, harness, software_release, or unclear."""
     source = str(item.get("source") or "").strip().casefold()
     parser = str(item.get("parser_version") or "")
     if source in _SOFTWARE_RELEASE_SOURCES or parser.startswith("github-releases/"):

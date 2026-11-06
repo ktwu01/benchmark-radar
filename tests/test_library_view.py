@@ -89,3 +89,10 @@ def test_directions_are_kept_apart_from_searchable_categories():
     assert "searchBenchmarkIndex(records, state.libraryQuery)" in rows
     if search.exists():
         assert "library_direction" not in search.read_text(encoding="utf-8")
+
+
+def test_star_prompt_runs_against_the_production_function():
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node is not installed")
+    subprocess.run([node, "tests/star_prompt_harness.mjs"], check=True, timeout=60, cwd=ROOT)

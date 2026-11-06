@@ -25,7 +25,7 @@ from benchmark_radar.blog_shell import (
     extract_site_chrome,
 )
 from benchmark_radar.feed import SITE_URL
-from benchmark_radar.site_shell import esc
+from benchmark_radar.site_shell import SHARE_CARD_META, esc
 
 # The blog chrome is extracted from the committed dashboard source, so the
 # tests exercise the real site/index.html rather than a hand-written fixture
@@ -315,6 +315,15 @@ def test_each_page_carries_its_own_canonical_and_blogposting_schema(tmp_path):
     assert posting["inLanguage"] == ["en", "zh-Hans"]
 
 
+def test_each_page_declares_the_full_share_card(tmp_path):
+    # Issue #891: a shared blog link asks for the same large card as the homepage.
+    write_blog_with_chrome([_briefed(status="insight")], tmp_path)
+    page = (tmp_path / "blog" / "2026-08-30" / "index.html").read_text(encoding="utf-8")
+    assert SHARE_CARD_META in page
+    for tag in SHARE_CARD_META.splitlines():
+        assert tag in DASHBOARD_HTML
+
+
 def _schemas(page: str) -> list[dict]:
     return [
         json.loads(block.replace("<\\/", "</"))
@@ -515,7 +524,7 @@ def test_a_brief_states_the_day_once_and_opens_on_its_own_text(tmp_path):
     write_blog_with_chrome([_briefed()], tmp_path)
     page = (tmp_path / "blog" / "2026-08-30" / "index.html").read_text(encoding="utf-8")
     hero = re.search(r'<header class="blog-hero">.*?</header>', page, re.S).group(0)
-    assert hero.count("<h1>") == 1
+    assert hero.count("<h1") == 1
     for echo in ('class="eyebrow"', 'class="blog-lede"', 'class="blog-meta"', "<time"):
         assert echo not in hero, echo
 
@@ -558,6 +567,8 @@ def test_dashboard_and_blog_share_the_reduced_chrome_contract(tmp_path):
         "/saturation/",
         "/leaderboard/",
         "/cite/",
+        "/media/",
+        "/blog/",
         "/about/",
     ]
     for document in (DASHBOARD_HTML, page):
@@ -591,13 +602,15 @@ def test_the_contact_button_becomes_the_dashboard_deep_link(tmp_path):
     assert 'id="badge-contact"' not in page
 
 
-def test_the_footer_build_date_is_baked_from_the_day_the_page_describes(tmp_path):
-    write_blog_with_chrome([_briefed(), _legacy()], tmp_path)
-    brief = (tmp_path / "blog" / "2026-08-30" / "index.html").read_text(encoding="utf-8")
-    legacy = (tmp_path / "blog" / "2026-07-23" / "index.html").read_text(encoding="utf-8")
-    assert '<span data-i18n="Updated">Updated</span> 2026-08-30' in brief
-    assert '<span data-i18n="Updated">Updated</span> 2026-07-23' in legacy
-    assert "Updated \u2014" not in brief
+def test_every_brief_carries_the_footer_email_signup(tmp_path):
+    """The blog has no app.js, so the signup must work as a plain form post."""
+    write_blog_with_chrome([_briefed()], tmp_path)
+    page = (tmp_path / "blog" / "2026-08-30" / "index.html").read_text(encoding="utf-8")
+    footer = page.split("<footer>", 1)[1].split("</footer>", 1)[0]
+    assert '<form class="email-signup-form"' in footer
+    assert 'method="post"' in footer
+    assert 'name="email_address"' in footer
+    assert "build-meta" not in footer
 
 
 def test_a_missing_dashboard_source_fails_visibly(tmp_path):
@@ -613,15 +626,15 @@ def test_the_extractor_fails_loudly_when_the_dashboard_changes_shape():
 def test_a_page_cannot_claim_a_section_the_dashboard_does_not_link_to():
     """The active entry is marked from the real nav, so it has to be in one.
 
-    Both rows count: About is in the masthead, Blog is in the footer.
+    Both rows count: the masthead and the footer's link columns.
     A path in neither would leave the page with no current entry at all, which
     is the shape a silent miss takes, so it stops the build instead.
     """
     dashboard = Path("site/index.html").read_text(encoding="utf-8")
     marker = 'class="nav-active" aria-current="page"'
-    for path in ("/trends/", "/cite/", "/about/"):
+    for path in ("/trends/", "/cite/", "/about/", "/blog/", "/media/"):
         assert marker in extract_site_chrome(dashboard, active_path=path).header, path
-    for path in ("/blog/",):
+    for path in ("/benchmarks/",):
         assert marker in extract_site_chrome(dashboard, active_path=path).footer, path
     with pytest.raises(ValueError, match="no longer links to"):
         extract_site_chrome(dashboard, active_path="/nowhere/")
@@ -637,10 +650,12 @@ def test_the_chrome_i18n_table_is_baked_from_app_js_for_chinese_readers(tmp_path
     table = json.loads(match.group(1))
     # Same reviewed strings the dashboard applies: the contact label, the
     # toggle states, and the badge aria templates.
+    assert table["Accept"] == "接受"
+    assert table["Decline"] == "拒绝"
+    assert "Microsoft" in table["analytics-consent-text"]
     assert table["Contact"] == "联系作者"
     assert table["Switch to English"] == "切换到英文"
     assert "{count}" in table["Star this repository on GitHub. {count} stars"]
-    assert table["Updated"] == "更新于"
 
 
 def test_nav_labels_without_a_reviewed_string_stay_english_like_the_dashboard(tmp_path):
@@ -751,3 +766,151 @@ def test_client_malformed_chrome_i18n_logs_error_without_throwing():
     res = _run_blog_language_harness("malformed-json", "zh")
     assert any("Failed to parse #chrome-i18n payload" in err for err in res["consoleErrors"])
     assert res["contactText"] == "Contact"
+
+
+@pytest.mark.parametrize("mode", ["consent-query", "consent-saved"])
+def test_deferred_consent_translates_and_preserves_privacy_link(mode):
+    result = _run_blog_language_harness(mode, "zh")["consentResult"]
+    assert result["labels"] == ["接受", "拒绝"]
+    assert '<a href="https://privacy.microsoft.com/privacystatement">' in result["markup"]
+    assert "隐私声明" in result["markup"]
+    assert result["englishLabels"] == ["Accept", "Decline"]
+    assert ">Privacy</a>" in result["englishMarkup"]
+
+
+def test_a_bilingual_brief_serves_one_h1(tmp_path):
+    """#1066: both languages ship in one page; only the shown title is the h1."""
+    write_blog_with_chrome([_briefed()], tmp_path)
+    page = (tmp_path / "blog" / "2026-08-30" / "index.html").read_text(encoding="utf-8")
+    assert page.count("<h1") == 1
+    assert '<h1 class="blog-title">' in page
+    assert '<h2 class="blog-title" lang="zh-Hans">' in page
+
+
+def test_a_day_is_titled_after_its_lead_benchmark():
+    """#593: the title names the day's lead benchmark, the same pick as its top
+    share card; a day without a share block keeps its dated title."""
+    from benchmark_radar.blog_lead import _lead_titles
+
+    def day(*titles):
+        return {"share": {"cards": [{"title": title} for title in titles]}}
+
+    lead = "MemHarmBench: Evaluating Cross-Session Prompt Injection in Memory-Persistent AI Agents"
+    assert _lead_titles(day(lead, "b", "c", "d", "e"), "2026-11-03") == (
+        "MemHarmBench and 4 more in AI benchmark news · Nov 3, 2026",
+        "MemHarmBench 等 5 条 AI benchmark 动态 · 2026-11-03",
+    )
+    assert _lead_titles(day(lead, "b"), "2026-11-03")[0] == (
+        "MemHarmBench and 1 more in AI benchmark news · Nov 3, 2026"
+    )
+    assert _lead_titles(day(lead), "2026-11-03")[0] == (
+        "AI benchmark news: MemHarmBench · Nov 3, 2026"
+    )
+    # A long title ends at its first natural break, never mid-phrase.
+    long = (
+        "Is Your Long-Horizon Benchmark Really Deep? "
+        "Measuring and Synthesizing Depth in Terminal Tasks"
+    )
+    assert _lead_titles(day(long), "2026-11-03")[0] == (
+        "AI benchmark news: Is Your Long-Horizon Benchmark Really Deep? · Nov 3, 2026"
+    )
+    # With no break, it is cut at a word near 60 characters.
+    plain = "A very long benchmark title without any clause break " * 2
+    cut = _lead_titles(day(plain), "2026-11-03")[0].split("news: ", 1)[1].split(" · ")[0]
+    assert cut.endswith("…") and len(cut) <= 61
+    # A repository title names the repository, as the Today card does.
+    assert _lead_titles(day("chartact-benchmark/ChartAct", "x"), "2026-10-25")[0] == (
+        "ChartAct and 1 more in AI benchmark news · Oct 25, 2026"
+    )
+    assert _lead_titles(day("EleutherAI/lm-evaluation-harness v0.4.13"), "2026-09-01")[0] == (
+        "AI benchmark news: lm-evaluation-harness v0.4.13 · Sep 1, 2026"
+    )
+    # "T1: ..." is not a name a reader knows; the whole title is kept, then cut.
+    assert _lead_titles(day("T1: Terminal Agent Learning"), "2026-11-03")[0] == (
+        "AI benchmark news: T1: Terminal Agent Learning · Nov 3, 2026"
+    )
+    assert _lead_titles({"share": {}}, "2026-11-03") is None
+    assert _lead_titles({}, "2026-11-03") is None
+
+
+def test_a_cited_benchmark_links_to_its_page_only_by_exact_url():
+    """#593: a source that is exactly one catalog record links its benchmark page."""
+    from benchmark_radar.blog_content import _sources_section
+
+    sources = (
+        ("E001", "GPQA", "https://arxiv.org/abs/2311.12022"),
+        ("E002", "Other", "https://example.org/x"),
+    )
+    html = _sources_section(
+        sources,
+        "en",
+        {"https://arxiv.org/abs/2311.12022": "gpqa_diamond", "https://example.org/x": "../bad"},
+    )
+    assert html.count('class="blog-benchmark-link"') == 1
+    assert 'href="/benchmarks/gpqa_diamond/"' in html
+    assert "../bad" not in html
+    assert "blog-benchmark-link" not in _sources_section(sources, "en")
+    assert "Benchmark 页面" in _sources_section(sources, "zh", {sources[0][2]: "gpqa_diamond"})
+
+
+def test_a_day_before_share_blocks_is_titled_by_the_share_rule():
+    """Share blocks start on 2026-10-25; older days get the pick the share step
+    would make, so their titles name a benchmark instead of a date (#593)."""
+    from benchmark_radar.blog_lead import _lead_titles
+
+    day = {
+        "date": "2026-09-01",
+        "evidence_items": [
+            {
+                "title": "Low: a lower-scored release",
+                "url": "https://example.org/low",
+                "total_score": 40,
+                "event_kind": "released",
+                "recommended": True,
+                "suppression_reasons": [],
+                "source": "arXiv",
+                "source_id": "low",
+            },
+            {
+                "title": "TopBench: the highest-scored release",
+                "url": "https://example.org/top",
+                "total_score": 90,
+                "event_kind": "released",
+                "recommended": True,
+                "suppression_reasons": [],
+                "source": "arXiv",
+                "source_id": "top",
+            },
+        ],
+    }
+    title = _lead_titles(day, "2026-09-01", [day])[0]
+    assert title == "TopBench and 1 more in AI benchmark news · Sep 1, 2026"
+    # Without the other days, a day with no briefing keeps its dated title.
+    assert _lead_titles(day, "2026-09-01") is None
+
+
+def test_the_headline_benchmark_appears_in_the_post_body():
+    """A day without a briefing lists only its first ten evidence records, so a
+    top-scored release past them was named in the title and shown nowhere."""
+    from benchmark_radar.blog_content import build_post
+
+    def item(name, score):
+        return {
+            "title": f"{name}: a benchmark release",
+            "url": f"https://example.org/{name.lower()}",
+            "total_score": score,
+            "event_kind": "released",
+            "recommended": True,
+            "suppression_reasons": [],
+            "source": "arXiv",
+            "source_id": name,
+        }
+
+    filler = [item(f"Filler{n}", 10) for n in range(10)]
+    day = {"date": "2026-07-28", "evidence_items": [*filler, item("TopBench", 90)]}
+    post = build_post(day, {"https://example.org/topbench": "topbench"}, [day])
+    assert post.title.startswith("TopBench and ")
+    body = _text(post.body_en)
+    assert "TopBench: a benchmark release" in body
+    assert body.index("Featured on this day") < body.index("What the radar collected")
+    assert 'href="/benchmarks/topbench/"' in post.body_en

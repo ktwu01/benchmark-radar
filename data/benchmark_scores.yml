@@ -88,6 +88,10 @@ schema_version: 1
 # improves upward: an edit-distance metric inverts the axis, and a chart that
 # assumed higher-is-better would draw its progression upside down.
 benchmarks:
+  - benchmark_id: gobench
+    metric: elo
+    direction: higher_is_better
+    unit: elo
   - benchmark_id: mmlu
     metric: accuracy
     direction: higher_is_better
@@ -546,6 +550,10 @@ benchmarks:
     direction: lower_is_better
     unit: ratio
 
+  - benchmark_id: slopcodebench
+    metric: isolated_solve
+    direction: higher_is_better
+    unit: percent
 results:
   # Brain-to-Text '24's official challenge summary names the top three final
   # submissions and the PyTorch baseline. The challenge used 1,200 held-out
@@ -6140,3 +6148,751 @@ results:
     reported_at: '2025-04-30'
     value: 52.0
     read_from: html_text
+
+  # GoBench: all 47 entries in the pinned report's three LLM comparison tables.
+  # The KataGo calibration ladder is not an LLM comparison table. Costs, timing,
+  # and error rates use other metrics and are not entered as Elo observations.
+  # Model labels identify the evaluated model; protocol retains effort, harness,
+  # context mode and learning duration. Comments retain exact upstream player IDs,
+  # game counts and confidence intervals for transcription review.
+  # The snapshot date in instrument prevents a future refit of the relative Elo
+  # ladder from silently joining these measurements as an unchanged instrument.
+
+  # Track 1
+  # gpt6-astra-max-api-multi; 30 games; 95% CI +/- 140 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort max; 7 komi; random-player Elo 0
+    model: GPT-6 Astra
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2568
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt6.1-sol-max-api-multi; 20 games; 95% CI +/- 202 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort max; 7 komi; random-player Elo 0
+    model: GPT-6.1 Sol
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2379
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gemini-4-argon-high-api-multi; 20 games; 95% CI +/- 172 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: gemini-4-argon
+    organization: Google
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2353
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt6-astra-low-api-multi; 30 games; 95% CI +/- 139 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort low; 7 komi; random-player Elo 0
+    model: GPT-6 Astra
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2301
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # claude-opus-5-5-high-api-multi; 30 games; 95% CI +/- 134 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: Claude Opus 5.5
+    organization: Anthropic
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2276
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # fable-5.1-max-api-multi; 14 games; 95% CI +/- 219 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort max; 7 komi; random-player Elo 0
+    model: Claude Fable 5.1
+    organization: Anthropic
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2269
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # opus-5-max-api-multi; 30 games; 95% CI +/- 132 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort max; 7 komi; random-player Elo 0
+    model: Claude Opus 5
+    organization: Anthropic
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2256
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt6-astra-high-api-multi; 30 games; 95% CI +/- 138 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: GPT-6 Astra
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2227
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt6.1-sol-high-api-multi; 20 games; 95% CI +/- 175 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: GPT-6.1 Sol
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2172
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # fable-5.1-high-api-multi; 30 games; 95% CI +/- 134 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: Claude Fable 5.1
+    organization: Anthropic
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2122
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # claude-sonnet-5-5-high-api-multi; 20 games; 95% CI +/- 174 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: Claude Sonnet 5.5
+    organization: Anthropic
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2087
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # opus-5-high-api-multi2; 30 games; 95% CI +/- 139 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: Claude Opus 5
+    organization: Anthropic
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2076
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt6-astra-high-api; 14 games; 95% CI +/- 217 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; single-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: GPT-6 Astra
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2011
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt6-sol-max-api-multi; 14 games; 95% CI +/- 222 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort max; 7 komi; random-player Elo 0
+    model: GPT-6 Sol
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2006
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt5.6-sol-max-api-multi; 14 games; 95% CI +/- 207 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort max; 7 komi; random-player Elo 0
+    model: GPT-5.6 Sol
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 1929
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt5.6-sol-high-api-multi4; 14 games; 95% CI +/- 207 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: GPT-5.6 Sol
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 1846
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gemini-3.1-pro-high-api-multi; 20 games; 95% CI +/- 178 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: Gemini 3.1 Pro
+    organization: Google
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 1797
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # DeepSeek-V4.1-Flash-max-api-multi; 14 games; 95% CI +/- 206 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort max; 7 komi; random-player Elo 0
+    model: DeepSeek-V4.1-Flash
+    organization: DeepSeek
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 1707
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # DeepSeek-V4.1-Flash-1017-max-api-multi; 14 games; 95% CI +/- 195 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort max; 7 komi; random-player Elo 0
+    model: DeepSeek-V4.1-Flash-1017
+    organization: DeepSeek
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 1634
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gemini-3.8-flash-high-api-multi; 14 games; 95% CI +/- 206 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: Gemini 3.8 Flash
+    organization: Google
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 1616
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt6-sol-high-api-multi2; 14 games; 95% CI +/- 213 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: GPT-6 Sol
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 1499
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # DeepSeek-V4-Flash-0731-max-api-multi; 14 games; 95% CI +/- 227 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort max; 7 komi; random-player Elo 0
+    model: DeepSeek-V4-Flash-0731
+    organization: DeepSeek
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 1449
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # muse-spark-1.3-contributor-high-api-multi; 14 games; 95% CI +/- 227 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: Muse Spark 1.3 Contributor
+    organization: Meta
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 1449
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # muse-spark-1.3-contributor-xhigh-api-multi; 14 games; 95% CI +/- 217 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort xhigh; 7 komi; random-player Elo 0
+    model: Muse Spark 1.3 Contributor
+    organization: Meta
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 1415
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # DeepSeek-V4.1-Flash-high-api-multi; 14 games; 95% CI +/- 205 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: DeepSeek-V4.1-Flash
+    organization: DeepSeek
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 1381
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gemini-3.6-flash-high-api-multi; 14 games; 95% CI +/- 223 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: Gemini 3.6 Flash
+    organization: Google
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 1336
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # DeepSeek-V4-Flash-0731-high-api-multi2; 14 games; 95% CI +/- 197 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: DeepSeek-V4-Flash-0731
+    organization: DeepSeek
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 1189
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt6-luna-max-api-multi; 14 games; 95% CI +/- 191 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort max; 7 komi; random-player Elo 0
+    model: GPT-6 Luna
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 1120
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt5.6-luna-high-api-multi; 14 games; 95% CI +/- 190 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: GPT-5.6 Luna
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 1091
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt5.6-luna-max-api-multi; 14 games; 95% CI +/- 189 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort max; 7 komi; random-player Elo 0
+    model: GPT-5.6 Luna
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 1058
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # grok-4.6-xhigh-api-multi; 14 games; 95% CI +/- 189 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort xhigh; 7 komi; random-player Elo 0
+    model: Grok 4.6
+    organization: xAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 1045
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # grok-4.6-high-api-multi2; 14 games; 95% CI +/- 263 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: Grok 4.6
+    organization: xAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 916
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt6-luna-high-api-multi2; 14 games; 95% CI +/- 212 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track1_api_2026_10_19
+    protocol: Track 1; multi-turn API; no tools; reasoning effort high; 7 komi; random-player Elo 0
+    model: GPT-6 Luna
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 830
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  # Track 2
+  # claude-opus-5-5-high-claude-code-engine-60s-2h; 300 games; 95% CI +/- 51 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track2_engine60s_2026_10_19
+    protocol: Track 2; Claude Code; reasoning effort high; 2h engine development; no internet or KataGo
+      during development; code-only evaluation; 60s per game; 7 komi; random-player Elo 0
+    model: Claude Opus 5.5
+    organization: Anthropic
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 3389
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt6-astra-high-codex-engine-60s-4h; 300 games; 95% CI +/- 50 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track2_engine60s_2026_10_19
+    protocol: Track 2; Codex; reasoning effort high; 4h engine development; no internet or KataGo during
+      development; code-only evaluation; 60s per game; 7 komi; random-player Elo 0
+    model: GPT-6 Astra
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 3313
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt6-astra-high-codex-engine-60s-8h; 300 games; 95% CI +/- 50 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track2_engine60s_2026_10_19
+    protocol: Track 2; Codex; reasoning effort high; 8h engine development; no internet or KataGo during
+      development; code-only evaluation; 60s per game; 7 komi; random-player Elo 0
+    model: GPT-6 Astra
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 3264
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt6-astra-high-codex-engine-60s-2h; 300 games; 95% CI +/- 50 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track2_engine60s_2026_10_19
+    protocol: Track 2; Codex; reasoning effort high; 2h engine development; no internet or KataGo during
+      development; code-only evaluation; 60s per game; 7 komi; random-player Elo 0
+    model: GPT-6 Astra
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 3230
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # claude-opus-5-5-high-claude-code-engine-60s-1h; 300 games; 95% CI +/- 50 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track2_engine60s_2026_10_19
+    protocol: Track 2; Claude Code; reasoning effort high; 1h engine development; no internet or KataGo
+      during development; code-only evaluation; 60s per game; 7 komi; random-player Elo 0
+    model: Claude Opus 5.5
+    organization: Anthropic
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 3211
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt6-astra-high-codex-engine-60s-1h; 300 games; 95% CI +/- 50 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track2_engine60s_2026_10_19
+    protocol: Track 2; Codex; reasoning effort high; 1h engine development; no internet or KataGo during
+      development; code-only evaluation; 60s per game; 7 komi; random-player Elo 0
+    model: GPT-6 Astra
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 3063
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt5.6-sol-high-codex-engine-60s-1h; 300 games; 95% CI +/- 51 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track2_engine60s_2026_10_19
+    protocol: Track 2; Codex; reasoning effort high; 1h engine development; no internet or KataGo during
+      development; code-only evaluation; 60s per game; 7 komi; random-player Elo 0
+    model: GPT-5.6 Sol
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2609
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt5.6-sol-high-codex-engine-60s-8h; 300 games; 95% CI +/- 51 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track2_engine60s_2026_10_19
+    protocol: Track 2; Codex; reasoning effort high; 8h engine development; no internet or KataGo during
+      development; code-only evaluation; 60s per game; 7 komi; random-player Elo 0
+    model: GPT-5.6 Sol
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2492
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt5.6-sol-high-codex-engine-60s-2h; 300 games; 95% CI +/- 51 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track2_engine60s_2026_10_19
+    protocol: Track 2; Codex; reasoning effort high; 2h engine development; no internet or KataGo during
+      development; code-only evaluation; 60s per game; 7 komi; random-player Elo 0
+    model: GPT-5.6 Sol
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2472
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt5.6-sol-high-codex-engine-60s-4h; 300 games; 95% CI +/- 51 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track2_engine60s_2026_10_19
+    protocol: Track 2; Codex; reasoning effort high; 4h engine development; no internet or KataGo during
+      development; code-only evaluation; 60s per game; 7 komi; random-player Elo 0
+    model: GPT-5.6 Sol
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2388
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  # Track 3
+  # gpt6-astra-high-api-multi-tutorial3.3-gpt6-astra-high-codex-2h; 20 games; 95% CI +/- 181 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track3_tutorial3_3_2026_10_19
+    protocol: Track 3; multi-turn API; no evaluation tools; reasoning effort high; tutorial3.3 by GPT-6
+      Astra high in Codex; 2h tutorial development with KataGo; 5000-token tutorial; 7 komi; random-player
+      Elo 0
+    model: GPT-6 Astra
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2550
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt6-astra-high-api-multi-tutorial3.3-gpt6-astra-high-codex-4h; 20 games; 95% CI +/- 175 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track3_tutorial3_3_2026_10_19
+    protocol: Track 3; multi-turn API; no evaluation tools; reasoning effort high; tutorial3.3 by GPT-6
+      Astra high in Codex; 4h tutorial development with KataGo; 5000-token tutorial; 7 komi; random-player
+      Elo 0
+    model: GPT-6 Astra
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2386
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt6-astra-high-api-multi-tutorial3.3-gpt6-astra-high-codex-8h; 20 games; 95% CI +/- 170 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track3_tutorial3_3_2026_10_19
+    protocol: Track 3; multi-turn API; no evaluation tools; reasoning effort high; tutorial3.3 by GPT-6
+      Astra high in Codex; 8h tutorial development with KataGo; 5000-token tutorial; 7 komi; random-player
+      Elo 0
+    model: GPT-6 Astra
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2375
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # gpt6-astra-high-api-multi-tutorial3.3-gpt6-astra-high-codex-1h; 20 games; 95% CI +/- 173 Elo.
+  - benchmark_id: gobench
+    instrument: gobench_9x9_track3_tutorial3_3_2026_10_19
+    protocol: Track 3; multi-turn API; no evaluation tools; reasoning effort high; tutorial3.3 by GPT-6
+      Astra high in Codex; 1h tutorial development with KataGo; 5000-token tutorial; 7 komi; random-player
+      Elo 0
+    model: GPT-6 Astra
+    organization: OpenAI
+    source_id: gobench_llm_results_2026_10_19
+    reported_at: '2026-10-19'
+    value: 2341
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  # SlopCodeBench's official leaderboard publishes model-harness systems, not
+  # model-only measurements. The rows below are the leaderboard's displayed
+  # best-version-by-%-checkpoints rows (19 of its 24 runs), read from the
+  # leaderboard page, whose footer dates it 2026-04-24. The thinking level
+  # printed beside a model name is carried in the protocol. The leaderboard's
+  # erosion and verbosity columns are not recorded: a benchmark holds exactly
+  # one metric here, and isolated solve is the metric it ranks by.
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Codex; thinking: high"
+    model: GPT 5.5
+    organization: OpenAI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 28.06
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Codex; thinking: high"
+    model: GPT 5.3-Codex
+    organization: OpenAI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 26.02
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Codex; thinking: high"
+    model: GPT 5.4
+    organization: OpenAI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 23.47
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Codex; thinking: high"
+    model: GPT 5.2-Codex
+    organization: OpenAI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 21.94
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Claude Code; thinking: high"
+    model: Opus 4.6
+    organization: Anthropic
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 20.92
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Claude Code; thinking: high"
+    model: Opus 4.7
+    organization: Anthropic
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 20.92
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Kimi CLI; thinking: high"
+    model: Kimi K2.6
+    organization: Moonshot AI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 18.88
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Claude Code; thinking: high"
+    model: Opus 4.5
+    organization: Anthropic
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 17.35
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Claude Code; thinking: high"
+    model: Sonnet 4.6
+    organization: Anthropic
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 16.84
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Cursor CLI"
+    model: Composer 2
+    organization: Cursor
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 16.33
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Claude Code; thinking: high"
+    model: GLM 5.1
+    organization: Zhipu AI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 13.78
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Codex; thinking: high"
+    model: GPT 5.4-Mini
+    organization: OpenAI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 13.78
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Kimi CLI; thinking: high"
+    model: Kimi K2.5
+    organization: Moonshot AI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 9.69
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: OpenCode"
+    model: Kimi K2.5
+    organization: Moonshot AI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 8.67
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: OpenCode; thinking: high"
+    model: GLM 5.1
+    organization: Zhipu AI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 8.16
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Codex; thinking: high"
+    model: GPT 5.3-Codex-Spark
+    organization: OpenAI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 8.16
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Claude Code; thinking: high"
+    model: Kimi K2.5
+    organization: Moonshot AI
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 7.14
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: Claude Code; thinking: high"
+    model: MiniMax M2.7
+    organization: MiniMax
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 4.08
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: slopcodebench
+    instrument: slopcodebench_v1_0
+    protocol: "36 problems, 196 checkpoints; isolated solve rate; agent harness: OpenCode"
+    model: MiniMax M2.7
+    organization: MiniMax
+    source_id: slopcodebench_leaderboard_2026_04_24
+    reported_at: 2026-04-24
+    value: 3.57
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run

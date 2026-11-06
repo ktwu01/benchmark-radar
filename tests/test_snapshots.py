@@ -17,7 +17,9 @@ from benchmark_radar.models import (
 )
 from benchmark_radar.snapshots import (
     SnapshotError,
+    attach_catalog_cards,
     dashboard_trends,
+    dashboard_window,
     load_snapshots,
     merge_snapshots,
     migrate_snapshot_history,
@@ -311,6 +313,15 @@ def test_rebuild_writes_a_small_latest_day_bootstrap(tmp_path):
         bootstrap["days"]
     )
 
+    # Issue #1058: each Today window reads its own file, never the full archive.
+    for window_days in (30, 60, 90):
+        window_path = output.with_name(f"radar-window-{window_days}d.json")
+        window = json.loads(window_path.read_text(encoding="utf-8"))
+        assert window["window_days"] == window_days
+        assert window["latest_date"] == dashboard["latest_date"]
+        assert "corpus" not in window
+        assert window_path.stat().st_size < output.stat().st_size
+
 
 def test_rebuild_can_publish_the_feed_from_the_same_snapshot_history(tmp_path, site_shell):
     snapshot_dir = tmp_path / "snapshots"
@@ -367,7 +378,7 @@ def test_rebuild_writes_the_sitemap_at_the_site_root(tmp_path, site_shell):
     sitemap_output = tmp_path / "site" / "sitemap.xml"
     assert sitemap_output.exists()
     assert not (data_output.parent / "sitemap.xml").exists()
-    for slug in ("leaderboard", "trends", "explore", "cli", "cite", "rubric", "about"):
+    for slug in ("leaderboard", "trends", "explore", "cli", "cite", "rubric", "about", "media"):
         assert (tmp_path / "site" / slug / "index.html").exists()
     # The alias paths ship beside /about/ but stay out of the sitemap: they
     # immediately become /cite/, and a crawler asked to index both gets two
@@ -391,6 +402,7 @@ def test_rebuild_writes_the_sitemap_at_the_site_root(tmp_path, site_shell):
         f"{SITE_URL}/blog/archive/",
         f"{SITE_URL}/blog/2026-07-27/",
         f"{SITE_URL}/about/",
+        f"{SITE_URL}/media/",
     ]
     lastmods = [node.text for node in root.findall("sm:url/sm:lastmod", ns)]
     # The two shards carry no dated evidence, so their pages claim no lastmod
@@ -612,6 +624,7 @@ def test_dashboard_keeps_legacy_scores_on_their_original_rubric(tmp_path):
     assert data["rubrics"]["1"]["score_max"] == 4
     assert data["rubrics"]["2"]["score_max"] == 100
     assert data["rubrics"]["4"]["scoring_version"] == 4
+    assert data["rubrics"]["5"]["scoring_version"] == 5
     assert data["rubrics"][str(rubric.SCORING_VERSION)]["scoring_version"] == (
         rubric.SCORING_VERSION
     )
@@ -1835,3 +1848,228 @@ def test_primary_revision_retains_previously_merged_digest_evidence(reverse):
     score_item(revision, taxonomy, now=revision_run.generated_at)
     assert record["total_score"] == revision.total_score
     assert record["recommended"] is True
+
+
+def test_dashboard_day_maps_each_share_card_to_its_published_image(tmp_path):
+    """Issue #671: the site reads image URLs from radar.json, never builds them."""
+    snapshot_dir = tmp_path / "snapshots"
+    write_snapshot(radar_run(26), snapshot_dir)
+    write_snapshot(radar_run(27), snapshot_dir)
+    path = snapshot_dir / "2026-07-27.json"
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    raw["share"] = {
+        "date": "2026-07-27",
+        "cards": [
+            {"url": "https://example.org/a", "title": "A"},
+            {"url": "https://example.org/b", "title": "B"},
+        ],
+    }
+    path.write_text(json.dumps(raw), encoding="utf-8")
+
+    dashboard = rebuild_dashboard(snapshot_dir, tmp_path / "radar.json")
+
+    base = "https://cards.benchmark-radar.org/daily/2026-07-27"
+    share = dashboard["days"][1]["share"]
+    assert share["top3_image"] == f"{base}/top3.png"
+    assert [(c["url"], c["image"]) for c in share["cards"]] == [
+        ("https://example.org/a", f"{base}/card-01.png"),
+        ("https://example.org/b", f"{base}/card-02.png"),
+    ]
+    # A day the share step never ran on has no images to offer.
+    assert dashboard["days"][0]["share"] == {}
+
+
+def _window_day(
+    date: str,
+    evidence: list[tuple[str, str, str]],
+    attention: list[str] = (),
+) -> dict:
+    return {
+        "date": date,
+        "generated_at": f"{date}T06:00:00+00:00",
+        "selection": {"recommendation_score": 40, "minimum_score": 20},
+        "evidence_items": [
+            {
+                "source": source,
+                "source_id": source_id,
+                "title": source_id,
+                "event_kind": event_kind,
+                "seen_on": date,
+            }
+            for source, source_id, event_kind in evidence
+        ],
+        "attention": {
+            "observations": [
+                {"observation_id": oid, "title": oid, "event_kind": "discussed", "seen_on": date}
+                for oid in attention
+            ]
+        },
+        "briefing": {"bullets": ["not needed by Today windows"]},
+    }
+
+
+def test_dashboard_window_drops_only_sightings_a_newer_one_repeats():
+    """A repeat adds nothing to a window, so it is not shipped (issue #1058).
+
+    On 2026-11-03 the 90 day window held 42,489 evidence rows for 23,932 records.
+    Filters run before app.js keeps a record's latest sighting, so a sighting
+    that differs from every newer one in what a filter reads must stay, or a
+    record released yesterday and updated today vanishes under the Released
+    filter (Codex review of #1059).
+    """
+    days = [
+        _window_day("2026-08-01", [("HF", "outside/window", "released")]),
+        _window_day("2026-10-20", [("HF", "old/only", "released"), ("HF", "repeat/a", "released")]),
+        _window_day(
+            "2026-10-28", [("HF", "repeat/a", "released"), ("GitHub", "repeat/a", "updated")]
+        ),
+        _window_day(
+            "2026-11-03",
+            [
+                ("HF", "repeat/a", "released"),
+                ("HF", "repeat/a", "released"),
+                ("HF", "new/one", "released"),
+                ("GitHub", "repeat/a", "updated"),
+            ],
+        ),
+    ]
+    for day in days[1:3]:
+        day["attention"]["observations"].append({"observation_id": "obs-1", "title": "obs-1"})
+    dashboard = {
+        "latest_date": "2026-11-03",
+        "generated_at": "2026-11-03T06:00:00+00:00",
+        "days": days,
+        "corpus": {"huge": "graph"},
+    }
+
+    window = dashboard_window(dashboard, 30)
+
+    assert window["window_days"] == 30
+    assert window["start_date"] == "2026-10-05"
+    assert window["latest_date"] == "2026-11-03"
+    # The page compares this with the bootstrap's, so another build's file is refused.
+    assert window["generated_at"] == dashboard["generated_at"]
+    # Both ends of the range are inclusive, and a day before the start is out.
+    assert [day["date"] for day in window["days"]] == ["2026-10-20", "2026-10-28", "2026-11-03"]
+    ids = {
+        day["date"]: [(i["source"], i["source_id"]) for i in day["evidence_items"]]
+        for day in window["days"]
+    }
+    assert ids["2026-10-20"] == [("HF", "old/only")]  # repeat/a is repeated exactly later
+    assert ids["2026-10-28"] == []  # HF repeat/a and GitHub repeat/a are both repeated later
+    # Two rows for one record on the same day both stay: app.js picks between
+    # them after sorting, and picking here would choose differently.
+    assert ids["2026-11-03"] == [
+        ("HF", "repeat/a"),
+        ("HF", "repeat/a"),
+        ("HF", "new/one"),
+        ("GitHub", "repeat/a"),
+    ]
+    attention = {day["date"]: day["attention"]["observations"] for day in window["days"]}
+    assert attention["2026-10-20"] == []
+    assert [o["observation_id"] for o in attention["2026-10-28"]] == ["obs-1"]
+    # What a row needs to rank, and nothing the window never reads.
+    assert window["days"][0]["selection"] == {"recommendation_score": 40, "minimum_score": 20}
+    assert window["days"][0]["generated_at"] == "2026-10-20T06:00:00+00:00"
+    assert all("briefing" not in day for day in window["days"])
+    assert "corpus" not in window
+
+
+def test_dashboard_window_keeps_each_days_published_share_cards():
+    """An older item shared from a window finds its own day's published card (#1019)."""
+    share = {
+        "top3_image": "https://cards.benchmark-radar.org/daily/2026-11-02/top3.png",
+        "cards": [
+            {
+                "url": "https://arxiv.org/abs/2611.00001",
+                "title": "CompoSET",
+                "image": "https://cards.benchmark-radar.org/daily/2026-11-02/card-01.png",
+            }
+        ],
+    }
+    days = [
+        {**_window_day("2026-11-02", [("arXiv", "2611.00001", "released")]), "share": share},
+        _window_day("2026-11-03", [("HF", "new/one", "released")]),
+    ]
+    dashboard = {"latest_date": "2026-11-03", "generated_at": "g", "days": days}
+
+    window = dashboard_window(dashboard, 30)
+
+    assert [day["share"] for day in window["days"]] == [share, {}]
+
+
+def test_dashboard_window_keeps_a_sighting_a_filter_can_still_see():
+    days = [
+        _window_day("2026-10-30", [("HF", "moved/on", "released")]),
+        _window_day("2026-11-03", [("HF", "moved/on", "updated")]),
+    ]
+    dashboard = {"latest_date": "2026-11-03", "generated_at": "g", "days": days}
+
+    window = dashboard_window(dashboard, 30)
+
+    # Under the Released filter the archive lists the 10-30 sighting, so it stays.
+    assert [i["event_kind"] for d in window["days"] for i in d["evidence_items"]] == [
+        "released",
+        "updated",
+    ]
+    # Any changed filter input keeps a sighting: title, summary, categories, organizations.
+    for field, value in (
+        ("title", "Renamed"),
+        ("summary", "Edited"),
+        ("categories", ["agentic"]),
+        ("organizations", ["Lab"]),
+        ("source", "GitHub"),
+    ):
+        changed = [
+            _window_day("2026-10-30", [("HF", "x", "released")]),
+            _window_day("2026-11-03", [("HF", "x", "released")]),
+        ]
+        changed[1]["evidence_items"][0][field] = value
+        kept = dashboard_window({"latest_date": "2026-11-03", "days": changed}, 30)["days"]
+        assert [len(d["evidence_items"]) for d in kept] == [1, 1], field
+
+
+def test_dashboard_window_keeps_an_attention_row_whose_source_changed():
+    # An attention row is identified by observation_id alone, but a source filter
+    # or a search for the source name reads the source (Codex review of #1059).
+    older = _window_day("2026-10-30", [], ["obs-1"])
+    newer = _window_day("2026-11-03", [], ["obs-1"])
+    older["attention"]["observations"][0]["source"] = "Hacker News"
+    newer["attention"]["observations"][0]["source"] = "Reddit"
+
+    window = dashboard_window({"latest_date": "2026-11-03", "days": [older, newer]}, 30)
+
+    assert [o["source"] for d in window["days"] for o in d["attention"]["observations"]] == [
+        "Hacker News",
+        "Reddit",
+    ]
+
+
+def test_today_items_name_their_catalog_record_only_by_exact_unique_url(tmp_path):
+    """#1061: an item that is exactly one catalog record shares that record's card."""
+    index = tmp_path / "benchmark-index.json"
+    index.write_text(
+        json.dumps(
+            {
+                "benchmarks": [
+                    {"slug": "gpqa_diamond", "source_url": "https://arxiv.org/abs/2311.12022"},
+                    # Two records share one URL: neither is named.
+                    {"slug": "a-one", "source_url": "https://example.org/shared"},
+                    {"slug": "a-two", "source_url": "https://example.org/shared"},
+                    {"slug": "no-url", "source_url": None},
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    items = [
+        {"url": "https://arxiv.org/abs/2311.12022"},
+        {"url": "https://arxiv.org/abs/2311.12022v2"},  # not the same URL
+        {"url": "https://example.org/shared"},
+        {"url": ""},
+    ]
+    dashboard = {"days": [{"date": "2026-11-03", "evidence_items": items}]}
+
+    assert attach_catalog_cards(dashboard, index) == 1
+    assert [item.get("catalog_slug") for item in items] == ["gpqa_diamond", None, None, None]
+    assert attach_catalog_cards(dashboard, tmp_path / "missing.json") == 0

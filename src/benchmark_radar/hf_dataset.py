@@ -117,8 +117,9 @@ combines two complementary systems:
 1. **Catalog & Scores**: A curated, normalized cross-registry archive of
    **{catalog_count:,}** benchmark suites and **{scores_count:,}** reported
    model score observations from catalog source providers including
-   LLM Stats, OpenCompass Hub, Artificial Analysis, Claire Radar, and model
-   technical reports.
+   LLM Stats, OpenCompass Hub, Artificial Analysis, Claire Radar, the Benchmark
+   Saturation study (github.com/evaleval/benchmark-saturation; MIT, notice in
+   LICENSE-CONTENT.md), and model technical reports.
 2. **Radar Discoveries**: A 24/7 automated intelligence pipeline tracking emerging
    papers, code repositories, datasets, and community attention across 37+ sources,
    capturing **{artifacts_count:,}** research artifacts and **{observations_count:,}**

@@ -18,7 +18,7 @@ const observation = (date, id = date) => ({
   title: 'agent benchmark', summary: '', categories: [],
 });
 let observations = [observation('2026-09-07'), observation('2026-09-06'), observation('2026-08-08', 'repeated'), observation('2026-08-09', 'repeated'), observation('2026-08-07'), observation('2026-07-09'), observation('2026-07-08')];
-const dateNames = ['todayDateRange', 'todayIsMultiDate', 'validTodayDate', 'filteredObservations', 'observationRecordKey', 'latestObservationsByRecord'];
+const dateNames = ['todayDateRange', 'todayIsMultiDate', 'validTodayDate', 'filteredObservations', 'observationRecordKey', 'latestObservationsByRecord', 'observationAttention', 'eventTimestamp', 'isRelease'];
 const dates = new Function('state', 'allObservations', `${source.match(/const TODAY_WINDOWS = .*;/)[0]}\n${dateNames.map(fn).join('\n')}\nreturn {${dateNames.join(',')}};`)(state, () => observations);
 assert.deepEqual(dates.todayDateRange(), {start:'2026-08-08',end:'2026-09-06'});
 assert.equal(dates.validTodayDate(), true);
@@ -38,6 +38,127 @@ state.source = 'github';
 assert.equal(dates.filteredObservations().length, 2);
 state.data.latest_date = '2024-03-01';
 assert.deepEqual(dates.todayDateRange(), {start:'2024-02-01',end:'2024-03-01'});
+
+// Issue #978: ranges include both boundaries, activity and date sorts differ,
+// and missing measurements preserve records after measured zero activity.
+state.data.latest_date = '2026-09-06';
+state.todayDate = '90d';
+state.q = ''; state.source = '';
+assert.deepEqual(dates.todayDateRange(), {start:'2026-06-09',end:'2026-09-06'});
+observations = [
+  {...observation('2026-06-09', 'old'), metrics:{stars:10}},
+  {...observation('2026-09-06', 'new'), metrics:{points:2}, published_at:'2026-09-06T12:00:00Z'},
+  {...observation('2026-09-06', 'zero'), metrics:{likes:0}, published_at:'2026-09-06T13:00:00Z'},
+  observation('2026-09-06', 'unknown'),
+  observation('2026-06-08', 'outside'),
+];
+state.todaySort = 'attention';
+assert.deepEqual(dates.filteredObservations().map(r=>r.source_id), ['old','new','zero','unknown']);
+state.todaySort = 'newest';
+assert.deepEqual(dates.filteredObservations().map(r=>r.source_id), ['zero','new','unknown','old']);
+state.todayDate = '30d';
+assert.equal(dates.filteredObservations().length, 3);
+state.todayDate = '2026-09-06';
+state.todaySort = 'attention';
+assert.deepEqual(dates.filteredObservations().map(r=>r.source_id), ['new','zero','unknown']);
+assert.equal(dates.observationAttention({metrics:{stars:'20', likes:null, downloads:NaN}}), -1);
+
+// Issue #1001: a GitHub Release carries its repository's stars, which do not
+// rank the release. It stays in the window and ranks by its own downloads.
+observations = [
+  {...observation('2026-09-06', 'openclaw/openclaw@v2026.8.34'), source:'GitHub Release', parser_version:'github-releases/3', metrics:{stars:391191, forks:82244, downloads:70}},
+  {...observation('2026-09-06', 'robodojo'), source:'Hugging Face', metrics:{likes:3, downloads:282284}},
+  {...observation('2026-09-06', 'repo'), metrics:{stars:500}},
+  {...observation('2026-09-06', 'tag-no-downloads'), source:'GitHub Release', parser_version:'github-releases/4', metrics:{stars:9000}},
+];
+assert.equal(dates.observationAttention(observations[0]), 70);
+assert.equal(dates.observationAttention(observations[3]), -1);
+assert.deepEqual(dates.filteredObservations().map(r=>r.source_id), ['robodojo','repo','openclaw/openclaw@v2026.8.34','tag-no-downloads']);
+
+// Issue #1056: a repository that only took a commit carries its lifetime
+// downloads. It stays listed, after every release of the day.
+observations = [
+  {...observation('2026-09-06', 'lmarena-ai/leaderboard-dataset'), event_kind:'updated', metrics:{downloads:251131}},
+  {...observation('2026-09-06', 'new-small'), event_kind:'released', metrics:{downloads:12}},
+  {...observation('2026-09-06', 'new-unmeasured'), event_kind:'released'},
+  {...observation('2026-09-06', 'kaggle'), event_kind:'discovered', metrics:{downloads:900}},
+];
+assert.deepEqual(dates.filteredObservations().map(r=>r.source_id), ['new-small','new-unmeasured','lmarena-ai/leaderboard-dataset','kaggle']);
+state.todaySort = 'newest';
+assert.equal(dates.filteredObservations().length, 4);
+
+state.todaySort = 'newest';
+observations = [
+  {...observation('2026-09-06', 'offset'), published_at:'2026-09-06T12:00:00+08:00'},
+  {...observation('2026-09-06', 'utc'), published_at:'2026-09-06T05:00:00Z'},
+];
+assert.deepEqual(dates.filteredObservations().map(r=>r.source_id), ['utc','offset']);
+
+// Issue #1058: a 30, 60 or 90 day window reads its own file, which holds each
+// record once. It must list exactly the rows the full archive lists, in the
+// same order, and the archive takes over once it has loaded.
+{
+  const names = ['todayDateRange', 'todayIsMultiDate', 'observationDays', 'allObservations', 'releaseAgeHours', 'releaseRank', 'isRelease', 'filteredObservations', 'observationRecordKey', 'latestObservationsByRecord', 'observationAttention', 'eventTimestamp', 'stateNeedsFullData', 'stateNeedsWindowData', 'freshWindowData', 'latestReleasesPayload'];
+  const consts = ['const TODAY_WINDOWS = .*;', 'const RELEASE_FRESH_HOURS = .*;', 'const RELEASE_RECENT_HOURS = .*;'].map((pattern) => source.match(new RegExp(pattern))[0]).join('\n');
+  const row = (id, extra = {}) => ({source: 'Hugging Face', source_id: id, title: id, summary: '', categories: [], event_kind: 'released', total_score: 50, ...extra});
+  const day = (date, evidence, attention = []) => ({date, generated_at: `${date}T06:00:00Z`, selection: {recommendation_score: 40, minimum_score: 20}, evidence_items: evidence, attention: {observations: attention}});
+  const archive = [
+    day('2026-08-01', [row('outside', {total_score: 99})]),
+    day('2026-09-20', [row('seen-twice'), row('only-old'), row('moved')]),
+    day('2026-09-30', [row('seen-twice', {total_score: 60})], [{source: 'Hacker News', source_id: 'h1', observation_id: 'obs-1', title: 'h1', event_kind: 'discussed', metrics: {points: 5}}]),
+    day('2026-10-02', [row('seen-twice', {total_score: 61}), row('seen-twice', {total_score: 70}), row('fresh', {metrics: {downloads: 3}}), row('moved', {event_kind: 'updated'})], [{source: 'Hacker News', source_id: 'h1', observation_id: 'obs-1', title: 'h1', event_kind: 'discussed', metrics: {points: 9}}]),
+  ];
+  // What the build keeps: a record leaves every day older than its latest one.
+  const windowFile = {generated_at: 'build-1', latest_date: '2026-10-02', days: [
+    day('2026-09-20', [row('only-old'), row('moved')]),
+    day('2026-09-30', []),
+    day('2026-10-02', [row('seen-twice', {total_score: 61}), row('seen-twice', {total_score: 70}), row('fresh', {metrics: {downloads: 3}}), row('moved', {event_kind: 'updated'})], [{source: 'Hacker News', source_id: 'h1', observation_id: 'obs-1', title: 'h1', event_kind: 'discussed', metrics: {points: 9}}]),
+  ]};
+  const windowState = {view: 'today', todayDate: '30d', todaySort: 'attention', q: '', source: '', kind: '', category: '', organization: '', event: '', fullDataLoaded: false, observations: null, observationsSource: null, windowData: {}, data: {generated_at: 'build-1', latest_date: '2026-10-02', days: [archive[3]], facets: {dates: []}}};
+  const windowApi = new Function('state', `${consts}\n${names.map(fn).join('\n')}\nreturn {${names.join(',')}};`)(windowState);
+  const listed = () => windowApi.filteredObservations().map((r) => `${r.source_id}:${r.snapshot_date}:${r.total_score ?? ''}`);
+  for (const sort of ['attention', 'newest']) {
+    windowState.todaySort = sort;
+    windowState.fullDataLoaded = true; windowState.data.days = archive; windowState.observations = null;
+    const fromArchive = listed();
+    windowState.fullDataLoaded = false; windowState.data.days = [archive[3]]; windowState.windowData = {'30d': windowFile}; windowState.observations = null;
+    assert.deepEqual(listed(), fromArchive, `${sort}: the window file lists the archive's rows`);
+  }
+  assert.deepEqual(listed().filter((r) => r.startsWith('seen-twice')), ['seen-twice:2026-10-02:70'], 'the highest-ranked same-day row is the one shown');
+  // A filter runs before the latest sighting is chosen, so a record released
+  // earlier and updated since still lists under Released.
+  windowState.event = 'released';
+  windowState.fullDataLoaded = true; windowState.data.days = archive; windowState.observations = null;
+  const releasedFromArchive = listed();
+  windowState.fullDataLoaded = false; windowState.data.days = [archive[3]]; windowState.observations = null;
+  assert.deepEqual(listed(), releasedFromArchive, 'the Released filter lists the same rows from the window file');
+  assert.equal(listed().some((r) => r.startsWith('moved:2026-09-20')), true, 'a record released then updated stays under Released');
+  windowState.event = '';
+  assert.equal(listed().some((r) => r.startsWith('outside')), false, 'a row outside the window stays out');
+
+  // A window needs its own file, not the archive; every other date still needs the archive.
+  windowState.windowData = {};
+  assert.equal(windowApi.stateNeedsFullData(), false);
+  assert.equal(windowApi.stateNeedsWindowData(), true);
+  windowState.windowData = {'30d': windowFile};
+  assert.equal(windowApi.stateNeedsWindowData(), false);
+  // A file from another build is not used, and is fetched again: after a
+  // refresh brings a newer crawl of the same day, and after another window loads.
+  windowState.data.generated_at = 'build-2';
+  assert.equal(windowApi.freshWindowData('30d'), null);
+  assert.equal(windowApi.stateNeedsWindowData(), true);
+  assert.equal(windowApi.observationDays(), windowState.data.days, 'a stale window file is not listed');
+  windowState.data.generated_at = 'build-1';
+  windowState.todayDate = 'all';
+  assert.equal(windowApi.stateNeedsFullData(), true);
+  assert.equal(windowApi.stateNeedsWindowData(), false);
+  windowState.todayDate = '2026-09-20';
+  assert.equal(windowApi.stateNeedsFullData(), true);
+  // Once the archive is loaded it serves the window, and the cached rows follow it.
+  windowState.todayDate = '30d'; windowState.fullDataLoaded = true; windowState.data.days = archive;
+  assert.equal(windowApi.stateNeedsWindowData(), false);
+  assert.equal(windowApi.observationDays(), archive);
+}
 
 const summary = (display_max, numeric_count=1) => ({display_max,numeric_count,display_multiplier:1,raw_min:display_max,raw_max:display_max});
 state.data.model_card_leaderboard = {entries:[{benchmark_id:'curated',name:'Curated'}]};

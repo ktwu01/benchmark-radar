@@ -1,0 +1,158 @@
+name: Send email brief
+
+# Issue #977. Once a day, after the 05:00 UTC radar run has recorded the day's
+# snapshot and Deploy Dashboard has published its brief, send that brief to
+# the Kit subscribers. Setup and recovery: docs/kit-email.md.
+
+on:
+  schedule:
+    # Three hours after the radar cron, which leaves room for a late scheduled
+    # start and the deploy. A brief that is still not live fails the run.
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: Brief date (YYYY-MM-DD). Empty means today in UTC.
+        required: false
+        type: string
+      mode:
+        description: preview renders only; draft saves to Kit; send schedules it
+        required: true
+        type: choice
+        options: [preview, draft, send]
+        default: preview
+
+# One send at a time, and a queued run never replaces a running one.
+concurrency:
+  group: send-email
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    # Live sends only from the default branch's own code.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      # Pushing the email/<date> tag is the record that a day was sent.
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The write token stays out of .git/config, so `pip install` never
+          # runs next to it; only the tag step receives it.
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -e .
+
+      - name: Choose the date and mode
+        id: plan
+        env:
+          INPUT_DATE: ${{ inputs.date }}
+          INPUT_MODE: ${{ inputs.mode }}
+          # A scheduled run sends unless the KIT_EMAIL_MODE variable says
+          # otherwise; set it to "off" to stop every scheduled send.
+          SCHEDULED_MODE: ${{ vars.KIT_EMAIL_MODE || 'send' }}
+        run: |
+          set -euo pipefail
+          day="${INPUT_DATE:-$(date -u +%F)}"
+          if ! [[ "$day" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+            echo "::error::date must be YYYY-MM-DD, got: $day"
+            exit 1
+          fi
+          mode="${INPUT_MODE:-$SCHEDULED_MODE}"
+          case "$mode" in off|preview|draft|send) ;; *)
+            echo "::error::unknown mode: $mode"; exit 1 ;;
+          esac
+          echo "day=$day" >> "$GITHUB_OUTPUT"
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
+          echo "Brief $day, mode $mode"
+
+      - name: Require the brief to be live on the site
+        if: steps.plan.outputs.mode != 'off'
+        env:
+          DAY: ${{ steps.plan.outputs.day }}
+        run: |
+          set -euo pipefail
+          url="https://benchmark-radar.org/blog/${DAY}/"
+          for wait in 0 30 60 120 240; do
+            sleep "$wait"
+            # Fetch first, then search. Piping curl into `grep -q` fails under
+            # pipefail even on a match: grep exits at the first hit and curl's
+            # next write errors, so a live page read as unpublished.
+            page="$(curl -fsS --max-time 30 "$url" || true)"
+            if grep -qF "<link rel=\"canonical\" href=\"${url}\">" <<< "$page"; then
+              echo "Live: $url"
+              exit 0
+            fi
+          done
+          echo "::error title=Brief not live::$url is not published, so nothing was sent"
+          exit 1
+
+      - name: Render and check everything except the send
+        if: steps.plan.outputs.mode != 'off'
+        env:
+          DAY: ${{ steps.plan.outputs.day }}
+          MODE: ${{ steps.plan.outputs.mode }}
+          KIT_API_KEY: ${{ steps.plan.outputs.mode != 'preview' && secrets.KIT_API_KEY || '' }}
+          KIT_DAILY_SEGMENT_ID: ${{ vars.KIT_DAILY_SEGMENT_ID }}
+          KIT_WEEKLY_SEGMENT_ID: ${{ vars.KIT_WEEKLY_SEGMENT_ID }}
+        run: python -m benchmark_radar.email_brief --date "$DAY" --mode "$MODE" --out email.html --preflight
+
+      - name: Record the day, or skip a day already recorded
+        if: steps.plan.outputs.mode == 'send'
+        id: ledger
+        env:
+          DAY: ${{ steps.plan.outputs.day }}
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+          tag="refs/tags/email/${DAY}"
+          ls_code=0
+          git ls-remote --exit-code --tags "$remote" "$tag" >/dev/null || ls_code=$?
+          if [ "$ls_code" -eq 0 ]; then
+            echo "email/${DAY} exists: this day was sent or its send is unresolved. Skipping."
+            echo "sent=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          elif [ "$ls_code" -ne 2 ]; then
+            echo "::error::could not read the email tags (git exit $ls_code); nothing was sent"
+            exit 1
+          fi
+          # The tag goes up before Kit is called. If the call then fails or its
+          # answer is lost, the day stays blocked until someone checks Kit and
+          # deletes the tag, so one day can be missed but never mailed twice.
+          # Only a push that reports a new tag counts: "up to date" means
+          # another run got there first.
+          git tag "email/${DAY}"
+          result="$(git push --porcelain "$remote" "${tag}:${tag}" 2>&1 || true)"
+          if ! grep -q "^\*[[:space:]]*${tag}:${tag}" <<< "$result"; then
+            echo "::error::email/${DAY} was not newly created; nothing was sent"
+            exit 1
+          fi
+          echo "sent=false" >> "$GITHUB_OUTPUT"
+
+      - name: Send or save to Kit
+        if: (steps.plan.outputs.mode == 'draft') || (steps.plan.outputs.mode == 'send' && steps.ledger.outputs.sent == 'false')
+        env:
+          DAY: ${{ steps.plan.outputs.day }}
+          MODE: ${{ steps.plan.outputs.mode }}
+          KIT_API_KEY: ${{ secrets.KIT_API_KEY }}
+          KIT_DAILY_SEGMENT_ID: ${{ vars.KIT_DAILY_SEGMENT_ID }}
+          KIT_WEEKLY_SEGMENT_ID: ${{ vars.KIT_WEEKLY_SEGMENT_ID }}
+        run: python -m benchmark_radar.email_brief --date "$DAY" --mode "$MODE" --out email.html
+
+      - name: Keep the rendered email
+        if: always() && steps.plan.outputs.mode != 'off'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: email-${{ steps.plan.outputs.day }}
+          path: email.html
+          if-no-files-found: ignore

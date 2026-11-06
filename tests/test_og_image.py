@@ -10,6 +10,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import generate_og_image as og  # noqa: E402
 
 
+def _index(records):
+    return {"count": 999, "benchmarks": records}
+
+
 def test_requested_size_is_honoured():
     # The property that actually broke. Asserted by measuring, not by checking
     # the font class: Pillow's load_default() returns a scalable FreeTypeFont
@@ -37,45 +41,48 @@ def test_guard_rejects_a_face_that_ignores_the_requested_size(monkeypatch):
 def test_render_writes_a_correctly_sized_card(tmp_path):
     # 1200x630 is what the og:image:width/height meta in site/index.html
     # declares, and a mismatch makes the unfurled card letterbox or crop.
-    progression = og.build_score_progression(og.DEFAULT_SCORES_PATH)
-    output = og.render(progression, tmp_path / "og-card.png")
+    index = _index(
+        [
+            {
+                "key": og.EXAMPLE_KEYS[0],
+                "name": "Example Bench",
+                "source": "llm_stats",
+                "publisher": "Example Lab",
+                "released": "2024-08-13",
+                "has_paper": True,
+                "has_repo": False,
+                "has_dataset": True,
+                "score_count": 12,
+            }
+        ]
+    )
+    output = og.render(index, tmp_path / "og-card.png")
     with Image.open(output) as image:
         assert image.size == (1200, 630)
 
 
-def test_card_reports_the_current_registry_counts(tmp_path):
-    # The card is a claim about the score evidence that travels without it.
-    progression = og.build_score_progression(og.DEFAULT_SCORES_PATH)
-    assert progression["observation_count"] > 0
-    output = og.render(progression, tmp_path / "og-card.png")
-    assert output.stat().st_size > 0
-
-
-def test_card_uses_score_frontiers_instead_of_the_adoption_rank():
-    assert "build_adoption_rank" not in og.__file__
-    assert set(og.CHART_BENCHMARKS) >= {"gpqa_diamond", "hle"}
-
-
-def test_catalog_count_includes_all_searchable_records(tmp_path):
-    index = tmp_path / "benchmark-index.json"
-    index.write_text(
-        json.dumps(
-            {
-                "count": 124,
-                "benchmarks": [
-                    {"source": "llm_stats"},
-                    {"source": "opencompass_hub"},
-                    {"source": "artificial_analysis"},
-                ],
-            }
-        ),
-        encoding="utf-8",
+def test_catalog_counts_include_every_record_and_source():
+    # Count records, never the stale header or a second registry, and count
+    # sources from the records themselves rather than a constant.
+    index = _index(
+        [
+            {"source": "llm_stats"},
+            {"source": "opencompass_hub"},
+            {"source": "artificial_analysis"},
+            {"source": "llm_stats"},
+        ]
     )
-    progression = og.build_score_progression(og.DEFAULT_SCORES_PATH)
-    assert (
-        og.catalog_count(progression, index) == 3
-    )  # Count records, never stale headers or a second registry.
+    assert og.catalog_counts(index) == (4, 3)
 
 
-def test_card_uses_the_daily_source_count():
-    assert og.DAILY_SOURCE_COUNT == 11
+def test_examples_come_from_the_catalog_and_skip_missing_records():
+    index = _index([{"key": og.EXAMPLE_KEYS[1], "name": "Present"}, {"key": "other"}])
+    assert [row["name"] for row in og.example_rows(index)] == ["Present"]
+
+
+def test_examples_exist_in_the_built_catalog():
+    path = og.DEFAULT_INDEX_PATH
+    if not path.exists():
+        pytest.skip("run benchmark-radar normalize-catalog first")
+    rows = og.example_rows(json.loads(path.read_text(encoding="utf-8")))
+    assert [row["key"] for row in rows] == list(og.EXAMPLE_KEYS)

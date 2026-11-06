@@ -30,9 +30,11 @@ Known traps in this repo. Each entry states the trap and what to do.
   requires one approval, which the sole maintainer cannot give. A merge shows
   `BLOCKED` with green CI and needs `gh pr merge --admin`. Merge only when the
   user asks.
-- **Pages has a 100 GB/month bandwidth cap.** `data/radar.json` is about 9 MB
-  gzipped. A default visit loads `radar-bootstrap.json` (about 420 KB) instead.
-  Keep that lazy-load split in `app.js`. Put bulk artifacts on GitHub Releases.
+- **Pages has a 100 GB/month bandwidth cap.** `data/radar.json` is about 58 MB
+  gzipped (324 MB parsed). A default visit loads `radar-bootstrap.json` (about
+  0.8 MB) instead, and the 30, 60 and 90 day Today windows load
+  `radar-window-<n>d.json` (7 to 15 MB), which keeps each record once. Keep that
+  lazy-load split in `app.js`. Put bulk artifacts on GitHub Releases.
 - **Do not run `npx skills add` inside this repo.** It replaces the tracked
   `skills/benchmark-radar/` with a symlink. Test the consumer install from a
   scratch directory.

@@ -7,10 +7,12 @@ and fail loudly rather than silently writing an empty directory.
 """
 
 import json
+import re
 from pathlib import Path
 
 import pytest
 
+from benchmark_radar.cards import benchmark_card_url
 from benchmark_radar.feed import SITE_URL
 from benchmark_radar.site_pages import (
     benchmark_page_urls,
@@ -92,6 +94,26 @@ def test_writes_one_page_per_shard_plus_directory(tmp_path):
     assert (output / "alpha-bench" / "index.html").exists()
     assert (output / "beta-bench" / "index.html").exists()
     assert (output / "index.html").exists()
+
+
+def test_benchmark_pages_share_the_dashboard_shell_without_duplicate_navigation(tmp_path):
+    from benchmark_radar.blog_shell import extract_site_chrome
+
+    dashboard = Path("site/index.html").read_text(encoding="utf-8")
+    chrome = extract_site_chrome(dashboard, active_path="/saturation/")
+    output = _generated_pages(tmp_path, _shard("alpha-bench", "Alpha Bench"))
+    page = _page_text(output, "alpha-bench")
+    directory = (output / "index.html").read_text(encoding="utf-8")
+    for text in (page, directory):
+        assert chrome.header in text
+        assert chrome.footer in text
+        assert text.count("<footer>") == 1
+        assert '<nav class="site">' not in text
+        assert 'id="main-content"' in text
+        assert 'src="/assets/blog.js"' in text
+        assert text.count('src="/assets/clarity.js"') == 1
+    assert page.count('class="record-history-link"') == 1
+    assert f'href="{SITE_URL}/saturation/?lfrontier=alpha-bench"' in page
 
 
 def test_pages_build_when_invoked_outside_repository(tmp_path, monkeypatch):
@@ -180,6 +202,30 @@ def test_page_has_unique_title_and_canonical(tmp_path):
     )
 
 
+def test_benchmark_and_directory_pages_declare_the_same_share_card_as_the_homepage(tmp_path):
+    # Issue #891: a deep link shared on X should get the same large card as the
+    # homepage, so every head carries the image, its size and twitter:image.
+    # A benchmark page carries its own card (issue #671) in the same block.
+    output = _generated_pages(tmp_path, _shard("alpha-bench", "Alpha Bench"))
+    homepage = Path("site/index.html").read_text(encoding="utf-8")
+
+    def expected(card):
+        return [
+            f'<meta property="og:image" content="{card}">',
+            '<meta property="og:image:width" content="1200">',
+            '<meta property="og:image:height" content="630">',
+            '<meta name="twitter:card" content="summary_large_image">',
+            f'<meta name="twitter:image" content="{card}">',
+        ]
+
+    site_card = f"{SITE_URL}/assets/og-card.png"
+    for tag in expected(site_card):
+        assert tag in homepage
+        assert tag in (output / "index.html").read_text("utf-8")
+    for tag in expected(benchmark_card_url("alpha-bench")):
+        assert tag in _page_text(output, "alpha-bench")
+
+
 def test_interactive_view_link_lands_on_saturation_with_the_slug(tmp_path):
     output = _generated_pages(tmp_path, _shard("alpha-bench", "Alpha Bench"))
     page = _page_text(output, "alpha-bench")
@@ -187,6 +233,27 @@ def test_interactive_view_link_lands_on_saturation_with_the_slug(tmp_path):
     # the root, which opens the default Today view and cannot resolve the slug.
     assert 'href="https://benchmark-radar.org/saturation/?lfrontier=alpha-bench"' in page
     assert "?lfrontier=alpha-bench" not in page.replace("/saturation/?lfrontier=alpha-bench", "")
+
+
+def test_page_previews_and_shares_its_own_benchmark_card(tmp_path):
+    output = _generated_pages(tmp_path, _shard("gpqa", "GPQA <Diamond>"))
+    html = _page_text(output, "gpqa")
+    # On the page's own host: X showed no preview for a card on another host (#891).
+    card = "https://benchmark-radar.org/cards/gpqa.png"
+    assert f'<meta property="og:image" content="{card}">' in html
+    # Hidden until share-card.js wakes it, so no reader meets a dead control.
+    button = re.search(r"<button[^>]*data-share-benchmark=[^>]*>", html).group(0)
+    assert 'data-share-benchmark="gpqa"' in button
+    assert 'data-name="GPQA &lt;Diamond&gt;"' in button
+    assert " hidden" in button
+    assert '<script src="/assets/share-card.js" type="module"></script>' in html
+
+
+def test_card_urls_agree_between_the_build_and_the_browser():
+    script = Path("site/assets/share-card.js").read_text(encoding="utf-8")
+    base = re.search(r'CARDS_URL =\s*"([^"]+)"', script).group(1)
+    # The browser asks its own origin for the card the page names.
+    assert benchmark_card_url("gpqa") == f"{SITE_URL}{base}/gpqa.png"
 
 
 def test_description_is_present_and_derived_from_the_shard(tmp_path):
@@ -207,6 +274,48 @@ def test_description_is_present_and_derived_from_the_shard(tmp_path):
     assert len(beta.split('content="', 1)[1].split('"', 1)[0]) <= 160
 
 
+def test_visible_overview_is_complete_and_has_no_observation_count(tmp_path):
+    description = (
+        "A benchmark of scientific reasoning across biology, chemistry and physics. "
+        "Each question requires specialist knowledge and has been checked by independent experts. "
+        "The final sentence explains the evaluation task in full."
+    )
+    output = _generated_pages(
+        tmp_path,
+        _shard("alpha-bench", "Alpha Bench", description=description, scores=[{"value": 0}]),
+        _shard("beta-bench", "Beta Bench", scores=[{"value": 0}]),
+    )
+    page = _page_text(output, "alpha-bench")
+    assert f'<p class="lede">{description}</p>' in page
+    assert "<h2>About Alpha Bench</h2>" not in page
+    assert len(page.split('name="description" content="')[1].split('"')[0]) <= 160
+    overview = page.split('<p class="lede">')[1].split("</section>")[0]
+    assert "Reported scores" not in overview
+    fallback = _page_text(output, "beta-bench").split('<p class="lede">')[1].split("</p>")[0]
+    assert fallback == "Beta Bench is an AI benchmark in the Benchmark Radar catalog."
+
+
+def test_score_evidence_is_complete_inside_closed_source_disclosures(tmp_path):
+    shard = _shard("alpha-bench", "Alpha Bench", scores=[{"model_name": "Zero", "value": 0}])
+    shard["scores_by_source"]["llm_stats"] = {
+        "rows": [{"model_name": "Other model", "value": 42}],
+        "series": {},
+    }
+    page = _page_text(_generated_pages(tmp_path, shard), "alpha-bench")
+    disclosures = re.findall(r'<details class="record-scores">(.*?)</details>', page, re.S)
+    assert len(disclosures) == 2
+    for disclosure in disclosures:
+        summary = disclosure.split("</summary>")[0]
+        assert "Reported benchmark scores · " in summary
+        assert "Reported scores: 1" not in summary
+        assert "Reported scores: 1" in disclosure
+        assert "<table>" in disclosure
+        assert disclosure.count("<tbody><tr>") == 1
+    assert any("Zero</td>" in part and "<td>0</td>" in part for part in disclosures)
+    assert any("Other model</td>" in part for part in disclosures)
+    assert 'record-scores" open' not in page
+
+
 def test_jsonld_blocks_are_single_objects_with_expected_types(tmp_path):
     output = _generated_pages(tmp_path, _shard("alpha-bench", "Alpha Bench"))
     blocks = _jsonld_blocks(_page_text(output, "alpha-bench"))
@@ -217,6 +326,63 @@ def test_jsonld_blocks_are_single_objects_with_expected_types(tmp_path):
     assert webpage["about"]["name"] == "Alpha Bench"
     crumbs = [item["name"] for item in blocks[1]["itemListElement"]]
     assert crumbs == ["Benchmark Radar", "Benchmark directory", "Alpha Bench"]
+
+
+def test_benchmark_is_described_as_a_dataset_from_its_own_fields(tmp_path):
+    """Answer engines cite the paper and the publisher, so both reach the markup."""
+    shard = _shard(
+        "alpha-bench",
+        "Alpha Bench",
+        description="A tough reasoning test.",
+        categories=["math", "Official"],
+        released="2025-03-04",
+    )
+    shard["record"]["publisher"] = {"name": "Alpha Lab", "role": "hub_publisher"}
+    shard["record"]["artifacts"] = [
+        {"kind": "repo", "url": "https://github.com/alpha/bench"},
+        {"kind": "paper", "url": "https://arxiv.org/abs/2501.00001"},
+    ]
+    output = _generated_pages(tmp_path, shard, _shard("beta-bench", "Beta Bench"))
+    alpha_text = _page_text(output, "alpha-bench")
+    webpage = _jsonld_blocks(alpha_text)[0]
+    entity = webpage["about"]
+    assert entity["@type"] == "Dataset"
+    assert entity["@id"] == "https://benchmark-radar.org/benchmarks/alpha-bench/#benchmark"
+    assert webpage["mainEntity"] == {"@type": "Dataset", "@id": entity["@id"]}
+    assert entity["citation"] == ["https://arxiv.org/abs/2501.00001"]
+    assert entity["sameAs"] == ["https://github.com/alpha/bench"]
+    assert entity["publisher"] == {"@type": "Organization", "name": "Alpha Lab"}
+    assert entity["datePublished"] == "2025-03-04"
+    assert entity["keywords"] == ["math"]
+    # Score dates are evidence dates, not when the page changed, so no
+    # modification time is claimed.
+    assert "dateModified" not in webpage
+    assert (
+        '<link rel="alternate" type="application/json" '
+        'href="https://benchmark-radar.org/data/benchmarks/alpha-bench.json">'
+    ) in alpha_text
+
+    beta = _jsonld_blocks(_page_text(output, "beta-bench"))[0]
+    for missing in ("citation", "sameAs", "publisher", "datePublished", "keywords"):
+        assert missing not in beta["about"]
+
+
+def test_object_publisher_reaches_the_visible_facts(tmp_path):
+    """The Publisher fact reads publisher["name"]; an object is not a missing value (#982)."""
+    shard = _shard("alpha-bench", "Alpha Bench", categories=["math"])
+    shard["record"]["publisher"] = {
+        "name": "mbzuai",
+        "role": "hub_publisher",
+        "locator": "detail.basicInfo.publishOrg",
+    }
+    string_shard = _shard("beta-bench", "Beta Bench", publisher="Beta Lab")
+    output = _generated_pages(tmp_path, shard, string_shard)
+    alpha = _page_text(output, "alpha-bench")
+    # A hub card's publisher is often not the benchmark's creator (#982), so
+    # the page labels the role the way the dynamic site does.
+    assert "<dt>Publisher</dt><dd>mbzuai (published the hub card)</dd>" in alpha
+    assert "published by mbzuai" not in alpha
+    assert "<dt>Publisher</dt><dd>Beta Lab</dd>" in _page_text(output, "beta-bench")
 
 
 def test_node_references_carry_their_own_type_so_they_resolve_off_the_homepage(tmp_path):
@@ -245,7 +411,8 @@ def test_values_are_escaped_and_cannot_inject_markup(tmp_path):
     assert "&lt;script&gt;alert(1)&lt;/script&gt;" in page
     assert "<img src=x onerror" not in page
     assert "payload</script>" not in page
-    assert page.count("</script>") == 4  # two JSON-LD blocks, chrome data and behavior
+    # two JSON-LD blocks, chrome data, two chrome scripts and share-card.js
+    assert page.count("</script>") == 6
 
 
 def test_no_placeholder_text_for_missing_fields(tmp_path):
@@ -287,7 +454,9 @@ def test_scores_are_partitioned_by_source(tmp_path):
     assert "LLM Stats" in page
     assert "llm_stats" not in page
     assert "never merged into a single cross-source ranking" in page
-    assert "<dt>Reported scores</dt><dd>2</dd>" in page
+    evidence = page.split('<details class="record-scores">', 1)[1].split("</details>")[0]
+    assert '<p class="caveat">Reported scores: 2</p>' in evidence
+    assert "<dt>Reported scores</dt>" not in page
 
 
 def test_directory_page_lists_every_benchmark(tmp_path):
@@ -354,12 +523,13 @@ def test_sitemap_includes_benchmark_pages_when_entries_are_passed(tmp_path):
     assert lastmods == ["2026-08-21"] * 11 + ["2025-05-22"]
 
 
-def test_benchmark_lastmod_comes_from_the_pages_own_evidence(tmp_path):
-    """A page is not modified by another benchmark's snapshot landing."""
+def test_benchmark_sitemap_omits_unverified_page_change_dates(tmp_path):
+    """Release/score dates describe evidence, not when the page changed (#987)."""
     shard_dir = _write_shards(
         tmp_path,
-        _shard("alpha-bench", "Alpha Bench", released="2024-02-01"),
         _shard("zeta-bench", "Zeta Bench", released=None),
+        _shard("release-only", "Release Only", released="2025-03-04"),
+        _shard("alpha-bench", "Alpha Bench", released="2024-02-01"),
     )
     alpha = json.loads((shard_dir / "alpha-bench.json").read_text(encoding="utf-8"))
     alpha["scores_by_source"] = {
@@ -375,11 +545,28 @@ def test_benchmark_lastmod_comes_from_the_pages_own_evidence(tmp_path):
     }
     (shard_dir / "alpha-bench.json").write_text(json.dumps(alpha), encoding="utf-8")
 
-    assert benchmark_sitemap_entries(shard_dir) == [
-        ("/benchmarks/alpha-bench/", "2026-01-09"),
+    entries = benchmark_sitemap_entries(shard_dir)
+    assert entries == [
+        ("/benchmarks/alpha-bench/", None),
+        ("/benchmarks/release-only/", None),
         ("/benchmarks/zeta-bench/", None),
     ]
+    # The serializer must not fill an unknown benchmark date with the global
+    # snapshot date. Keep every URL, including release-only and undated rows.
+    namespace = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+    tree = sitemap_tree([{"generated_at": "2026-10-26T00:00:00Z"}], entries)
+    expected_urls = {SITE_URL + path for path, _ in entries}
+    benchmark_nodes = [
+        node
+        for node in tree.getroot().findall("sm:url", namespace)
+        if node.findtext("sm:loc", namespaces=namespace) in expected_urls
+    ]
+    assert len(benchmark_nodes) == len(entries)
+    assert all(node.find("sm:lastmod", namespace) is None for node in benchmark_nodes)
     assert benchmark_sitemap_entries(tmp_path / "missing") == []
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    assert benchmark_sitemap_entries(empty) == []
 
 
 def test_write_benchmark_pages_fails_loudly_without_shards(tmp_path):
@@ -458,6 +645,30 @@ def test_artifact_links_are_published_instead_of_staying_in_the_shard(tmp_path):
     assert "<h2>Alpha Bench paper, code and dataset</h2>" in page
     for kind in ("paper", "repo", "dataset"):
         assert f'href="https://example.org/alpha-bench/{kind}"' in page
+
+
+def test_resource_chips_share_marks_and_only_remove_repeated_destinations(tmp_path):
+    shard = _shard("alpha-bench", "Alpha Bench")
+    shard["record"]["artifacts"] = [
+        {"kind": "repo", "url": "https://github.com/example/bench"},
+        {"kind": "repo", "url": " https://github.com/example/bench "},
+        {"kind": "repo", "url": "https://www.github.com/example/other"},
+        {"kind": "paper", "url": "https://arxiv.org/abs/example"},
+        {"kind": "dataset", "url": "https://huggingface.co/datasets/example/bench"},
+        {"kind": "paper", "url": "ftp://example.org/paper"},
+        {"kind": "website", "url": "https://github.com.example.org/bench"},
+    ]
+    shard["record"]["provenance"] = {"source_url": "https://github.com/example/bench"}
+    page = _page_text(_generated_pages(tmp_path, shard), "alpha-bench")
+    assert page.count('href="https://github.com/example/bench"') == 1
+    assert 'href="https://www.github.com/example/other"' in page
+    for brand in ("github", "arxiv", "huggingface"):
+        assert f'href="/assets/source-icons.svg#{brand}"' in page
+    assert 'aria-label="Code · https://github.com/example/bench · GitHub"' in page
+    assert 'aria-label="Code · https://www.github.com/example/other · GitHub"' in page
+    assert 'aria-label="Website · github.com.example.org"' in page
+    assert "Original evidence" not in page
+    assert 'href="ftp://example.org/paper"' not in page
 
 
 def test_related_benchmarks_link_siblings_in_the_same_category(tmp_path):
@@ -551,3 +762,27 @@ def test_a_two_word_category_description_is_padded_with_real_evidence(tmp_path):
     description = description.split('"')[0]
     assert description.startswith("Coding.")
     assert "1 reported scores" in description
+
+
+def test_page_publishes_recorded_audits_with_receipts(tmp_path):
+    shard = _shard("alpha-bench", "Alpha Bench")
+    shard["record"]["audits"] = [
+        {
+            "auditor": "June Kim",
+            "audit_date": "2026-05-24",
+            "audit_url": "https://example.com/alpha-audit",
+            "finding": "Some Alpha instances cannot run.",
+            "receipts": ["https://example.com/alpha-receipt"],
+        }
+    ]
+    output = _generated_pages(tmp_path, shard)
+    page = _page_text(output, "alpha-bench")
+    assert "Independent audits of Alpha Bench" in page
+    assert "Some Alpha instances cannot run." in page
+    assert 'href="https://example.com/alpha-audit"' in page
+    assert 'href="https://example.com/alpha-receipt"' in page
+
+
+def test_page_without_audits_has_no_audits_section(tmp_path):
+    output = _generated_pages(tmp_path, _shard("alpha-bench", "Alpha Bench"))
+    assert "Independent audits" not in _page_text(output, "alpha-bench")

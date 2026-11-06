@@ -24,15 +24,17 @@ import html
 import json
 import re
 import shutil
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
+from .cards import benchmark_card_url
 from .feed import SITE_URL
-from .site_shell import SOURCE_LABELS, website_reference
+from .site_links import resource_link
+from .site_shell import SHARE_CARD_META, SOURCE_LABELS, share_card_meta, website_reference
 
 DEFAULT_SHARD_DIR = Path("site/data/benchmarks")
 DEFAULT_PAGES_DIR = Path("site/benchmarks")
@@ -93,8 +95,6 @@ _BENCH_CSS = """\
 :root { color-scheme: light; --ink: #15242a; --muted: #5f7078; --line: #bdc9ce; }
 body { margin: 0; font-family: Avenir Next, Avenir, Segoe UI, sans-serif;
   color: var(--ink); line-height: 1.55; }
-nav.site { padding: 1rem max(1rem, calc((100% - 900px) / 2));
-  border-bottom: 1px solid var(--line); display: flex; gap: 1rem; flex-wrap: wrap; }
 main { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem; }
 h1 { font-size: 2rem; margin: 0.25rem 0 0.5rem; }
 .lede { color: var(--muted); font-size: 1.05rem; }
@@ -118,12 +118,10 @@ _DIR_CSS = """\
 :root { color-scheme: light; --ink: #15242a; --line: #bdc9ce; }
 body { margin: 0; font-family: Avenir Next, Avenir, Segoe UI, sans-serif;
   color: var(--ink); line-height: 1.55; }
-nav.site { padding: 1rem max(1rem, calc((100% - 900px) / 2));
-  border-bottom: 1px solid var(--line); display: flex; gap: 1rem; flex-wrap: wrap; }
 main { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem; }
-ul { columns: 3; gap: 0.5rem 2rem; padding: 0; list-style: none; }
-li { break-inside: avoid; margin: 0.2rem 0; }
-@media (max-width: 700px) { ul { columns: 1; } }
+main > ul { columns: 3; gap: 0.5rem 2rem; padding: 0; list-style: none; }
+main > ul > li { break-inside: avoid; margin: 0.2rem 0; }
+@media (max-width: 700px) { main > ul { columns: 1; } }
 """
 
 
@@ -136,6 +134,55 @@ def _text(record: dict[str, Any], key: str) -> str | None:
     if isinstance(value, str) and value.strip():
         return value.strip()
     return None
+
+
+# The same role labels the dynamic site prints (`publisherRoleLabel` in
+# site/assets/app.js). OpenCompass `publishOrg` names whoever published the hub
+# card, which is frequently not the benchmark's creator, so a hub publisher is
+# never written as "published by".
+_PUBLISHER_ROLE_LABELS = {
+    "hub_publisher": "published the hub card",
+    "paper_org": "organization behind the paper",
+    "maintainer": "maintainer",
+}
+
+
+def _publisher(record: dict[str, Any]) -> tuple[str, str | None] | None:
+    """The publisher's name and role, whether stored as an object or a string.
+
+    Shards store the publisher as {"name", "role", "locator"}; a plain string
+    is accepted too so a hand-built record still says who published it.
+    """
+    raw_publisher = record.get("publisher")
+    if isinstance(raw_publisher, dict):
+        name = _text(raw_publisher, "name")
+        role = raw_publisher.get("role")
+        return (name, role if isinstance(role, str) else None) if name else None
+    name = _text(record, "publisher")
+    return (name, None) if name else None
+
+
+def _publisher_name(record: dict[str, Any]) -> str | None:
+    publisher = _publisher(record)
+    return publisher[0] if publisher else None
+
+
+def _creator_publisher(record: dict[str, Any]) -> str | None:
+    """The publisher only when it can be read as who published the benchmark."""
+    publisher = _publisher(record)
+    if not publisher or publisher[1] == "hub_publisher":
+        return None
+    return publisher[0]
+
+
+def _publisher_fact(record: dict[str, Any]) -> str | None:
+    """`name (role)`, as the dynamic site shows it, so attribution never overstates."""
+    publisher = _publisher(record)
+    if not publisher:
+        return None
+    name, role = publisher
+    label = _PUBLISHER_ROLE_LABELS.get(role, role) if role else None
+    return f"{name} ({label})" if label else name
 
 
 @dataclass(frozen=True)
@@ -179,11 +226,11 @@ def _artifacts(record: dict[str, Any]) -> list[tuple[str, str, str]]:
         for artifact in record.get("artifacts") or []:
             if not isinstance(artifact, dict) or artifact.get("kind") != kind:
                 continue
-            url = artifact.get("url")
-            if not isinstance(url, str) or not url.strip() or url in seen:
+            url = _http_url(artifact.get("url"))
+            if not url or url in seen:
                 continue
             seen.add(url)
-            found.append((kind, _ARTIFACT_LABELS[kind], url.strip()))
+            found.append((kind, _ARTIFACT_LABELS[kind], url))
     return found
 
 
@@ -269,7 +316,7 @@ def _evidence_sentence(
 def _summary_sentence(name: str, record: dict[str, Any]) -> str:
     """A first sentence for a record that carries no description of its own."""
     categories = _category_words(record)
-    publisher = _text(record, "publisher")
+    publisher = _creator_publisher(record)
     if categories and publisher:
         return f"{name} is a {categories} benchmark published by {publisher}."
     if categories:
@@ -317,9 +364,9 @@ def _canonical(slug: str) -> str:
     return f"{SITE_URL}/benchmarks/{slug}/"
 
 
-def _facts(record: dict[str, Any], scores_by_source: dict[str, Any]) -> list[tuple[str, str]]:
+def _facts(record: dict[str, Any]) -> list[tuple[str, str]]:
     facts: list[tuple[str, str]] = []
-    publisher = _text(record, "publisher")
+    publisher = _publisher_fact(record)
     if publisher:
         facts.append(("Publisher", publisher))
     released = _text(record, "released")
@@ -328,6 +375,11 @@ def _facts(record: dict[str, Any], scores_by_source: dict[str, Any]) -> list[tup
     modality = _text(record, "modality")
     if modality:
         facts.append(("Modality", modality))
+    # OpenAlex's linked institutions for the record's own paper (#933, #1120),
+    # the first three, the same as the Library card and the release ranking.
+    institutions = [str(name) for name in record.get("institutions") or [] if str(name).strip()]
+    if institutions:
+        facts.append(("Institutions", " · ".join(institutions[:3])))
     categories = _category_words(record)
     if categories:
         facts.append(("Evaluates", categories))
@@ -342,21 +394,73 @@ def _facts(record: dict[str, Any], scores_by_source: dict[str, Any]) -> list[tup
     review_state = provenance.get("review_state")
     if isinstance(review_state, str) and review_state.strip():
         facts.append(("Review status", review_state.strip()))
-    facts.append(("Reported scores", str(_score_count(scores_by_source))))
     return facts
 
 
 def _json_ld(payload: dict[str, Any]) -> str:
     """Serialize structured data for a <script> block.
 
-    JSON may legally contain the substring `</`, which would close the script
-    tag early no matter how valid the JSON is. Escaping the slash keeps the
-    block intact and is valid JSON for every consumer.
+    JSON may legally contain `<`, and `</script` or `<!--` would end or bend the
+    script block no matter how valid the JSON is. Escaping every `<` keeps the
+    block intact, leaves no markup-shaped text in the page, and is valid JSON
+    for every consumer.
     """
-    return json.dumps(payload, ensure_ascii=False, sort_keys=True).replace("</", "<\\/")
+    return json.dumps(payload, ensure_ascii=False, sort_keys=True).replace("<", "\\u003c")
 
 
-def _webpage_jsonld(slug: str, name: str, description: str, title: str) -> str:
+def _benchmark_entity(
+    slug: str,
+    name: str,
+    description: str,
+    record: dict[str, Any],
+    artifacts: list[tuple[str, str, str]],
+) -> dict[str, Any]:
+    """The benchmark itself as a schema.org Dataset, built only from shard fields.
+
+    A bare `Thing` told search and answer engines nothing but a name. The paper
+    is what a citing engine needs, so it goes in `citation`; the code, dataset
+    and website identify the same benchmark elsewhere, so they go in `sameAs`.
+    A field the record lacks is left out rather than guessed.
+    """
+    entity: dict[str, Any] = {
+        "@type": "Dataset",
+        "@id": f"{_canonical(slug)}#benchmark",
+        "name": name,
+        "description": description,
+        "url": _canonical(slug),
+        "includedInDataCatalog": {
+            "@type": "DataCatalog",
+            "name": "Benchmark Radar",
+            "url": f"{SITE_URL}/benchmarks/",
+        },
+    }
+    papers = [url for kind, _, url in artifacts if kind == "paper" and _http_url(url)]
+    if papers:
+        entity["citation"] = papers
+    same_as = [url for kind, _, url in artifacts if kind != "paper" and _http_url(url)]
+    if same_as:
+        entity["sameAs"] = same_as
+    publisher = _publisher_name(record)
+    if publisher:
+        entity["publisher"] = {"@type": "Organization", "name": publisher}
+    released = _text(record, "released")
+    if released and _is_calendar_date(released):
+        entity["datePublished"] = released
+    keywords = [word.strip() for word in _category_words(record).split(",") if word.strip()]
+    if keywords:
+        entity["keywords"] = keywords
+    return entity
+
+
+def _webpage_jsonld(
+    slug: str,
+    name: str,
+    description: str,
+    title: str,
+    record: dict[str, Any] | None = None,
+    artifacts: list[tuple[str, str, str]] | None = None,
+) -> str:
+    entity = _benchmark_entity(slug, name, description, record or {}, artifacts or [])
     payload = {
         "@context": "https://schema.org",
         "@type": "WebPage",
@@ -366,7 +470,8 @@ def _webpage_jsonld(slug: str, name: str, description: str, title: str) -> str:
         "description": description,
         "inLanguage": ["en", "zh-Hans"],
         "isPartOf": website_reference(),
-        "about": {"@type": "Thing", "name": name, "description": description},
+        "about": entity,
+        "mainEntity": {"@type": "Dataset", "@id": entity["@id"]},
     }
     return _json_ld(payload)
 
@@ -420,11 +525,13 @@ def _scores_sections(scores_by_source: dict[str, Any]) -> str:
         if not body:
             continue
         sections.append(
-            "<section>"
-            f"<h3>{_esc(SOURCE_LABELS.get(source, source))}</h3>"
+            '<details class="record-scores">'
+            "<summary><h3>Reported benchmark scores · "
+            f"{_esc(SOURCE_LABELS.get(source, source))}</h3></summary>"
+            f'<p class="caveat">Reported scores: {len(rows)}</p>'
             "<table><thead><tr><th>Model</th><th>Organization</th>"
             "<th>Reported value</th><th>Reported</th><th>Evidence</th></tr></thead>"
-            f"<tbody>{body}</tbody></table></section>"
+            f"<tbody>{body}</tbody></table></details>"
         )
     return "".join(sections)
 
@@ -443,12 +550,11 @@ def _http_url(value: Any) -> str | None:
 def _provenance_section(record: dict[str, Any]) -> str:
     provenance = record.get("provenance") or {}
     clean = _http_url(provenance.get("source_url"))
-    if not clean:
+    if not clean or any(url == clean for _, _, url in _artifacts(record)):
         return ""
     return (
-        '<section><h2>Source provenance</h2><ul class="links"><li>'
-        '<span class="artifact-kind">Original evidence</span> '
-        f'<a href="{_esc(clean)}" rel="nofollow noopener">{_esc(clean)}</a>'
+        '<section><h2>Source provenance</h2><ul class="links benchmark-resources"><li>'
+        f"{resource_link(clean, 'Original evidence')}"
         "</li></ul></section>"
     )
 
@@ -464,12 +570,22 @@ def _artifacts_section(name: str, artifacts: list[tuple[str, str, str]]) -> str:
         return ""
     labels = [_ARTIFACT_LABELS[kind].lower() for kind in _facet_kinds(artifacts)]
     heading = f"{name} {_join_words(labels).replace(' & ', ' and ')}" if labels else f"{name} links"
-    items = "".join(
-        f'<li><span class="artifact-kind">{_esc(label)}</span> '
-        f'<a href="{_esc(url)}" rel="nofollow noopener">{_esc(url)}</a></li>'
+    groups = Counter(
+        (label, (urlsplit(url).hostname or "").removeprefix("www.")) for _, label, url in artifacts
+    )
+    links = (
+        resource_link(
+            url,
+            label,
+            distinguish=groups[label, (urlsplit(url).hostname or "").removeprefix("www.")] > 1,
+        )
         for _, label, url in artifacts
     )
-    return f'<section><h2>{_esc(heading)}</h2><ul class="links">{items}</ul></section>'
+    items = "".join(f"<li>{link}</li>" for link in links)
+    return (
+        f"<section><h2>{_esc(heading)}</h2>"
+        f'<ul class="links benchmark-resources">{items}</ul></section>'
+    )
 
 
 def _documents_section(name: str, record: dict[str, Any]) -> str:
@@ -500,6 +616,45 @@ def _documents_section(name: str, record: dict[str, Any]) -> str:
     return (
         f"<section><h2>Which sources cite {_esc(name)}?</h2>"
         f'<ul class="links">{"".join(items)}</ul>{more}</section>'
+    )
+
+
+def _audits_section(name: str, record: dict[str, Any]) -> str:
+    """Independent audits of this benchmark, with the receipts to check them.
+
+    An audit is third-party evidence about what a benchmark's reported
+    numbers actually settle. It is recorded in the registry beside the
+    caveat; publishing the caveat without the audit would show the warning
+    and hide the evidence behind it.
+    """
+    audits = [item for item in (record.get("audits") or []) if isinstance(item, dict)]
+    if not audits:
+        return ""
+    items = []
+    for audit in audits:
+        auditor = _text(audit, "auditor") or "Independent audit"
+        url = _http_url(audit.get("audit_url"))
+        label = _esc(auditor)
+        if url:
+            label = f'<a href="{_esc(url)}" rel="nofollow noopener">{label}</a>'
+        audit_date = _text(audit, "audit_date")
+        suffix = f' <span class="caveat">{_esc(audit_date)}</span>' if audit_date else ""
+        finding = _text(audit, "finding")
+        finding_html = f"<p>{_esc(finding)}</p>" if finding else ""
+        receipts = [
+            clean for clean in (_http_url(item) for item in audit.get("receipts") or []) if clean
+        ]
+        receipts_html = ""
+        if receipts:
+            links = " · ".join(
+                f'<a href="{_esc(clean)}" rel="nofollow noopener">Receipt {index}</a>'
+                for index, clean in enumerate(receipts, start=1)
+            )
+            receipts_html = f'<p class="caveat">{links}</p>'
+        items.append(f"<li>{label}{suffix}{finding_html}{receipts_html}</li>")
+    return (
+        f"<section><h2>Independent audits of {_esc(name)}</h2>"
+        f'<ul class="links">{"".join(items)}</ul></section>'
     )
 
 
@@ -564,50 +719,47 @@ def _related_section(slug: str, record: dict[str, Any], context: CatalogContext)
     return f'<section><h2>{_esc(heading)}</h2><ul class="links">{items}</ul></section>'
 
 
-def _benchmark_nav(interactive: str) -> str:
-    return (
-        '<nav class="site">'
-        f'<a href="{SITE_URL}/">Benchmark Radar</a> '
-        f'<a href="{SITE_URL}/benchmarks/">Benchmark directory</a> '
-        f'<a href="{interactive}">Interactive view</a></nav>'
-    )
-
-
 def _page_html(
-    slug: str, shard: dict[str, Any], context: CatalogContext | None = None, header: str = ""
+    slug: str,
+    shard: dict[str, Any],
+    context: CatalogContext | None = None,
+    header: str = "",
+    footer: str = "",
 ) -> str:
     context = context or CatalogContext()
     record = shard.get("record") or {}
     scores_by_source = shard.get("scores_by_source") or {}
     name = _text(record, "name") or slug
     description = _description(record, scores_by_source)
+    # Search snippets are clipped; the visible explanation must remain complete.
+    overview = _own_description(record) or _summary_sentence(name, record)
     canonical = _canonical(slug)
     artifacts = _artifacts(record)
     title = _title(name, record, artifacts, scores_by_source, context)
     facts = "".join(
-        f"<dt>{_esc(label)}</dt><dd>{_esc(value)}</dd>"
-        for label, value in _facts(record, scores_by_source)
+        f"<dt>{_esc(label)}</dt><dd>{_esc(value)}</dd>" for label, value in _facts(record)
     )
     scores = _scores_sections(scores_by_source)
     if scores:
         scores_html = (
-            f"<section><h2>{_esc(name)} results and reported scores</h2>{scores}</section>"
+            f"<section><h2>{_esc(name)} results and reported scores</h2>{scores}"
             '<p class="caveat">Scores are partitioned by the source that reported '
             "them and are never merged into a single cross-source ranking, because "
-            "the sources measure different things and say so.</p>"
+            "the sources measure different things and say so.</p></section>"
         )
     else:
         scores_html = (
             '<p class="caveat">No reported scores are on record for this benchmark yet.</p>'
         )
     body = (
-        f"<section><h2>What is {_esc(name)}?</h2>"
-        f'<p class="lede">{_esc(description)}</p>'
+        # The h1 already names the benchmark, so the overview needs no heading.
+        f'<section><p class="lede">{_esc(overview)}</p>'
         f"<dl>{facts}</dl></section>"
         f"{_provenance_section(record)}"
         f"{_artifacts_section(name, artifacts)}"
         f"{scores_html}"
         f"{_documents_section(name, record)}"
+        f"{_audits_section(name, record)}"
         f"{_related_section(slug, record, context)}"
     )
     body = re.sub(
@@ -617,8 +769,8 @@ def _page_html(
         body,
         flags=re.S,
     )
+    jsonld = _webpage_jsonld(slug, name, description, title, record, artifacts)
     interactive = f"{SITE_URL}/saturation/?lfrontier={slug}"
-    nav = _benchmark_nav(interactive)
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -633,29 +785,34 @@ def _page_html(
 <meta property="og:title" content="{_esc(title)}">
 <meta property="og:description" content="{_esc(description)}">
 <meta property="og:url" content="{canonical}">
-<meta property="og:image" content="{SITE_URL}/assets/og-card.png">
-<meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{_webpage_jsonld(slug, name, description, title)}</script>
+{share_card_meta(benchmark_card_url(slug))}
+<link rel="alternate" type="application/json" href="{SITE_URL}/data/benchmarks/{slug}.json">
+<script type="application/ld+json">{jsonld}</script>
 <script type="application/ld+json">{_breadcrumb_jsonld(slug, name)}</script>
 <style>@layer legacy {{{_BENCH_CSS}}}</style>
 <link rel="stylesheet" href="/assets/styles.css">
 <link rel="stylesheet" href="/assets/design-system.css">
 </head>
 <body class="record-page">
+<a class="skip-link" href="#main-content">Skip to content</a>
 {header}
-{nav}
-<main>
-  <p class="eyebrow">Benchmark</p>
-  <h1>{_esc(_benchmark_phrase(name))}</h1>
+<main id="main-content" tabindex="-1">
+  <div class="record-heading">
+    <h1>{_esc(_benchmark_phrase(name))}</h1>
+    <a class="record-history-link" href="{interactive}">Explore score history ↗</a>
+    <button type="button" class="secondary-link benchmark-share" data-share-benchmark="{slug}"
+      data-name="{_esc(name)}" hidden>Share card</button>
+  </div>
   {body}
 </main>
-{nav}
+{footer}
+<script src="/assets/share-card.js" type="module"></script>
 </body>
 </html>
 """
 
 
-def _directory_html(entries: list[tuple[str, str]], header: str = "") -> str:
+def _directory_html(entries: list[tuple[str, str]], header: str = "", footer: str = "") -> str:
     """Directory page: title, canonical, schema, and the full listing."""
     canonical = f"{SITE_URL}/benchmarks/"
     payload = {
@@ -691,9 +848,10 @@ def _directory_html(entries: list[tuple[str, str]], header: str = "") -> str:
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Benchmark Radar">
 <meta property="og:title" content="Benchmark directory · Benchmark Radar">
+<meta property="og:description" content="{_esc(_DIR_DESCRIPTION)}">
 <meta property="og:url" content="{canonical}">
-<meta property="og:image" content="{SITE_URL}/assets/og-card.png">
-<meta name="twitter:card" content="summary_large_image">
+{SHARE_CARD_META}
+<link rel="alternate" type="application/json" href="{SITE_URL}/data/benchmark-index.json">
 <script type="application/ld+json">{_json_ld(payload)}</script>
 <script type="application/ld+json">{_json_ld(breadcrumb)}</script>
 <style>@layer legacy {{{_DIR_CSS}}}</style>
@@ -701,12 +859,9 @@ def _directory_html(entries: list[tuple[str, str]], header: str = "") -> str:
 <link rel="stylesheet" href="/assets/design-system.css">
 </head>
 <body class="record-page">
+<a class="skip-link" href="#main-content">Skip to content</a>
 {header}
-<nav class="site">
-  <a href="{SITE_URL}/">Benchmark Radar</a>
-  <a href="{SITE_URL}/benchmarks/">Benchmark directory</a>
-</nav>
-<main>
+<main id="main-content" tabindex="-1">
   <h1>Benchmark directory</h1>
   <p class="lede">Every benchmark in the catalog, each with its own page covering
     what it tests, who published it, and which scores are on record. The
@@ -714,6 +869,7 @@ def _directory_html(entries: list[tuple[str, str]], header: str = "") -> str:
   <p class="count">{count}</p>
   <ul>{links}</ul>
 </main>
+{footer}
 </body>
 </html>
 """
@@ -744,8 +900,8 @@ def _is_calendar_date(value: str) -> bool:
     """True only for a real `YYYY-MM-DD` day.
 
     Shape alone is not enough: `2023-02-29` matches the pattern and would reach
-    the sitemap as an invalid `lastmod`. The round trip also rejects the forms
-    `date.fromisoformat` accepts but the sitemap spec does not, such as
+    structured data as an invalid `datePublished`. The round trip also rejects the forms
+    `date.fromisoformat` accepts but our date fields do not, such as
     `20230101`.
     """
     try:
@@ -754,33 +910,13 @@ def _is_calendar_date(value: str) -> bool:
         return False
 
 
-def _shard_lastmod(shard: dict[str, Any]) -> str | None:
-    """Newest date the page's own evidence carries, or None when it carries none.
-
-    A page changes when a score lands on it or when the record itself is dated,
-    not when some other benchmark's snapshot arrives. Both fields are stored as
-    plain `YYYY-MM-DD`, so the newest one sorts lexically; anything a calendar
-    rejects is dropped rather than passed through to the sitemap.
-    """
-    dates = {
-        row.get("reported_date")
-        for source in (shard.get("scores_by_source") or {}).values()
-        for row in (source or {}).get("rows") or ()
-    }
-    dates.add((shard.get("record") or {}).get("released"))
-    dated = {value for value in dates if isinstance(value, str) and _is_calendar_date(value)}
-    return max(dated) if dated else None
-
-
 def benchmark_sitemap_entries(shard_dir: Path) -> list[tuple[str, str | None]]:
-    """Benchmark page paths in stable slug order, each with its own lastmod."""
-    if not shard_dir.is_dir():
-        return []
-    entries = []
-    for path in sorted(shard_dir.glob("*.json")):
-        shard = json.loads(path.read_text(encoding="utf-8"))
-        entries.append((f"/benchmarks/{path.stem}/", _shard_lastmod(shard)))
-    return entries
+    """Benchmark paths without lastmod until page-change dates are tracked.
+
+    Release and score dates describe the evidence, not the page's last
+    significant change. A rebuild timestamp does not establish that either.
+    """
+    return [(f"/benchmarks/{slug}/", None) for slug in benchmark_slugs(shard_dir)]
 
 
 def benchmark_page_urls(shard_dir: Path) -> list[str]:
@@ -852,20 +988,23 @@ def write_benchmark_pages(
         chrome.header
         + '<script id="chrome-i18n" type="application/json">'
         + json.dumps(translations, ensure_ascii=False).replace("<", "\\u003c")
-        + '</script><script src="/assets/blog.js" defer></script>'
+        + '</script><script src="/assets/clarity.js" defer></script>'
+        + '<script src="/assets/blog.js" defer></script>'
     )
     entries: list[tuple[str, str]] = []
     for slug, shard in loaded:
         page_dir = staging / slug
         page_dir.mkdir(parents=True)
         (page_dir / "index.html").write_text(
-            _page_html(slug, shard, context, header), encoding="utf-8"
+            _page_html(slug, shard, context, header, chrome.footer), encoding="utf-8"
         )
         name = _text(shard.get("record") or {}, "name") or slug
         entries.append((name, _canonical(slug)))
 
     entries.sort(key=lambda item: (item[0].lower(), item[1]))
-    (staging / "index.html").write_text(_directory_html(entries, header), encoding="utf-8")
+    (staging / "index.html").write_text(
+        _directory_html(entries, header, chrome.footer), encoding="utf-8"
+    )
 
     if output_dir.exists():
         shutil.rmtree(output_dir)

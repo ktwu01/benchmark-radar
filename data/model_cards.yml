@@ -45,6 +45,24 @@ schema_version: 1
 
 # Source documents for score extraction (non-card sources)
 source_documents:
+  - id: gobench_llm_results_2026_10_19
+    name: GoBench Track 1-3 LLM comparison tables (2026-10-19)
+    publisher: Roland Gao
+    document_type: benchmark_leaderboard
+    url: https://github.com/RolandGao/gobench/blob/ea88ed944c07dff5d063e7e2789a481818d0dc9c/log/summary/report.txt#L196-L255
+    benchmarks: [gobench]
+    # Publication date of the pinned results commit, not a model release date.
+    published: 2026-10-19
+    retrieved_at: 2026-10-25
+
+  - id: gobench_live_leaderboard
+    name: GoBench leaderboard and current track definitions
+    publisher: Roland Gao
+    document_type: benchmark_leaderboard
+    url: https://rolandgao.com/blog/gobench/
+    benchmarks: [gobench]
+    retrieved_at: 2026-10-25
+
   - id: frontier_challenge_leaderboard_2026_08_25
     name: FrontierChallenge leaderboard
     publisher: ApodexAI
@@ -108,7 +126,34 @@ source_documents:
 # Canonical benchmark records. `aliases` exist so a future extractor can map
 # vendor spellings ("SWE-bench-Verified", "SWE Bench Verified") onto one id
 # without changing the ids the leaderboard is built from.
+  - id: slopcodebench_leaderboard_2026_04_24
+    name: SlopCodeBench leaderboard (v1.0, best version by % checkpoints view)
+    publisher: SprocketLab
+    document_type: benchmark_leaderboard
+    url: https://www.scbench.ai/leaderboard
+    benchmarks: [slopcodebench]
+    # The leaderboard page's own "last updated" date, not a release date.
+    published: 2026-04-24
+    retrieved_at: 2026-11-04
+
 benchmarks:
+  - id: gobench
+    name: GoBench
+    aliases: ["GoBench", "GoBench 9x9 Go", "GoBench: Evaluating LLMs on the Game of Go"]
+    domain: reasoning
+    url: https://rolandgao.com/gobench.pdf
+    # The original publication date shown on the official live leaderboard.
+    released: 2026-09-15
+    caveat: >-
+      Elo is relative to this 9x9 Go KataGo ladder, with the random player fixed
+      at zero; it is not a percentage or a human Go rank. Track 1 uses APIs
+      without tools, Track 2 evaluates agent-built engines, and Track 3 evaluates
+      tutorial-assisted API play. Context mode, reasoning effort, learning time,
+      engine time limit, and the ladder snapshot affect comparisons. The cited
+      LLM tables have 14-30 games per API configuration or 300 per engine, with
+      95% confidence intervals reported in the source. Current Track 2 uses a
+      60-second engine clock, unlike the older agent-in-the-loop paper results.
+
   - id: hle
     name: Humanity's Last Exam
     aliases: ["HLE", "Humanity's Last Exam", "HLE-Full", "HLE-Verified"]
@@ -148,6 +193,19 @@ benchmarks:
     url: https://github.com/scaleapi/SWE-bench_Pro-os
     released: 2025-09-23
     caveat: Harness and split version must be recorded with any score.
+    audits:
+      - auditor: June Kim
+        audit_date: 2026-06-21
+        audit_url: https://june.kim/a-determinacy-audit-of-swebench-pro
+        finding: >-
+          June Kim's determinacy audit reports a proven floor of 15.0% of the
+          728 public tasks underdetermined (109/728), and that 3 gold patches
+          fail the benchmark's own verifier.
+        receipts:
+          - https://doi.org/10.5281/zenodo.20738219
+          - https://doi.org/10.5281/zenodo.20738220
+          - https://github.com/kimjune01/swebench-pro-audit
+          - https://github.com/scaleapi/SWE-bench_Pro-os/issues/108
 
   - id: swe_bench_multilingual
     name: SWE-bench Multilingual
@@ -193,6 +251,36 @@ benchmarks:
       set is not comparable to a 2.x number. Not to be confused with
       Cognition's FrontierCode, a separate instrument recorded separately
       despite the shared prefix.
+    audits:
+      - auditor: June Kim
+        audit_date: 2026-07-09
+        audit_url: https://june.kim/terminal-bench-frame
+        finding: >-
+          June Kim's audit of Terminal-Bench 2.1 reports that it has no frame
+          condition: 40 of 83 gold-passing tasks (48%) still pass after a
+          careless in-workspace deletion, and all 83 pass after off-task user
+          assets planted before the run are wiped. 6 of 89 reference solutions
+          fail their own grader on a clean rerun, which the audit quarantines
+          as unclassified rather than asserting as defects.
+        receipts:
+          - https://github.com/kimjune01/terminal-bench-audit
+          - https://doi.org/10.5281/zenodo.21463236
+      - auditor: June Kim
+        audit_date: 2026-07-25
+        audit_url: https://github.com/kimjune01/frontier-bench-audit
+        finding: >-
+          June Kim's frame-validity audit of Frontier-Bench, the Terminal-Bench
+          series version now billed as Terminal-Bench 3.0, reports that
+          off-task destruction is invisible on every task tested:
+          Frontier-Bench grades only a declared allowlist of artifacts
+          transported out of the agent container before teardown, and every
+          gold-passing task probed still returned reward 1 after an SSH key, a
+          second repository, and a customer data file planted outside the task
+          were destroyed. The audit states no rate, only a floor over the
+          tasks that gold-passed on the auditor's host, and credits that
+          in-workspace deletion is caught on the majority of tasks tested.
+        receipts:
+          - https://github.com/kimjune01/frontier-bench-audit
 
   - id: livecodebench
     name: LiveCodeBench
@@ -825,6 +913,38 @@ benchmarks:
     caveat: >-
       Mini-swe-agent harness, temperature=0.95, top_p=1.0, max_new_tokens=64k
       under 1M context.
+    audits:
+      - auditor: June Kim
+        audit_date: 2026-05-27
+        audit_url: https://june.kim/auditing-deepswe
+        finding: >-
+          June Kim's audit reports that 4 of DeepSWE's 113 reference solutions
+          fail their own verifiers (langchain-request-coalescing,
+          narwhals-rolling-window-suite, prometheus-transactional-reload-status,
+          skrub-duration-encoding), each confirmed in isolated reruns with the
+          cause unresolved. Reviewing the published leaderboard artifacts, he
+          also reports that gpt-5.5's headline mean is computed over 111 tasks
+          while the leaderboard footer announces 113 (two tasks dropped from
+          that model's denominator under the documented error-exclusion
+          policy), and that the published trial records carry no retrievable
+          model patches, so the verdicts cannot be re-graded independently.
+        receipts:
+          - https://github.com/kimjune01/deepswe-run
+      - auditor: June Kim
+        audit_date: 2026-07-07
+        audit_url: https://june.kim/auditing-deepswe-v1-1
+        finding: >-
+          June Kim's re-audit of DeepSWE v1.1 (shipped 2026-06-14) reports
+          that the re-grade lifted the four tasks his first audit flagged by
+          +10 to +65 points while the pooled pass rate held nearly flat (0.509
+          to 0.518), and that his independent gold rerun found 112 of 113
+          golds now passing their own verifiers, with
+          prometheus-transactional-reload-status still failing. He also
+          reports 122 trials excluded from the published v1.1 data with only
+          73 disclosed, and an adjudicated determinacy floor of 3 of 111
+          tasks, about 2.7%.
+        receipts:
+          - https://github.com/kimjune01/deepswe-run
 
   - id: toolathlon_verified
     name: Toolathlon Verified
@@ -969,6 +1089,18 @@ benchmarks:
       level has to travel with the number. First-party to a competing coding
       agent's vendor, and revised as 1.1 on 2026-07-07, so the methodology
       version has to travel with the number too.
+    audits:
+      - auditor: June Kim
+        audit_date: 2026-07-18
+        audit_url: https://june.kim/auditing-frontiercode
+        finding: >-
+          June Kim's audit reports that FrontierCode is marketed as
+          mergeability, but of 59 confidently coded real maintainer closures
+          the patch decided only 3; in at least 52 the deciding cause sat
+          outside the rubric's six patch axes. No scored trial artifact is
+          publicly retrievable.
+        receipts:
+          - https://github.com/kimjune01/frontiercode-audit
 
   - id: blueprint_bench_2
     name: Blueprint-Bench 2
@@ -1193,6 +1325,22 @@ benchmarks:
     caveat: >-
       Cleanroom program-rebuild tasks; most models score low, so small
       differences sit within run-to-run noise.
+    audits:
+      - auditor: June Kim
+        audit_date: 2026-06-27
+        audit_url: https://june.kim/programbench-measures-recall
+        finding: >-
+          June Kim's audit reports that at least 21 programs pin a value that
+          only recall of a published algorithm supplies, and at least 29
+          programs ship graded tests whose expected value is captured from the
+          reference and then asserted against it (self-capturing goldens).
+          Because the primary metric is conjunctive, one such test puts a
+          whole program beyond reconstruction, and the reported floor of zero
+          resolved tasks is, in the audit's words, consistent with a recall
+          gate.
+        receipts:
+          - https://github.com/kimjune01/program-bench-audit
+          - https://doi.org/10.5281/zenodo.21083756
 
   - id: harbor_index
     name: Harbor-Index
@@ -1658,6 +1806,61 @@ benchmarks:
       sentences used for the private leaderboard. Speaking strategy, language
       model and corpus mix affect word error rate, so these scores are not
       directly comparable to Brain-to-Text '24.
+
+  - id: mirrorcode
+    name: MirrorCode
+    aliases: ["MirrorCode"]
+    domain: coding_agent
+    url: https://arxiv.org/abs/2606.30182
+    released: 2026-06-29
+    caveat: >-
+      25 target programs graded by exact output match against the reference
+      on end-to-end tests, including held-out tests. Attempts are
+      long-horizon and budget-sensitive: the paper reports $2,600 over 19
+      days for a single attempt on a large task, so two reported scores are
+      comparable only when the inference budgets behind them are similar.
+    audits:
+      - auditor: June Kim
+        audit_date: 2026-07-17
+        audit_url: https://github.com/kimjune01/mirrorcode-audit
+        finding: >-
+          June Kim's audit reports that MirrorCode's claimed construct is
+          autonomous reconstruction of whole programs from behavior, while its
+          metric scores scoped reimplementation from a working oracle, partly
+          via recall: the benchmark's own memorization screen flags 17 of 25
+          targets, and 2 of 25 are recall by construction (brotlid,
+          mailauth). The audit discloses that Kim applied for a role at Epoch
+          AI, which co-produced MirrorCode.
+        receipts:
+          - https://github.com/kimjune01/mirrorcode-audit
+
+  - id: slopcodebench
+    name: SlopCodeBench
+    aliases: ["SlopCodeBench"]
+    domain: coding
+    url: https://www.scbench.ai
+    caveat: >-
+      36 problems run as checkpoint sequences (196 checkpoints in v1.0):
+      the agent extends its own earlier solution as new requirements
+      arrive, so a checkpoint score reflects the accumulated codebase
+      rather than a fresh attempt, and the headline erosion measures
+      (verbosity, dead branches, redundant structure) are not a plain
+      solve rate.
+    audits:
+      - auditor: June Kim
+        audit_date: 2026-08-09
+        audit_url: https://june.kim/auditing-slopcodebench
+        finding: >-
+          June Kim's audit reports that the erosion metric measures static
+          code-shape drift, not yet extension robustness: its correlation
+          with passing the next checkpoint is −0.018, weaker than raw line
+          count at −0.212, and iteration is confounded because every
+          checkpoint adds requirements. In his 12-problem sample, 28 of 343
+          core tests assert exact values no visible spec determines, and of
+          all 196 answer keys run through the benchmark's own harness, 4 are
+          deterministically defective and 1 is unstable.
+        receipts:
+          - https://github.com/kimjune01/slopcodebench-audit
 
 # Model cards, technical reports and release posts.
 #

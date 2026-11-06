@@ -156,6 +156,10 @@ def test_structured_data_describes_a_searchable_site_and_a_dataset():
     distributions = [entry["contentUrl"] for entry in dataset["distribution"]]
     assert dataset["url"] in distributions
     assert dataset["license"].endswith("/MIT")
+    # Google's Dataset feature reads isPartOf as membership in a larger dataset;
+    # a WebSite parent triggers `Invalid object type for field "isPartOf"` (#944).
+    assert "isPartOf" not in dataset
+    assert dataset["includedInDataCatalog"]["@type"] == "DataCatalog"
 
 
 def test_sitemap_lists_the_blog_with_a_per_brief_lastmod():

@@ -10,8 +10,8 @@ Cohorts:
   window_start <= release_timestamp <= generated_at_utc
 - Canonical benchmark entities with at least one `event_kind == "released"`
   observation in the window. Routine `updated` records are excluded, and so are
-  records typed as a model, a method paper or a software version release
-  (`release_kind.py`).
+  records typed as a model, a method, an agent, a harness, or a software version
+  release (`release_kind.py`).
 - Normalization: log1p(val) / log1p(window_max) with fixed weights:
   GitHub stars: 55%
   Hugging Face paper upvotes: 30%
@@ -35,13 +35,21 @@ from urllib.parse import urlsplit
 
 import yaml
 
+from .affiliation_rank import affiliation_normalized, best_institution, institution_weights
 from .catalog_identity import DEFAULT_IDENTITY_PATH
 from .catalog_overrides import DEFAULT_LLM_STATS_IDENTITY_OVERRIDES_PATH
 from .corpus import artifact_alias_map, exact_artifact_key
 from .model_cards import DEFAULT_REGISTRY_PATH
+from .paper_institutions import SHOWN_INSTITUTIONS, arxiv_id
 from .release_kind import is_benchmark_release
+from .release_signals import ReleaseSignals
 
 METHOD_VERSION = "attention-ranking-v1"
+# Issue #1120: the default once release signals are loaded. Attention keeps its
+# internal split, scaled to 80%; the affiliation signal (affiliation_rank.py)
+# adds 20%. Unknown affiliation contributes nothing and is not redistributed.
+COMBINED_METHOD_VERSION = "attention-affiliation-v2"
+AFFILIATION_WEIGHT = 0.20
 MIN_OBSERVED_WEIGHT_RANK = 0.45
 DEFAULT_TOP_LIMIT = 10
 
@@ -444,9 +452,10 @@ def filter_release_cohort(
     for canonical_id, occurrences in items_by_canonical.items():
         release_dates = []
         for item, snap in occurrences:
-            # A model, a method paper or a software version tag is a release of
-            # something, but not of a benchmark. It stays in the corpus; it just
-            # does not open a Latest releases entry (issue #902).
+            # A model, a method, an agent, a harness, or a software version tag
+            # is a release of something, but not of a benchmark. It stays in the
+            # corpus; it just does not open a Latest releases entry
+            # (issues #902 and #961).
             if item.get("event_kind") == "released" and is_benchmark_release(item):
                 ts = (
                     item.get("published_at")
@@ -498,8 +507,18 @@ def compute_window_ranking(
     *,
     window_days: int,
     top_limit: int | None = DEFAULT_TOP_LIMIT,
+    affiliation_weight: float | None = None,
 ) -> dict[str, Any]:
-    """Rank candidates for a window using Ranking v1 formulas."""
+    """Rank candidates for a window.
+
+    Without ``affiliation_weight`` this is Ranking v1. With it, every attention
+    weight is scaled by ``1 - affiliation_weight`` and a candidate's
+    ``affiliation`` (0 to 1, or None for unknown) adds the rest. The rank
+    threshold still reads attention alone: affiliation never qualifies a
+    release by itself. A placeholder, archived or gone repository keeps the release listed, but
+    unranked.
+    """
+    scale = 1.0 - (affiliation_weight or 0.0)
     window_maxes = {
         signal: max(
             [
@@ -507,6 +526,9 @@ def compute_window_ranking(
                 for c in candidates
                 if c.get("signals", {}).get(signal, {}).get("value") is not None
                 and c.get("signals", {}).get(signal, {}).get("status") == "fresh"
+                # A held-back release is unranked; it must not set the scale
+                # the ranked releases are normalized against either.
+                and not _held_back(c)
             ]
             or [0.0]
         )
@@ -532,7 +554,7 @@ def compute_window_ranking(
             entry = {
                 "value": val,
                 "normalized": norm,
-                "weight": weight,
+                "weight": round(weight * scale, 4),
                 "status": status,
                 "source_url": sig.get("source_url"),
             }
@@ -541,14 +563,30 @@ def compute_window_ranking(
             components[signal] = entry
 
             if norm is not None:
-                coverage += weight
+                coverage += weight * scale
                 observed_count += 1
                 if status == "fresh":
-                    composite_score += weight * norm
+                    composite_score += weight * scale * norm
                     fresh_count += 1
                     fresh_weight += weight
                     if signal in DURABLE_SIGNALS:
                         has_durable = True
+
+        if affiliation_weight is not None:
+            affiliation = c.get("affiliation")
+            components["affiliation"] = {
+                "value": c.get("affiliation_paper_count"),
+                "institution": c.get("affiliation_institution"),
+                "normalized": affiliation,
+                "weight": affiliation_weight,
+                "status": "fresh" if affiliation is not None else "unknown",
+                "source_url": c.get("institutions_source_url"),
+            }
+            if affiliation is not None:
+                # An observed signal like any other for the confidence tag.
+                observed_count += 1
+                coverage += affiliation_weight
+                composite_score += affiliation_weight * affiliation
 
         raw_score = 100.0 * composite_score if fresh_count > 0 else None
         score = round(raw_score + 1e-9) if raw_score is not None else None
@@ -568,7 +606,18 @@ def compute_window_ranking(
         sufficient_weight = round(fresh_weight, 4) >= MIN_OBSERVED_WEIGHT_RANK or fresh_weight >= (
             MIN_OBSERVED_WEIGHT_RANK - 1e-9
         )
-        qualifies = is_eligible and has_durable and sufficient_weight and score is not None
+        held_back = _held_back(c)
+        qualifies = (
+            is_eligible and has_durable and sufficient_weight and score is not None
+        ) and not held_back
+
+        extra: dict[str, Any] = {}
+        if c.get("institutions"):
+            extra["institutions"] = c["institutions"]
+            extra["institutions_basis"] = c.get("institutions_basis")
+            extra["institutions_source_url"] = c.get("institutions_source_url")
+        if held_back:
+            extra["limited_reason"] = held_back
 
         scored_entries.append(
             {
@@ -582,6 +631,7 @@ def compute_window_ranking(
                 "status": "ranked" if qualifies else "limited_signals",
                 "rank": None,
                 "components": components,
+                **extra,
                 "_ranking_score": raw_score,
             }
         )
@@ -630,8 +680,16 @@ def build_latest_releases_leaderboard(
     reviewed_benchmark_ids: set[str] | None = None,
     include_unconfirmed: bool = False,
     top_limit: int | None = DEFAULT_TOP_LIMIT,
+    signals: ReleaseSignals | None = None,
+    institution_counts: dict[str, int] | None = None,
 ) -> dict[str, Any]:
-    """Build the full multi-window latest releases leaderboard for radar.json."""
+    """Build the full multi-window latest releases leaderboard for radar.json.
+
+    ``signals`` (release_signals.py) switches the ranking to
+    ``attention-affiliation-v2``, attaches each paper's first three
+    institutions, and holds back placeholder, archived and gone repositories. Without it the payload
+    is Ranking v1 exactly.
+    """
     if not snapshots:
         return {
             "schema_version": 1,
@@ -650,6 +708,9 @@ def build_latest_releases_leaderboard(
 
     all_evidence = [item for snap in snapshots for item in snap.get("evidence_items", [])]
     shared_aliases = artifact_alias_map(all_evidence)
+    papers_by_canonical = _papers_by_canonical(shared_aliases) if signals is not None else {}
+    counts = dict(institution_counts or {})
+    weights = institution_weights(counts)
 
     windows_data: dict[str, Any] = {}
     for window_key, days in WINDOW_DAYS.items():
@@ -662,7 +723,15 @@ def build_latest_releases_leaderboard(
             aliases=shared_aliases,
             include_unconfirmed=include_unconfirmed,
         )
-        ranking = compute_window_ranking(cohort, window_days=days, top_limit=top_limit)
+        if signals is not None:
+            for candidate in cohort:
+                _attach_release_signals(candidate, signals, counts, weights, papers_by_canonical)
+        ranking = compute_window_ranking(
+            cohort,
+            window_days=days,
+            top_limit=top_limit,
+            affiliation_weight=AFFILIATION_WEIGHT if signals is not None else None,
+        )
         window_start = (as_of_dt - timedelta(days=days)).isoformat()
         windows_data[window_key] = {
             "window_start": window_start,
@@ -672,8 +741,95 @@ def build_latest_releases_leaderboard(
 
     return {
         "schema_version": 1,
-        "method_version": METHOD_VERSION,
+        "method_version": COMBINED_METHOD_VERSION if signals is not None else METHOD_VERSION,
         "generated_at": as_of_dt.isoformat(),
         "default_window": "30d",
         "windows": windows_data,
     }
+
+
+def _held_back(candidate: dict[str, Any]) -> str | None:
+    """Why a candidate is listed but not ranked: placeholder, archived or gone."""
+    if candidate.get("held_back"):
+        return str(candidate["held_back"])
+    return "placeholder_repository" if candidate.get("placeholder_repository") else None
+
+
+def _papers_by_canonical(aliases: dict[str, str]) -> dict[str, str]:
+    """The arXiv paper each canonical release is linked to through its aliases."""
+    papers: dict[str, str] = {}
+    for key, canonical in [*aliases.items(), *((c, c) for c in aliases.values())]:
+        paper = arxiv_id(key)
+        if paper:
+            papers.setdefault(canonical, paper)
+    return papers
+
+
+def release_signal_targets(
+    snapshots: list[dict[str, Any]],
+    *,
+    as_of: datetime | str | None = None,
+    registry_path: Path | None = None,
+) -> tuple[set[str], set[str]]:
+    """arXiv papers and GitHub star URLs of the widest window's cohort.
+
+    ``scripts/fetch_release_signals.py`` looks these up, so the build that
+    reads the files finds an entry for every release it ranks.
+    """
+    if not snapshots:
+        return set(), set()
+    all_evidence = [item for snap in snapshots for item in snap.get("evidence_items", [])]
+    aliases = artifact_alias_map(all_evidence)
+    papers_by_canonical = _papers_by_canonical(aliases)
+    as_of_dt = (
+        _parse_utc_datetime(as_of)
+        or _parse_utc_datetime(snapshots[-1].get("generated_at"))
+        or datetime.now(UTC)
+    )
+    cohort = filter_release_cohort(
+        snapshots,
+        window_days=max(WINDOW_DAYS.values()),
+        as_of=as_of_dt,
+        registry_path=registry_path,
+        aliases=aliases,
+    )
+    papers, repos = set(), set()
+    for candidate in cohort:
+        canonical = candidate["canonical_artifact_id"]
+        paper = papers_by_canonical.get(canonical) or arxiv_id(canonical)
+        if paper:
+            papers.add(paper)
+        url = (candidate.get("signals", {}).get("github_stars") or {}).get("source_url")
+        if url:
+            repos.add(str(url))
+    return papers, repos
+
+
+def _attach_release_signals(
+    candidate: dict[str, Any],
+    signals: ReleaseSignals,
+    counts: dict[str, int],
+    weights: dict[str, float],
+    papers_by_canonical: dict[str, str],
+) -> None:
+    """Add institutions, affiliation and the hold-back reason to one candidate."""
+    canonical = candidate["canonical_artifact_id"]
+    paper = papers_by_canonical.get(canonical) or arxiv_id(canonical)
+    row = signals.paper(paper)
+    if row and row.get("institutions"):
+        names = [str(name) for name in row["institutions"]]
+        candidate["institutions"] = names[:SHOWN_INSTITUTIONS]
+        candidate["institutions_basis"] = row.get("basis")
+        candidate["institutions_source_url"] = row.get("source_url")
+        # A paper OpenAlex has not indexed yet is scored on the names it
+        # prints that exactly match a counted OpenAlex name; never fuzzily.
+        candidate["affiliation"] = affiliation_normalized(names, weights)
+        best = best_institution(names, weights)
+        if best:
+            # The input a reader can check: which institution, on how many papers.
+            candidate["affiliation_institution"] = best
+            candidate["affiliation_paper_count"] = counts[best]
+    stars_url = (candidate.get("signals", {}).get("github_stars") or {}).get("source_url")
+    reason = signals.held_back(stars_url)
+    if reason:
+        candidate["held_back"] = reason

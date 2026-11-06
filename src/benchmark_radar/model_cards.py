@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import re
 from collections import Counter
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
@@ -65,7 +65,31 @@ def _benchmark_summary(benchmark: dict[str, Any]) -> dict[str, Any]:
         "url": str(benchmark.get("url") or "") or None,
         "released": str(benchmark["released"]) if benchmark.get("released") else None,
         "caveat": (str(benchmark["caveat"]).strip() if benchmark.get("caveat") else None),
+        "audits": _benchmark_audits(benchmark) or None,
     }
+
+
+def _benchmark_audits(benchmark: dict[str, Any]) -> list[dict[str, Any]]:
+    """The benchmark's independent audit records, in publishable form.
+
+    The registry writes `audit_date` unquoted, which PyYAML reads as a date
+    object, and every surface these projections feed is JSON. Dates are
+    therefore stringified here, exactly as `released` and `published` are at
+    their projections. Nothing else is rewritten: auditor, finding, audit URL
+    and receipts travel as recorded, so a reader can check the audit against
+    its source rather than trusting a summary of it.
+    """
+    audits = []
+    for audit in benchmark.get("audits") or []:
+        published = {}
+        for field, value in audit.items():
+            if isinstance(value, datetime):
+                value = value.date().isoformat()
+            elif isinstance(value, date):
+                value = value.isoformat()
+            published[str(field)] = value
+        audits.append(published)
+    return audits
 
 
 class _descending:
@@ -140,6 +164,22 @@ def _require_date(value: Any, *, label: str) -> None:
         raise ModelCardRegistryError(f"{label} is not a real calendar date") from error
 
 
+def _require_http_url(value: Any, *, label: str) -> None:
+    """Reject a link that is not an HTTP(S) URL naming a host.
+
+    A prefix check alone is not enough: `https:///path` and `http:foo` both
+    carry an HTTP scheme but no host, so the published href names no server
+    and renders as a dead link on every surface that publishes it. Parsing
+    the URL and requiring a non-empty netloc closes that gap.
+    """
+    try:
+        parsed = urlsplit(str(value))
+    except ValueError as error:
+        raise ModelCardRegistryError(f"{label} is not a parseable URL: {value}") from error
+    if parsed.scheme not in ("http", "https") or not parsed.netloc:
+        raise ModelCardRegistryError(f"{label} must be HTTP(S) with a host: {value}")
+
+
 def load_registry(path: Path = DEFAULT_REGISTRY_PATH) -> dict[str, Any]:
     """Read and validate the curated model card registry.
 
@@ -190,6 +230,34 @@ def load_registry(path: Path = DEFAULT_REGISTRY_PATH) -> dict[str, Any]:
             _require_date(
                 benchmark["released"], label=f"{path}: benchmark {benchmark_id!r} released"
             )
+        # Audits get the same checks as the benchmark's own fields. An audit
+        # date reaches the same browser formatter as `released`, so a
+        # malformed one (a string `_require_date` would reject; a YAML date
+        # object is the form in use and is accepted) would break the
+        # dashboard the same way, and an audit or receipt link that is not
+        # HTTP(S) with a host would render as a dead or unsafe href on
+        # every surface that publishes the audit.
+        audits = benchmark.get("audits")
+        if audits is not None:
+            if not isinstance(audits, list):
+                raise ModelCardRegistryError(
+                    f"{path}: benchmark {benchmark_id!r} audits must be a list"
+                )
+            for audit_index, audit in enumerate(audits):
+                audit_label = f"{path}: benchmark {benchmark_id!r} audit {audit_index}"
+                if not isinstance(audit, dict):
+                    raise ModelCardRegistryError(f"{audit_label} must be a mapping")
+                if audit.get("audit_date"):
+                    _require_date(audit["audit_date"], label=f"{audit_label} audit_date")
+                audit_url = audit.get("audit_url")
+                if audit_url:
+                    _require_http_url(audit_url, label=f"{audit_label} audit_url")
+                receipts = audit.get("receipts")
+                if receipts is not None:
+                    if not isinstance(receipts, list):
+                        raise ModelCardRegistryError(f"{audit_label} receipts must be a list")
+                    for receipt in receipts:
+                        _require_http_url(receipt, label=f"{audit_label} receipt")
         by_id[benchmark_id] = benchmark
 
     seen_cards: set[str] = set()
@@ -376,6 +444,10 @@ def adoption_rank(registry: dict[str, Any]) -> dict[str, Any]:
                 # high and does not say "saturated and contaminated" invites
                 # exactly the reading issue #83 warns against.
                 "caveat": (str(benchmark["caveat"]).strip() if benchmark.get("caveat") else None),
+                # Independent audits travel with the row for the same reason:
+                # a benchmark an auditor has already questioned should not be
+                # publishable here with the question left behind in the YAML.
+                "audits": _benchmark_audits(benchmark),
                 "card_count": count,
                 "organization_count": len(organizations.get(benchmark_id, set())),
                 "organizations": sorted(organizations.get(benchmark_id, set())),

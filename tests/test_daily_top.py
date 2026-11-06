@@ -1,9 +1,11 @@
 import http.client
 import json
+import re
 import sys
 import time
 from pathlib import Path
 
+import pytest
 from PIL import Image
 
 from benchmark_radar import cli
@@ -139,6 +141,15 @@ def test_huggingface_user_gets_a_name_and_no_affiliation():
     assert resolve_creators(item, fetch=fetch) == {"authors": ["clsr"], "affiliations": []}
 
 
+def test_a_numeric_owner_handle_is_still_looked_up():
+    # 488315/DeafBench (2026-08-10): a handle without letters is a valid account;
+    # only displayed names need a letter (#1070 review).
+    fetch = _fetcher({"https://huggingface.co/api/users/488315/overview": {"fullname": "Deaf Lab"}})
+    item = _item("k", 1, source="Hugging Face", organizations=["488315"], authors=[])
+    assert resolve_creators(item, fetch=fetch) == {"authors": ["Deaf Lab"], "affiliations": []}
+    assert any("/488315/" in url for url in fetch.calls)
+
+
 def test_github_user_company_is_the_affiliation():
     fetch = _fetcher(
         {
@@ -201,6 +212,27 @@ def test_arxiv_html_affiliations_cover_a_paper_openalex_has_not_indexed():
     item = _item("k", 1, url="https://arxiv.org/abs/2610.31404")
     creators = resolve_creators(item, fetch=_fetcher({}), fetch_text=lambda url, **_: page)
     assert creators["affiliations"] == ["Carnegie Mellon University", "CMU & UNC"]
+
+
+def test_an_affiliation_without_a_letter_stays_unknown():
+    # arXiv:2611.01700 (MemHarmBench) renders every affiliation as "[" in its
+    # HTML, and the 2026-11-03 card printed it (#1070).
+    page = (
+        '<span class="ltx_contact ltx_role_affiliation">'
+        '<span class="ltx_contact_name">Affiliation: </span>[\n</span>'
+    ) * 3
+    item = _item("k", 1, url="https://arxiv.org/abs/2611.01700", authors=["Zhihua Wang", "-"])
+    creators = resolve_creators(item, fetch=_fetcher({}), fetch_text=lambda url, **_: page)
+    assert creators == {"authors": ["Zhihua Wang"], "affiliations": []}
+
+
+def test_committed_share_cards_name_no_letterless_creator():
+    letter = re.compile(r"[^\W\d_]")
+    for path in sorted(Path("data/snapshots").glob("*.json")):
+        share = json.loads(path.read_text(encoding="utf-8")).get("share") or {}
+        for card in share.get("cards") or []:
+            for value in [*(card.get("authors") or []), *(card.get("affiliations") or [])]:
+                assert letter.search(value), (path.name, card.get("url"), value)
 
 
 def test_paper_without_any_stated_affiliation_shows_authors_only():
@@ -370,6 +402,89 @@ def test_a_snapshot_without_cards_renders_nothing(tmp_path):
     assert share.render_day({"date": "2026-10-23"}, tmp_path) == []
 
 
+def _index_record(slug, **extra):
+    return {"slug": slug, "key": f"llm-stats:{slug}", "name": slug.upper(), **extra}
+
+
+def test_catalog_render_writes_one_card_per_benchmark_named_by_slug(tmp_path):
+    index = {
+        "benchmarks": [
+            _index_record(
+                "mmlu-pro",
+                source="llm_stats",
+                publisher="University of Waterloo",
+                released="2024-06-03",
+                description="Ten options per question.",
+                has_paper=True,
+                score_count=134,
+            ),
+            # No date, publisher, description or score: still gets a card.
+            _index_record("bare"),
+        ]
+    }
+    written = share.render_catalog(index, tmp_path, workers=1)
+    assert [path.name for path in written] == ["mmlu-pro.png", "bare.png"]
+    for path in written:
+        with Image.open(path) as image:
+            assert image.size == (1200, 630)
+
+
+def test_catalog_card_names_authors_only_when_the_record_has_them(tmp_path):
+    # Issue #933: who made a benchmark is on its card when its paper says so.
+    plain = _index_record("gpqa", description="Graduate-level questions.")
+    named = {**plain, "authors": ["David Rein", "Betty Li Hou", "Asa Cooper Stickland", "X"]}
+    empty = {**plain, "authors": []}
+    paths = [
+        share.render_benchmark(record, tmp_path / f"{index}.png")
+        for index, record in enumerate((plain, named, empty))
+    ]
+    plain_bytes, named_bytes, empty_bytes = (path.read_bytes() for path in paths)
+    assert named_bytes != plain_bytes
+    assert empty_bytes == plain_bytes
+
+
+def test_catalog_card_names_the_first_two_institutions(tmp_path):
+    # Issue #933: where a benchmark came from, as OpenAlex links its paper.
+    plain = _index_record("gpqa", description="Graduate-level questions.")
+    three = ["New York University", "Cohere", "Anthropic"]
+    face = share.font(20)
+    assert share._institutions(three, face, 900) == "New York University; Cohere +1"
+    assert share._institutions(three[:2], face, 900) == "New York University; Cohere"
+    # A long pair is cut, and "+1" still says the list goes on.
+    cut = share._institutions(three, face, 200)
+    assert cut.endswith("… +1") and face.getlength(cut) <= 200
+    named = {**plain, "institutions": three}
+    empty = {**plain, "institutions": []}
+    paths = [
+        share.render_benchmark(record, tmp_path / f"{index}.png")
+        for index, record in enumerate((plain, named, empty))
+    ]
+    plain_bytes, named_bytes, empty_bytes = (path.read_bytes() for path in paths)
+    assert named_bytes != plain_bytes
+    assert empty_bytes == plain_bytes
+
+
+def test_catalog_render_is_deterministic(tmp_path):
+    index = {"benchmarks": [_index_record("gpqa", description="Graduate-level questions.")]}
+    first = share.render_catalog(index, tmp_path / "a", workers=1)
+    second = share.render_catalog(index, tmp_path / "b", workers=1)
+    assert first[0].read_bytes() == second[0].read_bytes()
+
+
+def test_catalog_render_refuses_a_slug_that_is_not_a_file_name(tmp_path):
+    index = {"benchmarks": [_index_record("../escape")]}
+    with pytest.raises(ValueError, match="unsafe slug"):
+        share.render_catalog(index, tmp_path, workers=1)
+
+
+def test_a_text_cut_to_one_line_ends_in_an_ellipsis():
+    face = share.font(22)
+    text = "Explanation stability across histopathology datasets and many more words " * 3
+    (line,) = share._wrap(text, face, 400, 1)
+    assert line.endswith("…") and face.getlength(line) <= 400
+    assert share._wrap("Short", face, 400, 1) == ["Short"]
+
+
 def test_no_wrapped_line_is_wider_than_the_text_area():
     face = share.font(30, bold=True)
     title = "Pegi1727/" + "DIINA-Human-in-the-Loop-Evaluation-" * 4 + " of educational content"
@@ -389,11 +504,48 @@ def test_cjk_the_image_font_cannot_draw_is_dropped_unless_nothing_remains():
 def test_social_checklist_embeds_the_days_images():
     block = _snapshot_with_cards(2)["share"]
     section = render_social_section("insight", "repo", [], [{"name": "X"}], share=block)
-    base = (
-        "https://raw.githubusercontent.com/ktwu01/benchmark-radar-cards/refs/heads/daily/2026-10-23"
+    base = "https://cards.benchmark-radar.org/daily/2026-10-23"
+    assert f"[![Top benchmarks on 2026-10-23]({base}/top3.png)]({base}/top3.png)" in section
+    # Every card is shown inline, so a card cannot be forgotten.
+    for index in (1, 2):
+        assert f"]({base}/card-0{index}.png)\n\n```text\n" in section
+        assert f"]({base}/card-0{index}.png)]({base}/card-0{index}.png)" in section
+
+
+def test_each_card_carries_its_full_text_above_the_image():
+    # The drawn card cuts the title, authors and summary; the poster copies them here.
+    block = _snapshot_with_cards(1)["share"]
+    section = render_social_section("insight", "repo", [], [{"name": "X"}], share=block)
+    title = "Bench 0: " + " ".join(["a long benchmark title"] * 4)
+    expected = "\n".join(
+        [
+            "```text",
+            title,
+            "Vivien Jiaqian Zhu 朱佳谦, B, C, D",
+            "Carnegie Mellon University",
+            "Tests agents.",
+            "arXiv · 2026-10-23",
+            "u0",
+            "```",
+        ]
     )
-    assert f"![Top benchmarks on 2026-10-23]({base}/top3.png)" in section
-    assert f"{base}/card-02.png" in section
+    assert f"1. [{title}](" in section
+    assert expected in section
+    assert section.index(expected) < section.index("[![Bench 0")
+
+
+def test_card_text_fence_outlasts_backticks_in_the_text():
+    block = _snapshot_with_cards(1)["share"]
+    block["cards"][0]["blurb"] = "Run ```make``` first."
+    section = render_social_section("insight", "repo", [], [{"name": "X"}], share=block)
+    assert "````text\n" in section and "\n````\n" in section
+
+
+def test_checklist_title_with_brackets_keeps_the_link_closed():
+    block = _snapshot_with_cards(1)["share"]
+    block["cards"][0]["title"] = "a]b[c\\d|e"
+    section = render_social_section("insight", "repo", [], [{"name": "X"}], share=block)
+    assert "1. [a\\]b\\[c\\\\d\\|e](" in section
 
 
 def test_spent_lookup_budget_fails_fast_without_calling_the_api(monkeypatch):
@@ -457,3 +609,22 @@ def test_social_command_embeds_nothing_without_recorded_cards(monkeypatch, tmp_p
 def test_social_command_omits_images_that_were_not_published(monkeypatch, tmp_path):
     body = _run_social(monkeypatch, tmp_path, _snapshot_with_cards(1), "--skip-share-images")
     assert "benchmark-radar-cards" not in body
+
+
+def test_arxiv_papers_from_any_source_get_institutions():
+    # 2026-10-28: an XBsleepy card for arXiv:2610.37166v1 and DataCite cards
+    # for 10.48550/arxiv.* DOIs showed no institution, because only items
+    # sourced "arXiv" were looked up (#1120).
+    fetch = _fetcher(
+        {
+            "https://api.openalex.org/works/doi:10.48550/arXiv.2610.37166": {
+                "authorships": [{"institutions": [{"display_name": "Tsinghua University"}]}]
+            }
+        }
+    )
+    for source, url in (
+        ("XBsleepy", "https://arxiv.org/abs/2610.37166v1"),
+        ("DataCite", "https://doi.org/10.48550/arxiv.2610.37166"),
+    ):
+        item = _item("k", 1, source=source, url=url)
+        assert resolve_creators(item, fetch=fetch)["affiliations"] == ["Tsinghua University"]

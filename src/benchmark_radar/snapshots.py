@@ -5,11 +5,16 @@ import math
 import re
 from collections import Counter
 from copy import deepcopy
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 from . import kw_bench, rubric
+from .affiliation_rank import (
+    institution_counts,
+    institution_ranking,
+    paper_institutions,
+)
 from .app_pages import write_app_pages
 from .attention import fetch_attention_feeds
 from .benchmark_attention import merge_benchmark_attention
@@ -34,6 +39,7 @@ from .release_leaderboard import (
     canonical_metric_key,
     is_exact_attention_source_url,
 )
+from .release_signals import ReleaseSignals, load_release_signals
 from .rubric import (
     SCORING_VERSION,
     legacy_rubric_reference,
@@ -42,6 +48,7 @@ from .rubric import (
     v2_rubric_reference,
     v3_rubric_reference,
     v4_rubric_reference,
+    v5_rubric_reference,
 )
 from .science_domains import science_domains_for_record
 from .site_about import write_about
@@ -1143,6 +1150,7 @@ def dashboard_data(
     registry_path: Path | None = None,
     scores_path: Path | None = None,
     kw_bench_store_path: Path | None = None,
+    release_signals: ReleaseSignals | None = None,
 ) -> dict[str, Any]:
     days: list[dict[str, Any]] = []
     categories: set[str] = set()
@@ -1252,6 +1260,10 @@ def dashboard_data(
                 # persisted, or days where the call was skipped or failed. The
                 # dashboard renders its own absent state from that.
                 "briefing": snapshot.get("briefing") or {},
+                # Where the day's published share images are (issue #671), or
+                # an empty object for a day the share step never ran on. The
+                # dashboard shows a Share control only where this names an image.
+                "share": _share_images(snapshot.get("share")),
                 # Same contract as `briefing`: an empty object means the opt-in
                 # Q&A did not run for this day, which the dashboard renders as
                 # its own absent state rather than as an empty answer set.
@@ -1271,6 +1283,8 @@ def dashboard_data(
     last_successful = next(
         (day for day in reversed(days) if day["required_coverage_complete"]), None
     )
+    papers = paper_institutions(release_signals) if release_signals else {}
+    counts = institution_counts(papers)
     return {
         "schema_version": SCHEMA_VERSION,
         "latest_date": days[-1]["date"] if days else None,
@@ -1311,6 +1325,14 @@ def dashboard_data(
         "latest_releases_leaderboard": build_latest_releases_leaderboard(
             snapshots,
             registry_path=registry_path,
+            signals=release_signals,
+            institution_counts=counts if release_signals else None,
+        ),
+        # Issue #1120: institutions by the number of benchmark papers they
+        # appear on, OpenAlex names only. Triage by a disclosed count, not a
+        # grade of any institution.
+        "institution_ranking": (
+            institution_ranking(counts, paper_count=len(papers)) if release_signals else None
         ),
         # Curated and versioned in the repository rather than collected daily:
         # they answer "which benchmarks do vendors report", "how have the
@@ -1334,6 +1356,11 @@ def dashboard_data(
                 ),
             ),
             "4": v4_rubric_reference(
+                lookback_hours=(
+                    (days[-1].get("selection") or {}).get("lookback_hours") or 48 if days else 48
+                ),
+            ),
+            "5": v5_rubric_reference(
                 lookback_hours=(
                     (days[-1].get("selection") or {}).get("lookback_hours") or 48 if days else 48
                 ),
@@ -1383,6 +1410,33 @@ def records_badge(dashboard: dict[str, Any]) -> str:
     )
 
 
+def _share_images(share: dict[str, Any] | None) -> dict[str, Any]:
+    """Public image URLs for a snapshot's ``share`` block, keyed by card URL.
+
+    The images themselves are rendered by the daily pipeline from this block,
+    so the file names follow the card order. The card text stays in the
+    snapshot; the dashboard only needs to know which item has which image.
+    """
+    # Imported here because daily_top imports this module.
+    from .daily_top import card_image_name, daily_image_url
+
+    cards = [card for card in (share or {}).get("cards") or [] if card.get("url")]
+    if not cards or not share or not share.get("date"):
+        return {}
+    day = str(share["date"])
+    return {
+        "top3_image": daily_image_url(day, "top3.png"),
+        "cards": [
+            {
+                "url": str(card["url"]),
+                "title": str(card.get("title") or ""),
+                "image": daily_image_url(day, card_image_name(index)),
+            }
+            for index, card in enumerate(cards, start=1)
+        ],
+    }
+
+
 def dashboard_bootstrap(dashboard: dict[str, Any]) -> dict[str, Any]:
     """Return the small payload needed for the first useful dashboard paint.
 
@@ -1416,6 +1470,8 @@ def dashboard_bootstrap(dashboard: dict[str, Any]) -> dict[str, Any]:
                 def_win: lrl.get("windows", {}).get(def_win, {}),
             },
         }
+    if dashboard.get("institution_ranking"):
+        bootstrap["institution_ranking"] = dashboard["institution_ranking"]
     return bootstrap
 
 
@@ -1465,6 +1521,139 @@ def dashboard_trends(dashboard: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# Calendar-day windows the Today time-window control offers. app.js keeps the
+# same table (TODAY_WINDOWS) and reads the file written for each one.
+TODAY_WINDOW_DAYS = (30, 60, 90)
+
+
+def _sighting_key(kind: str, item: dict[str, Any]) -> str:
+    """Identify a record together with every field a Today filter reads.
+
+    app.js filters first and then keeps each record's latest matching sighting
+    (filteredObservations), so an older sighting is redundant only when a newer
+    one is identical in the record identity and in all filter inputs: event
+    kind, categories, organizations, producer, title, summary and source.
+    Otherwise a record released yesterday and updated today would vanish under
+    the Released filter.
+    """
+    if kind == "attention":
+        fallback = f"{item.get('source')}\0{item.get('source_id')}"
+        identity: Any = [kind, str(item.get("observation_id") or fallback)]
+    else:
+        identity = [kind, str(item.get("source")), str(item.get("source_id"))]
+    inputs = [
+        item.get("source"),
+        item.get("event_kind"),
+        item.get("categories"),
+        item.get("organizations"),
+        item.get("producer"),
+        item.get("title"),
+        item.get("summary"),
+    ]
+    return json.dumps([identity, inputs], sort_keys=True, ensure_ascii=False)
+
+
+def dashboard_window(dashboard: dict[str, Any], window_days: int) -> dict[str, Any]:
+    """Return what Today needs for a 30, 60 or 90 day window, without repeat rows.
+
+    radar.json repeats a record on every day it was seen: the last 90 days hold
+    42,489 evidence rows for 23,932 distinct records, and the file is 324 MB in
+    memory because it also carries the corpus graph (issue #1058). A window view
+    shows each record once, so a sighting that a newer one repeats exactly adds
+    nothing. A sighting that differs from every newer one in anything a Today
+    filter reads stays (see ``_sighting_key``), so each filtered view lists the
+    rows it lists from radar.json.
+    """
+    days = dashboard.get("days") or []
+    latest = str(dashboard.get("latest_date") or (days[-1]["date"] if days else ""))
+    if not latest:
+        return {
+            "schema_version": 2,
+            "window_days": window_days,
+            "generated_at": dashboard.get("generated_at"),
+            "days": [],
+        }
+    start = (date.fromisoformat(latest) - timedelta(days=window_days - 1)).isoformat()
+    in_window = [day for day in days if start <= str(day["date"]) <= latest]
+    seen: set[str] = set()
+    kept: dict[str, dict[str, Any]] = {}
+    for day in reversed(in_window):  # newest first, so the first sighting is the latest
+        # Only a sighting on a newer day removes a row. Two rows for one record on
+        # the same day both stay: app.js picks between them after sorting, and
+        # picking here would choose differently.
+        today: set[str] = set()
+        evidence = []
+        for item in day.get("evidence_items") or []:
+            key = _sighting_key("evidence", item)
+            if key not in seen:
+                today.add(key)
+                evidence.append(item)
+        attention = []
+        for item in (day.get("attention") or {}).get("observations") or []:
+            key = _sighting_key("attention", item)
+            if key not in seen:
+                today.add(key)
+                attention.append(item)
+        seen |= today
+        kept[str(day["date"])] = {
+            "date": day["date"],
+            "generated_at": day.get("generated_at"),
+            "selection": day.get("selection"),
+            # A few image links per day: an older item shared from a window
+            # still finds the card its day published (#1019).
+            "share": day.get("share") or {},
+            "evidence_items": evidence,
+            "attention": {"observations": attention},
+        }
+    return {
+        "schema_version": 2,
+        "window_days": window_days,
+        # The page compares this with the bootstrap's own, so a window file from
+        # another build is never mixed into the list.
+        "generated_at": dashboard.get("generated_at"),
+        "start_date": start,
+        "latest_date": latest,
+        "days": [kept[str(day["date"])] for day in in_window],
+    }
+
+
+def catalog_pages_by_url(index_path: Path) -> dict[str, str]:
+    """Map each URL that exactly one catalog record cites as its source to that slug.
+
+    A URL two records share names neither, and nothing is matched by name.
+    """
+    if not index_path.exists():
+        return {}
+    records = json.loads(index_path.read_text(encoding="utf-8")).get("benchmarks") or []
+    slugs_by_url: dict[str, set[str]] = {}
+    for record in records:
+        url = str(record.get("source_url") or "")
+        slug = str(record.get("slug") or "")
+        if url and slug:
+            slugs_by_url.setdefault(url, set()).add(slug)
+    return {url: next(iter(slugs)) for url, slugs in slugs_by_url.items() if len(slugs) == 1}
+
+
+def attach_catalog_cards(dashboard: dict[str, Any], index_path: Path) -> int:
+    """Name the catalog record a Today item is, by exact URL, so it shares that card.
+
+    A Today's radar item whose URL is exactly one catalog record's source URL
+    is that benchmark, and every catalog record has a published share card
+    (#1061). Sharing the record's card keeps the two cards from disagreeing.
+    Only an exact, unique match counts: a URL two records share names neither,
+    and nothing is matched by name. Returns how many items were tagged.
+    """
+    unique = catalog_pages_by_url(index_path)
+    tagged = 0
+    for day in dashboard.get("days") or []:
+        for item in day.get("evidence_items") or []:
+            slug = unique.get(str(item.get("url") or ""))
+            if slug:
+                item["catalog_slug"] = slug
+                tagged += 1
+    return tagged
+
+
 def rebuild_dashboard(
     snapshot_dir: Path,
     output: Path,
@@ -1474,6 +1663,7 @@ def rebuild_dashboard(
     scores_path: Path | None = None,
     kw_bench_store_path: Path | None = None,
     benchmark_shard_dir: Path = DEFAULT_SHARD_DIR,
+    release_signals: ReleaseSignals | None = None,
 ) -> dict[str, Any]:
     snapshots = load_snapshots(snapshot_dir)
     value = dashboard_data(
@@ -1481,7 +1671,10 @@ def rebuild_dashboard(
         registry_path=registry_path,
         scores_path=scores_path,
         kw_bench_store_path=kw_bench_store_path,
+        release_signals=release_signals or load_release_signals(),
     )
+    # normalize-catalog writes the index beside the shard directory.
+    attach_catalog_cards(value, benchmark_shard_dir.parent / "benchmark-index.json")
     _write_json(output, value)
     # The browser starts here.  Historical views lazily upgrade: Trends reads
     # the chart payload, Today-all-dates and Explore's canvas still use the
@@ -1490,6 +1683,9 @@ def rebuild_dashboard(
     _write_json(bootstrap_path, dashboard_bootstrap(value))
     trends_path = output.with_name(f"{output.stem}-trends{output.suffix}")
     _write_json(trends_path, dashboard_trends(value))
+    for window_days in TODAY_WINDOW_DAYS:
+        window_path = output.with_name(f"{output.stem}-window-{window_days}d{output.suffix}")
+        _write_json(window_path, dashboard_window(value, window_days))
     # The record-count badge lives beside radar.json so it deploys with the same
     # dashboard build and can never report a corpus newer than the page it sits
     # on. It is the single self-describing "how much have we collected" signal
@@ -1518,19 +1714,23 @@ def rebuild_dashboard(
     if feed_output is not None:
         app_pages = write_app_pages(value, sitemap_output.parent)
         view_paths = app_pages["paths"]
-        # /about/ is prose, not a view over the corpus, so it is written from
-        # the shared chrome rather than from the dashboard document. The nav
-        # links to it from every page this build writes, so it is written
-        # unconditionally; only its sitemap date depends on there being a
-        # corpus history to date it by.
+        # /about/ and /media/ are prose, not views over the corpus, so they are
+        # written from the shared chrome rather than from the dashboard
+        # document. The nav links to them from every page this build writes, so
+        # they are written unconditionally; only their sitemap date depends on
+        # there being a corpus history to date it by.
         site_updated = site_lastmod(snapshots)
-        about = write_about(sitemap_output.parent, updated=site_updated)
+        about = write_about(sitemap_output.parent)
         page_entries = [(path, site_updated) for path in about["paths"]]
         write_feed(snapshots, feed_output)
         # One page per collection day, plus the blog's own feed. Built from the
         # same validated snapshots the dashboard is, in the same run, so a
         # brief can never describe a day the published corpus has moved past.
-        blog = write_blog(snapshots, sitemap_output.parent)
+        blog = write_blog(
+            snapshots,
+            sitemap_output.parent,
+            catalog_pages=catalog_pages_by_url(benchmark_shard_dir.parent / "benchmark-index.json"),
+        )
         blog_entries = blog["sitemap_entries"]
     write_sitemap(
         snapshots,

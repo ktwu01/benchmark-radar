@@ -118,6 +118,50 @@ watchlist:
   - name: RSI-Exam
     aliases: [rsi-exam, "rsi exam"]
     note: Executable long-horizon research benchmark for recursive self-improvement.
+  # Issue #1051: Realtime-Bench was missed because its title
+  # ("Realtime-Bench: Can Frontier Models Solve Real-time Interactive
+  # Problems?") contains none of the rss_keywords phrases, and it is framed
+  # as interactive tasks rather than "we introduce a benchmark". A watchlist
+  # hit is a routing decision, not a quality claim: it pins the record to
+  # the top of the digest and labels why.
+  - name: Realtime-Bench
+    aliases: [realtime-bench, "realtime bench"]
+    note: Real-time interactive game and web tasks where delayed actions directly affect success (issue #1051).
+  # Issues #555 and #1065: reader-requested repositories fetched through
+  # data/requested_github_repositories.yml. Their titles are bare repo names,
+  # so the taxonomy may find no category in them; the reader asked for each by
+  # name. Name and alias are the exact owner/name: the watchlist also matches
+  # the name, and a short benchmark name would pin unrelated papers.
+  - name: sunblaze-ucb/vero
+    aliases: [sunblaze-ucb/vero]
+    note: Vero — Repository-level implementation and proof synthesis benchmark for AI agents (issue #555).
+  - name: LifeSci Diamond
+    aliases: [arcainc/lifesci-diamond, "lifesci diamond"]
+    note: Regulatory-affairs tasks for drugs, biologics and devices; scores are publisher-reported and 45 of 55 tasks are held out (issue #1065).
+  # Issue #832: classic logic and negation benchmarks requested through the
+  # registry whose GitHub descriptions are blank, so the taxonomy finds no
+  # category. Name and alias are the exact owner/name, as above.
+  - name: allenai/ruletaker
+    aliases: [allenai/ruletaker]
+    note: RuleTaker — Synthetic rule-reasoning theories from Transformers as Soft Reasoners over Language (issue #832).
+  - name: Yale-LILY/FOLIO
+    aliases: [Yale-LILY/FOLIO]
+    note: FOLIO — Natural-language reasoning with first-order logic annotations (issue #832).
+  - name: omnilabNLP/LogicNLI
+    aliases: [omnilabNLP/LogicNLI]
+    note: LogicNLI — Diagnostic NLI set for first-order logical reasoning, EMNLP 2021 (issue #832).
+  - name: facebookarchive/bAbI-tasks
+    aliases: [facebookarchive/bAbI-tasks]
+    note: bAbI — Task generation for testing text understanding and reasoning; archived upstream (issue #832).
+  - name: hitachi-nlp/FLD
+    aliases: [hitachi-nlp/FLD]
+    note: FLD — Formal Logic Deduction corpus for deductive reasoning (issue #832).
+  - name: michaelchen-lab/JustLogic
+    aliases: [michaelchen-lab/JustLogic]
+    note: JustLogic — Benchmark for evaluating deductive reasoning in LLMs, arXiv 2501.14851 (issue #832).
+  - name: selenashe/ScoNe
+    aliases: [selenashe/ScoNe]
+    note: ScoNe — Scoped Negation benchmark for negation reasoning (issue #832).
 
 sources:
   arxiv:
@@ -177,6 +221,12 @@ sources:
       - agentic evaluation
       - multi-agent benchmark
       - benchmark for agent
+      # Issue #1051: named alias only — bare "realtime" or "interactive"
+      # would match most agent papers. These two substrings match the
+      # Realtime-Bench title and its "real-time interactive problems"
+      # framing without widening the generic keyword set.
+      - realtime-bench
+      - real-time interactive
     queries:
       - 'ti:"benchmark" AND (all:"we introduce" OR all:"we present" OR all:"we release")'
       - 'ti:"dataset" AND (all:"we introduce" OR all:"we present" OR all:"we release")'
@@ -225,6 +275,16 @@ sources:
     page_size: 30
     max_pages_per_organization: 1
     max_requests: 361
+    attempts: 2
+    timeout_seconds: 30
+
+  # Reader-reported repositories that every time-windowed path missed (issue
+  # #555). Each registry row is fetched by owner/name once, by the first run
+  # that gets an answer for it. A request grants discovery only.
+  github_requested_repositories:
+    enabled: true
+    required: false
+    registry_path: data/requested_github_repositories.yml
     attempts: 2
     timeout_seconds: 30
 
@@ -472,7 +532,10 @@ sources:
       - black-forest-labs/flux
       - 01-ai/Yi
       - meta-llama/llama-models
-      - openclaw/openclaw
+      # openclaw/openclaw was removed (#1008, strategy S4 in #1011): an agent
+      # app, not a model lab, and its only admitted release matched just
+      # "re-evaluate" in release-engineering prose. In 102 snapshots it
+      # contributed no benchmark, so removing it filters none.
       - karpathy/autoresearch
       - xai-org/grok-1
     page_size: 30

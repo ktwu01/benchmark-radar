@@ -27,8 +27,7 @@ exists because the SPA machinery it referenced is absent:
   same reviewed translations to the chrome — the app.js ``I18N`` table is
   parsed at build time and the subset the chrome needs is baked into the
   page, so a Chinese reader sees 联系作者 and the ⓘ tooltips on a brief
-  too. A body without a stored translation simply stays English;
-* the footer's build date is baked from the day the page describes.
+  too. A body without a stored translation simply stays English.
 
 Nothing here writes files. It owns the record a brief is built into and the
 chrome that wraps it, so ``blog_content.py`` can turn snapshots into posts
@@ -45,7 +44,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .feed import SITE_URL
-from .site_shell import esc, json_ld
+from .site_shell import SHARE_CARD_META, esc, json_ld
 
 BLOG_PATH = "/blog/"
 BLOG_ARCHIVE_PATH = "/blog/archive/"
@@ -214,35 +213,12 @@ def _adapt_header(header: str, active_path: str) -> tuple[str, bool]:
     return header, in_nav
 
 
-def _page_footer(footer: str, updated: str | None) -> str:
-    """Bake the build date into the dashboard footer's placeholder.
-
-    ``updated`` is None when the corpus has no history to date the build by.
-    The whole line is then dropped rather than left half-written: a footer
-    reading "Updated" with nothing after it claims a date the build lacks.
-    """
-    replacement = (
-        rf'\g<1><span data-i18n="Updated">Updated</span> {esc(updated)}\g<2>' if updated else ""
-    )
-    stamped, count = re.subn(
-        r'(<p id="build-meta">)Updated —(</p>)',
-        replacement,
-        footer,
-    )
-    if count != 1:
-        raise ValueError(
-            "the dashboard footer no longer has the 'Updated —' placeholder; "
-            "the blog pages cannot bake their build date"
-        )
-    return stamped
-
-
 def extract_site_chrome(dashboard_html: str, *, active_path: str = BLOG_PATH) -> SiteChrome:
     """Pull the shared masthead and footer out of ``site/index.html``.
 
     ``active_path`` is the nav entry this page belongs under. It must be a link
     the dashboard already carries, in the view row or in the footer's document
-    nav, so a standalone page cannot claim a section the site does not have.
+    links, so a standalone page cannot claim a section the site does not have.
     """
     header = _region(dashboard_html, r'<header class="masthead">.*?</header>', "masthead")
     footer = _region(dashboard_html, r"<footer>.*?</footer>", "footer")
@@ -261,9 +237,6 @@ def extract_site_chrome(dashboard_html: str, *, active_path: str = BLOG_PATH) ->
 # chrome's own data-i18n keys cover everything else.
 _TOGGLE_I18N_KEYS = ("Switch to Chinese (中文)", "Switch to English")
 _BADGE_I18N_KEYS = ("Star this repository on GitHub. {count} stars",)
-# The footer's build date prefix is baked in per page, after the keys were
-# collected from the raw extracted chrome, so it is listed here.
-_FOOTER_I18N_KEYS = ("Updated",)
 
 
 def parse_zh_table(app_js: str) -> dict[str, str]:
@@ -290,9 +263,11 @@ def parse_zh_table(app_js: str) -> dict[str, str]:
         )
     table: dict[str, str] = {}
     # Object keys are quoted or bare JS identifiers (both appear in the table).
-    pair = re.compile(r'(?:"((?:[^"\\]|\\.)*)"|([A-Za-z_$][\w$]*))\s*:\s*"((?:[^"\\]|\\.)*)"')
-    for quoted, bare, value in pair.findall(app_js[open_brace:end]):
-        table[quoted or bare] = value
+    pair = re.compile(
+        r"""(?:"((?:[^"\\]|\\.)*)"|([A-Za-z_$][\w$]*))\s*:\s*(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)')"""
+    )
+    for quoted, bare, double_value, single_value in pair.findall(app_js[open_brace:end]):
+        table[quoted or bare] = double_value or single_value
     return table
 
 
@@ -308,7 +283,8 @@ def chrome_i18n_table(chrome: SiteChrome, app_js: str) -> dict[str, str]:
     keys = set(re.findall(r'data-i18n(?:-title|-aria)?="([^"]+)"', chrome_html))
     keys.update(_TOGGLE_I18N_KEYS)
     keys.update(_BADGE_I18N_KEYS)
-    keys.update(_FOOTER_I18N_KEYS)
+    # clarity.js inserts these after the initial chrome translation.
+    keys.update({"Accept", "Decline", "analytics-consent-text"})
     table = parse_zh_table(app_js)
     # Keys the table does not carry (short nav labels like Blog and Trends)
     # stay English on the dashboard too — t() falls back to the key itself —
@@ -323,7 +299,6 @@ def render_page(
     canonical: str,
     body: str,
     chrome: SiteChrome,
-    updated: str | None,
     chrome_i18n: dict[str, str] | None = None,
     schemas: Iterable[dict[str, Any]] = (),
     og_type: str = "website",
@@ -353,11 +328,9 @@ def render_page(
 <meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(description)}">
 <meta property="og:url" content="{esc(canonical)}">
-<meta property="og:image" content="{SITE_URL}/assets/og-card.png">
-<meta name="twitter:card" content="summary_large_image">
+{SHARE_CARD_META}
 <meta name="twitter:title" content="{esc(title)}">
 <meta name="twitter:description" content="{esc(description)}">
-<meta name="twitter:image" content="{SITE_URL}/assets/og-card.png">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="alternate" type="application/rss+xml" title="Benchmark Radar daily brief"
       href="{BLOG_FEED_PATH}">
@@ -367,12 +340,13 @@ def render_page(
 {schema_blocks}
 {i18n_block}
 <script src="/assets/blog.js" defer></script>
+<script src="/assets/clarity.js" defer></script>
 </head>
 <body class="blog-page">
 <a class="skip-link" href="#main-content">Skip to content</a>
 {chrome.header}
 <main id="main-content" tabindex="-1"><div class="blog-view">{body}</div></main>
-{_page_footer(chrome.footer, updated)}
+{chrome.footer}
 </body>
 </html>
 """

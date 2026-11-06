@@ -82,10 +82,8 @@ def test_the_panel_prints_no_reporting_stage_verdict():
     assert 't("Saturated reporting")' not in script
     assert '"Saturated reporting":' not in script, "no zh entry for a badge nothing renders"
     assert "convention, not quality" not in script
-    # The element survives for the external path, which puts a source name in it,
-    # and the curated path hides it rather than leaving a bare outline.
-    assert 'id="frontier-stage"' in html
-    assert "stage.hidden = true;" in script or "stageBadge.hidden = true;" in script
+    # Every path left the badge empty, so the element is gone (issue #995).
+    assert 'id="frontier-stage"' not in html
 
 
 def test_frontier_svg_fits_the_viewport_without_horizontal_scrolling():
@@ -249,7 +247,7 @@ def test_all_permalink_ids_resolve_through_the_same_catalog():
     script = source("site/assets/app.js")
     dispatch = script.split("function renderAdoptionFrontier(board)", 1)[1].split("\n// ---", 1)[0]
     assert "state.benchmarkIndex.find((row) => row.slug === state.lfrontier)" in dispatch
-    assert "renderCatalogBenchmark(board, scored, record)" in dispatch
+    assert "renderCatalogBenchmark(board, record)" in dispatch
     assert "scoreRecord(" not in dispatch
     assert "board.entries" not in dispatch
     assert "if (!state.lfrontierExplicit)" in dispatch
@@ -271,7 +269,7 @@ def test_detail_panel_renders_for_any_selected_record():
     script = source("site/assets/app.js")
 
     for fn in (
-        "function renderCatalogBenchmark(board, scored, record)",
+        "function renderCatalogBenchmark(board, record)",
         "function catalogIdentityBlock(detail)",
         "function catalogOpennessBlock(detail)",
         "function catalogSizesBlock(detail)",
@@ -296,7 +294,7 @@ def test_detail_panel_renders_for_any_selected_record():
         "function catalogOpennessBlock", 1
     )[0]
     assert 't("Importer")' in identity
-    assert 't("Original evidence")' in identity
+    assert "catalogResourceLinks(detail)" in identity
     assert 't("Review status")' in identity
     assert "provenance.review_state" in identity
     assert 't("not reviewed")' not in identity
@@ -710,10 +708,8 @@ def test_a_benchmark_without_documents_or_scores_uses_its_own_catalog_detail():
     script = source("site/assets/app.js")
     body = script.split("function renderAdoptionFrontier(board)", 1)[1].split("\n// ---", 1)[0]
     assert "state.benchmarkIndex.find(" in body
-    assert "renderCatalogBenchmark(board, scored, record);" in body
+    assert "renderCatalogBenchmark(board, record);" in body
     assert "card_count" not in body and "scoreRecord(" not in body
-    detail = script.split("function renderCatalogBenchmark(", 1)[1].split("\nfunction ", 1)[0]
-    assert "picker.prepend(option(record.slug" in detail
 
 
 def test_leaderboard_keeps_its_rankings_and_saturation_owns_the_workbench():
@@ -809,25 +805,23 @@ def test_issue_298_a_crawled_record_names_itself_once():
     An eyebrow reading "External catalog record", the benchmark name as the
     title, a non-interactive "LLM Stats" chip, and a second heading inside the
     scores block repeating the source and the count. Four elements, two facts.
-    There is now one title and one subline, and the picker still mirrors the
-    selection because a <select> disagreeing with the panel is a lie about
-    state rather than a duplicate.
+    There is now one title and one subline. The dropdown that mirrored the
+    selection is gone too: it repeated the browser on the left (issue #995).
     """
     script = source("site/assets/app.js")
 
-    external = script.split("function renderCatalogBenchmark(board, scored, record)", 1)[1].split(
+    external = script.split("function renderCatalogBenchmark(board, record)", 1)[1].split(
         "\nfunction ", 1
     )[0]
-    # No eyebrow and no badge on this path; both are passed empty and hidden.
+    # No eyebrow on this path; it is passed empty and hidden.
     assert 'eyebrow: ""' in external
-    assert 'badge: ""' in external
+    assert "badge:" not in external
     assert 'eyebrow: t("External catalog record")' not in script
-    assert "subline: catalogSubline(record, meta)" in external
+    assert "subline: meta.name" in external
 
     shell = script.split("function renderCatalogShell(", 1)[1].split("\nfunction ", 1)[0]
     # Empty means hidden, not rendered blank.
     assert "eyebrowNode.hidden = !eyebrow;" in shell
-    assert "stage.hidden = !badge;" in shell
 
     # Neither the block nor its per-source renderer carries a heading now.
     scores = script.split("function catalogScoresBlock(shard)", 1)[1].split("\n}\n", 1)[0]

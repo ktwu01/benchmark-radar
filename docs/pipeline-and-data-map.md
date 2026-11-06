@@ -15,16 +15,25 @@ sources below, run the generators in order, and measure the rebuilt outputs.
    snapshot. The block holds the benchmarks the daily briefing covers (or the
    radar-score top 3 when the day has no model briefing) and who made them.
    `scripts/render_share_images.py` renders the day's images from that block
-   only, and the daily workflow pushes them to the `daily/YYYY-MM-DD` branch of
-   `ktwu01/benchmark-radar-cards`. To change a card, fix the snapshot or the
-   lookup, not the image.
+   only, and the daily workflow pushes them to `daily/YYYY-MM-DD/` on the
+   `cards` branch of `ktwu01/benchmark-radar-cards`, which GitHub Pages serves
+   at `https://cards.benchmark-radar.org/daily/YYYY-MM-DD/`. To change a card,
+   fix the snapshot or the lookup, not the image.
 2. **Benchmark registry snapshots.** `data/leaderboard_snapshots.yml` registers
    immutable crawl inputs under `data/leaderboard_snapshots/`. The reviewed
    join rules are `data/catalog/identity.yml` and
    `data/catalog/llm_stats_identity_overrides.yml`. Cited release and first-score
    dates missing from the crawls live in `data/catalog/benchmark_dates.yml`,
    keyed by exact source record. Numeric first-score evidence only verifies a
-   date; it does not supply a highest score or merge records. Other JSONL and
+   date; it does not supply a highest score or merge records. Benchmark authors
+   live in `data/catalog/benchmark_authors.yml`, also keyed by exact source
+   record. They are read from the arXiv metadata of the record's own
+   introducing paper by `scripts/fetch_arxiv_authors.py`; rerun the script
+   rather than editing names. Benchmark institutions live in
+   `data/catalog/benchmark_institutions.yml`, keyed the same way. They are the
+   institutions OpenAlex links to that paper's authorships, read by
+   `scripts/fetch_openalex_institutions.py`, and never replace `publisher`.
+   Other JSONL and
    validation files under `data/catalog/` are normalization products; do not hand-edit or
    treat them as a separate corpus, even when Git currently tracks a generated
    copy.
@@ -35,7 +44,35 @@ sources below, run the generators in order, and measure the rebuilt outputs.
    as every other source. Document type and protocol describe the evidence;
    they do not establish a preferred corpus or a source ranking.
 
-Adding a document to either file is one procedure, written up in
+4. **Release signals.** The Latest releases ranking (`attention-affiliation-v2`)
+   reads two committed files beyond the snapshots, both keyed by exact
+   identifier and written only by `scripts/fetch_release_signals.py`. The
+   `refresh-release-signals` job in `.github/workflows/daily-radar.yml` runs
+   it after each daily snapshot and may change only these two files. Rerun
+   the script rather than editing them by hand.
+   - `data/release_institutions.yml`: institutions behind each arXiv paper in
+     the widest release window, keyed by arXiv id. `basis` says where they
+     came from: `openalex_linked_institutions` (normalized names, counted in
+     the institution ranking) or `arxiv_html_affiliations` (the paper's own
+     printed names, shown "as written in the paper" and never counted). A
+     paper is retried every three days until OpenAlex has it.
+   - `data/release_repos.yml`: each GitHub repository the cohort is ranked
+     on, keyed by `owner/name`: size, stars on the check date, archived flag,
+     creation and last-push dates (search API, six per call), plus
+     `placeholder` (README-only root, listed only for repositories up to
+     2 MB) and `unavailable` (404 on the repository endpoint, which follows
+     renames). A placeholder, archived or unavailable repository holds its
+     release back: listed, unranked, with the reason. Stars and size never
+     do. Placeholders and unknowns are rechecked daily, others weekly. A
+     missing row or a null field means unknown, never a hold-back.
+     `scripts/release_repo_findings.py` reproduces the cohort statistics from
+     these files without the network.
+
+   `snapshots.rebuild_dashboard` reads both through
+   `release_signals.load_release_signals`, then `affiliation_rank` counts
+   institutions across these papers and `data/catalog/benchmark_institutions.yml`.
+
+Adding a document to either report file is one procedure, written up in
 [`docs/sop-add-model-cards.md`](sop-add-model-cards.md).
 
 ## Generator order and outputs
@@ -52,17 +89,31 @@ Run these from the repository root, in this order:
    catalog shards and model-report YAML files. It regenerates
    `data/kw_bench_classifications.jsonl`, `site/data/radar.json`,
    `site/data/radar-bootstrap.json`, `site/data/radar-trends.json`,
+   `site/data/radar-window-{30,60,90}d.json`,
    `site/data/models.json`, `site/feed.xml`, the daily brief blog under
    `site/blog/`, and `site/blog/feed.xml`. The classifier currently uses
    the deterministic null extractor in CI; it makes no external model call.
+   `radar.json` and its split files come from `snapshots.rebuild_dashboard`,
+   which also reads the release signals above. `benchmark-radar rebuild` runs
+   that same step on its own when only `radar.json` needs refreshing.
 3. `benchmark-radar build-data-release` validates the local corpus through
    `QueryService` and writes `site/data/cli/manifest.json` plus the checksummed
    `site/data/cli/benchmark-radar-data.zip`. The manifest is published on Pages;
    the complete archive is uploaded to the rolling `cli-data` GitHub Release.
 4. `benchmark-radar export` writes the full-catalog documentation ranking as JSON,
-   CSV, Markdown, and badge files under `site/data/`. Pages then runs
+   CSV, Markdown, and badge files under `site/data/`. It does not write
+   `radar.json`; after changing the release signals or the leaderboard code,
+   rebuild with `classify` or `rebuild` before reading `radar.json`. Pages then runs
    `scripts/generate_og_image.py` and `scripts/build_logo_registry.py` before
    tests and deployment.
+5. The Pages build then runs `scripts/render_share_images.py --catalog` on the
+   validated `site/data/benchmark-index.json`, writing one `<slug>.png` per
+   catalog benchmark to `site/cards/`. They deploy with the site at
+   `https://benchmark-radar.org/cards/<slug>.png`, where each benchmark's
+   Share button (`site/assets/share-card.js`) and its static page's `og:image`
+   load them. The job `publish-benchmark-cards` archives the same files to the
+   `cards` branch of `ktwu01/benchmark-radar-cards`. To change a card, fix the
+   catalog record, not the image.
 
 Most `site/data/` files and `data/kw_bench_classifications.jsonl` are derived
 and gitignored. Their absence in a fresh checkout is normal. Never patch them

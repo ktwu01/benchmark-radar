@@ -3,7 +3,7 @@
    applies to the dashboard: every rule is scoped to .blog-page, which only the
    generated blog documents carry. */
 .blog-page .blog-view {
-  padding: clamp(1.25rem, 2vw, 1.75rem) 0 6rem;
+  padding: var(--space-4) 0 3rem;
 }
 
 .blog-page .blog-hero {
@@ -16,6 +16,15 @@
 .blog-page .blog-hero h1 {
   max-width: 920px;
   font-size: clamp(1.25rem, 2vw, 1.5rem);
+}
+
+/* A brief's title is an h1 in the language on screen and an h2 in the hidden
+   one (#1066); the h2 restates the h1 rules so switching never changes it. */
+.blog-page .blog-hero h2.blog-title {
+  max-width: 920px;
+  margin-bottom: 0;
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  letter-spacing: -0.015em;
 }
 
 .blog-page .blog-lede {

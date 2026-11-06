@@ -12,6 +12,7 @@ never resets posting progress.
 
 from __future__ import annotations
 
+import html
 import re
 import subprocess
 from collections import Counter
@@ -36,8 +37,8 @@ _RECORDS_BADGE = (
     "(https://benchmark-radar.org/)"
 )
 
-# Issue #671: the day's share images live on that day's branch of the cards
-# repository, rendered from the snapshot's share block. Embedding a URL per day
+# Issue #671: the day's share images live in that day's folder on the cards
+# site, rendered from the snapshot's share block. Embedding a URL per day
 # keeps an older checklist showing its own day.
 _CHECKBOX_RE = re.compile(r"^-\s+\[([ xX])\]\s+(.+)$")
 
@@ -70,6 +71,35 @@ class GitChange:
 
 def _escape(text: str) -> str:
     return text.replace("|", "\\|").replace("\n", " ").strip()
+
+
+def _plain(text: str) -> str:
+    # DataCite descriptions arrive as escaped HTML, sometimes escaped twice.
+    for _ in range(2):
+        text = html.unescape(text)
+    return " ".join(re.sub(r"<[^>]+>", " ", text).split())
+
+
+def _card_text(card: dict) -> list[str]:
+    """Return a card's full text as a fenced block, so it can be copied whole.
+
+    The drawn card cuts the title, author list and summary to fit; the poster
+    needs the uncut text to paste beside the image.
+    """
+    published = str(card.get("published_at") or "")[:10]
+    rows = [
+        _plain(str(card.get("title") or "")),
+        _plain(", ".join(str(name) for name in card.get("authors") or [])),
+        _plain("; ".join(str(name) for name in card.get("affiliations") or [])),
+        _plain(str(card.get("blurb") or "")),
+        " · ".join(part for part in (str(card.get("source") or ""), published) if part),
+        str(card.get("url") or ""),
+    ]
+    rows = [row for row in rows if row]
+    # A fence longer than any backtick run in the text keeps the block closed.
+    longest = max((len(run) for run in re.findall(r"`+", "\n".join(rows))), default=0)
+    fence = "`" * max(3, longest + 1)
+    return [f"{fence}text", *rows, fence]
 
 
 def load_post_sample(path: Path) -> str | None:
@@ -262,17 +292,26 @@ def render_social_section(
             [
                 f"**Today's image** for X, WeChat groups and Discord ([download]({top})):",
                 "",
-                f"![Top benchmarks on {day}]({top})",
+                f"[![Top benchmarks on {day}]({top})]({top})",
                 "",
-                "**One card per benchmark:** "
-                + " · ".join(
-                    f"[{index}. {_escape(str(card.get('title') or 'untitled'))[:60]}]"
-                    f"({daily_image_url(day, card_image_name(index))})"
-                    for index, card in enumerate(share["cards"], start=1)
-                ),
+                "**One card per benchmark** (each image is shown here so none is forgotten):",
                 "",
             ]
         )
+        for index, card in enumerate(share["cards"], start=1):
+            raw = _plain(str(card.get("title") or "")) or "untitled"
+            title = _escape(re.sub(r"([\\\[\]])", r"\\\1", raw))
+            url = daily_image_url(day, card_image_name(index))
+            lines.extend(
+                [
+                    f"{index}. [{title}]({url})",
+                    "",
+                    *_card_text(card),
+                    "",
+                    f"[![{title}]({url})]({url})",
+                    "",
+                ]
+            )
     lines += [
         "Ready-to-post material for today. Rephrase per platform; the two "
         "sentences below are the factual core.",

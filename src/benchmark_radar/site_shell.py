@@ -19,7 +19,28 @@ SOURCE_LABELS = {
     "artificial_analysis": "Artificial Analysis",
     "opencompass_hub": "OpenCompass Hub",
     "claire_radar": "Claire Radar",
+    "benchmark_saturation": "Benchmark Saturation",
 }
+
+
+# The share card every generated page declares, the same tags site/index.html
+# ships (issue #891). The size lets a consumer reserve the large preview on
+# first fetch instead of falling back to a thumbnail, and twitter:image mirrors
+# og:image for consumers that skip the og: namespace.
+SHARE_CARD_URL = f"{SITE_URL}/assets/og-card.png"
+
+
+def share_card_meta(image: str) -> str:
+    """The share-card block for ``image``; a benchmark page passes its own card."""
+    return f"""\
+<meta property="og:image" content="{image}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{image}">"""
+
+
+SHARE_CARD_META = share_card_meta(SHARE_CARD_URL)
 
 
 def esc(value: Any) -> str:

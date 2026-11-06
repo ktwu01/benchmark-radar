@@ -53,14 +53,30 @@ function t(key, params) {
 // The same three passes app.js applies, including the repo-badge tooltip
 // contract: a data-i18n-title on a badge becomes the CSS-rendered
 // data-tooltip instead of the browser's delayed native title.
+const chromeI18nMarkup = new WeakMap();
 function applyChromeI18n() {
   if (!chromeI18N) return;
   const zh = document.documentElement.lang === "zh-CN";
   document.querySelectorAll("[data-i18n]").forEach((node) => {
     if (node.dataset.i18nEn === undefined) {
       node.dataset.i18nEn = node.textContent;
+      if (node.querySelector("a,strong,em,code")) {
+        chromeI18nMarkup.set(node, node.cloneNode(true));
+      }
     }
-    node.textContent = zh ? (chromeI18N[node.dataset.i18n] ?? node.dataset.i18nEn) : node.dataset.i18nEn;
+    const text = zh ? chromeI18N[node.dataset.i18n] : undefined;
+    if (text !== undefined) {
+      if (text.includes("<")) {
+        node.replaceChildren();
+        node.insertAdjacentHTML("afterbegin", text);
+      } else {
+        node.textContent = text;
+      }
+    } else if (chromeI18nMarkup.has(node)) {
+      node.replaceChildren(chromeI18nMarkup.get(node).cloneNode(true));
+    } else {
+      node.textContent = node.dataset.i18nEn;
+    }
   });
   document.querySelectorAll("[data-i18n-title]").forEach((node) => {
     if (node.dataset.i18nTitleEn === undefined) {
@@ -89,6 +105,23 @@ function applyChromeI18n() {
   });
 }
 
+// One h1 per page (#1066): the title of the language on screen holds it.
+function retagTitle(node, tag) {
+  if (!node?.tagName || node.tagName === tag.toUpperCase() || typeof node.replaceWith !== "function") {
+    return;
+  }
+  const copy = document.createElement(tag);
+  for (const { name, value } of Array.from(node.attributes)) copy.setAttribute(name, value);
+  copy.append(...node.childNodes);
+  node.replaceWith(copy);
+}
+
+function syncTitleHeading() {
+  document.querySelectorAll("[data-lang-content]").forEach((block) => {
+    retagTitle(block.querySelector(".blog-title"), block.hidden ? "h2" : "h1");
+  });
+}
+
 function showLanguage(language, { remember = false } = {}) {
   const hasZh = Boolean(document.querySelector('[data-lang-content="zh"]'));
   document.querySelectorAll("[data-lang-content]").forEach((node) => {
@@ -99,6 +132,7 @@ function showLanguage(language, { remember = false } = {}) {
     }
   });
   document.documentElement.lang = language === "zh" ? "zh-CN" : "en";
+  syncTitleHeading();
   applyChromeI18n();
   const toggle = document.getElementById("lang-toggle");
   if (toggle) {
@@ -119,13 +153,18 @@ function showLanguage(language, { remember = false } = {}) {
   }
 }
 
-const langToggle = document.getElementById("lang-toggle");
-if (langToggle) {
-  langToggle.addEventListener("click", () => {
-    const current = document.documentElement.lang === "zh-CN" ? "zh" : "en";
-    showLanguage(current === "zh" ? "en" : "zh", { remember: true });
-  });
+function flipLanguage() {
+  const current = document.documentElement.lang === "zh-CN" ? "zh" : "en";
+  showLanguage(current === "zh" ? "en" : "zh", { remember: true });
 }
+
+const langToggle = document.getElementById("lang-toggle");
+if (langToggle) langToggle.addEventListener("click", flipLanguage);
+// The footer switch is a second door to the same language state.
+document.querySelectorAll("[data-lang-switch]").forEach((control) => {
+  control.addEventListener("click", flipLanguage);
+});
+document.addEventListener("analytics-consent-shown", applyChromeI18n);
 showLanguage(savedLanguage());
 
 // Repository star count. Mirrors app.js's renderStarCount: a rate-limited API

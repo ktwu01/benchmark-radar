@@ -1,4 +1,4 @@
-"""The /about/ page and the /publication(s)/ aliases (issue #593)."""
+"""The /about/ and /media/ pages and the /publication(s)/ aliases (issues #593, #906)."""
 
 from __future__ import annotations
 
@@ -26,9 +26,16 @@ def _site(tmp_path: Path) -> Path:
 @pytest.fixture
 def about(tmp_path: Path) -> str:
     site = _site(tmp_path)
-    report = write_about(site, updated="2026-09-11")
-    assert report["paths"] == ["/about/"]
+    report = write_about(site)
+    assert report["paths"] == ["/about/", "/media/"]
     return (site / "about" / "index.html").read_text(encoding="utf-8")
+
+
+@pytest.fixture
+def media(tmp_path: Path) -> str:
+    site = _site(tmp_path / "media-build")
+    write_about(site)
+    return (site / "media" / "index.html").read_text(encoding="utf-8")
 
 
 def test_about_carries_its_own_head_metadata(about: str):
@@ -50,14 +57,15 @@ def test_about_has_one_h1_and_no_placeholder_text(about: str):
 def test_about_marks_its_own_nav_entry_active(about: str):
     """The chrome is the dashboard's, so About must not arrive under Blog."""
     active = re.findall(r'<a class="nav-active"[^>]*href="([^"]+)"', about)
-    assert active == ["/about/"]
+    # The masthead and the footer's Project column both link to /about/.
+    assert set(active) == {"/about/"}
     header = re.search(r'<nav class="view-nav".*?</nav>', about, re.S).group(0)
     assert 'aria-current="page" href="/about/"' in header
     assert re.findall(r'href="([^"]+)"', header)[-1] == "/about/"
 
 
-def test_about_contains_every_coverage_link_from_issue_626(about: str):
-    coverage = re.search(r'<section id="coverage">.*?</section>', about, re.S).group(0)
+def test_media_contains_every_coverage_link_from_issue_626(media: str, about: str):
+    coverage = re.search(r'<section id="coverage">.*?</section>', media, re.S).group(0)
     for path in (
         "paperswithcode.co/paper/2609.11115",
         "www.arxivdaily.com/universities/sjtu",
@@ -85,6 +93,18 @@ def test_about_contains_every_coverage_link_from_issue_626(about: str):
     ).group(0)
     assert 'href="https://koutian.is-a.dev/posts/2026/09/benchmark-radar-day47/"' in build_log
     assert "benchmark-radar-day47" not in coverage
+    # One list, one page: About points to Media rather than repeating it.
+    assert 'id="coverage"' not in about
+
+
+def test_media_names_the_contact_for_press(media: str):
+    lede = re.search(r'<p class="blog-lede">.*?</p>', media, re.S).group(0)
+    assert 'href="mailto:ktwu@utexas.edu"' in lede
+    assert "media inquiries" in lede
+    assert f'<link rel="canonical" href="{SITE_URL}/media/">' in media
+    assert media.count("<h1>") == 1
+    active = re.findall(r'<a class="nav-active"[^>]*href="([^"]+)"', media)
+    assert set(active) == {"/media/"}
 
 
 def test_about_links_out_to_the_project_and_the_build_log(about: str):
@@ -99,7 +119,7 @@ def test_about_links_out_to_the_project_and_the_build_log(about: str):
 
 def test_about_links_into_the_catalog(about: str):
     """An About page that is a dead end wastes the only prose page on the site."""
-    for path in ("/benchmarks/", "/leaderboard/", "/blog/", "/cite/"):
+    for path in ("/benchmarks/", "/leaderboard/", "/blog/", "/cite/", "/media/"):
         assert f'href="{path}"' in about
 
 
@@ -120,7 +140,7 @@ def test_about_declares_itself_an_about_page(about: str):
 
 def test_publication_aliases_point_at_cite_without_competing_with_it(tmp_path: Path):
     site = _site(tmp_path)
-    report = write_about(site, updated="2026-09-11")
+    report = write_about(site)
     assert report["aliases"] == [alias for alias, _ in ALIAS_PATHS]
     for alias, target in ALIAS_PATHS:
         page = (site / alias.strip("/") / "index.html").read_text(encoding="utf-8")
@@ -136,18 +156,18 @@ def test_publication_aliases_point_at_cite_without_competing_with_it(tmp_path: P
 
 def test_about_is_rewritten_rather_than_merged(tmp_path: Path):
     site = _site(tmp_path)
-    write_about(site, updated="2026-09-11")
+    write_about(site)
     stale = site / "about" / "stale.html"
     stale.write_text("old", encoding="utf-8")
-    write_about(site, updated="2026-09-12")
+    write_about(site)
     assert not stale.exists()
 
 
 def test_about_is_byte_deterministic(tmp_path: Path):
     first = _site(tmp_path / "a")
     second = _site(tmp_path / "b")
-    write_about(first, updated="2026-09-11")
-    write_about(second, updated="2026-09-11")
+    write_about(first)
+    write_about(second)
     assert (first / "about" / "index.html").read_bytes() == (
         second / "about" / "index.html"
     ).read_bytes()
@@ -162,11 +182,8 @@ def test_the_menu_bar_says_publications_and_keeps_the_cite_path():
     assert 'data-i18n="Cite"' not in nav
 
 
-def test_about_is_written_even_before_the_corpus_has_a_date(tmp_path: Path):
-    """The nav links to /about/ from every page, so it can never be skipped."""
-    site = _site(tmp_path)
-    write_about(site, updated=None)
-    page = (site / "about" / "index.html").read_text(encoding="utf-8")
-    assert "<h1>" in page
-    # No date means no stamp, rather than a footer that says "Updated" and stops.
-    assert '<p id="build-meta">' not in page
+def test_the_footer_carries_no_build_stamp(about: str):
+    """A build time tells a reader nothing, so the footer dropped it (issue #906)."""
+    footer = re.search(r"<footer>.*?</footer>", about, re.S).group(0)
+    assert "build-meta" not in footer
+    assert "Updated" not in footer

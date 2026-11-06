@@ -74,6 +74,18 @@ active indicator, and Back and Forward should restore meaningful states.
 Show a concise answer first, then offer the evidence and method behind it.
 Expansion should be clear and reversible.
 
+### A shared block follows the surface's job
+
+The same benchmark explanation appears on several surfaces. Its position
+follows each surface's primary job in the table above; it is not one global
+order. On a static benchmark page, the definition is the answer, so it comes
+first. On Saturation, the score chart is the answer, so the chart leads and the
+explanation sits directly under it.
+
+Harm when this is missed: PR #976 applied "explanation first" to both
+surfaces, which pushed the Saturation chart below a block of facts that are
+often "not established".
+
 ## Bold values, never labels
 
 Bold tells the reader where the information is. A label (a key such as

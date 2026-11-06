@@ -23,6 +23,7 @@ from .describe import (
 from .http import get_json, get_text
 from .models import RadarItem, digest_evidence_version
 from .priority_organizations import load_priority_github_organizations
+from .requested_repositories import load_requested_github_repositories
 
 
 class ConnectorPayloadError(ValueError):
@@ -30,6 +31,13 @@ class ConnectorPayloadError(ValueError):
 
 
 FUTURE_TIMESTAMP_TOLERANCE = timedelta(minutes=5)
+# A record is quarantined as future-dated only when it is more than a day ahead
+# of the collection clock. Civil time zones run up to UTC+14, so a record that
+# carries its uploader's local date or wall-clock time (a Beijing upload read
+# as UTC, a date-only field) can sit many hours ahead of a UTC runner while
+# being current. The five-minute query bound above discarded such records
+# (#907); only values a full day ahead are treated as malformed.
+FUTURE_QUARANTINE_TOLERANCE = timedelta(days=1)
 GITHUB_RELEASE_PARSER_VERSION = "github-releases/4"
 
 
@@ -207,11 +215,15 @@ def fetch_first_party_feeds(config: dict[str, Any], since: datetime, limit: int)
     )[:limit]
 
 
-def _latest_allowed(config: dict[str, Any]) -> datetime:
+def _collection_clock(config: dict[str, Any]) -> datetime:
     collection_now = config.get("_collection_now")
     if not isinstance(collection_now, datetime):
         collection_now = datetime.now(UTC)
-    return collection_now.astimezone(UTC) + FUTURE_TIMESTAMP_TOLERANCE
+    return collection_now.astimezone(UTC)
+
+
+def _latest_allowed(config: dict[str, Any]) -> datetime:
+    return _collection_clock(config) + FUTURE_TIMESTAMP_TOLERANCE
 
 
 def _reject_future(
@@ -219,7 +231,8 @@ def _reject_future(
     identity: str,
     *timestamps: datetime | None,
 ) -> bool:
-    if not any(value is not None and value > _latest_allowed(config) for value in timestamps):
+    latest = _collection_clock(config) + FUTURE_QUARANTINE_TOLERANCE
+    if not any(value is not None and value > latest for value in timestamps):
         return False
     identities = config.setdefault("_future_rejection_ids", set())
     identities.add(identity)
@@ -680,6 +693,7 @@ def fetch_github(config: dict[str, Any], since: datetime, limit: int) -> list[Ra
 
 
 GITHUB_ORGANIZATIONS_PARSER_VERSION = "github-organizations/2"
+GITHUB_REQUESTED_PARSER_VERSION = "github-requested/1"
 KAGGLE_DATASETS_PARSER_VERSION = "kaggle-datasets/2"
 HUGGINGFACE_PAPERS_PARSER_VERSION = "huggingface-papers/2"
 
@@ -804,6 +818,112 @@ def fetch_github_organizations(
         key=lambda item: (item.updated_at or item.published_at, item.source_id),
         reverse=True,
     )[:limit]
+
+
+def fetch_github_requested_repositories(
+    config: dict[str, Any],
+    since: datetime,
+    limit: int,
+) -> list[RadarItem]:
+    """Fetch reader-requested repositories by owner/name, outside any time window.
+
+    Search and organization discovery only see repositories pushed or created
+    inside the run's window, so a repository they dropped cannot come back
+    (issue #555). A reviewed request fetches it directly, once. A row stays
+    pending until a run gets an answer for it, so a row merged late or a fetch
+    that failed is picked up by the next run. The pipeline records each
+    answered row (`_requested_resolved`) in the snapshot's `discovery_state`,
+    passed back in as `_seen_state`, so the record is not repeated.
+
+    A request grants discovery only. The record is a plain GitHub record, so it
+    is summarised, scored, suppressed and deduplicated exactly like a search
+    hit, and a blank upstream description stays blank.
+    """
+    registry_path = Path(str(config.get("registry_path", "data/requested_github_repositories.yml")))
+    resolved = {str(name).casefold() for name in config.get("_seen_state") or {}}
+    due = [
+        entry
+        for entry in load_requested_github_repositories(registry_path)
+        if entry["full_name"].casefold() not in resolved
+    ]
+    # Every pending row is fetched; the registry is reviewed by hand, so its
+    # size is the bound.
+    answered: list[str] = config.setdefault("_requested_resolved", [])
+    headers = _github_headers()
+    found: dict[str, RadarItem] = {}
+    failures: list[Exception] = []
+    for entry in due:
+        full_name = entry["full_name"]
+        try:
+            row = _payload_dict(
+                get_json(
+                    f"https://api.github.com/repos/{full_name}",
+                    headers=headers,
+                    **_request_options(config),
+                ),
+                "GitHub repository",
+            )
+            url = str(row.get("html_url") or "").strip()
+            created = _optional_date(row.get("created_at"))
+            changed = _optional_date(row.get("pushed_at")) or _optional_date(row.get("updated_at"))
+            if not url or created is None:
+                raise ConnectorPayloadError(f"GitHub repository {full_name} has no URL or date")
+        except Exception as error:
+            config.setdefault("_source_warnings", []).append(
+                f"{full_name}: {type(error).__name__}: {error}"
+            )
+            failures.append(error)
+            continue
+        # The API answers for the canonical name, so a renamed or transferred
+        # repository is recorded under the name GitHub reports today. The
+        # watchlist still matches the requested name kept in `raw["request"]`.
+        canonical = str(row.get("full_name") or full_name).strip()
+        if canonical.casefold() != full_name.casefold():
+            config.setdefault("_source_warnings", []).append(
+                f"{full_name}: GitHub now names it {canonical}"
+            )
+        # A future-dated answer is quarantined and stays pending, so a later run
+        # can publish it once its timestamps are valid.
+        if _reject_future(config, canonical, created, changed):
+            continue
+        # GitHub answered, so the request is resolved whether or not the
+        # repository becomes a record below. A renamed repository is resolved
+        # under both names, so editing the row to the new name does not fetch
+        # and publish it a second time.
+        answered.append(full_name)
+        if canonical.casefold() != full_name.casefold():
+            answered.append(canonical)
+        # The reader asked for this exact repository, so neither archiving (a
+        # finished benchmark often is) nor fork status drops it. GitHub serves
+        # nothing for a disabled repository, so say why it published nothing.
+        if row.get("disabled"):
+            config.setdefault("_source_warnings", []).append(
+                f"{full_name}: GitHub reports the repository disabled; nothing published"
+            )
+            continue
+        found[canonical] = RadarItem(
+            source="GitHub",
+            source_id=canonical,
+            title=canonical,
+            url=url,
+            published_at=created,
+            updated_at=changed or created,
+            summary=github_summary(row),
+            event_kind="released" if created >= since else "updated",
+            metrics=_reported_metrics(row, stars="stargazers_count", forks="forks_count"),
+            raw={
+                "repository": row,
+                "request": {
+                    "full_name": full_name,
+                    "issue": entry["issue"],
+                    "requested_at": entry["requested_at"].isoformat(),
+                },
+            },
+            parser_version=GITHUB_REQUESTED_PARSER_VERSION,
+        )
+    if due and not answered and failures:
+        raise failures[0]
+    return list(found.values())
 
 
 def _kaggle_summary(row: dict[str, Any]) -> str:
@@ -959,9 +1079,13 @@ def fetch_zenodo_records(
             source_id = str(row.get("recid") or row.get("id") or "").strip()
             title = str(metadata.get("title") or row.get("title") or "").strip()
             url = str(links.get("self_html") or links.get("doi") or "").strip()
-            published = _optional_date(
-                str(metadata.get("publication_date") or row.get("created") or "")
-            )
+            # The depositor sets publication_date to any date, including a future
+            # one or a bare year (#907). The deposition's own creation time
+            # stands in when that value is unreadable or ahead of the clock, so
+            # the record is kept; raw retains the depositor's value.
+            published = _optional_date(str(metadata.get("publication_date") or ""))
+            if published is None or published > _latest_allowed(config):
+                published = _optional_date(str(row.get("created") or ""))
             updated = _optional_date(str(row.get("updated") or row.get("modified") or ""))
             activity = updated or published
             if not source_id or not title or not url or published is None or activity is None:
@@ -2454,6 +2578,7 @@ SOURCE_FETCHERS = {
     "huggingface": fetch_huggingface,
     "github": fetch_github,
     "github_organizations": fetch_github_organizations,
+    "github_requested_repositories": fetch_github_requested_repositories,
     "huggingface_papers": fetch_huggingface_papers,
     "kaggle_datasets": fetch_kaggle_datasets,
     "zenodo": fetch_zenodo_records,
@@ -2479,6 +2604,7 @@ _PARSER_VERSION_METHODS = {
     "huggingface-hub": "API",
     "github-search": "API",
     "github-organizations": "API",
+    "github-requested": "API",
     "huggingface-papers": "API",
     "kaggle-datasets": "API",
     "zenodo-records": "API",
@@ -2500,6 +2626,7 @@ SOURCE_DEFAULT_METHODS = {
     "huggingface": "API",
     "github": "API",
     "github_organizations": "API",
+    "github_requested_repositories": "API",
     "huggingface_papers": "API",
     "kaggle_datasets": "API",
     "zenodo": "API",

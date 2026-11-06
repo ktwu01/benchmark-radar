@@ -7,6 +7,7 @@ import yaml
 
 from benchmark_radar import cli
 from benchmark_radar.briefing import BriefingError, GeneratedBriefing
+from benchmark_radar.cards import CARDS_DOMAIN
 from benchmark_radar.models import ProducerHealth, RadarItem, RadarRun
 from benchmark_radar.pipeline import SOURCE_FETCHERS
 from benchmark_radar.snapshots import write_snapshot
@@ -561,6 +562,52 @@ def test_pages_custom_domain_stays_on_the_actions_artifact():
         if step.get("uses", "").startswith("actions/upload-pages-artifact@")
     )
     assert upload["with"]["path"] == "site/"
+
+
+def test_pages_build_deploys_each_benchmark_card_with_its_page():
+    """Benchmark pages name /cards/<slug>.png as og:image (issue #671, #891).
+    The build draws the cards into the Pages artifact, so a card can never go
+    live later than the page naming it, and the archive job never holds up a
+    deploy."""
+    workflow = yaml.safe_load(Path(".github/workflows/pages.yml").read_text(encoding="utf-8"))
+    jobs = workflow["jobs"]
+    build = next(
+        step["run"]
+        for step in jobs["build"]["steps"]
+        if step.get("name") == "Build validated dashboard data"
+    )
+    render = build.index("scripts/render_share_images.py")
+    assert "--output-dir site/cards" in build[render:]
+    assert render < build.index("pytest -q")
+    assert "publish-benchmark-cards" not in jobs["deploy"]["needs"]
+    archive = jobs["publish-benchmark-cards"]
+    assert archive["if"] == "github.ref == 'refs/heads/main'"
+    download = next(
+        step for step in archive["steps"] if "download-artifact" in step.get("uses", "")
+    )
+    assert download["with"]["name"] == "benchmark-cards"
+    publish = next(step for step in archive["steps"] if step.get("name") == "Publish the cards")
+    assert f'echo "{CARDS_DOMAIN}" > CNAME' in publish["run"]
+
+
+def test_daily_share_images_are_served_by_the_cards_site_before_they_are_linked():
+    """The day's images go to daily/<date>/ on the branch GitHub Pages serves
+    at CARDS_DOMAIN, and the share block that links them is recorded only once
+    they answer, so neither the site nor the checklist links a 404."""
+    workflow = yaml.safe_load(Path(".github/workflows/daily-radar.yml").read_text(encoding="utf-8"))
+    steps = workflow["jobs"]["publish-share-images"]["steps"]
+    names = [step.get("name") for step in steps]
+    publish = steps[names.index("Render and publish the day's share images")]["run"]
+    assert 'branch="cards"' in publish
+    assert 'folder="daily/${snapshot_date}"' in publish
+    # Every image the share block will link, not only top3.png: a rerun that
+    # appends a card finds its neighbours already served.
+    assert f"https://{CARDS_DOMAIN}/${{folder}}/$(basename" in publish
+    assert "for image in ../share-out/*.png" in publish
+    assert "exit 0" not in publish.split("already pushed")[1].split("fi")[0]
+    assert names.index("Render and publish the day's share images") < names.index(
+        "Record the day's share cards in the snapshot"
+    )
 
 
 def test_daily_radar_persists_only_a_fresh_target_day_snapshot():
@@ -1188,3 +1235,22 @@ def test_first_day_report_projection_preserves_committed_metadata(monkeypatch, t
     assert items["generated_at"] == committed["generated_at"]
     assert items["since"] == committed["since"]
     print("FIRST_DAY_METADATA_PROOF=" + json.dumps({"committed": committed, "items": items}))
+
+
+def test_share_commit_starts_a_pages_build():
+    """Issue #671: the site reads the share block, so its commit must deploy."""
+    workflow = Path(".github/workflows/daily-radar.yml").read_text(encoding="utf-8")
+    pages = Path(".github/workflows/pages.yml").read_text(encoding="utf-8")
+    commit = next(
+        line for line in workflow.splitlines() if "git commit" in line and "share cards" in line
+    )
+    assert "skip ci" not in commit
+    assert '"data/snapshots/**"' in pages
+
+
+def test_share_block_is_committed_only_after_its_images_are_published():
+    """A failed image push must not leave site buttons pointing at missing images."""
+    workflow = Path(".github/workflows/daily-radar.yml").read_text(encoding="utf-8")
+    publish = workflow.index("- name: Render and publish the day's share images")
+    record = workflow.index("- name: Record the day's share cards in the snapshot")
+    assert publish < record

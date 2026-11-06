@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-25",
+  "share": {
+    "top3_image": "https://cards.benchmark-radar.org/daily/2026-10-25/top3.png",
+    "cards": [
+      {
+        "url": "https://github.com/example/carded-bench",
+        "title": "example/carded-bench",
+        "image": "https://cards.benchmark-radar.org/daily/2026-10-25/card-01.png"
+      }
+    ]
+  },
+  "briefing": {
+    "bullets": [
+      "The carded bench tests agents. Why it matters: It is new. Evidence: E001. High confidence.",
+      "The uncarded bench tests retrieval. Why it matters: It is also new. Evidence: E002. High confidence."
+    ],
+    "citations": [
+      {"id": "E001", "source": "GitHub", "title": "example/carded-bench", "url": "https://github.com/example/carded-bench"},
+      {"id": "E002", "source": "GitHub", "title": "example/uncarded-bench", "url": "https://github.com/example/uncarded-bench"}
+    ],
+    "date": "2026-10-25",
+    "generator": "openai-responses"
+  }
+}

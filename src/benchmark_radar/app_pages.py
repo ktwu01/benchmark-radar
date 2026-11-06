@@ -17,6 +17,8 @@ this module writes copies of it that differ in four ways:
   marker, so a result can show where the page sits;
 * the named view starts visible and Today starts hidden, or the named utility
   dialog starts open over Today;
+* the named view's heading, or the open sheet's title, is the page's one h1,
+  and the homepage h1 is an h2;
 * the view or dialog's own containers arrive holding real content;
 * the link for the route arrives with its active state and ``aria-current``.
 
@@ -76,6 +78,20 @@ UTILITY_LABELS = {
     "cite": "Publications",
     "rubric": "Scoring rubric",
 }
+
+# /saturation/ shares the score-plateau card instead of the search card the
+# other pages share, because that chart is what the page shows
+# (scripts/generate_saturation_og_image.py writes it at deploy time).
+SATURATION_CARD = f"{SITE_URL}/assets/og-card-saturation.png"
+SATURATION_CARD_ALT = (
+    "Benchmark Radar: where benchmark scores start to plateau, with cited score "
+    "frontiers across GPQA Diamond, Humanity's Last Exam, Terminal-Bench and "
+    "SWE-bench Verified."
+)
+_CARD_IMAGE = re.compile(
+    r'(<meta (?:property="og:image"|name="twitter:image") content=")([^"]*)(">)'
+)
+_CARD_ALT = re.compile(r'(property="og:image:alt"\s+content=")([^"]*)(")')
 
 _SEO_BLOCK = r"const\s+{name}\s*=\s*\{{(.*?)^\s*\}};"
 _SEO_ENTRY = re.compile(
@@ -180,6 +196,18 @@ def _head_seo(seo: dict[str, str]) -> str:
 """
 
 
+def _saturation_card(document: str) -> str:
+    """Point the og:image, twitter:image and alt text at the saturation card."""
+    document, images = _CARD_IMAGE.subn(rf"\g<1>{SATURATION_CARD}\g<3>", document)
+    document, alts = _CARD_ALT.subn(rf"\g<1>{esc(SATURATION_CARD_ALT)}\g<3>", document)
+    if images != 2 or alts != 1:
+        raise AppPageError(
+            f"expected og:image, twitter:image and og:image:alt once each, "
+            f"found {images} images and {alts} alt texts"
+        )
+    return document
+
+
 def _page_jsonld(label: str, seo: dict[str, str]) -> str:
     canonical = f"{SITE_URL}{seo['canonical']}"
     blocks = (
@@ -212,6 +240,44 @@ def _open_on(document: str, view: str) -> str:
     if not opening.search(document):
         raise AppPageError(f"{view}-view section is not present and hidden in site/index.html")
     return opening.sub(rf'<section class="view" id="{view}-view"\1>', document, count=1)
+
+
+_HOME_H1 = re.compile(r'<h1 (class="visually-hidden"[^>]*)>(.*?)</h1>', re.DOTALL)
+
+
+def _promote_view_heading(document: str, view: str) -> str:
+    """Make the named view's heading the page's one h1.
+
+    Search engines read the whole document, hidden views included, so a page
+    with one h1 per view told Bing it had seven main topics (issue #945). The
+    shared document carries only the homepage h1; on a view's own page that
+    heading steps down to h2 and the view's heading steps up. Both tags are
+    styled alike, so nothing on screen moves.
+    """
+    document, demoted = _HOME_H1.subn(r"<h2 \1>\2</h2>", document, count=1)
+    if demoted != 1:
+        raise AppPageError("homepage h1 not found in site/index.html")
+    heading = re.compile(rf'<h2 (id="{view}-heading"[^>]*)>(.*?)</h2>', re.DOTALL)
+    document, promoted = heading.subn(r"<h1 \1>\2</h1>", document, count=1)
+    if promoted != 1:
+        raise AppPageError(f"{view}-heading h2 not found in site/index.html")
+    return document
+
+
+def _promote_utility_title(document: str, page: str) -> str:
+    """Make the open sheet's title the page's one h1 on /cli/, /cite/, /rubric/.
+
+    The sheet is what the page is about; the homepage h1 behind it describes
+    another page. The title keeps its look in either tag (styles.css).
+    """
+    document, demoted = _HOME_H1.subn(r"<h2 \1>\2</h2>", document, count=1)
+    if demoted != 1:
+        raise AppPageError("homepage h1 not found in site/index.html")
+    title = re.compile(rf'<h2 (class="[^"]*\b{page}-title"[^>]*)>(.*?)</h2>', re.DOTALL)
+    document, promoted = title.subn(r"<h1 \1>\2</h1>", document, count=1)
+    if promoted != 1:
+        raise AppPageError(f"{page}-title h2 not found in the {page} seed")
+    return document
 
 
 def _with_active_attributes(opening_tag: str) -> str:
@@ -292,6 +358,9 @@ def render_app_page(
         what="page JSON-LD marker",
     )
     document = _open_on(document, view)
+    document = _promote_view_heading(document, view)
+    if view == "saturation":
+        document = _saturation_card(document)
     document = _deactivate_home_navigation(document)
     if view not in UNLISTED_ROUTES:
         document = _activate_navigation(document, view)
@@ -320,7 +389,7 @@ def render_utility_page(
     document = _open_dialog(document, page)
     for anchor, replacement in seeds.items():
         document = _replace_once(document, anchor, replacement, what=f"{page} seed container")
-    return document
+    return _promote_utility_title(document, page)
 
 
 def write_app_pages(

@@ -19,7 +19,7 @@ class Node {
 }
 let language = 'en';
 const document = { createElement: tag => new Node(tag) };
-const functions = ['t', 'element', 'formatDate', 'safeHttpUrl', 'catalogSourceMeta', 'catalogDisplayFactor', 'catalogSourceTable', 'catalogScoreResults', 'catalogScoresBlock'];
+const functions = ['t', 'element', 'formatDate', 'safeHttpUrl', 'catalogSourceMeta', 'catalogDisplayFactor', 'catalogSourceTable', 'catalogScoreResults', 'catalogScoresBlock', 'artifactKindLabel', 'linkHost', 'catalogResourceLinks'];
 const render = new Function('document', 'getLang', `
 ${constant('I18N')}
 ${constant('CATALOG_SOURCE_META')}
@@ -27,7 +27,7 @@ const dateValue = value => Date.parse(value);
 const catalogScoreChart = () => null;
 const infoDisclosure = text => element('details', {text});
 ${functions.map(fn).join('\n')}
-return {catalogScoreResults, catalogScoresBlock};
+return {catalogScoreResults, catalogScoresBlock, catalogResourceLinks};
 `)(document, () => language);
 const all = (node, predicate) => [node, ...node.children.flatMap(child => all(child, predicate))].filter(predicate);
 const rows = Array.from({length: 1100}, (_, i) => ({
@@ -39,6 +39,10 @@ rows[1] = {obs_id: 'document', model_name: 'Same model', value: 42, reported_dat
 rows[2] = {obs_id: 'variant', model_name: 'Same model', value: 43, reported_date: '2026-09-02', date_precision: 'document_publication', instrument: 'Variant B', protocol: 'with tools'};
 const originalOrder = rows.map(row => row.obs_id);
 const section = render.catalogScoreResults('model_reports', rows);
+assert.equal(section.tag, 'details', 'raw scores are folded by default');
+assert(!('open' in section.attrs));
+assert.equal(section.children[0].tag, 'summary');
+assert.equal(section.children[0].textContent, 'Reported benchmark scores · Model reports');
 const items = all(section, node => node.tag === 'li');
 assert.equal(items.length, rows.length, 'large histories never truncate observations');
 for (const row of rows) assert(items.some(item => item.textContent.includes(row.model_name)));
@@ -59,9 +63,24 @@ assert.deepEqual(sources.map(node => all(node, item => item.tag === 'li').length
 assert.equal(sources.filter(node => node.textContent.includes('Registry-only model')).length, 1);
 language = 'zh';
 const chinese = render.catalogScoreResults('model_reports', rows);
-assert(all(chinese, node => node.tag === 'h3')[0].textContent.includes('Benchmark 已报告成绩 · 模型报告'));
+assert.equal(all(chinese, node => node.tag === 'summary')[0].textContent, 'Benchmark 已报告成绩 · 模型报告');
 for (const label of ['模型发布日期', '文档发布日期', '日期未知', '打开来源记录 ↗']) assert(chinese.textContent.includes(label), label);
 for (const label of ['Reported benchmark scores', 'Model reports', 'model release date', 'Document publication date', 'Date unknown', 'Open source record']) assert(!chinese.textContent.includes(label), label);
 language = 'en';
 assert(render.catalogScoreResults('model_reports', rows).textContent.includes('Reported benchmark scores · Model reports'));
+const resources = {artifacts: [
+  {kind: 'repo', url: 'https://github.com/example/bench'},
+  {kind: 'repo', url: ' https://github.com/example/bench '},
+  {kind: 'repo', url: 'https://github.com/example/other'},
+  {kind: 'dataset', url: 'https://huggingface.co/datasets/example/bench'},
+  {kind: 'paper', url: 'ftp://example.org/paper'},
+], provenance: {source_url: 'https://github.com/example/bench'}};
+const input = JSON.stringify(resources);
+const links = render.catalogResourceLinks(resources);
+assert.equal(links.length, 3, 'repeat destinations fold, distinct resources remain');
+assert.equal(new Set(links.map(link => link.label)).size, 3, 'different resources remain distinguishable');
+assert(links.every(link => link.label && link.kind));
+assert.equal(JSON.stringify(resources), input, 'rendering does not change source records');
+assert.equal(render.catalogResourceLinks({provenance: {source_url: 'https://example.org/evidence'}})[0].label, 'Original evidence');
+assert.deepEqual(render.catalogResourceLinks({provenance: {source_url: 'ftp://example.org/evidence'}}), []);
 console.log('Complete histories, undated zero scores, source partitions, run variants, safe links, and Chinese/English rendering passed.');

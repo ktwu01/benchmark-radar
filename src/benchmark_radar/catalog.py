@@ -47,9 +47,16 @@ SOURCES = {
     LLM_STATS_SNAPSHOT_ID: (LLM_STATS_SOURCE, LLM_STATS_KEY_PREFIX),
     ARTIFICIAL_ANALYSIS_SNAPSHOT_ID: (ARTIFICIAL_ANALYSIS_SOURCE, ARTIFICIAL_ANALYSIS_KEY_PREFIX),
     "claire_radar_2026-10-14": ("claire_radar", "claire-radar"),
+    "benchmark_saturation_2026-11-04": ("benchmark_saturation", "benchmark-saturation"),
 }
 
 _SLUG_STRIP = re.compile(r"[^a-z0-9]+")
+# Hosts that answer every http:// request with a permanent redirect to the same
+# https:// URL (checked 2026-10-26). A source that still writes http:// for them
+# costs each reader and crawler a redirect hop, so the link is published as the
+# address the host sends them to. Any other host keeps the scheme it was given:
+# rewriting a host that only speaks http would break the link.
+_HTTPS_HOSTS = frozenset({"arxiv.org", "github.com", "robodojo-benchmark.com"})
 
 # One organization, one name, across all sources.
 #
@@ -202,6 +209,13 @@ def value_kind(raw: str, parsed: float | None) -> str:
     return "number" if parsed is not None else "text"
 
 
+def https_url(url: str) -> str:
+    """The https:// form of a link whose host only redirects http:// to it."""
+    if url[:7].lower() == "http://" and urlsplit(url).hostname in _HTTPS_HOSTS:
+        return "https://" + url[7:]
+    return url
+
+
 def _source_record(
     row: dict[str, Any],
     slug: str,
@@ -220,7 +234,7 @@ def _source_record(
         ("dataset", "dataset_url"),
         ("website", "project_url"),
     ):
-        url = (row.get(column) or "").strip()
+        url = https_url((row.get(column) or "").strip())
         if url:
             artifact = {"kind": kind, "url": url}
             identifier = artifact_identifier(url)
@@ -229,7 +243,7 @@ def _source_record(
             if artifact not in artifacts:
                 artifacts.append(artifact)
     provenance = {
-        "source_url": (row.get("detail_source_url") or "").strip() or None,
+        "source_url": https_url((row.get("detail_source_url") or "").strip()) or None,
         "crawled_at": crawled_at,
         "crawl_bundle": snapshot_id,
     }
@@ -452,10 +466,12 @@ def _series(
     return {
         "series_id": f"{source}:{row['benchmark_id'].strip()}:default",
         "key": key,
-        # The API does not name the metric, so it stays null. Direction is not
-        # guessed from the scale: every scored series is source-ranked in
-        # descending numeric order, pinned by the snapshot invariant tests.
-        "metric": None,
+        # A source that states its metric (Benchmark Saturation: "Accuracy",
+        # "F1") names it on the row; the aggregator APIs do not, so theirs stays
+        # null. Direction is not guessed from the scale: every scored series is
+        # source-ranked in descending numeric order, pinned by the snapshot
+        # invariant tests.
+        "metric": str(row.get("metric") or "").strip() or None,
         "direction": "higher_is_better",
         "direction_basis": "source_rank_descending",
         "bounds": {"min": None, "max": declared_max, "basis": "aggregator_declared"},
@@ -728,6 +744,11 @@ def build_benchmark_index(
                 "key": record["key"],
                 "name": record["name"],
                 "aliases": list(record.get("aliases") or []),
+                # Independent audits, where the source recorded any: the
+                # compact form of the shard's evidence, so search results can
+                # show that a benchmark's numbers have been questioned
+                # without fetching its shard.
+                "audits": list(record.get("audits") or []),
                 # Search text stays source-derived. The normalizers carry
                 # descriptions by language; no generated prose or inferred
                 # category is introduced in this compact index.
@@ -744,6 +765,12 @@ def build_benchmark_index(
                 "languages": list(record.get("languages") or []),
                 "source": record["source"],
                 "publisher": publisher["name"] if publisher else None,
+                # Read from the record's own introducing paper (#933); empty
+                # when no cited document names them.
+                "authors": list(record.get("authors") or []),
+                # OpenAlex's linked institutions for the same paper, in
+                # first-appearance order; separate from the cited publisher.
+                "institutions": list(record.get("institutions") or []),
                 "released": record.get("released"),
                 "released_reference": record.get("released_reference"),
                 # Collection is provenance, never benchmark introduction.

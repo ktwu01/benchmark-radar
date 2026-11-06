@@ -860,6 +860,44 @@ def test_zenodo_records_preserve_doi_and_upstream_metadata(monkeypatch):
     assert items[0].metrics == {"downloads": 13.0, "views": 21.0}
 
 
+def test_zenodo_keeps_records_whose_depositor_chose_a_future_or_bare_year_date(monkeypatch):
+    # #907: live records 23680549 and 23673366 carried publication_date
+    # 2026-10-31 and 2027 on deposits created on 26-27 Oct. The depositor may
+    # set any date, so the deposition's created time dates the record instead.
+    def deposit(recid: str, publication_date: str, created: str) -> dict:
+        return {
+            "recid": recid,
+            "created": created,
+            "updated": created,
+            "links": {"self_html": f"https://zenodo.org/records/{recid}"},
+            "metadata": {"title": f"Record {recid}", "publication_date": publication_date},
+        }
+
+    payload = {
+        "hits": {
+            "hits": [
+                deposit("23680549", "2026-10-31", "2026-10-27T02:01:03Z"),
+                deposit("23673366", "2027", "2026-10-26T08:00:00Z"),
+            ]
+        }
+    }
+    monkeypatch.setattr("benchmark_radar.sources.get_json", lambda url, **kwargs: payload)
+    config = {
+        "searches": ["benchmark"],
+        "max_requests": 1,
+        "_collection_now": datetime(2026, 10, 27, 2, 11, tzinfo=UTC),
+    }
+
+    items = fetch_zenodo_records(config, datetime(2026, 10, 25, tzinfo=UTC), 10)
+
+    assert {item.source_id: item.published_at for item in items} == {
+        "23680549": datetime(2026, 10, 27, 2, 1, 3, tzinfo=UTC),
+        "23673366": datetime(2026, 10, 26, 8, tzinfo=UTC),
+    }
+    assert items[0].raw["metadata"]["publication_date"] in {"2026-10-31", "2027"}
+    assert "_future_rejections" not in config
+
+
 def _deposit(recid: str, title: str, description: str, creators: list[str], day: int) -> dict:
     return {
         "recid": recid,
@@ -3214,6 +3252,37 @@ def test_huggingface_rejects_a_future_creation_date_even_when_modified_now(monke
 
     assert fetch_huggingface(config, datetime(2026, 7, 26, tzinfo=UTC), 10) == []
     assert config["_future_rejections"] == 1
+
+
+def test_huggingface_keeps_a_record_ahead_only_by_time_zone(monkeypatch):
+    # #907: at 09:42 UTC on 20 Oct it is already 17:42 in Beijing, and a repo
+    # stamped with that local wall-clock time reads as eight hours ahead of a
+    # UTC runner. Time-zone skew is not a malformed date, so the record stays.
+    monkeypatch.setattr(
+        "benchmark_radar.sources.get_json",
+        lambda url, params: [
+            {
+                "id": "org/beijing-upload",
+                "createdAt": "2026-10-20T17:42:00Z",
+                "lastModified": "2026-10-20T17:42:00Z",
+            },
+            {
+                "id": "org/next-local-day",
+                "createdAt": "2026-10-21",
+                "lastModified": "2026-10-21",
+            },
+        ],
+    )
+    config = {
+        "kinds": ["datasets"],
+        "searches": ["benchmark"],
+        "_collection_now": datetime(2026, 10, 20, 9, 42, tzinfo=UTC),
+    }
+
+    items = fetch_huggingface(config, datetime(2026, 10, 18, tzinfo=UTC), 10)
+
+    assert {item.source_id for item in items} == {"org/beijing-upload", "org/next-local-day"}
+    assert "_future_rejections" not in config
 
 
 def test_huggingface_drops_a_short_description_a_later_owner_inherited(monkeypatch):

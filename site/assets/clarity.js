@@ -1,6 +1,8 @@
 // Session replay starts only after opt-in. Consent APIs alone can leave
 // Clarity running in cookieless mode, so withdrawal also stops the recorder.
 (function () {
+  // A copied deployment or local preview must not send visits to production.
+  if (window.location.hostname !== "benchmark-radar.org") return;
   const STORAGE_KEY = "benchmark-radar:analytics-consent";
   const PROJECT_ID = "ya4h95jvfj";
 
@@ -75,6 +77,14 @@
     closeBanner();
     if (value === "granted") loadClarity();
     else stopClarity();
+  }
+
+  // Maintainers can bookmark this URL once per browser. Reuse the persisted
+  // denial so ordinary navigation stays excluded without recording an ID/IP.
+  if (new URLSearchParams(window.location.search).get("analytics") === "off") {
+    storeChoice("denied");
+    stopClarity();
+    return;
   }
 
   function showBanner() {

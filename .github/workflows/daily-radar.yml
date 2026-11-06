@@ -65,7 +65,7 @@ jobs:
           ref: main
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
           cache: pip
@@ -126,7 +126,7 @@ jobs:
           cp "data/snapshots/${snapshot_date}.json" "out/snapshot-${snapshot_date}.json"
           printf '%s\n' "${snapshot_date}" > out/snapshot-date.txt
       - name: Upload evidence artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: benchmark-radar-${{ github.run_id }}
           path: |
@@ -144,7 +144,7 @@ jobs:
     steps:
       - name: Create snapshot-writer token
         id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           app-id: ${{ vars.RADAR_APP_ID }}
           private-key: ${{ secrets.RADAR_APP_PRIVATE_KEY }}
@@ -156,7 +156,7 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
       - name: Download validated snapshot
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: benchmark-radar-${{ github.run_id }}
           path: generated/
@@ -196,19 +196,20 @@ jobs:
   # Issue #671: the day's share cards. Runs only after the snapshot is
   # persisted, so a slow or failed lookup can never cost the day its evidence.
   # It records the chosen cards and who made them in the snapshot once, then
-  # renders the images from that record alone and pushes them to their own
-  # branch in ktwu01/benchmark-radar-cards. Images in this repository would
-  # grow every clone; a branch per day keeps each day's images at a stable URL.
+  # renders the images from that record alone and pushes them to daily/<date>/
+  # on the cards branch of ktwu01/benchmark-radar-cards, which GitHub Pages
+  # serves at cards.benchmark-radar.org. Images in this repository would grow
+  # every clone; a folder per day keeps each day's images at a stable URL.
   publish-share-images:
     needs: [build-report, persist-snapshot]
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - name: Create snapshot and cards writer token
         id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           app-id: ${{ vars.RADAR_APP_ID }}
           private-key: ${{ secrets.RADAR_APP_PRIVATE_KEY }}
@@ -219,11 +220,11 @@ jobs:
           ref: main
           token: ${{ steps.app-token.outputs.token }}
       - name: Download validated snapshot
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: benchmark-radar-${{ github.run_id }}
           path: generated/
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
           cache: pip
@@ -231,8 +232,10 @@ jobs:
         run: python -m pip install '.[dev]'
       # The briefing's benchmarks, or the radar-score top 3 on a day without a
       # model briefing, and who made them. Cards an earlier pass recorded are
-      # kept as they are, so a rerun never changes a posted card.
-      - name: Record the day's share cards in the snapshot
+      # kept as they are, so a rerun never changes a posted card. The block is
+      # committed only after the images are published, so the site never links
+      # to an image that does not exist.
+      - name: Compute the day's share cards
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash
@@ -240,6 +243,68 @@ jobs:
           set -euo pipefail
           snapshot_date="$(cat generated/out/snapshot-date.txt)"
           benchmark-radar share --items generated/out/items.json
+      - name: Render and publish the day's share images
+        env:
+          CARDS_TOKEN: ${{ steps.app-token.outputs.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          snapshot_date="$(cat generated/out/snapshot-date.txt)"
+          branch="cards"
+          folder="daily/${snapshot_date}"
+          remote="https://x-access-token:${CARDS_TOKEN}@github.com/ktwu01/benchmark-radar-cards.git"
+          python scripts/render_share_images.py \
+            --snapshot "data/snapshots/${snapshot_date}.json" \
+            --output-dir share-out
+          if [[ -z "$(ls -A share-out 2>/dev/null)" ]]; then
+            echo "No share cards for ${snapshot_date}"
+            exit 0
+          fi
+          # A same-day rerun adds a commit, so earlier images stay in history.
+          git clone -q --depth 1 --branch "${branch}" "${remote}" cards
+          mkdir -p "cards/${folder}"
+          cp share-out/*.png "cards/${folder}/"
+          cd cards
+          git config user.name "benchmark-radar[bot]"
+          git config user.email "benchmark-radar[bot]@users.noreply.github.com"
+          git add "${folder}"
+          if git diff --cached --quiet; then
+            echo "Share images for ${snapshot_date} are already pushed"
+          else
+            git commit -q -m "Share images for ${snapshot_date}"
+            # The Pages deploy pushes benchmark cards to the same branch, so a
+            # push can lose the race once; replay this commit on top and retry.
+            for attempt in 1 2 3; do
+              if git push -q "${remote}" "HEAD:refs/heads/${branch}"; then
+                break
+              fi
+              [[ "${attempt}" == 3 ]] && exit 1
+              git pull -q --rebase "${remote}" "${branch}"
+            done
+          fi
+          # A push is not yet a served file. The next step records the share
+          # block, which is what makes the site and the checklist link these
+          # images, so wait until the cards site serves every one of them. That
+          # holds even with nothing new to push (an earlier run may have pushed
+          # and then timed out here) and for a card a rerun appended, whose
+          # neighbours already answer.
+          deadline=$((SECONDS + 600))
+          for image in ../share-out/*.png; do
+            url="https://cards.benchmark-radar.org/${folder}/$(basename "${image}")"
+            until curl -fsS -o /dev/null "${url}"; do
+              if (( SECONDS >= deadline )); then
+                echo "::error::${url} was not served after 10 minutes"
+                exit 1
+              fi
+              sleep 10
+            done
+            echo "Published: ${url}"
+          done
+      - name: Record the day's share cards in the snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          snapshot_date="$(cat generated/out/snapshot-date.txt)"
           git config user.name "benchmark-radar[bot]"
           git config user.email "benchmark-radar[bot]@users.noreply.github.com"
           git add "data/snapshots/${snapshot_date}.json"
@@ -253,47 +318,76 @@ jobs:
             echo "Share cards are already recorded"
             exit 0
           fi
-          # [skip ci]: the site does not read the share block, so this commit
-          # must not start a second full Pages build after persist-snapshot's.
-          git commit -m "Record daily share cards [skip ci]"
+          # No [skip ci]: the site reads the share block (the Share buttons),
+          # and persist-snapshot's push built Pages from a snapshot without
+          # it. This push touches data/snapshots/**, so it starts the second
+          # Pages build that adds the buttons. The images are already
+          # published, so no button can open a 404. The App token is used so the
+          # push triggers workflows; the github-pages concurrency group queues
+          # the build behind one already running instead of cancelling it.
+          git commit -m "Record daily share cards"
           git push origin HEAD:main || {
             git pull --rebase origin main
             git push origin HEAD:main
           }
-      - name: Render and publish the day's share images
+
+  # Issue #1120: the facts the Latest releases ranking reads beyond attention,
+  # the institutions behind each paper and whether each ranked repository is a
+  # README-only placeholder. Runs after the snapshot (and the cards, which push
+  # to main too) so a slow lookup never costs the day its evidence. Pushing
+  # data/** starts the Pages build that re-ranks with the new facts.
+  refresh-release-signals:
+    needs: [persist-snapshot, publish-share-images]
+    if: always() && needs.persist-snapshot.result == 'success'
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Create release-signals writer token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ vars.RADAR_APP_ID }}
+          private-key: ${{ secrets.RADAR_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: benchmark-radar
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          token: ${{ steps.app-token.outputs.token }}
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: python -m pip install .
+      - name: Look up institutions and placeholder repositories
         env:
-          CARDS_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/fetch_release_signals.py
+      - name: Commit the refreshed release signals
         shell: bash
         run: |
           set -euo pipefail
-          snapshot_date="$(cat generated/out/snapshot-date.txt)"
-          branch="daily/${snapshot_date}"
-          remote="https://x-access-token:${CARDS_TOKEN}@github.com/ktwu01/benchmark-radar-cards.git"
-          python scripts/render_share_images.py \
-            --snapshot "data/snapshots/${snapshot_date}.json" \
-            --output-dir share-out
-          if [[ -z "$(ls -A share-out 2>/dev/null)" ]]; then
-            echo "No share cards for ${snapshot_date}"
-            exit 0
-          fi
-          # A same-day rerun adds a commit to the day's branch, so earlier
-          # images stay in its history.
-          if git ls-remote --exit-code --heads "${remote}" "${branch}" > /dev/null; then
-            git clone -q --depth 1 --branch "${branch}" "${remote}" cards
-          else
-            git init -q -b "${branch}" cards
-          fi
-          cp share-out/*.png cards/
-          cd cards
           git config user.name "benchmark-radar[bot]"
           git config user.email "benchmark-radar[bot]@users.noreply.github.com"
-          git add .
+          git add data/release_institutions.yml data/release_repos.yml
+          if git diff --cached --name-only |
+            grep -Fvx -e data/release_institutions.yml -e data/release_repos.yml
+          then
+            echo "::error::Release-signals step attempted to modify an unexpected path"
+            exit 1
+          fi
           if git diff --cached --quiet; then
-            echo "Share images for ${snapshot_date} are already current"
+            echo "Release signals are already current"
             exit 0
           fi
-          git commit -q -m "Share images for ${snapshot_date}"
-          git push -q "${remote}" "HEAD:refs/heads/${branch}"
+          git commit -m "Refresh release institutions and placeholder repositories"
+          git push origin HEAD:main || {
+            git pull --rebase origin main
+            git push origin HEAD:main
+          }
 
   # Issue #88: one daily Issue carrying only the day's social posting checklist.
   # The dashboard and site/feed.xml remain the reading surface (issue #37), so
@@ -328,14 +422,14 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Download validated report
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: benchmark-radar-${{ github.run_id }}
           path: generated/
       # The repo-change sentence reads the last 24 hours of git history, which
       # the full fetch above provides rather than the default shallow single
       # commit.
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
           cache: pip
@@ -360,8 +454,8 @@ jobs:
           existing="$(gh issue list --state open --search "\"${title}\" in:title" \
             --json number,title --jq ".[] | select(.title == \"${title}\") | .number" | head -1)"
           existing_body_args=()
-          # The share block is committed before its images are pushed, so a
-          # failed push would leave the checklist embedding missing images.
+          # A failed image push also leaves the share block uncommitted, and
+          # the checklist must not embed images that were never published.
           share_args=()
           if [[ "${SHARE_IMAGES_RESULT}" != "success" ]]; then
             share_args=(--skip-share-images)

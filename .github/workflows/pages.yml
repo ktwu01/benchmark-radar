@@ -5,6 +5,10 @@ on:
     branches: [main]
     paths:
       - "data/snapshots/**"
+      # The Latest releases ranking reads these (#1120): institutions behind
+      # each paper and README-only placeholder repositories.
+      - "data/release_institutions.yml"
+      - "data/release_repos.yml"
       # Report documents and scores feed the same catalog as source snapshots.
       - "data/model_cards.yml"
       # benchmark_scores.yml feeds the score-progression and insights layers of
@@ -27,6 +31,8 @@ on:
       - "data/leaderboard_snapshots.yml"
       - "data/catalog/identity.yml"
       - "data/catalog/benchmark_dates.yml"
+      - "data/catalog/benchmark_authors.yml"
+      - "data/catalog/benchmark_institutions.yml"
       - "data/catalog/llm_stats_identity_overrides.yml"
       - "data/catalog/claire_library_categories.json"
       - "data/catalog/claire_library_signals.json"
@@ -47,6 +53,9 @@ on:
       # deploy. Without these, editing the share-card generator or the export
       # layer succeeds, merges, and changes nothing that anyone can see.
       - "scripts/generate_og_image.py"
+      - "scripts/generate_saturation_og_image.py"
+      # Draws every benchmark's share card into site/cards/.
+      - "scripts/render_share_images.py"
       - "src/benchmark_radar/export.py"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
@@ -63,13 +72,14 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # About two and a half minutes of it draw the benchmark cards.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: recursive
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
           cache: pip
@@ -111,25 +121,49 @@ jobs:
           # Regenerated rather than served from the commit, so a share card can
           # never advertise counts the registry has moved past.
           python scripts/generate_og_image.py
+          # /saturation/ shares its own score-plateau card (app_pages.py).
+          python scripts/generate_saturation_og_image.py
+          # One share card per catalog benchmark (issue #671), served at
+          # /cards/<slug>.png and named by each benchmark page's og:image.
+          # Drawn here so a card always deploys with the page that names it,
+          # on the page's own host (src/benchmark_radar/cards.py says why).
+          python scripts/render_share_images.py \
+            --catalog site/data/benchmark-index.json \
+            --output-dir site/cards
           # Freeze IDs for any model or organization that appeared since the
           # last run. Never ran in CI before, which is how the registry drifted
           # to 357 models against models.json's 355 and nothing noticed.
           python scripts/build_logo_registry.py
           pytest -q
-      - name: Minify the dashboard stylesheet
-        run: python scripts/minify_css.py site/assets/styles.css
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+      # Runs after pytest, which reads the readable sources. esbuild parses the
+      # code, so string and template-literal text is kept byte for byte; a
+      # regex minifier collapsed spaces inside nested template literals.
+      - name: Minify the published JavaScript and CSS
+        run: >-
+          npx --yes esbuild@0.28.2 site/assets/*.js site/assets/*.css
+          --minify --outdir=site/assets --allow-overwrite --log-level=error
       - name: Upload CLI data release for publishing
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: cli-data-release
           path: site/data/cli/
           if-no-files-found: error
           retention-days: 1
       - name: Upload Hugging Face dataset release
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: hf-dataset-release
           path: site/data/hf_dataset/
+          if-no-files-found: error
+          retention-days: 1
+      - name: Upload benchmark cards for the archive
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: benchmark-cards
+          path: site/cards/
           if-no-files-found: error
           retention-days: 1
       - name: Remove CLI archive from Pages artifact
@@ -149,7 +183,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Download verified CLI data release
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: cli-data-release
           path: cli-data-release
@@ -180,7 +214,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Download verified HF dataset release
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: hf-dataset-release
           path: hf-dataset-release
@@ -213,6 +247,72 @@ jobs:
           )
           print(f"Successfully synced dataset to https://huggingface.co/datasets/{repo_id}")
           '
+
+  # Issue #671: archive the cards the build drew to the `cards` branch of
+  # ktwu01/benchmark-radar-cards, which GitHub Pages also serves at
+  # cards.benchmark-radar.org. Images in this repository would grow every clone.
+  # The site serves its own copy, so the deploy does not wait on this job.
+  publish-benchmark-cards:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Create cards writer token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ vars.RADAR_APP_ID }}
+          private-key: ${{ secrets.RADAR_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: benchmark-radar-cards
+      - name: Download the cards the build drew
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: benchmark-cards
+          path: cards-out
+      - name: Publish the cards
+        env:
+          CARDS_TOKEN: ${{ steps.app-token.outputs.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch="cards"
+          remote="https://x-access-token:${CARDS_TOKEN}@github.com/ktwu01/benchmark-radar-cards.git"
+          if git ls-remote --exit-code --heads "${remote}" "${branch}" > /dev/null; then
+            git clone -q --depth 1 --branch "${branch}" "${remote}" cards
+          else
+            git init -q -b "${branch}" cards
+          fi
+          # Copied over, never mirrored: a card someone already posted keeps
+          # its URL after its benchmark leaves the catalog. The renderer is
+          # deterministic, so only cards whose facts changed make a diff.
+          cp cards-out/*.png cards/
+          cd cards
+          # GitHub Pages serves this branch at the domain in CNAME (CARDS_DOMAIN
+          # in src/benchmark_radar/cards.py); .nojekyll skips a Jekyll build
+          # that would only copy thousands of images.
+          echo "cards.benchmark-radar.org" > CNAME
+          touch .nojekyll
+          git config user.name "benchmark-radar[bot]"
+          git config user.email "benchmark-radar[bot]@users.noreply.github.com"
+          git add .
+          if git diff --cached --quiet; then
+            echo "Benchmark cards are already current"
+            exit 0
+          fi
+          git commit -q -m "Benchmark cards for ${GITHUB_SHA::7}"
+          # The daily run pushes its share images to the same branch, so a
+          # push can lose the race once; replay this commit on top and retry.
+          for attempt in 1 2 3; do
+            if git push -q "${remote}" "HEAD:refs/heads/${branch}"; then
+              break
+            fi
+            [[ "${attempt}" == 3 ]] && exit 1
+            git pull -q --rebase "${remote}" "${branch}"
+          done
 
   deploy:
     needs: [build, publish-cli-data, publish-hf-dataset]

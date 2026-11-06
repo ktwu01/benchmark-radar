@@ -24,7 +24,6 @@ affiliation neither states is left off rather than guessed.
 
 from __future__ import annotations
 
-import html
 import http.client
 import json
 import os
@@ -35,17 +34,16 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from .cards import CARDS_SITE_URL
 from .corpus import organizations_for_item
 from .http import RequestError, get_json, get_text
+from .paper_institutions import arxiv_html_affiliations, arxiv_id, openalex_institutions
 from .snapshots import _write_json, load_snapshots, validate_snapshot
 
 # A lookup that fails in any of these ways costs the card one fact. An
 # IncompleteRead or a reset connection escapes http.py as itself, not as
 # RequestError, and a failed lookup must never cost the day its snapshot.
 _LOOKUP_ERRORS = (RequestError, OSError, http.client.HTTPException)
-
-CARDS_REPOSITORY = "ktwu01/benchmark-radar-cards"
-CARDS_RAW_URL = f"https://raw.githubusercontent.com/{CARDS_REPOSITORY}/refs/heads"
 
 DEFAULT_LIMIT = 3
 SHARE_SCHEMA_VERSION = 1
@@ -59,9 +57,6 @@ _EXCLUDED_SOURCES = frozenset({"GitHub Release"})
 # institution the item reported.
 _HANDLE_SOURCES = frozenset({"Hugging Face", "GitHub", "GitHub Organization", "Kaggle Dataset"})
 
-_ARXIV_ID = re.compile(r"(\d{4}\.\d{4,5})")
-_AFFILIATION_SPAN = re.compile(r'<span class="ltx_contact ltx_role_affiliation">')
-_SPAN_TAG = re.compile(r"<(/?)span\b[^>]*>")
 
 Fetch = Callable[..., Any]
 
@@ -146,6 +141,21 @@ def select_top_items(
     return selected
 
 
+# A displayed name or institution has at least one letter. A paper whose LaTeX
+# macro broke renders its affiliation as "[" in arXiv HTML (arXiv:2611.01700),
+# and a card that prints "[" reads as broken (#1070); such a value stays
+# unknown. Applied to what a card shows, never to lookup handles: an owner such
+# as "488315" is a valid account to look up.
+_LETTER = re.compile(r"[^\W\d_]")
+
+
+def _shown(creators: dict[str, list[str]]) -> dict[str, list[str]]:
+    return {
+        field: [value for value in values if _LETTER.search(value)]
+        for field, values in creators.items()
+    }
+
+
 def _unique(values: list[str]) -> list[str]:
     return list(dict.fromkeys(value.strip() for value in values if value and value.strip()))
 
@@ -170,31 +180,14 @@ def _github_headers() -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"} if token else {}
 
 
-def _openalex_institutions(arxiv_id: str, fetch: Fetch) -> list[str]:
-    work = fetch(f"https://api.openalex.org/works/doi:10.48550/arXiv.{arxiv_id}")
-    return _unique(
-        [
-            str(institution.get("display_name") or "")
-            for authorship in work.get("authorships") or []
-            for institution in authorship.get("institutions") or []
-        ]
+def _openalex_institutions(paper: str, fetch: Fetch) -> list[str]:
+    return openalex_institutions(
+        fetch(f"https://api.openalex.org/works/doi:10.48550/arXiv.{paper}")
     )
 
 
-def _arxiv_html_affiliations(arxiv_id: str, fetch_text: Fetch) -> list[str]:
-    page = fetch_text(f"https://arxiv.org/html/{arxiv_id}")
-    affiliations: list[str] = []
-    for match in _AFFILIATION_SPAN.finditer(page):
-        depth, end = 1, match.end()
-        for tag in _SPAN_TAG.finditer(page, match.end()):
-            depth += -1 if tag.group(1) else 1
-            if depth == 0:
-                end = tag.start()
-                break
-        inner = re.sub(r'<span class="ltx_contact_name">.*?</span>', "", page[match.end() : end])
-        text = " ".join(html.unescape(re.sub(r"<[^>]+>", " ", inner)).split())
-        affiliations.append(text.removeprefix("Affiliation:").strip())
-    return _unique(affiliations)
+def _arxiv_html_affiliations(paper: str, fetch_text: Fetch) -> list[str]:
+    return arxiv_html_affiliations(str(fetch_text(f"https://arxiv.org/html/{paper}") or ""))
 
 
 def _huggingface_creator(handle: str, fetch: Fetch) -> tuple[list[str], list[str]]:
@@ -225,6 +218,12 @@ def resolve_creators(
     A failed lookup keeps whatever the item already carried. The image then
     shows fewer facts, never a guessed one.
     """
+    return _shown(_lookup_creators(item, fetch=fetch, fetch_text=fetch_text))
+
+
+def _lookup_creators(
+    item: dict[str, Any], *, fetch: Fetch, fetch_text: Fetch
+) -> dict[str, list[str]]:
     authors = _unique_people([str(name) for name in item.get("authors") or []])
     organizations = _unique(organizations_for_item(item))
     source = str(item.get("source") or "")
@@ -236,14 +235,17 @@ def resolve_creators(
             return {"authors": authors or owner_authors, "affiliations": affiliations}
         if source in _HANDLE_SOURCES:
             return {"authors": authors, "affiliations": []}
-        match = _ARXIV_ID.search(url) if source in {"arXiv", "Hugging Face Papers"} else None
-        if match and not organizations:
+        # Any source that links an arXiv paper, not only arXiv itself: the
+        # same paper reaches the radar through DataCite (its 10.48550 DOI) and
+        # mirrors such as XBsleepy, and those cards showed no institution.
+        paper = arxiv_id(url)
+        if paper and not organizations:
             try:
-                organizations = _openalex_institutions(match.group(1), fetch)
+                organizations = _openalex_institutions(paper, fetch)
             except _LOOKUP_ERRORS:
                 organizations = []
             if not organizations:
-                organizations = _arxiv_html_affiliations(match.group(1), fetch_text)
+                organizations = _arxiv_html_affiliations(paper, fetch_text)
     except (*_LOOKUP_ERRORS, AttributeError, TypeError, ValueError) as error:
         print(f"warning: creator lookup failed for {url}: {error}", file=sys.stderr)
         if source in _HANDLE_SOURCES:
@@ -355,13 +357,13 @@ def build_share_block(
 
 
 def card_image_name(index: int) -> str:
-    """File name of the ``index``-th (1-based) card on the day's branch."""
+    """File name of the ``index``-th (1-based) card in the day's folder."""
     return f"card-{index:02d}.png"
 
 
 def daily_image_url(date: str, name: str) -> str:
-    """Public URL of an image on the day's branch in the cards repository."""
-    return f"{CARDS_RAW_URL}/daily/{date}/{name}"
+    """Public URL of one of the day's images on the cards site."""
+    return f"{CARDS_SITE_URL}/daily/{date}/{name}"
 
 
 def write_share_block(snapshot_dir: Path, date: str) -> dict[str, Any] | None:

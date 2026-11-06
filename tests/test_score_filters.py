@@ -139,10 +139,13 @@ def test_generated_catalog_index_and_shards_share_summary():
         )
         assert series["score_summary"] == expected
         assert record["score_summary"] == expected
-        model_ids = {
+        model_ids = [
             row["model_id"] for row in payload["rows"] if isinstance(row["value"], (int, float))
-        }
-        assert record["score_summary"]["model_count"] == (len(model_ids) if model_ids else None)
+        ]
+        # A source that names no model ids (Benchmark Saturation) has no
+        # certain model count; a name alone could double-count one model.
+        expected_count = len(set(model_ids)) if model_ids and all(model_ids) else None
+        assert record["score_summary"]["model_count"] == expected_count
 
 
 def test_generated_curated_summary_counts_all_observations():

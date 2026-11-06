@@ -77,9 +77,14 @@ def _post_page(post: BlogPost, chrome: SiteChrome, chrome_i18n: dict[str, str]) 
     def language_body(language: str, content: str, *, hidden: bool) -> str:
         title = post.title_zh if language == "zh" and post.title_zh else post.title
         hidden_attr = " hidden" if hidden else ""
+        # One h1 per page (#1066). Both languages ship in one document, so the
+        # hidden Chinese title is an h2 that looks the same; blog.js moves the
+        # h1 to whichever title the reader switches to.
+        tag = "h2" if hidden else "h1"
+        lang = ' lang="zh-Hans"' if language == "zh" else ""
         return f"""<div data-lang-content="{language}"{hidden_attr}>
 <header class="blog-hero">
-  <h1>{esc(title)}</h1>
+  <{tag} class="blog-title"{lang}>{esc(title)}</{tag}>
 </header>
 <div class="blog-prose">{content}</div>
 </div>"""
@@ -116,7 +121,6 @@ def _post_page(post: BlogPost, chrome: SiteChrome, chrome_i18n: dict[str, str]) 
         body=body,
         chrome=chrome,
         chrome_i18n=chrome_i18n,
-        updated=post.updated,
         schemas=(
             posting,
             breadcrumb_schema(
@@ -187,7 +191,6 @@ def _index_page(
         body=body,
         chrome=chrome,
         chrome_i18n=chrome_i18n,
-        updated=posts[0].updated if posts else "—",
         schemas=(
             webpage_schema(title=title, description=description, canonical=canonical),
             item_list,
@@ -239,9 +242,11 @@ def blog_feed_tree(posts: list[BlogPost]) -> ET.ElementTree:
     return ET.ElementTree(root)
 
 
-def build_posts(snapshots: list[dict[str, Any]]) -> list[BlogPost]:
+def build_posts(
+    snapshots: list[dict[str, Any]], catalog_pages: dict[str, str] | None = None
+) -> list[BlogPost]:
     """One post per snapshot, newest first, with duplicate days rejected."""
-    posts = [build_post(snapshot) for snapshot in snapshots]
+    posts = [build_post(snapshot, catalog_pages, snapshots) for snapshot in snapshots]
     slugs = [post.slug for post in posts]
     duplicates = sorted({slug for slug in slugs if slugs.count(slug) > 1})
     if duplicates:
@@ -256,6 +261,7 @@ def write_blog(
     *,
     dashboard_html: str | None = None,
     app_js: str | None = None,
+    catalog_pages: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """Write the whole blog tree atomically and report what it published.
 
@@ -284,7 +290,7 @@ def write_blog(
         app_js = app_js_source.read_text(encoding="utf-8")
     chrome = extract_site_chrome(dashboard_html)
     chrome_i18n = chrome_i18n_table(chrome, app_js)
-    posts = build_posts(snapshots)
+    posts = build_posts(snapshots, catalog_pages)
     output_dir = site_dir / "blog"
     staging = site_dir / "blog.staging"
     if staging.exists():

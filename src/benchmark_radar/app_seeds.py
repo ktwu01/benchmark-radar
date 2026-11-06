@@ -24,6 +24,7 @@ from typing import Any
 from urllib.parse import urlsplit, urlunsplit
 
 from .citation import apa_citation
+from .media import MEDIA_COVERAGE
 from .model_scores import (
     CAPABILITY_ORDER,
     DATE_LABELS,
@@ -909,6 +910,9 @@ def _library_seed(
         )
         if record.get("released"):
             facts.append(_medium_date(record["released"]))
+        # The first three institutions behind the record's paper (#1120).
+        if record.get("institutions"):
+            facts.append(" · ".join(str(name) for name in record["institutions"][:3]))
         facts.append(SOURCE_LABELS.get(record["source"], record["source"]))
         # The same artifact and star facts the live row shows.
         facts.extend(
@@ -1481,6 +1485,7 @@ SCORE_SOURCE_LINKS: tuple[tuple[str, str], ...] = (
     ("LLM Stats", "https://llm-stats.com"),
     ("Artificial Analysis", "https://artificialanalysis.ai"),
     ("OpenCompass Hub", "https://hub.opencompass.org.cn"),
+    ("Benchmark Saturation", "https://github.com/evaleval/benchmark-saturation"),
 )
 CITE_CREDIT_LEAD = "Benchmark score data comes from lab model reports and from"
 
@@ -1520,6 +1525,20 @@ def _cite_credit() -> str:
     return f"{esc(CITE_CREDIT_LEAD)} {joined}."
 
 
+def _cite_media() -> str:
+    """Coverage under the citation formats, mirrored by app.js's citeMedia()."""
+    rows = "".join(
+        f'<li><a href="{esc(url)}" target="_blank" rel="noopener noreferrer">{esc(label)}</a>'
+        f' <span class="cite-media-note">{esc(note)}</span></li>'
+        for label, url, note in MEDIA_COVERAGE
+    )
+    return (
+        '<section class="cite-media" aria-labelledby="cite-media-title">'
+        '<h3 class="cite-media-title" id="cite-media-title">In the media</h3>'
+        f'<ul class="cite-media-list">{rows}</ul></section>'
+    )
+
+
 def _cite_seed() -> dict[str, str]:
     blocks = "".join(
         (
@@ -1539,6 +1558,7 @@ def _cite_seed() -> dict[str, str]:
         f'href="{esc(CITE_CFF_URL)}" target="_blank" rel="noopener noreferrer">'
         "View the citation file</a>"
         f'<p class="cite-credit">{_cite_credit()}</p>'
+        f"{_cite_media()}"
     )
     return {'<div id="cite-content"></div>': (f'<div id="cite-content" data-seed>{content}</div>')}
 

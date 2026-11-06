@@ -1,4 +1,4 @@
-"""The /about/ page and the alias paths that redirect into /cite/ (issue #593).
+"""The /about/ and /media/ pages, and the alias paths that redirect into /cite/ (issue #593).
 
 Two gaps this closes. The project's own story lived only in the GitHub README,
 so a reader who arrived from search had no page explaining what the catalog is,
@@ -28,10 +28,12 @@ from typing import Any
 
 from .blog_shell import SiteChrome, chrome_i18n_table, extract_site_chrome, render_page
 from .feed import SITE_URL
+from .media import MEDIA_CONTACT, MEDIA_COVERAGE
 from .site_shell import breadcrumb_schema, esc, organization_reference, website_reference
 
 ABOUT_PATH = "/about/"
 CITE_PATH = "/cite/"
+MEDIA_PATH = "/media/"
 # Both the singular and the plural, because a reader types either one and a
 # 404 on the second is a lost citation.
 ALIAS_PATHS: tuple[tuple[str, str], ...] = (
@@ -124,65 +126,7 @@ _INSIDE: tuple[tuple[str, str], ...] = (
     ("/blog/", "Read the daily brief: what appeared today and what it means"),
     ("/cli/", "Query the whole catalog offline from the command line"),
     (CITE_PATH, "Cite the technical report, or read the publications behind it"),
-)
-
-# Keep labels factual: a paper listing or social post is not an endorsement.
-_COVERAGE: tuple[tuple[str, str, str], ...] = (
-    (
-        "Daily AI Wire News",
-        "https://dailyaiwire.news/article/benchmark-radar-ai-evaluation-database-search-engine",
-        "Article",
-    ),
-    (
-        "Moonlight",
-        "https://www.themoonlight.io/en/review/"
-        "benchmark-radar-a-living-database-and-search-engine-for-ai-benchmarks-and-evaluation",
-        "Paper summary",
-    ),
-    ("Papers with Code", "https://paperswithcode.co/paper/2609.11115", "Paper listing"),
-    ("alphaXiv", "https://www.alphaxiv.org/abs/2609.11115", "Paper discussion"),
-    ("Hugging Face Papers", "https://huggingface.co/papers/2609.11115", "Paper discussion"),
-    (
-        "arXivDaily",
-        "https://www.arxivdaily.com/universities/sjtu",
-        "Shanghai Jiao Tong University paper feed (rolling)",
-    ),
-    ("Geepity", "https://geepity.com/2609.11115/", "Paper page"),
-    ("Isfahan AI", "https://isfahan-ai.ir/news/1248", "News post"),
-    (
-        "Collected",
-        "https://collected.ga/typesafe-ai-daily-benchmark-radar-a-living-database-"
-        "and-search-engine-for-ai-benchmarks-and-eval/",
-        "Typesafe AI Daily",
-    ),
-    (
-        "Alexy Khrabrov on LinkedIn",
-        "https://www.linkedin.com/posts/chiefscientist_typesafe-ai-daily-benchmark-radar-"
-        "a-living-share-7504531089483309056-9uO7/",
-        "Community post",
-    ),
-    (
-        "Daily AI Wire News on LinkedIn",
-        "https://www.linkedin.com/posts/benchmark-radar-launches-as-centralized-ai-"
-        "share-7504478957413527552-jdN_/",
-        "Article announcement",
-    ),
-    ("@SciFi on X", "https://x.com/SciFi/status/2098817718036127993", "Community post"),
-    (
-        "@HuggingPapers on X",
-        "https://x.com/HuggingPapers/status/2099412410264060340",
-        "Community post",
-    ),
-    (
-        "@marcel_butucea on X",
-        "https://x.com/marcel_butucea/status/2098914581204680765",
-        "Community post",
-    ),
-    (
-        "Moltbook",
-        "https://www.moltbook.com/post/a65591a2-d28d-4f3d-b381-fe2836c4e4c3",
-        "Community post",
-    ),
+    (MEDIA_PATH, "Read press, paper summaries, and community posts about the project"),
 )
 
 _STORY = (
@@ -199,9 +143,9 @@ _STORY = (
         "OpenReview, Semantic Scholar, Hacker News, and the labs' own release feeds, and "
         "writes down the benchmark work that appeared that day. Separately, the scored "
         "catalog is built from registered leaderboards and model reports: OpenCompass Hub, "
-        "LLM Stats, Artificial Analysis, and the evaluation tables labs publish with a "
-        "model. Each benchmark in that catalog keeps its own page with the paper, code, "
-        "and dataset links it has, plus every score on record.",
+        "LLM Stats, Artificial Analysis, the Benchmark Saturation study, and the evaluation "
+        "tables labs publish with a model. Each benchmark in that catalog keeps its own page "
+        "with the paper, code, and dataset links it has, plus every score on record.",
     ),
     (
         "The rule the whole project follows",
@@ -245,14 +189,11 @@ def about_body() -> str:
 </header>
 <div class="blog-prose">{story}
 <section><h2>Where to start</h2>{_inside_list()}</section>
-<section id="coverage"><h2>Media and community</h2>
-<p>Read coverage, paper summaries, and community discussions of Benchmark Radar.</p>
-{_link_list(_COVERAGE)}</section>
 <section><h2>Benchmark Radar elsewhere</h2>{_link_list(_ELSEWHERE)}</section>
 </div>"""
 
 
-def about_page(chrome: SiteChrome, chrome_i18n: dict[str, str], updated: str | None) -> str:
+def about_page(chrome: SiteChrome, chrome_i18n: dict[str, str]) -> str:
     canonical = SITE_URL + ABOUT_PATH
     about = {
         "@context": "https://schema.org",
@@ -272,7 +213,6 @@ def about_page(chrome: SiteChrome, chrome_i18n: dict[str, str], updated: str | N
         body=about_body(),
         chrome=chrome,
         chrome_i18n=chrome_i18n,
-        updated=updated,
         schemas=(
             about,
             breadcrumb_schema(
@@ -282,6 +222,70 @@ def about_page(chrome: SiteChrome, chrome_i18n: dict[str, str], updated: str | N
             ),
         ),
     )
+
+
+MEDIA_TITLE = "Benchmark Radar in the media"
+MEDIA_DESCRIPTION = (
+    "Press coverage, paper summaries, and community posts about Benchmark Radar, the open "
+    "database and search engine for AI benchmarks, with a contact for media inquiries."
+)
+
+
+def media_body() -> str:
+    contact = f'<a href="mailto:{esc(MEDIA_CONTACT)}">{esc(MEDIA_CONTACT)}</a>'
+    return f"""<header class="blog-hero">
+  <h1>{esc(MEDIA_TITLE)}</h1>
+  <p class="blog-lede">Articles, paper summaries, and community posts about Benchmark Radar.
+  For press and media inquiries, contact {contact}.</p>
+</header>
+<div class="blog-prose">
+<section id="coverage"><h2>Coverage</h2>{_link_list(MEDIA_COVERAGE)}</section>
+<section id="contact"><h2>Media contact</h2>
+<p>For interviews, quotes, or data for a story, email {contact}.</p></section>
+</div>"""
+
+
+def media_page(chrome: SiteChrome, chrome_i18n: dict[str, str]) -> str:
+    canonical = SITE_URL + MEDIA_PATH
+    page = {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "@id": canonical,
+        "name": MEDIA_TITLE,
+        "url": canonical,
+        "description": MEDIA_DESCRIPTION,
+        "inLanguage": ["en"],
+        "isPartOf": website_reference(),
+        "about": organization_reference(),
+    }
+    return render_page(
+        title=MEDIA_TITLE,
+        description=MEDIA_DESCRIPTION,
+        canonical=canonical,
+        body=media_body(),
+        chrome=chrome,
+        chrome_i18n=chrome_i18n,
+        schemas=(
+            page,
+            breadcrumb_schema(
+                ("Benchmark Radar", f"{SITE_URL}/"),
+                ("Media", canonical),
+                canonical=canonical,
+            ),
+        ),
+    )
+
+
+def _write_page(site_dir: Path, path: str, html: str) -> None:
+    output = site_dir / path.strip("/")
+    staging = output.with_name(output.name + ".staging")
+    if staging.exists():
+        shutil.rmtree(staging)
+    staging.mkdir(parents=True)
+    (staging / "index.html").write_text(html, encoding="utf-8")
+    if output.exists():
+        shutil.rmtree(output)
+    staging.rename(output)
 
 
 def alias_page(target: str) -> str:
@@ -306,36 +310,26 @@ def alias_page(target: str) -> str:
 def write_about(
     site_dir: Path,
     *,
-    updated: str | None,
     dashboard_html: str | None = None,
     app_js: str | None = None,
 ) -> dict[str, Any]:
-    """Write /about/ and the alias stubs, reporting the paths the sitemap may list.
+    """Write /about/, /media/ and the alias stubs, reporting the paths the sitemap may list.
 
-    Only the about page is returned as indexable. The aliases exist so a typed
+    Only the two pages are returned as indexable. The aliases exist so a typed
     or linked URL lands somewhere, and a sitemap that advertised them would be
     asking a crawler to index a page that immediately becomes another one.
 
-    ``updated`` is None when the corpus has no history yet. The page is still
-    written: it is prose about the project, the site nav links to it from every
-    other page, and a build that skipped it would publish a nav item that 404s.
+    Both pages are written even when the corpus has no history yet: they are
+    prose about the project, the site nav links to them from every other page,
+    and a build that skipped them would publish nav items that 404.
     """
     if dashboard_html is None:
         dashboard_html = (site_dir / "index.html").read_text(encoding="utf-8")
     if app_js is None:
         app_js = (site_dir / "assets" / "app.js").read_text(encoding="utf-8")
-    chrome = extract_site_chrome(dashboard_html, active_path=ABOUT_PATH)
-    i18n = chrome_i18n_table(chrome, app_js)
-
-    output = site_dir / ABOUT_PATH.strip("/")
-    staging = output.with_name(output.name + ".staging")
-    if staging.exists():
-        shutil.rmtree(staging)
-    staging.mkdir(parents=True)
-    (staging / "index.html").write_text(about_page(chrome, i18n, updated), encoding="utf-8")
-    if output.exists():
-        shutil.rmtree(output)
-    staging.rename(output)
+    for path, render in ((ABOUT_PATH, about_page), (MEDIA_PATH, media_page)):
+        chrome = extract_site_chrome(dashboard_html, active_path=path)
+        _write_page(site_dir, path, render(chrome, chrome_i18n_table(chrome, app_js)))
 
     aliases = []
     for alias, target in ALIAS_PATHS:
@@ -343,4 +337,4 @@ def write_about(
         alias_dir.mkdir(parents=True, exist_ok=True)
         (alias_dir / "index.html").write_text(alias_page(target), encoding="utf-8")
         aliases.append(alias)
-    return {"paths": [ABOUT_PATH], "aliases": aliases}
+    return {"paths": [ABOUT_PATH, MEDIA_PATH], "aliases": aliases}

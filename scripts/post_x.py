@@ -1,0 +1,485 @@
+#!/usr/bin/env python3
+"""Post the day's Benchmark Radar briefing to X.
+
+Reads the committed daily snapshot and builds one long post from material the
+radar already produced: the briefing bullets and the share block that also
+drives the day's cards. Nothing here writes new copy beyond fixed framing
+lines, and no count is hard-coded: the item count and source list come from
+the snapshot, the corpus total from the live records badge.
+
+Two scheduled workflows call this script, one fixed UTC time each:
+
+- post-x-en.yml at 13:00 UTC, posting the English briefing;
+- post-x-zh.yml at 03:00 UTC, posting the Chinese briefing from
+  ``briefing.bullets_zh`` for the latest committed snapshot.
+
+The post body never carries a link; the maintainer adds benchmark-radar.org
+as the first reply himself. Posting uses the official X API with OAuth 1.0a
+user context: four secrets (X_API_KEY, X_API_SECRET, X_ACCESS_TOKEN,
+X_ACCESS_TOKEN_SECRET) generated in the X developer console for the app
+owner's account. Every request is signed with HMAC-SHA1; the tokens do not
+expire unless they are regenerated in the console, so there is no refresh
+flow at all. A ledger at data/x-posts.json records each
+{date, lang, post id} so a re-run never posts the same briefing twice.
+There are no retries: one attempt, then the run fails loudly.
+"""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import datetime as dt
+import hashlib
+import hmac
+import json
+import os
+import re
+import secrets
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from collections import Counter
+from pathlib import Path
+from typing import Any
+
+ROOT = Path(__file__).resolve().parent.parent
+SNAPSHOT_DIR = ROOT / "data" / "snapshots"
+LEDGER_PATH = ROOT / "data" / "x-posts.json"
+CARDS_IMAGE_URL = "https://cards.benchmark-radar.org/daily/{date}/top3.png"
+BADGE_URL = "https://benchmark-radar.org/data/records-badge.json"
+MEDIA_UPLOAD_URL = "https://api.x.com/2/media/upload"
+TWEETS_URL = "https://api.x.com/2/tweets"
+MAX_POST_CHARS = 4_000
+
+_MONTHS_EN = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+]
+
+_EVIDENCE_RE = re.compile(r"\s*Evidence:\s*[^.]*\.?")
+_CITATION_RE = re.compile(r"\bEvidence\b")
+
+
+def _clean(text: str) -> str:
+    """Collapse whitespace and drop the briefing's evidence annotations."""
+    text = _EVIDENCE_RE.sub("", str(text or ""))
+    return " ".join(text.split()).strip()
+
+
+def first_sentence_en(text: str) -> str:
+    cleaned = _clean(text)
+    match = re.match(r"^(.+?[.!?])(?:\s|$)", cleaned)
+    return match.group(1) if match else cleaned
+
+
+def first_sentence_zh(text: str) -> str:
+    cleaned = _clean(text)
+    match = re.match(r"^(.+?[。！？])", cleaned)
+    return match.group(1) if match else first_sentence_en(cleaned)
+
+
+def list_snapshots() -> list[str]:
+    if not SNAPSHOT_DIR.is_dir():
+        return []
+    return sorted(path.stem for path in SNAPSHOT_DIR.glob("????-??-??.json"))
+
+
+def pick_snapshot_date(lang: str, requested: str | None) -> str | None:
+    """Which snapshot a run posts.
+
+    English runs after the day's 05:00 UTC radar run, so it prefers today's
+    UTC date. Chinese runs at 03:00 UTC, before that day's run, so the
+    latest committed snapshot is the previous UTC day's; both languages fall
+    back to the newest snapshot on disk so a delayed run still posts.
+    """
+    dates = list_snapshots()
+    if not dates:
+        return None
+    if requested:
+        return requested if requested in dates else None
+    today = dt.datetime.now(dt.UTC).date().isoformat()
+    if lang == "en" and today in dates:
+        return today
+    return dates[-1]
+
+
+def load_snapshot(date: str) -> dict[str, Any]:
+    path = SNAPSHOT_DIR / f"{date}.json"
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _format_date_en(iso_date: str) -> str:
+    parsed = dt.date.fromisoformat(iso_date)
+    return f"{_MONTHS_EN[parsed.month - 1]} {parsed.day}, {parsed.year}"
+
+
+def _format_date_zh(iso_date: str) -> str:
+    parsed = dt.date.fromisoformat(iso_date)
+    return f"{parsed.year} 年 {parsed.month} 月 {parsed.day} 日"
+
+
+def _format_day_en(iso_datetime: str) -> str:
+    parsed = dt.datetime.fromisoformat(str(iso_datetime).replace("Z", "+00:00"))
+    return f"{_MONTHS_EN[parsed.month - 1]} {parsed.day}"
+
+
+def _format_day_zh(iso_datetime: str) -> str:
+    parsed = dt.datetime.fromisoformat(str(iso_datetime).replace("Z", "+00:00"))
+    return f"{parsed.month} 月 {parsed.day} 日"
+
+
+def _creators_line(card: dict[str, Any], lang: str) -> str | None:
+    authors = [str(name) for name in card.get("authors") or [] if str(name).strip()]
+    affiliations = [str(name) for name in card.get("affiliations") or [] if str(name).strip()]
+    if not authors and not affiliations:
+        return None
+    label = "By" if lang == "en" else "作者"
+    parts = []
+    if authors:
+        shown = ", ".join(authors[:3])
+        if len(authors) > 3:
+            shown += " et al."
+        parts.append(shown)
+    if affiliations:
+        parts.append(", ".join(affiliations[:2]))
+    return f"{label} {' · '.join(parts)}"
+
+
+def build_post(snapshot: dict[str, Any], lang: str, total_records: int | None) -> str:
+    """Assemble the long post for one snapshot in one language."""
+    date = str(snapshot["date"])
+    items = snapshot.get("evidence_items") or []
+    sources = ", ".join(
+        source
+        for source, _ in Counter(
+            str(item.get("source") or "unknown") for item in items
+        ).most_common()
+    )
+    briefing = snapshot.get("briefing") or {}
+    bullets = briefing.get("bullets") or []
+    bullets_zh = briefing.get("bullets_zh") or []
+    cards = (snapshot.get("share") or {}).get("cards") or []
+    top_cards = cards[:3]
+
+    if lang == "zh":
+        lines = [
+            f"📡 Benchmark Radar，{_format_date_zh(date)}",
+            "",
+            f"今天从 {sources} 共扫到 {len(items)} 条新条目。最值得先点开的三条：",
+            "",
+        ]
+        for index, card in enumerate(top_cards):
+            day = _format_day_zh(str(card.get("published_at") or ""))
+            lines.append(f"{index + 1}. {card.get('title')}（{card.get('source')}，{day}）")
+            blurb = (
+                first_sentence_zh(bullets_zh[index])
+                if index < len(bullets_zh)
+                else first_sentence_en(str(card.get("blurb") or ""))
+            )
+            if blurb:
+                lines.append(blurb)
+            creators = _creators_line(card, lang)
+            if creators:
+                lines.append(creators)
+            lines.append("")
+        extra = [first_sentence_zh(b) for b in bullets_zh[3:5] if b.strip()]
+        if extra:
+            lines.append("今日简报其他要点：")
+            lines.extend(f"· {line}" for line in extra)
+            lines.append("")
+        if total_records:
+            lines.append(f"Radar 现在共 {total_records:,} 条记录，每天更新，免费开源。")
+        lines.append("完整数据和搜索在第一条回复里 👇")
+        return "\n".join(lines)
+
+    lines = [
+        f"📡 Benchmark Radar, {_format_date_en(date)}",
+        "",
+        f"{len(items)} new benchmark items surfaced today across {sources}. Three to open first:",
+        "",
+    ]
+    for index, card in enumerate(top_cards):
+        day = _format_day_en(str(card.get("published_at") or ""))
+        lines.append(f"{index + 1}. {card.get('title')} ({card.get('source')}, {day})")
+        blurb = first_sentence_en(str(card.get("blurb") or ""))
+        if blurb:
+            lines.append(blurb)
+        creators = _creators_line(card, lang)
+        if creators:
+            lines.append(creators)
+        lines.append("")
+    extra = [first_sentence_en(b) for b in bullets[3:5] if b.strip()]
+    if extra:
+        lines.append("Also in today's briefing:")
+        lines.extend(f"· {line}" for line in extra)
+        lines.append("")
+    if total_records:
+        lines.append(
+            f"Radar totals: {total_records:,} records, updated daily, free and open source."
+        )
+    lines.append("Full data and search in the first reply 👇")
+    return "\n".join(lines)
+
+
+def fetch_total_records() -> int | None:
+    """Corpus size from the live records badge; None when unreachable."""
+    try:
+        with urllib.request.urlopen(BADGE_URL, timeout=15) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+        match = re.match(r"([\d,]+)", str(payload.get("message") or ""))
+        return int(match.group(1).replace(",", "")) if match else None
+    except (OSError, ValueError) as error:
+        print(f"warning: records badge unavailable: {error}", file=sys.stderr)
+        return None
+
+
+def fetch_image(date: str) -> bytes | None:
+    """The day's top3 card image; None when the cards site has not served it."""
+    url = CARDS_IMAGE_URL.format(date=date)
+    try:
+        with urllib.request.urlopen(url, timeout=30) as response:
+            return response.read()
+    except OSError as error:
+        print(f"warning: share image unavailable ({url}): {error}", file=sys.stderr)
+        return None
+
+
+def load_ledger() -> dict[str, Any]:
+    if LEDGER_PATH.exists():
+        return json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
+    return {"posts": []}
+
+
+def already_posted(ledger: dict[str, Any], date: str, lang: str) -> bool:
+    return any(
+        entry.get("date") == date and entry.get("lang") == lang
+        for entry in ledger.get("posts") or []
+    )
+
+
+def record_post(ledger: dict[str, Any], date: str, lang: str, post_id: str) -> None:
+    ledger.setdefault("posts", []).append(
+        {
+            "date": date,
+            "lang": lang,
+            "id": post_id,
+            "posted_at": dt.datetime.now(dt.UTC).isoformat(),
+        }
+    )
+    LEDGER_PATH.write_text(
+        json.dumps(ledger, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+
+
+def _request_json(request: urllib.request.Request) -> dict[str, Any]:
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as error:
+        body = error.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"X API {error.code}: {body}") from error
+
+
+def _pct(value: str) -> str:
+    return urllib.parse.quote(value, safe="")
+
+
+def oauth1_authorization_header(
+    method: str,
+    url: str,
+    credentials: dict[str, str],
+    extra_params: dict[str, str] | None = None,
+    *,
+    nonce: str | None = None,
+    timestamp: str | None = None,
+) -> str:
+    """Build an OAuth 1.0a (HMAC-SHA1) Authorization header for one request.
+
+    The signature covers the oauth_* parameters, the URL query, and any form
+    parameters; JSON request bodies are excluded, per the OAuth 1.0a spec.
+    """
+    oauth_params = {
+        "oauth_consumer_key": credentials["api_key"],
+        "oauth_nonce": nonce or secrets.token_hex(16),
+        "oauth_signature_method": "HMAC-SHA1",
+        "oauth_timestamp": timestamp or str(int(time.time())),
+        "oauth_token": credentials["access_token"],
+        "oauth_version": "1.0",
+    }
+    parts = urllib.parse.urlsplit(url)
+    signature_params = dict(oauth_params)
+    signature_params.update(dict(urllib.parse.parse_qsl(parts.query)))
+    if extra_params:
+        signature_params.update(extra_params)
+    normalized = "&".join(
+        f"{_pct(key)}={_pct(value)}" for key, value in sorted(signature_params.items())
+    )
+    base_url = f"{parts.scheme}://{parts.netloc}{parts.path}"
+    base_string = "&".join((method.upper(), _pct(base_url), _pct(normalized)))
+    signing_key = f"{_pct(credentials['api_secret'])}&{_pct(credentials['access_token_secret'])}"
+    signature = base64.b64encode(
+        hmac.new(signing_key.encode("utf-8"), base_string.encode("utf-8"), hashlib.sha1).digest()
+    ).decode("utf-8")
+    header_params = {**oauth_params, "oauth_signature": signature}
+    return "OAuth " + ", ".join(
+        f'{_pct(key)}="{_pct(value)}"' for key, value in sorted(header_params.items())
+    )
+
+
+def _multipart_form_body(
+    fields: dict[str, str],
+    file_field: str,
+    filename: str,
+    file_content_type: str,
+    file_bytes: bytes,
+) -> tuple[bytes, str]:
+    """Build a multipart/form-data body (the v2 one-shot upload format)."""
+    boundary = "----benchmark-radar-" + secrets.token_hex(12)
+    chunks: list[bytes] = []
+    for name, value in fields.items():
+        chunks.append(
+            (
+                f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"\r\n\r\n{value}\r\n'
+            ).encode()
+        )
+    chunks.append(
+        (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="{file_field}"; filename="{filename}"\r\n'
+            f"Content-Type: {file_content_type}\r\n\r\n"
+        ).encode()
+    )
+    chunks.append(file_bytes)
+    chunks.append(f"\r\n--{boundary}--\r\n".encode())
+    return b"".join(chunks), f"multipart/form-data; boundary={boundary}"
+
+
+def upload_media(image: bytes, credentials: dict[str, str]) -> str:
+    # The v2 one-shot upload takes multipart/form-data with the raw image in
+    # a "media" field. A JSON body with base64 "media_data" is the retired
+    # v1.1 shape; the v2 endpoint answers it with a bare 503.
+    body, content_type = _multipart_form_body(
+        {"media_category": "tweet_image", "media_type": "image/png"},
+        "media",
+        "card.png",
+        "image/png",
+        image,
+    )
+    request = urllib.request.Request(
+        MEDIA_UPLOAD_URL,
+        data=body,
+        method="POST",
+        headers={
+            "Authorization": oauth1_authorization_header("POST", MEDIA_UPLOAD_URL, credentials),
+            "Content-Type": content_type,
+        },
+    )
+    payload = _request_json(request)
+    media_id = (payload.get("data") or {}).get("id") or payload.get("media_id_string")
+    if not media_id:
+        raise RuntimeError(f"X media upload returned no media id: {payload}")
+    return str(media_id)
+
+
+def create_post(text: str, media_id: str | None, credentials: dict[str, str]) -> str:
+    payload: dict[str, Any] = {"text": text}
+    if media_id:
+        payload["media"] = {"media_ids": [media_id]}
+    request = urllib.request.Request(
+        TWEETS_URL,
+        data=json.dumps(payload).encode("utf-8"),
+        method="POST",
+        headers={
+            "Authorization": oauth1_authorization_header("POST", TWEETS_URL, credentials),
+            "Content-Type": "application/json",
+        },
+    )
+    result = _request_json(request)
+    post_id = (result.get("data") or {}).get("id")
+    if not post_id:
+        raise RuntimeError(f"X post creation returned no id: {result}")
+    return str(post_id)
+
+
+def _emit_output(**values: str) -> None:
+    output_path = os.environ.get("GITHUB_OUTPUT")
+    if output_path:
+        with open(output_path, "a", encoding="utf-8") as handle:
+            for key, value in values.items():
+                handle.write(f"{key}={value}\n")
+    for key, value in values.items():
+        print(f"{key}={value}")
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--lang", choices=("en", "zh"), required=True)
+    parser.add_argument("--date", help="Snapshot date (YYYY-MM-DD); default per language")
+    parser.add_argument("--dry-run", action="store_true", help="Print, do not post")
+    args = parser.parse_args(argv)
+
+    date = pick_snapshot_date(args.lang, args.date)
+    if date is None:
+        print("::error::No snapshot found to post.", file=sys.stderr)
+        return 1
+    snapshot = load_snapshot(date)
+    text = build_post(snapshot, args.lang, fetch_total_records())
+    if len(text) > MAX_POST_CHARS:
+        print(
+            f"::error::Post is {len(text)} characters, over the {MAX_POST_CHARS} cap.",
+            file=sys.stderr,
+        )
+        return 1
+    if "http://" in text or "https://" in text:
+        print("::error::Post text contains a URL; links belong in the reply.", file=sys.stderr)
+        return 1
+
+    if args.dry_run:
+        print(text)
+        _emit_output(posted="false", snapshot_date=date)
+        return 0
+
+    ledger = load_ledger()
+    if already_posted(ledger, date, args.lang):
+        print(f"Skipping: {date} ({args.lang}) is already in the ledger.")
+        _emit_output(posted="false", snapshot_date=date)
+        return 0
+
+    credentials = {
+        "api_key": os.environ.get("X_API_KEY") or "",
+        "api_secret": os.environ.get("X_API_SECRET") or "",
+        "access_token": os.environ.get("X_ACCESS_TOKEN") or "",
+        "access_token_secret": os.environ.get("X_ACCESS_TOKEN_SECRET") or "",
+    }
+    if not all(credentials.values()):
+        print(
+            "::warning::X API secrets are not set yet; skipping the post. "
+            "Add X_API_KEY, X_API_SECRET, X_ACCESS_TOKEN and "
+            "X_ACCESS_TOKEN_SECRET as repository secrets to enable posting."
+        )
+        _emit_output(posted="false", snapshot_date=date)
+        return 0
+
+    image = fetch_image(date)
+    media_id = upload_media(image, credentials) if image else None
+    post_id = create_post(text, media_id, credentials)
+    record_post(ledger, date, args.lang, post_id)
+    print(f"Posted {date} ({args.lang}): https://x.com/ktwu01/status/{post_id}")
+    _emit_output(posted="true", snapshot_date=date, post_id=post_id)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

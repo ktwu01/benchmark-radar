@@ -105,3 +105,22 @@ after screenshots at one viewport, or the before and after text for CLI output.
   the before.
 - A PR with no link to an existing issue is closed by automation. Do not review
   it. Only bot-authored PRs are exempt.
+
+## 10. Does the fix cover every similar case, with a reasonable treatment?
+
+A fix for one instance often leaves its siblings with the old behavior, and the
+next report is the same bug in another place. In #1001, ranking stopped counting
+a GitHub release's repository stars, while the gold card tint kept counting them.
+In #994, downloads first earned the gold tint at the star threshold, although a
+download records no human decision.
+
+- List the siblings of what the fix touches: the other metrics, sources, record
+  types, and surfaces (ranking, card tint, counts, search, exports) that use the
+  same field or rule. For each, mark it covered in the diff, deliberately left
+  out with a reason, or not affected.
+- Give each sibling a treatment that fits its meaning, not a copied value. Where
+  the repository already sets a relation, such as the metric saturation values in
+  `src/benchmark_radar/rubric.py`, use it or state why not.
+- Ask for the counts before and after on the full corpus, such as how many cards
+  change tint or rank. A count that moves several times more than the issue
+  suggests needs a reason in the description.

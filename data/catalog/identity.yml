@@ -43,6 +43,21 @@ equivalent:
     reviewed_at: 2026-09-27
     note: Both records identify ELBench through the ZeroLoss-Lab/ELBench dataset.
 
+  # The registry's MirrorCode entry and the Claire import are the same
+  # benchmark: both cite the introducing paper, arXiv:2606.30182, and the
+  # Claire record also carries the epoch-research/MirrorCode repo. Left
+  # unlinked the catalog published two MirrorCode rows whose detail shards
+  # did not name each other, and the registry row carrying June Kim's audit
+  # sat apart from the crawl's record. Siblings only, like the Claire links
+  # above: neither record inherits fields or scores from the other.
+  - group_id: mirrorcode
+    basis: reviewer_asserted
+    members: [claire-radar:2606.30182, model-reports:mirrorcode]
+    anchors: [arxiv:2606.30182, gh:epoch-research/mirrorcode]
+    reviewed_by: ktwu01
+    reviewed_at: 2026-11-04
+    note: Both are MirrorCode (Adamczewski et al., 2026).
+
   # Same instrument across the two crawls, confirmed by hand. These 21 groups
   # pair score-dense llm-stats records with identity-rich OpenCompass records.
   - group_id: gpqa
