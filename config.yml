@@ -532,7 +532,10 @@ sources:
       - black-forest-labs/flux
       - 01-ai/Yi
       - meta-llama/llama-models
-      - openclaw/openclaw
+      # openclaw/openclaw was removed (#1008, strategy S4 in #1011): an agent
+      # app, not a model lab, and its only admitted release matched just
+      # "re-evaluate" in release-engineering prose. In 102 snapshots it
+      # contributed no benchmark, so removing it filters none.
       - karpathy/autoresearch
       - xai-org/grok-1
     page_size: 30
