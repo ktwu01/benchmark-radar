@@ -81,7 +81,7 @@ DATA_HOSTS = re.compile(
     r"huggingface\.co/datasets|hf\.co/datasets|drive\.google\.com|zenodo\.org"
     r"|kaggle\.com/datasets|figshare\.com|dropbox\.com|1drv\.ms|onedrive\.live\.com"
     r"|sharepoint\.com|pan\.baidu\.com|modelscope\.cn/datasets|osf\.io|dataverse"
-    r"|\.s3\.amazonaws\.com|storage\.googleapis\.com|physionet\.org"
+    r"|s3(?:[.-][a-z0-9-]+)?\.amazonaws\.com|storage\.googleapis\.com|physionet\.org"
     r"|openxlab\.org\.cn/datasets",
     re.IGNORECASE,
 )

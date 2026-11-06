@@ -414,3 +414,47 @@ def test_readme_data_links():
     assert readme_data_link("Code coming soon. https://huggingface.co/x") is None
     assert readme_name(["LICENSE", "readme.md", "assets"]) == "readme.md"
     assert readme_name(["LICENSE"]) is None
+
+
+def test_s3_dataset_links_in_every_url_style():
+    from benchmark_radar.release_signals import readme_data_link
+
+    for url in (
+        "https://s3.amazonaws.com/bucket/data.zip",
+        "https://bucket.s3.us-east-1.amazonaws.com/data.zip",
+        "https://bucket.s3.amazonaws.com/data.zip",
+        "https://s3-us-west-2.amazonaws.com/bucket/data.zip",
+    ):
+        assert readme_data_link(url), url
+    assert readme_data_link("https://aws.amazon.com/") is None
+
+
+def test_a_failed_readme_read_keeps_the_previous_row():
+    from datetime import date
+
+    from benchmark_radar.http import RequestError
+
+    fetch = _fetch_module()
+    previous = {
+        "placeholder": False,
+        "data_link": "drive.google.com",
+        "unavailable": False,
+        "retrieved_at": "2026-10-01",
+    }
+    rows = {"a/data": dict(previous)}
+
+    def read_readme(repo, name):
+        raise RequestError("HTTP 503 from raw.githubusercontent.com")
+
+    fetch.refresh_repos(
+        ["https://github.com/a/data"],
+        rows,
+        today=date(2026, 11, 6),
+        limit=5,
+        search=lambda repos: {"a/data": _meta("a/data", 17)},
+        confirm=lambda repo: None,
+        list_root=lambda repo: ["README.md"],
+        read_readme=read_readme,
+    )
+    # Not evidence of a placeholder: the run keeps what it knew.
+    assert rows["a/data"] == previous

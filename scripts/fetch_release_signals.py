@@ -158,12 +158,10 @@ def _apply_readme_data_link(row, full_name, names, read_readme):
 
 
 def _read_readme(full_name, name):
+    # A failed read is not evidence of "no data link": the error propagates
+    # so refresh_repos keeps the repository's previous row for this run.
     url = f"https://raw.githubusercontent.com/{full_name}/HEAD/{name}"
-    try:
-        return get_text(url, headers=_headers(), attempts=2)
-    except (RequestError, OSError) as error:
-        print(f"warning: {full_name}: README unreadable: {error}", file=sys.stderr)
-        return ""
+    return get_text(url, headers=_headers(), attempts=2)
 
 
 def refresh_repos(
