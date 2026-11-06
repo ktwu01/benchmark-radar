@@ -219,7 +219,7 @@ def test_catalog_search_is_deterministic_and_explains_matches(tmp_path: Path) ->
     assert result["total_matches"] == 2
     assert result["full_match_count"] == 2
     assert result["partial_match_count"] == 0
-    assert result["matching_policy"]["name"] == "lexical_candidates_v1"
+    assert result["matching_policy"]["name"] == "lexical_candidates_v2"
     assert result["matching_policy"]["ranking"] == "bm25f_v3"
     assert result["results"][0]["match"]["matched_fields"] == [
         "name",
@@ -331,6 +331,49 @@ def test_search_returns_partial_candidates_with_evidence_for_agent_judgment(
         set(item["match"]["score_components"]) == {"bm25f", "name_bonus", "phrase_bonus"}
         for item in result["results"]
     )
+
+
+def test_multi_word_query_drops_description_only_single_token_matches(tmp_path: Path) -> None:
+    # Issue #432: "protein structure prediction" returned a page of records
+    # matching one generic word ("prediction") in description only, ranked as
+    # confident matches while the rarer words matched nothing. A lone
+    # description-only token no longer qualifies for a multi-word query; a
+    # token in a name, category or other field still does.
+    service = QueryService(_catalog(tmp_path))
+
+    result = service.search("scientific protein prediction", scope="catalog", limit=10)
+
+    # "scientific" appears only in Science Discovery Suite's description.
+    assert result["search_status"] == "no_lexical_candidates"
+    assert result["candidate_count"] == 0
+    assert result["total_matches"] == 0
+    assert result["results"] == []
+    assert result["decision"] == "no_confident_match"
+    assert result["decision_reason"] == "no record matched any query token"
+
+
+def test_search_decision_marks_full_and_partial_coverage(tmp_path: Path) -> None:
+    # Issue #432: the JSON contract carried a rank and prose but no signal a
+    # caller could threshold on. `decision` states whether any record covered
+    # every query token; the raw BM25 score is deliberately not called
+    # confidence, since it is not comparable across queries.
+    service = QueryService(_catalog(tmp_path))
+
+    full = service.search("agent workbench", scope="catalog", limit=10)
+    assert full["search_status"] == "full_matches_found"
+    assert full["decision"] == "matches"
+    assert full["decision_reason"] == "at least one record matched every query token"
+    assert full["matching_policy"]["name"] == "lexical_candidates_v2"
+
+    partial = service.search("protein agent prediction", scope="catalog", limit=10)
+    assert partial["search_status"] == "partial_candidates_only"
+    assert partial["decision"] == "no_confident_match"
+    assert partial["decision_reason"] == (
+        "no record matched every query token; partial candidates share only some query tokens"
+    )
+    # Name-field partials survive the floor: both records match "agent" in
+    # their name, so the agent still gets candidates to inspect.
+    assert partial["candidate_count"] == 2
 
 
 def test_exact_name_and_phrase_are_controlled_boosts(tmp_path: Path) -> None:
@@ -511,7 +554,7 @@ def test_radar_results_carry_derived_science_domains(tmp_path: Path) -> None:
     recent = service.recent(limit=5)
     searched = service.search("brainbench", scope="radar", limit=5)
 
-    assert recent["schema_version"] == 7
+    assert recent["schema_version"] == 8
     assert recent["results"][0]["science_domains"] == ["neuroscience"]
     radar_hits = [record for record in searched["results"] if record["kind"] == "radar"]
     assert radar_hits and radar_hits[0]["science_domains"] == ["neuroscience"]
@@ -768,7 +811,7 @@ def test_healthz_identifies_local_health_check_contract(tmp_path: Path) -> None:
         thread.join(timeout=5)
 
     assert payload == {
-        "schema_version": 7,
+        "schema_version": 8,
         "retrieval_mode": "health_check",
         "data": {"source": "local", "citation": citation_block()},
         "status": "ok",
@@ -850,7 +893,7 @@ def test_http_errors_are_machine_readable(tmp_path: Path) -> None:
 
     assert captured.value.code == 400
     assert payload == {
-        "schema_version": 7,
+        "schema_version": 8,
         "error": {"code": "invalid_request", "message": "q is required"},
     }
 
