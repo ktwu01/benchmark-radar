@@ -248,6 +248,9 @@ assert.equal(cutoff('44'), 40, 'an off-step value snaps to the nearest step');
 // share their request. Failed loads still return the explicit unavailable state.
 const makeLoaders = new Function('fetch', `const state = {}; let benchmarkIndexPromise = null;
   const benchmarkShardCache = new Map();
+  // The load-feedback pill is app-wide chrome; run each load straight through.
+  const CATALOG_VIEWS = [];
+  const trackLoad = (label, views, run) => run(null);
   ${fn('loadBenchmarkIndex')}
   ${fn('loadBenchmarkShard')}
   return {loadBenchmarkIndex,loadBenchmarkShard};`);
