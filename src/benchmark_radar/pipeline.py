@@ -123,6 +123,11 @@ def deduplicate(items: list[RadarItem]) -> list[RadarItem]:
         for rationale in duplicate.rationale:
             if rationale not in target.rationale:
                 target.rationale.append(rationale)
+        # A reader request names the repository it asked for; the watchlist
+        # matches that name, so it must survive whichever copy wins the merge.
+        request = (duplicate.raw or {}).get("request")
+        if request and not (target.raw or {}).get("request"):
+            target.raw = {**(target.raw or {}), "request": request}
         note = f"Also found via {duplicate.source}"
         if note not in target.rationale:
             target.rationale.append(note)
@@ -422,7 +427,10 @@ def apply_watchlist(
     if not watchlist:
         return items
     for item in items:
-        haystack = f"{item.title} {item.source_id}".casefold()
+        # A reader-requested repository also matches by the name it was
+        # requested under, so a rename on GitHub keeps its watchlist entry.
+        requested = str(((item.raw or {}).get("request") or {}).get("full_name") or "")
+        haystack = f"{item.title} {item.source_id} {requested}".casefold()
         for entry in watchlist:
             name = str(entry.get("name") or "").strip()
             aliases = [str(alias).casefold() for alias in entry.get("aliases") or []]
@@ -917,11 +925,15 @@ def simulate_backfill(
 SOURCE_LANES = {
     "github": "github",
     "github_organizations": "github",
+    "github_requested_repositories": "github",
     "github_releases": "github",
     "huggingface": "huggingface",
     "huggingface_papers": "huggingface",
 }
 MAX_FETCH_WORKERS = 8
+# Connectors that read their own durable state back from the previous
+# snapshot's `discovery_state`, keyed by source name.
+SEEN_STATE_SOURCES = frozenset({"xbsleepy", "github_requested_repositories"})
 
 
 def _fetch_one(
@@ -1000,8 +1012,8 @@ def run_pipeline(
     enabled = [
         (
             name,
-            {**source_config, "_seen_state": discovery_state.get("xbsleepy", {})}
-            if name == "xbsleepy"
+            {**source_config, "_seen_state": discovery_state.get(name, {})}
+            if name in SEEN_STATE_SOURCES
             else source_config,
         )
         for name, source_config in config["sources"].items()
@@ -1046,6 +1058,13 @@ def run_pipeline(
                 changed = _apply_xbsleepy_discovery_state(fetched, now=now, state=discovery_state)
                 suppressed_count += len(fetched) - len(changed)
                 items.extend(changed)
+            elif source_name == "github_requested_repositories":
+                resolved = discovery_state.setdefault(source_name, {})
+                for name in fetch_config.get("_requested_resolved", []):
+                    resolved[name] = {"resolved_at": now.astimezone(UTC).isoformat()}
+                for item in fetched:
+                    item.discovered_at = now
+                items.extend(fetched)
             else:
                 for item in fetched:
                     item.discovered_at = now
