@@ -59,6 +59,10 @@ WINDOW_DAYS: dict[str, int] = {
     "90d": 90,
 }
 
+# github_forks is collected by benchmark_attention as a displayed counter
+# only (#659): it is not a ranking signal and must not be added here. The
+# ranking iterates WINDOW_WEIGHTS, so a signal absent from it can never
+# change a score, a weight, or the observed-weight floor.
 WINDOW_WEIGHTS: dict[str, float] = {
     "github_stars": 0.55,
     "hf_paper_upvotes": 0.30,
@@ -70,6 +74,8 @@ DURABLE_SIGNALS: frozenset[str] = frozenset({"github_stars", "hf_dataset_downloa
 METRIC_ALIASES: dict[str, str] = {
     "stars": "github_stars",
     "github_stars": "github_stars",
+    "forks": "github_forks",
+    "github_forks": "github_forks",
     "paper_upvotes": "hf_paper_upvotes",
     "hf_paper_upvotes": "hf_paper_upvotes",
     "upvotes": "hf_paper_upvotes",
@@ -80,12 +86,14 @@ METRIC_ALIASES: dict[str, str] = {
 
 SIGNAL_SOURCES: dict[str, str] = {
     "github_stars": "github",
+    "github_forks": "github",
     "hf_paper_upvotes": "huggingface",
     "hf_dataset_downloads": "huggingface",
 }
 
 SIGNAL_VALUE_KINDS: dict[str, str] = {
     "github_stars": "cumulative",
+    "github_forks": "cumulative",
     "hf_paper_upvotes": "cumulative",
     "hf_dataset_downloads": "rolling_30d",
 }
@@ -132,7 +140,7 @@ def is_exact_attention_source_url(signal: str, url: str | None) -> bool:
     """Whether a metric URL names the exact resource required by Ranking v1."""
     if not isinstance(url, str) or not url.strip():
         return False
-    if signal == "github_stars":
+    if signal in {"github_stars", "github_forks"}:
         return is_dedicated_benchmark_repo(url)
 
     parsed = urlsplit(url.strip())
