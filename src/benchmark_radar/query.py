@@ -20,7 +20,7 @@ from .snapshots import REQUIRED_SOURCES, load_snapshots
 if TYPE_CHECKING:
     from .related_work import ManuscriptContext
 
-QUERY_SCHEMA_VERSION = 7
+QUERY_SCHEMA_VERSION = 8
 DEFAULT_INDEX_PATH = Path("site/data/benchmark-index.json")
 DEFAULT_SHARD_DIR = Path("site/data/benchmarks")
 DEFAULT_SNAPSHOT_DIR = Path("data/snapshots")
@@ -371,6 +371,13 @@ def _match(
         if hits:
             matched_fields.append(field)
             matched_tokens.update(hits)
+    # Issue #432: for a multi-word query, a record matching one query token
+    # in description only is noise, not evidence. Generic prose words (e.g.
+    # "prediction") fill every slot while the rarer query words match
+    # nothing. A single token in a name, category or other field still
+    # counts, as does a one-word query.
+    if len(query_tokens) > 1 and len(matched_tokens) == 1 and matched_fields == ["description"]:
+        return None
     name_match = _name_match(document.field_tokens["name"], query_tokens)
 
     coverage = len(matched_tokens) / len(query_tokens)
@@ -692,10 +699,19 @@ class QueryService:
         ]
         if full_match_count:
             status = "full_matches_found"
+            decision = "matches"
+            decision_reason = "at least one record matched every query token"
         elif partial_match_count:
             status = "partial_candidates_only"
+            decision = "no_confident_match"
+            decision_reason = (
+                "no record matched every query token; partial candidates "
+                "share only some query tokens"
+            )
         else:
             status = "no_lexical_candidates"
+            decision = "no_confident_match"
+            decision_reason = "no record matched any query token"
         LOGGER.info(
             "lexical search query=%r scope=%s documents=%d candidates=%d full=%d partial=%d "
             "returned=%d status=%s",
@@ -714,10 +730,15 @@ class QueryService:
             "scope": scope,
             "retrieval_mode": "lexical",
             "search_status": status,
+            "decision": decision,
+            "decision_reason": decision_reason,
             "matching_policy": {
-                "name": "lexical_candidates_v1",
+                "name": "lexical_candidates_v2",
                 "ranking": "bm25f_v3",
-                "minimum_should_match": "one unique query term",
+                "minimum_should_match": (
+                    "one unique query term, except a lone description-only "
+                    "token for a multi-word query"
+                ),
                 "query_coverage": "tie-breaker and explanation",
                 "idf_coverage": "tie-breaker and explanation using smoothed query IDF",
             },
