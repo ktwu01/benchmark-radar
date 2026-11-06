@@ -27,6 +27,14 @@ connector, a first-party feed, or the Hacker News attention source. -->
   <a href="https://scholar.google.com/citations?user=s9w1k-cAAAAJ&amp;hl=en"><img alt="Google Scholar" src="https://img.shields.io/badge/Google%20Scholar-4285F4?style=for-the-badge&amp;logo=googlescholar&amp;logoColor=white"></a>
 </p>
 
+<!-- Trust row (issue #553): only badges whose target page works. The OpenSSF
+Scorecard badge stays out until the Scorecard API publishes a result for this
+repository, and the Best Practices badge until the project is registered. -->
+<p align="center">
+  <a href="https://github.com/ktwu01/benchmark-radar/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/ktwu01/benchmark-radar/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://doi.org/10.5281/zenodo.22167102"><img alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.22167102.svg"></a>
+</p>
+
 Researchers and evaluation engineers from these institutions use Benchmark
 Radar for benchmark discovery and score tracking:
 
