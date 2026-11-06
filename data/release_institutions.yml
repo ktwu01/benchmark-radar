@@ -1513,6 +1513,12 @@ papers:
     source_url: null
     retrieved_at: '2026-11-05'
     institutions: []
+  '2611.00883':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.00883
+    retrieved_at: '2026-11-06'
+    institutions:
+    - Bosch Research
   '2611.01484':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2611.01484
@@ -1577,4 +1583,14 @@ papers:
     basis: null
     source_url: null
     retrieved_at: '2026-11-05'
+    institutions: []
+  '2611.08089':
+    basis: null
+    source_url: null
+    retrieved_at: '2026-11-06'
+    institutions: []
+  '2611.08369':
+    basis: null
+    source_url: null
+    retrieved_at: '2026-11-06'
     institutions: []
