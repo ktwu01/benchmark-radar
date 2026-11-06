@@ -507,6 +507,45 @@ def test_top_right_utilities_use_shared_icon_geometry_and_contact_control():
     assert ".repo-badge svg," in styles
 
 
+def test_every_homepage_image_carries_an_alt_attribute():
+    """Issue #946: Bing reported a missing image alt on the homepage.
+
+    The homepage's only image is the Hugging Face award badge, and it is
+    decorative inside a link whose aria-label already names the award, so
+    its empty alt is the correct value, not a missing one. This guards the
+    failure Bing reported: any image added without an alt fails here.
+    """
+
+    class Images(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.images = []
+
+        def handle_starttag(self, tag, attrs):
+            if tag == "img":
+                self.images.append(dict(attrs))
+
+    parser = Images()
+    parser.feed(Path("site/index.html").read_text(encoding="utf-8"))
+    assert parser.images, "the homepage declares no image to check"
+    for image in parser.images:
+        assert "alt" in image, f"image without alt: {image.get('src')}"
+    badge = parser.images[0]
+    assert badge["src"] == "/assets/hf-paper-of-the-day.svg"
+    assert badge["alt"] == ""
+    # The badge sits in a link that already names the award, so the empty
+    # alt is deliberate: a repeated alt would read the award twice.
+    html = Path("site/index.html").read_text(encoding="utf-8")
+    assert "Hugging Face: #1 Paper of the Day" in html
+    # The page generators emit no <img> at all, so no generated page can
+    # reintroduce the missing alt Bing found.
+    pages = Path("src/benchmark_radar/site_pages.py").read_text(encoding="utf-8")
+    assert "<img" not in pages
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+    assert 'createElement("img"' not in script
+    assert 'element("img"' not in script
+
+
 def test_top_right_utilities_have_immediate_visible_feedback():
     """Issue #228: feedback includes a fast high-contrast state and label."""
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
