@@ -2585,10 +2585,24 @@ function recordFactEntries(item) {
   return facts;
 }
 
+// A Zenodo record dated by its deposition's created time, because the
+// uploader's publication_date was in the future or unreadable (#1016). The
+// source value is shown as given; a record dated by its own publication
+// date carries no note.
+function publishedDateNote(item) {
+  if (item.published_basis !== "created") return "";
+  return item.published_source_value
+    ? ` (dated by deposition created; source publication_date was ${item.published_source_value})`
+    : " (dated by deposition created; no publication_date supplied)";
+}
+
 function recordDateEntries(item) {
   const entries = [];
   if (item.published_at) {
-    entries.push([t("Published"), formatDate(item.published_at, { dateStyle: "medium" })]);
+    entries.push([
+      t("Published"),
+      formatDate(item.published_at, { dateStyle: "medium" }) + publishedDateNote(item),
+    ]);
   }
   if (
     item.updated_at &&
