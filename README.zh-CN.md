@@ -22,7 +22,15 @@
   <a href="https://scholar.google.com/citations?user=s9w1k-cAAAAJ&amp;hl=en"><img alt="Google Scholar" src="https://img.shields.io/badge/Google%20Scholar-4285F4?style=for-the-badge&amp;logo=googlescholar&amp;logoColor=white"></a>
 </p>
 
-做 benchmark 研究的时候发现新东西太多了，所以我搞了这个持续爬虫，每天自动从全网抓新的 benchmark 相关信息。它目前每天从 41 个公开来源采集，并持续更新。你如果需要寻找 related work 或找到适合eval自己的agent 的 bench 或者关注最新的 eval 进展，可以看这里哈哈哈：
+<!-- Trust row (issue #553): only badges whose target page works. The OpenSSF
+Scorecard badge stays out until the Scorecard API publishes a result for this
+repository, and the Best Practices badge until the project is registered. -->
+<p align="center">
+  <a href="https://github.com/ktwu01/benchmark-radar/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/ktwu01/benchmark-radar/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://doi.org/10.5281/zenodo.22167102"><img alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.22167102.svg"></a>
+</p>
+
+做 benchmark 研究的时候发现新东西太多了，所以我搞了这个持续爬虫，每天自动从全网抓新的 benchmark 相关信息。它目前每天从 40 个公开来源采集，并持续更新。你如果需要寻找 related work 或找到适合eval自己的agent 的 bench 或者关注最新的 eval 进展，可以看这里哈哈哈：
 github.com/ktwu01/benchmark-radar，每天更新，并支持一键导出数据
 
 **几秒找到一个 benchmark，再看模型成绩如何随时间变化。点击下面的动图，查看
@@ -134,7 +142,7 @@ benchmark 论文、代码仓库、数据集和 release 的每日发现，和一�
 目录、模型卡与技术报告中的引用、以及分数变化历史放在一起。每条记录都保留自己的
 来源标识和引用，方便你核对一个 benchmark 和它背后的评测证据。
 
-每日发现覆盖 41 个来源：17 个直接 connector 和 24 个机构自有的研究与工程 feed。
+每日发现覆盖 40 个来源：16 个直接 connector 和 24 个机构自有的研究与工程 feed。
 目录汇集了来自 5 个 benchmark 目录的记录，并为其中有分数的记录保留数值观测。项目
 提供 web dashboard，包含 benchmark 排行榜、分数与实际使用量的 Pareto 前沿视图、
 saturation 和趋势视图、每日 feed、可下载的证据数据，以及一个可离线查询的命令行
