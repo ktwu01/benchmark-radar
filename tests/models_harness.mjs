@@ -230,6 +230,26 @@ assert.deepEqual(
 assert.deepEqual(models.modelSharedAverage([cells({ hard: 1 }), cells({ easy: 2 })], benchmarks), { means: [null, null], shared: [] });
 // Rounds like model_scores.round_tenth (half up, not to even).
 assert.deepEqual(models.modelSharedAverage([cells({ hard: 0.25 })], benchmarks).means, [0.3]);
+// Joined benchmarks (#904): columns scoring different records of one reviewed
+// equivalent group share that benchmark; different groups do not share.
+const joined = new Map([["hard", "gpqa"], ["easy", "gpqa"]]);
+assert.deepEqual(
+  models.modelSharedAverage([cells({ hard: 40 }), cells({ easy: 60 })], benchmarks, joined),
+  { means: [40, 60], shared: ["gpqa"] },
+);
+assert.deepEqual(
+  models.modelSharedAverage(
+    [cells({ hard: 40 }), cells({ easy: 60 })],
+    benchmarks,
+    new Map([["hard", "g1"], ["easy", "g2"]]),
+  ),
+  { means: [null, null], shared: [] },
+);
+// Without the joined map the behaviour is unchanged.
+assert.deepEqual(
+  models.modelSharedAverage([cells({ hard: 40 }), cells({ easy: 60 })], benchmarks),
+  { means: [null, null], shared: [] },
+);
 assert.equal(models.modelValueText(74.66, pct), "74.7%");
 assert.equal(models.modelValueText(1577, benchmarks.get("elo")), "1,577 Elo");
 
