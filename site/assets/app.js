@@ -506,6 +506,13 @@ const I18N = {
     "Reasoning & Knowledge": "推理与知识",
     "Close": "关闭",
     "Loading scores…": "正在加载成绩…",
+    "Loading the full archive…": "正在加载完整档案…",
+    "Loading the benchmark catalog…": "正在加载 benchmark 目录…",
+    "Loading the latest scan…": "正在加载最新扫描…",
+    "Loading trends…": "正在加载趋势…",
+    "Preparing results…": "正在整理结果…",
+    "Loading…": "正在加载…",
+    "{mb} MB received": "已接收 {mb} MB",
     "Score details could not be loaded.": "无法加载成绩详情。",
     "Scores for this model": "该模型的成绩",
     "announced {date}": "{date} 发布",
@@ -1693,6 +1700,127 @@ function debounce(fn, waitMs = 80) {
   return debounced;
 }
 
+// --- Data-load feedback -----------------------------------------------------
+// Some routes download a lot before they can answer: the first homepage search
+// pulls the full archive (radar.json, tens of megabytes), and the Library,
+// Scores, Models and Ranking views wait on the benchmark catalog. Without a
+// visible cue the page looked frozen for seconds, and readers took it for dead
+// (issue #1128). Every such load goes through trackLoad, which shows one
+// status pill with the megabytes received so far and marks the views waiting
+// on it as busy, so their stale results dim instead of posing as the answer.
+const LOAD_INDICATOR_DELAY_MS = 250;
+const activeLoads = new Set();
+let loadIndicatorTimer = null;
+let loadIndicatorFrame = null;
+
+function trackLoad(label, views, run) {
+  const load = { label, views, bytes: 0, phase: "download", startedAt: Date.now() };
+  activeLoads.add(load);
+  syncLoadIndicator();
+  let promise;
+  try {
+    promise = Promise.resolve(run(load));
+  } catch (error) {
+    promise = Promise.reject(error);
+  }
+  const finish = () => {
+    activeLoads.delete(load);
+    syncLoadIndicator();
+  };
+  promise.then(finish, finish);
+  return promise;
+}
+
+function loadIsRelevant(load) {
+  return !load.views || load.views.includes(state.view);
+}
+
+let loadIndicator = null;
+
+function loadIndicatorParts() {
+  if (loadIndicator) return loadIndicator;
+  if (!document.body) return null;
+  // The byte count changes many times a second, so it stays out of the
+  // accessibility tree; a screen reader hears the label once instead.
+  const label = element("span", { className: "data-loading-label" });
+  const bytes = element("span", { className: "data-loading-bytes", attrs: { "aria-hidden": "true" } });
+  const node = element("div", { className: "data-loading", attrs: { id: "data-loading", role: "status" } }, [
+    element("span", { className: "data-loading-spinner", attrs: { "aria-hidden": "true" } }),
+    label,
+    bytes,
+    element("span", { className: "data-loading-bar", attrs: { "aria-hidden": "true" } }),
+  ]);
+  node.hidden = true;
+  document.body.append(node);
+  loadIndicator = { node, label, bytes };
+  return loadIndicator;
+}
+
+function renderLoadIndicator() {
+  loadIndicatorFrame = null;
+  const relevant = [...activeLoads].filter(loadIsRelevant);
+  document.querySelectorAll(".view").forEach((section) => {
+    const view = section.id.replace(/-view$/, "");
+    const busy = relevant.some((load) => !load.views || load.views.includes(view));
+    if (busy) section.setAttribute("aria-busy", "true");
+    else section.removeAttribute("aria-busy");
+  });
+  if (!relevant.length) {
+    if (loadIndicator) loadIndicator.node.hidden = true;
+    return;
+  }
+  const now = Date.now();
+  const shown = relevant.filter((load) => now - load.startedAt >= LOAD_INDICATOR_DELAY_MS);
+  if (!shown.length) {
+    // A cached or fast response should not flash a banner.
+    clearTimeout(loadIndicatorTimer);
+    loadIndicatorTimer = setTimeout(syncLoadIndicator, LOAD_INDICATOR_DELAY_MS);
+    return;
+  }
+  // The largest download is the one the reader is waiting on.
+  const lead = shown.reduce((a, b) => (b.bytes > a.bytes ? b : a));
+  const parts = loadIndicatorParts();
+  if (!parts) return;
+  const { node, label, bytes } = parts;
+  const labelText = lead.phase === "parse" ? t("Preparing results…") : t(lead.label);
+  if (label.textContent !== labelText) label.textContent = labelText;
+  bytes.textContent = lead.phase === "download" && lead.bytes >= 100_000
+    ? t("{mb} MB received", { mb: (lead.bytes / 1_000_000).toFixed(1) })
+    : "";
+  node.hidden = false;
+}
+
+function syncLoadIndicator() {
+  if (loadIndicatorFrame !== null) return;
+  loadIndicatorFrame = (window.requestAnimationFrame || ((fn) => setTimeout(fn, 16)))(renderLoadIndicator);
+}
+
+// response.json() with progress: the body is streamed so the pill can count
+// megabytes as they arrive, which is what tells a reader on a slow line that
+// the page is still working.
+async function readJson(response, load) {
+  if (!load || !response.body?.getReader || typeof TextDecoder === "undefined") return response.json();
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  const parts = [];
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    load.bytes += value.byteLength;
+    parts.push(decoder.decode(value, { stream: true }));
+    syncLoadIndicator();
+  }
+  parts.push(decoder.decode());
+  if (load.bytes > 1_000_000) {
+    // Parsing a large payload blocks the main thread; paint "Preparing
+    // results…" first so the last visible state is not a stalled counter.
+    load.phase = "parse";
+    syncLoadIndicator();
+    await new Promise((resolve) => setTimeout(resolve, 32));
+  }
+  return JSON.parse(parts.join(""));
+}
+
 function svgElement(tag, attrs = {}, text = null) {
   const node = document.createElementNS("http://www.w3.org/2000/svg", tag);
   Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, String(value)));
@@ -2289,6 +2417,7 @@ function setView(view, update = true, mode = "push") {
   });
   syncPageHeading();
   syncNavState();
+  syncLoadIndicator();
   if (update) writeUrl(mode);
 }
 
@@ -5263,16 +5392,18 @@ function taskShape(entry) {
 const BENCHMARK_SEARCH_LIMIT = 50;
 
 let benchmarkIndexPromise = null;
+// Views whose content waits on the benchmark catalog.
+const CATALOG_VIEWS = ["library", "saturation", "leaderboard", "models", "trends"];
 
 function loadBenchmarkIndex() {
   if (!benchmarkIndexPromise) {
     // Revalidate on page load so newly recovered dates reach the figure.
     // The promise still shares one request across all views in this page.
-    benchmarkIndexPromise = fetch("/data/benchmark-index.json", { cache: "no-cache" })
+    benchmarkIndexPromise = trackLoad("Loading the benchmark catalog…", CATALOG_VIEWS, (load) => fetch("/data/benchmark-index.json", { cache: "no-cache" })
       .then((response) => {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.json();
-      })
+        return readJson(response, load);
+      }))
       .then((payload) => {
         if (!Array.isArray(payload.benchmarks)) throw new Error("Invalid benchmark catalog");
         state.catalogDocuments = payload.document_registry || null;
@@ -7039,8 +7170,8 @@ function modelRowSetting(row) {
 let modelScoresPromise = null;
 function loadModelScores() {
   if (!modelScoresPromise) {
-    modelScoresPromise = fetch("/data/model-scores.json", { cache: "no-cache" })
-      .then((response) => (response.ok ? response.json() : null))
+    modelScoresPromise = trackLoad("Loading scores…", ["models"], (load) => fetch("/data/model-scores.json", { cache: "no-cache" })
+      .then((response) => (response.ok ? readJson(response, load) : null)))
       .then((payload) => (Array.isArray(payload?.models) && Array.isArray(payload?.benchmarks) ? payload : null))
       .catch(() => null);
   }
@@ -7716,11 +7847,11 @@ function loadBenchmarkShard(slug) {
   if (!benchmarkShardCache.has(slug)) {
     benchmarkShardCache.set(
       slug,
-      fetch(`/data/benchmarks/${slug}.json`, { cache: "no-cache" })
+      trackLoad("Loading benchmark details…", null, (load) => fetch(`/data/benchmarks/${slug}.json`, { cache: "no-cache" })
         .then((response) => {
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          return response.json();
-        })
+          return readJson(response, load);
+        }))
         .catch(() => null),
     );
   }
@@ -12679,9 +12810,11 @@ async function ensureWindowData(cache = "default") {
   if (!state.windowPromises[key]) {
     state.windowPromises[key] = (async () => {
       try {
-        const response = await fetch(`/data/radar-window-${key}.json`, { cache });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
+        const data = await trackLoad("Loading this window…", ["today"], async (load) => {
+          const response = await fetch(`/data/radar-window-${key}.json`, { cache });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return readJson(response, load);
+        });
         // A window file from another build than the page's own would list a
         // different range. Use the full archive rather than a mixed view.
         if (
@@ -12711,10 +12844,26 @@ function stateNeedsTrendsData() {
   return state.view === "trends";
 }
 
+// What each dashboard payload is called while it downloads, and which views
+// wait on it. The full archive is the large one: a reader's first homepage
+// search or an All-dates pick waits on it (issue #1128).
+const DASHBOARD_LOADS = {
+  "/data/radar.json": ["Loading the full archive…", ["today", "map", "leaderboard", "trends"]],
+  "/data/radar-trends.json": ["Loading trends…", ["trends"]],
+  "/data/radar-bootstrap.json": ["Loading the latest scan…", null],
+};
+
+function fetchDashboardJson(path, cache) {
+  const [label, views] = DASHBOARD_LOADS[path] || ["Loading…", null];
+  return trackLoad(label, views, async (load) => {
+    const response = await fetch(path, { cache });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return readJson(response, load);
+  });
+}
+
 async function fetchDashboardPayload(path, cache, requestSequence, fullPayload) {
-  const response = await fetch(path, { cache });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  const data = await response.json();
+  const data = await fetchDashboardJson(path, cache);
   if (!compatibleDashboard(data)) throw new Error("No compatible snapshots");
   const applied = applyDashboardData(data, requestSequence, fullPayload);
   if (!applied && fullPayload && !state.fullDataLoaded) {
@@ -12779,9 +12928,12 @@ async function refreshData() {
       : needsTrendsPayload
         ? "/data/radar-trends.json"
         : "/data/radar-bootstrap.json";
-    const response = await fetch(path, { cache: "reload" });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
+    const [label, views] = DASHBOARD_LOADS[path];
+    const data = await trackLoad(label, views, async (load) => {
+      const response = await fetch(path, { cache: "reload" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return readJson(response, load);
+    });
     if (!compatibleDashboard(data)) throw new Error("No compatible snapshots");
     if (!applyDashboardData(data, requestSequence, path === "/data/radar.json")) return;
     if (!validTodayDate()) {
@@ -12863,9 +13015,11 @@ async function initialize() {
     // leaderboard. Trends, Explore, All dates, and historical permalinks lazily
     // upgrade to the full public corpus only when the reader asks for them.
     const requestSequence = ++nextDashboardRequestSequence;
-    const response = await fetch("/data/radar-bootstrap.json");
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
+    const data = await trackLoad("Loading the latest scan…", null, async (load) => {
+      const response = await fetch("/data/radar-bootstrap.json");
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return readJson(response, load);
+    });
     if (!compatibleDashboard(data)) throw new Error("No compatible snapshots");
     if (!applyDashboardData(data, requestSequence, false)) return;
     await ensureDataForState();
