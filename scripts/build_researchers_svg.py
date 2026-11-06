@@ -29,6 +29,16 @@ ROWS = [
     ["cmu.svg", "harvard.svg", "mit.svg", "nus.svg", "auckland.svg", "xtracta.svg"],
     ["alibaba.svg", "tencent.svg", "hunyuan.svg", "qwen.svg"],
     ["stepfun.png", "kuaishou.png", "zhihu.svg", "tsinghua.svg", "sjtu.png"],
+    # Row 5 (issue #735): the remaining verified institutions. moreGeo and
+    # Kultiva have no official logo on Wikimedia Commons, so they stay out.
+    [
+        "hebrew-university.svg",
+        "fudan.svg",
+        "chungnam.png",
+        "rise.svg",
+        "york.svg",
+        "great-learning.png",
+    ],
 ]
 
 FONT = "Helvetica Neue, Helvetica, Arial, sans-serif"
@@ -38,7 +48,7 @@ ROW_H = 30  # row box height
 ROW_GAP = 16
 BOTTOM_PAD = 3
 LOGO_SCALE = {"alibaba.svg": 0.6}  # logos that look oversized at the common height
-PNG_MAX_W = {"kuaishou.png": 1200, "sjtu.png": 120}
+PNG_MAX_W = {"kuaishou.png": 1200, "sjtu.png": 120, "chungnam.png": 400, "great-learning.png": 200}
 # Many wordmarks are dark (Amazon, Qwen, Zhihu, StepFun, Xtracta), so the strip
 # carries its own light backing: on GitHub's dark theme it would otherwise sit
 # on a near-black canvas and those names would all but disappear.
