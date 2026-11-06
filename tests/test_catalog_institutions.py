@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -109,6 +110,126 @@ def test_fetch_keeps_linked_names_in_first_appearance_order():
     assert fetch.parse({"results": [work, {**work, "id": "W2"}]}, ["2605.21858"]) == {
         "2605.21858": None
     }
+
+
+def test_location_lookup_accepts_exactly_one_work(monkeypatch):
+    # Issue #1081: OpenAlex merges an older arXiv preprint into the published
+    # version's work, so the arXiv DOI finds nothing; the arXiv location
+    # still finds the merged work.
+    work = {
+        "id": "https://openalex.org/W2",
+        "doi": "https://doi.org/10.1016/j.example.2025.01.001",
+        "authorships": [
+            _authorship("MIT"),
+            _authorship("MIT", "Stanford University"),
+        ],
+    }
+    seen = {}
+
+    class _Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def read(self):
+            return json.dumps({"results": [work]}).encode()
+
+    def _urlopen(request, **kwargs):
+        seen["url"] = request.full_url
+        return _Response()
+
+    monkeypatch.setattr("urllib.request.urlopen", _urlopen)
+    payload = fetch.request_by_arxiv_location("2502.19187")
+    assert "locations.landing_page_url" in seen["url"]
+    assert "arxiv.org%2Fabs%2F2502.19187" in seen["url"]
+    assert fetch.parse_location(payload, "2502.19187") == {
+        "work": "https://openalex.org/W2",
+        "institutions": ["MIT", "Stanford University"],
+    }
+
+
+def test_location_lookup_rejects_zero_or_two_works():
+    # The same certainty rule as the DOI lookup: no work, or more than one,
+    # records nothing.
+    assert fetch.parse_location({"results": []}, "2502.19187") is None
+    work = {"id": "https://openalex.org/W1", "authorships": [_authorship("MIT")]}
+    assert fetch.parse_location({"results": [work, {**work, "id": "W2"}]}, "2502.19187") is None
+    # A single work with no linked institution still records nothing.
+    assert (
+        fetch.parse_location({"results": [{"id": "W1", "authorships": []}]}, "2502.19187") is None
+    )
+
+
+def test_main_retries_doi_misses_by_arxiv_location(tmp_path, monkeypatch):
+    # Issue #1081 end to end: the DOI pass resolves one paper and misses the
+    # other; the location pass resolves the miss, and the output cites the
+    # OpenAlex work for both.
+    records_dir = tmp_path / "catalog"
+    records_dir.mkdir()
+    for name, key, paper in (
+        ("model_reports_source_records.jsonl", "model-reports:bbeb", "2502.19187"),
+        ("model_reports_source_records.jsonl", "model-reports:other", "2504.19314"),
+        ("claire_radar_source_records.jsonl", "claire-radar:other", "2504.19314"),
+    ):
+        with (records_dir / name).open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(_record(key, papers=(paper,))) + "\n")
+
+    def _doi_request(papers, **kwargs):
+        assert papers == ["2502.19187", "2504.19314"]
+        return {
+            "results": [
+                {
+                    "id": "https://openalex.org/W9",
+                    "doi": "https://doi.org/10.48550/arxiv.2504.19314",
+                    "authorships": [_authorship("Tsinghua University")],
+                }
+            ]
+        }
+
+    def _location_request(paper, **kwargs):
+        assert paper == "2502.19187"
+        return {
+            "results": [
+                {
+                    "id": "https://openalex.org/W2",
+                    "doi": "https://doi.org/10.1016/j.example.2025.01.001",
+                    "authorships": [_authorship("MIT")],
+                }
+            ]
+        }
+
+    monkeypatch.setattr(fetch, "request", _doi_request)
+    monkeypatch.setattr(fetch, "request_by_arxiv_location", _location_request)
+    output = tmp_path / "institutions.yml"
+    checkpoint = tmp_path / "checkpoint.json"
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "fetch_openalex_institutions.py",
+            "--records-dir",
+            str(records_dir),
+            "--output",
+            str(output),
+            "--checkpoint",
+            str(checkpoint),
+            "--delay",
+            "0",
+        ],
+    )
+
+    fetch.main()
+
+    payload = yaml.safe_load(output.read_text(encoding="utf-8"))
+    assert payload["benchmarks"]["model-reports:bbeb"] == {
+        "source_url": "https://openalex.org/W2",
+        "doi": "10.48550/arxiv.2502.19187",
+        "retrieved_at": payload["benchmarks"]["model-reports:bbeb"]["retrieved_at"],
+        "institutions": ["MIT"],
+    }
+    assert payload["benchmarks"]["model-reports:other"]["institutions"] == ["Tsinghua University"]
+    assert not checkpoint.exists()
 
 
 def test_committed_file_names_only_introducing_papers():
