@@ -49,4 +49,12 @@ def test_load_labels_have_chinese_translations():
 
 def test_waiting_views_mark_their_results_as_stale():
     assert '.view[aria-busy="true"]' in STYLES
-    assert "#today-list" in STYLES.split('.view[aria-busy="true"] :is(', 1)[1].split("{", 1)[0]
+    dimmed = STYLES.split('.view[aria-busy="true"] :is(', 1)[1].split("{", 1)[0]
+    assert "#today-list" in dimmed
+    # The Trends direction table is rebuilt from the catalog (#1142 review).
+    assert "#direction-trends-table" in dimmed
+
+
+def test_detail_shards_mark_only_the_views_that_show_them():
+    # A null scope would dim whichever view the reader moved on to (#1142 review).
+    assert 'trackLoad("Loading benchmark details…", ["saturation", "models"]' in APP

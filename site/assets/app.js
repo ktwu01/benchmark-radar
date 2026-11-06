@@ -7829,7 +7829,7 @@ function loadBenchmarkShard(slug) {
   if (!benchmarkShardCache.has(slug)) {
     benchmarkShardCache.set(
       slug,
-      trackLoad("Loading benchmark details…", null, () => fetch(`/data/benchmarks/${slug}.json`, { cache: "no-cache" })
+      trackLoad("Loading benchmark details…", ["saturation", "models"], () => fetch(`/data/benchmarks/${slug}.json`, { cache: "no-cache" })
         .then((response) => {
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           return response.json();

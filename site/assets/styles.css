@@ -7779,7 +7779,8 @@ a.radar-source::after {
 }
 
 .view[aria-busy="true"] :is(#today-list, #today-benchmarks-results, #library-list, #models-list,
-  #leaderboard-list, #latest-releases-list, #benchmark-search-results, #map-canvas, #trend-chart, #trend-table) {
+  #leaderboard-list, #latest-releases-list, #benchmark-search-results, #map-canvas, #trend-chart, #trend-table,
+  #direction-trends-table) {
   opacity: 0.45;
   transition: opacity 0.2s ease;
 }
