@@ -8,10 +8,12 @@ import pytest
 
 from benchmark_radar.release_leaderboard import (
     METHOD_VERSION,
+    ONE_LINE_SUMMARY_MAX_CHARS,
     build_latest_releases_leaderboard,
     compute_window_ranking,
     filter_release_cohort,
     is_dedicated_benchmark_repo,
+    one_line_summary,
 )
 from benchmark_radar.snapshots import SnapshotError, validate_snapshot
 
@@ -1042,3 +1044,112 @@ def test_stale_values_are_displayed_but_do_not_change_score_order():
     stale = next(entry for entry in entries if entry["name"] == "Stale context")
     assert stale["components"]["hf_paper_upvotes"]["value"] == 1_000
     assert stale["components"]["hf_paper_upvotes"]["status"] == "stale"
+
+
+def test_one_line_summary_is_the_first_sentence_capped_at_140():
+    # Issue #348: one sentence per release, derived from the record's own
+    # text, capped at roughly 140 characters.
+    assert one_line_summary("Evaluates tool-using agents on long-horizon tasks.") == (
+        "Evaluates tool-using agents on long-horizon tasks."
+    )
+    assert (
+        one_line_summary(
+            "A benchmark for code generation. It covers 50 languages and ships with a harness."
+        )
+        == "A benchmark for code generation."
+    )
+    long_first = (
+        "A benchmark for evaluating long-horizon planning in household robots "
+        "across two hundred tasks with randomized layouts, object placements, "
+        "and multi-room navigation in simulation."
+    )
+    line = one_line_summary(long_first)
+    assert len(line) <= ONE_LINE_SUMMARY_MAX_CHARS
+    assert line.endswith("…")
+    assert long_first.startswith(line[:-1].rstrip())
+    # A second sentence never leaks in through the cap.
+    assert one_line_summary(long_first + " Second sentence here.") == line
+
+
+def test_one_line_summary_uses_only_text_present_in_the_source_record():
+    # Issue #348 pins this: a generated line must only use text present in
+    # the source record. The derivation is extractive, so the line (minus
+    # the truncation ellipsis) is a word-boundary prefix of the cleaned
+    # source, never a paraphrase.
+    source = (
+        "⚡ Local LLM Evaluation Leaderboard Welcome to the official public benchmark "
+        "leaderboard maintained by @ahmedBargady. This dataset repository hosts "
+        "benchmark evaluation metrics."
+    )
+    line = one_line_summary(source)
+    assert line
+    assert len(line) <= ONE_LINE_SUMMARY_MAX_CHARS
+    cleaned = " ".join(source.split())
+    assert cleaned.startswith(line[:-1] if line.endswith("…") else line)
+
+
+def test_one_line_summary_strips_characters_that_break_the_column():
+    # Issue #333: one release's "summary" was a run of ═══ box-drawing
+    # characters that pushed a 720px column to 1349px. Control characters
+    # go the same way.
+    assert one_line_summary("═══ Box drawing ═══ A benchmark for summarization.") == (
+        "Box drawing A benchmark for summarization."
+    )
+    assert one_line_summary("═══\n═══") == ""
+    assert one_line_summary("A benchmark\x00 for \x01evaluation.\x7f") == (
+        "A benchmark for evaluation."
+    )
+
+
+def test_one_line_summary_keeps_an_honest_empty_state():
+    # Issue #348: a release with nothing to summarise gets no
+    # plausible-sounding line manufactured for it.
+    assert one_line_summary("") == ""
+    assert one_line_summary("   ") == ""
+    assert one_line_summary(None) == ""
+    assert one_line_summary(42) == ""
+
+
+def test_release_purpose_is_one_line_or_empty_never_a_fallback():
+    # Issue #348, end to end through the cohort builder: the purpose is the
+    # one-line summary of the record's own summary. The old fallbacks — the
+    # title, then the manufactured "Benchmark and evaluation suite" — are
+    # gone, so a title-only record shows the empty state instead.
+    generated_at = datetime(2026, 9, 1, 12, 0, 0, tzinfo=UTC)
+    rel_time = (generated_at - timedelta(days=2)).isoformat()
+    long_summary = (
+        "A benchmark for evaluating long-horizon planning in household robots "
+        "across two hundred tasks with randomized layouts and object placements. "
+        "It also ships a harness and a leaderboard."
+    )
+    items = [
+        {
+            "id": "bench-long",
+            "url": "https://github.com/org/long-bench",
+            "title": "Long Bench",
+            "summary": long_summary,
+            "event_kind": "released",
+            "discovered_at": rel_time,
+            "source": "GitHub",
+            "source_id": "org/long-bench",
+        },
+        {
+            "id": "bench-title-only",
+            "url": "https://github.com/org/title-bench",
+            "title": "Title Bench",
+            "event_kind": "released",
+            "discovered_at": rel_time,
+            "source": "GitHub",
+            "source_id": "org/title-bench",
+        },
+    ]
+    snapshots = [make_snapshot("2026-09-01", generated_at.isoformat(), evidence_items=items)]
+    cohort = filter_release_cohort(
+        snapshots, window_days=30, as_of=generated_at, include_unconfirmed=True
+    )
+    by_name = {entry["name"]: entry for entry in cohort}
+    assert len(by_name) == 2
+    long_line = by_name["Long Bench"]["purpose"]
+    assert long_line == one_line_summary(long_summary)
+    assert len(long_line) <= ONE_LINE_SUMMARY_MAX_CHARS
+    assert by_name["Title Bench"]["purpose"] == ""
