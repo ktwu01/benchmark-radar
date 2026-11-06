@@ -16,3 +16,60 @@ repositories:
   - full_name: arcainc/lifesci-diamond
     issue: https://github.com/ktwu01/benchmark-radar/issues/1065
     requested_at: 2026-11-05
+  - full_name: xiaowu0162/LongMemEval
+    issue: https://github.com/ktwu01/benchmark-radar/issues/653
+    requested_at: 2026-11-06
+  - full_name: HUST-AI-HYZ/MemoryAgentBench
+    issue: https://github.com/ktwu01/benchmark-radar/issues/653
+    requested_at: 2026-11-06
+  - full_name: allenai/ruletaker
+    issue: https://github.com/ktwu01/benchmark-radar/issues/832
+    requested_at: 2026-11-06
+  - full_name: asaparov/prontoqa
+    issue: https://github.com/ktwu01/benchmark-radar/issues/832
+    requested_at: 2026-11-06
+  - full_name: Yale-LILY/FOLIO
+    issue: https://github.com/ktwu01/benchmark-radar/issues/832
+    requested_at: 2026-11-06
+  - full_name: omnilabNLP/LogicNLI
+    issue: https://github.com/ktwu01/benchmark-radar/issues/832
+    requested_at: 2026-11-06
+  - full_name: facebookresearch/clutrr
+    issue: https://github.com/ktwu01/benchmark-radar/issues/832
+    requested_at: 2026-11-06
+  - full_name: facebookarchive/bAbI-tasks
+    issue: https://github.com/ktwu01/benchmark-radar/issues/832
+    requested_at: 2026-11-06
+  - full_name: hitachi-nlp/FLD
+    issue: https://github.com/ktwu01/benchmark-radar/issues/832
+    requested_at: 2026-11-06
+  - full_name: michaelchen-lab/JustLogic
+    issue: https://github.com/ktwu01/benchmark-radar/issues/832
+    requested_at: 2026-11-06
+  - full_name: lgw863/LogiQA-dataset
+    issue: https://github.com/ktwu01/benchmark-radar/issues/832
+    requested_at: 2026-11-06
+  - full_name: csitfun/LogiQA2.0
+    issue: https://github.com/ktwu01/benchmark-radar/issues/832
+    requested_at: 2026-11-06
+  - full_name: yuweihao/reclor
+    issue: https://github.com/ktwu01/benchmark-radar/issues/832
+    requested_at: 2026-11-06
+  - full_name: Mihir3009/LogicBench
+    issue: https://github.com/ktwu01/benchmark-radar/issues/832
+    requested_at: 2026-11-06
+  - full_name: Mihir3009/Multi-LogiEval
+    issue: https://github.com/ktwu01/benchmark-radar/issues/832
+    requested_at: 2026-11-06
+  - full_name: AbhilashaRavichander/CondaQA
+    issue: https://github.com/ktwu01/benchmark-radar/issues/832
+    requested_at: 2026-11-06
+  - full_name: selenashe/ScoNe
+    issue: https://github.com/ktwu01/benchmark-radar/issues/832
+    requested_at: 2026-11-06
+  - full_name: joey234/nan-nli
+    issue: https://github.com/ktwu01/benchmark-radar/issues/832
+    requested_at: 2026-11-06
+  - full_name: hitz-zentroa/This-is-not-a-Dataset
+    issue: https://github.com/ktwu01/benchmark-radar/issues/832
+    requested_at: 2026-11-06

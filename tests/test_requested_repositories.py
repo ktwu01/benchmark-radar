@@ -122,7 +122,7 @@ def test_request_grants_discovery_not_relevance(tmp_path, monkeypatch):
     # Eligibility comes only from the committed watchlist entry naming it.
     watchlist = yaml.safe_load((ROOT / "config.yml").read_text(encoding="utf-8"))["watchlist"]
     apply_watchlist([item], watchlist)
-    assert item.watchlist == "Vero"
+    assert item.watchlist == "sunblaze-ucb/vero"
 
 
 def test_one_failed_request_does_not_drop_the_others(tmp_path, monkeypatch):

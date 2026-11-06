@@ -130,13 +130,38 @@ watchlist:
   # Issues #555 and #1065: reader-requested repositories fetched through
   # data/requested_github_repositories.yml. Their titles are bare repo names,
   # so the taxonomy may find no category in them; the reader asked for each by
-  # name. Aliases are the exact owner/name so no other record can match.
-  - name: Vero
+  # name. Name and alias are the exact owner/name: the watchlist also matches
+  # the name, and a short benchmark name would pin unrelated papers.
+  - name: sunblaze-ucb/vero
     aliases: [sunblaze-ucb/vero]
-    note: Repository-level implementation and proof synthesis benchmark for AI agents (issue #555).
+    note: Vero — Repository-level implementation and proof synthesis benchmark for AI agents (issue #555).
   - name: LifeSci Diamond
     aliases: [arcainc/lifesci-diamond, "lifesci diamond"]
     note: Regulatory-affairs tasks for drugs, biologics and devices; scores are publisher-reported and 45 of 55 tasks are held out (issue #1065).
+  # Issue #832: classic logic and negation benchmarks requested through the
+  # registry whose GitHub descriptions are blank, so the taxonomy finds no
+  # category. Name and alias are the exact owner/name, as above.
+  - name: allenai/ruletaker
+    aliases: [allenai/ruletaker]
+    note: RuleTaker — Synthetic rule-reasoning theories from Transformers as Soft Reasoners over Language (issue #832).
+  - name: Yale-LILY/FOLIO
+    aliases: [Yale-LILY/FOLIO]
+    note: FOLIO — Natural-language reasoning with first-order logic annotations (issue #832).
+  - name: omnilabNLP/LogicNLI
+    aliases: [omnilabNLP/LogicNLI]
+    note: LogicNLI — Diagnostic NLI set for first-order logical reasoning, EMNLP 2021 (issue #832).
+  - name: facebookarchive/bAbI-tasks
+    aliases: [facebookarchive/bAbI-tasks]
+    note: bAbI — Task generation for testing text understanding and reasoning; archived upstream (issue #832).
+  - name: hitachi-nlp/FLD
+    aliases: [hitachi-nlp/FLD]
+    note: FLD — Formal Logic Deduction corpus for deductive reasoning (issue #832).
+  - name: michaelchen-lab/JustLogic
+    aliases: [michaelchen-lab/JustLogic]
+    note: JustLogic — Benchmark for evaluating deductive reasoning in LLMs, arXiv 2501.14851 (issue #832).
+  - name: selenashe/ScoNe
+    aliases: [selenashe/ScoNe]
+    note: ScoNe — Scoped Negation benchmark for negation reasoning (issue #832).
 
 sources:
   arxiv:
