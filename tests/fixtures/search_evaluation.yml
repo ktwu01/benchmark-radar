@@ -184,7 +184,12 @@ queries:
     intent: Detect whether the Catalog gains a full lexical match for this missing task.
     scope: catalog
     relevant_keys: []
-    expected_partial_keys: ["llm-stats:cruxeval-output-cot"]
+    # Issue #432: the previous expected partial (llm-stats:cruxeval-output-cot)
+    # matched only "prediction", in description only, for a two-word query —
+    # the noise tier the floor removes. Research Attention Prediction matches
+    # "prediction" in its name, so it survives the floor as inspectable
+    # partial evidence.
+    expected_partial_keys: ["claire-radar:2609.10092"]
 
   - id: topic-robot-grasp-planning
     kind: topical
