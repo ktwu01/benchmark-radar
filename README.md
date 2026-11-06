@@ -31,12 +31,12 @@ Researchers and evaluation engineers from these institutions use Benchmark
 Radar for benchmark discovery and score tracking:
 
 <p align="center">
-  <img src="assets/researchers.svg" alt="Institutions whose researchers use Benchmark Radar: Google, Amazon, AWS, IBM, ByteDance, Carnegie Mellon, Harvard, MIT, NUS, Auckland, Xtracta, Alibaba, Tencent, Tencent Hunyuan, Qwen, StepFun, Kuaishou, Zhihu, Tsinghua, SJTU" />
+  <img src="assets/researchers.svg" alt="Institutions whose researchers use Benchmark Radar: Google, Amazon, AWS, IBM, ByteDance, Carnegie Mellon, Harvard, MIT, NUS, Auckland, Xtracta, Alibaba, Tencent, Tencent Hunyuan, Qwen, StepFun, Kuaishou, Zhihu, Tsinghua, SJTU, Hebrew University of Jerusalem, Fudan, Chungnam National University, RISE, York, Great Learning" />
 </p>
 
 I kept running into new benchmarks while doing benchmark research, so I built a
 crawler that continuously collects benchmark-related signals from across the
-web. It pulls evidence from 41 public sources every day, and keeps updating.
+web. It pulls evidence from 40 public sources every day, and keeps updating.
 
 **Find a benchmark in seconds, then see how model scores change over time. Click
 the GIF below to watch SWE-bench Verified move toward saturation.**
@@ -163,7 +163,7 @@ benchmark catalog, mentions in model cards and technical reports, and score
 histories. It retains source identities and citations so readers can inspect
 candidate benchmarks and their evaluation evidence.
 
-Daily discovery draws on 41 sources: 17 direct connectors and 24 first-party
+Daily discovery draws on 40 sources: 16 direct connectors and 24 first-party
 research and engineering feeds. The catalog collects source records from five
 benchmark catalogs, with numeric score observations on the records that carry
 them. The project publishes the web dashboard with a benchmark leaderboard, a
