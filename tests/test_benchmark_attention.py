@@ -117,7 +117,7 @@ def test_a_clone_url_reads_the_repository_rather_than_a_404():
     # module exists to prevent, made permanent because only fresh and stale
     # readings are ever carried forward. The reported source_url stays the URL
     # as deposited.
-    api = FakeApi({GITHUB_API: {"stargazers_count": 150}})
+    api = FakeApi({GITHUB_API: {"stargazers_count": 150, "forks_count": 3}})
     block = collect_benchmark_attention(
         CONFIG,
         [
@@ -133,9 +133,10 @@ def test_a_clone_url_reads_the_repository_rather_than_a_404():
     )[0]
 
     assert api.calls == [GITHUB_API]
-    observation = block["observations"][0]
-    assert (observation["value"], observation["status"]) == (150, "fresh")
-    assert observation["source_url"] == f"{REPO}.git"
+    by_metric = {observation["metric"]: observation for observation in block["observations"]}
+    assert (by_metric["stars"]["value"], by_metric["stars"]["status"]) == (150, "fresh")
+    assert by_metric["stars"]["source_url"] == f"{REPO}.git"
+    assert by_metric["forks"]["value"] == 3
 
 
 def test_a_capitalised_github_host_does_not_abort_the_run():
@@ -144,7 +145,9 @@ def test_a_capitalised_github_host_does_not_abort_the_run():
     # The collector calls that predicate inside run_pipeline, where one such
     # link in historical evidence would abort the whole daily run rather than
     # skip one resource.
-    api = FakeApi({"https://api.github.com/repos/Org/Bench": {"stargazers_count": 7}})
+    api = FakeApi(
+        {"https://api.github.com/repos/Org/Bench": {"stargazers_count": 7, "forks_count": 2}}
+    )
     block = collect_benchmark_attention(
         CONFIG,
         [_item("https://GitHub.com/Org/Bench", days_ago=3)],
@@ -152,7 +155,10 @@ def test_a_capitalised_github_host_does_not_abort_the_run():
         get_json=api,
     )[0]
 
-    assert [observation["value"] for observation in block["observations"]] == [7]
+    assert [(o["metric"], o["value"]) for o in block["observations"]] == [
+        ("stars", 7),
+        ("forks", 2),
+    ]
 
 
 def test_select_targets_groups_by_identity_and_keeps_only_exact_resources():
@@ -189,8 +195,8 @@ def test_select_targets_groups_by_identity_and_keeps_only_exact_resources():
 
     assert [target.resources for target in targets] == [
         {"hf_dataset_downloads": DATASET},
-        {"github_stars": linked},
-        {"github_stars": REPO},
+        {"github_stars": linked, "github_forks": linked},
+        {"github_stars": REPO, "github_forks": REPO},
     ]
     assert targets[1].released_at == NOW - timedelta(days=4)
     assert targets[2].released_at == NOW - timedelta(days=5)
@@ -218,6 +224,10 @@ def test_collector_writes_a_block_the_snapshot_validator_accepts():
 
     by_metric = {observation["metric"]: observation for observation in block["observations"]}
     assert by_metric["stars"]["value"] == 150 and by_metric["stars"]["value_kind"] == "cumulative"
+    # Forks are a displayed counter only (#659): read from the same payload
+    # as stars, never a ranking weight.
+    assert by_metric["forks"]["value"] == 3 and by_metric["forks"]["value_kind"] == "cumulative"
+    assert by_metric["forks"]["source"] == "github"
     # Counters stay whole numbers in the snapshot; 150 must not become 150.0.
     assert all(isinstance(o["value"], int) for o in block["observations"])
     assert by_metric["upvotes"]["value"] == 20 and by_metric["upvotes"]["source"] == "huggingface"
@@ -227,8 +237,25 @@ def test_collector_writes_a_block_the_snapshot_validator_accepts():
     assert by_metric["downloads_30d"]["value_kind"] == "rolling_30d"
     assert {observation["status"] for observation in block["observations"]} == {"fresh"}
     assert all(row["ok"] and row["item_count"] == 1 for row in block["health"])
-    assert [row.kind for row in health] == ["attention"] * 3
+    assert [row.kind for row in health] == ["attention"] * 4
     validate_snapshot(_snapshot(NOW, benchmark_attention=block))
+
+
+def test_stars_and_forks_share_one_github_request():
+    # Both counters come from one repository payload (#659): the second
+    # signal is served from the run's cache, so the source budget is spent
+    # once and a budget of one still refreshes both.
+    api = FakeApi({GITHUB_API: {"stargazers_count": 150, "forks_count": 3}})
+    config = {**CONFIG, "github": {"max_requests": 1, "request_delay_seconds": 0.0}}
+
+    block, _ = collect_benchmark_attention(
+        config, [_item(REPO, days_ago=2)], observed_at=NOW, get_json=api
+    )
+
+    assert api.calls == [GITHUB_API]
+    by_metric = {observation["metric"]: observation for observation in block["observations"]}
+    assert (by_metric["stars"]["value"], by_metric["forks"]["value"]) == (150, 3)
+    assert all(row["ok"] for row in block["health"])
 
 
 def test_missing_resource_is_unavailable_not_zero():
@@ -240,10 +267,16 @@ def test_missing_resource_is_unavailable_not_zero():
         CONFIG, [_item(REPO, days_ago=2)], observed_at=NOW, get_json=api
     )
 
-    (observation,) = block["observations"]
-    assert observation["status"] == "unavailable" and observation["value"] is None
+    # A gone repository records every counter on it as unavailable, never 0.
+    assert {o["metric"] for o in block["observations"]} == {"stars", "forks"}
+    assert all(
+        observation["status"] == "unavailable" and observation["value"] is None
+        for observation in block["observations"]
+    )
     stars_health = next(row for row in block["health"] if row["metric"] == "stars")
     assert stars_health["ok"] is True and stars_health["item_count"] == 1
+    forks_health = next(row for row in block["health"] if row["metric"] == "forks")
+    assert forks_health["ok"] is True and forks_health["item_count"] == 1
     validate_snapshot(_snapshot(NOW, benchmark_attention=block))
 
 
@@ -258,7 +291,7 @@ def test_transient_failure_carries_the_last_reading_forward_as_stale():
     api = FakeApi(
         {
             GITHUB_API: RequestError(f"HTTP 429 from {GITHUB_API} after 3 attempts"),
-            "https://api.github.com/repos/org/other": {"stargazers_count": 7},
+            "https://api.github.com/repos/org/other": {"stargazers_count": 7, "forks_count": 2},
         }
     )
     items = [_item(REPO, days_ago=1), _item(other, days_ago=2)]
@@ -285,11 +318,20 @@ def test_transient_failure_carries_the_last_reading_forward_as_stale():
         CONFIG, items, observed_at=NOW, previous_block=previous, get_json=api
     )
 
-    by_url = {observation["source_url"]: observation for observation in block["observations"]}
-    assert by_url[other]["status"] == "fresh" and by_url[other]["value"] == 7
-    assert by_url[REPO]["status"] == "stale" and by_url[REPO]["value"] == 140
-    assert by_url[REPO]["last_successful_date"] == yesterday.date().isoformat()
-    assert by_url[REPO]["observed_at"] == NOW.isoformat()
+    # Keyed by (metric, url): one repository now carries two counters, so a
+    # url alone no longer names one observation.
+    by_metric_url = {
+        (observation["metric"], observation["source_url"]): observation
+        for observation in block["observations"]
+    }
+    assert by_metric_url[("stars", other)]["status"] == "fresh"
+    assert by_metric_url[("stars", other)]["value"] == 7
+    assert by_metric_url[("forks", other)]["status"] == "fresh"
+    assert by_metric_url[("forks", other)]["value"] == 2
+    assert by_metric_url[("stars", REPO)]["status"] == "stale"
+    assert by_metric_url[("stars", REPO)]["value"] == 140
+    assert by_metric_url[("stars", REPO)]["last_successful_date"] == yesterday.date().isoformat()
+    assert by_metric_url[("stars", REPO)]["observed_at"] == NOW.isoformat()
     stars_health = next(row for row in block["health"] if row["metric"] == "stars")
     assert stars_health["ok"] is True and stars_health["item_count"] == 1
     assert stars_health["error"].startswith("1 of 2 requests failed; last: RequestError: HTTP 429")
@@ -301,14 +343,19 @@ def test_transient_failure_carries_the_last_reading_forward_as_stale():
     chained, _ = collect_benchmark_attention(
         CONFIG, items, observed_at=later, previous_block=block, get_json=api
     )
-    carried = next(o for o in chained["observations"] if o["source_url"] == REPO)
+    carried = next(
+        o for o in chained["observations"] if o["source_url"] == REPO and o["metric"] == "stars"
+    )
     assert carried["status"] == "stale"
     assert carried["last_successful_date"] == yesterday.date().isoformat()
 
     # With nothing to carry forward, a failure writes nothing: a null reading
     # would admit the artifact to the cohort with no signal to rank on.
     bare, _ = collect_benchmark_attention(CONFIG, items, observed_at=NOW, get_json=api)
-    assert [observation["source_url"] for observation in bare["observations"]] == [other]
+    assert {(o["metric"], o["source_url"]) for o in bare["observations"]} == {
+        ("stars", other),
+        ("forks", other),
+    }
 
 
 def test_the_ranking_reports_the_carried_reading_as_stale():
@@ -319,7 +366,7 @@ def test_the_ranking_reports_the_carried_reading_as_stale():
         CONFIG,
         evidence,
         observed_at=NOW - timedelta(days=1),
-        get_json=FakeApi({GITHUB_API: {"stargazers_count": 150}}),
+        get_json=FakeApi({GITHUB_API: {"stargazers_count": 150, "forks_count": 3}}),
     )
     second, _ = collect_benchmark_attention(
         CONFIG,
@@ -453,9 +500,9 @@ def test_budget_is_spent_newest_first_and_the_unread_tail_is_carried_forward():
     oldest = "https://github.com/org/oldest"
     api = FakeApi(
         {
-            "https://api.github.com/repos/org/newest": {"stargazers_count": 1},
-            GITHUB_API: {"stargazers_count": 2},
-            "https://api.github.com/repos/org/oldest": {"stargazers_count": 3},
+            "https://api.github.com/repos/org/newest": {"stargazers_count": 1, "forks_count": 4},
+            GITHUB_API: {"stargazers_count": 2, "forks_count": 5},
+            "https://api.github.com/repos/org/oldest": {"stargazers_count": 3, "forks_count": 6},
         }
     )
     items = [
@@ -688,7 +735,7 @@ def test_leaderboard_ranks_a_release_from_the_collected_block():
     # End to end: an unreviewed release with a dedicated repository enters the
     # 30-day cohort only because the collector observed it, and ranks
     # formally because GitHub stars are a durable signal above the 45% floor.
-    api = FakeApi({GITHUB_API: {"stargazers_count": 150}})
+    api = FakeApi({GITHUB_API: {"stargazers_count": 150, "forks_count": 7}})
     evidence = [_item(REPO, days_ago=5)]
     block, _ = collect_benchmark_attention(CONFIG, evidence, observed_at=NOW, get_json=api)
     snapshots = [_snapshot(NOW, evidence_items=evidence, benchmark_attention=block)]
