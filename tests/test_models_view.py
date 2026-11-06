@@ -14,6 +14,7 @@ from benchmark_radar.model_scores import (
     average_value,
     build_model_scores,
     capability_group,
+    joined_map_from_groups,
     latest_date,
     model_family,
     order_models,
@@ -134,6 +135,70 @@ def test_a_label_a_source_reuses_for_two_checkpoints_is_two_columns(tmp_path):
 
 def test_averages_round_half_up_like_the_page():
     assert shared_average([{"a": 0.25}], {"a": PERCENT})[0] == [0.3]
+
+
+# --- Joined benchmarks (#904) ---------------------------------------------------
+
+
+def test_joined_records_share_one_benchmark():
+    # Two columns score different records of one reviewed equivalent group.
+    joined = {"llm-stats:gpqa": "gpqa", "opencompass:1135": "gpqa"}
+    benchmarks = {"llm-stats:gpqa": PERCENT, "opencompass:1135": PERCENT}
+    means, shared = shared_average(
+        [{"llm-stats:gpqa": 40.0}, {"opencompass:1135": 60.0}],
+        benchmarks,
+        joined=joined,
+    )
+    assert means == [40.0, 60.0]
+    assert shared == ["gpqa"]
+
+
+def test_joined_records_do_not_share_across_different_groups():
+    joined = {"a": "g1", "b": "g2"}
+    benchmarks = {"a": PERCENT, "b": PERCENT}
+    assert shared_average([{"a": 40.0}, {"b": 60.0}], benchmarks, joined=joined) == (
+        [None, None],
+        [],
+    )
+
+
+def test_joined_records_still_require_one_comparable_group():
+    joined = {"a": "g", "b": "g"}
+    benchmarks = {"a": PERCENT, "b": PERCENT}
+    columns = [{"a": 40.0}, {"b": 60.0}]
+    means, shared = shared_average(columns, benchmarks, [{"a": 0}, {"b": 1}], joined=joined)
+    assert (means, shared) == ([None, None], [])
+    means, shared = shared_average(columns, benchmarks, [{"a": 0}, {"b": 0}], joined=joined)
+    assert (means, shared) == ([40.0, 60.0], ["g"])
+
+
+def test_joined_map_ignores_single_member_groups():
+    groups = [
+        {"group_id": "lonely", "members": ["a"]},
+        {"group_id": "g", "members": ["a", "b"]},
+        {"members": ["c", "d"]},
+    ]
+    assert joined_map_from_groups(groups) == {"a": "g", "b": "g"}
+
+
+def test_build_model_scores_marks_joined_benchmarks(tmp_path):
+    shards = tmp_path / "benchmarks"
+    shards.mkdir()
+    for name, key in {"a": "llm-stats:aime", "b": "model-reports:aime"}.items():
+        (shards / f"{name}.json").write_text(
+            json.dumps(_shard(key, [("M", "Lab", 50.0, "2026-01-01")]))
+        )
+    payload = build_model_scores(
+        shards,
+        equivalences=[{"group_id": "aime", "members": ["llm-stats:aime", "model-reports:aime"]}],
+    )
+    assert {benchmark["key"]: benchmark.get("joined") for benchmark in payload["benchmarks"]} == {
+        "llm-stats:aime": "aime",
+        "model-reports:aime": "aime",
+    }
+    # Without equivalences the payload is unchanged: no joined field appears.
+    plain = build_model_scores(shards)
+    assert all("joined" not in benchmark for benchmark in plain["benchmarks"])
 
 
 # --- Data -------------------------------------------------------------------------
