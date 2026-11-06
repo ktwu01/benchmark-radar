@@ -204,9 +204,30 @@ function sortKey(document, queryTokens, corpus) {
   const prefixHits = lastTerm ? prefixCounts(document, lastTerm) : {};
   if (!queryTokens.some((token) => document.allTokens.has(token)) && !Object.keys(prefixHits).length) return null;
   const matched = new Set();
+  const matchedFields = [];
   for (const field of FIELD_ORDER) {
-    for (const token of queryTokens) if (document.fieldCounts[field].has(token)) matched.add(token);
-    if (prefixHits[field]) matched.add(lastTerm);
+    let hits = false;
+    for (const token of queryTokens) {
+      if (document.fieldCounts[field].has(token)) {
+        matched.add(token);
+        hits = true;
+      }
+    }
+    if (prefixHits[field]) {
+      matched.add(lastTerm);
+      hits = true;
+    }
+    if (hits) matchedFields.push(field);
+  }
+  // Issue #432: a multi-word query whose only hit is one token in
+  // description only is noise, not evidence. Mirrors QueryService.
+  if (
+    queryTokens.length > 1 &&
+    matched.size === 1 &&
+    matchedFields.length === 1 &&
+    matchedFields[0] === "description"
+  ) {
+    return null;
   }
   const tier = nameMatchTier(document.fieldTokens.name, queryTokens);
   let queryWeight = 0;
@@ -242,7 +263,8 @@ function compareKeys(a, b) {
 
 const corpusCache = new WeakMap();
 
-// Every record sharing one query token is a candidate, as in QueryService;
+// Every record sharing one query token is a candidate, as in QueryService,
+// except a multi-word query's lone description-only token (issue #432);
 // the ranking puts full matches and exact names first. Each result keeps the
 // query words it lacks, so a surface can tell a full match from a partial
 // candidate instead of calling both a match.
