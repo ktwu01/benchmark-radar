@@ -7,9 +7,11 @@ each release looks up:
   own arXiv HTML (``benchmark_radar.paper_institutions.lookup``). A paper is
   retried every few days until OpenAlex has it, because OpenAlex lags new
   papers;
-* the root listing of the GitHub repository its stars come from, to mark
-  README-only placeholders. Set GITHUB_TOKEN for the 5,000-request hourly
-  budget.
+* the GitHub repository its stars come from: size, stars, archived flag and
+  dates from the search API (six repositories per call), the repository
+  endpoint for any search misses (it follows renames; a 404 means gone), and
+  the root listing for repositories small enough to be README-only. Set
+  GITHUB_TOKEN; the search API allows 30 requests a minute.
 
 Entries for releases that left the window are dropped. Each run is bounded by
 --max-papers and --max-repos; what is left is picked up by the next run.
@@ -30,6 +32,7 @@ from benchmark_radar.release_leaderboard import release_signal_targets
 from benchmark_radar.release_signals import (
     DEFAULT_RELEASE_INSTITUTIONS_PATH,
     DEFAULT_RELEASE_REPOS_PATH,
+    LISTING_MAX_KB,
     github_repo,
     is_placeholder_root,
     load_release_signals,
@@ -75,39 +78,97 @@ def refresh_institutions(papers, rows, *, today, limit, delay):
     return looked_up, len(pending)
 
 
-def _is_empty_repository(repo: str) -> bool:
+SEARCH_BATCH = 6
+
+
+def _search_repositories(repos, *, fetch=None):
+    """Metadata for public repositories, six per search call, keyed by owner/name.
+
+    Search does not follow renames, so a repository it misses is not yet
+    known to be gone; ``_confirm`` asks the repository endpoint.
+    """
+    fetch = fetch or (lambda url, params: get_json(url, params=params, headers=_headers(True)))
+    found = {}
+    for start in range(0, len(repos), SEARCH_BATCH):
+        batch = repos[start : start + SEARCH_BATCH]
+        query = " ".join(f"repo:{repo}" for repo in batch)
+        payload = fetch("https://api.github.com/search/repositories", {"q": query, "per_page": 100})
+        for item in payload.get("items") or []:
+            found[str(item.get("full_name") or "").lower()] = item
+        time.sleep(2.1)  # the search API allows 30 requests a minute
+    return found
+
+
+def _confirm(repo, *, fetch=None):
+    """The repository record, following renames, or None when it is gone (404)."""
+    fetch = fetch or (lambda url: get_json(url, headers=_headers(True), attempts=2))
     try:
-        meta = get_json(f"https://api.github.com/repos/{repo}", headers=_headers(github=True))
-    except RequestError:
-        return False
-    return int(meta.get("size") or 0) == 0
+        return fetch(f"https://api.github.com/repos/{repo}")
+    except RequestError as error:
+        if "404" in str(error):
+            return None
+        raise
 
 
-def refresh_repos(urls, rows, *, today, limit):
+def _root(repo, *, fetch=None):
+    fetch = fetch or (lambda url: get_json(url, headers=_headers(True), attempts=2))
+    listing = fetch(f"https://api.github.com/repos/{repo}/contents/")
+    return sorted(str(entry.get("name") or "") for entry in listing or [])
+
+
+def repo_row(meta, today, *, list_root):
+    """One release_repos.yml row from a repository record."""
+    size = int(meta.get("size") or 0)
+    row = {
+        "full_name": meta.get("full_name"),
+        "size_kb": size,
+        "stars_at_check": meta.get("stargazers_count"),
+        "archived": bool(meta.get("archived")),
+        "created_at": str(meta.get("created_at") or "")[:10] or None,
+        "pushed_at": str(meta.get("pushed_at") or "")[:10] or None,
+        "unavailable": False,
+        "placeholder": None,
+        "retrieved_at": today.isoformat(),
+    }
+    if row["archived"]:
+        return row
+    if size == 0:
+        # An empty repository: GitHub answers 404 for its contents.
+        row.update(placeholder=True, root=[])
+    elif size > LISTING_MAX_KB:
+        row["placeholder"] = False
+    else:
+        names = list_root(str(meta.get("full_name") or ""))
+        row.update(placeholder=is_placeholder_root(names), root=names[:20])
+    return row
+
+
+def refresh_repos(urls, rows, *, today, limit, search=None, confirm=None, list_root=None):
+    search = search or _search_repositories
+    confirm = confirm or _confirm
+    list_root = list_root or _root
     repos = sorted({repo for repo in map(github_repo, urls) if repo})
-    pending = [repo for repo in repos if needs_repo_refresh(rows.get(repo), today)]
+    pending = [repo for repo in repos if needs_repo_refresh(rows.get(repo), today)][:limit]
+    try:
+        found = search(pending)
+    except (RequestError, OSError) as error:
+        print(f"warning: repository search failed: {error}", file=sys.stderr)
+        return 0, len(pending)
     looked_up = 0
-    for repo in pending[:limit]:
+    for repo in pending:
         try:
-            listing = get_json(
-                f"https://api.github.com/repos/{repo}/contents/",
-                headers=_headers(github=True),
-                attempts=2,
-            )
-        except RequestError as error:
-            # GitHub answers 404 both for a repository that is gone and for one
-            # that exists but is empty; the repository's own record tells them
-            # apart. An empty repository is the plainest placeholder.
-            if "404" not in str(error) or not _is_empty_repository(repo):
-                print(f"warning: {repo}: {error}", file=sys.stderr)
-                continue
-            listing = []
-        names = sorted(str(entry.get("name") or "") for entry in listing or [])
-        rows[repo] = {
-            "placeholder": is_placeholder_root(names),
-            "root": names[:20],
-            "retrieved_at": today.isoformat(),
-        }
+            meta = found.get(repo) or confirm(repo)
+            if meta is None:
+                rows[repo] = {
+                    "unavailable": True,
+                    "placeholder": None,
+                    "retrieved_at": today.isoformat(),
+                }
+            else:
+                rows[repo] = repo_row(meta, today, list_root=list_root)
+        except (RequestError, OSError) as error:
+            print(f"warning: {repo}: {error}", file=sys.stderr)
+            continue
         looked_up += 1
     return looked_up, len(pending)
 
@@ -137,8 +198,10 @@ def main(argv: list[str] | None = None) -> int:
     done, pending = refresh_repos(star_urls, repos, today=today, limit=args.max_repos)
     write_release_repos(args.repos, repos)
     placeholders = sum(1 for row in repos.values() if row.get("placeholder"))
+    archived = sum(1 for row in repos.values() if row.get("archived"))
+    unavailable = sum(1 for row in repos.values() if row.get("unavailable"))
     print(f"repos: {len(live_repos)} in window, {done} of {pending} pending looked up")
-    print(f"placeholder repositories: {placeholders}")
+    print(f"held back: {placeholders} placeholder, {archived} archived, {unavailable} gone")
     return 0
 
 
