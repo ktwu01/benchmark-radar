@@ -136,6 +136,14 @@ source_documents:
     published: 2026-04-24
     retrieved_at: 2026-11-04
 
+  - id: lifesci_diamond_arca_blog
+    name: LifeSci Diamond results (Arca blog)
+    publisher: Arca
+    document_type: benchmark_leaderboard
+    url: https://www.arca.inc/blog/lifesci-diamond
+    benchmarks: [lifesci_diamond]
+    retrieved_at: 2026-11-05
+
 benchmarks:
   - id: gobench
     name: GoBench
@@ -1861,6 +1869,20 @@ benchmarks:
           deterministically defective and 1 is unstable.
         receipts:
           - https://github.com/kimjune01/slopcodebench-audit
+
+  - id: lifesci_diamond
+    name: LifeSci Diamond
+    aliases: ["LifeSci Diamond", "LifeSci-Diamond"]
+    domain: health
+    url: https://www.arca.inc/blog/lifesci-diamond
+    caveat: >-
+      55 life-science research tasks; 10 public, 45 held out. Strict pass
+      requires every rubric line fully met and no penalty fires. Scores are
+      publisher-reported by Arca, which publishes the benchmark and fields
+      evaluated systems, so they are not independent measurements. Sample
+      scores are not comparable to the full benchmark. Only 44 of 55 answer
+      keys are specialist-written or reviewed; 11 rest on primary sources
+      without expert review, and 6 November additions are not second-reviewed.
 
 # Model cards, technical reports and release posts.
 #
