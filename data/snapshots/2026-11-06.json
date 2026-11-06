@@ -95221,5 +95221,132 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 9
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "Stanford University Cornell University"
+        ],
+        "authors": [
+          "E. Kelly Buchanan",
+          "Crystal Zhou",
+          "Scott W. Linderman",
+          "Christopher R\\'e",
+          "Christopher Ré"
+        ],
+        "blurb": "The new “Benchmarks as Software” paper uses Terminal-Bench to define continuous validation for agent benchmarks.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-06T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Benchmarks as Software: Terminal-Bench and the Case for Continuous Benchmarks",
+        "url": "https://arxiv.org/abs/2611.08417"
+      },
+      {
+        "affiliations": [
+          "Jinhua Weiqujia Technology Co., Ltd."
+        ],
+        "authors": [
+          "Nie Jingchuan"
+        ],
+        "blurb": "The newly released Agent Operation Recovery Benchmark tests whether an agent can resume an uncertain business operation without changing the original target or executing it twice, while still allowing a genuinely authorized new request.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-06T02:28:40+00:00",
+        "source": "DataCite",
+        "title": "Agent Operation Recovery Benchmark: 24 Synthetic Scenarios and 96 Model Episodes (full96-v1)",
+        "url": "https://doi.org/10.57760/sciencedb.018qc"
+      },
+      {
+        "affiliations": [
+          "Chia-Jung Lee, Vanessa Murdock",
+          "Amazon Responsible AI"
+        ],
+        "authors": [
+          "Rongting Zhang",
+          "Martin Bertran",
+          "Sandeep Avula",
+          "Chia-Jung Lee",
+          "Vanessa Murdock"
+        ],
+        "blurb": "Two new releases in this captured feed test integrity attacks that do not simply tell an agent to abandon its task.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-06T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Beyond Instruction Override: Benchmarking Indirect Prompt Injection with Task-Tampering Attacks",
+        "url": "https://arxiv.org/abs/2611.07640"
+      },
+      {
+        "affiliations": [
+          "Peking University Zhongguancun Academy Meituan",
+          "The Hong Kong University of Science and Technology",
+          "Beijing Key Laboratory of Data Intelligence and Security, Peking University"
+        ],
+        "authors": [
+          "Yizhen Jiang",
+          "Haowei Guo",
+          "Tianyi Bai",
+          "Zengjie Hu",
+          "Lu Ma",
+          "Zhengyang Zhao",
+          "Haoze Sun",
+          "Peng Pei",
+          "Wentao Zhang",
+          "Yi-Zhen Jiang",
+          "Hao-Wei Guo",
+          "Tian-Yi Bai",
+          "Zeng-Jie Hu",
+          "Zheng-Yang Zhao",
+          "Hao-Ze Sun",
+          "Wen-Tao Zhang"
+        ],
+        "blurb": "The new MCPHallu benchmark separates hallucination-prone failures in Model Context Protocol agents into reasoning, execution, and memory.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-06T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "MCPHallu: Benchmarking Reasoning, Execution, and Memory Hallucinations in MCP Agents",
+        "url": "https://arxiv.org/abs/2611.07689"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "wenzhi yuan"
+        ],
+        "blurb": "A new parcel-damage inspection package makes dataset leakage part of the evaluation artifact.",
+        "categories": [
+          "evaluation",
+          "dataset",
+          "data_quality"
+        ],
+        "published_at": "2026-11-06T11:54:34+00:00",
+        "source": "DataCite",
+        "title": "Parcel damage detection under dataset shift: harmonised annotations, leakage-free splits, evaluation outputs and code",
+        "url": "https://doi.org/10.5281/zenodo.24009912"
+      }
+    ],
+    "date": "2026-11-06",
+    "schema_version": 1,
+    "top": [
+      "https://arxiv.org/abs/2611.08417",
+      "https://doi.org/10.57760/sciencedb.018qc",
+      "https://arxiv.org/abs/2611.07640"
+    ]
+  },
   "since": "2026-11-04T12:35:06.667462+00:00"
 }
