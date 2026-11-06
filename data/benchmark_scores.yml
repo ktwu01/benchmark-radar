@@ -6902,8 +6902,10 @@ results:
     measurement_kind: benchmark_publisher_run
 
   # Arca's own systems on the full 55-task benchmark, from the publisher's
-  # results blog (updated 2026-11-04). Plain-API runs from the same table are
-  # verified in the blog but not filed here; see PR body.
+  # results blog (updated 2026-11-04). The 18 plain-API runs from the same
+  # tables follow below; organizations are read from the blog's own run-settings
+  # table, which gives each model's API ID with its vendor prefix
+  # (openai/, anthropic/, meta/, google/, moonshotai/, spacexai/).
   - benchmark_id: lifesci_diamond
     instrument: lifesci_diamond_full_55
     protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; Arca chat workflow via OpenRouter
@@ -6942,5 +6944,193 @@ results:
     source_id: lifesci_diamond_arca_blog
     reported_at: 2026-11-04
     value: 9.1
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  # Plain-API runs on the same full 55-task benchmark, from the same blog
+  # tables ("Full fixed task set" and "View exact values for 22 systems").
+  # Arca ran these itself through its reference harness (Vercel AI Gateway
+  # /v1/chat/completions, web_search tool backed by Exa, 40 steps max), so
+  # they are benchmark_publisher_run rows like the Arca systems above, with
+  # no reported_by: Arca measured them, it did not repeat a self-report.
+  # Organizations come from the blog's API-ID table (see comment above).
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: GPT-6 Astra
+    organization: OpenAI
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 20.0
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: GPT-6.1 Sol
+    organization: OpenAI
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 14.5
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: GPT-6.1 Terra
+    organization: OpenAI
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 9.1
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: Muse Wonder
+    organization: Meta
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 9.1
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: GPT-5.6 Sol
+    organization: OpenAI
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 5.5
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: Grok 4.6
+    organization: xAI
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 3.6
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: Claude Opus 5.5
+    organization: Anthropic
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 3.6
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: Claude Fable 5
+    organization: Anthropic
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 3.6
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: Gemini 3.7 Flash
+    organization: Google
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 1.8
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: GPT-5.6 Terra
+    organization: OpenAI
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 1.8
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: Claude Sonnet 5
+    organization: Anthropic
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 1.8
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: Kimi K3
+    organization: Moonshot AI
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 1.8
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: Claude Fable 5.1
+    organization: Anthropic
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 1.8
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: Claude Opus 5
+    organization: Anthropic
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 1.8
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: Gemini 4 Argon
+    organization: Google
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 0.0
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: Gemini 3.1 Pro Preview
+    organization: Google
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 0.0
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: Muse Spark 1.2
+    organization: Meta
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 0.0
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; plain API via Vercel AI Gateway reference harness, web_search tool (Exa)
+    model: Claude Opus 4.8
+    organization: Anthropic
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 0.0
     read_from: html_text
     measurement_kind: benchmark_publisher_run
