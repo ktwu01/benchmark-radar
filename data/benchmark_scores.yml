@@ -554,6 +554,10 @@ benchmarks:
     metric: isolated_solve
     direction: higher_is_better
     unit: percent
+  - benchmark_id: lifesci_diamond
+    metric: strict_pass_rate
+    direction: higher_is_better
+    unit: percent
 results:
   # Brain-to-Text '24's official challenge summary names the top three final
   # submissions and the PyTorch baseline. The challenge used 1,200 held-out
@@ -6894,5 +6898,49 @@ results:
     source_id: slopcodebench_leaderboard_2026_04_24
     reported_at: 2026-04-24
     value: 3.57
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  # Arca's own systems on the full 55-task benchmark, from the publisher's
+  # results blog (updated 2026-11-04). Plain-API runs from the same table are
+  # verified in the blog but not filed here; see PR body.
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; Arca chat workflow via OpenRouter
+    model: Arca with GPT-6 Astra
+    organization: Arca
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 29.1
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; Arca chat workflow via OpenRouter
+    model: Arca Auto
+    organization: Arca
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 20.0
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; Arca chat workflow via OpenRouter
+    model: Arca with Claude Opus 5.5
+    organization: Arca
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 12.7
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge; Arca chat workflow via OpenRouter
+    model: Arca with Claude Opus 5
+    organization: Arca
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 9.1
     read_from: html_text
     measurement_kind: benchmark_publisher_run
