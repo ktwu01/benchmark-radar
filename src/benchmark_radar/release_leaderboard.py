@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import math
 import re
+import unicodedata
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -52,6 +53,52 @@ COMBINED_METHOD_VERSION = "attention-affiliation-v2"
 AFFILIATION_WEIGHT = 0.20
 MIN_OBSERVED_WEIGHT_RANK = 0.45
 DEFAULT_TOP_LIMIT = 10
+
+# One-line release summary (issue #348). A release row answers one question —
+# what does this benchmark measure, and for whom — in a single scannable
+# line, or it says nothing. The line is extractive, never generated: it is
+# the first sentence of the source record's own summary, so a line can only
+# state what the source already stated. No API call, no cache, nothing to
+# regenerate: the same record always yields the same line.
+ONE_LINE_SUMMARY_MAX_CHARS = 140
+# Box-drawing and block characters: one release's summary was a run of "═══"
+# that pushed a 720px column to 1349px (issue #333). They carry no meaning
+# here, so they are stripped rather than escaped around.
+_ONE_LINE_STRIP_RANGES = ((0x2500, 0x259F),)
+_SENTENCE_END_RE = re.compile(r"[.!?](?=\s+[A-Z0-9\"'(\[]|\s*$)")
+
+
+def one_line_summary(value: Any) -> str:
+    """Derive a release row's one-line summary from the record's own text.
+
+    Takes the first sentence of ``value`` (the source record's summary),
+    capped at :data:`ONE_LINE_SUMMARY_MAX_CHARS` characters. Control and
+    box-drawing characters are stripped, so nothing in the line can break
+    the column. Returns ``""`` when the record carries nothing usable: a
+    release with nothing to summarise keeps an honest empty state instead
+    of a manufactured line.
+    """
+    if not isinstance(value, str):
+        return ""
+    cleaned = "".join(
+        char
+        for char in value
+        if unicodedata.category(char) not in ("Cc", "Cf", "Zl", "Zp")
+        and not any(start <= ord(char) <= end for start, end in _ONE_LINE_STRIP_RANGES)
+    )
+    text = " ".join(cleaned.split())
+    if not text:
+        return ""
+    match = _SENTENCE_END_RE.search(text)
+    if match:
+        text = text[: match.end()]
+    if len(text) <= ONE_LINE_SUMMARY_MAX_CHARS:
+        return text
+    cut = text.rfind(" ", 0, ONE_LINE_SUMMARY_MAX_CHARS - 1)
+    if cut <= 0:
+        return text[: ONE_LINE_SUMMARY_MAX_CHARS - 1] + "…"
+    return text[:cut] + "…"
+
 
 WINDOW_DAYS: dict[str, int] = {
     "7d": 7,
@@ -487,11 +534,12 @@ def filter_release_cohort(
             {
                 "canonical_artifact_id": canonical_id,
                 "name": name,
-                "purpose": (
-                    primary_item.get("summary")
-                    or primary_item.get("title")
-                    or "Benchmark and evaluation suite"
-                ),
+                # One line from the record's own summary (issue #348). No
+                # fallback to the title — the row already shows it — and no
+                # manufactured "Benchmark and evaluation suite": a record
+                # with nothing to summarise keeps an honest empty purpose,
+                # which the row renders as an explicit empty state.
+                "purpose": one_line_summary(primary_item.get("summary")),
                 "release_date": earliest_dt.isoformat(),
                 "has_dated_attention": has_attention,
                 "is_reviewed_benchmark": is_reviewed,
