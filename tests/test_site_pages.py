@@ -34,6 +34,7 @@ def _shard(
     modality: str | None = None,
     scores: list[dict] | None = None,
     provenance: dict | None = None,
+    source_metadata: dict | None = None,
 ) -> dict:
     record = {
         "slug": slug,
@@ -48,6 +49,8 @@ def _shard(
         "description": {"en": description} if description else {},
         "provenance": provenance or {},
     }
+    if source_metadata is not None:
+        record["source_metadata"] = source_metadata
     scores_by_source = {source: {"rows": scores or [], "series": {}}} if scores else {}
     return {
         "schema_version": 1,
@@ -383,6 +386,36 @@ def test_object_publisher_reaches_the_visible_facts(tmp_path):
     assert "<dt>Publisher</dt><dd>mbzuai (published the hub card)</dd>" in alpha
     assert "published by mbzuai" not in alpha
     assert "<dt>Publisher</dt><dd>Beta Lab</dd>" in _page_text(output, "beta-bench")
+
+
+def test_stated_saturation_index_reaches_the_visible_facts(tmp_path):
+    """The study's stated index and label render as its own fact (#1085).
+
+    The value is the study's, as stated in source_metadata: shown, never
+    recomputed, and labelled with the study. A record the study did not
+    annotate shows no such row rather than a zero.
+    """
+    stated = {
+        "benchmark_saturation": {
+            "saturation_index": "0.916397111",
+            "saturation_index_interpreted": "Very high",
+            "test_samples": "500",
+        }
+    }
+    shard = _shard(
+        "math-500",
+        "MATH-500",
+        source="benchmark_saturation",
+        source_metadata=stated,
+    )
+    plain = _shard("alpha-bench", "Alpha Bench")
+    output = _generated_pages(tmp_path, shard, plain)
+    assert (
+        "<dt>Saturation index (study)</dt>"
+        "<dd>0.916397111 (Very high) — Benchmark Saturation study (arXiv:2602.16763)</dd>"
+        in _page_text(output, "math-500")
+    )
+    assert "Saturation index (study)" not in _page_text(output, "alpha-bench")
 
 
 def test_node_references_carry_their_own_type_so_they_resolve_off_the_homepage(tmp_path):
