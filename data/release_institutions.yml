@@ -1493,6 +1493,12 @@ papers:
     retrieved_at: '2026-11-05'
     institutions:
     - Independent
+  '2610.37739':
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7224780448
+    retrieved_at: '2026-11-07'
+    institutions:
+    - University of Illinois Urbana-Champaign
   '2610.38293':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7224837629
