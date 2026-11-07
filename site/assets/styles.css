@@ -5911,6 +5911,8 @@ dialog {
 .skyline-count { color: #876014; font-size: .9rem; font-weight: 600; white-space: nowrap; }
 .skyline-height-control { display: flex; align-items: center; gap: .6rem; margin-top: .85rem; color: var(--muted); font-size: .875rem; }
 .skyline-height-control select { min-width: 0; max-width: 100%; padding: .4rem 1.7rem .4rem .6rem; color: var(--ink); background: var(--panel); border: 1px solid var(--edge); border-radius: 6px; font: inherit; }
+.skyline-date-control { display: flex; align-items: center; gap: .6rem; margin-top: .85rem; color: var(--muted); font-size: .875rem; }
+.skyline-date-control input { min-width: 0; max-width: 100%; padding: .4rem .6rem; color: var(--ink); background: var(--panel); border: 1px solid var(--edge); border-radius: 6px; font: inherit; }
 .skyline-chart { overflow-x: auto; margin-top: .5rem; }
 .skyline-chart svg { display: block; width: 100%; min-width: 1100px; max-width: 1300px; margin: 0 auto; }
 .skyline-chart svg.skyline-has-undated { min-width: 1500px; max-width: 1830px; }

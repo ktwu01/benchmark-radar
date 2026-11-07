@@ -797,7 +797,7 @@
           </div>
           <div class="skyline-toolbar">
             <label class="score-filter" for="leaderboard-score-filter">
-              <span data-i18n="Show benchmarks with highest reported score below:">Show benchmarks with highest reported score below:</span>
+              <span data-i18n="Show benchmarks with highest reported score below (default 70; 100 = full range):">Show benchmarks with highest reported score below (default 70; 100 = full range):</span>
               <input id="leaderboard-score-filter" name="lscore" type="range" min="10" max="100" step="10" value="70" list="score-filter-steps" data-score-filter aria-controls="benchmark-skyline-chart">
               <output id="leaderboard-score-value" for="leaderboard-score-filter">70</output>
             </label>
@@ -813,6 +813,14 @@
                 <option value="models" data-i18n="Models with reported scores">Models with reported scores</option>
                 <option value="documents" data-i18n="Source documents">Source documents</option>
               </select>
+            </label>
+            <label class="skyline-date-control" for="benchmark-skyline-date-from">
+              <span data-i18n="Date from">Date from</span>
+              <input id="benchmark-skyline-date-from" type="date" min="2024-01-01">
+            </label>
+            <label class="skyline-date-control" for="benchmark-skyline-date-to">
+              <span data-i18n="Date to">Date to</span>
+              <input id="benchmark-skyline-date-to" type="date" min="2024-01-01">
             </label>
           </div>
           <div class="frontier-chart skyline-chart" id="benchmark-skyline-chart" tabindex="0" role="region" aria-label="Benchmark Frontier chart" data-i18n-aria="Benchmark Frontier chart"></div>
@@ -1004,7 +1012,7 @@
         <div class="score-browse-header">
           <h2 id="saturation-heading" class="view-title" data-i18n="Saturation">Saturation</h2>
           <label class="score-filter" for="saturation-score-filter">
-            <span data-i18n="Show benchmarks with highest reported score below:">Show benchmarks with highest reported score below:</span>
+            <span data-i18n="Show benchmarks with highest reported score below (default 70; 100 = full range):">Show benchmarks with highest reported score below (default 70; 100 = full range):</span>
             <input id="saturation-score-filter" name="lscore" type="range" min="10" max="100" step="10" value="70" list="score-filter-steps" data-score-filter aria-controls="benchmark-search-results">
             <output id="saturation-score-value" for="saturation-score-filter">70</output>
           </label>
