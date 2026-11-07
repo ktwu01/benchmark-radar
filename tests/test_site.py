@@ -514,12 +514,16 @@ def test_trends_table_stays_inside_the_320px_viewport():
     Unless the frame is its containing block, the frame's overflow cannot clip
     it and its place at the table's far right widens documentElement past the
     viewport. All seven columns stay: the frame scrolls, the page does not.
+    Checking the headings exist in the HTML is not enough on its own — the
+    old mobile rule hid the "Previous period" column with display: none —
+    so the test also asserts no rule hides any trends-table column.
     """
     html = Path("site/index.html").read_text(encoding="utf-8")
     styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
     frame = styles.split(".direction-trends-frame {", 1)[1].split("}", 1)[0]
     assert "position: relative" in frame
     assert "overflow-x: auto" in frame
+    assert ".direction-trends-table tr > :nth-child(3)" not in styles
     assert (
         '<div class="direction-trends-frame" tabindex="0" role="region" '
         'aria-labelledby="direction-trends-heading">'
@@ -534,6 +538,45 @@ def test_trends_table_stays_inside_the_320px_viewport():
         "16-week trend",
     ):
         assert heading in html
+
+
+def test_every_homepage_image_carries_an_alt_attribute():
+    """Issue #946: Bing reported a missing image alt on the homepage.
+
+    The homepage's only image is the Hugging Face award badge, and it is
+    decorative inside a link whose aria-label already names the award, so
+    its empty alt is the correct value, not a missing one. This guards the
+    failure Bing reported: any image added without an alt fails here.
+    """
+
+    class Images(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.images = []
+
+        def handle_starttag(self, tag, attrs):
+            if tag == "img":
+                self.images.append(dict(attrs))
+
+    parser = Images()
+    parser.feed(Path("site/index.html").read_text(encoding="utf-8"))
+    assert parser.images, "the homepage declares no image to check"
+    for image in parser.images:
+        assert "alt" in image, f"image without alt: {image.get('src')}"
+    badge = parser.images[0]
+    assert badge["src"] == "/assets/hf-paper-of-the-day.svg"
+    assert badge["alt"] == ""
+    # The badge sits in a link that already names the award, so the empty
+    # alt is deliberate: a repeated alt would read the award twice.
+    html = Path("site/index.html").read_text(encoding="utf-8")
+    assert "Hugging Face: #1 Paper of the Day" in html
+    # The page generators emit no <img> at all, so no generated page can
+    # reintroduce the missing alt Bing found.
+    pages = Path("src/benchmark_radar/site_pages.py").read_text(encoding="utf-8")
+    assert "<img" not in pages
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+    assert 'createElement("img"' not in script
+    assert 'element("img"' not in script
 
 
 def test_top_right_utilities_have_immediate_visible_feedback():
@@ -1247,6 +1290,22 @@ def test_evidence_cards_show_fetched_source_metadata_without_inventing_zeroes():
         ["Published", "date:2026-08-24T17:59:04Z"],
         ["Updated", "date:2026-08-25T17:59:04Z"],
     ]
+    # Issue #1016: a record dated by its deposition's created time says so
+    # next to Published, with the uploader's value as given.
+    assert facts["dates_with_basis"] == [
+        [
+            "Published",
+            "date:2026-10-27T02:01:03Z (dated by deposition created; "
+            "source publication_date was 2026-10-31)",
+        ],
+    ]
+    assert facts["published_note"] == {
+        "replaced": " (dated by deposition created; source publication_date was 2026-10-31)",
+        "replacedBareYear": " (dated by deposition created; source publication_date was 2027)",
+        "noSourceValue": " (dated by deposition created; no publication_date supplied)",
+        "normal": "",
+        "unknown": "",
+    }
     assert facts["rendered"] == {
         "tag": "div",
         "className": "record-facts",
