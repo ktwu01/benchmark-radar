@@ -157,6 +157,9 @@ QUERIES = [
     "robot gra",
     "x",
     "gra robot gra",
+    # Issue #432: every record matches at most one of these two words, in
+    # description only, so the floor drops them all on both implementations.
+    "forecasting prediction",
 ]
 
 
@@ -176,9 +179,12 @@ def test_description_only_matches_are_found_on_the_site():
 def test_partial_candidates_are_distinguished_from_full_matches():
     # Search keeps records sharing one query word; only records containing every
     # word are full matches, as QueryService's missing_tokens reports.
+    # Issue #432: WeatherBench 2 ("c") matched only "weather", in description
+    # only, for a two-word query. That weakest tier no longer qualifies, so
+    # it is dropped instead of kept as a partial candidate.
     site = site_ranking(SYNTHETIC, ["weather forecasting"])["weather forecasting"]
     assert site["full"] == ["a", "b"]
-    assert "c" in site["keys"] and "c" not in site["full"]
+    assert "c" not in site["keys"]
 
 
 def test_a_partly_typed_word_matches_words_that_start_with_it():

@@ -72,7 +72,9 @@ when the user explicitly wants one mixed evidence list; never compare ranking
 scores across the two layers.
 
 Search is deterministic lexical/token matching, not semantic search. Any shared
-token can retrieve a candidate. BM25F is the main retrieval score, with controlled
+token can retrieve a candidate, except that a multi-word query drops a record
+matching a single token in description only (#432). BM25F is the main retrieval
+score, with controlled
 name and phrase boosts; IDF coverage is a tie-breaker and explanation, not a
 service-side acceptance decision. The `retrieval_score` is query-local ranking
 evidence, not confidence and not comparable across queries. Partial matches remain
@@ -93,8 +95,18 @@ across queries.
 Interpret `search_status: full_matches_found` as complete lexical coverage in at
 least one candidate, not proof of suitability. Interpret `partial_candidates_only`
 as inspectable evidence that still needs query refinement or record review, never as
-an answer. Interpret `no_lexical_candidates` as “no record shared any query token in
-this local data version,” not proof that no such benchmark exists. If Catalog
+an answer. Interpret `no_lexical_candidates` as “no candidate passed the matching
+policy in this local data version,” not proof that no such benchmark exists: the
+only records sharing a query token may have been lone description-only tokens the
+policy drops (`weak_filtered_count` says how many), or matches an active filter
+excluded (`filter_excluded_match_count` says how many). Interpret
+`decision: no_confident_match` as the service's own statement that no record
+covered every query token — a lexical outcome, not a semantic absence. Do not
+report “no benchmark in the catalog covers this”: a partial candidate may still
+be suitable once inspected (synonyms, morphology, or details outside the indexed
+fields). Refine the query or inspect the partial candidates instead, and report
+`no confident match` only as the agent's own judgment after that review, never
+as the lexical outcome alone. If Catalog
 candidates remain insufficient and recent discovery is relevant, search `radar` with
 the same task terms and label every result as unverified Radar evidence.
 
@@ -107,8 +119,9 @@ The service does not decide whether a benchmark satisfies the user's intent. Aft
 retrieval, the Agent should remove conversational wrapper text from the next query,
 compare a small set of focused variants, inspect `missing_tokens` and
 `idf_coverage`, and call `show` for any candidate it may present as suitable. The
-Agent may report `no confident match` when the details do not support the request;
-that is an agent judgment, not a lexical search status.
+service reports `decision: no_confident_match` when no record covers every query
+token; whether a full match actually satisfies the request is still the agent's
+judgment, not a lexical search status.
 
 Before presenting a catalog record as suitable, call `show` and check that its
 description, modality, artifacts, openness, and provenance support the user's
