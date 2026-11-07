@@ -8,6 +8,7 @@ and fail loudly rather than silently writing an empty directory.
 
 import json
 import re
+from html.parser import HTMLParser
 from pathlib import Path
 
 import pytest
@@ -97,6 +98,39 @@ def test_writes_one_page_per_shard_plus_directory(tmp_path):
     assert (output / "alpha-bench" / "index.html").exists()
     assert (output / "beta-bench" / "index.html").exists()
     assert (output / "index.html").exists()
+
+
+def test_generated_pages_give_every_image_an_alt_attribute(tmp_path):
+    """Issue #946: validate alt attributes by parsing generated output.
+
+    The homepage test used to ban "<img" in the generator source, which
+    would also fail a generated page that legitimately adds an accessible
+    <img alt="...">. Check the rendered pages instead: every image in
+    every generated page must carry an alt attribute. No generated page
+    emits an image today, so this guards the next one the generator adds.
+    """
+
+    class Images(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.images = []
+
+        def handle_starttag(self, tag, attrs):
+            if tag == "img":
+                self.images.append(dict(attrs))
+
+    output = _generated_pages(
+        tmp_path,
+        _shard("alpha-bench", "Alpha Bench"),
+        _shard("beta-bench", "Beta Bench"),
+    )
+    pages = sorted(output.rglob("*.html"))
+    assert pages, "the generator wrote no pages to check"
+    for page in pages:
+        parser = Images()
+        parser.feed(page.read_text(encoding="utf-8"))
+        for image in parser.images:
+            assert "alt" in image, f"{page}: image without alt: {image.get('src')}"
 
 
 def test_benchmark_pages_share_the_dashboard_shell_without_duplicate_navigation(tmp_path):
