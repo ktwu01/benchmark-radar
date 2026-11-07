@@ -1,8 +1,8 @@
 {
   "note": "Frozen IDs for the logo audit page (site/logos.html). An ID is assigned once and never reused, so review feedback citing it stays valid across rebuilds. Which models and organizations exist is decided by models.json, not here.",
   "high_water": {
-    "O": 89,
-    "M": 1163
+    "O": 90,
+    "M": 1177
   },
   "organizations": {
     "AI21 Labs": "O-01",
@@ -89,7 +89,8 @@
     "Shlizerman Lab": "O-86",
     "Stanford NPTL": "O-87",
     "Tyler Benster et al.": "O-88",
-    "UC Davis Neuroprosthetics Lab": "O-89"
+    "UC Davis Neuroprosthetics Lab": "O-89",
+    "Cursor": "O-90"
   },
   "models": {
     "Olmo 3 (7B and 32B)␟Ai2": "M-01",
@@ -281,7 +282,21 @@
     "Stanford-NPTL causal RNN TTA-Ensemble + 5gram␟Stanford NPTL": "M-1161",
     "Tyler Benster et al. submission␟Tyler Benster et al.": "M-1162",
     "UCD-NPL causal RNN + 5gram␟UC Davis Neuroprosthetics Lab": "M-1163",
+    "Opus 4.5␟Anthropic": "M-1164",
+    "Opus 4.6␟Anthropic": "M-1165",
+    "Opus 4.7␟Anthropic": "M-1166",
+    "Sonnet 4.6␟Anthropic": "M-1167",
+    "Composer 2␟Cursor": "M-1168",
+    "DeepSeek V4 Flash␟DeepSeek": "M-1169",
     "Gemma 3 1B␟Google": "M-117",
+    "GPT 5.2-Codex␟OpenAI": "M-1170",
+    "GPT 5.3-Codex␟OpenAI": "M-1171",
+    "GPT 5.3-Codex-Spark␟OpenAI": "M-1172",
+    "GPT 5.4␟OpenAI": "M-1173",
+    "GPT 5.4-Mini␟OpenAI": "M-1174",
+    "GPT 5.5␟OpenAI": "M-1175",
+    "GLM 5.2␟Z.ai": "M-1176",
+    "GLM 5.1␟Zhipu AI": "M-1177",
     "Gemma 3 27B␟Google": "M-118",
     "Gemma 3 4B␟Google": "M-119",
     "Gemini 2.5 Pro␟Google": "M-12",

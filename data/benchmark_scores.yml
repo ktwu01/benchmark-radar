@@ -554,6 +554,11 @@ benchmarks:
     metric: isolated_solve
     direction: higher_is_better
     unit: percent
+
+  - benchmark_id: swe_refactor_bench
+    metric: score
+    direction: higher_is_better
+    unit: percent
 results:
   # Brain-to-Text '24's official challenge summary names the top three final
   # submissions and the PyTorch baseline. The challenge used 1,200 held-out
@@ -6895,4 +6900,269 @@ results:
     reported_at: 2026-04-24
     value: 3.57
     read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # Table 3 of arXiv:2608.23564 (SWE Refactor Bench results table). The paper
+  # reports two numbers per configuration; the Score column is the benchmark's
+  # headline metric, equation (4), mean over runs, out of 100. Behavioural
+  # pass rate and Cost are components/context of the same table, not a
+  # second metric identity, so they are not filed as rows.
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Claude Code; effort: low"
+    model: Claude Opus 5
+    organization: Anthropic
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 20.5
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Claude Code; effort: medium"
+    model: Claude Opus 5
+    organization: Anthropic
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 28.5
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Claude Code; effort: high"
+    model: Claude Opus 5
+    organization: Anthropic
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 34.5
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Claude Code; effort: xhigh"
+    model: Claude Opus 5
+    organization: Anthropic
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 47.0
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Claude Code; effort: max"
+    model: Claude Opus 5
+    organization: Anthropic
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 31.0
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Codex; effort: none"
+    model: GPT-5.6 Sol
+    organization: OpenAI
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 4.0
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Codex; effort: low"
+    model: GPT-5.6 Sol
+    organization: OpenAI
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 7.0
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Codex; effort: medium"
+    model: GPT-5.6 Sol
+    organization: OpenAI
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 6.5
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Codex; effort: high"
+    model: GPT-5.6 Sol
+    organization: OpenAI
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 19.0
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Codex; effort: xhigh"
+    model: GPT-5.6 Sol
+    organization: OpenAI
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 9.5
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Codex; effort: max"
+    model: GPT-5.6 Sol
+    organization: OpenAI
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 28.5
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Claude Code; effort: max"
+    model: Kimi K3
+    organization: Moonshot AI
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 19.5
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Claude Code; effort: low"
+    model: Claude Sonnet 5
+    organization: Anthropic
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 4.0
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Claude Code; effort: medium"
+    model: Claude Sonnet 5
+    organization: Anthropic
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 15.0
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Claude Code; effort: high"
+    model: Claude Sonnet 5
+    organization: Anthropic
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 6.0
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Claude Code; effort: xhigh"
+    model: Claude Sonnet 5
+    organization: Anthropic
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 9.0
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Claude Code; effort: max"
+    model: Claude Sonnet 5
+    organization: Anthropic
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 8.5
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Codex; effort: none"
+    model: GPT-5.6 Luna
+    organization: OpenAI
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 4.0
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Codex; effort: low"
+    model: GPT-5.6 Luna
+    organization: OpenAI
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 4.0
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Codex; effort: medium"
+    model: GPT-5.6 Luna
+    organization: OpenAI
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 0.0
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Codex; effort: high"
+    model: GPT-5.6 Luna
+    organization: OpenAI
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 4.0
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Codex; effort: xhigh"
+    model: GPT-5.6 Luna
+    organization: OpenAI
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 5.5
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Codex; effort: max"
+    model: GPT-5.6 Luna
+    organization: OpenAI
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 10.5
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Claude Code; effort: max"
+    model: Qwen 3.8 Max
+    organization: Qwen
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 10.0
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Claude Code; effort: max"
+    model: DeepSeek V4 Flash
+    organization: DeepSeek
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 7.0
+    read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: swe_refactor_bench
+    instrument: swe_refactor_bench_20_tasks
+    protocol: "20 whole-repository migrations; score per equation (4), mean over runs, out of 100; harness: Claude Code; effort: max"
+    model: GLM 5.2
+    organization: Z.ai
+    source_id: swe_refactor_bench_results_table
+    reported_at: 2026-08-24
+    value: 6.5
+    read_from: pdf_text
     measurement_kind: benchmark_publisher_run
