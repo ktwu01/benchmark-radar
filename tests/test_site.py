@@ -982,6 +982,11 @@ def test_initial_page_uses_small_bootstrap_and_lazy_loads_history():
         "\nasync function initialize()", 1
     )[0]
     assert 'await ensureSearchData("reload").catch' in refresh
+    # The full archive answers All dates once loaded, so the index is released
+    # rather than held beside it (#1182).
+    apply = script.split("function applyDashboardData(", 1)[1].split("\n}\n", 1)[0]
+    assert "if (state.fullDataLoaded && state.searchData) {" in apply
+    assert "state.searchData = null;" in apply
     assert "const previousSearchData = state.searchData;" in refresh
     assert "state.searchData = previousSearchData;" in refresh
     assert "await ensureDataForState();" in initialize

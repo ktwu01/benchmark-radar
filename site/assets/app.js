@@ -1614,6 +1614,13 @@ function applyDashboardData(data, requestSequence, fullPayload) {
   if (payloadHasObservations(data)) {
     state.observations = null;
   }
+  // Once the full archive is installed it answers All dates searches itself.
+  // Holding the compact index next to it kept both parsed copies alive, which
+  // is the memory the index exists to save (#1182).
+  if (state.fullDataLoaded && state.searchData) {
+    state.searchData = null;
+    state.observations = null;
+  }
   return true;
 }
 

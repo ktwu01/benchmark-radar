@@ -367,6 +367,8 @@ def _validate_attention(attention: Any, *, source: str) -> None:
         "title",
         "url",
         "published_at",
+        "discovered_at",
+        "observed_at",
         "event_kind",
         "categories",
         "metrics",
