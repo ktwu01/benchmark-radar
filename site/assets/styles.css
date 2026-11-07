@@ -7352,9 +7352,9 @@ dialog {
   font-size: 0.85rem;
 }
 
-/* On a phone the counts and bars fit beside the names: names wrap, and the
-   previous-period count (the change column carries the comparison) is left
-   for wider screens. */
+/* On a phone the counts and bars fit beside the names: names wrap, and all
+   seven columns stay available through the frame's horizontal scroll
+   (#1002), so no column is hidden here. */
 @media (max-width: 720px) {
   .direction-trends-table {
     font-size: 0.8rem;
@@ -7363,12 +7363,6 @@ dialog {
   .direction-trends-table th,
   .direction-trends-table td {
     padding: 0.3rem 0.25rem;
-  }
-
-  /* Undated stays: without it a direction whose records have no release
-     date would read as zero. */
-  .direction-trends-table tr > :nth-child(3) {
-    display: none;
   }
 
   .direction-spark {
@@ -7717,4 +7711,108 @@ a.radar-source::after {
   font-size: 1.1rem;
   line-height: 1;
   cursor: pointer;
+}
+
+/* Data-load feedback (issue #1128). The full archive behind the first homepage
+   search is tens of megabytes, and the benchmark catalog behind Library,
+   Scores, Models and Ranking takes a moment on a slow line. A fixed pill says
+   what is loading and counts the seconds, and the waiting view's results dim
+   so a stale list is not read as the answer. */
+.data-loading {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  z-index: 1000;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: calc(100vw - 32px);
+  padding: 8px 14px 10px;
+  overflow: hidden;
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  background: var(--panel);
+  box-shadow: 0 6px 24px rgb(27 48 56 / 16%);
+  color: var(--ink);
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.data-loading-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.data-loading-elapsed {
+  color: var(--muted);
+  font-family: var(--utility);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.data-loading-elapsed:empty {
+  display: none;
+}
+
+.data-loading-spinner {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--line);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: data-loading-spin 0.8s linear infinite;
+}
+
+.data-loading-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  height: 3px;
+  background: var(--blue);
+  animation: data-loading-slide 1.2s ease-in-out infinite;
+}
+
+.view[aria-busy="true"] {
+  cursor: progress;
+}
+
+.view[aria-busy="true"] :is(#today-list, #today-benchmarks-results, #library-list, #models-list,
+  #leaderboard-list, #latest-releases-list, #benchmark-search-results, #map-canvas, #trend-chart, #trend-table,
+  #direction-trends-table) {
+  opacity: 0.45;
+  transition: opacity 0.2s ease;
+}
+
+/* An emptied list (the homepage search clears it before the archive arrives)
+   becomes a shimmering placeholder rather than blank space. */
+.view[aria-busy="true"] :is(#today-list, #library-list, #models-list, #leaderboard-list,
+  #benchmark-search-results):empty {
+  min-height: 180px;
+  border-radius: var(--radius);
+  background: linear-gradient(90deg, var(--line) 0%, var(--canvas) 50%, var(--line) 100%) 0 0 / 200% 100%;
+  animation: data-loading-shimmer 1.4s linear infinite;
+}
+
+@keyframes data-loading-shimmer {
+  to { background-position: -200% 0; }
+}
+
+@keyframes data-loading-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes data-loading-slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .data-loading-spinner,
+  .data-loading-bar,
+  .view[aria-busy="true"] :empty {
+    animation-duration: 3s;
+  }
 }
