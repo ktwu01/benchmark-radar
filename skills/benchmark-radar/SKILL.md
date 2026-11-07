@@ -94,11 +94,17 @@ across queries.
 Interpret `search_status: full_matches_found` as complete lexical coverage in at
 least one candidate, not proof of suitability. Interpret `partial_candidates_only`
 as inspectable evidence that still needs query refinement or record review, never as
-an answer. Interpret `no_lexical_candidates` as “no record shared any query token in
-this local data version,” not proof that no such benchmark exists. Interpret
+an answer. Interpret `no_lexical_candidates` as “no candidate passed the matching
+policy in this local data version,” not proof that no such benchmark exists: the
+only records sharing a query token may have been lone description-only tokens the
+policy drops (`weak_filtered_count` says how many). Interpret
 `decision: no_confident_match` as the service's own statement that no record
-covered every query token: report “no benchmark in the catalog covers this”
-rather than presenting partial candidates as answers. If Catalog
+covered every query token — a lexical outcome, not a semantic absence. Do not
+report “no benchmark in the catalog covers this”: a partial candidate may still
+be suitable once inspected (synonyms, morphology, or details outside the indexed
+fields). Refine the query or inspect the partial candidates instead, and report
+`no confident match` only as the agent's own judgment after that review, never
+as the lexical outcome alone. If Catalog
 candidates remain insufficient and recent discovery is relevant, search `radar` with
 the same task terms and label every result as unverified Radar evidence.
 

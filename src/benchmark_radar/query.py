@@ -681,12 +681,22 @@ class QueryService:
         corpus = _build_search_corpus(candidates)
         scored: list[tuple[tuple[Any, ...], dict[str, Any]]] = []
         candidate_count = 0
+        weak_filtered_count = 0
+        query_token_set = set(query_tokens)
         for document in corpus.documents:
             record = document.record
             if not _matches_filter(record, filters):
                 continue
             match = _match(document, query_tokens=query_tokens, corpus=corpus)
             if match is None:
+                # _match drops a record for zero overlap or for the #432
+                # description-only floor. One it drops despite sharing a
+                # query token is a weak hit the policy hid, not proof that
+                # nothing shares a word; count it so the reason can say so.
+                # (A prefix-only sharer is not counted: a prefix is not a
+                # whole-token match.)
+                if not document.all_tokens.isdisjoint(query_token_set):
+                    weak_filtered_count += 1
                 continue
             candidate_count += 1
             sort_key, explanation = match
@@ -711,7 +721,15 @@ class QueryService:
         else:
             status = "no_lexical_candidates"
             decision = "no_confident_match"
-            decision_reason = "no record matched any query token"
+            if weak_filtered_count:
+                noun = "record" if weak_filtered_count == 1 else "records"
+                decision_reason = (
+                    "no candidate passed the matching policy; "
+                    f"{weak_filtered_count} {noun} shared a query token but "
+                    "only a single token in description"
+                )
+            else:
+                decision_reason = "no record matched any query token"
         LOGGER.info(
             "lexical search query=%r scope=%s documents=%d candidates=%d full=%d partial=%d "
             "returned=%d status=%s",
@@ -746,6 +764,7 @@ class QueryService:
             "limit": limit,
             "candidate_count": candidate_count,
             "total_matches": len(scored),
+            "weak_filtered_count": weak_filtered_count,
             "full_match_count": full_match_count,
             "partial_match_count": partial_match_count,
             "count": len(results),
