@@ -144,6 +144,15 @@ source_documents:
     benchmarks: [lifesci_diamond]
     retrieved_at: 2026-11-05
 
+  - id: benchmarks_are_not_monolithic_results
+    name: Benchmarks Are Not Monolithic results tables (Tables 4 and 9)
+    publisher: Aleph Alpha Research
+    document_type: benchmark_leaderboard
+    url: https://arxiv.org/abs/2607.28801
+    benchmarks: [mmlu, arc, winogrande, hellaswag, truthfulqa, truthfulqa_mc1_mc2]
+    published: 2026-07-30
+    retrieved_at: 2026-11-07
+
 benchmarks:
   - id: gobench
     name: GoBench
@@ -1883,8 +1892,9 @@ benchmarks:
       "Think you have Solved Question Answering? Try ARC, the AI2 Reasoning
       Challenge"). The study notes its small scale and multiple-choice format
       limit its discriminative power (arXiv:2607.28801, section 2). The
-      annotating paper reports no new benchmark scores, so no score rows are
-      filed here.
+      annotating paper also reports full-split accuracies for Llama-3.2-1B
+      and SmolLM-1.7B-Instruct (arXiv:2607.28801, Table 4 / App. Table 9);
+      those rows are filed in benchmark_scores.yml.
 
   - id: winogrande
     name: WinoGrande
@@ -1898,7 +1908,9 @@ benchmarks:
       (arXiv:1907.10641). An adversarial Winograd Schema challenge
       (arXiv:1907.10641). The study notes analyses reveal persistent gender
       and cultural biases (arXiv:2607.28801, section 2). The annotating paper
-      reports no new benchmark scores, so no score rows are filed here.
+      also reports full-split accuracies for Llama-3.2-1B and
+      SmolLM-1.7B-Instruct (arXiv:2607.28801, Table 4 / App. Table 9); those
+      rows are filed in benchmark_scores.yml.
 
   - id: hellaswag
     name: HellaSwag
@@ -1912,8 +1924,10 @@ benchmarks:
       (arXiv:1905.07830). Sentence-completion benchmark (arXiv:1905.07830,
       "HellaSwag: Can a Machine Really Finish Your Sentence?"). The study
       notes concerns persist about validity and data contamination
-      (arXiv:2607.28801, section 2). The annotating paper reports no new
-      benchmark scores, so no score rows are filed here.
+      (arXiv:2607.28801, section 2). The annotating paper also reports
+      full-split accuracies for Llama-3.2-1B and SmolLM-1.7B-Instruct
+      (arXiv:2607.28801, Table 4 / App. Table 9); those rows are filed in
+      benchmark_scores.yml.
 
   - id: truthfulqa
     name: TruthfulQA
@@ -1925,8 +1939,20 @@ benchmarks:
       817 questions (arXiv:2607.28801, Table 1), the full benchmark. Measures
       how models mimic human falsehoods (arXiv:2109.07958). The study notes
       the difficulties of consistent human judgment (arXiv:2607.28801,
-      section 2). The annotating paper reports no new benchmark scores, so no
-      score rows are filed here.
+      section 2). The paper reports 18.7 / 21.0 over TruthfulQA MC1+MC2
+      combined (n=1634), not the standard single TruthfulQA metric, so no
+      plain TruthfulQA rows are filed from it; the combined scores are filed
+      as the distinct instrument truthfulqa_mc1_mc2.
+  - id: truthfulqa_mc1_mc2
+    name: TruthfulQA (MC1+MC2 combined)
+    aliases: ["TruthfulQA MC1+MC2"]
+    domain: factuality
+    url: https://arxiv.org/abs/2109.07958
+    released: 2021-09-08
+    caveat: >-
+      Not the standard single TruthfulQA metric. Scores the MC1 and MC2
+      questions combined (n=1634, arXiv:2607.28801 Tables 4 and 9), so it is
+      a distinct instrument from TruthfulQA (817 questions).
   - id: lifesci_diamond
     name: LifeSci Diamond
     aliases: ["LifeSci Diamond", "LifeSci-Diamond"]
