@@ -6,7 +6,12 @@ downloaded from Wikimedia Commons / Wikipedia, or supplied by the organization
 where Commons has none (xtracta.svg: Xtracta's official full-colour RGB logo,
 unmodified). zai.svg is the 2025 Z.ai logo from Wikimedia Commons
 (File:Z.ai (company logo).svg); antgroup.png is the Ant Group logo from the
-company's media library, via en.wikipedia File:Ant_Group_logo.png. Run this
+company's media library, via en.wikipedia File:Ant_Group_logo.png.
+berkeley.svg is the University of California, Berkeley 2024 logo from
+en.wikipedia File:University_of_California,_Berkeley_Logo_2024.svg
+(public domain — typefaces only; trademarked). tesla.svg is the Tesla, Inc.
+black-script wordmark from Wikimedia Commons
+(File:Tesla,_Inc._-_Logo_(black_script_version).svg). Run this
 script after adding, removing, or replacing a logo there:
 
     python scripts/build_researchers_svg.py
@@ -28,8 +33,8 @@ LOGO_DIR = REPO_ROOT / "assets" / "researchers-logos"
 OUT = REPO_ROOT / "assets" / "researchers.svg"
 
 ROWS = [
-    ["google.svg", "amazon.svg", "aws.svg", "ibm.svg", "bytedance.svg"],
-    ["cmu.svg", "harvard.svg", "mit.svg", "nus.svg", "auckland.svg", "xtracta.svg"],
+    ["google.svg", "amazon.svg", "aws.svg", "ibm.svg", "bytedance.svg", "tesla.svg"],
+    ["cmu.svg", "harvard.svg", "mit.svg", "berkeley.svg", "nus.svg", "auckland.svg", "xtracta.svg"],
     ["alibaba.svg", "tencent.svg", "hunyuan.svg", "qwen.svg", "zai.svg", "antgroup.png"],
     ["stepfun.png", "kuaishou.png", "zhihu.svg", "tsinghua.svg", "sjtu.png"],
 ]

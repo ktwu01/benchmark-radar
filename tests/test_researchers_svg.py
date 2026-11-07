@@ -28,6 +28,16 @@ def test_new_logos_are_in_the_strip():
     assert (ROOT / "assets" / "researchers-logos" / "antgroup.png").is_file()
 
 
+def test_berkeley_and_tesla_logos_are_in_the_strip():
+    builder = _builder()
+    assert "berkeley.svg" in builder.ROWS[1]
+    assert "mit.svg" in builder.ROWS[1]
+    assert "harvard.svg" in builder.ROWS[1]
+    assert "tesla.svg" in builder.ROWS[0]
+    assert (ROOT / "assets" / "researchers-logos" / "berkeley.svg").is_file()
+    assert (ROOT / "assets" / "researchers-logos" / "tesla.svg").is_file()
+
+
 def test_logo_css_classes_are_scoped_per_logo():
     builder = _builder()
     fragment = (
