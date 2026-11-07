@@ -396,7 +396,7 @@ def test_search_defaults_to_all_dates_and_explains_the_scope():
     assert "const hadQuery = Boolean(state.q.trim());" in handler
     assert 'state.todayDate = "all";' in handler
     assert "!hadQuery && state.q.trim()" in handler
-    assert "ensureFullData()" in handler
+    assert "ensureSearchData()" in handler
 
     # The banner offers a real today link, and large result sets point to the
     # public CLI setup route for a complete export.
@@ -417,7 +417,7 @@ def test_dashboard_bounds_work_before_and_during_filtering():
     """Issue #222: hidden views and unbounded card lists must not block input."""
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
 
-    assert "state.observations = [...evidence, ...attention].sort" in script
+    assert "state.observations = sortObservations([...evidence, ...attention])" in script
     # The sorted rows stay cached between keystrokes; the cache is reused only
     # while it was built from the same days (a window file or the archive).
     assert "state.observations && state.observationsSource === days" in script
@@ -969,6 +969,32 @@ def test_initial_page_uses_small_bootstrap_and_lazy_loads_history():
     initialize = script.split("async function initialize()", 1)[1]
     assert 'fetch("/data/radar-bootstrap.json")' in initialize
     assert "await ensureDataForState();" in initialize
+    assert '"/data/radar-search.json"' in script
+    search_loader = script.split("async function ensureSearchData(", 1)[1].split(
+        "\nasync function ", 1
+    )[0]
+    assert 'fetchDashboardJson("/data/radar-search.json", cache)' in search_loader
+    search_state = script.split("function stateNeedsSearchData()", 1)[1].split(
+        "function stateNeedsWindowData", 1
+    )[0]
+    assert 'state.todayDate === "all"' in search_state
+    refresh = script.split("async function refreshData()", 1)[1].split(
+        "\nasync function initialize()", 1
+    )[0]
+    assert 'await ensureSearchData("reload").catch' in refresh
+    # The full archive answers All dates once loaded, so the index is released
+    # rather than held beside it (#1182).
+    apply = script.split("function applyDashboardData(", 1)[1].split("\n}\n", 1)[0]
+    assert "if (state.fullDataLoaded && state.searchData) {" in apply
+    assert "state.searchData = null;" in apply
+    # An index that arrives after the full archive is not kept either.
+    loader = script.split("async function ensureSearchData(", 1)[1].split("\n}\n", 1)[0]
+    assert loader.index("if (state.fullDataLoaded) return null;") < loader.index(
+        "state.searchData = data;"
+    )
+    assert "const previousSearchData = state.searchData;" in refresh
+    assert "state.searchData = previousSearchData;" in refresh
+    assert "await ensureDataForState();" in initialize
     loader = script.split("async function ensureFullData(", 1)[1].split("\nasync function ", 1)[0]
     assert 'fetchDashboardPayload("/data/radar.json", cache, requestSequence, true)' in loader
     trends_loader = script.split("async function ensureTrendsData(", 1)[1].split(
@@ -1186,6 +1212,7 @@ def test_today_toolbar_keeps_secondary_filters_in_a_popover():
     assert "function refreshData()" in script
     assert "state.fullDataLoaded || stateNeedsFullData()" in script
     assert '"/data/radar-trends.json"' in script
+    assert "safeHttpUrl(item.share_image)" in script
     assert '"/data/radar-bootstrap.json"' in script
     assert 'const response = await fetch(path, { cache: "reload" });' in script
     assert "drawer.hidden = true" in script
@@ -3201,9 +3228,7 @@ def test_issue_332_a_release_outranks_a_same_day_update():
     assert "Date.now()" not in age
     assert script.count("snapshot_generated_at: day.generated_at,") == 2
 
-    sort_body = script.split("state.observations = [...evidence, ...attention].sort(", 1)[1].split(
-        "\n  });", 1
-    )[0]
+    sort_body = script.split("function sortObservations(observations)", 1)[1].split("\n  });", 1)[0]
     # Date still leads: the archive is a chronology before it is a ranking.
     assert sort_body.index("const dateOrder") < sort_body.index("const releaseOrder")
     # Then releases, scored recency, and only then priority. The v5 event-kind
