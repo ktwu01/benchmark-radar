@@ -92332,5 +92332,131 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [],
+        "authors": [
+          "Tushar Kumar"
+        ],
+        "blurb": "The newly released LLM Evals Judge Adversarial Benchmark tests the graders themselves.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-07T05:09:56+00:00",
+        "source": "Hugging Face",
+        "title": "Tushar29k/llm-evals-judge-adversarial-benchmark",
+        "url": "https://huggingface.co/datasets/Tushar29k/llm-evals-judge-adversarial-benchmark"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Md Khairul Azman",
+          "Shibbir Ahmed"
+        ],
+        "blurb": "The new study “Uncovering the Security Debt of Machine Unlearning in Agentic Deployment” evaluates models after machine unlearning—attempted removal of specified knowledge—inside tool-using agents.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-06T00:00:00+00:00",
+        "source": "Crossref",
+        "title": "Uncovering the Security Debt of Machine Unlearning in Agentic Deployment",
+        "url": "https://doi.org/10.1609/aaaiss.v10i1.43411"
+      },
+      {
+        "affiliations": [
+          "OpenAI News"
+        ],
+        "authors": [],
+        "blurb": "OpenAI newly released BioBasicsBench, a 100-task benchmark for whether agents can interpret raw experimental data and handle routine wet-lab science tasks.",
+        "categories": [
+          "benchmark",
+          "agentic"
+        ],
+        "published_at": "2026-11-06T00:00:00+00:00",
+        "source": "First-party feed",
+        "title": "Measuring how AI agents handle everyday wet-lab science",
+        "url": "https://openai.com/index/measuring-how-ai-agents-handle-wet-lab-science"
+      },
+      {
+        "affiliations": [
+          "Independent Researcher"
+        ],
+        "authors": [
+          "Violetta Pidvolotska"
+        ],
+        "blurb": "The newly deposited “Time and Money in LLM-Generated Code” protocol freezes 20 coding tasks, prompt variants, reference implementations, test sets, deliberately altered programs, model providers, sampling settings, analysis plans, sandbox code, and file hashes before the main experiments; the authors state that no benchmark task had yet been sent to a model.",
+        "categories": [
+          "benchmark"
+        ],
+        "published_at": "2026-11-06T14:18:24+00:00",
+        "source": "DataCite",
+        "title": "Time and Money in LLM-Generated Code: Benchmark Protocol v1 (Pre-registration)",
+        "url": "https://doi.org/10.5281/zenodo.24012894"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Pradhyut"
+        ],
+        "blurb": "The newly released EVIDENCELOCK benchmark evaluates decisions against evidence that changes through corrections and retractions.",
+        "categories": [
+          "benchmark",
+          "dataset"
+        ],
+        "published_at": "2026-11-07T02:42:42+00:00",
+        "source": "Hugging Face",
+        "title": "pradhyut/evidencelock-benchmark",
+        "url": "https://huggingface.co/datasets/pradhyut/evidencelock-benchmark"
+      },
+      {
+        "affiliations": [
+          "Dhanalakshmi Srinivasan College of Engineering and Technology"
+        ],
+        "authors": [
+          "Priyanga R"
+        ],
+        "blurb": "The new cross-dataset intrusion-detection study evaluates transfer among three network-traffic datasets rather than relying on within-dataset tests.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-06T00:00:00+00:00",
+        "source": "Crossref",
+        "title": "Cross-Dataset Intrusion Detection under Benchmark Shift: Directed Transfer, Probability Calibration, and Alert Burden",
+        "url": "https://doi.org/10.66261/vx9swp16"
+      },
+      {
+        "affiliations": [
+          "DaVita Inc"
+        ],
+        "authors": [
+          "Lipsa Senapati"
+        ],
+        "blurb": "A newly released healthcare-agent benchmark holds the task, model, prompt, and tools fixed while changing only the action-authorization layer across 576 synthetic care-coordination episodes.",
+        "categories": [
+          "benchmark",
+          "agentic"
+        ],
+        "published_at": "2026-11-06T00:00:00+00:00",
+        "source": "Crossref",
+        "title": "A live agent benchmark of independent action authorization for healthcare AI agents",
+        "url": "https://doi.org/10.21203/rs.3.rs-11133816/v1"
+      }
+    ],
+    "date": "2026-11-07",
+    "schema_version": 1,
+    "top": [
+      "https://huggingface.co/datasets/Tushar29k/llm-evals-judge-adversarial-benchmark",
+      "https://doi.org/10.1609/aaaiss.v10i1.43411",
+      "https://openai.com/index/measuring-how-ai-agents-handle-wet-lab-science"
+    ]
+  },
   "since": "2026-11-05T11:24:31.357647+00:00"
 }
