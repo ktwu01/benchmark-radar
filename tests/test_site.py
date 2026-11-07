@@ -570,13 +570,9 @@ def test_every_homepage_image_carries_an_alt_attribute():
     # alt is deliberate: a repeated alt would read the award twice.
     html = Path("site/index.html").read_text(encoding="utf-8")
     assert "Hugging Face: #1 Paper of the Day" in html
-    # The page generators emit no <img> at all, so no generated page can
-    # reintroduce the missing alt Bing found.
-    pages = Path("src/benchmark_radar/site_pages.py").read_text(encoding="utf-8")
-    assert "<img" not in pages
-    script = Path("site/assets/app.js").read_text(encoding="utf-8")
-    assert 'createElement("img"' not in script
-    assert 'element("img"' not in script
+    # Generated pages are checked by parsing their rendered output instead
+    # (tests/test_site_pages.py): a blanket ban on "<img" in the generator
+    # source would also block a future accessible image.
 
 
 def test_top_right_utilities_have_immediate_visible_feedback():
