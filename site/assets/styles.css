@@ -7186,6 +7186,13 @@ dialog {
 }
 
 .direction-trends-frame {
+  /* Relative so the frame is the containing block for the absolutely
+     positioned .visually-hidden text in the sparkline cells (#1002): without
+     it, that text's containing block sits outside the frame, the frame's
+     overflow cannot clip it, and its position at the table's far right edge
+     widens documentElement.scrollWidth past a 320px viewport even though the
+     table itself scrolls inside the frame. */
+  position: relative;
   overflow-x: auto;
 }
 
@@ -7345,9 +7352,9 @@ dialog {
   font-size: 0.85rem;
 }
 
-/* On a phone the counts and bars fit beside the names: names wrap, and the
-   previous-period count (the change column carries the comparison) is left
-   for wider screens. */
+/* On a phone the counts and bars fit beside the names: names wrap, and all
+   seven columns stay available through the frame's horizontal scroll
+   (#1002), so no column is hidden here. */
 @media (max-width: 720px) {
   .direction-trends-table {
     font-size: 0.8rem;
@@ -7356,12 +7363,6 @@ dialog {
   .direction-trends-table th,
   .direction-trends-table td {
     padding: 0.3rem 0.25rem;
-  }
-
-  /* Undated stays: without it a direction whose records have no release
-     date would read as zero. */
-  .direction-trends-table tr > :nth-child(3) {
-    display: none;
   }
 
   .direction-spark {
