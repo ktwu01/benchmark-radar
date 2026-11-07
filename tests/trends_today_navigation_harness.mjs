@@ -109,6 +109,13 @@ globalThis.fetch = (path) => {
   if (path === "/data/benchmark-index.json") {
     return Promise.resolve({ ok: true, status: 200, json: async () => ({ benchmarks: [] }) });
   }
+  if (path === "/data/radar-search.json") {
+    return Promise.resolve({
+      ok: true,
+      status: 200,
+      json: async () => ({ schema_version: 1, generated_at: state.data?.generated_at, observations: [] }),
+    });
+  }
   if (path !== "/data/radar.json") throw new Error(`Unexpected fetch path: ${path}`);
   return new Promise((resolve) => {
     releaseFullResponse = () => resolve({
@@ -145,6 +152,7 @@ globalThis.__harness = {
   state,
   renderTrends,
   ensureFullData,
+  ensureSearchData,
   bindEvents,
 };
 `;
