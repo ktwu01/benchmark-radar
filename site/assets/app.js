@@ -12997,9 +12997,12 @@ async function ensureSearchData(cache = "default") {
     ) {
       throw new Error("No compatible search index");
     }
+    byId("today-load-error").hidden = true;
+    // The full archive may have landed while this request was in flight; it
+    // already answers All dates, so keeping the index too would hold both.
+    if (state.fullDataLoaded) return null;
     state.searchData = data;
     state.observations = null;
-    byId("today-load-error").hidden = true;
     return data;
   })();
   try {

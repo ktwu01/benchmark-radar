@@ -987,6 +987,11 @@ def test_initial_page_uses_small_bootstrap_and_lazy_loads_history():
     apply = script.split("function applyDashboardData(", 1)[1].split("\n}\n", 1)[0]
     assert "if (state.fullDataLoaded && state.searchData) {" in apply
     assert "state.searchData = null;" in apply
+    # An index that arrives after the full archive is not kept either.
+    loader = script.split("async function ensureSearchData(", 1)[1].split("\n}\n", 1)[0]
+    assert loader.index("if (state.fullDataLoaded) return null;") < loader.index(
+        "state.searchData = data;"
+    )
     assert "const previousSearchData = state.searchData;" in refresh
     assert "state.searchData = previousSearchData;" in refresh
     assert "await ensureDataForState();" in initialize
