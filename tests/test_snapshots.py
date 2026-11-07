@@ -1850,6 +1850,121 @@ def test_primary_revision_retains_previously_merged_digest_evidence(reverse):
     assert record["recommended"] is True
 
 
+@pytest.mark.parametrize("reverse", [False, True])
+def test_merged_evidence_metrics_do_not_depend_on_arrival_order(reverse):
+    # Issue #841: a digest adds citations 5000 to an arXiv record, and a later
+    # arXiv revision on the same day reports citations 12. The merged record
+    # showed 12 in both merge orders, and the digest's value was lost: a flat
+    # metrics dict cannot tell which source supplied a value.
+    from benchmark_radar.pipeline import score_item
+
+    taxonomy = {"benchmark": ["benchmark"]}
+    original_run = radar_run(27)
+    original_run.items[0].event_kind = "released"
+    score_item(original_run.items[0], taxonomy, now=original_run.generated_at)
+    digest_run = radar_run(27)
+    digest_run.generated_at += timedelta(hours=1)
+    digest = digest_run.items[0]
+    digest.source = "XBsleepy"
+    digest.metrics = {"citations": 5000}
+    score_item(digest, taxonomy, now=digest_run.generated_at)
+    merged = merge_snapshots(snapshot_for_run(original_run), snapshot_for_run(digest_run))
+    revision_run = radar_run(27)
+    revision_run.generated_at += timedelta(hours=2)
+    revision = revision_run.items[0]
+    revision.updated_at = revision_run.generated_at
+    revision.event_kind = "updated"
+    revision.metrics = {"citations": 12}
+    score_item(revision, taxonomy, now=revision_run.generated_at)
+    incoming = snapshot_for_run(revision_run)
+    incoming["selection"] = {"recommendation_score": 0}
+    result = merge_snapshots(incoming, merged) if reverse else merge_snapshots(merged, incoming)
+    record = result["evidence_items"][0]
+    assert record["metrics"] == {"citations": 5000}
+    assert record["metrics_by_source"] == {
+        "XBsleepy": {"citations": 5000},
+        "arXiv": {"citations": 12},
+    }
+    assert record["contributing_sources"] == ["XBsleepy", "arXiv"]
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_in_pass_dedup_keeps_per_source_metrics_for_later_revision(reverse):
+    # Issue #841 / Codex P1 on #1171: one pass observes an artifact through
+    # arXiv and XBsleepy, so deduplicate() merges them before the snapshot is
+    # written. The merged record used to carry only flat metrics, which the
+    # snapshot merge attributed wholesale to the envelope source; a later
+    # same-day arXiv revision omitting citations then dropped the digest's
+    # 5000. The merged record must carry metrics_by_source.
+    from benchmark_radar.pipeline import deduplicate, score_item
+
+    taxonomy = {"benchmark": ["benchmark"]}
+    run = radar_run(27)
+    primary = run.items[0]
+    primary.event_kind = "released"
+    primary.updated_at = run.generated_at
+    score_item(primary, taxonomy, now=run.generated_at)
+    digest_run = radar_run(27)
+    digest_run.generated_at += timedelta(hours=1)
+    digest = digest_run.items[0]
+    digest.source = "XBsleepy"
+    digest.source_id = "xbsleepy:2607.0027"
+    digest.metrics = {"citations": 5000}
+    digest.updated_at = run.generated_at - timedelta(hours=1)
+    digest.artifact_urls = ["https://arxiv.org/pdf/2607.0027"]
+    score_item(digest, taxonomy, now=digest_run.generated_at)
+    merged_items = deduplicate([primary, digest])
+    assert len(merged_items) == 1
+    run.items = merged_items
+    first = snapshot_for_run(run)
+    record = first["evidence_items"][0]
+    assert record["source"] == "arXiv"
+    assert record["metrics"] == {"citations": 5000}
+    assert record["metrics_by_source"] == {
+        "XBsleepy": {"citations": 5000},
+        "arXiv": {"citations": 2},
+    }
+    assert record["contributing_sources"] == ["XBsleepy", "arXiv"]
+
+    revision_run = radar_run(27)
+    revision_run.generated_at += timedelta(hours=2)
+    revision = revision_run.items[0]
+    revision.updated_at = revision_run.generated_at
+    revision.event_kind = "updated"
+    revision.metrics = {}
+    revision.artifact_urls = []
+    score_item(revision, taxonomy, now=revision_run.generated_at)
+    incoming = snapshot_for_run(revision_run)
+    incoming["selection"] = {"recommendation_score": 0}
+    result = merge_snapshots(incoming, first) if reverse else merge_snapshots(first, incoming)
+    record = result["evidence_items"][0]
+    assert record["metrics"] == {"citations": 5000}
+    assert record["metrics_by_source"] == {
+        "XBsleepy": {"citations": 5000},
+        "arXiv": {},
+    }
+    assert record["contributing_sources"] == ["XBsleepy", "arXiv"]
+
+
+def test_merge_keeps_other_source_metrics_from_legacy_merged_record():
+    # Snapshots written before in-pass attribution existed carry
+    # contributing_sources but no metrics_by_source; their flat metrics mix
+    # contributors, so a same-source revision omitting one must not drop it.
+    first = snapshot_for_run(radar_run(27))
+    record = first["evidence_items"][0]
+    record["metrics"] = {"citations": 5000}
+    record["contributing_sources"] = ["XBsleepy", "arXiv"]
+    assert "metrics_by_source" not in record
+    revision_run = radar_run(27)
+    revision_run.generated_at += timedelta(hours=1)
+    revision = revision_run.items[0]
+    revision.metrics = {}
+    revision.event_kind = "updated"
+    later = snapshot_for_run(revision_run)
+    merged = merge_snapshots(first, later)
+    assert merged["evidence_items"][0]["metrics"] == {"citations": 5000}
+
+
 def test_dashboard_day_maps_each_share_card_to_its_published_image(tmp_path):
     """Issue #671: the site reads image URLs from radar.json, never builds them."""
     snapshot_dir = tmp_path / "snapshots"
