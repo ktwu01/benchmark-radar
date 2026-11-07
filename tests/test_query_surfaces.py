@@ -349,7 +349,22 @@ def test_multi_word_query_drops_description_only_single_token_matches(tmp_path: 
     assert result["total_matches"] == 0
     assert result["results"] == []
     assert result["decision"] == "no_confident_match"
-    assert result["decision_reason"] == "no record matched any query token"
+    # Codex P2: the old reason ("no record matched any query token") was
+    # false here — one record did share "scientific", and the #432 floor
+    # hid it. The reason now says the policy hid weak hits, and the count
+    # lets a caller tell that apart from true zero overlap.
+    assert result["decision_reason"] == (
+        "no candidate passed the matching policy; 1 record shared a query "
+        "token but only a single token in description"
+    )
+    assert result["weak_filtered_count"] == 1
+
+    # True zero overlap keeps the old reason and a zero count.
+    empty = service.search("zzzzqqqq xxxxwwww", scope="catalog", limit=10)
+    assert empty["search_status"] == "no_lexical_candidates"
+    assert empty["decision"] == "no_confident_match"
+    assert empty["decision_reason"] == "no record matched any query token"
+    assert empty["weak_filtered_count"] == 0
 
 
 def test_search_decision_marks_full_and_partial_coverage(tmp_path: Path) -> None:
