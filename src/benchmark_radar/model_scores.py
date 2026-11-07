@@ -72,7 +72,31 @@ def _unit_label(series: dict[str, Any], percent: bool) -> str | None:
     return {"elo": "Elo", "usd": "USD"}.get(unit, unit)
 
 
-def build_model_scores(shard_dir: Path) -> dict[str, Any]:
+def joined_map_from_groups(groups: list[dict[str, Any]] | None) -> dict[str, str]:
+    """Record key -> equivalent-group id, from reviewed `equivalent` groups only.
+
+    Only groups from `data/catalog/identity.yml` belong here: a shared name is
+    not an anchor, and `variants` never join (they are related records, not the
+    same instrument). A group with fewer than two members joins nothing, and a
+    record claimed by two groups keeps the first, matching the identity
+    loader, which forbids a key in two equivalent groups.
+    """
+    joined: dict[str, str] = {}
+    for group in groups or []:
+        if not isinstance(group, dict):
+            continue
+        group_id = group.get("group_id")
+        members = group.get("members") or []
+        if not group_id or len(members) < 2:
+            continue
+        for member in members:
+            joined.setdefault(str(member), str(group_id))
+    return joined
+
+
+def build_model_scores(
+    shard_dir: Path, equivalences: list[dict[str, Any]] | None = None
+) -> dict[str, Any]:
     """Each registry model's best reported score on each benchmark record.
 
     Models are the registry's (organization, model) identities, so the matrix
@@ -80,8 +104,15 @@ def build_model_scores(shard_dir: Path) -> dict[str, Any]:
     protocols or settings) keep the best by the series' direction; the count of
     rows is kept so the page can say that more settings were reported, and the
     side panel reads every row from the record's shard.
+
+    When `equivalences` is given (reviewed `equivalent` groups from
+    `data/catalog/identity.yml`), each benchmark entry also carries the
+    `"joined"` group id of its record, so the Models average can intersect
+    on joined keys. The cells stay per record: the join is an average
+    computation, not a catalog merge, and no source row disappears.
     """
     shard_dir = Path(shard_dir)
+    joined = joined_map_from_groups(equivalences)
     registry = build_registry({}, shard_dir)
     keys = {
         (record.organization.lower(), record.model.lower()): key for key, record in registry.items()
@@ -134,6 +165,8 @@ def build_model_scores(shard_dir: Path) -> dict[str, Any]:
                 "percent": percent,
                 "unit": _unit_label(series, percent),
             }
+            if record_key in joined:
+                benchmark["joined"] = joined[record_key]
             if len(groups) > 1:
                 benchmark["groups"] = groups
             benchmarks.append(benchmark)
@@ -227,10 +260,55 @@ def round_tenth(value: float) -> float:
     return math.floor(10 * value + 0.5) / 10
 
 
+def _joined_columns(
+    columns: list[dict[str, float]],
+    benchmarks: dict[str, dict[str, Any]],
+    joined: dict[str, str],
+) -> list[dict[str, tuple[str, float]]]:
+    """Collapse each column onto joined keys, one record's score per group.
+
+    A column scores a joined benchmark through its first averageable record
+    in sorted record-key order. The join counts shared benchmarks; it does
+    not merge scores across records, so no value is averaged across sources
+    to make a cell.
+    """
+    collapsed: list[dict[str, tuple[str, float]]] = []
+    for column in columns:
+        by_joined: dict[str, tuple[str, float]] = {}
+        for key in sorted(column):
+            group_key = joined.get(key, key)
+            if group_key in by_joined:
+                continue
+            if average_value(column[key], benchmarks.get(key) or {}) is None:
+                continue
+            by_joined[group_key] = (key, column[key])
+        collapsed.append(by_joined)
+    return collapsed
+
+
+def _joined_group_label(
+    record_key: str,
+    index: int | None,
+    benchmarks: dict[str, dict[str, Any]],
+) -> str | int | None:
+    """Comparable-group label for one joined record's cell.
+
+    ``index`` is local to the record's own ``benchmark["groups"]`` list, so
+    index 0 can mean ``cot`` on one record and ``plain`` on another; resolve
+    it to the label before comparing across records. A record without a
+    groups list keeps its index, which preserves the single-group behaviour.
+    """
+    groups = (benchmarks.get(record_key) or {}).get("groups")
+    if isinstance(groups, list) and index is not None and 0 <= index < len(groups):
+        return groups[index]
+    return index
+
+
 def shared_average(
     columns: list[dict[str, float]],
     benchmarks: dict[str, dict[str, Any]],
     groups: list[dict[str, int | None]] | None = None,
+    joined: dict[str, str] | None = None,
 ) -> tuple[list[float | None], list[str]]:
     """Mean over the averageable benchmarks every column has a score on.
 
@@ -241,9 +319,46 @@ def shared_average(
     Returns each column's mean (None when nothing is shared) and the shared
     record keys, whose count the page shows. Mirrors modelSharedAverage in
     app.js, summing in the same key order so both round the same float.
+
+    When ``joined`` maps record keys to reviewed equivalent-group ids (see
+    :func:`joined_map_from_groups`), the intersection is on joined keys
+    instead of raw record keys: two columns scoring different records of
+    one group share that benchmark. The returned keys are the joined keys,
+    and the comparable-group rule still applies, now to the records each
+    column scored the group through, comparing each record's group label
+    (not its local index into its own groups list). Without ``joined`` the
+    behaviour is unchanged.
     """
     if not columns:
         return [], []
+    if joined:
+        collapsed = _joined_columns(columns, benchmarks, joined)
+        shared = sorted(
+            key
+            for key in collapsed[0]
+            if all(key in column for column in collapsed)
+            and len(
+                {
+                    _joined_group_label(
+                        collapsed[i][key][0],
+                        (groups or [{}] * len(columns))[i].get(collapsed[i][key][0]),
+                        benchmarks,
+                    )
+                    for i in range(len(columns))
+                }
+            )
+            == 1
+        )
+        if not shared:
+            return [None] * len(columns), []
+        means: list[float | None] = []
+        for column in collapsed:
+            total = 0.0
+            for key in shared:
+                record_key, value = column[key]
+                total += average_value(value, benchmarks[record_key])
+            means.append(round_tenth(total / len(shared)))
+        return means, shared
     shared = sorted(
         key
         for key in columns[0]

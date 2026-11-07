@@ -6723,8 +6723,44 @@ function modelAverageValue(value, benchmark) {
   return benchmark.direction === "lower_is_better" ? 100 - value : value;
 }
 
-function modelSharedAverage(columns, benchmarks) {
+function modelSharedAverage(columns, benchmarks, joined) {
   if (!columns.length) return { means: [], shared: [] };
+  if (joined) {
+    // Joined keys (#904): columns scoring different records of one reviewed
+    // equivalent group share that benchmark. Each column contributes the
+    // first averageable record of the group in sorted key order; the join
+    // counts shared benchmarks, it does not merge scores across records.
+    // `joined` is a Map (or plain object) from record key to group id.
+    // A cell's `group` is only an index into its own record's
+    // `benchmark.groups` list, so index 0 can mean `cot` on one record and
+    // `plain` on another; resolve it to the per-record label before
+    // comparing across joined records.
+    const groupOf = (key) => (joined instanceof Map ? joined.get(key) : joined[key]) ?? key;
+    const groupLabel = (entry) => benchmarks.get(entry.key)?.groups?.[entry.group] ?? entry.group ?? null;
+    const grouped = columns.map((cells) => {
+      const byJoined = new Map();
+      for (const key of [...cells.keys()].sort(compareText)) {
+        const groupKey = groupOf(key);
+        if (byJoined.has(groupKey)) continue;
+        const cell = cells.get(key);
+        if (modelAverageValue(cell.value, benchmarks.get(key)) === null) continue;
+        byJoined.set(groupKey, { ...cell, key });
+      }
+      return byJoined;
+    });
+    const shared = [...grouped[0].keys()]
+      .filter((key) => grouped.every((cells) => cells.has(key) && groupLabel(cells.get(key)) === groupLabel(grouped[0].get(key))))
+      .sort(compareText);
+    if (!shared.length) return { means: columns.map(() => null), shared };
+    const means = grouped.map((cells) => {
+      const total = shared.reduce((sum, key) => {
+        const entry = cells.get(key);
+        return sum + modelAverageValue(entry.value, benchmarks.get(entry.key));
+      }, 0);
+      return Math.round(10 * (total / shared.length)) / 10;
+    });
+    return { means, shared };
+  }
   // Sorted keys, summed in that order, so model_scores.shared_average rounds
   // the same float for the seed.
   const shared = [...columns[0].keys()]
