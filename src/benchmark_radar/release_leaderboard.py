@@ -276,6 +276,7 @@ def _is_reviewed_entity(
 
 FALLBACK_METRIC_CONFIG = {
     "github_stars": ("github.com", "stars", is_dedicated_benchmark_repo),
+    "github_forks": ("github.com", "forks", is_dedicated_benchmark_repo),
     "hf_paper_upvotes": ("huggingface.co", "upvotes", None),
     "hf_dataset_downloads": ("huggingface.co/datasets", "downloads", None),
 }
@@ -377,7 +378,11 @@ def _resolve_signals(
     snapshots: list[dict[str, Any]],
 ) -> dict[str, dict[str, Any]]:
     signals = {}
-    for key in WINDOW_WEIGHTS:
+    # github_forks is resolved exactly like a weighted signal so the daily
+    # count reaches the release row, but it is not a ranking signal: it is
+    # never added to WINDOW_WEIGHTS, so it cannot change a score, a weight,
+    # or the observed-weight floor.
+    for key in (*WINDOW_WEIGHTS, "github_forks"):
         key_obs = [
             pair for pair in ba_obs_pairs if canonical_metric_key(pair[0].get("metric")) == key
         ]
@@ -579,6 +584,18 @@ def compute_window_ranking(
         )
         qualifies = is_eligible and has_durable and sufficient_weight and score is not None
 
+        # Forks are a displayed counter only (#659): carried through to the
+        # release row next to stars, never a score component, so no weight,
+        # no normalized contribution, and no effect on coverage or rank.
+        forks_sig = c.get("signals", {}).get("github_forks") or {}
+        forks = {
+            "value": forks_sig.get("value"),
+            "status": forks_sig.get("status", "unknown"),
+            "source_url": forks_sig.get("source_url"),
+        }
+        if forks_sig.get("last_successful_date"):
+            forks["last_successful_date"] = forks_sig["last_successful_date"]
+
         scored_entries.append(
             {
                 "canonical_artifact_id": c["canonical_artifact_id"],
@@ -591,6 +608,7 @@ def compute_window_ranking(
                 "status": "ranked" if qualifies else "limited_signals",
                 "rank": None,
                 "components": components,
+                "forks": forks,
                 "_ranking_score": raw_score,
             }
         )
