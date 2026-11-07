@@ -6508,7 +6508,12 @@ function modelSharedAverage(columns, benchmarks, joined) {
     // first averageable record of the group in sorted key order; the join
     // counts shared benchmarks, it does not merge scores across records.
     // `joined` is a Map (or plain object) from record key to group id.
+    // A cell's `group` is only an index into its own record's
+    // `benchmark.groups` list, so index 0 can mean `cot` on one record and
+    // `plain` on another; resolve it to the per-record label before
+    // comparing across joined records.
     const groupOf = (key) => (joined instanceof Map ? joined.get(key) : joined[key]) ?? key;
+    const groupLabel = (entry) => benchmarks.get(entry.key)?.groups?.[entry.group] ?? entry.group ?? null;
     const grouped = columns.map((cells) => {
       const byJoined = new Map();
       for (const key of [...cells.keys()].sort(compareText)) {
@@ -6521,7 +6526,7 @@ function modelSharedAverage(columns, benchmarks, joined) {
       return byJoined;
     });
     const shared = [...grouped[0].keys()]
-      .filter((key) => grouped.every((cells) => cells.has(key) && (cells.get(key).group ?? null) === (grouped[0].get(key).group ?? null)))
+      .filter((key) => grouped.every((cells) => cells.has(key) && groupLabel(cells.get(key)) === groupLabel(grouped[0].get(key))))
       .sort(compareText);
     if (!shared.length) return { means: columns.map(() => null), shared };
     const means = grouped.map((cells) => {
