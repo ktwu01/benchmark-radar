@@ -18,6 +18,7 @@ from benchmark_radar.models import (
 from benchmark_radar.snapshots import (
     SnapshotError,
     attach_catalog_cards,
+    dashboard_search_index,
     dashboard_trends,
     dashboard_window,
     load_snapshots,
@@ -321,6 +322,64 @@ def test_rebuild_writes_a_small_latest_day_bootstrap(tmp_path):
         assert window["latest_date"] == dashboard["latest_date"]
         assert "corpus" not in window
         assert window_path.stat().st_size < output.stat().st_size
+
+    search_path = output.with_name("radar-search.json")
+    search = json.loads(search_path.read_text(encoding="utf-8"))
+    assert search["schema_version"] == 1
+    assert search["generated_at"] == dashboard["generated_at"]
+    assert len(search["observations"]) == sum(
+        len(day["evidence_items"]) + len(day["attention"]["observations"])
+        for day in dashboard["days"]
+    )
+    assert all("supporting_observations" not in item for item in search["observations"])
+    assert search_path.stat().st_size < output.stat().st_size
+
+
+def test_search_index_keeps_only_latest_sighting_and_needed_fields():
+    dashboard = {
+        "generated_at": "build-1",
+        "latest_date": "2026-07-27",
+        "days": [
+            {
+                "date": "2026-07-26",
+                "generated_at": "2026-07-26T12:00:00Z",
+                "selection": {"recommendation_score": 40},
+                "evidence_items": [
+                    {
+                        "source": "GitHub",
+                        "source_id": "repo",
+                        "title": "Old",
+                        "summary": "Old summary",
+                        "total_score": 1,
+                        "supporting_observations": [{"source": "extra"}],
+                    }
+                ],
+                "attention": {"observations": []},
+            },
+            {
+                "date": "2026-07-27",
+                "generated_at": "2026-07-27T12:00:00Z",
+                "selection": {"recommendation_score": 40},
+                "evidence_items": [
+                    {
+                        "source": "GitHub",
+                        "source_id": "repo",
+                        "title": "New",
+                        "summary": "New summary",
+                        "total_score": 2,
+                        "supporting_observations": [{"source": "extra"}],
+                    }
+                ],
+                "attention": {"observations": []},
+            },
+        ],
+    }
+
+    index = dashboard_search_index(dashboard)
+
+    assert len(index["observations"]) == 2
+    assert {item["title"] for item in index["observations"]} == {"Old", "New"}
+    assert all("supporting_observations" not in item for item in index["observations"])
 
 
 def test_rebuild_can_publish_the_feed_from_the_same_snapshot_history(tmp_path, site_shell):

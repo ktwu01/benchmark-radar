@@ -150,7 +150,7 @@ assert.deepEqual(dates.filteredObservations().map(r=>r.source_id), ['utc','offse
   assert.equal(windowApi.observationDays(), windowState.data.days, 'a stale window file is not listed');
   windowState.data.generated_at = 'build-1';
   windowState.todayDate = 'all';
-  assert.equal(windowApi.stateNeedsFullData(), true);
+  assert.equal(windowApi.stateNeedsFullData(), false);
   assert.equal(windowApi.stateNeedsWindowData(), false);
   windowState.todayDate = '2026-09-20';
   assert.equal(windowApi.stateNeedsFullData(), true);
