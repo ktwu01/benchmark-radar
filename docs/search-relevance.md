@@ -51,8 +51,8 @@ Search has three explicit stages:
    relevance and suitability judgment. Weighted query coverage is a tie-breaker and
    explanation, never an eligibility gate or an additive score component.
 
-The response exposes `candidate_count`, `total_matches`, `full_match_count`,
-`partial_match_count`, `search_status`, `decision`, `decision_reason`, policy
+The response exposes `candidate_count`, `total_matches`, `weak_filtered_count`,
+`full_match_count`, `partial_match_count`, `search_status`, `decision`, `decision_reason`, policy
 identity, matched and missing tokens,
 lexical coverage, fields, phrase fields, the raw retrieval score, and its score
 components. Candidate count and total matches are equal because search no longer
@@ -66,7 +66,10 @@ Status is a lexical decision separate from candidate retrieval:
 
 - `full_matches_found`: at least one candidate covers every unique query token;
 - `partial_candidates_only`: candidates exist, but all have missing query tokens;
-- `no_lexical_candidates`: no record shares any query token.
+- `no_lexical_candidates`: no candidate passed the matching policy. Either no
+  record shares any query token, or the only sharers were lone description-only
+  tokens the #432 floor drops; `weak_filtered_count` says how many were
+  dropped, so a caller can tell the two apart.
 
 `decision` states the same coverage in one word so a caller can abstain without
 parsing prose: `matches` when at least one candidate covers every query token,
@@ -87,15 +90,20 @@ When no record shares even one token with the query, the result is:
   "decision_reason": "no record matched any query token",
   "candidate_count": 0,
   "total_matches": 0,
+  "weak_filtered_count": 0,
   "full_match_count": 0,
   "partial_match_count": 0,
   "results": []
 }
 ```
 
-This is a retrieval fact about the current local data version. It does not prove
-that the wider world contains no such benchmark. Likewise, complete lexical coverage
-does not assert that a candidate satisfies the user's task.
+When records shared a token but only as a lone description-only match the
+#432 floor drops, the status is the same and the reason says so instead:
+`decision_reason` is "no candidate passed the matching policy; N record(s)
+shared a query token but only a single token in description", with
+`weak_filtered_count` set to N. Neither case proves the wider world contains
+no such benchmark. Likewise, complete lexical coverage does not assert that a
+candidate satisfies the user's task.
 
 This follows the same broad decomposition used by established lexical engines:
 
