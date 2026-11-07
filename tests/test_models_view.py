@@ -172,6 +172,26 @@ def test_joined_records_still_require_one_comparable_group():
     assert (means, shared) == ([40.0, 60.0], ["g"])
 
 
+def test_joined_records_compare_group_labels_not_local_indexes():
+    # Codex P2 (#1129): index 0 is "cot" on record a and "plain" on record
+    # b, so equal indexes must not share the joined benchmark; the same
+    # protocol under different indexes must.
+    joined = {"a": "g", "b": "g"}
+    benchmarks = {
+        "a": {**PERCENT, "groups": ["cot", "plain"]},
+        "b": {**PERCENT, "groups": ["plain", "cot"]},
+    }
+    columns = [{"a": 40.0}, {"b": 60.0}]
+    assert shared_average(columns, benchmarks, [{"a": 0}, {"b": 0}], joined=joined) == (
+        [None, None],
+        [],
+    )
+    assert shared_average(columns, benchmarks, [{"a": 1}, {"b": 0}], joined=joined) == (
+        [40.0, 60.0],
+        ["g"],
+    )
+
+
 def test_joined_map_ignores_single_member_groups():
     groups = [
         {"group_id": "lonely", "members": ["a"]},
