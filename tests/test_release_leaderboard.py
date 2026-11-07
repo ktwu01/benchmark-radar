@@ -1088,6 +1088,22 @@ def test_one_line_summary_uses_only_text_present_in_the_source_record():
     assert cleaned.startswith(line[:-1] if line.endswith("…") else line)
 
 
+def test_one_line_summary_turns_whitespace_controls_into_spaces():
+    # Codex review on #1160: a newline between words was stripped with the
+    # other Cc characters, so committed summaries starting "OBJECTIVE" plus
+    # a newline rendered as "OBJECTIVEThis...". Whitespace controls become
+    # spaces; non-whitespace controls are still dropped.
+    assert one_line_summary(
+        "OBJECTIVE\nTo evaluate whether an agentic AI system can reliably "
+        "automate cost-effectiveness model development."
+    ) == (
+        "OBJECTIVE To evaluate whether an agentic AI system can reliably "
+        "automate cost-effectiveness model development."
+    )
+    assert one_line_summary("A benchmark\tfor evaluation.") == ("A benchmark for evaluation.")
+    assert one_line_summary("A benchmark\r\nfor evaluation.") == ("A benchmark for evaluation.")
+
+
 def test_one_line_summary_strips_characters_that_break_the_column():
     # Issue #333: one release's "summary" was a run of ═══ box-drawing
     # characters that pushed a 720px column to 1349px. Control characters
@@ -1153,3 +1169,62 @@ def test_release_purpose_is_one_line_or_empty_never_a_fallback():
     assert long_line == one_line_summary(long_summary)
     assert len(long_line) <= ONE_LINE_SUMMARY_MAX_CHARS
     assert by_name["Title Bench"]["purpose"] == ""
+
+
+def test_release_purpose_uses_first_nonempty_summary_not_earliest_occurrence():
+    # Codex review on #1160, real case from the committed snapshots:
+    # blanca-pueche/benchmark-complex-prediction has an empty summary on
+    # its 2026-10-08 occurrence and a substantive one on 2026-10-09. The
+    # release date stays the earliest occurrence, but the purpose must
+    # come from the first occurrence that has a summary — not the empty
+    # state.
+    later_summary = (
+        "Dataset, benchmark workflows, and analysis code for evaluating "
+        "AI-based biomolecular complex structure prediction."
+    )
+    snapshots = [
+        make_snapshot(
+            "2026-10-08",
+            "2026-10-08T12:00:00+00:00",
+            evidence_items=[
+                {
+                    "id": "bench-complex-prediction",
+                    "url": "https://github.com/blanca-pueche/benchmark-complex-prediction",
+                    "title": "blanca-pueche/benchmark-complex-prediction",
+                    "summary": "",
+                    "event_kind": "released",
+                    "published_at": "2026-10-08T11:22:33+00:00",
+                    "discovered_at": "2026-10-08T11:40:36+00:00",
+                    "source": "GitHub",
+                    "source_id": "blanca-pueche/benchmark-complex-prediction",
+                }
+            ],
+        ),
+        make_snapshot(
+            "2026-10-09",
+            "2026-10-09T12:00:00+00:00",
+            evidence_items=[
+                {
+                    "id": "bench-complex-prediction",
+                    "url": "https://github.com/blanca-pueche/benchmark-complex-prediction",
+                    "title": "blanca-pueche/benchmark-complex-prediction",
+                    "summary": later_summary,
+                    "event_kind": "released",
+                    "published_at": "2026-10-08T11:22:33+00:00",
+                    "discovered_at": "2026-10-09T11:34:00+00:00",
+                    "source": "GitHub",
+                    "source_id": "blanca-pueche/benchmark-complex-prediction",
+                }
+            ],
+        ),
+    ]
+    cohort = filter_release_cohort(
+        snapshots,
+        window_days=30,
+        as_of=datetime(2026, 10, 9, 12, 0, 0, tzinfo=UTC),
+        include_unconfirmed=True,
+    )
+    assert len(cohort) == 1
+    assert cohort[0]["release_date"] == "2026-10-08T11:22:33+00:00"
+    assert cohort[0]["purpose"] == one_line_summary(later_summary)
+    assert cohort[0]["purpose"] == later_summary
