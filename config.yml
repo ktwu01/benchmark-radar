@@ -194,6 +194,11 @@ sources:
     # merely using one, which cuts matches to about one in ten.
     rss_keywords:
       - benchmark for
+      # Issue #382: FORGE (arXiv:2506.18795) is a smart-contract vulnerability
+      # dataset; its title carries this phrase, and no generic keyword does.
+      # Narrow on purpose: bare "smart contract" or "vulnerability" would
+      # match most security papers.
+      - smart contract vulnerability dataset
       # Named suites often end the title with "Bench:" and put the full word
       # only after their name (for example SWE Refactor Bench). The leading
       # space catches that form without matching compounds such as Workbench:
@@ -230,11 +235,12 @@ sources:
       # framing without widening the generic keyword set.
       - realtime-bench
       - real-time interactive
-      # Issue #382: FORGE (arXiv:2506.18795) is a smart-contract vulnerability
-      # dataset; its title carries this phrase, and no generic keyword does.
-      # Narrow on purpose: bare "smart contract" or "vulnerability" would
-      # match most security papers.
-      - smart contract vulnerability dataset
+      # Named-alias keyword: the Vero paper is titled "Vero: Can AI Agents
+      # Build Formally Verified Software Repositories?" and its abstract says
+      # "we introduce Vero, the first benchmark", which no generic phrase
+      # above matches (#555). The colon keeps this from matching words that
+      # merely contain "vero" (Verona, Veronica).
+      - "vero:"
     queries:
       - 'ti:"benchmark" AND (all:"we introduce" OR all:"we present" OR all:"we release")'
       - 'ti:"dataset" AND (all:"we introduce" OR all:"we present" OR all:"we release")'
