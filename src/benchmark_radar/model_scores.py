@@ -286,6 +286,24 @@ def _joined_columns(
     return collapsed
 
 
+def _joined_group_label(
+    record_key: str,
+    index: int | None,
+    benchmarks: dict[str, dict[str, Any]],
+) -> str | int | None:
+    """Comparable-group label for one joined record's cell.
+
+    ``index`` is local to the record's own ``benchmark["groups"]`` list, so
+    index 0 can mean ``cot`` on one record and ``plain`` on another; resolve
+    it to the label before comparing across records. A record without a
+    groups list keeps its index, which preserves the single-group behaviour.
+    """
+    groups = (benchmarks.get(record_key) or {}).get("groups")
+    if isinstance(groups, list) and index is not None and 0 <= index < len(groups):
+        return groups[index]
+    return index
+
+
 def shared_average(
     columns: list[dict[str, float]],
     benchmarks: dict[str, dict[str, Any]],
@@ -307,8 +325,9 @@ def shared_average(
     instead of raw record keys: two columns scoring different records of
     one group share that benchmark. The returned keys are the joined keys,
     and the comparable-group rule still applies, now to the records each
-    column scored the group through. Without ``joined`` the behaviour is
-    unchanged.
+    column scored the group through, comparing each record's group label
+    (not its local index into its own groups list). Without ``joined`` the
+    behaviour is unchanged.
     """
     if not columns:
         return [], []
@@ -320,7 +339,11 @@ def shared_average(
             if all(key in column for column in collapsed)
             and len(
                 {
-                    (groups or [{}] * len(columns))[i].get(collapsed[i][key][0])
+                    _joined_group_label(
+                        collapsed[i][key][0],
+                        (groups or [{}] * len(columns))[i].get(collapsed[i][key][0]),
+                        benchmarks,
+                    )
                     for i in range(len(columns))
                 }
             )
