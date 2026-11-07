@@ -136,6 +136,14 @@ source_documents:
     published: 2026-04-24
     retrieved_at: 2026-11-04
 
+  - id: lifesci_diamond_arca_blog
+    name: LifeSci Diamond results (Arca blog)
+    publisher: Arca
+    document_type: benchmark_leaderboard
+    url: https://www.arca.inc/blog/lifesci-diamond
+    benchmarks: [lifesci_diamond]
+    retrieved_at: 2026-11-05
+
 benchmarks:
   - id: gobench
     name: GoBench
@@ -1869,10 +1877,14 @@ benchmarks:
     url: https://arxiv.org/abs/1803.05457
     released: 2018-03-14
     caveat: >-
-      3,550 questions (arXiv:2607.28801, Table 1). A question-answering
-      benchmark (arXiv:1803.05457, "Think you have Solved Question Answering?
-      Try ARC, the AI2 Reasoning Challenge"). The annotating paper reports no
-      new benchmark scores, so no score rows are filed here.
+      3,550 questions is the sample count the study audited
+      (arXiv:2607.28801, Table 1), not the full corpus of 7,787 questions
+      (arXiv:1803.05457). A question-answering benchmark (arXiv:1803.05457,
+      "Think you have Solved Question Answering? Try ARC, the AI2 Reasoning
+      Challenge"). The study notes its small scale and multiple-choice format
+      limit its discriminative power (arXiv:2607.28801, section 2). The
+      annotating paper reports no new benchmark scores, so no score rows are
+      filed here.
 
   - id: winogrande
     name: WinoGrande
@@ -1881,9 +1893,12 @@ benchmarks:
     url: https://arxiv.org/abs/1907.10641
     released: 2019-07-24
     caveat: >-
-      1,270 questions (arXiv:2607.28801, Table 1). An adversarial Winograd
-      Schema challenge (arXiv:1907.10641). The annotating paper reports no new
-      benchmark scores, so no score rows are filed here.
+      1,270 problems is the sample count the study audited
+      (arXiv:2607.28801, Table 1), not the full dataset of 44k problems
+      (arXiv:1907.10641). An adversarial Winograd Schema challenge
+      (arXiv:1907.10641). The study notes analyses reveal persistent gender
+      and cultural biases (arXiv:2607.28801, section 2). The annotating paper
+      reports no new benchmark scores, so no score rows are filed here.
 
   - id: hellaswag
     name: HellaSwag
@@ -1892,10 +1907,13 @@ benchmarks:
     url: https://arxiv.org/abs/1905.07830
     released: 2019-05-19
     caveat: >-
-      10,000 questions (arXiv:2607.28801, Table 1). Sentence-completion
-      benchmark (arXiv:1905.07830, "HellaSwag: Can a Machine Really Finish
-      Your Sentence?"). The annotating paper reports no new benchmark scores,
-      so no score rows are filed here.
+      10,000 questions is the sample count the study audited
+      (arXiv:2607.28801, Table 1), not the full dataset of 70k problems
+      (arXiv:1905.07830). Sentence-completion benchmark (arXiv:1905.07830,
+      "HellaSwag: Can a Machine Really Finish Your Sentence?"). The study
+      notes concerns persist about validity and data contamination
+      (arXiv:2607.28801, section 2). The annotating paper reports no new
+      benchmark scores, so no score rows are filed here.
 
   - id: truthfulqa
     name: TruthfulQA
@@ -1904,9 +1922,24 @@ benchmarks:
     url: https://arxiv.org/abs/2109.07958
     released: 2021-09-08
     caveat: >-
-      817 questions (arXiv:2607.28801, Table 1). Measures how models mimic
-      human falsehoods (arXiv:2109.07958). The annotating paper reports no new
-      benchmark scores, so no score rows are filed here.
+      817 questions (arXiv:2607.28801, Table 1), the full benchmark. Measures
+      how models mimic human falsehoods (arXiv:2109.07958). The study notes
+      the difficulties of consistent human judgment (arXiv:2607.28801,
+      section 2). The annotating paper reports no new benchmark scores, so no
+      score rows are filed here.
+  - id: lifesci_diamond
+    name: LifeSci Diamond
+    aliases: ["LifeSci Diamond", "LifeSci-Diamond"]
+    domain: health
+    url: https://www.arca.inc/blog/lifesci-diamond
+    caveat: >-
+      55 life-science research tasks; 10 public, 45 held out. Strict pass
+      requires every rubric line fully met and no penalty fires. Scores are
+      publisher-reported by Arca, which publishes the benchmark and fields
+      evaluated systems, so they are not independent measurements. Sample
+      scores are not comparable to the full benchmark. Only 44 of 55 answer
+      keys are specialist-written or reviewed; 11 rest on primary sources
+      without expert review, and 6 November additions are not second-reviewed.
 
 # Model cards, technical reports and release posts.
 #
