@@ -28,8 +28,9 @@ health, across the CLI, the HTTP surface, and the public consumer Skill.
   `full_matches_found` means at least one candidate covers every query token,
   `partial_candidates_only` preserves weaker evidence without claiming an answer,
   and `no_lexical_candidates` means no candidate passed the matching policy
-  (zero token overlap, or only lone description-only tokens the floor drops;
-  `weak_filtered_count` says how many were dropped). The payload also carries
+  (zero token overlap, only lone description-only tokens the floor drops, or
+  only matches an active filter excluded; `weak_filtered_count` and
+  `filter_excluded_match_count` say how many of each). The payload also carries
   a top-level `decision` (`matches` when at least one candidate covers every
   query token, otherwise `no_confident_match`) and a `decision_reason`, so a
   caller can abstain without parsing prose; the raw retrieval score is never

@@ -682,10 +682,18 @@ class QueryService:
         scored: list[tuple[tuple[Any, ...], dict[str, Any]]] = []
         candidate_count = 0
         weak_filtered_count = 0
+        filter_excluded_match_count = 0
         query_token_set = set(query_tokens)
         for document in corpus.documents:
             record = document.record
             if not _matches_filter(record, filters):
+                # The filter hid this record before overlap was tracked, so
+                # a name hit outside the filter looked like no record
+                # matched at all. Count a whole-token sharer here (same
+                # whole-token test as the weak-hit count; a prefix-only
+                # sharer is not counted) so the reason can say so.
+                if not document.all_tokens.isdisjoint(query_token_set):
+                    filter_excluded_match_count += 1
                 continue
             match = _match(document, query_tokens=query_tokens, corpus=corpus)
             if match is None:
@@ -721,13 +729,22 @@ class QueryService:
         else:
             status = "no_lexical_candidates"
             decision = "no_confident_match"
+            reasons: list[str] = []
             if weak_filtered_count:
                 noun = "record" if weak_filtered_count == 1 else "records"
-                decision_reason = (
-                    "no candidate passed the matching policy; "
+                reasons.append(
                     f"{weak_filtered_count} {noun} shared a query token but "
                     "only a single token in description"
                 )
+            if filter_excluded_match_count:
+                noun = "record" if filter_excluded_match_count == 1 else "records"
+                verb = "was" if filter_excluded_match_count == 1 else "were"
+                reasons.append(
+                    f"{filter_excluded_match_count} {noun} shared a query token "
+                    f"but {verb} excluded by the active filters"
+                )
+            if reasons:
+                decision_reason = "no candidate passed the matching policy; " + "; ".join(reasons)
             else:
                 decision_reason = "no record matched any query token"
         LOGGER.info(
@@ -765,6 +782,7 @@ class QueryService:
             "candidate_count": candidate_count,
             "total_matches": len(scored),
             "weak_filtered_count": weak_filtered_count,
+            "filter_excluded_match_count": filter_excluded_match_count,
             "full_match_count": full_match_count,
             "partial_match_count": partial_match_count,
             "count": len(results),

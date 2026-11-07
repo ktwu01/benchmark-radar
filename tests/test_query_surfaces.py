@@ -367,6 +367,49 @@ def test_multi_word_query_drops_description_only_single_token_matches(tmp_path: 
     assert empty["weak_filtered_count"] == 0
 
 
+def test_filter_excluded_matches_are_not_reported_as_no_match(tmp_path: Path) -> None:
+    # Codex P2: an active filter skipped records before overlap was tracked,
+    # so a benchmark-name query with has_repo=false fell through to "no
+    # record matched any query token" even though the named record exists
+    # outside the filter. The reason now says the filter hid the match, and
+    # the count lets a caller tell that apart from true zero overlap.
+    service = QueryService(_catalog(tmp_path))
+
+    filtered = service.search("science discovery", scope="catalog", limit=10, has_repo=False)
+    assert filtered["search_status"] == "no_lexical_candidates"
+    assert filtered["decision"] == "no_confident_match"
+    assert filtered["decision_reason"] == (
+        "no candidate passed the matching policy; 1 record shared a query "
+        "token but was excluded by the active filters"
+    )
+    assert filtered["weak_filtered_count"] == 0
+    assert filtered["filter_excluded_match_count"] == 1
+
+    # A filter-excluded sharer and a policy-dropped weak hit are reported
+    # together, not one hiding the other: "evaluation scientific
+    # prediction" with modality=multimodal leaves Science Discovery Suite
+    # sharing only "scientific" in description (weak hit) while Agent
+    # Workbench shares "evaluation" but is filtered out as text modality.
+    combined = service.search(
+        "evaluation scientific prediction", scope="catalog", limit=10, modality="multimodal"
+    )
+    assert combined["search_status"] == "no_lexical_candidates"
+    assert combined["decision_reason"] == (
+        "no candidate passed the matching policy; 1 record shared a query "
+        "token but only a single token in description; 1 record shared a "
+        "query token but was excluded by the active filters"
+    )
+    assert combined["weak_filtered_count"] == 1
+    assert combined["filter_excluded_match_count"] == 1
+
+    # True zero overlap under a filter keeps the old reason and zero counts.
+    empty = service.search("zzzzqqqq xxxxwwww", scope="catalog", limit=10, has_repo=False)
+    assert empty["search_status"] == "no_lexical_candidates"
+    assert empty["decision_reason"] == "no record matched any query token"
+    assert empty["weak_filtered_count"] == 0
+    assert empty["filter_excluded_match_count"] == 0
+
+
 def test_search_decision_marks_full_and_partial_coverage(tmp_path: Path) -> None:
     # Issue #432: the JSON contract carried a rank and prose but no signal a
     # caller could threshold on. `decision` states whether any record covered

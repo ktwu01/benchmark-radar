@@ -97,7 +97,8 @@ as inspectable evidence that still needs query refinement or record review, neve
 an answer. Interpret `no_lexical_candidates` as “no candidate passed the matching
 policy in this local data version,” not proof that no such benchmark exists: the
 only records sharing a query token may have been lone description-only tokens the
-policy drops (`weak_filtered_count` says how many). Interpret
+policy drops (`weak_filtered_count` says how many), or matches an active filter
+excluded (`filter_excluded_match_count` says how many). Interpret
 `decision: no_confident_match` as the service's own statement that no record
 covered every query token — a lexical outcome, not a semantic absence. Do not
 report “no benchmark in the catalog covers this”: a partial candidate may still
