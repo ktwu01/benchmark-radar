@@ -1878,11 +1878,15 @@ benchmarks:
     aliases: ["SALAD-Bench", "SALAD Bench"]
     domain: security
     caveat: >-
-      21,318 prompts (arXiv:2608.17183, §3.1). Judged by MD-Judge under a
-      ternary 0 / 0.5 / 1 rubric. No per-model scores filed: the paper reports
-      ambiguity and rank instability across suites rather than benchmark
-      scores, and SALAD-Bench's judge and rubric differ from the other suites
-      studied in the same paper.
+      21,318 prompts (arXiv:2608.17183, §3.1). MD-Judge-v0.1 natively
+      produces an unsafe probability plus a binary safe/unsafe judgment,
+      not a ternary score: the paper derives ternary 0 / 0.5 / 1 outcomes
+      with model-specific Otsu thresholds (§3.2) to compare SALAD with the
+      HELM-style suites, so the ternary scale is the paper's derivation,
+      not SALAD-Bench's native protocol, and a future native MD-Judge
+      score must not be read as ternary. No per-model scores filed: the
+      paper reports ambiguity and rank instability across suites rather
+      than benchmark scores.
 
   - id: harmbench
     name: HarmBench
