@@ -30,7 +30,14 @@ Each rule below prevents a specific failure:
 - Requests are bounded per source and spent newest release first, so the
   windows the leaderboard shows by default are refreshed before the 90-day
   tail, and a budget smaller than the eligible cohort degrades to stale
-  readings on the oldest releases rather than to nothing.
+  readings on the oldest releases rather than to nothing. Stars and forks
+  read the same GitHub repository payload, so one request refreshes both
+  counters and spends one unit of the source budget.
+- GitHub forks are a displayed counter only (#659), never a ranking weight:
+  the ranking iterates WINDOW_WEIGHTS, which has no forks entry. A gone
+  repository records forks as `unavailable` with a null value, the same as
+  stars, and a stale forks reading keeps the `last_successful_date` of the
+  day it was actually read.
 - A signal that fails several times in a row is not asked again this run.
   A rate limit or outage answers every request the same way, and a run that
   waits out the timeout for each of a thousand resources would outlive the
@@ -84,6 +91,14 @@ SIGNALS: dict[str, dict[str, str]] = {
         "metric": "downloads_30d",
         "value_kind": "rolling_30d",
         "label": "Hugging Face dataset downloads",
+    },
+    # Displayed counter only (#659): read from the same repository payload
+    # as stars, shown in the attention health list, never a ranking weight.
+    "github_forks": {
+        "source": "github",
+        "metric": "forks",
+        "value_kind": "cumulative",
+        "label": "GitHub forks",
     },
 }
 
@@ -224,6 +239,16 @@ def _fetch_counter(
             **options,
         )
         return _counter(payload, "stargazers_count", label="GitHub repository")
+    if signal == "github_forks":
+        # Same payload as stars, same request: the collector memoizes by
+        # request URL within a run, so this costs no second GitHub request.
+        owner, repo = segments[0], segments[1].removesuffix(".git")
+        payload = get_json(
+            f"https://api.github.com/repos/{owner}/{repo}",
+            headers=_github_headers(),
+            **options,
+        )
+        return _counter(payload, "forks_count", label="GitHub repository")
     if signal == "hf_paper_upvotes":
         payload = get_json(f"https://huggingface.co/api/papers/{segments[1]}", **options)
         return _counter(payload, "upvotes", label="Hugging Face paper")
@@ -356,20 +381,51 @@ def collect_benchmark_attention(
     observations: list[dict[str, Any]] = []
     observed_iso = observed_at.isoformat()
 
+    # Stars and forks read the same repository payload, so the second signal
+    # is served from this run's cache instead of a second request. A failed
+    # request is cached too and re-raised: an outage or rate limit answers
+    # every request the same way, and each signal still counts its own
+    # failure against its breaker. The budget counts requests actually made,
+    # so a cached read spends nothing.
+    payload_cache: dict[str, Any] = {}
+
+    def _cached_get_json(url: str, **kwargs: Any) -> Any:
+        if url in payload_cache:
+            cached = payload_cache[url]
+            if isinstance(cached, Exception):
+                raise cached
+            return cached
+        try:
+            payload = get_json(url, **kwargs)
+        except Exception as error:
+            payload_cache[url] = error
+            raise
+        payload_cache[url] = payload
+        return payload
+
+    requested_urls: set[str] = set()
     for target in targets:
         for signal, url in target.resources.items():
             spec = SIGNALS[signal]
             source = spec["source"]
             signal_stats = stats[signal]
             reading = None
-            if paused[signal] or requests_made[source] >= budgets[source]:
+            # A URL already requested this run costs nothing to read again
+            # (the cache serves it), so the budget never skips a signal whose
+            # payload is already in hand -- a budget of one still refreshes
+            # both counters on a repository.
+            if paused[signal] or (
+                url not in requested_urls and requests_made[source] >= budgets[source]
+            ):
                 signal_stats.skipped += 1
             else:
                 if requests_made[source] and delays[source]:
                     sleep(delays[source])
-                requests_made[source] += 1
+                if url not in requested_urls:
+                    requested_urls.add(url)
+                    requests_made[source] += 1
                 reading = _read_resource(
-                    signal, url, options=options, get_json=get_json, stats=signal_stats
+                    signal, url, options=options, get_json=_cached_get_json, stats=signal_stats
                 )
                 if reading is None:
                     failure_streaks[signal] += 1
