@@ -66,6 +66,78 @@ ONE_LINE_SUMMARY_MAX_CHARS = 140
 # here, so they are stripped rather than escaped around.
 _ONE_LINE_STRIP_RANGES = ((0x2500, 0x259F),)
 _SENTENCE_END_RE = re.compile(r"[.!?](?=\s+[A-Z0-9\"'(\[]|\s*$)")
+# Periods that do not end a sentence: "vs.", "Dr.", "e.g.", "U.S.".
+_SENTENCE_ABBREVIATIONS = frozenset(
+    {
+        "vs",
+        "dr",
+        "mr",
+        "mrs",
+        "ms",
+        "st",
+        "jr",
+        "sr",
+        "etc",
+        "al",
+        "e.g",
+        "i.e",
+        "u.s",
+        "u.k",
+        "no",
+        "fig",
+        "eq",
+        "approx",
+        "dept",
+        "inc",
+        "ltd",
+        "corp",
+        "jan",
+        "feb",
+        "mar",
+        "apr",
+        "jun",
+        "jul",
+        "aug",
+        "sep",
+        "sept",
+        "oct",
+        "nov",
+        "dec",
+    }
+)
+
+
+def _first_sentence_end(text: str) -> int | None:
+    """Return the end index of the first substantive sentence in ``text``.
+
+    Skips a period that belongs to an abbreviation (``vs.``, ``Dr.``,
+    ``U.S.``) and a period that ends a standalone label (``Background.``),
+    so the compact line still says what the release is about instead of
+    publishing a nearly meaningless fragment. A skipped candidate is only
+    skipped while a later candidate exists: when it is the last one, the
+    text ends there anyway and the whole line is the sentence.
+    """
+    matches = list(_SENTENCE_END_RE.finditer(text))
+    for index, match in enumerate(matches):
+        sentence = text[: match.end()]
+        before = text[: match.start()].rstrip()
+        token = before.rsplit(None, 1)[-1] if before else ""
+        token_lower = token.lower().rstrip(".")
+        is_abbreviation = (
+            token_lower in _SENTENCE_ABBREVIATIONS
+            or ("." in token and len(token.rsplit(".", 1)[-1]) == 1)
+            or (
+                len(token) == 1
+                and match.end() + 1 < len(text)
+                and text[match.end()].isalpha()
+                and text[match.end() + 1] == "."
+            )
+        )
+        is_label = " " not in sentence.strip()
+        if (is_abbreviation or is_label) and index < len(matches) - 1:
+            continue
+        return match.end()
+    return None
 
 
 def one_line_summary(value: Any) -> str:
@@ -97,9 +169,9 @@ def one_line_summary(value: Any) -> str:
     text = " ".join(cleaned.split())
     if not text:
         return ""
-    match = _SENTENCE_END_RE.search(text)
-    if match:
-        text = text[: match.end()]
+    end = _first_sentence_end(text)
+    if end is not None:
+        text = text[:end]
     if len(text) <= ONE_LINE_SUMMARY_MAX_CHARS:
         return text
     cut = text.rfind(" ", 0, ONE_LINE_SUMMARY_MAX_CHARS - 1)

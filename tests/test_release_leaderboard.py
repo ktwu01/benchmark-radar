@@ -1104,6 +1104,40 @@ def test_one_line_summary_turns_whitespace_controls_into_spaces():
     assert one_line_summary("A benchmark\r\nfor evaluation.") == ("A benchmark for evaluation.")
 
 
+def test_one_line_summary_skips_headings_and_abbreviation_periods():
+    # Codex review on #1160 (2026-11-07, head 102e8ad): the sentence regex
+    # mistook a section label or abbreviation period for the sentence
+    # boundary, publishing fragments such as "Background.", "Claimed vs."
+    # and "LocalIRAC: U.S." from committed release records. Skip those
+    # periods so the line still says what the release is about.
+    # The label period is skipped as a boundary, so the line runs past it
+    # to the first substantive sentence end (the line stays a prefix of
+    # the cleaned source, per the derivation rule pinned above).
+    assert (
+        one_line_summary("Background. This benchmark evaluates reasoning in legal documents.")
+        == "Background. This benchmark evaluates reasoning in legal documents."
+    )
+    assert one_line_summary(
+        "Claimed vs. Done: a deterministic benchmark of whether AI coding "
+        "agents' DONE reports are true."
+    ) == (
+        "Claimed vs. Done: a deterministic benchmark of whether AI coding "
+        "agents' DONE reports are true."
+    )
+    assert one_line_summary(
+        "LocalIRAC: U.S. Local Ordinance Reasoning and Adaptation Dataset "
+        "and Benchmark for legal reasoning."
+    ) == (
+        "LocalIRAC: U.S. Local Ordinance Reasoning and Adaptation Dataset "
+        "and Benchmark for legal reasoning."
+    )
+    assert one_line_summary("Dr. Smith built a benchmark. It works well.") == (
+        "Dr. Smith built a benchmark."
+    )
+    # A trailing abbreviation is still the sentence end.
+    assert one_line_summary("It was built in the U.S.") == ("It was built in the U.S.")
+
+
 def test_one_line_summary_strips_characters_that_break_the_column():
     # Issue #333: one release's "summary" was a run of ═══ box-drawing
     # characters that pushed a 720px column to 1349px. Control characters
