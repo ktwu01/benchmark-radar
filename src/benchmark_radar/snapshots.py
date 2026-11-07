@@ -798,7 +798,26 @@ def merge_snapshots(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[
             # sources the combined value is the highest reported. This removes
             # the cross_source special case the old loop below used.
             by_source = _metrics_by_source(previous)
-            by_source[item["source"]] = dict(item.get("metrics") or {})
+            incoming_by_source = _metrics_by_source(item)
+            if not previous.get("metrics_by_source") and previous.get("contributing_sources"):
+                # Legacy merged record, written before in-pass attribution
+                # existed: its flat metrics mix its contributors, so
+                # replacing the envelope source's map would drop the other
+                # contributors' measurements. Union with the incoming
+                # revision instead; the next pass that sees the other source
+                # again re-attributes properly.
+                for source, metrics in incoming_by_source.items():
+                    combined_source = dict(by_source.get(source) or {})
+                    for metric, value in metrics.items():
+                        if metric not in combined_source or value > combined_source[metric]:
+                            combined_source[metric] = value
+                    by_source[source] = combined_source
+            else:
+                # Within a source the newer record replaces that source's
+                # map; across sources the maps union. An incoming merged
+                # record carries its own map, so update with it rather than
+                # attributing its flat combined metrics to its envelope.
+                by_source.update(incoming_by_source)
             by_source = dict(sorted(by_source.items()))
             merged = {
                 **selected,
