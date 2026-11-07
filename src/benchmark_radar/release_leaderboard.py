@@ -65,7 +65,11 @@ ONE_LINE_SUMMARY_MAX_CHARS = 140
 # that pushed a 720px column to 1349px (issue #333). They carry no meaning
 # here, so they are stripped rather than escaped around.
 _ONE_LINE_STRIP_RANGES = ((0x2500, 0x259F),)
-_SENTENCE_END_RE = re.compile(r"[.!?](?=\s+[A-Z0-9\"'(\[]|\s*$)")
+_SENTENCE_END_RE = re.compile(r"[.!?](?=\s+\S|\s*$)")
+# A sentence can start with lowercase text ("... platform. adaption-python
+# code preferences ..."), so the boundary lookahead must not require an
+# uppercase start. Abbreviation periods ("vs.", "Dr.", "U.S.") are still
+# guarded by the checks in _first_sentence_end, not by this regex.
 # Periods that do not end a sentence: "vs.", "Dr.", "e.g.", "U.S.".
 _SENTENCE_ABBREVIATIONS = frozenset(
     {

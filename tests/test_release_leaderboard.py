@@ -1138,6 +1138,36 @@ def test_one_line_summary_skips_headings_and_abbreviation_periods():
     assert one_line_summary("It was built in the U.S.") == ("It was built in the U.S.")
 
 
+def test_one_line_summary_recognises_lowercase_sentence_starts():
+    # Codex review on #1160 (2026-11-07, head 7b4b12c7): the sentence regex
+    # only recognised a boundary before an uppercase start, so a second
+    # sentence starting lowercase leaked into the line. The committed
+    # himanshunakrani9/adaption-python-code-preferences record rendered as
+    # "... platform. adaption-python code preferences This dataset…"
+    # instead of stopping after "platform.". Abbreviation periods are
+    # still skipped even before a lowercase continuation.
+    assert one_line_summary(
+        "This dataset is a remastered version prepared using Adaption's "
+        "Adaptive Data platform. adaption-python code preferences This "
+        "dataset consists of paired code completions designed for "
+        "preference alignment of language models."
+    ) == ("This dataset is a remastered version prepared using Adaption's Adaptive Data platform.")
+    assert one_line_summary("A benchmark for code generation. it covers 50 languages.") == (
+        "A benchmark for code generation."
+    )
+    assert one_line_summary("Is it a benchmark? yes, it evaluates code.") == ("Is it a benchmark?")
+    assert one_line_summary(
+        "Claimed vs. done: a deterministic benchmark of whether AI coding "
+        "agents' DONE reports are true."
+    ) == (
+        "Claimed vs. done: a deterministic benchmark of whether AI coding "
+        "agents' DONE reports are true."
+    )
+    assert one_line_summary("Dr. smith built a benchmark. It works well.") == (
+        "Dr. smith built a benchmark."
+    )
+
+
 def test_one_line_summary_strips_characters_that_break_the_column():
     # Issue #333: one release's "summary" was a run of ═══ box-drawing
     # characters that pushed a 720px column to 1349px. Control characters
