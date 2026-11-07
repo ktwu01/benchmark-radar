@@ -29,6 +29,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from .catalog_identity import load_equivalent_groups
 from .models_registry import build_registry
 
 SCHEMA_VERSION = 1
@@ -239,8 +240,22 @@ def latest_date(dates: dict[str, list[str]], source: str | None = None) -> tuple
     return best[0], best[1]
 
 
-def write_model_scores(shard_dir: Path, output: Path = DEFAULT_SCORES_OUTPUT) -> dict[str, Any]:
-    payload = build_model_scores(shard_dir)
+def write_model_scores(
+    shard_dir: Path,
+    output: Path = DEFAULT_SCORES_OUTPUT,
+    equivalences: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Write the Models matrix payload, joining reviewed equivalent records.
+
+    With no `equivalences` given, the reviewed groups are read from
+    `data/catalog/identity.yml` (see `load_equivalent_groups`): the
+    generators run in `classify`, where the loaded identity is not in scope,
+    and a payload built without them reports equivalent records as sharing
+    no benchmark (#1129).
+    """
+    if equivalences is None:
+        equivalences = load_equivalent_groups()
+    payload = build_model_scores(shard_dir, equivalences)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
         json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8"

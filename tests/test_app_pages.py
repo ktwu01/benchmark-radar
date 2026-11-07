@@ -294,6 +294,47 @@ def test_every_view_is_published_at_its_own_path(tmp_path):
     assert not list(tmp_path.glob("*/index.html.tmp"))
 
 
+def test_models_page_seed_averages_joined_benchmarks(tmp_path):
+    # #1129 P1: the Models seed rebuilt its scores without the reviewed
+    # groups, so two models scoring equivalent records showed as sharing no
+    # benchmark. The second model scores the equivalent record here.
+    _write(tmp_path, _dashboard())
+    shard = {
+        "record": {"key": "model-reports:benchmark-1"},
+        "scores_by_source": {
+            "model_reports": {
+                "series": {
+                    "direction": "higher_is_better",
+                    "score_summary": {"display_multiplier": 1, "unit": "percent"},
+                },
+                "rows": [
+                    {
+                        "obs_id": "benchmark-1:0",
+                        "model_name": "Frontier-2",
+                        "organization": "Acme",
+                        "value": 60.0,
+                        "reported_date": "2026-05-14",
+                    }
+                ],
+            }
+        },
+    }
+    (tmp_path / "data" / "benchmarks" / "benchmark-1.json").write_text(json.dumps(shard))
+    write_app_pages(
+        _dashboard(),
+        tmp_path,
+        equivalences=[
+            {
+                "group_id": "gpqa",
+                "members": ["model-reports:benchmark-0", "model-reports:benchmark-1"],
+            }
+        ],
+    )
+    models = (tmp_path / "models" / "index.html").read_text(encoding="utf-8")
+    assert "over the 1 benchmarks all 2 models share, 0–100" in models
+    assert "<strong>74.7</strong>" in models and "<strong>60</strong>" in models
+
+
 def test_each_page_declares_the_url_it_is_served_at(tmp_path):
     _write(tmp_path, _dashboard())
     view_seo = load_view_seo(SITE / "assets" / "app.js")

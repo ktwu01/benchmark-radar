@@ -213,6 +213,29 @@ def _sibling(record: dict[str, Any], relation: str) -> dict[str, Any]:
     }
 
 
+def load_equivalent_groups(
+    path: Path = DEFAULT_IDENTITY_PATH,
+) -> list[dict[str, Any]]:
+    """Reviewed `equivalent` groups, without record validation.
+
+    For the Models generators (`model_scores.write_model_scores`,
+    `app_pages.write_app_pages`), which run in `classify` where the raw
+    records are not in scope: a member that matches no shard record simply
+    never joins, and `joined_map_from_groups` drops groups with fewer than
+    two members, so an unvalidated read cannot manufacture a join. Full
+    validation (anchors, membership, duplicates) stays in `load_identity`,
+    which normalize-catalog runs before these generators in CI.
+    """
+    if not path.exists():
+        return []
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    if data.get("schema_version") != CATALOG_SCHEMA_VERSION:
+        raise IdentityError(
+            f"{path}: schema_version {data.get('schema_version')!r} != {CATALOG_SCHEMA_VERSION}"
+        )
+    return list(data.get("equivalent") or [])
+
+
 def load_identity(
     records: list[dict[str, Any]],
     path: Path = DEFAULT_IDENTITY_PATH,

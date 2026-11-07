@@ -6798,7 +6798,12 @@ function modelMatrixTable(columns, data, recordsByKey) {
   }
   const groups = new Map(MODEL_CAPABILITY_ORDER.map((group) => [group, []]));
   for (const key of shownKeys) groups.get(modelCapabilityGroup(recordsByKey.get(key))).push(recordsByKey.get(key));
-  const average = data.scored ? modelSharedAverage(columns.map((model) => model.cells), data.benchmarks) : null;
+  const joined = new Map([...data.benchmarks]
+    .filter(([, benchmark]) => benchmark.joined)
+    .map(([key, benchmark]) => [key, benchmark.joined]));
+  const average = data.scored
+    ? modelSharedAverage(columns.map((model) => model.cells), data.benchmarks, joined.size ? joined : undefined)
+    : null;
   const bodies = [...groups].filter(([, records]) => records.length).map(([group, records]) => element("tbody", {}, [
     element("tr", { className: "models-group" }, [element("th", {
       attrs: { colspan: columns.length + 1, scope: "colgroup" },

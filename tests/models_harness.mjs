@@ -151,7 +151,7 @@ const env = {
 };
 const names = [
   "modelDocuments", "modelFirstMentions", "modelCapabilityGroup", "modelFamily", "modelAverageValue",
-  "modelSharedAverage", "modelMatrixModels", "modelOrder", "modelMatches", "modelLabCounts",
+  "modelSharedAverage", "modelMatrixModels", "modelMatrixTable", "modelOrder", "modelMatches", "modelLabCounts",
   "renderModelLabs", "modelValueText", "modelSeriesScale", "modelLatestDate", "openModelPanel", "closeModelPanel", "renderModels", "initModels",
 ];
 const models = new Function(
@@ -322,6 +322,33 @@ const family = [
 assert.deepEqual(models.modelOrder(family, "newest").map((model) => model.name), ["M", "M (high)", "N"]);
 assert.deepEqual(models.modelOrder(family).map((model) => model.name), ["N", "M", "M (high)"]);
 assert.deepEqual(models.modelLabCounts(matrix.models), [["Acme", 8], ["Beta", 1]]);
+
+// modelMatrixTable (#1129 P1): the reviewed join reaches the live average --
+// two models scoring different records of one equivalent group share it.
+const joinedRecords = [
+  record("llm-stats:gpqa", "GPQA", "llm_stats"),
+  record("opencompass:1135", "GPQA", "opencompass"),
+];
+const joinedPayload = {
+  schema_version: 1,
+  benchmarks: [
+    { key: "llm-stats:gpqa", direction: "higher_is_better", multiplier: 1, percent: true, unit: "%", joined: "gpqa" },
+    { key: "opencompass:1135", direction: "higher_is_better", multiplier: 1, percent: true, unit: "%", joined: "gpqa" },
+  ],
+  models: [
+    { key: "a", model: "A", organization: "Lab", dates: {}, scores: [[0, 40]] },
+    { key: "b", model: "B", organization: "Lab", dates: {}, scores: [[1, 60]] },
+  ],
+};
+const joinedMatrix = models.modelMatrixModels(joinedRecords, joinedPayload);
+const joinedTable = models.modelMatrixTable(
+  joinedMatrix.models, joinedMatrix,
+  new Map(joinedRecords.map((entry) => [entry.key, entry])),
+);
+const joinedAverage = joinedTable.querySelector("tbody.models-average").textContent;
+assert.match(joinedAverage, /over the 1 benchmarks all 2 models share, 0–100/);
+assert.match(joinedAverage, /40/);
+assert.match(joinedAverage, /60/);
 
 // --- Rendering. ------------------------------------------------------------------
 function reset(scores) {
