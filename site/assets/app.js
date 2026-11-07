@@ -1313,6 +1313,7 @@ const I18N = {
     "90 days": "90 天",
     "Attention score": "关注度得分",
     "GitHub stars": "GitHub star 数",
+    "GitHub forks": "GitHub 复刻数",
     "Hugging Face paper upvotes": "Hugging Face 论文点赞数",
     "Hugging Face dataset downloads, last 30 days": "Hugging Face 数据集下载量（最近 30 天）",
     unavailable: "资源已不可用",
@@ -10405,6 +10406,24 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
       ]);
     }),
   );
+  // Forks are a displayed counter only (#659): the count reaches the row
+  // next to the stars, with the same status wording, but it is not a score
+  // component, so it carries no normalized contribution or weight.
+  const forks = entry.forks || {};
+  const forksUrl = safeHttpUrl(forks.source_url);
+  const forksLine =
+    forks.value === null || forks.value === undefined
+      ? null
+      : element("p", { className: "latest-release-forks" }, [
+          element("span", { text: `${t("GitHub forks")}: ${latestSignalText(forks)}` }),
+          forksUrl
+            ? element("a", {
+                className: "latest-release-source",
+                text: t("source ↗"),
+                attrs: { href: forksUrl, target: "_blank", rel: "noopener noreferrer" },
+              })
+            : null,
+        ]);
   const meta = [
     t("Coverage {coverage}", { coverage: Number(entry.coverage || 0).toFixed(2) }),
     confidence ? `${t("confidence")} ${t(confidence)}` : "",
@@ -10421,6 +10440,7 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
       element("div", { className: "latest-release-body" }, [
         entry.purpose ? element("p", { className: "latest-release-purpose", text: entry.purpose }) : null,
         signals,
+        forksLine,
         element("p", { className: "latest-release-meta", text: meta }),
       ]),
     ]),

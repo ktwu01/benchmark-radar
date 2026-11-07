@@ -286,6 +286,23 @@ def _latest_release_row(entry: dict[str, Any], top: float) -> str:
             f"normalized {esc(_latest_normalized_text(component))}</small>"
             f"{link}{weight_text}</dd></div>"
         )
+    # Forks are a displayed counter only (#659): the count reaches the row
+    # next to the stars, with the same status wording, but it is not a score
+    # component, so it carries no normalized contribution or weight.
+    forks = entry.get("forks") or {}
+    forks_html = ""
+    if forks.get("value") is not None:
+        forks_url = _safe_http_url(forks.get("source_url"))
+        forks_link = (
+            f'<a class="latest-release-source" href="{esc(forks_url)}" target="_blank" '
+            'rel="noopener noreferrer">source ↗</a>'
+            if forks_url
+            else ""
+        )
+        forks_html = (
+            '<p class="latest-release-forks">'
+            f"<span>GitHub forks: {esc(_latest_signal_text(forks))}</span>{forks_link}</p>"
+        )
     meta = " · ".join(
         part
         for part in (
@@ -309,7 +326,7 @@ def _latest_release_row(entry: dict[str, Any], top: float) -> str:
         f'<span class="leaderboard-top-count"><span>{score_text}</span>{pill}</span>'
         "</summary>"
         f'<div class="latest-release-body">{purpose_html}'
-        f'<dl class="latest-release-signals">{"".join(signals)}</dl>'
+        f'<dl class="latest-release-signals">{"".join(signals)}</dl>{forks_html}'
         f'<p class="latest-release-meta">{esc(meta)}</p></div>'
         "</details></li>"
     )
