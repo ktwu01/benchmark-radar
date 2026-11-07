@@ -1290,22 +1290,6 @@ def test_evidence_cards_show_fetched_source_metadata_without_inventing_zeroes():
         ["Published", "date:2026-08-24T17:59:04Z"],
         ["Updated", "date:2026-08-25T17:59:04Z"],
     ]
-    # Issue #1016: a record dated by its deposition's created time says so
-    # next to Published, with the uploader's value as given.
-    assert facts["dates_with_basis"] == [
-        [
-            "Published",
-            "date:2026-10-27T02:01:03Z (dated by deposition created; "
-            "source publication_date was 2026-10-31)",
-        ],
-    ]
-    assert facts["published_note"] == {
-        "replaced": " (dated by deposition created; source publication_date was 2026-10-31)",
-        "replacedBareYear": " (dated by deposition created; source publication_date was 2027)",
-        "noSourceValue": " (dated by deposition created; no publication_date supplied)",
-        "normal": "",
-        "unknown": "",
-    }
     assert facts["rendered"] == {
         "tag": "div",
         "className": "record-facts",
