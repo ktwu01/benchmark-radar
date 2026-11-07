@@ -10771,7 +10771,7 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
   const forks = entry.forks || {};
   const forksUrl = safeHttpUrl(forks.source_url);
   const forksLine =
-    forks.value === null || forks.value === undefined
+    (forks.value === null || forks.value === undefined) && forks.status !== "unavailable"
       ? null
       : element("p", { className: "latest-release-forks" }, [
           element("span", { text: `${t("GitHub forks")}: ${latestSignalText(forks)}` }),

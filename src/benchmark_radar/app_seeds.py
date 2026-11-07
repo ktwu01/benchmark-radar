@@ -291,7 +291,7 @@ def _latest_release_row(entry: dict[str, Any], top: float) -> str:
     # component, so it carries no normalized contribution or weight.
     forks = entry.get("forks") or {}
     forks_html = ""
-    if forks.get("value") is not None:
+    if forks.get("value") is not None or forks.get("status") == "unavailable":
         forks_url = _safe_http_url(forks.get("source_url"))
         forks_link = (
             f'<a class="latest-release-source" href="{esc(forks_url)}" target="_blank" '
@@ -581,14 +581,17 @@ def _score_browser_seed(
 
     The default is the shared 70; a caller that has read a reader's choice
     passes it in, so the seed and the browser's `state.lscore` slice the same
-    population. 100 is the full range: every reported score is below it.
+    population. 100 is the full range: the browser treats it as "All", so no
+    reported score is cut, including a genuine 100.
     """
     if not catalog_index:
         return {}
     rows = [
         row
         for row in _catalog_score_rows(catalog_index)
-        if not _has_reported_score(row) or row["summary"]["display_max"] < score_cutoff
+        if not _has_reported_score(row)
+        or score_cutoff >= 100
+        or row["summary"]["display_max"] < score_cutoff
     ]
     shown = rows[:50]
     content = ""

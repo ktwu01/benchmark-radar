@@ -487,6 +487,16 @@ def test_latest_release_row_shows_forks_next_to_stars():
     assert _inner(seed_plain[LIST_ANCHOR]) == drawn_plain["default"]["list"]
     assert "latest-release-forks" not in drawn_plain["default"]["list"]
 
+    # Codex P2 (#1175): a repo whose fork count is unavailable (404/410/451,
+    # no previous reading) still shows the forks line as "unavailable"
+    # instead of dropping it — seed and renderer must agree.
+    gone_forks = {**entry, "forks": {"value": None, "status": "unavailable", "source_url": None}}
+    gone = _payload(entries=[gone_forks])
+    drawn_gone = _render(gone)
+    seed_gone = _latest_releases_seed({"latest_releases_leaderboard": gone})
+    assert _inner(seed_gone[LIST_ANCHOR]) == drawn_gone["default"]["list"]
+    assert "GitHub forks: unavailable" in drawn_gone["default"]["list"]
+
 
 def test_the_renderer_keeps_open_rows_loads_wider_windows_and_reports_failure():
     drawn = _render(json.loads(FIXTURE.read_text(encoding="utf-8")))
