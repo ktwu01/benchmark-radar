@@ -396,7 +396,7 @@ def test_search_defaults_to_all_dates_and_explains_the_scope():
     assert "const hadQuery = Boolean(state.q.trim());" in handler
     assert 'state.todayDate = "all";' in handler
     assert "!hadQuery && state.q.trim()" in handler
-    assert "ensureFullData()" in handler
+    assert "ensureSearchData()" in handler
 
     # The banner offers a real today link, and large result sets point to the
     # public CLI setup route for a complete export.
@@ -968,6 +968,20 @@ def test_initial_page_uses_small_bootstrap_and_lazy_loads_history():
 
     initialize = script.split("async function initialize()", 1)[1]
     assert 'fetch("/data/radar-bootstrap.json")' in initialize
+    assert "await ensureDataForState();" in initialize
+    assert '"/data/radar-search.json"' in script
+    search_loader = script.split("async function ensureSearchData(", 1)[1].split(
+        "\nasync function ", 1
+    )[0]
+    assert 'fetchDashboardJson("/data/radar-search.json", cache)' in search_loader
+    search_state = script.split("function stateNeedsSearchData()", 1)[1].split(
+        "function stateNeedsWindowData", 1
+    )[0]
+    assert 'state.todayDate === "all"' in search_state
+    refresh = script.split("async function refreshData()", 1)[1].split(
+        "\nasync function initialize()", 1
+    )[0]
+    assert 'await ensureSearchData("reload");' in refresh
     assert "await ensureDataForState();" in initialize
     loader = script.split("async function ensureFullData(", 1)[1].split("\nasync function ", 1)[0]
     assert 'fetchDashboardPayload("/data/radar.json", cache, requestSequence, true)' in loader
