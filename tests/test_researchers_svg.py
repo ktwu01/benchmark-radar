@@ -58,3 +58,10 @@ def test_the_built_strip_keeps_both_definitions_of_st0():
     assert not re.search(r"(?<![\w-])\.st\d+\s*\{", strip)
     assert re.search(r"\.l\d+_st0\{fill:#930084;\}", strip)
     assert re.search(r"\.l\d+_st0\{opacity:0\.3;fill:#E2E4E7;\}", strip)
+
+
+def test_bytedance_moved_to_third_row_and_tesla_scaled_down():
+    builder = _builder()
+    assert "bytedance.svg" not in builder.ROWS[0]
+    assert "bytedance.svg" in builder.ROWS[2]
+    assert builder.LOGO_SCALE["tesla.svg"] < 1

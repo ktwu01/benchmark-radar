@@ -33,9 +33,9 @@ LOGO_DIR = REPO_ROOT / "assets" / "researchers-logos"
 OUT = REPO_ROOT / "assets" / "researchers.svg"
 
 ROWS = [
-    ["google.svg", "amazon.svg", "aws.svg", "ibm.svg", "bytedance.svg", "tesla.svg"],
+    ["google.svg", "amazon.svg", "aws.svg", "ibm.svg", "tesla.svg"],
     ["cmu.svg", "harvard.svg", "mit.svg", "berkeley.svg", "nus.svg", "auckland.svg", "xtracta.svg"],
-    ["alibaba.svg", "tencent.svg", "hunyuan.svg", "qwen.svg", "zai.svg", "antgroup.png"],
+    ["alibaba.svg", "tencent.svg", "hunyuan.svg", "qwen.svg", "bytedance.svg", "zai.svg", "antgroup.png"],
     ["stepfun.png", "kuaishou.png", "zhihu.svg", "tsinghua.svg", "sjtu.png"],
 ]
 
@@ -45,7 +45,7 @@ GAP = 26  # gap between logos in a row
 ROW_H = 30  # row box height
 ROW_GAP = 16
 BOTTOM_PAD = 3
-LOGO_SCALE = {"alibaba.svg": 0.6}  # logos that look oversized at the common height
+LOGO_SCALE = {"alibaba.svg": 0.6, "tesla.svg": 0.6}  # logos that look oversized at the common height
 PNG_MAX_W = {"kuaishou.png": 1200, "sjtu.png": 120}
 # Many wordmarks are dark (Amazon, Qwen, Zhihu, StepFun, Xtracta), so the strip
 # carries its own light backing: on GitHub's dark theme it would otherwise sit
