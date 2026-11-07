@@ -83,13 +83,14 @@ export function skylineModel(catalog = [], cutoff = 70, matchingIds = null, heig
   // does: a benchmark whose release or first-score date falls outside it is
   // not drawn and cannot be a frontier candidate, but the dominance
   // comparison set stays the full cohort, so the slice cannot promote a
-  // dominated benchmark onto the frontier. Undated records have no date in
-  // the span, so an active range hides them; the note says how many.
+  // dominated benchmark onto the frontier. An undated record has no date, so
+  // no bound can place it outside the span: it stays visible in the undated
+  // panel instead of being counted as outside the range (principle.md).
   const from = validDate(dateRange?.from) ? dateRange.from : null;
   const to = validDate(dateRange?.to) ? dateRange.to : null;
   const inRange = (row) => {
     if (!from && !to) return true;
-    if (!row.date) return false;
+    if (!row.date) return true;
     return (!from || row.date >= from) && (!to || row.date <= to);
   };
   const population = scorePopulation(catalog);

@@ -486,6 +486,22 @@ assert.equal(after2025.dateHidden, 8);
 const unranged = skylineModel(tracks, cards, [], 100);
 assert.equal(unranged.dateHidden, 0);
 assert.deepEqual(unranged.dateRange, { from: null, to: null });
+// Codex P1 (#1148): a missing date is not evidence a benchmark falls outside
+// the span, so an active range keeps undated records listed as undated
+// (principle.md) instead of dropping them from the chart and its panel.
+const rangedUndated = skylineModel(
+  { dated: record(50), undated: record(10, { observations: [{ value: 10 }] }) },
+  [entry('dated', 1), entry('undated', 2, { released: null, adopters: [{ model_card_id: 'a' }, { model_card_id: 'b' }] })],
+  [], 100, null, 'documents', { from: '2026-01-01', to: '2026-12-31' });
+assert.deepEqual(rangedUndated.visible.map((row) => row.id), ['undated']);
+assert.deepEqual(rangedUndated.undated.map((row) => row.id), ['undated']);
+assert.equal(rangedUndated.dateHidden, 1, 'only the dated record outside 2026 counts as outside the range');
+const rangedUndatedFromOnly = skylineModel(
+  { dated: record(50), undated: record(10, { observations: [{ value: 10 }] }) },
+  [entry('dated', 1), entry('undated', 2, { released: null, adopters: [{ model_card_id: 'a' }, { model_card_id: 'b' }] })],
+  [], 100, null, 'documents', { from: '2026-01-01', to: null });
+assert.deepEqual(rangedUndatedFromOnly.visible.map((row) => row.id), ['undated']);
+assert.equal(rangedUndatedFromOnly.dateHidden, 1);
 // A malformed bound is no filter, not an error.
 assert.equal(ranged('not-a-date', null).visible.length, 8);
 for(const m of [byModels,byCards]) {
