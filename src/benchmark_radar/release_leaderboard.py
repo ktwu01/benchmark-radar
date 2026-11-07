@@ -72,17 +72,25 @@ def one_line_summary(value: Any) -> str:
     """Derive a release row's one-line summary from the record's own text.
 
     Takes the first sentence of ``value`` (the source record's summary),
-    capped at :data:`ONE_LINE_SUMMARY_MAX_CHARS` characters. Control and
-    box-drawing characters are stripped, so nothing in the line can break
-    the column. Returns ``""`` when the record carries nothing usable: a
+    capped at :data:`ONE_LINE_SUMMARY_MAX_CHARS` characters. Whitespace
+    controls become spaces and other control and box-drawing characters
+    are stripped, so nothing in the line can break the column. Returns
+    ``""`` when the record carries nothing usable: a
     release with nothing to summarise keeps an honest empty state instead
     of a manufactured line.
     """
     if not isinstance(value, str):
         return ""
+    # Whitespace controls (\n, \t, \r, ...) separate words: turn them into
+    # spaces first, so "OBJECTIVE\nThis..." does not become
+    # "OBJECTIVEThis...". Every other control character is dropped.
+    spaced = "".join(
+        " " if char.isspace() and unicodedata.category(char) in ("Cc", "Zl", "Zp") else char
+        for char in value
+    )
     cleaned = "".join(
         char
-        for char in value
+        for char in spaced
         if unicodedata.category(char) not in ("Cc", "Cf", "Zl", "Zp")
         and not any(start <= ord(char) <= end for start, end in _ONE_LINE_STRIP_RANGES)
     )
@@ -521,6 +529,16 @@ def filter_release_cohort(
         if not (window_start_dt <= earliest_dt <= as_of_dt):
             continue
 
+        # A later snapshot can enrich a record whose earliest occurrence
+        # has no summary (blanca-pueche/benchmark-complex-prediction:
+        # empty on 2026-10-08, substantive on 2026-10-09). Keep the
+        # earliest occurrence for the release date, but take the summary
+        # from the first occurrence that has one.
+        purpose_item = next(
+            (item for _, item in release_dates if one_line_summary(item.get("summary"))),
+            primary_item,
+        )
+
         name = primary_item.get("title") or primary_item.get("source_id") or canonical_id
         is_reviewed = _is_reviewed_entity(canonical_id, name, occurrences, reviewed_benchmark_ids)
         ba_obs = attention_by_canonical.get(canonical_id, [])
@@ -539,7 +557,7 @@ def filter_release_cohort(
                 # manufactured "Benchmark and evaluation suite": a record
                 # with nothing to summarise keeps an honest empty purpose,
                 # which the row renders as an explicit empty state.
-                "purpose": one_line_summary(primary_item.get("summary")),
+                "purpose": one_line_summary(purpose_item.get("summary")),
                 "release_date": earliest_dt.isoformat(),
                 "has_dated_attention": has_attention,
                 "is_reviewed_benchmark": is_reviewed,
