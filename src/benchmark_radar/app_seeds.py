@@ -296,7 +296,16 @@ def _latest_release_row(entry: dict[str, Any], top: float) -> str:
         if part
     )
     purpose = entry.get("purpose")
-    purpose_html = f'<p class="latest-release-purpose">{esc(purpose)}</p>' if purpose else ""
+    if purpose:
+        purpose_html = f'<p class="latest-release-purpose">{esc(purpose)}</p>'
+    else:
+        # An honest empty state (issue #348): the record carries nothing to
+        # summarise, so the row says so instead of showing nothing or
+        # repeating the title. The renderer draws the same markup.
+        purpose_html = (
+            '<p class="latest-release-purpose latest-release-purpose-empty">'
+            "No summary available.</p>"
+        )
     return (
         '<li class="latest-release"><details class="latest-release-details" '
         f'data-artifact="{esc(entry.get("canonical_artifact_id") or "")}">'

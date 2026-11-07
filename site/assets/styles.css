@@ -6212,6 +6212,11 @@ dialog {
   margin: 0 0 0.4rem;
 }
 
+.latest-release-purpose-empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
 .latest-release-signals {
   display: grid;
   gap: 0.3rem;

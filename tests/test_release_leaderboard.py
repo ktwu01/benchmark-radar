@@ -8,10 +8,12 @@ import pytest
 
 from benchmark_radar.release_leaderboard import (
     METHOD_VERSION,
+    ONE_LINE_SUMMARY_MAX_CHARS,
     build_latest_releases_leaderboard,
     compute_window_ranking,
     filter_release_cohort,
     is_dedicated_benchmark_repo,
+    one_line_summary,
 )
 from benchmark_radar.snapshots import SnapshotError, validate_snapshot
 
@@ -1042,3 +1044,251 @@ def test_stale_values_are_displayed_but_do_not_change_score_order():
     stale = next(entry for entry in entries if entry["name"] == "Stale context")
     assert stale["components"]["hf_paper_upvotes"]["value"] == 1_000
     assert stale["components"]["hf_paper_upvotes"]["status"] == "stale"
+
+
+def test_one_line_summary_is_the_first_sentence_capped_at_140():
+    # Issue #348: one sentence per release, derived from the record's own
+    # text, capped at roughly 140 characters.
+    assert one_line_summary("Evaluates tool-using agents on long-horizon tasks.") == (
+        "Evaluates tool-using agents on long-horizon tasks."
+    )
+    assert (
+        one_line_summary(
+            "A benchmark for code generation. It covers 50 languages and ships with a harness."
+        )
+        == "A benchmark for code generation."
+    )
+    long_first = (
+        "A benchmark for evaluating long-horizon planning in household robots "
+        "across two hundred tasks with randomized layouts, object placements, "
+        "and multi-room navigation in simulation."
+    )
+    line = one_line_summary(long_first)
+    assert len(line) <= ONE_LINE_SUMMARY_MAX_CHARS
+    assert line.endswith("…")
+    assert long_first.startswith(line[:-1].rstrip())
+    # A second sentence never leaks in through the cap.
+    assert one_line_summary(long_first + " Second sentence here.") == line
+
+
+def test_one_line_summary_uses_only_text_present_in_the_source_record():
+    # Issue #348 pins this: a generated line must only use text present in
+    # the source record. The derivation is extractive, so the line (minus
+    # the truncation ellipsis) is a word-boundary prefix of the cleaned
+    # source, never a paraphrase.
+    source = (
+        "⚡ Local LLM Evaluation Leaderboard Welcome to the official public benchmark "
+        "leaderboard maintained by @ahmedBargady. This dataset repository hosts "
+        "benchmark evaluation metrics."
+    )
+    line = one_line_summary(source)
+    assert line
+    assert len(line) <= ONE_LINE_SUMMARY_MAX_CHARS
+    cleaned = " ".join(source.split())
+    assert cleaned.startswith(line[:-1] if line.endswith("…") else line)
+
+
+def test_one_line_summary_turns_whitespace_controls_into_spaces():
+    # Codex review on #1160: a newline between words was stripped with the
+    # other Cc characters, so committed summaries starting "OBJECTIVE" plus
+    # a newline rendered as "OBJECTIVEThis...". Whitespace controls become
+    # spaces; non-whitespace controls are still dropped.
+    assert one_line_summary(
+        "OBJECTIVE\nTo evaluate whether an agentic AI system can reliably "
+        "automate cost-effectiveness model development."
+    ) == (
+        "OBJECTIVE To evaluate whether an agentic AI system can reliably "
+        "automate cost-effectiveness model development."
+    )
+    assert one_line_summary("A benchmark\tfor evaluation.") == ("A benchmark for evaluation.")
+    assert one_line_summary("A benchmark\r\nfor evaluation.") == ("A benchmark for evaluation.")
+
+
+def test_one_line_summary_skips_headings_and_abbreviation_periods():
+    # Codex review on #1160 (2026-11-07, head 102e8ad): the sentence regex
+    # mistook a section label or abbreviation period for the sentence
+    # boundary, publishing fragments such as "Background.", "Claimed vs."
+    # and "LocalIRAC: U.S." from committed release records. Skip those
+    # periods so the line still says what the release is about.
+    # The label period is skipped as a boundary, so the line runs past it
+    # to the first substantive sentence end (the line stays a prefix of
+    # the cleaned source, per the derivation rule pinned above).
+    assert (
+        one_line_summary("Background. This benchmark evaluates reasoning in legal documents.")
+        == "Background. This benchmark evaluates reasoning in legal documents."
+    )
+    assert one_line_summary(
+        "Claimed vs. Done: a deterministic benchmark of whether AI coding "
+        "agents' DONE reports are true."
+    ) == (
+        "Claimed vs. Done: a deterministic benchmark of whether AI coding "
+        "agents' DONE reports are true."
+    )
+    assert one_line_summary(
+        "LocalIRAC: U.S. Local Ordinance Reasoning and Adaptation Dataset "
+        "and Benchmark for legal reasoning."
+    ) == (
+        "LocalIRAC: U.S. Local Ordinance Reasoning and Adaptation Dataset "
+        "and Benchmark for legal reasoning."
+    )
+    assert one_line_summary("Dr. Smith built a benchmark. It works well.") == (
+        "Dr. Smith built a benchmark."
+    )
+    # A trailing abbreviation is still the sentence end.
+    assert one_line_summary("It was built in the U.S.") == ("It was built in the U.S.")
+
+
+def test_one_line_summary_recognises_lowercase_sentence_starts():
+    # Codex review on #1160 (2026-11-07, head 7b4b12c7): the sentence regex
+    # only recognised a boundary before an uppercase start, so a second
+    # sentence starting lowercase leaked into the line. The committed
+    # himanshunakrani9/adaption-python-code-preferences record rendered as
+    # "... platform. adaption-python code preferences This dataset…"
+    # instead of stopping after "platform.". Abbreviation periods are
+    # still skipped even before a lowercase continuation.
+    assert one_line_summary(
+        "This dataset is a remastered version prepared using Adaption's "
+        "Adaptive Data platform. adaption-python code preferences This "
+        "dataset consists of paired code completions designed for "
+        "preference alignment of language models."
+    ) == ("This dataset is a remastered version prepared using Adaption's Adaptive Data platform.")
+    assert one_line_summary("A benchmark for code generation. it covers 50 languages.") == (
+        "A benchmark for code generation."
+    )
+    assert one_line_summary("Is it a benchmark? yes, it evaluates code.") == ("Is it a benchmark?")
+    assert one_line_summary(
+        "Claimed vs. done: a deterministic benchmark of whether AI coding "
+        "agents' DONE reports are true."
+    ) == (
+        "Claimed vs. done: a deterministic benchmark of whether AI coding "
+        "agents' DONE reports are true."
+    )
+    assert one_line_summary("Dr. smith built a benchmark. It works well.") == (
+        "Dr. smith built a benchmark."
+    )
+
+
+def test_one_line_summary_strips_characters_that_break_the_column():
+    # Issue #333: one release's "summary" was a run of ═══ box-drawing
+    # characters that pushed a 720px column to 1349px. Control characters
+    # go the same way.
+    assert one_line_summary("═══ Box drawing ═══ A benchmark for summarization.") == (
+        "Box drawing A benchmark for summarization."
+    )
+    assert one_line_summary("═══\n═══") == ""
+    assert one_line_summary("A benchmark\x00 for \x01evaluation.\x7f") == (
+        "A benchmark for evaluation."
+    )
+
+
+def test_one_line_summary_keeps_an_honest_empty_state():
+    # Issue #348: a release with nothing to summarise gets no
+    # plausible-sounding line manufactured for it.
+    assert one_line_summary("") == ""
+    assert one_line_summary("   ") == ""
+    assert one_line_summary(None) == ""
+    assert one_line_summary(42) == ""
+
+
+def test_release_purpose_is_one_line_or_empty_never_a_fallback():
+    # Issue #348, end to end through the cohort builder: the purpose is the
+    # one-line summary of the record's own summary. The old fallbacks — the
+    # title, then the manufactured "Benchmark and evaluation suite" — are
+    # gone, so a title-only record shows the empty state instead.
+    generated_at = datetime(2026, 9, 1, 12, 0, 0, tzinfo=UTC)
+    rel_time = (generated_at - timedelta(days=2)).isoformat()
+    long_summary = (
+        "A benchmark for evaluating long-horizon planning in household robots "
+        "across two hundred tasks with randomized layouts and object placements. "
+        "It also ships a harness and a leaderboard."
+    )
+    items = [
+        {
+            "id": "bench-long",
+            "url": "https://github.com/org/long-bench",
+            "title": "Long Bench",
+            "summary": long_summary,
+            "event_kind": "released",
+            "discovered_at": rel_time,
+            "source": "GitHub",
+            "source_id": "org/long-bench",
+        },
+        {
+            "id": "bench-title-only",
+            "url": "https://github.com/org/title-bench",
+            "title": "Title Bench",
+            "event_kind": "released",
+            "discovered_at": rel_time,
+            "source": "GitHub",
+            "source_id": "org/title-bench",
+        },
+    ]
+    snapshots = [make_snapshot("2026-09-01", generated_at.isoformat(), evidence_items=items)]
+    cohort = filter_release_cohort(
+        snapshots, window_days=30, as_of=generated_at, include_unconfirmed=True
+    )
+    by_name = {entry["name"]: entry for entry in cohort}
+    assert len(by_name) == 2
+    long_line = by_name["Long Bench"]["purpose"]
+    assert long_line == one_line_summary(long_summary)
+    assert len(long_line) <= ONE_LINE_SUMMARY_MAX_CHARS
+    assert by_name["Title Bench"]["purpose"] == ""
+
+
+def test_release_purpose_uses_first_nonempty_summary_not_earliest_occurrence():
+    # Codex review on #1160, real case from the committed snapshots:
+    # blanca-pueche/benchmark-complex-prediction has an empty summary on
+    # its 2026-10-08 occurrence and a substantive one on 2026-10-09. The
+    # release date stays the earliest occurrence, but the purpose must
+    # come from the first occurrence that has a summary — not the empty
+    # state.
+    later_summary = (
+        "Dataset, benchmark workflows, and analysis code for evaluating "
+        "AI-based biomolecular complex structure prediction."
+    )
+    snapshots = [
+        make_snapshot(
+            "2026-10-08",
+            "2026-10-08T12:00:00+00:00",
+            evidence_items=[
+                {
+                    "id": "bench-complex-prediction",
+                    "url": "https://github.com/blanca-pueche/benchmark-complex-prediction",
+                    "title": "blanca-pueche/benchmark-complex-prediction",
+                    "summary": "",
+                    "event_kind": "released",
+                    "published_at": "2026-10-08T11:22:33+00:00",
+                    "discovered_at": "2026-10-08T11:40:36+00:00",
+                    "source": "GitHub",
+                    "source_id": "blanca-pueche/benchmark-complex-prediction",
+                }
+            ],
+        ),
+        make_snapshot(
+            "2026-10-09",
+            "2026-10-09T12:00:00+00:00",
+            evidence_items=[
+                {
+                    "id": "bench-complex-prediction",
+                    "url": "https://github.com/blanca-pueche/benchmark-complex-prediction",
+                    "title": "blanca-pueche/benchmark-complex-prediction",
+                    "summary": later_summary,
+                    "event_kind": "released",
+                    "published_at": "2026-10-08T11:22:33+00:00",
+                    "discovered_at": "2026-10-09T11:34:00+00:00",
+                    "source": "GitHub",
+                    "source_id": "blanca-pueche/benchmark-complex-prediction",
+                }
+            ],
+        ),
+    ]
+    cohort = filter_release_cohort(
+        snapshots,
+        window_days=30,
+        as_of=datetime(2026, 10, 9, 12, 0, 0, tzinfo=UTC),
+        include_unconfirmed=True,
+    )
+    assert len(cohort) == 1
+    assert cohort[0]["release_date"] == "2026-10-08T11:22:33+00:00"
+    assert cohort[0]["purpose"] == one_line_summary(later_summary)
+    assert cohort[0]["purpose"] == later_summary
