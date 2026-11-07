@@ -4419,7 +4419,15 @@ function sortObservations(observations) {
     // Attention rows carry no priority, so within a day they order by the
     // event timestamp the row displays, keeping the visible order consistent
     // with the "Sort: Date ↓" caption.
-    return String(eventTimestamp(b)).localeCompare(String(eventTimestamp(a)));
+    const timeOrder = String(eventTimestamp(b)).localeCompare(String(eventTimestamp(a)));
+    if (timeOrder) return timeOrder;
+    // Rows that tie on everything above would otherwise keep their input
+    // order, which differs between radar.json and radar-search.json, so the
+    // two paths paged the same results differently (#1143). Break the tie on
+    // the record's identity so both produce one order.
+    const keyOrder = observationRecordKey(a).localeCompare(observationRecordKey(b));
+    if (keyOrder) return keyOrder;
+    return `${a.url || ""}\u0000${a.title || ""}`.localeCompare(`${b.url || ""}\u0000${b.title || ""}`);
   });
 }
 

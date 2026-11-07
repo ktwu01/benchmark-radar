@@ -1713,12 +1713,32 @@ def dashboard_search_index(dashboard: dict[str, Any]) -> dict[str, Any]:
         "authors",
         "rationale",
         "watchlist",
+        # Read by the result cards, so an index-backed hit must render the
+        # same as a radar.json one: artifact links, the catalog card Share
+        # uses, the recommended badge and the scan's cutoffs, GitHub-release
+        # detection, Hacker News submissions, and the watchlist note.
+        "artifact_urls",
+        "catalog_slug",
+        "recommended",
+        "recommendation_score",
+        "minimum_score",
+        "parser_version",
+        "supporting_observations",
+        "watchlist_note",
     }
     observations = [
         {key: item[key] for key in searchable_fields if key in item}
         for items in latest.values()
         for item in items
     ]
+    for observation in observations:
+        # The page reads parser_version only to recognise a GitHub release;
+        # every other value is about 70 KB of gzip that changes nothing shown.
+        if not str(observation.get("parser_version") or "").startswith("github-releases/"):
+            observation.pop("parser_version", None)
+        # Only an expanded attention row lists its supporting submissions.
+        if observation.get("observation_kind") != "attention":
+            observation.pop("supporting_observations", None)
     return {
         "schema_version": 1,
         "generated_at": dashboard.get("generated_at"),

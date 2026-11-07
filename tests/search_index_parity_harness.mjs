@@ -77,6 +77,14 @@ const sameDay = [
   }),
 ];
 
+// Two records that tie on every sort key. tie-a was first seen a day earlier,
+// so the generator emits it before tie-b, while the archive lists tie-b first
+// on the shared day. Without a tie-breaker the two paths ordered them
+// differently (#1170).
+const tiePublished = { published_at: "2026-09-05T10:00:00Z" };
+const tieEarly = row("2026-09-02", "tie-a", tiePublished);
+const tied = [row("2026-09-05", "tie-b", tiePublished), row("2026-09-05", "tie-a", tiePublished)];
+
 const day = (date, items, signals = []) => ({
   date,
   generated_at: `${date}T12:00:00Z`,
@@ -91,10 +99,10 @@ const dashboard = {
   latest_date: "2026-09-06",
   days: [
     day("2026-09-01", evidence.slice(0, 1)),
-    day("2026-09-02", evidence.slice(1, 2)),
+    day("2026-09-02", [...evidence.slice(1, 2), tieEarly]),
     day("2026-09-03", evidence.slice(2, 3)),
     day("2026-09-04", [evidence[3], ...sameDay]),
-    day("2026-09-05", evidence.slice(4, 5)),
+    day("2026-09-05", [...evidence.slice(4, 5), ...tied]),
     day("2026-09-06", [], attention),
   ],
 };
@@ -125,6 +133,7 @@ const cases = [
   { q: "", todayDate: "2026-09-01" },
   { q: "", todayDate: "30d", event: "released" },
   { q: "needle", todayDate: "all", category: "evaluation" },
+  { q: "tie", todayDate: "all" },
 ];
 
 for (const filters of cases) {
@@ -160,6 +169,13 @@ for (const filters of cases) {
           minimum_score: 20,
         })),
         ...sameDay.map((item) => ({
+          ...item,
+          observation_kind: "evidence",
+          snapshot_generated_at: `${item.snapshot_date}T12:00:00Z`,
+          recommendation_score: 40,
+          minimum_score: 20,
+        })),
+        ...[tied[1], tied[0]].map((item) => ({
           ...item,
           observation_kind: "evidence",
           snapshot_generated_at: `${item.snapshot_date}T12:00:00Z`,
