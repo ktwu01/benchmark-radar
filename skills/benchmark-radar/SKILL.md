@@ -52,7 +52,8 @@ inspecting details with `show`, or tracking recent evidence).
 ## Choose the smallest command
 
 - Discover records:
-  `benchmark-radar search "<query>" --scope catalog|radar|all --json`
+  `benchmark-radar search --query "<query>" --scope catalog|radar|all --json`
+  (the query may also be positional: `benchmark-radar search "<query>" ...`)
 - Inspect one known key or slug:
   `benchmark-radar show "<identifier>" --json`
 - Inspect the newest Radar evidence:

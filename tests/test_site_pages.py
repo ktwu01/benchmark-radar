@@ -8,6 +8,7 @@ and fail loudly rather than silently writing an empty directory.
 
 import json
 import re
+from html.parser import HTMLParser
 from pathlib import Path
 
 import pytest
@@ -34,6 +35,7 @@ def _shard(
     modality: str | None = None,
     scores: list[dict] | None = None,
     provenance: dict | None = None,
+    source_metadata: dict | None = None,
 ) -> dict:
     record = {
         "slug": slug,
@@ -48,6 +50,8 @@ def _shard(
         "description": {"en": description} if description else {},
         "provenance": provenance or {},
     }
+    if source_metadata is not None:
+        record["source_metadata"] = source_metadata
     scores_by_source = {source: {"rows": scores or [], "series": {}}} if scores else {}
     return {
         "schema_version": 1,
@@ -94,6 +98,39 @@ def test_writes_one_page_per_shard_plus_directory(tmp_path):
     assert (output / "alpha-bench" / "index.html").exists()
     assert (output / "beta-bench" / "index.html").exists()
     assert (output / "index.html").exists()
+
+
+def test_generated_pages_give_every_image_an_alt_attribute(tmp_path):
+    """Issue #946: validate alt attributes by parsing generated output.
+
+    The homepage test used to ban "<img" in the generator source, which
+    would also fail a generated page that legitimately adds an accessible
+    <img alt="...">. Check the rendered pages instead: every image in
+    every generated page must carry an alt attribute. No generated page
+    emits an image today, so this guards the next one the generator adds.
+    """
+
+    class Images(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.images = []
+
+        def handle_starttag(self, tag, attrs):
+            if tag == "img":
+                self.images.append(dict(attrs))
+
+    output = _generated_pages(
+        tmp_path,
+        _shard("alpha-bench", "Alpha Bench"),
+        _shard("beta-bench", "Beta Bench"),
+    )
+    pages = sorted(output.rglob("*.html"))
+    assert pages, "the generator wrote no pages to check"
+    for page in pages:
+        parser = Images()
+        parser.feed(page.read_text(encoding="utf-8"))
+        for image in parser.images:
+            assert "alt" in image, f"{page}: image without alt: {image.get('src')}"
 
 
 def test_benchmark_pages_share_the_dashboard_shell_without_duplicate_navigation(tmp_path):
@@ -383,6 +420,36 @@ def test_object_publisher_reaches_the_visible_facts(tmp_path):
     assert "<dt>Publisher</dt><dd>mbzuai (published the hub card)</dd>" in alpha
     assert "published by mbzuai" not in alpha
     assert "<dt>Publisher</dt><dd>Beta Lab</dd>" in _page_text(output, "beta-bench")
+
+
+def test_stated_saturation_index_reaches_the_visible_facts(tmp_path):
+    """The study's stated index and label render as its own fact (#1085).
+
+    The value is the study's, as stated in source_metadata: shown, never
+    recomputed, and labelled with the study. A record the study did not
+    annotate shows no such row rather than a zero.
+    """
+    stated = {
+        "benchmark_saturation": {
+            "saturation_index": "0.916397111",
+            "saturation_index_interpreted": "Very high",
+            "test_samples": "500",
+        }
+    }
+    shard = _shard(
+        "math-500",
+        "MATH-500",
+        source="benchmark_saturation",
+        source_metadata=stated,
+    )
+    plain = _shard("alpha-bench", "Alpha Bench")
+    output = _generated_pages(tmp_path, shard, plain)
+    assert (
+        "<dt>Saturation index (study)</dt>"
+        "<dd>0.916397111 (Very high) — Benchmark Saturation study (arXiv:2602.16763)</dd>"
+        in _page_text(output, "math-500")
+    )
+    assert "Saturation index (study)" not in _page_text(output, "alpha-bench")
 
 
 def test_node_references_carry_their_own_type_so_they_resolve_off_the_homepage(tmp_path):

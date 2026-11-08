@@ -15,6 +15,13 @@ class RadarItem:
     url: str
     published_at: datetime
     updated_at: datetime | None = None
+    # What published_at is dated by, and the source's own value when it was
+    # replaced (#1016). Zenodo records it: "publication_date" when the
+    # uploader's value dates the record, "created" when the deposition's
+    # created time stands in because that value was in the future or
+    # unreadable (#907, #1013). Other sources leave both unset.
+    published_basis: str | None = None
+    published_source_value: str | None = None
     discovered_at: datetime | None = None
     retrieved_at: datetime | None = None
     # Digest activity drives collection without replacing publication provenance.

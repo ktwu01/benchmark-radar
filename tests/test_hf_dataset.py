@@ -214,6 +214,65 @@ def test_export_hf_dataset(tmp_path: Path):
     assert frontmatter_match is not None
 
 
+def test_export_hf_dataset_carries_stated_saturation_index(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    # Issue #1085: the study's stated index and label reach the exported
+    # catalog rows as stated, never recomputed.
+    output_dir = tmp_path / "hf_dataset"
+    custom_paths = _write_catalog(
+        tmp_path,
+        key="benchmark_saturation:1",
+        slug="math-500",
+        catalog_source="benchmark_saturation",
+        shard_key="benchmark_saturation:1",
+    )
+    (tmp_path / "benchmarks" / "math-500.json").write_text(
+        json.dumps(
+            {
+                "record": {
+                    "key": "benchmark_saturation:1",
+                    "source_metadata": {
+                        "benchmark_saturation": {
+                            "saturation_index": "0.916397111",
+                            "saturation_index_interpreted": "Very high",
+                        }
+                    },
+                },
+                "scores_by_source": {},
+            }
+        ),
+        encoding="utf-8",
+    )
+    _write_minimal_radar(tmp_path)
+    _allow_tiny_test_catalog(monkeypatch, source="benchmark_saturation")
+
+    result = export_hf_dataset(output_dir=output_dir, paths=custom_paths)
+
+    assert result.catalog_count == 1
+    with (output_dir / "data" / "catalog.jsonl").open(encoding="utf-8") as handle:
+        rows = [json.loads(line) for line in handle]
+    assert rows[0]["saturation_index"] == "0.916397111"
+    assert rows[0]["saturation_index_interpreted"] == "Very high"
+
+
+def test_export_hf_dataset_leaves_saturation_fields_null_without_the_study(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    # A record the study did not annotate carries nulls, not a zero.
+    output_dir = tmp_path / "hf_dataset"
+    custom_paths = _write_catalog(tmp_path, slug="plain-bench", shard_key="test:bench")
+    _write_minimal_radar(tmp_path)
+    _allow_tiny_test_catalog(monkeypatch)
+
+    export_hf_dataset(output_dir=output_dir, paths=custom_paths)
+
+    with (output_dir / "data" / "catalog.jsonl").open(encoding="utf-8") as handle:
+        rows = [json.loads(line) for line in handle]
+    assert rows[0]["saturation_index"] is None
+    assert rows[0]["saturation_index_interpreted"] is None
+
+
 def test_export_hf_dataset_rejects_missing_shard(tmp_path: Path):
     output_dir = tmp_path / "hf_dataset"
     custom_paths = _write_catalog(tmp_path, slug="missing-bench")

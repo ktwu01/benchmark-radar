@@ -18,6 +18,7 @@ from benchmark_radar.models import (
 from benchmark_radar.snapshots import (
     SnapshotError,
     attach_catalog_cards,
+    dashboard_search_index,
     dashboard_trends,
     dashboard_window,
     load_snapshots,
@@ -321,6 +322,158 @@ def test_rebuild_writes_a_small_latest_day_bootstrap(tmp_path):
         assert window["latest_date"] == dashboard["latest_date"]
         assert "corpus" not in window
         assert window_path.stat().st_size < output.stat().st_size
+
+    search_path = output.with_name("radar-search.json")
+    search = json.loads(search_path.read_text(encoding="utf-8"))
+    assert search["schema_version"] == 1
+    assert search["generated_at"] == dashboard["generated_at"]
+    assert len(search["observations"]) == sum(
+        len(day["evidence_items"]) + len(day["attention"]["observations"])
+        for day in dashboard["days"]
+    )
+    # Only an expanded attention row lists its supporting submissions (#1170).
+    assert all(
+        "supporting_observations" not in item
+        for item in search["observations"]
+        if item["observation_kind"] != "attention"
+    )
+    assert search_path.stat().st_size < output.stat().st_size
+
+
+def test_search_index_keeps_only_latest_sighting_and_needed_fields():
+    dashboard = {
+        "generated_at": "build-1",
+        "latest_date": "2026-07-27",
+        "days": [
+            {
+                "date": "2026-07-26",
+                "generated_at": "2026-07-26T12:00:00Z",
+                "selection": {"recommendation_score": 40},
+                "evidence_items": [
+                    {
+                        "source": "GitHub",
+                        "source_id": "repo",
+                        "title": "Old",
+                        "summary": "Old summary",
+                        "total_score": 1,
+                        "supporting_observations": [{"source": "extra"}],
+                        "url": "https://github.com/example/repo",
+                    }
+                ],
+                "attention": {"observations": []},
+                "share": {
+                    "cards": [
+                        {
+                            "url": "https://github.com/example/repo",
+                            "image": "/cards/example.png",
+                        }
+                    ]
+                },
+            },
+            {
+                "date": "2026-07-27",
+                "generated_at": "2026-07-27T12:00:00Z",
+                "selection": {"recommendation_score": 40},
+                "evidence_items": [
+                    {
+                        "source": "GitHub",
+                        "source_id": "repo",
+                        "title": "New",
+                        "summary": "New summary",
+                        "total_score": 2,
+                        "supporting_observations": [{"source": "extra"}],
+                        "url": "https://github.com/example/repo",
+                    }
+                ],
+                "attention": {"observations": []},
+            },
+        ],
+    }
+
+    index = dashboard_search_index(dashboard)
+
+    assert len(index["observations"]) == 2
+    assert {item["title"] for item in index["observations"]} == {"Old", "New"}
+    assert all("supporting_observations" not in item for item in index["observations"])
+    assert index["observations"][0]["share_image"] == "/cards/example.png"
+
+
+def test_search_index_keeps_every_field_the_result_cards_read():
+    """An All dates hit served from radar-search.json renders like a radar.json one (#1170)."""
+    dashboard = {
+        "generated_at": "build-1",
+        "latest_date": "2026-07-27",
+        "days": [
+            {
+                "date": "2026-07-27",
+                "generated_at": "2026-07-27T12:00:00Z",
+                "selection": {"recommendation_score": 40, "minimum_score": 20},
+                "evidence_items": [
+                    {
+                        "source": "GitHub Release",
+                        "source_id": "org/repo@v1",
+                        "title": "Release",
+                        "summary": "A release",
+                        "url": "https://github.com/org/repo/releases/v1",
+                        "total_score": 55,
+                        "artifact_urls": ["https://huggingface.co/datasets/org/repo"],
+                        "catalog_slug": "org-repo",
+                        "parser_version": "github-releases/v2",
+                        "watchlist": True,
+                        "watchlist_note": "Tracked for the reader request in #555.",
+                        "supporting_observations": [{"source": "extra"}],
+                    },
+                    {
+                        "source": "arXiv",
+                        "source_id": "2611.00001",
+                        "title": "Paper",
+                        "summary": "A paper",
+                        "url": "https://arxiv.org/abs/2611.00001",
+                        "total_score": 10,
+                        "parser_version": "arxiv-rss/v3",
+                    },
+                ],
+                "attention": {
+                    "observations": [
+                        {
+                            "observation_id": "hn-1",
+                            "producer": "Hacker News",
+                            "source": "Hacker News",
+                            "source_id": "1",
+                            "title": "Discussion",
+                            "url": "https://news.ycombinator.com/item?id=1",
+                            "published_at": "2026-07-27T10:00:00Z",
+                            "event_kind": "discussed",
+                            "categories": [],
+                            "metrics": {"points": 9},
+                            "rationale": ["Linked twice"],
+                            "quality_scored": False,
+                            "supporting_observations": [{"url": "https://example.org/a"}],
+                        }
+                    ]
+                },
+            }
+        ],
+    }
+
+    rows = {row["source_id"]: row for row in dashboard_search_index(dashboard)["observations"]}
+
+    release = rows["org/repo@v1"]
+    assert release["artifact_urls"] == ["https://huggingface.co/datasets/org/repo"]
+    assert release["catalog_slug"] == "org-repo"
+    assert release["watchlist_note"] == "Tracked for the reader request in #555."
+    assert release["parser_version"] == "github-releases/v2"
+    assert (release["recommended"], release["recommendation_score"], release["minimum_score"]) == (
+        True,
+        40,
+        20,
+    )
+    assert rows["2611.00001"]["recommended"] is False
+    # Only GitHub-release detection reads parser_version, and only an
+    # expanded attention row lists supporting submissions.
+    assert "parser_version" not in rows["2611.00001"]
+    assert "supporting_observations" not in release
+    assert rows["1"]["supporting_observations"] == [{"url": "https://example.org/a"}]
 
 
 def test_rebuild_can_publish_the_feed_from_the_same_snapshot_history(tmp_path, site_shell):

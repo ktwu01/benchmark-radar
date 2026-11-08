@@ -609,6 +609,72 @@ def test_build_latest_releases_leaderboard_payload():
     assert w30d["entries"][1]["name"] == "Slow Bench"
 
 
+def test_forks_reach_the_release_row_without_changing_the_rank():
+    # Codex P1 (#1148): the daily fork count was collected but never reached
+    # a reader: it is a displayed counter next to stars, not a score
+    # component, so it must not move the score, the coverage, or the rank.
+    generated_at = datetime(2026, 9, 1, 12, 0, 0, tzinfo=UTC)
+    rel_time = (generated_at - timedelta(days=5)).isoformat()
+    repo_url = "https://github.com/org/fast-bench"
+    items = [
+        {
+            "id": "bench-1",
+            "url": repo_url,
+            "title": "Fast Bench",
+            "event_kind": "released",
+            "discovered_at": rel_time,
+            "source": "GitHub",
+            "source_id": "org/fast-bench",
+            "metrics": {"stars": 200},
+        },
+    ]
+    stars_obs = {
+        "canonical_artifact_id": "artifact:github:org/fast-bench",
+        "source": "github",
+        "metric": "stars",
+        "value": 200,
+        "value_kind": "cumulative",
+        "source_url": repo_url,
+        "status": "fresh",
+    }
+    forks_obs = {
+        "canonical_artifact_id": "artifact:github:org/fast-bench",
+        "source": "github",
+        "metric": "forks",
+        "value": 3,
+        "value_kind": "cumulative",
+        "source_url": repo_url,
+        "status": "fresh",
+    }
+
+    def _payload(observations):
+        attention = {
+            "schema_version": 1,
+            "observed_at": generated_at.isoformat(),
+            "observations": observations,
+            "health": [],
+        }
+        snapshots = [
+            make_snapshot(
+                "2026-09-01",
+                generated_at.isoformat(),
+                evidence_items=items,
+                benchmark_attention=attention,
+            )
+        ]
+        return build_latest_releases_leaderboard(snapshots, as_of=generated_at)
+
+    with_forks = _payload([stars_obs, forks_obs])["windows"]["30d"]["entries"][0]
+    assert with_forks["forks"] == {"value": 3, "status": "fresh", "source_url": repo_url}
+    assert "github_forks" not in with_forks["components"]
+
+    without_forks = _payload([stars_obs])["windows"]["30d"]["entries"][0]
+    assert without_forks["forks"] == {"value": None, "status": "unknown", "source_url": None}
+    assert with_forks["score"] == without_forks["score"]
+    assert with_forks["coverage"] == without_forks["coverage"]
+    assert with_forks["status"] == without_forks["status"]
+
+
 def test_evidence_item_fallback_without_attention_or_reviewed_does_not_rank():
     # Issue #530 / Review blocker 1:
     # Ordinary keyword/category discovery with connector metrics must NOT establish formal rank.

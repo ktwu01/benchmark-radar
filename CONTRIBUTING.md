@@ -3,7 +3,8 @@
 Thanks for considering a contribution. This page is the single starting point:
 what we merge, what we don't merge, and the problems that most often hold a pull
 request back. Read it before you open a PR. It takes five minutes and can save
-you a week of review rounds.
+you a week of review rounds. Everyone who participates here is also expected to
+follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 | You want to… | Read |
 | --- | --- |

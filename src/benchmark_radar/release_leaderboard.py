@@ -59,6 +59,10 @@ WINDOW_DAYS: dict[str, int] = {
     "90d": 90,
 }
 
+# github_forks is collected by benchmark_attention as a displayed counter
+# only (#659): it is not a ranking signal and must not be added here. The
+# ranking iterates WINDOW_WEIGHTS, so a signal absent from it can never
+# change a score, a weight, or the observed-weight floor.
 WINDOW_WEIGHTS: dict[str, float] = {
     "github_stars": 0.55,
     "hf_paper_upvotes": 0.30,
@@ -70,6 +74,8 @@ DURABLE_SIGNALS: frozenset[str] = frozenset({"github_stars", "hf_dataset_downloa
 METRIC_ALIASES: dict[str, str] = {
     "stars": "github_stars",
     "github_stars": "github_stars",
+    "forks": "github_forks",
+    "github_forks": "github_forks",
     "paper_upvotes": "hf_paper_upvotes",
     "hf_paper_upvotes": "hf_paper_upvotes",
     "upvotes": "hf_paper_upvotes",
@@ -80,12 +86,14 @@ METRIC_ALIASES: dict[str, str] = {
 
 SIGNAL_SOURCES: dict[str, str] = {
     "github_stars": "github",
+    "github_forks": "github",
     "hf_paper_upvotes": "huggingface",
     "hf_dataset_downloads": "huggingface",
 }
 
 SIGNAL_VALUE_KINDS: dict[str, str] = {
     "github_stars": "cumulative",
+    "github_forks": "cumulative",
     "hf_paper_upvotes": "cumulative",
     "hf_dataset_downloads": "rolling_30d",
 }
@@ -132,7 +140,7 @@ def is_exact_attention_source_url(signal: str, url: str | None) -> bool:
     """Whether a metric URL names the exact resource required by Ranking v1."""
     if not isinstance(url, str) or not url.strip():
         return False
-    if signal == "github_stars":
+    if signal in {"github_stars", "github_forks"}:
         return is_dedicated_benchmark_repo(url)
 
     parsed = urlsplit(url.strip())
@@ -276,6 +284,7 @@ def _is_reviewed_entity(
 
 FALLBACK_METRIC_CONFIG = {
     "github_stars": ("github.com", "stars", is_dedicated_benchmark_repo),
+    "github_forks": ("github.com", "forks", is_dedicated_benchmark_repo),
     "hf_paper_upvotes": ("huggingface.co", "upvotes", None),
     "hf_dataset_downloads": ("huggingface.co/datasets", "downloads", None),
 }
@@ -377,7 +386,11 @@ def _resolve_signals(
     snapshots: list[dict[str, Any]],
 ) -> dict[str, dict[str, Any]]:
     signals = {}
-    for key in WINDOW_WEIGHTS:
+    # github_forks is resolved exactly like a weighted signal so the daily
+    # count reaches the release row, but it is not a ranking signal: it is
+    # never added to WINDOW_WEIGHTS, so it cannot change a score, a weight,
+    # or the observed-weight floor.
+    for key in (*WINDOW_WEIGHTS, "github_forks"):
         key_obs = [
             pair for pair in ba_obs_pairs if canonical_metric_key(pair[0].get("metric")) == key
         ]
@@ -619,6 +632,18 @@ def compute_window_ranking(
         if held_back:
             extra["limited_reason"] = held_back
 
+        # Forks are a displayed counter only (#659): carried through to the
+        # release row next to stars, never a score component, so no weight,
+        # no normalized contribution, and no effect on coverage or rank.
+        forks_sig = c.get("signals", {}).get("github_forks") or {}
+        forks = {
+            "value": forks_sig.get("value"),
+            "status": forks_sig.get("status", "unknown"),
+            "source_url": forks_sig.get("source_url"),
+        }
+        if forks_sig.get("last_successful_date"):
+            forks["last_successful_date"] = forks_sig["last_successful_date"]
+
         scored_entries.append(
             {
                 "canonical_artifact_id": c["canonical_artifact_id"],
@@ -632,6 +657,7 @@ def compute_window_ranking(
                 "rank": None,
                 "components": components,
                 **extra,
+                "forks": forks,
                 "_ranking_score": raw_score,
             }
         )

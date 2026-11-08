@@ -328,6 +328,33 @@ def test_saturation_shares_its_own_card_and_every_other_route_the_site_card(tmp_
     assert f'"image": "{site_card}"' in saturation
 
 
+def test_dashboard_detail_shows_the_study_stated_saturation_index():
+    # Issue #1085: the dashboard detail renders the study's stated index and
+    # label as stated, and nothing when the study did not annotate the record.
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node is not installed")
+    result = subprocess.run(
+        [node, "tests/saturation_index_fact_harness.mjs"],
+        check=True,
+        timeout=60,
+        cwd=Path(__file__).resolve().parents[1],
+        capture_output=True,
+        text=True,
+    )
+    facts = json.loads(result.stdout)
+    assert facts["stated"] == [
+        "Saturation index (study)",
+        "0.916397111 (Very high) — Benchmark Saturation study (arXiv:2602.16763)",
+    ]
+    assert facts["indexOnly"] == [
+        "Saturation index (study)",
+        "0.5 — Benchmark Saturation study (arXiv:2602.16763)",
+    ]
+    assert facts["unannotated"] is None
+    assert facts["noMetadata"] is None
+
+
 def test_only_the_named_view_is_open(tmp_path):
     _write(tmp_path, _dashboard())
     for path, open_id in (

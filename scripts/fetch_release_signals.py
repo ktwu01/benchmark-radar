@@ -38,6 +38,8 @@ from benchmark_radar.release_signals import (
     load_release_signals,
     needs_institution_refresh,
     needs_repo_refresh,
+    readme_data_link,
+    readme_name,
     write_release_institutions,
     write_release_repos,
 )
@@ -116,8 +118,9 @@ def _root(repo, *, fetch=None):
     return sorted(str(entry.get("name") or "") for entry in listing or [])
 
 
-def repo_row(meta, today, *, list_root):
+def repo_row(meta, today, *, list_root, read_readme=None):
     """One release_repos.yml row from a repository record."""
+    read_readme = read_readme or _read_readme
     size = int(meta.get("size") or 0)
     row = {
         "full_name": meta.get("full_name"),
@@ -140,10 +143,30 @@ def repo_row(meta, today, *, list_root):
     else:
         names = list_root(str(meta.get("full_name") or ""))
         row.update(placeholder=is_placeholder_root(names), root=names[:20])
+        _apply_readme_data_link(row, str(meta.get("full_name") or ""), names, read_readme)
     return row
 
 
-def refresh_repos(urls, rows, *, today, limit, search=None, confirm=None, list_root=None):
+def _apply_readme_data_link(row, full_name, names, read_readme):
+    """A README-only root whose README links a dataset host has shipped its data."""
+    readme = readme_name(names)
+    if not row.get("placeholder") or not readme:
+        return
+    host = readme_data_link(read_readme(full_name, readme))
+    if host:
+        row.update(placeholder=False, data_link=host)
+
+
+def _read_readme(full_name, name):
+    # A failed read is not evidence of "no data link": the error propagates
+    # so refresh_repos keeps the repository's previous row for this run.
+    url = f"https://raw.githubusercontent.com/{full_name}/HEAD/{name}"
+    return get_text(url, headers=_headers(), attempts=2)
+
+
+def refresh_repos(
+    urls, rows, *, today, limit, search=None, confirm=None, list_root=None, read_readme=None
+):
     search = search or _search_repositories
     confirm = confirm or _confirm
     list_root = list_root or _root
@@ -165,7 +188,7 @@ def refresh_repos(urls, rows, *, today, limit, search=None, confirm=None, list_r
                     "retrieved_at": today.isoformat(),
                 }
             else:
-                rows[repo] = repo_row(meta, today, list_root=list_root)
+                rows[repo] = repo_row(meta, today, list_root=list_root, read_readme=read_readme)
         except (RequestError, OSError) as error:
             print(f"warning: {repo}: {error}", file=sys.stderr)
             continue

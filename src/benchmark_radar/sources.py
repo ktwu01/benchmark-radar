@@ -1082,10 +1082,15 @@ def fetch_zenodo_records(
             # The depositor sets publication_date to any date, including a future
             # one or a bare year (#907). The deposition's own creation time
             # stands in when that value is unreadable or ahead of the clock, so
-            # the record is kept; raw retains the depositor's value.
-            published = _optional_date(str(metadata.get("publication_date") or ""))
+            # the record is kept; raw retains the depositor's value. The basis
+            # and the source value are also serialized on the item (#1016), so
+            # snapshots, the report, and the site can say which date this is.
+            source_date = str(metadata.get("publication_date") or "").strip()
+            published = _optional_date(source_date)
+            published_basis = "publication_date"
             if published is None or published > _latest_allowed(config):
                 published = _optional_date(str(row.get("created") or ""))
+                published_basis = "created"
             updated = _optional_date(str(row.get("updated") or row.get("modified") or ""))
             activity = updated or published
             if not source_id or not title or not url or published is None or activity is None:
@@ -1107,6 +1112,8 @@ def fetch_zenodo_records(
                 url=url,
                 published_at=published,
                 updated_at=updated or published,
+                published_basis=published_basis,
+                published_source_value=source_date or None,
                 summary=clean_card_text(str(metadata.get("description") or "")),
                 event_kind="updated" if updated and updated > published else "released",
                 authors=[
