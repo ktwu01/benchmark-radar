@@ -406,6 +406,10 @@ const I18N = {
     "No numeric scores recorded for this benchmark.": "这条 benchmark 尚未记录数值成绩。",
     "Benchmark Frontier: {n} individual benchmarks from all sources. Dated benchmarks run left to right from 2024. Undated benchmarks remain visible by score. Gold rings mark the measured Pareto frontier.": "Benchmark 前沿：全部来源的 {n} 个独立标记。日期从 2024 年起向右排列，日期未知的仍按分数显示。金色环标出有测量依据的 Pareto 前沿。",
     "{unscored} without scores excluded · {older} before 2024 · {hidden} hidden by score": "未报告成绩的 {unscored} 个已排除 · {older} 个早于 2024 年 · 分数筛选隐藏 {hidden} 个",
+    "{from} to {to}": "{from} 至 {to}",
+    "from {from}": "自 {from} 起",
+    "to {to}": "截至 {to}",
+    "{n} outside {span}": "{n} 个不在 {span} 范围内",
     "Saturation": "饱和度",
     "Library": "Benchmark 库",
     "Search the library": "搜索 benchmark 库",
@@ -560,7 +564,9 @@ const I18N = {
     "Benchmark Frontier": "Benchmark 前沿",
     "Benchmark Frontier chart": "Benchmark 前沿图",
     "Which difficult benchmarks have been tested most": "哪些难题，已有更多模型参加测试",
-    "Show benchmarks with highest reported score below:": "只看最高报告分数低于此值的 benchmark：",
+    "Show benchmarks with highest reported score below (default 70; 100 = full range):": "只看最高报告分数低于此值的 benchmark（默认 70；100 = 全部）:",
+    "Date from": "开始日期",
+    "Date to": "结束日期",
     "How to read the frontier": "怎样读这张前沿图",
     "skyline.reading": "每个点代表一条 benchmark 记录。默认高度表示有数值成绩的独立模型数，按来源的模型 ID 去重，保留单独评测的配置；重复成绩不增加模型数。“来源文档数”统计引用的独立报告或登记页面，所有来源按同一规则计数。悬停可查看两种数量。",
     "skyline.pareto": "侧视图把报告分数和当前选择的数量投影到左侧墙面，省略时间。金色阶梯线只比较分数刻度已核实的 benchmark。在日期不早于 2024 年的范围内，如果没有另一个符合计算条件的 benchmark 标准化分数不高于它、所选数量不低于它，且至少一项严格占优，它就位于 Pareto 前沿。日期只用于筛选范围，不参与支配关系计算；分数和数量也不相乘。拖动分数上限，不会把原本被支配的点变成前沿点。",
@@ -1320,6 +1326,7 @@ const I18N = {
     "90 days": "90 天",
     "Attention score": "关注度得分",
     "GitHub stars": "GitHub star 数",
+    "GitHub forks": "GitHub 复刻数",
     "Hugging Face paper upvotes": "Hugging Face 论文点赞数",
     "Hugging Face dataset downloads, last 30 days": "Hugging Face 数据集下载量（最近 30 天）",
     unavailable: "资源已不可用",
@@ -1480,6 +1487,8 @@ const state = {
   lera: "",
   lscore: 70,
   lheight: "models",
+  ldateFrom: null,
+  ldateTo: null,
   benchmarkVisibleLimit: 50,
   scoreRankingExpanded: false,
   lfrontier: "",
@@ -1924,6 +1933,10 @@ function readUrl() {
   state.lwindow = LATEST_WINDOWS.includes(params.get("lwindow")) ? params.get("lwindow") : "";
   state.lscore = scoreCutoff(params.get("lscore"));
   state.lheight = ["cards", "documents"].includes(params.get("lheight")) ? "documents" : "models";
+  // A malformed date is no filter, not an error: the range is optional and
+  // the figure keeps its default span.
+  state.ldateFrom = urlDate(params.get("ldate_from"));
+  state.ldateTo = urlDate(params.get("ldate_to"));
   state.benchmarkVisibleLimit = BENCHMARK_SEARCH_LIMIT;
   state.benchmarkQuery = (params.get("bq") || "").trim();
   state.benchmarkModel = (params.get("bmodel") || "").trim();
@@ -2038,6 +2051,8 @@ function writeUrl(mode = "replace") {
       if (state.ldomain) params.set("ldomain", state.ldomain);
       if (state.lorg) params.set("lorg", state.lorg);
       if (state.lera) params.set("lera", state.lera);
+      if (state.ldateFrom) params.set("ldate_from", state.ldateFrom);
+      if (state.ldateTo) params.set("ldate_to", state.ldateTo);
     } else {
       if (state.lwindow && state.lwindow !== latestReleasesDefaultWindow()) {
         params.set("lwindow", state.lwindow);
@@ -5568,6 +5583,16 @@ function scoreCutoff(value) {
   return Math.round(raw / 10) * 10;
 }
 
+// A YYYY-MM-DD calendar date, or null. Mirrors skyline.js validDate, and is
+// defined here rather than imported: the render harnesses evaluate app.js
+// with its imports stripped, and readUrl runs on boot, so an imported name
+// on that path breaks every harness that boots the app.
+function urlDate(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const time = Date.parse(`${value}T00:00:00Z`);
+  return Number.isFinite(time) && new Date(time).toISOString().slice(0, 10) === value ? value : null;
+}
+
 function matchesScoreFilter(summary) {
   return matchesScoreCutoff(summary, state.lscore);
 }
@@ -6111,6 +6136,8 @@ function renderBenchmarkSkyline(cutoff = state.lscore) {
   const host = byId("benchmark-skyline-chart");
   if (!host) return;
   byId("benchmark-skyline-height").value = state.lheight;
+  byId("benchmark-skyline-date-from").value = state.ldateFrom || "";
+  byId("benchmark-skyline-date-to").value = state.ldateTo || "";
   // Do not briefly present the small registry as the whole population while
   // the catalog is loading, or turn a failed load into a plausible tiny chart.
   if (!state.benchmarkIndex) {
@@ -6122,7 +6149,7 @@ function renderBenchmarkSkyline(cutoff = state.lscore) {
   }
   // Selection in another chart survives a slider preview.
   if (host.contains(selectedFrontierPoint) || host.contains(describedFrontierPoint)) clearFrontierPointSelection();
-  const model = skylineModel(state.benchmarkIndex, cutoff, null, state.lheight);
+  const model = skylineModel(state.benchmarkIndex, cutoff, null, state.lheight, { from: state.ldateFrom, to: state.ldateTo });
   const svg = skylineChart(model, cutoff);
   const sourceCounts = [...new Set(model.all.map((row) => row.source))].map((source) =>
     `${scoreSourceLabel(source)}: ${model.visible.filter((row) => row.source === source).length.toLocaleString()} / ${model.all.filter((row) => row.source === source).length.toLocaleString()}`);
@@ -6148,10 +6175,22 @@ function renderBenchmarkSkyline(cutoff = state.lscore) {
   byId("benchmark-skyline-count").textContent = t("{visible} of {n} benchmarks shown · {s} sources in total", {
     visible: model.visible.length.toLocaleString(), n: model.population.toLocaleString(), s: model.sources,
   });
-  byId("benchmark-skyline-note").textContent = t("{unscored} without scores excluded · {older} before 2024 · {hidden} hidden by score", {
+  // The date range hides its own share, so the score count stays a score
+  // count; the note names the span the figure is actually showing.
+  const hiddenByScore = model.hidden - model.beforeStart - model.unscored - model.dateHidden;
+  let skylineNote = t("{unscored} without scores excluded · {older} before 2024 · {hidden} hidden by score", {
     unscored: model.unscored.toLocaleString(), older: model.beforeStart.toLocaleString(),
-    hidden: (model.hidden - model.beforeStart - model.unscored).toLocaleString(),
+    hidden: hiddenByScore.toLocaleString(),
   });
+  if (model.dateRange.from || model.dateRange.to) {
+    const span = model.dateRange.from && model.dateRange.to
+      ? t("{from} to {to}", { from: model.dateRange.from, to: model.dateRange.to })
+      : model.dateRange.from
+        ? t("from {from}", { from: model.dateRange.from })
+        : t("to {to}", { to: model.dateRange.to });
+    skylineNote += ` · ${t("{n} outside {span}", { n: model.dateHidden.toLocaleString(), span })}`;
+  }
+  byId("benchmark-skyline-note").textContent = skylineNote;
 }
 
 function initBenchmarkSearch() {
@@ -10467,7 +10506,7 @@ function latestSignalsFor(entries) {
 }
 // The adoption view's own filters. A permalink carrying one was written when
 // the page had no modes, and must keep opening the view it filtered.
-const LEADERBOARD_ADOPTION_PARAMS = ["lscore", "lheight", "lq", "ldomain", "lorg", "lera"];
+const LEADERBOARD_ADOPTION_PARAMS = ["lscore", "lheight", "lq", "ldomain", "lorg", "lera", "ldate_from", "ldate_to"];
 
 // The cutoff is shared with Saturation, whose every address carries it, so on
 // its own it marks the adoption mode only on a leaderboard address: a reader
@@ -10766,6 +10805,24 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
       ]);
     }),
   );
+  // Forks are a displayed counter only (#659): the count reaches the row
+  // next to the stars, with the same status wording, but it is not a score
+  // component, so it carries no normalized contribution or weight.
+  const forks = entry.forks || {};
+  const forksUrl = safeHttpUrl(forks.source_url);
+  const forksLine =
+    (forks.value === null || forks.value === undefined) && forks.status !== "unavailable"
+      ? null
+      : element("p", { className: "latest-release-forks" }, [
+          element("span", { text: `${t("GitHub forks")}: ${latestSignalText(forks)}` }),
+          forksUrl
+            ? element("a", {
+                className: "latest-release-source",
+                text: t("source ↗"),
+                attrs: { href: forksUrl, target: "_blank", rel: "noopener noreferrer" },
+              })
+            : null,
+        ]);
   const meta = [
     t("Coverage {coverage}", { coverage: Number(entry.coverage || 0).toFixed(2) }),
     confidence ? `${t("confidence")} ${t(confidence)}` : "",
@@ -10782,6 +10839,7 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
       element("div", { className: "latest-release-body" }, [
         entry.purpose ? element("p", { className: "latest-release-purpose", text: entry.purpose }) : null,
         signals,
+        forksLine,
         element("p", { className: "latest-release-meta", text: meta }),
       ]),
     ]),
@@ -12446,6 +12504,15 @@ function bindEvents() {
     renderBenchmarkSkyline();
     writeUrl();
   });
+  // A date range is a Frontier filter (#570): it narrows the figure, is
+  // carried in the shared address, and clears when the field is emptied.
+  for (const [inputId, stateKey] of [["benchmark-skyline-date-from", "ldateFrom"], ["benchmark-skyline-date-to", "ldateTo"]]) {
+    byId(inputId).addEventListener("change", (event) => {
+      state[stateKey] = urlDate(event.target.value);
+      renderBenchmarkSkyline();
+      writeUrl();
+    });
+  }
   byId("benchmark-search-more").addEventListener("click", () => {
     state.benchmarkVisibleLimit += BENCHMARK_SEARCH_LIMIT;
     renderBenchmarkSearch();

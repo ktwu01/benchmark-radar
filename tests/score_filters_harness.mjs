@@ -292,8 +292,8 @@ function fixtureCatalog(benchmarks={},entries=[],catalog=[]) {
     };
   }),...catalog];
 }
-const skylineModel = (benchmarks={},entries=[],catalog=[],cutoff=70,matchingIds=null,metric='models') =>
-  buildSkylineModel(fixtureCatalog(benchmarks,entries,catalog),cutoff,matchingIds,metric);
+const skylineModel = (benchmarks={},entries=[],catalog=[],cutoff=70,matchingIds=null,metric='models',dateRange=null) =>
+  buildSkylineModel(fixtureCatalog(benchmarks,entries,catalog),cutoff,matchingIds,metric,dateRange);
 const cardSkyline = (benchmarks={},entries=[],catalog=[],cutoff=70,matchingIds=null) =>
   skylineModel(benchmarks,entries,catalog,cutoff,matchingIds,'documents');
 // --- Benchmark Frontier: identity, normalization and dominance ----------------
@@ -468,6 +468,45 @@ for(const cut of [10,30,70,100]) {
 }
 const searchHeight=skylineModel(countedTracks,countedCards,[],70,new Set(['hard']));
 assert.equal(skylineGeometry(searchHeight.cohort).maximum,577,'search never rescales the count axis');
+// Issue #570: a date range narrows the figure to a timespan. The frontier
+// candidates shrink with the slice, while dominance still compares against
+// the full cohort, so the slice cannot promote a dominated benchmark.
+// Documents mode, like the frontier assertions above it: these fixtures
+// carry document counts, not model counts.
+const ranged = (from, to) => skylineModel(tracks, cards, [], 100, null, 'documents', { from, to });
+const in2025 = ranged('2025-01-01', '2025-12-31');
+assert.deepEqual(in2025.visible.map((row) => row.id).sort(),
+  ['adopted', 'all', 'dominated', 'hardest', 'sameAdoption', 'sameScore', 'zero']);
+assert.equal(in2025.dateHidden, 1, 'only the 2024 twin falls outside 2025');
+assert.deepEqual(in2025.dateRange, { from: '2025-01-01', to: '2025-12-31' });
+assert.deepEqual(paretoIds(in2025), ['adopted', 'all', 'hardest', 'zero']);
+const in2024 = ranged('2024-01-01', '2024-12-31');
+assert.deepEqual(in2024.visible.map((row) => row.id), ['twin']);
+assert.equal(in2024.dateHidden, 7);
+const after2025 = ranged('2026-01-01', null);
+assert.deepEqual(after2025.visible, []);
+assert.equal(after2025.dateHidden, 8);
+const unranged = skylineModel(tracks, cards, [], 100);
+assert.equal(unranged.dateHidden, 0);
+assert.deepEqual(unranged.dateRange, { from: null, to: null });
+// Codex P1 (#1148): a missing date is not evidence a benchmark falls outside
+// the span, so an active range keeps undated records listed as undated
+// (principle.md) instead of dropping them from the chart and its panel.
+const rangedUndated = skylineModel(
+  { dated: record(50), undated: record(10, { observations: [{ value: 10 }] }) },
+  [entry('dated', 1), entry('undated', 2, { released: null, adopters: [{ model_card_id: 'a' }, { model_card_id: 'b' }] })],
+  [], 100, null, 'documents', { from: '2026-01-01', to: '2026-12-31' });
+assert.deepEqual(rangedUndated.visible.map((row) => row.id), ['undated']);
+assert.deepEqual(rangedUndated.undated.map((row) => row.id), ['undated']);
+assert.equal(rangedUndated.dateHidden, 1, 'only the dated record outside 2026 counts as outside the range');
+const rangedUndatedFromOnly = skylineModel(
+  { dated: record(50), undated: record(10, { observations: [{ value: 10 }] }) },
+  [entry('dated', 1), entry('undated', 2, { released: null, adopters: [{ model_card_id: 'a' }, { model_card_id: 'b' }] })],
+  [], 100, null, 'documents', { from: '2026-01-01', to: null });
+assert.deepEqual(rangedUndatedFromOnly.visible.map((row) => row.id), ['undated']);
+assert.equal(rangedUndatedFromOnly.dateHidden, 1);
+// A malformed bound is no filter, not an error.
+assert.equal(ranged('not-a-date', null).visible.length, 8);
 for(const m of [byModels,byCards]) {
   const drawn=flatten(chart(m,100));
   const max=skylineGeometry(m.cohort).maximum;
