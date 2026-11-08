@@ -19,7 +19,8 @@ const harness = `${source.slice(start, end)}
 globalThis.__recordFactEntries = recordFactEntries;
 globalThis.__recordDateEntries = recordDateEntries;
 globalThis.__recordFacts = recordFacts;
-globalThis.__cardTierClass = cardTierClass;`;
+globalThis.__cardTierClass = cardTierClass;
+globalThis.__publishedDateNote = publishedDateNote;`;
 new Function(harness)();
 
 const reportedItem = {
@@ -43,6 +44,30 @@ const dates = globalThis.__recordDateEntries({
   published_at: "2026-08-24T17:59:04Z",
   updated_at: "2026-08-25T17:59:04Z",
 });
+const datesWithBasis = globalThis.__recordDateEntries({
+  published_at: "2026-10-27T02:01:03Z",
+  updated_at: "2026-10-27T02:01:03Z",
+  published_basis: "created",
+  published_source_value: "2026-10-31",
+});
+// Issue #1016: a record dated by its deposition's created time says so next
+// to Published, with the uploader's value as given; any other basis is silent.
+const publishedNote = {
+  replaced: globalThis.__publishedDateNote({
+    published_basis: "created",
+    published_source_value: "2026-10-31",
+  }),
+  replacedBareYear: globalThis.__publishedDateNote({
+    published_basis: "created",
+    published_source_value: "2027",
+  }),
+  noSourceValue: globalThis.__publishedDateNote({ published_basis: "created" }),
+  normal: globalThis.__publishedDateNote({
+    published_basis: "publication_date",
+    published_source_value: "2026-07-27",
+  }),
+  unknown: globalThis.__publishedDateNote({}),
+};
 const rendered = globalThis.__recordFacts(reportedItem);
 // Issue #994: each published count tints the card light gold past its first
 // threshold and strong gold past its second.
@@ -73,6 +98,8 @@ console.log(
     slug_owner: slugOwner,
     unreported,
     dates,
+    dates_with_basis: datesWithBasis,
+    published_note: publishedNote,
     tiers,
     rendered: {
       tag: rendered.tag,

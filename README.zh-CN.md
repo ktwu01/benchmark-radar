@@ -22,6 +22,14 @@
   <a href="https://scholar.google.com/citations?user=s9w1k-cAAAAJ&amp;hl=en"><img alt="Google Scholar" src="https://img.shields.io/badge/Google%20Scholar-4285F4?style=for-the-badge&amp;logo=googlescholar&amp;logoColor=white"></a>
 </p>
 
+<!-- Trust row (issue #553): only badges whose target page works. The OpenSSF
+Scorecard badge stays out until the Scorecard API publishes a result for this
+repository, and the Best Practices badge until the project is registered. -->
+<p align="center">
+  <a href="https://github.com/ktwu01/benchmark-radar/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/ktwu01/benchmark-radar/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://doi.org/10.5281/zenodo.22167102"><img alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.22167102.svg"></a>
+</p>
+
 做 benchmark 研究的时候发现新东西太多了，所以我搞了这个持续爬虫，每天自动从全网抓新的 benchmark 相关信息。它目前每天从 41 个公开来源采集，并持续更新。你如果需要寻找 related work 或找到适合eval自己的agent 的 bench 或者关注最新的 eval 进展，可以看这里哈哈哈：
 github.com/ktwu01/benchmark-radar，每天更新，并支持一键导出数据
 

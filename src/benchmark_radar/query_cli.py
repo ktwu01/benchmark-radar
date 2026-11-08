@@ -61,7 +61,11 @@ def _parser() -> argparse.ArgumentParser:
     search = subparsers.add_parser(
         "search", parents=[data_parent], help="Search benchmark catalog and Radar records."
     )
-    search.add_argument("query")
+    # Issue #421: the request shows the query as `--query "..."`. Accept that
+    # form alongside the positional one; giving both with different values is
+    # an error, not a silent pick.
+    search.add_argument("query", nargs="?", default=None)
+    search.add_argument("--query", dest="query_flag", default=None)
     search.add_argument("--scope", choices=SEARCH_SCOPES, default="catalog")
     search.add_argument("--limit", type=int, default=20)
     search.add_argument("--has-paper", action=argparse.BooleanOptionalAction, default=None)
@@ -408,8 +412,22 @@ def run_query_cli(argv: Sequence[str] | None = None) -> int:
         else:
             service = _service(args)
             if args.command == "search":
+                if args.query_flag is not None and args.query is not None:
+                    if args.query_flag != args.query:
+                        raise QueryError(
+                            "search query was given twice with different values",
+                            code="invalid_query",
+                            status=400,
+                        )
+                query = args.query_flag if args.query_flag is not None else args.query
+                if query is None:
+                    raise QueryError(
+                        "search query is required; pass a query or --query",
+                        code="invalid_query",
+                        status=400,
+                    )
                 payload = service.search(
-                    args.query,
+                    query,
                     scope=args.scope,
                     limit=args.limit,
                     has_paper=args.has_paper,
