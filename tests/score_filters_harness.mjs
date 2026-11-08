@@ -18,7 +18,7 @@ const observation = (date, id = date) => ({
   title: 'agent benchmark', summary: '', categories: [],
 });
 let observations = [observation('2026-09-07'), observation('2026-09-06'), observation('2026-08-08', 'repeated'), observation('2026-08-09', 'repeated'), observation('2026-08-07'), observation('2026-07-09'), observation('2026-07-08')];
-const dateNames = ['todayDateRange', 'todayIsMultiDate', 'validTodayDate', 'filteredObservations', 'observationRecordKey', 'latestObservationsByRecord', 'observationAttention', 'eventTimestamp', 'isRelease'];
+const dateNames = ['todayDateRange', 'todayIsMultiDate', 'validTodayDate', 'filteredObservations', 'observationRecordKey', 'latestObservationsByRecord', 'observationAttention', 'eventTimestamp', 'isRelease', 'sortObservations'];
 const dates = new Function('state', 'allObservations', `${source.match(/const TODAY_WINDOWS = .*;/)[0]}\n${dateNames.map(fn).join('\n')}\nreturn {${dateNames.join(',')}};`)(state, () => observations);
 assert.deepEqual(dates.todayDateRange(), {start:'2026-08-08',end:'2026-09-06'});
 assert.equal(dates.validTodayDate(), true);
@@ -98,7 +98,7 @@ assert.deepEqual(dates.filteredObservations().map(r=>r.source_id), ['utc','offse
 // record once. It must list exactly the rows the full archive lists, in the
 // same order, and the archive takes over once it has loaded.
 {
-  const names = ['todayDateRange', 'todayIsMultiDate', 'observationDays', 'allObservations', 'releaseAgeHours', 'releaseRank', 'isRelease', 'filteredObservations', 'observationRecordKey', 'latestObservationsByRecord', 'observationAttention', 'eventTimestamp', 'stateNeedsFullData', 'stateNeedsWindowData', 'freshWindowData', 'latestReleasesPayload'];
+  const names = ['todayDateRange', 'todayIsMultiDate', 'observationDays', 'allObservations', 'sortObservations', 'releaseAgeHours', 'releaseRank', 'isRelease', 'filteredObservations', 'observationRecordKey', 'latestObservationsByRecord', 'observationAttention', 'eventTimestamp', 'stateNeedsFullData', 'stateNeedsWindowData', 'freshWindowData', 'latestReleasesPayload'];
   const consts = ['const TODAY_WINDOWS = .*;', 'const RELEASE_FRESH_HOURS = .*;', 'const RELEASE_RECENT_HOURS = .*;'].map((pattern) => source.match(new RegExp(pattern))[0]).join('\n');
   const row = (id, extra = {}) => ({source: 'Hugging Face', source_id: id, title: id, summary: '', categories: [], event_kind: 'released', total_score: 50, ...extra});
   const day = (date, evidence, attention = []) => ({date, generated_at: `${date}T06:00:00Z`, selection: {recommendation_score: 40, minimum_score: 20}, evidence_items: evidence, attention: {observations: attention}});
@@ -150,7 +150,7 @@ assert.deepEqual(dates.filteredObservations().map(r=>r.source_id), ['utc','offse
   assert.equal(windowApi.observationDays(), windowState.data.days, 'a stale window file is not listed');
   windowState.data.generated_at = 'build-1';
   windowState.todayDate = 'all';
-  assert.equal(windowApi.stateNeedsFullData(), true);
+  assert.equal(windowApi.stateNeedsFullData(), false);
   assert.equal(windowApi.stateNeedsWindowData(), false);
   windowState.todayDate = '2026-09-20';
   assert.equal(windowApi.stateNeedsFullData(), true);
