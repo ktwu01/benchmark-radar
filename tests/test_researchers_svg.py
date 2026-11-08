@@ -1,5 +1,5 @@
-"""The researchers logo strip: new logos land, and one logo's CSS classes
-cannot repaint another's (issue #1096)."""
+"""The researchers logo strip: every listed logo exists, and one logo's CSS
+classes cannot repaint another's (issue #1096)."""
 
 from __future__ import annotations
 
@@ -20,22 +20,14 @@ def _builder():
     return module
 
 
-def test_new_logos_are_in_the_strip():
+def test_every_logo_in_the_strip_exists():
+    # No CI job runs the builder, so this is the only check that catches a
+    # logo named in ROWS but missing or misspelled on disk. Row placement is a
+    # design choice reviewers see in the image, so it is deliberately unpinned.
     builder = _builder()
-    assert "zai.svg" in builder.ROWS[2]
-    assert "antgroup.png" in builder.ROWS[2]
-    assert (ROOT / "assets" / "researchers-logos" / "zai.svg").is_file()
-    assert (ROOT / "assets" / "researchers-logos" / "antgroup.png").is_file()
-
-
-def test_berkeley_and_tesla_logos_are_in_the_strip():
-    builder = _builder()
-    assert "berkeley.svg" in builder.ROWS[1]
-    assert "mit.svg" in builder.ROWS[1]
-    assert "harvard.svg" in builder.ROWS[1]
-    assert "tesla.svg" in builder.ROWS[0]
-    assert (ROOT / "assets" / "researchers-logos" / "berkeley.svg").is_file()
-    assert (ROOT / "assets" / "researchers-logos" / "tesla.svg").is_file()
+    logos = ROOT / "assets" / "researchers-logos"
+    missing = [name for row in builder.ROWS for name in row if not (logos / name).is_file()]
+    assert missing == []
 
 
 def test_logo_css_classes_are_scoped_per_logo():
@@ -58,10 +50,3 @@ def test_the_built_strip_keeps_both_definitions_of_st0():
     assert not re.search(r"(?<![\w-])\.st\d+\s*\{", strip)
     assert re.search(r"\.l\d+_st0\{fill:#930084;\}", strip)
     assert re.search(r"\.l\d+_st0\{opacity:0\.3;fill:#E2E4E7;\}", strip)
-
-
-def test_bytedance_moved_to_third_row_and_tesla_scaled_down():
-    builder = _builder()
-    assert "bytedance.svg" not in builder.ROWS[0]
-    assert "bytedance.svg" in builder.ROWS[2]
-    assert builder.LOGO_SCALE["tesla.svg"] < 1
