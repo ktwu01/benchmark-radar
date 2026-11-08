@@ -14,11 +14,13 @@ from benchmark_radar.model_scores import (
     average_value,
     build_model_scores,
     capability_group,
+    joined_map_from_groups,
     latest_date,
     model_family,
     order_models,
     score_scale,
     shared_average,
+    write_model_scores,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -134,6 +136,177 @@ def test_a_label_a_source_reuses_for_two_checkpoints_is_two_columns(tmp_path):
 
 def test_averages_round_half_up_like_the_page():
     assert shared_average([{"a": 0.25}], {"a": PERCENT})[0] == [0.3]
+
+
+# --- Joined benchmarks (#904) ---------------------------------------------------
+
+
+def test_joined_records_share_one_benchmark():
+    # Two columns score different records of one reviewed equivalent group.
+    joined = {"llm-stats:gpqa": "gpqa", "opencompass:1135": "gpqa"}
+    benchmarks = {"llm-stats:gpqa": PERCENT, "opencompass:1135": PERCENT}
+    means, shared = shared_average(
+        [{"llm-stats:gpqa": 40.0}, {"opencompass:1135": 60.0}],
+        benchmarks,
+        joined=joined,
+    )
+    assert means == [40.0, 60.0]
+    assert shared == ["gpqa"]
+
+
+def test_joined_records_do_not_share_across_different_groups():
+    joined = {"a": "g1", "b": "g2"}
+    benchmarks = {"a": PERCENT, "b": PERCENT}
+    assert shared_average([{"a": 40.0}, {"b": 60.0}], benchmarks, joined=joined) == (
+        [None, None],
+        [],
+    )
+
+
+def test_joined_records_still_require_one_comparable_group():
+    joined = {"a": "g", "b": "g"}
+    benchmarks = {"a": PERCENT, "b": PERCENT}
+    columns = [{"a": 40.0}, {"b": 60.0}]
+    means, shared = shared_average(columns, benchmarks, [{"a": 0}, {"b": 1}], joined=joined)
+    assert (means, shared) == ([None, None], [])
+    means, shared = shared_average(columns, benchmarks, [{"a": 0}, {"b": 0}], joined=joined)
+    assert (means, shared) == ([40.0, 60.0], ["g"])
+
+
+def test_joined_records_compare_group_labels_not_local_indexes():
+    # Codex P2 (#1129): index 0 is "cot" on record a and "plain" on record
+    # b, so equal indexes must not share the joined benchmark; the same
+    # protocol under different indexes must.
+    joined = {"a": "g", "b": "g"}
+    benchmarks = {
+        "a": {**PERCENT, "groups": ["cot", "plain"]},
+        "b": {**PERCENT, "groups": ["plain", "cot"]},
+    }
+    columns = [{"a": 40.0}, {"b": 60.0}]
+    assert shared_average(columns, benchmarks, [{"a": 0}, {"b": 0}], joined=joined) == (
+        [None, None],
+        [],
+    )
+    assert shared_average(columns, benchmarks, [{"a": 1}, {"b": 0}], joined=joined) == (
+        [40.0, 60.0],
+        ["g"],
+    )
+
+
+def test_joined_map_ignores_single_member_groups():
+    groups = [
+        {"group_id": "lonely", "members": ["a"]},
+        {"group_id": "g", "members": ["a", "b"]},
+        {"members": ["c", "d"]},
+    ]
+    assert joined_map_from_groups(groups) == {"a": "g", "b": "g"}
+
+
+def test_build_model_scores_marks_joined_benchmarks(tmp_path):
+    shards = tmp_path / "benchmarks"
+    shards.mkdir()
+    for name, key in {"a": "llm-stats:aime", "b": "model-reports:aime"}.items():
+        (shards / f"{name}.json").write_text(
+            json.dumps(_shard(key, [("M", "Lab", 50.0, "2026-01-01")]))
+        )
+    payload = build_model_scores(
+        shards,
+        equivalences=[{"group_id": "aime", "members": ["llm-stats:aime", "model-reports:aime"]}],
+    )
+    assert {benchmark["key"]: benchmark.get("joined") for benchmark in payload["benchmarks"]} == {
+        "llm-stats:aime": "aime",
+        "model-reports:aime": "aime",
+    }
+    # Without equivalences the payload is unchanged: no joined field appears.
+    plain = build_model_scores(shards)
+    assert all("joined" not in benchmark for benchmark in plain["benchmarks"])
+
+
+def _gpqa_shards(tmp_path):
+    """Two models scoring different records of the reviewed gpqa group."""
+    shards = tmp_path / "benchmarks"
+    shards.mkdir()
+    (shards / "gpqa.json").write_text(
+        json.dumps(_shard("llm-stats:gpqa", [("M-A", "Lab", 40.0, "2026-01-01")]))
+    )
+    (shards / "gpqa-oc.json").write_text(
+        json.dumps(_shard("opencompass:1135", [("M-B", "Lab", 60.0, "2026-01-01")]))
+    )
+    return shards
+
+
+GPQA_EQUIVALENCES = [{"group_id": "gpqa", "members": ["llm-stats:gpqa", "opencompass:1135"]}]
+
+
+def _generated_payload_columns(payload):
+    """Columns and benchmarks read back out of a generated payload."""
+    benchmarks = {benchmark["key"]: benchmark for benchmark in payload["benchmarks"]}
+    columns = [
+        {payload["benchmarks"][score[0]]["key"]: score[1] for score in model["scores"]}
+        for model in payload["models"]
+    ]
+    return columns, benchmarks
+
+
+def test_write_model_scores_carries_reviewed_join_into_generated_payload(tmp_path):
+    # #1129 P1: the join never reached production, because the generators
+    # called build_model_scores without the reviewed groups. The average
+    # below reads the generated payload, not a hand-built fixture.
+    shards = _gpqa_shards(tmp_path)
+    output = tmp_path / "model-scores.json"
+    write_model_scores(shards, output, equivalences=GPQA_EQUIVALENCES)
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert {b["key"]: b.get("joined") for b in payload["benchmarks"]} == {
+        "llm-stats:gpqa": "gpqa",
+        "opencompass:1135": "gpqa",
+    }
+    columns, benchmarks = _generated_payload_columns(payload)
+    means, shared = shared_average(
+        columns, benchmarks, joined=joined_map_from_groups(GPQA_EQUIVALENCES)
+    )
+    assert (means, shared) == ([40.0, 60.0], ["gpqa"])
+
+
+def test_write_model_scores_loads_reviewed_groups_by_default(tmp_path, monkeypatch):
+    # The production call passes no equivalences, so the generator reads the
+    # reviewed groups itself; without that the payload has no joined fields.
+    monkeypatch.setattr(
+        "benchmark_radar.model_scores.load_equivalent_groups",
+        lambda: GPQA_EQUIVALENCES,
+    )
+    output = tmp_path / "model-scores.json"
+    write_model_scores(_gpqa_shards(tmp_path), output)
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert {b["key"]: b.get("joined") for b in payload["benchmarks"]} == {
+        "llm-stats:gpqa": "gpqa",
+        "opencompass:1135": "gpqa",
+    }
+
+
+def test_seed_averages_joined_benchmarks_from_generated_payload(tmp_path):
+    shards = _gpqa_shards(tmp_path)
+    payload = build_model_scores(shards, equivalences=GPQA_EQUIVALENCES)
+    records = [
+        {
+            "key": "llm-stats:gpqa",
+            "slug": "gpqa",
+            "name": "GPQA",
+            "source": "llm_stats",
+            "categories": ["reasoning"],
+            "scored_models": [{"name": "M-A"}],
+        },
+        {
+            "key": "opencompass:1135",
+            "slug": "1135",
+            "name": "GPQA",
+            "source": "opencompass",
+            "categories": ["reasoning"],
+            "scored_models": [{"name": "M-B"}],
+        },
+    ]
+    _, _, matrix, _ = _models_seed(records, payload).values()
+    assert "over the 1 benchmarks all 2 models share, 0–100" in matrix
+    assert "<strong>40</strong>" in matrix and "<strong>60</strong>" in matrix
 
 
 # --- Data -------------------------------------------------------------------------

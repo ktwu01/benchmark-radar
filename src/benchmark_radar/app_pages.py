@@ -43,6 +43,7 @@ from pathlib import Path
 from typing import Any
 
 from .app_seeds import utility_seeds, view_seeds
+from .catalog_identity import load_equivalent_groups
 from .feed import SITE_URL
 from .model_scores import build_model_scores
 from .site_shell import breadcrumb_schema, esc, json_ld, webpage_schema
@@ -395,6 +396,7 @@ def render_utility_page(
 def write_app_pages(
     dashboard: dict[str, Any],
     site_dir: Path,
+    equivalences: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Publish the dashboard at each view's own path.
 
@@ -403,6 +405,11 @@ def write_app_pages(
     canonical over whatever the runtime falls back to showing, and a URL that
     describes a page nobody can see is worse than a URL that does not exist yet.
     The returned paths are what the sitemap lists, so the two cannot disagree.
+
+    With no `equivalences` given, the reviewed groups are read from
+    `data/catalog/identity.yml`: the Models seed is rebuilt from the shards
+    here, and without them it reports equivalent records as sharing no
+    benchmark (#1129).
     """
     template = (site_dir / "index.html").read_text(encoding="utf-8")
     app_js = site_dir / "assets" / "app.js"
@@ -420,7 +427,9 @@ def write_app_pages(
     shard_dir = site_dir / "data" / "benchmarks"
     model_scores = None
     if shard_dir.is_dir() and next(shard_dir.glob("*.json"), None) is not None:
-        model_scores = build_model_scores(shard_dir)
+        if equivalences is None:
+            equivalences = load_equivalent_groups()
+        model_scores = build_model_scores(shard_dir, equivalences)
     seed_dashboard = dict(dashboard)
     seed_dashboard["model_card_leaderboard"] = {
         **(documents or {}),

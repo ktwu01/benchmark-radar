@@ -1089,6 +1089,14 @@ def _model_matrix_seed(
         [{key: cell["value"] for key, cell in column["cells"].items()} for column in columns],
         benchmarks,
         [{key: cell["group"] for key, cell in column["cells"].items()} for column in columns],
+        # The payload marks reviewed equivalent records with "joined" (#904):
+        # without it the seed reports them as sharing no benchmark (#1129).
+        joined={
+            key: benchmark["joined"]
+            for key, benchmark in benchmarks.items()
+            if "joined" in benchmark
+        }
+        or None,
     )
     ranked = sorted((mean for mean in means if mean is not None), reverse=True)
     note = (

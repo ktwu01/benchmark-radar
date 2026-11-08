@@ -1889,6 +1889,7 @@ def rebuild_dashboard(
     scores_path: Path | None = None,
     kw_bench_store_path: Path | None = None,
     benchmark_shard_dir: Path = DEFAULT_SHARD_DIR,
+    equivalences: list[dict[str, Any]] | None = None,
     release_signals: ReleaseSignals | None = None,
 ) -> dict[str, Any]:
     snapshots = load_snapshots(snapshot_dir)
@@ -1940,7 +1941,7 @@ def rebuild_dashboard(
     blog_entries: list[tuple[str, str | None]] = []
     page_entries: list[tuple[str, str | None]] = []
     if feed_output is not None:
-        app_pages = write_app_pages(value, sitemap_output.parent)
+        app_pages = write_app_pages(value, sitemap_output.parent, equivalences)
         view_paths = app_pages["paths"]
         # /about/ and /media/ are prose, not views over the corpus, so they are
         # written from the shared chrome rather than from the dashboard

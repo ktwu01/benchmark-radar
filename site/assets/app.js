@@ -6831,8 +6831,53 @@ function modelAverageValue(value, benchmark) {
   return benchmark.direction === "lower_is_better" ? 100 - value : value;
 }
 
-function modelSharedAverage(columns, benchmarks) {
+// Whether every column scores `key`, or another record of its reviewed
+// equivalent group (#904), so the shared-only filter keeps the rows behind
+// a joined average instead of hiding them.
+function modelHeldByAll(columns, key, benchmarks) {
+  const group = benchmarks.get(key)?.joined;
+  return columns.every((model) => model.cells.has(key)
+    || (group && [...model.cells.keys()].some((other) => benchmarks.get(other)?.joined === group)));
+}
+
+function modelSharedAverage(columns, benchmarks, joined) {
   if (!columns.length) return { means: [], shared: [] };
+  if (joined) {
+    // Joined keys (#904): columns scoring different records of one reviewed
+    // equivalent group share that benchmark. Each column contributes the
+    // first averageable record of the group in sorted key order; the join
+    // counts shared benchmarks, it does not merge scores across records.
+    // `joined` is a Map (or plain object) from record key to group id.
+    // A cell's `group` is only an index into its own record's
+    // `benchmark.groups` list, so index 0 can mean `cot` on one record and
+    // `plain` on another; resolve it to the per-record label before
+    // comparing across joined records.
+    const groupOf = (key) => (joined instanceof Map ? joined.get(key) : joined[key]) ?? key;
+    const groupLabel = (entry) => benchmarks.get(entry.key)?.groups?.[entry.group] ?? entry.group ?? null;
+    const grouped = columns.map((cells) => {
+      const byJoined = new Map();
+      for (const key of [...cells.keys()].sort(compareText)) {
+        const groupKey = groupOf(key);
+        if (byJoined.has(groupKey)) continue;
+        const cell = cells.get(key);
+        if (modelAverageValue(cell.value, benchmarks.get(key)) === null) continue;
+        byJoined.set(groupKey, { ...cell, key });
+      }
+      return byJoined;
+    });
+    const shared = [...grouped[0].keys()]
+      .filter((key) => grouped.every((cells) => cells.has(key) && groupLabel(cells.get(key)) === groupLabel(grouped[0].get(key))))
+      .sort(compareText);
+    if (!shared.length) return { means: columns.map(() => null), shared };
+    const means = grouped.map((cells) => {
+      const total = shared.reduce((sum, key) => {
+        const entry = cells.get(key);
+        return sum + modelAverageValue(entry.value, benchmarks.get(entry.key));
+      }, 0);
+      return Math.round(10 * (total / shared.length)) / 10;
+    });
+    return { means, shared };
+  }
   // Sorted keys, summed in that order, so model_scores.shared_average rounds
   // the same float for the seed.
   const shared = [...columns[0].keys()]
@@ -7084,7 +7129,7 @@ function modelAverageRow(columns, average) {
 
 function modelMatrixTable(columns, data, recordsByKey) {
   const keys = new Set(columns.flatMap((model) => [...model.cells.keys()]));
-  const shownKeys = [...keys].filter((key) => !state.modelsSharedOnly || columns.every((model) => model.cells.has(key)));
+  const shownKeys = [...keys].filter((key) => !state.modelsSharedOnly || modelHeldByAll(columns, key, data.benchmarks));
   const collisions = new Map();
   for (const key of shownKeys) {
     const record = recordsByKey.get(key);
@@ -7093,7 +7138,12 @@ function modelMatrixTable(columns, data, recordsByKey) {
   }
   const groups = new Map(MODEL_CAPABILITY_ORDER.map((group) => [group, []]));
   for (const key of shownKeys) groups.get(modelCapabilityGroup(recordsByKey.get(key))).push(recordsByKey.get(key));
-  const average = data.scored ? modelSharedAverage(columns.map((model) => model.cells), data.benchmarks) : null;
+  const joined = new Map([...data.benchmarks]
+    .filter(([, benchmark]) => benchmark.joined)
+    .map(([key, benchmark]) => [key, benchmark.joined]));
+  const average = data.scored
+    ? modelSharedAverage(columns.map((model) => model.cells), data.benchmarks, joined.size ? joined : undefined)
+    : null;
   const bodies = [...groups].filter(([, records]) => records.length).map(([group, records]) => element("tbody", {}, [
     element("tr", { className: "models-group" }, [element("th", {
       attrs: { colspan: columns.length + 1, scope: "colgroup" },
@@ -7392,7 +7442,7 @@ function renderModels() {
   // shared-only toggle can hide its row.
   const panelRecord = state.modelsPanel?.record;
   const panelShown = columns.some((model) => model.key === state.modelsPanel?.model && model.cells.has(panelRecord))
-    && (!state.modelsSharedOnly || columns.every((model) => model.cells.has(panelRecord)));
+    && (!state.modelsSharedOnly || modelHeldByAll(columns, panelRecord, data.benchmarks));
   if (state.modelsPanel && !panelShown) closeModelPanel();
 }
 

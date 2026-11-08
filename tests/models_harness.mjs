@@ -154,7 +154,7 @@ const env = {
 };
 const names = [
   "modelDocuments", "modelFirstMentions", "modelCapabilityGroup", "modelFamily", "modelAverageValue",
-  "modelSharedAverage", "modelMatrixModels", "modelOrder", "modelMatches", "modelLabCounts",
+  "modelHeldByAll", "modelSharedAverage", "modelMatrixModels", "modelMatrixTable", "modelOrder", "modelMatches", "modelLabCounts",
   "renderModelLabs", "modelValueText", "modelSeriesScale", "modelLatestDate", "openModelPanel", "closeModelPanel", "renderModels", "initModels",
 ];
 const models = new Function(
@@ -233,6 +233,49 @@ assert.deepEqual(
 assert.deepEqual(models.modelSharedAverage([cells({ hard: 1 }), cells({ easy: 2 })], benchmarks), { means: [null, null], shared: [] });
 // Rounds like model_scores.round_tenth (half up, not to even).
 assert.deepEqual(models.modelSharedAverage([cells({ hard: 0.25 })], benchmarks).means, [0.3]);
+// Joined benchmarks (#904): columns scoring different records of one reviewed
+// equivalent group share that benchmark; different groups do not share.
+const joined = new Map([["hard", "gpqa"], ["easy", "gpqa"]]);
+assert.deepEqual(
+  models.modelSharedAverage([cells({ hard: 40 }), cells({ easy: 60 })], benchmarks, joined),
+  { means: [40, 60], shared: ["gpqa"] },
+);
+assert.deepEqual(
+  models.modelSharedAverage(
+    [cells({ hard: 40 }), cells({ easy: 60 })],
+    benchmarks,
+    new Map([["hard", "g1"], ["easy", "g2"]]),
+  ),
+  { means: [null, null], shared: [] },
+);
+// Without the joined map the behaviour is unchanged.
+assert.deepEqual(
+  models.modelSharedAverage([cells({ hard: 40 }), cells({ easy: 60 })], benchmarks),
+  { means: [null, null], shared: [] },
+);
+// Joined benchmarks compare group labels, not local indexes: index 0 is
+// "cot" on "hard" and "plain" on "easy", so equal indexes must not share;
+// the same protocol under different indexes must.
+const labelled = new Map([
+  ["hard", { ...pct, groups: ["cot", "plain"] }],
+  ["easy", { ...pct, groups: ["plain", "cot"] }],
+]);
+assert.deepEqual(
+  models.modelSharedAverage(
+    [grouped({ hard: [40, 0] }), grouped({ easy: [60, 0] })],
+    labelled,
+    joined,
+  ),
+  { means: [null, null], shared: [] },
+);
+assert.deepEqual(
+  models.modelSharedAverage(
+    [grouped({ hard: [40, 1] }), grouped({ easy: [60, 0] })],
+    labelled,
+    joined,
+  ),
+  { means: [40, 60], shared: ["gpqa"] },
+);
 assert.equal(models.modelValueText(74.66, pct), "74.7%");
 assert.equal(models.modelValueText(1577, benchmarks.get("elo")), "1,577 Elo");
 
@@ -282,6 +325,41 @@ const family = [
 assert.deepEqual(models.modelOrder(family, "newest").map((model) => model.name), ["M", "M (high)", "N"]);
 assert.deepEqual(models.modelOrder(family).map((model) => model.name), ["N", "M", "M (high)"]);
 assert.deepEqual(models.modelLabCounts(matrix.models), [["Acme", 8], ["Beta", 1]]);
+
+// modelMatrixTable (#1129 P1): the reviewed join reaches the live average --
+// two models scoring different records of one equivalent group share it.
+const joinedRecords = [
+  record("llm-stats:gpqa", "GPQA", "llm_stats"),
+  record("opencompass:1135", "GPQA", "opencompass"),
+];
+const joinedPayload = {
+  schema_version: 1,
+  benchmarks: [
+    { key: "llm-stats:gpqa", direction: "higher_is_better", multiplier: 1, percent: true, unit: "%", joined: "gpqa" },
+    { key: "opencompass:1135", direction: "higher_is_better", multiplier: 1, percent: true, unit: "%", joined: "gpqa" },
+  ],
+  models: [
+    { key: "a", model: "A", organization: "Lab", dates: {}, scores: [[0, 40]] },
+    { key: "b", model: "B", organization: "Lab", dates: {}, scores: [[1, 60]] },
+  ],
+};
+const joinedMatrix = models.modelMatrixModels(joinedRecords, joinedPayload);
+const joinedTable = models.modelMatrixTable(
+  joinedMatrix.models, joinedMatrix,
+  new Map(joinedRecords.map((entry) => [entry.key, entry])),
+);
+const joinedAverage = joinedTable.querySelector("tbody.models-average").textContent;
+assert.match(joinedAverage, /over the 1 benchmarks all 2 models share, 0–100/);
+assert.match(joinedAverage, /40/);
+assert.match(joinedAverage, /60/);
+// The shared-only filter keeps both rows behind the joined average.
+state.modelsSharedOnly = true;
+const sharedOnlyTable = models.modelMatrixTable(
+  joinedMatrix.models, joinedMatrix,
+  new Map(joinedRecords.map((entry) => [entry.key, entry])),
+);
+state.modelsSharedOnly = false;
+assert.equal((sharedOnlyTable.textContent.match(/GPQA/g) || []).length, (joinedTable.textContent.match(/GPQA/g) || []).length);
 
 // --- Rendering. ------------------------------------------------------------------
 function reset(scores) {
