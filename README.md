@@ -109,7 +109,10 @@ written in the
 
 ## Licensing
 
-Software: [MIT License](LICENSE).
+Web UI (`site/`): [AGPL-3.0](site/LICENSE). If you run a modified copy as a
+public website, you must offer your visitors its source code.
+
+Other software (pipeline, CLI, query service) and data files: [MIT License](LICENSE).
 
 Technical report and original editorial content: [CC BY-NC-SA 4.0](LICENSE-CONTENT.md).
 Commercial republication, resale, paid newsletters, dataset packaging, or
