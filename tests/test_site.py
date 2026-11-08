@@ -1106,7 +1106,7 @@ def test_trends_day_load_does_not_override_newer_today_navigation():
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
     assert (
         'view === "today" && state.todayDate === "all" '
-        '&& !state.fullDataLoaded && !state.searchData'
+        "&& !state.fullDataLoaded && !state.searchData"
     ) in script
 
     node = shutil.which("node")
