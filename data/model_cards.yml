@@ -1884,6 +1884,65 @@ benchmarks:
       keys are specialist-written or reviewed; 11 rest on primary sources
       without expert review, and 6 November additions are not second-reviewed.
 
+  - id: airbench_2024
+    name: AirBench 2024
+    aliases: ["AirBench", "AirBench 2024"]
+    domain: security
+    caveat: >-
+      5,694 prompts across 314 risk categories (arXiv:2608.17183, §3.1).
+      Judged by GPT-4o under a ternary 0 / 0.5 / 1 rubric. The paper's own
+      finding is that mean-score leaderboards over these suites are unstable
+      under rubric ambiguity, so no per-model scores from the paper are filed
+      here; this entry records the suite so future runs can attach scores.
+
+  - id: salad_bench
+    name: SALAD-Bench
+    aliases: ["SALAD-Bench", "SALAD Bench"]
+    domain: security
+    caveat: >-
+      21,318 prompts (arXiv:2608.17183, §3.1). MD-Judge-v0.1 natively
+      produces an unsafe probability plus a binary safe/unsafe judgment,
+      not a ternary score: the paper derives ternary 0 / 0.5 / 1 outcomes
+      with model-specific Otsu thresholds (§3.2) to compare SALAD with the
+      HELM-style suites, so the ternary scale is the paper's derivation,
+      not SALAD-Bench's native protocol, and a future native MD-Judge
+      score must not be read as ternary. No per-model scores filed: the
+      paper reports ambiguity and rank instability across suites rather
+      than benchmark scores.
+
+  - id: harmbench
+    name: HarmBench
+    aliases: ["HarmBench"]
+    domain: security
+    caveat: >-
+      400 behavior prompts in HELM Safety v1.0 across 4 classes
+      (arXiv:2608.17183, §3.1). Judged by GPT-4o under a ternary 0 / 0.5 / 1
+      rubric. No per-model scores filed: the paper reports ambiguity and rank
+      instability across suites rather than benchmark scores.
+
+  - id: simple_safety_tests
+    name: Simple Safety Tests
+    aliases: ["Simple Safety Tests", "SST"]
+    domain: security
+    url: https://arxiv.org/abs/2311.08370
+    released: 2023-11-14
+    caveat: >-
+      100 prompts (arXiv:2608.17183, §3.1). Judged by GPT-4o under a ternary
+      0 / 0.5 / 1 rubric. No per-model scores filed: the paper reports
+      ambiguity and rank instability across suites rather than benchmark
+      scores.
+
+  - id: bbq
+    name: BBQ
+    aliases: ["BBQ", "Bias Benchmark for QA"]
+    domain: knowledge
+    caveat: >-
+      Multiple-choice social-bias question answering (arXiv:2608.17183, §3.1).
+      Scored by accuracy, unlike the ternary-judged suites in the same paper,
+      so its numbers are not comparable with theirs. No per-model scores
+      filed: the paper reports ambiguity and rank instability rather than
+      benchmark scores.
+
 # Model cards, technical reports and release posts.
 #
 # `organization` is the publisher of the document. `benchmarks` is the set of
