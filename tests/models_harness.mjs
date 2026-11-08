@@ -146,6 +146,9 @@ const env = {
   loadBenchmarkShard: async (slug) => shards.get(slug) ?? null,
   writeUrl: () => { env.urlWrites += 1; },
   fetch: async () => scoresResponse,
+  // The load-feedback pill is app-wide chrome, not Models behaviour; run the
+  // load straight through.
+  trackLoad: (label, views, run) => run(null),
   urlWrites: 0,
   records: [],
 };

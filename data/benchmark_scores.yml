@@ -96,6 +96,22 @@ benchmarks:
     metric: accuracy
     direction: higher_is_better
     unit: percent
+  - benchmark_id: arc
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+  - benchmark_id: winogrande
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+  - benchmark_id: hellaswag
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+  - benchmark_id: truthfulqa
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
   - benchmark_id: mmmlu
     metric: accuracy
     direction: higher_is_better
@@ -552,6 +568,10 @@ benchmarks:
 
   - benchmark_id: slopcodebench
     metric: isolated_solve
+    direction: higher_is_better
+    unit: percent
+  - benchmark_id: lifesci_diamond
+    metric: strict_pass_rate
     direction: higher_is_better
     unit: percent
 results:
@@ -6896,3 +6916,346 @@ results:
     value: 3.57
     read_from: html_text
     measurement_kind: benchmark_publisher_run
+
+  # Arca's own systems on the full 55-task benchmark, from the publisher's
+  # results blog (updated 2026-11-04). The 18 plain-API runs from the same
+  # tables follow below; organizations are read from the blog's own run-settings
+  # table, which gives each model's API ID with its vendor prefix
+  # (openai/, anthropic/, meta/, google/, moonshotai/, spacexai/).
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); Arca chat workflow via OpenRouter; no temperature, reasoning-effort or output-token overrides, effective settings not recorded; 20 minutes per workflow turn; one answer per task
+    model: Arca with GPT-6 Astra
+    organization: Arca
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 29.1
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); Arca chat workflow via OpenRouter; no temperature, reasoning-effort or output-token overrides, effective settings not recorded; 20 minutes per workflow turn; one answer per task
+    model: Arca Auto
+    organization: Arca
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 20.0
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); Arca chat workflow via OpenRouter; no temperature, reasoning-effort or output-token overrides, effective settings not recorded; 20 minutes per workflow turn; one answer per task
+    model: Arca with Claude Opus 5.5
+    organization: Arca
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 12.7
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); Arca chat workflow via OpenRouter; no temperature, reasoning-effort or output-token overrides, effective settings not recorded; 20 minutes per workflow turn; one answer per task
+    model: Arca with Claude Opus 5
+    organization: Arca
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 9.1
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  # Plain-API runs on the same full 55-task benchmark, from the same blog
+  # tables ("Full fixed task set" and "View exact values for 22 systems").
+  # Arca ran these itself through its reference harness (Vercel AI Gateway
+  # /v1/chat/completions, web_search tool backed by Exa, 40 steps max), so
+  # they are benchmark_publisher_run rows like the Arca systems above, with
+  # no reported_by: Arca measured them, it did not repeat a self-report.
+  # Organizations come from the blog's API-ID table (see comment above).
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: GPT-6 Astra
+    organization: OpenAI
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 20.0
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: GPT-6.1 Sol
+    organization: OpenAI
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 14.5
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: GPT-6.1 Terra
+    organization: OpenAI
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 9.1
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: Muse Wonder
+    organization: Meta
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 9.1
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: GPT-5.6 Sol
+    organization: OpenAI
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 5.5
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: Grok 4.6
+    organization: xAI
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 3.6
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: Claude Opus 5.5
+    organization: Anthropic
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 3.6
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: Claude Fable 5
+    organization: Anthropic
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 3.6
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: Gemini 3.7 Flash
+    organization: Google
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 1.8
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: GPT-5.6 Terra
+    organization: OpenAI
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 1.8
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: Claude Sonnet 5
+    organization: Anthropic
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 1.8
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: Kimi K3
+    organization: Moonshot AI
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 1.8
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: Claude Fable 5.1
+    organization: Anthropic
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 1.8
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: Claude Opus 5
+    organization: Anthropic
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 1.8
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: Gemini 4 Argon
+    organization: Google
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 0.0
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: Gemini 3.1 Pro Preview
+    organization: Google
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 0.0
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: Muse Spark 1.2
+    organization: Meta
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 0.0
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: lifesci_diamond
+    instrument: lifesci_diamond_full_55
+    protocol: 55 tasks; strict pass requires every rubric line fully met and no penalty fires; GPT-6.1 Sol judge (medium reasoning effort); plain API via Vercel AI Gateway reference harness, web_search tool (Exa); up to 40 model steps per turn; one answer per task; API IDs not pinned to model snapshots; temperature, top-p, seed, reasoning effort and max output tokens left to provider defaults, effective values not recorded
+    model: Claude Opus 4.8
+    organization: Anthropic
+    source_id: lifesci_diamond_arca_blog
+    reported_at: 2026-11-04
+    value: 0.0
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+
+  # Full-split accuracies from arXiv:2607.28801, Tables 4 and 9 (Aleph Alpha
+  # Eval-Framework, loglikelihood). Only the "All Samples" baseline rows: the
+  # paper's filtered-subset rows and its cross-benchmark Average column are
+  # not benchmark scores. TruthfulQA's 18.7 / 21.0 are MC1+MC2 combined
+  # (n=1634), not the standard single TruthfulQA metric, so they are filed
+  # below under benchmark_id truthfulqa with instrument truthfulqa_mc1_mc2.
+  # Values printed as proportions (0.579 etc.), stored as percent per this
+  # file's accuracy convention.
+  - benchmark_id: winogrande
+    instrument: winogrande
+    protocol: winogrande_xl test split, loglikelihood, Aleph Alpha Eval-Framework
+    model: Llama-3.2-1B
+    organization: Meta
+    reported_by: Aleph Alpha Research
+    source_id: benchmarks_are_not_monolithic_results
+    reported_at: 2026-07-30
+    value: 57.9
+    read_from: html_text
+  - benchmark_id: hellaswag
+    instrument: hellaswag
+    protocol: full released split (n=10042), loglikelihood, Aleph Alpha Eval-Framework
+    model: Llama-3.2-1B
+    organization: Meta
+    reported_by: Aleph Alpha Research
+    source_id: benchmarks_are_not_monolithic_results
+    reported_at: 2026-07-30
+    value: 47.7
+    read_from: html_text
+  - benchmark_id: arc
+    instrument: arc
+    protocol: Easy + Challenge test splits, loglikelihood, Aleph Alpha Eval-Framework
+    model: Llama-3.2-1B
+    organization: Meta
+    reported_by: Aleph Alpha Research
+    source_id: benchmarks_are_not_monolithic_results
+    reported_at: 2026-07-30
+    value: 48.4
+    read_from: html_text
+  - benchmark_id: mmlu
+    instrument: mmlu
+    protocol: all-subjects test split, loglikelihood, Aleph Alpha Eval-Framework
+    model: Llama-3.2-1B
+    organization: Meta
+    reported_by: Aleph Alpha Research
+    source_id: benchmarks_are_not_monolithic_results
+    reported_at: 2026-07-30
+    value: 39.6
+    read_from: html_text
+  - benchmark_id: winogrande
+    instrument: winogrande
+    protocol: winogrande_xl test split, loglikelihood, Aleph Alpha Eval-Framework
+    model: SmolLM-1.7B-Instruct
+    organization: HuggingFaceTB
+    reported_by: Aleph Alpha Research
+    source_id: benchmarks_are_not_monolithic_results
+    reported_at: 2026-07-30
+    value: 55.0
+    read_from: html_text
+  - benchmark_id: hellaswag
+    instrument: hellaswag
+    protocol: full released split (n=10042), loglikelihood, Aleph Alpha Eval-Framework
+    model: SmolLM-1.7B-Instruct
+    organization: HuggingFaceTB
+    reported_by: Aleph Alpha Research
+    source_id: benchmarks_are_not_monolithic_results
+    reported_at: 2026-07-30
+    value: 47.0
+    read_from: html_text
+  - benchmark_id: arc
+    instrument: arc
+    protocol: Easy + Challenge test splits, loglikelihood, Aleph Alpha Eval-Framework
+    model: SmolLM-1.7B-Instruct
+    organization: HuggingFaceTB
+    reported_by: Aleph Alpha Research
+    source_id: benchmarks_are_not_monolithic_results
+    reported_at: 2026-07-30
+    value: 53.0
+    read_from: html_text
+  - benchmark_id: mmlu
+    instrument: mmlu
+    protocol: all-subjects test split, loglikelihood, Aleph Alpha Eval-Framework
+    model: SmolLM-1.7B-Instruct
+    organization: HuggingFaceTB
+    reported_by: Aleph Alpha Research
+    source_id: benchmarks_are_not_monolithic_results
+    reported_at: 2026-07-30
+    value: 26.0
+    read_from: html_text
+  - benchmark_id: truthfulqa
+    instrument: truthfulqa_mc1_mc2
+    protocol: MC1+MC2 combined (n=1634), loglikelihood, Aleph Alpha Eval-Framework
+    model: Llama-3.2-1B
+    organization: Meta
+    reported_by: Aleph Alpha Research
+    source_id: benchmarks_are_not_monolithic_results
+    reported_at: 2026-07-30
+    value: 18.7
+    read_from: html_text
+  - benchmark_id: truthfulqa
+    instrument: truthfulqa_mc1_mc2
+    protocol: MC1+MC2 combined (n=1634), loglikelihood, Aleph Alpha Eval-Framework
+    model: SmolLM-1.7B-Instruct
+    organization: HuggingFaceTB
+    reported_by: Aleph Alpha Research
+    source_id: benchmarks_are_not_monolithic_results
+    reported_at: 2026-07-30
+    value: 21.0
+    read_from: html_text

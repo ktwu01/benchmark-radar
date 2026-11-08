@@ -294,6 +294,7 @@ def test_repository_checks_classify_every_case():
     found = {
         "a/empty": _meta("a/empty", 0),
         "a/readme": _meta("a/readme", 1),
+        "a/drive": _meta("a/drive", 17),
         "a/ships": _meta("a/ships", 40),
         "a/large": _meta("a/large", 50_000),
         "a/old": _meta("a/old", 900, archived=True),
@@ -302,7 +303,17 @@ def test_repository_checks_classify_every_case():
 
     def list_root(repo):
         listed.append(repo)
-        return {"a/readme": ["README.md", "teaser.png"], "a/ships": ["README.md", "eval.py"]}[repo]
+        return {
+            "a/readme": ["README.md", "teaser.png"],
+            "a/drive": ["README.md"],
+            "a/ships": ["README.md", "eval.py"],
+        }[repo]
+
+    readmes = {
+        "a/readme": "# Code coming soon",
+        # ShaohuaDong2021/RGBD20K: data on Google Drive, code "will be released".
+        "a/drive": "Download: https://drive.google.com/drive/folders/abc",
+    }
 
     def confirm(repo):
         # a/renamed moved; the repository endpoint follows the rename.
@@ -318,9 +329,13 @@ def test_repository_checks_classify_every_case():
         search=lambda repos: {r: found[r] for r in repos if r in found},
         confirm=confirm,
         list_root=lambda repo: list_root(repo) if repo != "b/new-name" else ["src"],
+        read_readme=lambda repo, name: readmes.get(repo, ""),
     )
     assert rows["a/empty"]["placeholder"] is True
     assert rows["a/readme"]["placeholder"] is True
+    # A README that links a dataset host has shipped its data.
+    assert rows["a/drive"]["placeholder"] is False
+    assert rows["a/drive"]["data_link"] == "drive.google.com"
     assert rows["a/ships"]["placeholder"] is False
     # Above LISTING_MAX_KB a repository is not README-only; no listing call.
     assert rows["a/large"]["placeholder"] is False and "a/large" not in listed
@@ -389,3 +404,57 @@ def test_a_placeholder_does_not_set_the_window_maximum():
     # the placeholder's.
     assert by_name["ships"]["components"]["github_stars"]["normalized"] == 1.0
     assert by_name["viral"]["status"] == "limited_signals"
+
+
+def test_readme_data_links():
+    from benchmark_radar.release_signals import readme_data_link, readme_name
+
+    assert readme_data_link("see https://huggingface.co/datasets/x/y") == "huggingface.co/datasets"
+    assert readme_data_link("Kaggle: https://www.kaggle.com/datasets/a/b") == "kaggle.com/datasets"
+    assert readme_data_link("Code coming soon. https://huggingface.co/x") is None
+    assert readme_name(["LICENSE", "readme.md", "assets"]) == "readme.md"
+    assert readme_name(["LICENSE"]) is None
+
+
+def test_s3_dataset_links_in_every_url_style():
+    from benchmark_radar.release_signals import readme_data_link
+
+    for url in (
+        "https://s3.amazonaws.com/bucket/data.zip",
+        "https://bucket.s3.us-east-1.amazonaws.com/data.zip",
+        "https://bucket.s3.amazonaws.com/data.zip",
+        "https://s3-us-west-2.amazonaws.com/bucket/data.zip",
+    ):
+        assert readme_data_link(url), url
+    assert readme_data_link("https://aws.amazon.com/") is None
+
+
+def test_a_failed_readme_read_keeps_the_previous_row():
+    from datetime import date
+
+    from benchmark_radar.http import RequestError
+
+    fetch = _fetch_module()
+    previous = {
+        "placeholder": False,
+        "data_link": "drive.google.com",
+        "unavailable": False,
+        "retrieved_at": "2026-10-01",
+    }
+    rows = {"a/data": dict(previous)}
+
+    def read_readme(repo, name):
+        raise RequestError("HTTP 503 from raw.githubusercontent.com")
+
+    fetch.refresh_repos(
+        ["https://github.com/a/data"],
+        rows,
+        today=date(2026, 11, 6),
+        limit=5,
+        search=lambda repos: {"a/data": _meta("a/data", 17)},
+        confirm=lambda repo: None,
+        list_root=lambda repo: ["README.md"],
+        read_readme=read_readme,
+    )
+    # Not evidence of a placeholder: the run keeps what it knew.
+    assert rows["a/data"] == previous

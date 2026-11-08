@@ -72,6 +72,19 @@ _PLACEHOLDER_NAMES = frozenset(
         "pics",
     }
 )
+# Hosts a README links to when the benchmark's data ships outside the repository
+# (ShaohuaDong2021/RGBD20K: dataset and models on Google Drive, code "will be
+# released"). For a benchmark the data is the deliverable, so such a README is
+# not a placeholder. A link to someone else's dataset passes too; that only
+# leaves a non-benchmark ranked, the error principle.md tolerates.
+DATA_HOSTS = re.compile(
+    r"huggingface\.co/datasets|hf\.co/datasets|drive\.google\.com|zenodo\.org"
+    r"|kaggle\.com/datasets|figshare\.com|dropbox\.com|1drv\.ms|onedrive\.live\.com"
+    r"|sharepoint\.com|pan\.baidu\.com|modelscope\.cn/datasets|osf\.io|dataverse"
+    r"|s3(?:[.-][a-z0-9-]+)?\.amazonaws\.com|storage\.googleapis\.com|physionet\.org"
+    r"|openxlab\.org\.cn/datasets",
+    re.IGNORECASE,
+)
 _IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".pdf")
 
 _HEADER_INSTITUTIONS = """\
@@ -107,6 +120,17 @@ def is_placeholder_root(names: list[str]) -> bool:
             continue
         return False
     return True
+
+
+def readme_data_link(text: str | None) -> str | None:
+    """The first dataset host a README links to, or None."""
+    match = DATA_HOSTS.search(str(text or ""))
+    return match.group(0).lower() if match else None
+
+
+def readme_name(names: list[str]) -> str | None:
+    """The README file among a repository's root entries, if any."""
+    return next((n for n in names if str(n).lower().split(".", 1)[0] == "readme"), None)
 
 
 def github_repo(url: str | None) -> str | None:

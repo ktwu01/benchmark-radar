@@ -10,6 +10,14 @@ Run ``benchmark-radar normalize-catalog`` first: this reads the normalized
 source records it writes under data/catalog/. Existing entries are kept, so a
 rerun fetches only papers not yet recorded; pass --refresh to re-read them all.
 
+A paper the DOI lookup misses is retried by its arXiv location
+(``filter=locations.landing_page_url:https://arxiv.org/abs/<id>``): OpenAlex
+often merges an older arXiv preprint into the published version's work, so
+the arXiv DOI finds nothing (#1081). A work counts only when exactly one
+matches, the same rule as the DOI lookup. One paper per request: the filter
+itself is the attribution, and a list response shows only a work's first 100
+locations, so a batched lookup could not tell which paper a work came from.
+
 Without an API key, OpenAlex gives every caller on a network one small shared
 daily budget, so each request carries 50 DOIs. Set OPENALEX_API_KEY to use a
 key. Failed requests back off exponentially (1 to 60 seconds, up to five
@@ -62,12 +70,9 @@ def eligible(records_dir: Path) -> dict[str, str]:
     return dict(sorted(found.items()))
 
 
-def request(papers: list[str], *, retries: int = 5) -> dict[str, Any]:
-    params = {
-        "filter": "doi:" + "|".join(arxiv_doi(paper) for paper in papers),
-        "select": "id,doi,authorships",
-        "per-page": "200",
-    }
+def _fetch(params: dict[str, str], *, retries: int = 5) -> dict[str, Any]:
+    """One OpenAlex request with the shared retry and backoff."""
+    params = dict(params)
     key = os.environ.get("OPENALEX_API_KEY")
     if key:
         params["api_key"] = key
@@ -89,6 +94,36 @@ def request(papers: list[str], *, retries: int = 5) -> dict[str, Any]:
             time.sleep(delay)
             delay = min(delay * 2, 60.0)
     raise AssertionError("unreachable")
+
+
+def request(papers: list[str], *, retries: int = 5) -> dict[str, Any]:
+    return _fetch(
+        {
+            "filter": "doi:" + "|".join(arxiv_doi(paper) for paper in papers),
+            "select": "id,doi,authorships",
+            "per-page": "200",
+        },
+        retries=retries,
+    )
+
+
+def request_by_arxiv_location(paper: str, *, retries: int = 5) -> dict[str, Any]:
+    """The works carrying one arXiv paper as a location (#1081).
+
+    OpenAlex often merges an older arXiv preprint into the published
+    version's work, so the arXiv DOI finds nothing. One paper per request:
+    the filter itself is the attribution, and a list response shows only a
+    work's first 100 locations, so a batched lookup could not tell which
+    paper a work came from.
+    """
+    return _fetch(
+        {
+            "filter": f"locations.landing_page_url:https://arxiv.org/abs/{paper}",
+            "select": "id,doi,authorships",
+            "per-page": "2",
+        },
+        retries=retries,
+    )
 
 
 def institutions(work: dict[str, Any]) -> list[str]:
@@ -124,6 +159,18 @@ def parse(payload: dict[str, Any], papers: list[str]) -> dict[str, dict[str, Any
     return found
 
 
+def parse_location(payload: dict[str, Any], paper: str) -> dict[str, Any] | None:
+    """The OpenAlex work for one paper found by its arXiv location, or None.
+
+    A paper counts only when exactly one work carries its arXiv location,
+    the same certainty rule as the DOI lookup; a work with no linked
+    institution still records nothing.
+    """
+    works = payload.get("results") or []
+    names = institutions(works[0]) if len(works) == 1 else []
+    return {"work": works[0]["id"], "institutions": names} if names else None
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--records-dir", type=Path, default=Path("data/catalog"))
@@ -154,6 +201,22 @@ def main() -> None:
         fetched.update(parse(request(batch), batch))
         args.checkpoint.write_text(json.dumps(fetched, ensure_ascii=False), encoding="utf-8")
         print(f"fetched {min(start + args.batch, len(missing))}/{len(missing)}")
+        time.sleep(args.delay)
+
+    # Papers the DOI misses — OpenAlex often merges an older arXiv preprint
+    # into the published version's work (#1081). Retry those by the arXiv
+    # location, one paper per request; a paper the DOI already resolved is
+    # never re-fetched, and a paper recorded as unresolved in an older
+    # checkpoint is retried here. Every paper is checkpointed as it resolves
+    # so an interrupted run resumes where it stopped.
+    unresolved = sorted(
+        {paper for key, paper in wanted.items() if key not in existing}
+        - {paper for paper, result in fetched.items() if result}
+    )
+    for count, paper in enumerate(unresolved, start=1):
+        fetched[paper] = parse_location(request_by_arxiv_location(paper), paper)
+        args.checkpoint.write_text(json.dumps(fetched, ensure_ascii=False), encoding="utf-8")
+        print(f"location fallback {count}/{len(unresolved)}")
         time.sleep(args.delay)
 
     today = datetime.now(UTC).date().isoformat()
