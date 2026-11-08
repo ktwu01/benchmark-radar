@@ -1373,6 +1373,7 @@ const I18N = {
     "Loading this window…": "正在加载该时间窗口…",
     "This window could not be loaded. Refresh to try again.": "无法加载该时间窗口，请刷新重试。",
     "The {window} window is not in this build.": "此版本未提供 {window} 的时间窗口。",
+    "No summary available.": "暂无摘要。",
     "The latest releases ranking is not available in this build.": "此版本未提供最新发布排行。",
     "{ranked} of {total} releases in this window are ranked; the rest are listed with limited signals.":
       "该时间窗口内 {total} 个发布中有 {ranked} 个进入排名；其余因信号有限仅列出。",
@@ -10837,7 +10838,12 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
     }, [
       summary,
       element("div", { className: "latest-release-body" }, [
-        entry.purpose ? element("p", { className: "latest-release-purpose", text: entry.purpose }) : null,
+        entry.purpose
+          ? element("p", { className: "latest-release-purpose", text: entry.purpose })
+          : element("p", {
+              className: "latest-release-purpose latest-release-purpose-empty",
+              text: t("No summary available."),
+            }),
         signals,
         forksLine,
         element("p", { className: "latest-release-meta", text: meta }),

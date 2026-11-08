@@ -325,6 +325,7 @@ def test_every_visible_latest_releases_string_is_translated():
         "Loading this window…",
         "This window could not be loaded. Refresh to try again.",
         "The {window} window is not in this build.",
+        "No summary available.",
         "Data through {through} · average signal coverage {coverage}.",
         "normalized",
         "not scored",
@@ -357,6 +358,10 @@ def test_the_static_leaderboard_page_seeds_the_default_window():
     assert ">high data</span>" in rows
     assert 'class="latest-release-date">released Sep 1, 2026</small>' in rows
     assert rows.count('<div class="latest-release-body">') == 2
+    # Both fixture entries carry no purpose, so each row shows the explicit
+    # empty state (issue #348) instead of an absent paragraph.
+    assert rows.count('class="latest-release-purpose latest-release-purpose-empty"') == 2
+    assert rows.count("No summary available.") == 2
     assert rows.count("<dt>GitHub stars</dt><dd><span>not observed</span>") == 2
     assert "limited signals: not enough fresh durable signal to rank" in rows
     assert rows.index("Bench") < rows.index("Quiet"), "published order is kept"

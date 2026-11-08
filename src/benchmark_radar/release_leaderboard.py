@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import math
 import re
+import unicodedata
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -52,6 +53,136 @@ COMBINED_METHOD_VERSION = "attention-affiliation-v2"
 AFFILIATION_WEIGHT = 0.20
 MIN_OBSERVED_WEIGHT_RANK = 0.45
 DEFAULT_TOP_LIMIT = 10
+
+# One-line release summary (issue #348). A release row answers one question —
+# what does this benchmark measure, and for whom — in a single scannable
+# line, or it says nothing. The line is extractive, never generated: it is
+# the first sentence of the source record's own summary, so a line can only
+# state what the source already stated. No API call, no cache, nothing to
+# regenerate: the same record always yields the same line.
+ONE_LINE_SUMMARY_MAX_CHARS = 140
+# Box-drawing and block characters: one release's summary was a run of "═══"
+# that pushed a 720px column to 1349px (issue #333). They carry no meaning
+# here, so they are stripped rather than escaped around.
+_ONE_LINE_STRIP_RANGES = ((0x2500, 0x259F),)
+_SENTENCE_END_RE = re.compile(r"[.!?](?=\s+\S|\s*$)")
+# A sentence can start with lowercase text ("... platform. adaption-python
+# code preferences ..."), so the boundary lookahead must not require an
+# uppercase start. Abbreviation periods ("vs.", "Dr.", "U.S.") are still
+# guarded by the checks in _first_sentence_end, not by this regex.
+# Periods that do not end a sentence: "vs.", "Dr.", "e.g.", "U.S.".
+_SENTENCE_ABBREVIATIONS = frozenset(
+    {
+        "vs",
+        "dr",
+        "mr",
+        "mrs",
+        "ms",
+        "st",
+        "jr",
+        "sr",
+        "etc",
+        "al",
+        "e.g",
+        "i.e",
+        "u.s",
+        "u.k",
+        "no",
+        "fig",
+        "eq",
+        "approx",
+        "dept",
+        "inc",
+        "ltd",
+        "corp",
+        "jan",
+        "feb",
+        "mar",
+        "apr",
+        "jun",
+        "jul",
+        "aug",
+        "sep",
+        "sept",
+        "oct",
+        "nov",
+        "dec",
+    }
+)
+
+
+def _first_sentence_end(text: str) -> int | None:
+    """Return the end index of the first substantive sentence in ``text``.
+
+    Skips a period that belongs to an abbreviation (``vs.``, ``Dr.``,
+    ``U.S.``) and a period that ends a standalone label (``Background.``),
+    so the compact line still says what the release is about instead of
+    publishing a nearly meaningless fragment. A skipped candidate is only
+    skipped while a later candidate exists: when it is the last one, the
+    text ends there anyway and the whole line is the sentence.
+    """
+    matches = list(_SENTENCE_END_RE.finditer(text))
+    for index, match in enumerate(matches):
+        sentence = text[: match.end()]
+        before = text[: match.start()].rstrip()
+        token = before.rsplit(None, 1)[-1] if before else ""
+        token_lower = token.lower().rstrip(".")
+        is_abbreviation = (
+            token_lower in _SENTENCE_ABBREVIATIONS
+            or ("." in token and len(token.rsplit(".", 1)[-1]) == 1)
+            or (
+                len(token) == 1
+                and match.end() + 1 < len(text)
+                and text[match.end()].isalpha()
+                and text[match.end() + 1] == "."
+            )
+        )
+        is_label = " " not in sentence.strip()
+        if (is_abbreviation or is_label) and index < len(matches) - 1:
+            continue
+        return match.end()
+    return None
+
+
+def one_line_summary(value: Any) -> str:
+    """Derive a release row's one-line summary from the record's own text.
+
+    Takes the first sentence of ``value`` (the source record's summary),
+    capped at :data:`ONE_LINE_SUMMARY_MAX_CHARS` characters. Whitespace
+    controls become spaces and other control and box-drawing characters
+    are stripped, so nothing in the line can break the column. Returns
+    ``""`` when the record carries nothing usable: a
+    release with nothing to summarise keeps an honest empty state instead
+    of a manufactured line.
+    """
+    if not isinstance(value, str):
+        return ""
+    # Whitespace controls (\n, \t, \r, ...) separate words: turn them into
+    # spaces first, so "OBJECTIVE\nThis..." does not become
+    # "OBJECTIVEThis...". Every other control character is dropped.
+    spaced = "".join(
+        " " if char.isspace() and unicodedata.category(char) in ("Cc", "Zl", "Zp") else char
+        for char in value
+    )
+    cleaned = "".join(
+        char
+        for char in spaced
+        if unicodedata.category(char) not in ("Cc", "Cf", "Zl", "Zp")
+        and not any(start <= ord(char) <= end for start, end in _ONE_LINE_STRIP_RANGES)
+    )
+    text = " ".join(cleaned.split())
+    if not text:
+        return ""
+    end = _first_sentence_end(text)
+    if end is not None:
+        text = text[:end]
+    if len(text) <= ONE_LINE_SUMMARY_MAX_CHARS:
+        return text
+    cut = text.rfind(" ", 0, ONE_LINE_SUMMARY_MAX_CHARS - 1)
+    if cut <= 0:
+        return text[: ONE_LINE_SUMMARY_MAX_CHARS - 1] + "…"
+    return text[:cut] + "…"
+
 
 WINDOW_DAYS: dict[str, int] = {
     "7d": 7,
@@ -487,6 +618,16 @@ def filter_release_cohort(
         if not (window_start_dt <= earliest_dt <= as_of_dt):
             continue
 
+        # A later snapshot can enrich a record whose earliest occurrence
+        # has no summary (blanca-pueche/benchmark-complex-prediction:
+        # empty on 2026-10-08, substantive on 2026-10-09). Keep the
+        # earliest occurrence for the release date, but take the summary
+        # from the first occurrence that has one.
+        purpose_item = next(
+            (item for _, item in release_dates if one_line_summary(item.get("summary"))),
+            primary_item,
+        )
+
         name = primary_item.get("title") or primary_item.get("source_id") or canonical_id
         is_reviewed = _is_reviewed_entity(canonical_id, name, occurrences, reviewed_benchmark_ids)
         ba_obs = attention_by_canonical.get(canonical_id, [])
@@ -500,11 +641,12 @@ def filter_release_cohort(
             {
                 "canonical_artifact_id": canonical_id,
                 "name": name,
-                "purpose": (
-                    primary_item.get("summary")
-                    or primary_item.get("title")
-                    or "Benchmark and evaluation suite"
-                ),
+                # One line from the record's own summary (issue #348). No
+                # fallback to the title — the row already shows it — and no
+                # manufactured "Benchmark and evaluation suite": a record
+                # with nothing to summarise keeps an honest empty purpose,
+                # which the row renders as an explicit empty state.
+                "purpose": one_line_summary(purpose_item.get("summary")),
                 "release_date": earliest_dt.isoformat(),
                 "has_dated_attention": has_attention,
                 "is_reviewed_benchmark": is_reviewed,
