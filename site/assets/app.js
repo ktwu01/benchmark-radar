@@ -2969,10 +2969,14 @@ function shareIcon() {
 }
 
 function shareControl(image, label, linkLabel = t("Share image"), share = null) {
+  // Every caller passes a URL it already checked, but this control navigates
+  // to it on failure, so it checks again: only an http(s) image is a link.
+  const href = safeHttpUrl(image);
+  if (!href) return null;
   const link = element("a", {
       className: "share-link share-icon",
       attrs: {
-        href: image,
+        href,
         target: "_blank",
         rel: "noopener noreferrer",
         title: linkLabel,
@@ -2989,11 +2993,11 @@ function shareControl(image, label, linkLabel = t("Share image"), share = null) 
       const caption = share.cards ? summaryCaption(share) : briefingCaption(share);
       openDailyShare({
         name: share.cards ? caption.split("\n")[0] : label,
-        image, day: share.day, caption, t,
+        image: href, day: share.day, caption, t,
       });
     } catch (error) {
       console.error(error);
-      window.location.assign(image);
+      window.location.assign(href);
     }
   });
   return element("div", { className: "share-control" }, [link]);

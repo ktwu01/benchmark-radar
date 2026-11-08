@@ -232,7 +232,7 @@ assert.match(readFileSync("site/assets/app.js", "utf8"), /import \{ starPrompt \
   const briefing = briefingCaption({ card, finding: "Finding with https://example.org/evidence.",
     implication: "Complete implication.", sources: ["https://example.org/extra"] });
   assert(briefing.includes("Why it matters: Complete implication."));
-  assert(briefing.includes("https://example.org/extra"));
+  assert(briefing.split("\n").includes("Source: https://example.org/extra"));
   assert(briefing.includes(card.blurb), "a revised finding retains the immutable PNG blurb");
   const summary = summaryCaption({ day: "2026-11-07", cards: [card, { ...card, title: "Second" },
     { ...card, title: "Third" }, { ...card, title: "Not on summary" }] });
@@ -295,9 +295,16 @@ assert.match(readFileSync("site/assets/app.js", "utf8"), /import \{ starPrompt \
     .replace('import("./share-card.js")', 'Promise.reject(new Error("chunk missing"))')
     .replace('import("./share-caption.js")', 'Promise.resolve({})');
   let fallback;
-  const control = new Function("element", "shareIcon", "t", "window", `return (${controlSource});`)(
+  const safeHttpSource = app.slice(app.indexOf("function safeHttpUrl("), app.indexOf("\n}\n", app.indexOf("function safeHttpUrl(")) + 2);
+  const makeControl = new Function("element", "shareIcon", "t", "window",
+    `${safeHttpSource}\nreturn (${controlSource});`);
+  const control = makeControl(
     element, () => null, (v) => v, { location: { assign: (url) => { fallback = url; } } },
   )("https://example.org/card.png", "Bench", "Share card", { day: "2026-11-07", card: daily });
+  // A non-http(s) image never becomes a link the fallback could navigate to.
+  assert.equal(makeControl(element, () => null, (v) => v, { location: { assign() {
+    throw new Error("must not navigate");
+  } } })("javascript:alert(1)", "Bench", "Share card", { day: "2026-11-07", card: daily }), null);
   let prevented = false;
   await control.children[0].listeners.click({ metaKey: true, preventDefault() { prevented = true; } });
   assert.equal(prevented, false);
