@@ -3498,6 +3498,17 @@ function renderSearchScopeBanner(observationCount, benchmarkMatches) {
   banner.hidden = false;
 }
 
+function clearTodayResultsForLoadError() {
+  replaceChildren(byId("today-list"), []);
+  replaceChildren(byId("today-benchmarks-results"), []);
+  byId("today-benchmarks").hidden = true;
+  byId("search-scope-banner").hidden = true;
+  byId("today-breakdown").textContent = "";
+  byId("today-page-status").textContent = "";
+  byId("today-page-prev").disabled = true;
+  byId("today-page-next").disabled = true;
+}
+
 function renderToday({ resultsOnly = false } = {}) {
   // Events are bound before the data file resolves (initialize), so a nav
   // click or filter keystroke in the load window must no-op, not throw.
@@ -12318,15 +12329,11 @@ function bindEvents() {
         state.todayDate = state.data.latest_date || "";
       }
       setView(view);
-      if (view === "today") renderToday();
-      if (view === "leaderboard") renderLeaderboard();
-      if (view === "saturation") renderSaturation();
-      if (view === "library") renderLibrary();
-      if (view === "models") renderModels();
-      if (view === "trends") renderTrends();
-      if (view === "map") renderTrendMap();
       try {
-        if (view === "trends") await ensureTrendsData();
+        if (view === "today" && state.todayDate === "all" && !state.fullDataLoaded && !state.searchData) {
+          await ensureSearchData();
+        }
+        else if (view === "trends") await ensureTrendsData();
         // A trends response can supersede an in-flight /data/radar.json fetch
         // while the relationship explorer is open. The <details> element never
         // closed, so no toggle event fires again and the explorer would stay
@@ -12337,10 +12344,22 @@ function bindEvents() {
       } catch (error) {
         console.error(error);
         if (navigationSequence !== viewNavigationSequence) return;
+        if (view === "today" && state.todayDate === "all" && !state.fullDataLoaded && !state.searchData) {
+          clearTodayResultsForLoadError();
+          const notice = byId("today-load-error");
+          notice.hidden = false;
+          notice.textContent = t("Search data could not be loaded. Refresh to retry.");
+          return;
+        }
         window.location.assign(anchor?.href || VIEW_PATHS[view] || "/");
         return;
       }
       if (navigationSequence !== viewNavigationSequence) return;
+      if (view === "today") renderToday();
+      if (view === "leaderboard") renderLeaderboard();
+      if (view === "saturation") renderSaturation();
+      if (view === "library") renderLibrary();
+      if (view === "models") renderModels();
       if (view === "trends") renderTrends();
       if (view === "map") renderTrendMap();
     });

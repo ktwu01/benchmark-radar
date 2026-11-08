@@ -66,6 +66,8 @@ const getNode = (id) => {
 };
 const todayTab = node("button");
 todayTab.dataset.view = "today";
+const trendsTab = node("button");
+trendsTab.dataset.view = "trends";
 
 function updateLocation(_state, _title, url) {
   const parsed = new URL(url, "https://benchmark-radar.org");
@@ -79,7 +81,7 @@ globalThis.document = {
   createElementNS: (_namespace, tag) => node(tag),
   createTextNode: (value) => ({ textContent: String(value) }),
   getElementById: getNode,
-  querySelectorAll: (selector) => selector === "[data-view]" ? [todayTab] : [],
+  querySelectorAll: (selector) => selector === "[data-view]" ? [todayTab, trendsTab] : [],
   querySelector: () => null,
   addEventListener() {},
 };
@@ -103,6 +105,7 @@ globalThis.showDayTooltip = () => {};
 globalThis.toggleLang = () => {};
 
 let releaseFullResponse;
+let failSearch = false;
 globalThis.fetch = (path) => {
   // Trends also reads the catalog index for its research-direction table
   // (#420); an empty catalog keeps that table out of this navigation test.
@@ -110,6 +113,7 @@ globalThis.fetch = (path) => {
     return Promise.resolve({ ok: true, status: 200, json: async () => ({ benchmarks: [] }) });
   }
   if (path === "/data/radar-search.json") {
+    if (failSearch) return Promise.reject(new Error("offline"));
     return Promise.resolve({
       ok: true,
       status: 200,
@@ -223,3 +227,33 @@ for (const entry of ["column", "table"]) {
   }
 }
 console.log(JSON.stringify({ scenarios }));
+
+Object.assign(state, {
+  data: structuredClone(initialData),
+  view: "today",
+  todayDate: "all",
+  todayRenderedDate: "sentinel",
+  fullDataLoaded: false,
+  trendsDataLoaded: true,
+  searchData: null,
+  searchDataPromise: null,
+});
+getNode("today-list").append({ textContent: "stale latest-day result" });
+failSearch = true;
+await todayTab.dispatch("click", { preventDefault() {} });
+if (state.todayRenderedDate !== "sentinel") {
+  throw new Error("failed All dates search rendered bootstrap observations");
+}
+if (getNode("today-list").children.length !== 0) {
+  throw new Error("failed All dates search left stale results visible");
+}
+if (getNode("today-load-error").hidden || !getNode("today-load-error").textContent.includes("Search data")) {
+  throw new Error("failed All dates search did not show its error");
+}
+await trendsTab.dispatch("click", { preventDefault() {} });
+failSearch = false;
+await todayTab.dispatch("click", { preventDefault() {} });
+if (state.todayRenderedDate !== "all" || !state.searchData) {
+  throw new Error("re-entering Today did not retry the All dates search");
+}
+console.error("Search failure and re-entry recovery passed.");
