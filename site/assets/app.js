@@ -511,6 +511,8 @@ const I18N = {
     "Close": "关闭",
     "Loading scores…": "正在加载成绩…",
     "Loading the full archive…": "正在加载完整档案…",
+    "Loading search results…": "正在加载搜索结果…",
+    "Search data could not be loaded. Refresh to retry.": "无法加载搜索数据，请刷新后重试。",
     "Loading the benchmark catalog…": "正在加载 benchmark 目录…",
     "Loading the latest scan…": "正在加载最新扫描…",
     "Loading trends…": "正在加载趋势…",
@@ -1542,6 +1544,8 @@ const state = {
   todayRenderedDate: "",
   todayPage: 1,
   observations: null,
+  searchData: null,
+  searchDataPromise: null,
   fullDataLoaded: false,
   fullDataPromise: null,
   // One entry per Today window ("30d"), holding the file for that window:
@@ -1617,6 +1621,13 @@ function applyDashboardData(data, requestSequence, fullPayload) {
     state.trendsDataLoaded ||
     Boolean(!data.bootstrap && Array.isArray(data.days) && data.days.length > 1);
   if (payloadHasObservations(data)) {
+    state.observations = null;
+  }
+  // Once the full archive is installed it answers All dates searches itself.
+  // Holding the compact index next to it kept both parsed copies alive, which
+  // is the memory the index exists to save (#1182).
+  if (state.fullDataLoaded && state.searchData) {
+    state.searchData = null;
     state.observations = null;
   }
   return true;
@@ -4364,6 +4375,12 @@ function freshWindowData(key) {
 }
 
 function allObservations() {
+  if (state.searchData && state.todayDate === "all" && !state.fullDataLoaded) {
+    if (state.observations && state.observationsSource === state.searchData) return state.observations;
+    state.observationsSource = state.searchData;
+    state.observations = sortObservations([...state.searchData.observations]);
+    return state.observations;
+  }
   const days = observationDays();
   // The cache belongs to one source: a window file, or the days in state.data.
   if (state.observations && state.observationsSource === days) return state.observations;
@@ -4397,7 +4414,12 @@ function allObservations() {
       observation_kind: "attention",
     })),
   );
-  state.observations = [...evidence, ...attention].sort((a, b) => {
+  state.observations = sortObservations([...evidence, ...attention]);
+  return state.observations;
+}
+
+function sortObservations(observations) {
+  return observations.sort((a, b) => {
     const dateOrder = String(b.snapshot_date).localeCompare(String(a.snapshot_date));
     if (dateOrder) return dateOrder;
     // A release outranks every non-release from the same day, whatever the
@@ -4419,9 +4441,16 @@ function allObservations() {
     // Attention rows carry no priority, so within a day they order by the
     // event timestamp the row displays, keeping the visible order consistent
     // with the "Sort: Date ↓" caption.
-    return String(eventTimestamp(b)).localeCompare(String(eventTimestamp(a)));
+    const timeOrder = String(eventTimestamp(b)).localeCompare(String(eventTimestamp(a)));
+    if (timeOrder) return timeOrder;
+    // Rows that tie on everything above would otherwise keep their input
+    // order, which differs between radar.json and radar-search.json, so the
+    // two paths paged the same results differently (#1143). Break the tie on
+    // the record's identity so both produce one order.
+    const keyOrder = observationRecordKey(a).localeCompare(observationRecordKey(b));
+    if (keyOrder) return keyOrder;
+    return `${a.url || ""}\u0000${a.title || ""}`.localeCompare(`${b.url || ""}\u0000${b.title || ""}`);
   });
-  return state.observations;
 }
 
 // All dates is a record finder, not a replay of every overlapping crawl
@@ -11748,7 +11777,8 @@ function radarTitleLink(name, catalogPage, sourceHref) {
 
 function evidenceCard(item, day) {
   const ownDay = itemDay(item, day);
-  const shareCard = shareCardFor(ownDay, item.url);
+  const shareCard = shareCardFor(ownDay, item.url)
+    || (safeHttpUrl(item.share_image) ? { image: safeHttpUrl(item.share_image) } : null);
   const catalog = catalogCardFor(item);
   const fullTitle = displayTitle(item);
   const { name, subtitle } = splitBenchmarkTitle(fullTitle);
@@ -12583,9 +12613,24 @@ function bindEvents() {
       viewNavigationSequence += 1;
       state.todayDate = "all";
       state.todayPage = 1;
-      ensureFullData()
-        .then(() => renderToday())
-        .catch((error) => console.error(error));
+      const searchNavigationSequence = viewNavigationSequence;
+      ensureSearchData()
+        .then(() => {
+          if (
+            viewNavigationSequence !== searchNavigationSequence
+            || state.todayDate !== "all"
+          ) return;
+          renderToday();
+        })
+        .catch((error) => {
+          console.error(error);
+          if (
+            viewNavigationSequence !== searchNavigationSequence
+            || state.todayDate !== "all"
+          ) return;
+          byId("today-load-error").hidden = false;
+          byId("today-load-error").textContent = t("Search data could not be loaded. Refresh to retry.");
+        });
       return;
     }
     scheduleTodayRender();
@@ -12607,7 +12652,7 @@ function bindEvents() {
     state.organization = "";
     state.event = "";
     try {
-      await ensureFullData();
+      await ensureSearchData();
     } catch (error) {
       console.error(error);
       return;
@@ -12875,10 +12920,19 @@ function stateNeedsFullData() {
     && !latest.windows?.[state.lwindow]
   ) return true;
   return state.view === "today" && Boolean(
-    state.todayDate === "all" ||
     (state.todayDate
       && state.todayDate !== state.data?.latest_date
+      && state.todayDate !== "all"
       && !TODAY_WINDOWS[state.todayDate])
+  );
+}
+
+function stateNeedsSearchData() {
+  return Boolean(
+    state.view === "today"
+    && state.todayDate === "all"
+    && !state.fullDataLoaded
+    && !state.searchData
   );
 }
 
@@ -12938,6 +12992,7 @@ function stateNeedsTrendsData() {
 // search or an All-dates pick waits on it (issue #1128).
 const DASHBOARD_LOADS = {
   "/data/radar.json": ["Loading the full archive…", ["today", "map", "leaderboard", "trends"]],
+  "/data/radar-search.json": ["Loading search results…", ["today"]],
   "/data/radar-trends.json": ["Loading trends…", ["trends"]],
   "/data/radar-bootstrap.json": ["Loading the latest scan…", null],
 };
@@ -12997,8 +13052,36 @@ async function ensureFullData(cache = "default") {
   }
 }
 
+async function ensureSearchData(cache = "default") {
+  if (state.fullDataLoaded || state.searchData) return state.searchData;
+  if (state.searchDataPromise) return state.searchDataPromise;
+  state.searchDataPromise = (async () => {
+    const data = await fetchDashboardJson("/data/radar-search.json", cache);
+    if (
+      data?.schema_version !== 1
+      || data.generated_at !== state.data?.generated_at
+      || !Array.isArray(data.observations)
+    ) {
+      throw new Error("No compatible search index");
+    }
+    byId("today-load-error").hidden = true;
+    // The full archive may have landed while this request was in flight; it
+    // already answers All dates, so keeping the index too would hold both.
+    if (state.fullDataLoaded) return null;
+    state.searchData = data;
+    state.observations = null;
+    return data;
+  })();
+  try {
+    return await state.searchDataPromise;
+  } finally {
+    state.searchDataPromise = null;
+  }
+}
+
 async function ensureDataForState() {
   if (stateNeedsFullData()) await ensureFullData();
+  else if (stateNeedsSearchData()) await ensureSearchData();
   else if (stateNeedsWindowData()) await ensureWindowData();
   else if (stateNeedsTrendsData()) await ensureTrendsData();
 }
@@ -13025,8 +13108,25 @@ async function refreshData() {
     });
     if (!compatibleDashboard(data)) throw new Error("No compatible snapshots");
     if (!applyDashboardData(data, requestSequence, path === "/data/radar.json")) return;
+    if (state.searchData && state.searchData.generated_at !== state.data.generated_at) {
+      state.searchData = null;
+      state.observations = null;
+    }
     if (!validTodayDate()) {
       state.todayDate = state.data.latest_date;
+    }
+    if (state.view === "today" && state.todayDate === "all" && !state.fullDataLoaded) {
+      const previousSearchData = state.searchData;
+      const previousObservations = state.observations;
+      const previousObservationsSource = state.observationsSource;
+      state.searchData = null;
+      state.observations = null;
+      await ensureSearchData("reload").catch((error) => {
+        state.searchData = previousSearchData;
+        state.observations = previousObservations;
+        state.observationsSource = previousObservationsSource;
+        throw error;
+      });
     }
     // Re-evaluate against the payload just received. This is normally a no-op,
     // but guarantees the error is not retired if a future bootstrap shape lacks
@@ -13148,6 +13248,7 @@ async function initialize() {
       initializationWasSuperseded
       && compatibleDashboard(state.data)
       && !stateNeedsFullData()
+      && !stateNeedsSearchData()
       && !stateNeedsWindowData()
     ) {
       syncLeaderboardNav();
