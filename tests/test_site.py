@@ -507,6 +507,39 @@ def test_top_right_utilities_use_shared_icon_geometry_and_contact_control():
     assert ".repo-badge svg," in styles
 
 
+def test_trends_table_stays_inside_the_320px_viewport():
+    """Issue #1002: the table scrolls inside its frame; the page must not.
+
+    The sparkline cells carry an absolutely positioned .visually-hidden text.
+    Unless the frame is its containing block, the frame's overflow cannot clip
+    it and its place at the table's far right widens documentElement past the
+    viewport. All seven columns stay: the frame scrolls, the page does not.
+    Checking the headings exist in the HTML is not enough on its own — the
+    old mobile rule hid the "Previous period" column with display: none —
+    so the test also asserts no rule hides any trends-table column.
+    """
+    html = Path("site/index.html").read_text(encoding="utf-8")
+    styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
+    frame = styles.split(".direction-trends-frame {", 1)[1].split("}", 1)[0]
+    assert "position: relative" in frame
+    assert "overflow-x: auto" in frame
+    assert ".direction-trends-table tr > :nth-child(3)" not in styles
+    assert (
+        '<div class="direction-trends-frame" tabindex="0" role="region" '
+        'aria-labelledby="direction-trends-heading">'
+    ) in html
+    for heading in (
+        "Research direction",
+        "New",
+        "Previous period",
+        "Change",
+        "Undated",
+        "Stars gained, 30 days",
+        "16-week trend",
+    ):
+        assert heading in html
+
+
 def test_every_homepage_image_carries_an_alt_attribute():
     """Issue #946: Bing reported a missing image alt on the homepage.
 
@@ -537,13 +570,9 @@ def test_every_homepage_image_carries_an_alt_attribute():
     # alt is deliberate: a repeated alt would read the award twice.
     html = Path("site/index.html").read_text(encoding="utf-8")
     assert "Hugging Face: #1 Paper of the Day" in html
-    # The page generators emit no <img> at all, so no generated page can
-    # reintroduce the missing alt Bing found.
-    pages = Path("src/benchmark_radar/site_pages.py").read_text(encoding="utf-8")
-    assert "<img" not in pages
-    script = Path("site/assets/app.js").read_text(encoding="utf-8")
-    assert 'createElement("img"' not in script
-    assert 'element("img"' not in script
+    # Generated pages are checked by parsing their rendered output instead
+    # (tests/test_site_pages.py): a blanket ban on "<img" in the generator
+    # source would also block a future accessible image.
 
 
 def test_top_right_utilities_have_immediate_visible_feedback():
