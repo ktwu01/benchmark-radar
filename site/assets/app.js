@@ -3498,6 +3498,17 @@ function renderSearchScopeBanner(observationCount, benchmarkMatches) {
   banner.hidden = false;
 }
 
+function clearTodayResultsForLoadError() {
+  replaceChildren(byId("today-list"), []);
+  replaceChildren(byId("today-benchmarks-results"), []);
+  byId("today-benchmarks").hidden = true;
+  byId("search-scope-banner").hidden = true;
+  byId("today-breakdown").textContent = "";
+  byId("today-page-status").textContent = "";
+  byId("today-page-prev").disabled = true;
+  byId("today-page-next").disabled = true;
+}
+
 function renderToday({ resultsOnly = false } = {}) {
   // Events are bound before the data file resolves (initialize), so a nav
   // click or filter keystroke in the load window must no-op, not throw.
@@ -12334,6 +12345,7 @@ function bindEvents() {
         console.error(error);
         if (navigationSequence !== viewNavigationSequence) return;
         if (view === "today" && state.todayDate === "all" && !state.fullDataLoaded && !state.searchData) {
+          clearTodayResultsForLoadError();
           const notice = byId("today-load-error");
           notice.hidden = false;
           notice.textContent = t("Search data could not be loaded. Refresh to retry.");

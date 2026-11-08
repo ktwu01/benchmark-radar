@@ -238,10 +238,14 @@ Object.assign(state, {
   searchData: null,
   searchDataPromise: null,
 });
+getNode("today-list").append({ textContent: "stale latest-day result" });
 failSearch = true;
 await todayTab.dispatch("click", { preventDefault() {} });
 if (state.todayRenderedDate !== "sentinel") {
   throw new Error("failed All dates search rendered bootstrap observations");
+}
+if (getNode("today-list").children.length !== 0) {
+  throw new Error("failed All dates search left stale results visible");
 }
 if (getNode("today-load-error").hidden || !getNode("today-load-error").textContent.includes("Search data")) {
   throw new Error("failed All dates search did not show its error");
