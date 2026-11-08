@@ -118,6 +118,13 @@ watchlist:
   - name: RSI-Exam
     aliases: [rsi-exam, "rsi exam"]
     note: Executable long-horizon research benchmark for recursive self-improvement.
+  # Issue #379: the paper's title contains "Bench:" so the existing
+  # '" bench:"' rss keyword already matches it, and cs.CL is already a
+  # fetched feed; the watchlist entry pins the canonical name and aliases
+  # so the record resolves to swe_refactor_bench instead of a fuzzy match.
+  - name: SWE Refactor Bench
+    aliases: [swe-refactor-bench, "swe refactor bench"]
+    note: Whole-repository stack-migration benchmark for coding agents (arXiv:2608.23564).
   # Issue #1051: Realtime-Bench was missed because its title
   # ("Realtime-Bench: Can Frontier Models Solve Real-time Interactive
   # Problems?") contains none of the rss_keywords phrases, and it is framed

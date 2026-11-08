@@ -1003,6 +1003,9 @@ def test_claire_exact_identity_links_are_reviewed_and_bidirectional(
     expected = {
         "claire-radar:2608.05948": "opencompass:2574",
         "claire-radar:2608.09548": "opencompass:2571",
+        # Codex P2 on #1172: the registry's SWE Refactor Bench entry and the
+        # Claire import are the same benchmark (arXiv:2608.23564).
+        "claire-radar:2608.23564": "model-reports:swe_refactor_bench",
     }
     for left, right in expected.items():
         assert {row["key"] for row in identity.siblings_for(left)} == {right}
@@ -1010,6 +1013,8 @@ def test_claire_exact_identity_links_are_reviewed_and_bidirectional(
         assert identity.siblings_for(left)[0]["relation"] == "equivalent"
     assert identity.inheritance_for("claire-radar:2608.05948") is None
     assert identity.inheritance_for("claire-radar:2608.09548") is None
+    assert identity.inheritance_for("claire-radar:2608.23564") is None
+    assert identity.inheritance_for("model-reports:swe_refactor_bench") is None
 
 
 def test_seed_inherits_gpqa_identity_and_leaves_near_matches_alone(

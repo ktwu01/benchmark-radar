@@ -144,6 +144,19 @@ source_documents:
     benchmarks: [lifesci_diamond]
     retrieved_at: 2026-11-05
 
+  # Table 3 of the benchmark paper (arXiv:2608.23564), the results table the
+  # benchmark's own authors publish; registered like the SWE-bench Science
+  # results table, not as a vendor model card, because the paper reports
+  # scores for eight models it ran itself rather than one vendor's card.
+  - id: swe_refactor_bench_results_table
+    name: SWE Refactor Bench results table
+    publisher: Einsia.AI
+    document_type: benchmark_leaderboard
+    url: https://arxiv.org/abs/2608.23564
+    benchmarks: [swe_refactor_bench]
+    published: 2026-08-24
+    retrieved_at: 2026-11-05
+
 benchmarks:
   - id: gobench
     name: GoBench
@@ -1869,6 +1882,20 @@ benchmarks:
           deterministically defective and 1 is unstable.
         receipts:
           - https://github.com/kimjune01/slopcodebench-audit
+
+  - id: swe_refactor_bench
+    name: SWE Refactor Bench
+    aliases: ["SWE-Refactor-Bench"]
+    domain: coding_agent
+    url: https://arxiv.org/abs/2608.23564
+    released: 2026-08-24
+    caveat: >-
+      20 whole-repository migrations only, so one task is 5 points of the
+      mean score; the composite score gates on Migration Audit and
+      all-or-nothing Behavioural Tests before Agentic Verification adds
+      partial credit, and the harness and effort level are part of the
+      result, so scores from different harnesses or effort levels are not
+      the same measurement.
 
   - id: arc
     name: ARC

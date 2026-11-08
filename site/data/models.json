@@ -1,16 +1,17 @@
 {
   "schema_version": 2,
-  "model_count": 993,
+  "model_count": 998,
   "source_counts": {
     "artificial_analysis": 595,
     "llm_stats": 339,
-    "model_reports": 168
+    "model_reports": 173
   },
   "multiple_sources": 104,
   "organizations": [
     "AI21 Labs",
     "AI9Stars",
     "Ai2",
+    "Aleph Alpha Research",
     "Alibaba",
     "Allen Institute for AI",
     "Amazon",
@@ -33,6 +34,7 @@
     "DeepSeek",
     "EPFL-INL",
     "Google",
+    "HuggingFaceTB",
     "HumanOmni",
     "IBM",
     "Inception",
@@ -209,6 +211,17 @@
       ],
       "source_counts": {
         "artificial_analysis": 10
+      }
+    },
+    {
+      "key": "aleph-alpha-research-llama-3-2-1b-and-smollm-1-7b-instruct",
+      "model": "Llama-3.2-1B and SmolLM-1.7B-Instruct",
+      "organization": "Aleph Alpha Research",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -1178,7 +1191,7 @@
       ],
       "source_counts": {
         "llm_stats": 12,
-        "model_reports": 12
+        "model_reports": 17
       }
     },
     {
@@ -1336,7 +1349,7 @@
       ],
       "source_counts": {
         "llm_stats": 22,
-        "model_reports": 1
+        "model_reports": 6
       }
     },
     {
@@ -2335,17 +2348,6 @@
       }
     },
     {
-      "key": "deepseek-deepseek-v4-flash",
-      "model": "DeepSeek-V4-Flash",
-      "organization": "DeepSeek",
-      "provenance_sources": [
-        "model_reports"
-      ],
-      "source_counts": {
-        "model_reports": 20
-      }
-    },
-    {
       "key": "deepseek-deepseek-v4-flash-0423",
       "model": "DeepSeek-V4-Flash-0423",
       "organization": "DeepSeek",
@@ -2389,6 +2391,28 @@
       ],
       "source_counts": {
         "artificial_analysis": 13
+      }
+    },
+    {
+      "key": "deepseek-deepseek-v4-flash-a6a6d059cc120cf5c2dc3cb93c277b249d31f3b21fed39b1d06eb813935624a2",
+      "model": "DeepSeek V4 Flash",
+      "organization": "DeepSeek",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "deepseek-deepseek-v4-flash-fff0fbca9ff8444e271c68b788a60527eb5e2d5df6a5e3e9956a69c278b7434b",
+      "model": "DeepSeek-V4-Flash",
+      "organization": "DeepSeek",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 20
       }
     },
     {
@@ -3762,6 +3786,17 @@
       }
     },
     {
+      "key": "huggingfacetb-smollm-1-7b-instruct",
+      "model": "SmolLM-1.7B-Instruct",
+      "organization": "HuggingFaceTB",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 5
+      }
+    },
+    {
       "key": "humanomni-humanomni-7b",
       "model": "HumanOmni-7B",
       "organization": "HumanOmni",
@@ -4544,6 +4579,17 @@
       ],
       "source_counts": {
         "llm_stats": 11
+      }
+    },
+    {
+      "key": "meta-llama-3-2-1b",
+      "model": "Llama-3.2-1B",
+      "organization": "Meta",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 5
       }
     },
     {
@@ -6024,7 +6070,7 @@
       ],
       "source_counts": {
         "llm_stats": 31,
-        "model_reports": 29
+        "model_reports": 30
       }
     },
     {
@@ -7368,7 +7414,7 @@
       ],
       "source_counts": {
         "llm_stats": 44,
-        "model_reports": 2
+        "model_reports": 8
       }
     },
     {
@@ -7447,7 +7493,7 @@
       ],
       "source_counts": {
         "llm_stats": 44,
-        "model_reports": 8
+        "model_reports": 14
       }
     },
     {
@@ -8279,7 +8325,7 @@
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 1
+        "model_reports": 2
       }
     },
     {
@@ -11072,7 +11118,7 @@
       }
     },
     {
-      "key": "z-ai-glm-5-2",
+      "key": "z-ai-glm-5-2-4766e721668a8a3447b65652501e8ed68b9a0fbe3bf1ef8505dfc4ce88cdbf40",
       "model": "GLM-5.2",
       "organization": "Z.ai",
       "provenance_sources": [
@@ -11082,6 +11128,17 @@
       "source_counts": {
         "llm_stats": 19,
         "model_reports": 13
+      }
+    },
+    {
+      "key": "z-ai-glm-5-2-ad83758ffc1100316063051ee67b5b88fecf3aea577ca308455e56efb8812ce1",
+      "model": "GLM 5.2",
+      "organization": "Z.ai",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
