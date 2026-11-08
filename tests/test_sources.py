@@ -243,6 +243,29 @@ Abstract: We introduce SWE Refactor Bench, a benchmark comprising 20 migrations.
 </rss>
 """
 
+# Issue #382: FORGE is a smart-contract vulnerability dataset, primary
+# cs.CR. Title and abstract first sentence are the paper's own words
+# (arXiv:2506.18795, submitted 23 Jun 2025).
+FORGE_RSS = """\
+<rss xmlns:arxiv="http://arxiv.org/schemas/atom"
+     xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+  <channel>
+    <item>
+      <title>FORGE: An LLM-driven Framework for Large-Scale Smart Contract
+Vulnerability Dataset Construction</title>
+      <link>https://arxiv.org/abs/2506.18795</link>
+      <description>arXiv:2506.18795v1 Announce Type: new
+Abstract: FORGE, the first automated approach for constructing smart contract
+vulnerability datasets.</description>
+      <guid isPermaLink="false">oai:arXiv.org:2506.18795v1</guid>
+      <pubDate>Mon, 23 Jun 2025 00:00:00 -0400</pubDate>
+      <arxiv:announce_type>new</arxiv:announce_type>
+      <dc:creator>Jiachi Chen, Yiming Shen</dc:creator>
+    </item>
+  </channel>
+</rss>
+"""
+
 
 def test_arxiv_uses_overlap_and_updated_timestamp(monkeypatch):
     calls = []
@@ -356,6 +379,37 @@ def test_arxiv_config_keeps_named_bench_releases(monkeypatch):
     assert requested == [
         "https://rss.arxiv.org/rss/cs.AI",
         "https://rss.arxiv.org/rss/cs.CL",
+        "https://rss.arxiv.org/rss/cs.CR",
+        "https://rss.arxiv.org/rss/cs.CV",
+        "https://rss.arxiv.org/rss/cs.SE",
+    ]
+
+
+def test_arxiv_config_keeps_forge_smart_contract_dataset(monkeypatch):
+    """Issue #382: FORGE (arXiv:2506.18795) is primary cs.CR, which the
+    configured feeds never fetched, and no keyword matched its title.
+    A bare FORGE watchlist entry would misroute: the catalog already holds
+    a different FORGE (claire-radar:2606.13610), so the fix is the category
+    plus a narrow keyword, not a name."""
+    config = yaml.safe_load(Path("config.yml").read_text(encoding="utf-8"))["sources"]["arxiv"]
+    requested = []
+
+    def fake_get_text(url, params=None):
+        assert params is None
+        requested.append(url)
+        if url == "https://rss.arxiv.org/rss/cs.CR":
+            return FORGE_RSS
+        return "<rss version='2.0'><channel /></rss>"
+
+    monkeypatch.setattr("benchmark_radar.sources.get_text", fake_get_text)
+
+    items = fetch_arxiv(config, datetime(2025, 6, 25, 5, tzinfo=UTC), 10)
+
+    assert [item.source_id for item in items] == ["2506.18795"]
+    assert requested == [
+        "https://rss.arxiv.org/rss/cs.AI",
+        "https://rss.arxiv.org/rss/cs.CL",
+        "https://rss.arxiv.org/rss/cs.CR",
         "https://rss.arxiv.org/rss/cs.CV",
         "https://rss.arxiv.org/rss/cs.SE",
     ]

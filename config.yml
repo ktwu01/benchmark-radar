@@ -189,7 +189,10 @@ sources:
     # Software-agent benchmarks can be primary cs.SE rather than cross-listed
     # into the three general AI feeds. Include that first-party category so a
     # named SWE benchmark is not dependent on a cross-list (issue #379).
-    rss_categories: [cs.AI, cs.CL, cs.CV, cs.SE]
+    # Smart-contract vulnerability datasets and benchmarks are likewise
+    # primary cs.CR, not cross-listed into cs.AI (issue #382: FORGE,
+    # arXiv:2506.18795, was missed because cs.CR was never fetched).
+    rss_categories: [cs.AI, cs.CL, cs.CR, cs.CV, cs.SE]
     # "benchmark"/"evaluation"/"dataset" alone match most ML papers, since
     # almost every paper evaluates on some existing benchmark. cs.AI+cs.CL+cs.CV
     # publish 700+ papers a day, and the old bare-word list matched roughly two
@@ -198,6 +201,11 @@ sources:
     # merely using one, which cuts matches to about one in ten.
     rss_keywords:
       - benchmark for
+      # Issue #382: FORGE (arXiv:2506.18795) is a smart-contract vulnerability
+      # dataset; its title carries this phrase, and no generic keyword does.
+      # Narrow on purpose: bare "smart contract" or "vulnerability" would
+      # match most security papers.
+      - smart contract vulnerability dataset
       # Named suites often end the title with "Bench:" and put the full word
       # only after their name (for example SWE Refactor Bench). The leading
       # space catches that form without matching compounds such as Workbench:
