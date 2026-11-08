@@ -67,9 +67,10 @@ async function load({ store = {}, lang = "en", blocked = false, consent = true, 
   });
   const promptUrl = new URL(`../site/assets/star-prompt.js?case=${++sequence}`, import.meta.url).href;
   const { starPrompt } = await import(promptUrl);
-  const shareModule = shareSource.replace('"./star-prompt.js"', JSON.stringify(promptUrl));
-  const { openBenchmarkShare } = await import(`data:text/javascript;base64,${Buffer.from(shareModule).toString("base64")}`);
-  return { starPrompt, openBenchmarkShare, events, store, body };
+  const shareModule = shareSource.replace('"./star-prompt.js"', JSON.stringify(promptUrl))
+    .replace('"./share-caption.js"', JSON.stringify(new URL("../site/assets/share-caption.js", import.meta.url).href));
+  const shares = await import(`data:text/javascript;base64,${Buffer.from(shareModule).toString("base64")}`);
+  return { starPrompt, ...shares, events, store, body };
 }
 
 const first = await load();
@@ -213,4 +214,105 @@ for (const [label, failure] of [["Copy link", "clipboard"], ["Copy image", "clip
 }
 
 assert.match(readFileSync("site/assets/app.js", "utf8"), /import \{ starPrompt \} from "\.\/star-prompt.js"/);
+
+// #1162: the actual X handoff and copy fallback contain every caption field.
+{
+  const { radarCaption, briefingCaption, summaryCaption } = await import("../site/assets/share-caption.js");
+  const card = {
+    title: "Full benchmark", authors: ["Ada Lovelace", "Grace Hopper", "Alan Turing", "Fourth Author"],
+    affiliations: ["First University", "Second Institute", "Third Lab"],
+    blurb: "The complete image blurb.", url: "https://example.org/paper?a=1&b=2",
+  };
+  const item = { title: "owner/full-benchmark", source: "Hugging Face", organizations: ["owner"],
+    url: "https://example.org/dataset", summary: "A long description. ".repeat(60) + "Final sentence preserved." };
+  const radar = radarCaption({ item, title: "Full Benchmark", card });
+  assert(radar.includes("By owner"));
+  assert(radar.includes(item.summary.trim()));
+  assert(radar.includes(card.blurb));
+  const briefing = briefingCaption({ card, finding: "Finding with https://example.org/evidence.",
+    implication: "Complete implication.", sources: ["https://example.org/extra"] });
+  assert(briefing.includes("Why it matters: Complete implication."));
+  assert(briefing.split("\n").includes("Source: https://example.org/extra"));
+  assert(briefing.includes(card.blurb), "a revised finding retains the immutable PNG blurb");
+  const summary = summaryCaption({ day: "2026-11-07", cards: [card, { ...card, title: "Second" },
+    { ...card, title: "Third" }, { ...card, title: "Not on summary" }] });
+  assert(summary.includes("3. Third"));
+  assert(!summary.includes("Not on summary"));
+  assert(summaryCaption({ day: "2026-11-07", cards: [card] }).startsWith("Top 1 AI benchmarks"));
+  for (const caption of [radar, briefing, summary]) {
+    for (const name of [...card.authors, ...card.affiliations]) assert(caption.includes(name));
+    const page = await load();
+    if (caption === radar) page.openRadarShare({ item, title: "Full Benchmark", card,
+      day: "2026-11-07", image: "https://example.org/card.png", pageUrl: item.url });
+    else page.openDailyShare({ name: card.title, image: "https://example.org/card.png", caption, day: "2026-11-07" });
+    const link = page.body.find((node) => node.textContent === "Copy card and post on X ↗");
+    const url = new URL(link.attrs.href);
+    assert.equal(url.searchParams.get("text"), caption, "the intent preserves the entire caption, including URL encoding");
+    assert.equal(url.searchParams.get("url"), null, "the site link is not appended twice");
+    let copied;
+    navigator.clipboard.writeText = async (text) => { copied = text; };
+    await page.body.find((node) => node.textContent === "Copy full text").click();
+    assert.equal(copied, caption);
+    const notice = page.body.find((node) => node.textContent?.includes("X Premium may be required"));
+    assert(notice.hidden, "X details stay hidden until Post on X is clicked");
+    link.click();
+    assert.equal(notice.hidden, false);
+  }
+  assert(!radarCaption({ item: { title: "Sparse", source: "arXiv" } }).includes("undefined"));
+  const neutralized = radarCaption({ item: { title: "Contact", summary: "Write energea@energeatech.com, @example-sandbox.dev, or @ktwu01." } });
+  assert(neutralized.includes("energea at energeatech.com"));
+  assert(neutralized.includes(" example-sandbox.dev"));
+  assert(neutralized.includes("@ktwu01"));
+  const contactUrl = "https://example.org/report?contact=author@example.org";
+  assert(radarCaption({ item: { title: "URL", url: contactUrl } }).includes(`Source: ${contactUrl}`));
+  assert(!briefingCaption({ card: { title: "Invalid", url: "javascript:alert(1)" } }).includes("javascript:"));
+}
+// Exercise the app's metadata handoff, including a search hit without its day.
+{
+  const app = readFileSync("site/assets/app.js", "utf8");
+  const start = app.indexOf("function radarShareButton(");
+  const source = app.slice(start, app.indexOf("\n}\n", start) + 2)
+    .replace('await import("./share-card.js")', '({ openRadarShare: capture })');
+  let captured;
+  const make = new Function("element", "shareIcon", "t", "shareCardFor", "safeHttpUrl", "window", "capture", `return (${source});`);
+  const element = (tag, props, children) => Object.assign(new Node(tag), { props, children });
+  const daily = { title: "Daily image", authors: ["Published Creator"] };
+  for (const [item, published, expected] of [
+    [{}, daily, daily],
+    [{ share_card: daily, snapshot_date: "2026-11-04" }, null, daily],
+    [{ catalog_card: { title: "Catalog", authors: ["Catalog Creator"] } }, null, null],
+  ]) {
+    const share = make(element, () => null, (v) => v, () => published, (v) => v,
+      { location: { href: "https://benchmark-radar.org" } }, (args) => { captured = args; });
+    const control = share(item, { date: "2026-11-07" }, "Display title", "https://example.org/card.png");
+    await control.children[0].listeners.click({ preventDefault() {}, stopPropagation() {} });
+    assert.equal(captured.card, expected || item.catalog_card);
+    assert.equal(captured.day, item.snapshot_date || "2026-11-07");
+  }
+  // A failed module load must retain the old image fallback; modifier clicks stay native.
+  const controlStart = app.indexOf("function shareControl(");
+  const controlSource = app.slice(controlStart, app.indexOf("function briefingShare(", controlStart))
+    .replace('import("./share-card.js")', 'Promise.reject(new Error("chunk missing"))')
+    .replace('import("./share-caption.js")', 'Promise.resolve({})');
+  let fallback;
+  const safeHttpSource = app.slice(app.indexOf("function safeHttpUrl("), app.indexOf("\n}\n", app.indexOf("function safeHttpUrl(")) + 2);
+  const makeControl = new Function("element", "shareIcon", "t", "window",
+    `${safeHttpSource}\nreturn (${controlSource});`);
+  const control = makeControl(
+    element, () => null, (v) => v, { location: { assign: (url) => { fallback = url; } } },
+  )("https://example.org/card.png", "Bench", "Share card", { day: "2026-11-07", card: daily });
+  // A non-http(s) image never becomes a link the fallback could navigate to.
+  assert.equal(makeControl(element, () => null, (v) => v, { location: { assign() {
+    throw new Error("must not navigate");
+  } } })("javascript:alert(1)", "Bench", "Share card", { day: "2026-11-07", card: daily }), null);
+  let prevented = false;
+  await control.children[0].listeners.click({ metaKey: true, preventDefault() { prevented = true; } });
+  assert.equal(prevented, false);
+  const originalError = console.error;
+  console.error = () => {};
+  try { await control.children[0].listeners.click({ preventDefault() { prevented = true; } }); }
+  finally { console.error = originalError; }
+  assert.equal(prevented, true);
+  assert.equal(fallback, "https://example.org/card.png");
+}
 console.log("star prompt and card actions harness ok");

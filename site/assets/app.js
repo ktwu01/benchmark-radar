@@ -1185,6 +1185,9 @@ const I18N = {
     "Share card for {name}": "{name} 的分享卡片",
     "Share…": "分享…",
     "Copy image": "复制图片",
+    "Copy full text": "复制完整文字",
+    "X opens with the full text. Paste the image with Ctrl+V or Cmd+V.": "打开 X 后会填好完整文字，再按 Ctrl+V 或 Cmd+V 粘贴图片。",
+    "Long caption: X Premium may be required. The full text is preserved.": "文字较长，可能需要 X Premium 才能发布。文字已完整保留。",
     "Copy link": "复制链接",
     "Post on X ↗": "发布到 X ↗",
     "Copy card and post on X ↗": "复制卡片并发布到 X ↗",
@@ -2941,16 +2944,13 @@ function briefingMeta(parts, citations) {
   return element("p", { className: "briefing-insight-meta" }, chips);
 }
 
-// Share images (issue #671) are rendered by the daily pipeline and published
-// per day, so the page only links to one. An item the day did not make a card
-// for gets no control: a link to an image that was never rendered would be a
-// dead end, and the item stays listed either way.
+// Published images and their caption metadata come from the same daily block.
 function shareCardFor(day, url) {
   const href = safeHttpUrl(url);
   if (!href) return null;
   const card = (day?.share?.cards || []).find((entry) => safeHttpUrl(entry.url) === href);
   const image = card ? safeHttpUrl(card.image) : "";
-  return image ? { image } : null;
+  return image ? { ...card, image } : null;
 }
 
 // Share is an icon wherever it appears (issue #1097): "Share image" and
@@ -2968,19 +2968,39 @@ function shareIcon() {
   return svg;
 }
 
-function shareControl(image, label, linkLabel = t("Share image")) {
-  return element("div", { className: "share-control" }, [
-    element("a", {
+function shareControl(image, label, linkLabel = t("Share image"), share = null) {
+  // Every caller passes a URL it already checked, but this control navigates
+  // to it on failure, so it checks again: only an http(s) image is a link.
+  const href = safeHttpUrl(image);
+  if (!href) return null;
+  const link = element("a", {
       className: "share-link share-icon",
       attrs: {
-        href: image,
+        href,
         target: "_blank",
         rel: "noopener noreferrer",
         title: linkLabel,
-        "aria-label": `${linkLabel === label ? linkLabel : `${linkLabel}: ${label}`} (${t("opens in a new tab")})`,
+        "aria-label": `${linkLabel === label ? linkLabel : `${linkLabel}: ${label}`}${share ? "" : ` (${t("opens in a new tab")})`}`,
       },
-    }, [shareIcon()]),
-  ]);
+    }, [shareIcon()]);
+  if (share) link.addEventListener("click", async (event) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    try {
+      const [{ openDailyShare }, { briefingCaption, summaryCaption }] = await Promise.all([
+        import("./share-card.js"), import("./share-caption.js"),
+      ]);
+      const caption = share.cards ? summaryCaption(share) : briefingCaption(share);
+      openDailyShare({
+        name: share.cards ? caption.split("\n")[0] : label,
+        image: href, day: share.day, caption, t,
+      });
+    } catch (error) {
+      console.error(error);
+      window.location.assign(href);
+    }
+  });
+  return element("div", { className: "share-control" }, [link]);
 }
 
 function briefingShare(parts, citations, day) {
@@ -2988,7 +3008,13 @@ function briefingShare(parts, citations, day) {
     .map((id) => citations.find((entry) => entry.id === id))
     .find(Boolean);
   const card = citation ? shareCardFor(day, citation.href) : null;
-  return card ? shareControl(card.image, citation.title) : null;
+  const sourceUrl = (id) => citations.find((entry) => entry.id === id)?.href || "";
+  const resolve = (text) => text.replace(/\bE\d{3}\b/g, (id) => sourceUrl(id) || id);
+  return card ? shareControl(card.image, card.title || citation.title, t("Share card"), {
+    day: day.date, card,
+    finding: resolve(parts.head), implication: resolve(parts.body),
+    sources: parts.evidenceIds.map(sourceUrl).filter(Boolean),
+  }) : null;
 }
 
 // top3.png holds the first three cards, or fewer when the day has fewer, so
@@ -3007,7 +3033,9 @@ function renderTopShare(day, visible) {
   replaceChildren(
     host,
     image
-      ? [shareControl(image, topShareLabel(count), topShareLabel(count))]
+      ? [shareControl(image, topShareLabel(count), topShareLabel(count), count ? {
+        day: day.date, cards: day.share.cards,
+      } : null)]
       : [],
   );
 }
@@ -11759,6 +11787,7 @@ function radarShareButton(item, day, title, image, pageUrl = "") {
       title,
       image,
       pageUrl: pageUrl || safeHttpUrl(item.url) || window.location.href,
+      card: shareCardFor(day, item.url) || item.share_card || item.catalog_card || null,
       t,
     });
   });
