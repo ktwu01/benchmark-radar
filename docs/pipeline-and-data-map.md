@@ -60,7 +60,8 @@ sources below, run the generators in order, and measure the rebuilt outputs.
      on, keyed by `owner/name`: size, stars on the check date, archived flag,
      creation and last-push dates (search API, six per call), plus
      `placeholder` (README-only root, listed only for repositories up to
-     2 MB) and `unavailable` (404 on the repository endpoint, which follows
+     2 MB; a README that links a dataset host such as Hugging Face datasets,
+     Google Drive or Zenodo is not a placeholder, recorded as `data_link`) and `unavailable` (404 on the repository endpoint, which follows
      renames). A placeholder, archived or unavailable repository holds its
      release back: listed, unranked, with the reason. Stars and size never
      do. Placeholders and unknowns are rechecked daily, others weekly. A
@@ -96,6 +97,10 @@ Run these from the repository root, in this order:
    `radar.json` and its split files come from `snapshots.rebuild_dashboard`,
    which also reads the release signals above. `benchmark-radar rebuild` runs
    that same step on its own when only `radar.json` needs refreshing.
+   The same step writes `site/data/radar-search.json`, a compact latest-sighting
+   index used by archive-wide homepage search. It keeps the newest sighting for
+   each source record and only the fields needed to filter and render Today
+   results; the full history remains in `radar.json`.
 3. `benchmark-radar build-data-release` validates the local corpus through
    `QueryService` and writes `site/data/cli/manifest.json` plus the checksummed
    `site/data/cli/benchmark-radar-data.zip`. The manifest is published on Pages;

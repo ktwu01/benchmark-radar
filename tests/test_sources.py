@@ -950,6 +950,46 @@ def test_zenodo_keeps_records_whose_depositor_chose_a_future_or_bare_year_date(m
     }
     assert items[0].raw["metadata"]["publication_date"] in {"2026-10-31", "2027"}
     assert "_future_rejections" not in config
+    # Issue #1016: the fallback is serialized, not only kept in raw, so
+    # snapshots, the report, and the site can say which date this is.
+    by_id = {item.source_id: item for item in items}
+    assert by_id["23680549"].published_basis == "created"
+    assert by_id["23680549"].published_source_value == "2026-10-31"
+    assert by_id["23673366"].published_basis == "created"
+    assert by_id["23673366"].published_source_value == "2027"
+    assert by_id["23680549"].to_dict()["published_basis"] == "created"
+    assert by_id["23680549"].to_dict()["published_source_value"] == "2026-10-31"
+
+
+def test_zenodo_records_dated_by_their_own_publication_date_name_the_basis(monkeypatch):
+    # Issue #1016: a usable publication_date dates the record and is recorded
+    # as given, so a reader can tell it apart from a created fallback.
+    payload = {
+        "hits": {
+            "hits": [
+                {
+                    "recid": "12345",
+                    "created": "2026-07-27T02:01:03Z",
+                    "updated": "2026-07-27T02:01:03Z",
+                    "links": {"self_html": "https://zenodo.org/records/12345"},
+                    "metadata": {"title": "Record 12345", "publication_date": "2026-07-27"},
+                }
+            ]
+        }
+    }
+    monkeypatch.setattr("benchmark_radar.sources.get_json", lambda url, **kwargs: payload)
+    config = {
+        "searches": ["benchmark"],
+        "max_requests": 1,
+        "_collection_now": datetime(2026, 10, 27, 2, 11, tzinfo=UTC),
+    }
+
+    items = fetch_zenodo_records(config, datetime(2026, 7, 25, tzinfo=UTC), 10)
+
+    assert len(items) == 1
+    assert items[0].published_at == datetime(2026, 7, 27, tzinfo=UTC)
+    assert items[0].published_basis == "publication_date"
+    assert items[0].published_source_value == "2026-07-27"
 
 
 def _deposit(recid: str, title: str, description: str, creators: list[str], day: int) -> dict:

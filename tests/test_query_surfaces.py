@@ -710,6 +710,59 @@ def test_cli_labels_partial_candidates_without_hiding_them(
     assert name in output
 
 
+def test_cli_search_accepts_query_flag(tmp_path: Path, capsys) -> None:
+    # Issue #421: the request shows the query as `--query "..."`. The flag
+    # form must return the same contract as the positional form, including
+    # the issue's `--scope` / `--limit` / `--json` shape.
+    paths = _catalog(tmp_path)
+    common = ["--scope", "catalog", "--limit", "10", "--json"]
+    cases = [
+        ["search", "agent workbench", *common],
+        ["search", "--query", "agent workbench", *common],
+        ["search", "agent workbench", "--query", "agent workbench", *common],
+    ]
+    payloads = []
+    for arguments in cases:
+        exit_code = run_query_cli(
+            [
+                *arguments,
+                "--index",
+                str(paths.index),
+                "--shards",
+                str(paths.shards),
+                "--snapshots",
+                str(paths.snapshots),
+            ]
+        )
+        assert exit_code == 0
+        payloads.append(json.loads(capsys.readouterr().out))
+    assert payloads[0] == payloads[1] == payloads[2]
+    assert payloads[0]["query"] == "agent workbench"
+
+
+def test_cli_search_rejects_conflicting_or_missing_query(tmp_path: Path, capsys) -> None:
+    # Giving both forms with different values is an error, not a silent pick;
+    # giving neither is an error too. Both fail non-zero with the machine
+    # error contract on stderr.
+    paths = _catalog(tmp_path)
+    base = [
+        "--json",
+        "--index",
+        str(paths.index),
+        "--shards",
+        str(paths.shards),
+        "--snapshots",
+        str(paths.snapshots),
+    ]
+    for arguments in (
+        ["search", "agent workbench", "--query", "science discovery", *base],
+        ["search", *base],
+    ):
+        exit_code = run_query_cli(arguments)
+        assert exit_code == 2
+        assert json.loads(capsys.readouterr().err)["error"]["code"] == "invalid_query"
+
+
 def test_cli_and_http_return_the_same_non_search_contracts(tmp_path: Path, capsys) -> None:
     # Regression: shared search alone did not prevent detail/status serializers drifting.
     paths = _catalog(tmp_path)
