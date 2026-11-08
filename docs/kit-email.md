@@ -12,7 +12,7 @@ Readers subscribe on benchmark-radar.org. Each day, a GitHub workflow sends that
 | Audiences | Kit segments named exactly `Daily` (ID `601632`, `frequency` is `daily`) and `Weekly` (ID `601633`, `frequency` is `weekly`). |
 | API key | Kit V4 key "benchmark-radar send-email.yml (2026-10-26)", stored only as the GitHub secret `KIT_API_KEY`. |
 | GitHub settings | Variables `KIT_DAILY_SEGMENT_ID=601632` and `KIT_WEEKLY_SEGMENT_ID=601633`. Optional variable `KIT_EMAIL_MODE`. |
-| Workflow | `.github/workflows/send-email.yml`. It is scheduled for 08:00 UTC each day. GitHub can start a scheduled run hours late, so the email can arrive late. It is never sent before the brief is live. |
+| Workflow | `.github/workflows/send-email.yml`. It is scheduled for 08:00 UTC each day, with a catch-up run at 22:00 UTC for a day whose brief went live late. GitHub can start a scheduled run hours late, so the email can arrive late. The `email/<date>` tag keeps a day from being sent twice. It is never sent before the brief is live. |
 | Code | `src/benchmark_radar/email_brief.py`. It renders the email from `data/snapshots/<date>.json`. |
 | Send record | A git tag `email/<date>` for each day that was sent. |
 

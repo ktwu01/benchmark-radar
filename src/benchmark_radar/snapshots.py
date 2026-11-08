@@ -121,10 +121,18 @@ def snapshot_for_run(run: RadarRun) -> dict[str, Any]:
     }
 
 
-def _write_json(path: Path, value: dict[str, Any]) -> None:
+def _write_json(path: Path, value: dict[str, Any], *, indent: int | None = 2) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    separators = (",", ":") if indent is None else None
     path.write_text(
-        json.dumps(value, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
+        json.dumps(
+            value,
+            indent=indent,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=separators,
+        )
+        + "\n",
         encoding="utf-8",
     )
 
@@ -1617,6 +1625,130 @@ def dashboard_window(dashboard: dict[str, Any], window_days: int) -> dict[str, A
     }
 
 
+def dashboard_search_index(dashboard: dict[str, Any]) -> dict[str, Any]:
+    """Return the compact latest-sighting payload used by archive-wide search."""
+    latest: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for day in dashboard.get("days") or []:
+        selection = day.get("selection") or {}
+        entries = [(item, "evidence") for item in day.get("evidence_items") or []] + [
+            (item, "attention") for item in (day.get("attention") or {}).get("observations") or []
+        ]
+        for item, kind in entries:
+            observation = {
+                **item,
+                "recommendation_score": selection.get("recommendation_score"),
+                "minimum_score": selection.get("minimum_score"),
+                "snapshot_date": day["date"],
+                "snapshot_generated_at": day.get("generated_at"),
+                "observation_kind": kind,
+            }
+            if kind == "attention":
+                observation["artifact_urls"] = (
+                    [item["primary_artifact_url"]] if item.get("primary_artifact_url") else []
+                )
+                observation["organizations"] = [item["producer"]] if item.get("producer") else []
+                key = ("attention", str(item.get("observation_id") or item.get("source_id")))
+            else:
+                share_card = next(
+                    (
+                        card
+                        for card in (day.get("share") or {}).get("cards") or []
+                        if card.get("url") == item.get("url")
+                    ),
+                    None,
+                )
+                if share_card and share_card.get("image"):
+                    observation["share_image"] = share_card["image"]
+                threshold = selection.get("recommendation_score")
+                if observation.get("recommended") is None:
+                    observation["recommended"] = threshold is not None and float(
+                        item.get("total_score") or 0
+                    ) >= float(threshold)
+                key = ("evidence", f"{item.get('source')}\0{item.get('source_id')}")
+            filter_key = json.dumps(
+                [
+                    key,
+                    observation.get("event_kind"),
+                    observation.get("categories"),
+                    observation.get("organizations"),
+                    observation.get("producer"),
+                    observation.get("title"),
+                    observation.get("summary"),
+                ],
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+            previous = latest.get((key[0], filter_key)) or []
+            previous_date = previous[0]["snapshot_date"] if previous else ""
+            if observation["snapshot_date"] > previous_date:
+                latest[(key[0], filter_key)] = [observation]
+            elif observation["snapshot_date"] == previous_date:
+                latest.setdefault((key[0], filter_key), []).append(observation)
+    searchable_fields = {
+        "source",
+        "source_id",
+        "observation_id",
+        "producer",
+        "title",
+        "summary",
+        "url",
+        "categories",
+        "organizations",
+        "event_kind",
+        "published_at",
+        "updated_at",
+        "discovered_at",
+        "observed_at",
+        "metrics",
+        "total_score",
+        "recency_score",
+        "score_version",
+        "score_max",
+        "relevance_score",
+        "evidence_score",
+        "adoption_score",
+        "snapshot_date",
+        "snapshot_generated_at",
+        "observation_kind",
+        "primary_artifact_url",
+        "share_image",
+        "authors",
+        "rationale",
+        "watchlist",
+        # Read by the result cards, so an index-backed hit must render the
+        # same as a radar.json one: artifact links, the catalog card Share
+        # uses, the recommended badge and the scan's cutoffs, GitHub-release
+        # detection, Hacker News submissions, and the watchlist note.
+        "artifact_urls",
+        "catalog_slug",
+        "recommended",
+        "recommendation_score",
+        "minimum_score",
+        "parser_version",
+        "supporting_observations",
+        "watchlist_note",
+    }
+    observations = [
+        {key: item[key] for key in searchable_fields if key in item}
+        for items in latest.values()
+        for item in items
+    ]
+    for observation in observations:
+        # The page reads parser_version only to recognise a GitHub release;
+        # every other value is about 70 KB of gzip that changes nothing shown.
+        if not str(observation.get("parser_version") or "").startswith("github-releases/"):
+            observation.pop("parser_version", None)
+        # Only an expanded attention row lists its supporting submissions.
+        if observation.get("observation_kind") != "attention":
+            observation.pop("supporting_observations", None)
+    return {
+        "schema_version": 1,
+        "generated_at": dashboard.get("generated_at"),
+        "latest_date": dashboard.get("latest_date"),
+        "observations": observations,
+    }
+
+
 def catalog_pages_by_url(index_path: Path) -> dict[str, str]:
     """Map each URL that exactly one catalog record cites as its source to that slug.
 
@@ -1678,14 +1810,16 @@ def rebuild_dashboard(
     _write_json(output, value)
     # The browser starts here.  Historical views lazily upgrade: Trends reads
     # the chart payload, Today-all-dates and Explore's canvas still use the
-    # full public dataset. radar.json remains the stable one-click export.
+    # the search index. radar.json remains the stable one-click export.
     bootstrap_path = output.with_name(f"{output.stem}-bootstrap{output.suffix}")
-    _write_json(bootstrap_path, dashboard_bootstrap(value))
+    _write_json(bootstrap_path, dashboard_bootstrap(value), indent=None)
     trends_path = output.with_name(f"{output.stem}-trends{output.suffix}")
-    _write_json(trends_path, dashboard_trends(value))
+    _write_json(trends_path, dashboard_trends(value), indent=None)
     for window_days in TODAY_WINDOW_DAYS:
         window_path = output.with_name(f"{output.stem}-window-{window_days}d{output.suffix}")
-        _write_json(window_path, dashboard_window(value, window_days))
+        _write_json(window_path, dashboard_window(value, window_days), indent=None)
+    search_path = output.with_name(f"{output.stem}-search{output.suffix}")
+    _write_json(search_path, dashboard_search_index(value), indent=None)
     # The record-count badge lives beside radar.json so it deploys with the same
     # dashboard build and can never report a corpus newer than the page it sits
     # on. It is the single self-describing "how much have we collected" signal

@@ -24,6 +24,7 @@ def test_every_site_data_fetch_goes_through_the_load_tracker():
 
 def test_the_full_archive_names_itself_while_it_downloads():
     assert '"/data/radar.json": ["Loading the full archive…"' in APP
+    assert '"/data/radar-search.json": ["Loading search results…"' in APP
 
 
 def test_loads_keep_the_browsers_own_json_reader():

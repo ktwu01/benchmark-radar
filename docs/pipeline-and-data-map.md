@@ -97,6 +97,10 @@ Run these from the repository root, in this order:
    `radar.json` and its split files come from `snapshots.rebuild_dashboard`,
    which also reads the release signals above. `benchmark-radar rebuild` runs
    that same step on its own when only `radar.json` needs refreshing.
+   The same step writes `site/data/radar-search.json`, a compact latest-sighting
+   index used by archive-wide homepage search. It keeps the newest sighting for
+   each source record and only the fields needed to filter and render Today
+   results; the full history remains in `radar.json`.
 3. `benchmark-radar build-data-release` validates the local corpus through
    `QueryService` and writes `site/data/cli/manifest.json` plus the checksummed
    `site/data/cli/benchmark-radar-data.zip`. The manifest is published on Pages;
