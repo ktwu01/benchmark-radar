@@ -18,6 +18,19 @@ def _safe_markdown_url(url: str) -> str:
     return quote(url, safe=":/?#[]@!$&'*+,;=%")
 
 
+def _published_detail(item: RadarItem) -> str:
+    """The Published line, labelling the basis when the source date was replaced (#1016)."""
+    published = f"Published: `{item.published_at.date().isoformat()}`"
+    if item.published_basis == "created":
+        if item.published_source_value:
+            return (
+                f"{published} (dated by deposition created; "
+                f"source publication_date was `{item.published_source_value}`)"
+            )
+        return f"{published} (dated by deposition created; no publication_date supplied)"
+    return published
+
+
 def _item_block(index: int, item: RadarItem) -> str:
     category = ", ".join(value.replace("_", " ") for value in item.categories)
     signals = ", ".join(f"{key}={value:g}" for key, value in item.metrics.items() if value)
@@ -42,7 +55,7 @@ def _item_block(index: int, item: RadarItem) -> str:
         # restate the source and event line directly above.
         lines.extend(["_No description published at the source._", ""])
     details = [
-        f"Published: `{item.published_at.date().isoformat()}`",
+        _published_detail(item),
         f"Evidence: `{item.evidence_score:.2f}`",
         f"Relevance: `{item.relevance_score:.2f}`",
         f"Recency: `{item.recency_score:.2f}`",

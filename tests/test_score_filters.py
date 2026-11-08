@@ -243,6 +243,49 @@ def test_saturation_seed_keeps_unscored_zero_scores_and_unjoined_records():
     assert "3 of 3 matches" in rendered
 
 
+def test_score_browser_seed_accepts_a_cutoff_parameter():
+    # #570: the Pareto cutoff is a parameter, default 70, with 100 the full
+    # range. A caller that has read the reader's choice passes it in, so the
+    # seed and the browser slice the same population.
+    index = [
+        {
+            "slug": "high",
+            "name": "Above cutoff",
+            "source": "llm_stats",
+            "score_summary": score_summary([{"value": 90}]),
+        },
+    ]
+    assert "Above cutoff" not in "".join(_score_browser_seed({}, index).values())
+    assert "Above cutoff" in "".join(_score_browser_seed({}, index, score_cutoff=100).values())
+    assert "Above cutoff" not in "".join(_score_browser_seed({}, index, score_cutoff=90).values())
+
+
+def test_score_browser_seed_treats_cutoff_100_as_unbounded():
+    # Codex P2 (#1175): the browser's matchesScoreCutoff treats 100 as
+    # "All", so the seed must too — a genuine 100, or a non-percentage
+    # measure above 100, must not be dropped at cutoff 100.
+    index = [
+        {
+            "slug": "perfect",
+            "name": "Perfect score",
+            "source": "llm_stats",
+            "score_summary": score_summary([{"value": 100}]),
+        },
+        {
+            "slug": "large",
+            "name": "Large measure",
+            "source": "llm_stats",
+            "score_summary": score_summary([{"value": 1400}]),
+        },
+    ]
+    at_100 = "".join(_score_browser_seed({}, index, score_cutoff=100).values())
+    assert "Perfect score" in at_100
+    assert "Large measure" in at_100
+    at_90 = "".join(_score_browser_seed({}, index, score_cutoff=90).values())
+    assert "Perfect score" not in at_90
+    assert "Large measure" not in at_90
+
+
 def test_seed_and_browser_format_scores_identically():
     """The seed and app.js must print one decimal the same way, half-up included."""
     node = shutil.which("node")

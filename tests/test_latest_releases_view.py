@@ -306,6 +306,7 @@ def test_every_visible_latest_releases_string_is_translated():
         assert has(key), f"missing zh translation for {key!r}"
     for key in (
         "GitHub stars",
+        "GitHub forks",
         "Hugging Face paper upvotes",
         "Hugging Face dataset downloads, last 30 days",
         "unavailable",
@@ -445,6 +446,61 @@ def test_seeds_are_what_the_renderer_draws():
     assert _inner(week[EMPTY_ANCHOR]) == drawn["empty7d"]["empty"]
     assert _inner(week[INFO_ANCHOR]) == drawn["empty7d"]["info"]
     assert drawn["empty7d"]["list"] == "" and drawn["empty7d"]["window"] == "· 7 days"
+
+
+def test_latest_release_row_shows_forks_next_to_stars():
+    # Codex P1 (#1148): the fork count is a displayed counter, not a score
+    # component, so the row shows it beside the stars with the same status
+    # wording; a row without a fork count shows no forks line. Seed and
+    # renderer must draw the same markup.
+    entry = {
+        "canonical_artifact_id": "artifact:github:org/bench",
+        "name": "Bench",
+        "purpose": "",
+        "release_date": "2026-09-01T00:00:00+00:00",
+        "score": 87,
+        "coverage": 0.85,
+        "confidence": "High",
+        "status": "ranked",
+        "rank": 1,
+        "components": {
+            "github_stars": {
+                "value": 200,
+                "normalized": 1.0,
+                "weight": 0.55,
+                "status": "fresh",
+                "source_url": "https://github.com/org/bench",
+            },
+        },
+        "forks": {
+            "value": 3,
+            "status": "fresh",
+            "source_url": "https://github.com/org/bench",
+        },
+    }
+    payload = _payload(entries=[entry])
+    drawn = _render(payload)
+    seed = _latest_releases_seed({"latest_releases_leaderboard": payload})
+    assert _inner(seed[LIST_ANCHOR]) == drawn["default"]["list"]
+    assert "GitHub forks: 3" in drawn["default"]["list"]
+    assert drawn["default"]["list"].count('class="latest-release-source"') == 2
+
+    no_forks = {**entry, "forks": {"value": None, "status": "unknown", "source_url": None}}
+    plain = _payload(entries=[no_forks])
+    drawn_plain = _render(plain)
+    seed_plain = _latest_releases_seed({"latest_releases_leaderboard": plain})
+    assert _inner(seed_plain[LIST_ANCHOR]) == drawn_plain["default"]["list"]
+    assert "latest-release-forks" not in drawn_plain["default"]["list"]
+
+    # Codex P2 (#1175): a repo whose fork count is unavailable (404/410/451,
+    # no previous reading) still shows the forks line as "unavailable"
+    # instead of dropping it — seed and renderer must agree.
+    gone_forks = {**entry, "forks": {"value": None, "status": "unavailable", "source_url": None}}
+    gone = _payload(entries=[gone_forks])
+    drawn_gone = _render(gone)
+    seed_gone = _latest_releases_seed({"latest_releases_leaderboard": gone})
+    assert _inner(seed_gone[LIST_ANCHOR]) == drawn_gone["default"]["list"]
+    assert "GitHub forks: unavailable" in drawn_gone["default"]["list"]
 
 
 def test_the_renderer_keeps_open_rows_loads_wider_windows_and_reports_failure():

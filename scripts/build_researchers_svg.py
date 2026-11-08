@@ -4,7 +4,15 @@
 Each file in assets/researchers-logos/ is the official institution logo as
 downloaded from Wikimedia Commons / Wikipedia, or supplied by the organization
 where Commons has none (xtracta.svg: Xtracta's official full-colour RGB logo,
-unmodified). Run this script after adding, removing, or replacing a logo there:
+unmodified). zai.svg is the 2025 Z.ai logo from Wikimedia Commons
+(File:Z.ai (company logo).svg); antgroup.png is the Ant Group logo from the
+company's media library, via en.wikipedia File:Ant_Group_logo.png.
+berkeley.svg is the University of California, Berkeley 2024 logo from
+en.wikipedia File:University_of_California,_Berkeley_Logo_2024.svg
+(public domain — typefaces only; trademarked). tesla.svg is the Tesla, Inc.
+black-script wordmark from Wikimedia Commons
+(File:Tesla,_Inc._-_Logo_(black_script_version).svg). Run this
+script after adding, removing, or replacing a logo there:
 
     python scripts/build_researchers_svg.py
 
@@ -25,10 +33,26 @@ LOGO_DIR = REPO_ROOT / "assets" / "researchers-logos"
 OUT = REPO_ROOT / "assets" / "researchers.svg"
 
 ROWS = [
-    ["google.svg", "amazon.svg", "aws.svg", "ibm.svg", "bytedance.svg"],
-    ["cmu.svg", "harvard.svg", "mit.svg", "nus.svg", "auckland.svg", "xtracta.svg"],
-    ["alibaba.svg", "tencent.svg", "hunyuan.svg", "qwen.svg"],
-    ["stepfun.png", "kuaishou.png", "zhihu.svg", "tsinghua.svg", "sjtu.png"],
+    ["google.svg", "amazon.svg", "aws.svg", "ibm.svg", "tesla.svg"],
+    ["cmu.svg", "harvard.svg", "mit.svg", "berkeley.svg", "nus.svg", "auckland.svg", "xtracta.svg"],
+    ["alibaba.svg", "hunyuan.svg", "qwen.svg", "bytedance.svg", "antgroup.png", "zai.svg"],
+    [
+        "stepfun.png",
+        "kuaishou.png",
+        "zhihu.svg",
+        "tsinghua.svg",
+        "sjtu.png",
+        "tencent.svg",
+    ],
+    # Row 5 (issue #735): the remaining verified institutions. moreGeo and
+    # Kultiva have no official logo on Wikimedia Commons, so they stay out.
+    [
+        "hebrew-university.svg",
+        "fudan.svg",
+        "chungnam.png",
+        "rise.svg",
+        "york.svg",
+    ],
 ]
 
 FONT = "Helvetica Neue, Helvetica, Arial, sans-serif"
@@ -37,8 +61,9 @@ GAP = 26  # gap between logos in a row
 ROW_H = 30  # row box height
 ROW_GAP = 16
 BOTTOM_PAD = 3
-LOGO_SCALE = {"alibaba.svg": 0.6}  # logos that look oversized at the common height
-PNG_MAX_W = {"kuaishou.png": 1200, "sjtu.png": 120}
+# Logos that look oversized at the common height.
+LOGO_SCALE = {"alibaba.svg": 0.6, "tesla.svg": 0.6}
+PNG_MAX_W = {"kuaishou.png": 1200, "sjtu.png": 120, "chungnam.png": 400}
 # Many wordmarks are dark (Amazon, Qwen, Zhihu, StepFun, Xtracta), so the strip
 # carries its own light backing: on GitHub's dark theme it would otherwise sit
 # on a near-black canvas and those names would all but disappear.
@@ -54,6 +79,7 @@ def load_svg(path):
     src = re.sub(r"<metadata[^>]*>.*?</metadata>", "", src, flags=re.S)
     src = re.sub(r"<sodipodi:[a-zA-Z-]+[^>]*/>", "", src)
     src = re.sub(r"\s+(sodipodi|inkscape):[a-zA-Z-]+=\"[^\"]*\"", "", src)
+    src = re.sub(r"[ \t]+$", "", src, flags=re.M)
     m = re.search(r"<svg[^>]*>", src)
     end = src.rfind("</svg>")
     inner = src[m.end() : end]
@@ -71,6 +97,29 @@ def prefix_ids(xml, prefix):
     xml = re.sub(r"url\(#([^)]+)\)", f"url(#{prefix}\\1)", xml)
     xml = re.sub(r'xlink:href="#([^"]+)"', f'xlink:href="#{prefix}\\1"', xml)
     return xml
+
+
+def prefix_classes(xml, prefix):
+    """Scope an SVG's CSS classes to one logo, as prefix_ids does for ids.
+
+    Illustrator exports name classes .st0, .st1, ...; two logos in one strip
+    can define the same class differently (Tsinghua's .st0 is purple, Z.ai's
+    is light grey), and the later <style> block would win for both. Rewrite
+    the selectors inside <style> blocks and the class attributes that use
+    them, so each logo keeps its own definitions.
+    """
+
+    def _prefix_style(match):
+        style = re.sub(r"\.([A-Za-z_][\w-]*)", f".{prefix}\\1", match.group(2))
+        return f"<style{match.group(1)}>{style}</style>"
+
+    xml = re.sub(r"<style([^>]*)>(.*?)</style>", _prefix_style, xml, flags=re.S)
+
+    def _prefix_attr(match):
+        names = " ".join(f"{prefix}{name}" for name in match.group(1).split())
+        return f'class="{names}"'
+
+    return re.sub(r'class="([^"]+)"', _prefix_attr, xml)
 
 
 def png_data_uri(path, max_w):
@@ -102,6 +151,7 @@ def logo_item(filename, idx):
     inner, w, h = load_svg(path)
     s = H / h * LOGO_SCALE.get(filename, 1)
     inner = prefix_ids(inner, f"l{idx}_")
+    inner = prefix_classes(inner, f"l{idx}_")
     return f'<g transform="scale({s:.4f})">{inner}</g>', w * s, h * s
 
 

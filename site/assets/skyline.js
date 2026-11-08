@@ -13,7 +13,7 @@ export const SKYLINE_HEIGHT_LABELS = {
   documents: "Source documents",
 };
 
-function validDate(value) {
+export function validDate(value) {
   if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const time = Date.parse(`${value}T00:00:00Z`);
   return Number.isFinite(time) && new Date(time).toISOString().slice(0, 10) === value;
@@ -78,7 +78,21 @@ export function matchesScoreCutoff(summary, cutoff) {
   return hasReportedScore(summary) && (cutoff >= 100 || summary.display_max < cutoff);
 }
 
-export function skylineModel(catalog = [], cutoff = 70, matchingIds = null, heightMetric = "models") {
+export function skylineModel(catalog = [], cutoff = 70, matchingIds = null, heightMetric = "models", dateRange = null) {
+  // A date range (#570) narrows what the figure shows, like the score cutoff
+  // does: a benchmark whose release or first-score date falls outside it is
+  // not drawn and cannot be a frontier candidate, but the dominance
+  // comparison set stays the full cohort, so the slice cannot promote a
+  // dominated benchmark onto the frontier. An undated record has no date, so
+  // no bound can place it outside the span: it stays visible in the undated
+  // panel instead of being counted as outside the range (principle.md).
+  const from = validDate(dateRange?.from) ? dateRange.from : null;
+  const to = validDate(dateRange?.to) ? dateRange.to : null;
+  const inRange = (row) => {
+    if (!from && !to) return true;
+    if (!row.date) return true;
+    return (!from || row.date >= from) && (!to || row.date <= to);
+  };
   const population = scorePopulation(catalog);
   const all = population.map((item) => {
     const { id, name, source, record, summary } = item;
@@ -132,7 +146,7 @@ export function skylineModel(catalog = [], cutoff = 70, matchingIds = null, heig
   // The figure's cutoff is independent of Saturation search. Normalized reversed
   // metrics remain explicit in the tooltip; they never change source scores.
   const visible = withinDates.filter((row) => (!matchingIds || matchingIds.has(row.id))
-    && matchesScoreCutoff(row.summary, cutoff));
+    && matchesScoreCutoff(row.summary, cutoff) && inRange(row));
   const dated = visible.filter((row) => row.date !== null);
   return {
     all, visible, dated, cohort, eligible, heightMetric, heightLabel: SKYLINE_HEIGHT_LABELS[heightMetric], comparable: dated.filter(comparable),
@@ -142,7 +156,11 @@ export function skylineModel(catalog = [], cutoff = 70, matchingIds = null, heig
     beforeStart: all.length - withinDates.length,
     population: all.length, sources: new Set(all.map((row) => row.source)).size,
     hidden: all.length - visible.length,
-    // Exclusive counts: old records first, then unscored, then score/search.
+    dateRange: { from, to },
+    dateHidden: withinDates.filter((row) => (!matchingIds || matchingIds.has(row.id))
+      && matchesScoreCutoff(row.summary, cutoff) && !inRange(row)).length,
+    // Exclusive counts: old records first, then unscored, then score/search,
+    // then the date range.
     unscored: withinDates.filter((row) => !hasReportedScore(row.summary)).length,
   };
 }
