@@ -85,6 +85,23 @@ def deduplicate(items: list[RadarItem]) -> list[RadarItem]:
     def merge_into(target: RadarItem, duplicate: RadarItem) -> None:
         if duplicate.url != target.url and duplicate.url not in target.artifact_urls:
             target.artifact_urls.append(duplicate.url)
+        # Keep per-source attribution for the combined metrics (#841). The
+        # snapshot merge replaces one source's map wholesale, so a flat max
+        # cannot tell which source supplied a value: without this, a later
+        # revision from the envelope source drops every other contributor's
+        # measurement it omits. Seed from the target's own metrics before
+        # the flat update below mutates them; within a source the combined
+        # value is the highest reported, the same max rule as the flat map.
+        if not target.metrics_by_source:
+            target.metrics_by_source = {target.source: dict(target.metrics)}
+        duplicate_by_source = duplicate.metrics_by_source or {
+            duplicate.source: dict(duplicate.metrics)
+        }
+        for source, metrics in duplicate_by_source.items():
+            target_map = target.metrics_by_source.setdefault(source, {})
+            for metric, value in metrics.items():
+                if metric not in target_map or value > target_map[metric]:
+                    target_map[metric] = value
         target.metrics.update(
             {
                 metric: max(value, target.metrics.get(metric, 0))
