@@ -110,6 +110,11 @@ models, adding counts, averaging scores or assuming matching test protocols.
 
 ## Put the figure first; collect explanations in one information note
 
+Show action-specific details only after the reader chooses that action.
+Keep X caption-length, Premium, and image-paste guidance hidden until the
+reader clicks Post on X. These details must not compete with benchmark content
+or appear by default in the share preview.
+
 Place **all legends below the main figure** they explain, including domain
 colors, organization colors and mark shapes. Keep only the keys needed to read
 the visible marks expanded. Axis names, units, ticks and essential missing-data

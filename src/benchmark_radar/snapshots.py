@@ -1495,8 +1495,8 @@ def _share_images(share: dict[str, Any] | None) -> dict[str, Any]:
     """Public image URLs for a snapshot's ``share`` block, keyed by card URL.
 
     The images themselves are rendered by the daily pipeline from this block,
-    so the file names follow the card order. The card text stays in the
-    snapshot; the dashboard only needs to know which item has which image.
+    so the file names follow the card order. Keep the same creator and blurb
+    fields beside each image so X captions do not lose the names in the PNG.
     """
     # Imported here because daily_top imports this module.
     from .daily_top import card_image_name, daily_image_url
@@ -1511,6 +1511,9 @@ def _share_images(share: dict[str, Any] | None) -> dict[str, Any]:
             {
                 "url": str(card["url"]),
                 "title": str(card.get("title") or ""),
+                "authors": list(card.get("authors") or []),
+                "affiliations": list(card.get("affiliations") or []),
+                "blurb": str(card.get("blurb") or ""),
                 "image": daily_image_url(day, card_image_name(index)),
             }
             for index, card in enumerate(cards, start=1)
@@ -1732,6 +1735,7 @@ def dashboard_search_index(dashboard: dict[str, Any]) -> dict[str, Any]:
                 )
                 if share_card and share_card.get("image"):
                     observation["share_image"] = share_card["image"]
+                    observation["share_card"] = share_card
                 threshold = selection.get("recommendation_score")
                 if observation.get("recommended") is None:
                     observation["recommended"] = threshold is not None and float(
@@ -1785,6 +1789,7 @@ def dashboard_search_index(dashboard: dict[str, Any]) -> dict[str, Any]:
         "observation_kind",
         "primary_artifact_url",
         "share_image",
+        "share_card",
         "authors",
         "rationale",
         "watchlist",
@@ -1794,6 +1799,7 @@ def dashboard_search_index(dashboard: dict[str, Any]) -> dict[str, Any]:
         # detection, Hacker News submissions, and the watchlist note.
         "artifact_urls",
         "catalog_slug",
+        "catalog_card",
         "recommended",
         "recommendation_score",
         "minimum_score",
@@ -1849,12 +1855,27 @@ def attach_catalog_cards(dashboard: dict[str, Any], index_path: Path) -> int:
     and nothing is matched by name. Returns how many items were tagged.
     """
     unique = catalog_pages_by_url(index_path)
+    records = (
+        json.loads(index_path.read_text(encoding="utf-8")).get("benchmarks") or [] if unique else []
+    )
+    cards = {
+        record["slug"]: {
+            "title": record.get("name") or record["slug"],
+            "authors": list(record.get("authors") or []),
+            "affiliations": list(record.get("institutions") or []),
+            "blurb": record.get("description") or "",
+            "publisher": record.get("publisher") or "",
+        }
+        for record in records
+        if record.get("slug")
+    }
     tagged = 0
     for day in dashboard.get("days") or []:
         for item in day.get("evidence_items") or []:
             slug = unique.get(str(item.get("url") or ""))
             if slug:
                 item["catalog_slug"] = slug
+                item["catalog_card"] = cards[slug]
                 tagged += 1
     return tagged
 

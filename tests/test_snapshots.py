@@ -366,6 +366,8 @@ def test_search_index_keeps_only_latest_sighting_and_needed_fields():
                         {
                             "url": "https://github.com/example/repo",
                             "image": "/cards/example.png",
+                            "authors": ["Creator"],
+                            "affiliations": ["Institute"],
                         }
                     ]
                 },
@@ -396,6 +398,8 @@ def test_search_index_keeps_only_latest_sighting_and_needed_fields():
     assert {item["title"] for item in index["observations"]} == {"Old", "New"}
     assert all("supporting_observations" not in item for item in index["observations"])
     assert index["observations"][0]["share_image"] == "/cards/example.png"
+    assert index["observations"][0]["share_card"]["authors"] == ["Creator"]
+    assert index["observations"][0]["share_card"]["affiliations"] == ["Institute"]
 
 
 def test_search_index_keeps_every_field_the_result_cards_read():
@@ -2128,7 +2132,13 @@ def test_dashboard_day_maps_each_share_card_to_its_published_image(tmp_path):
     raw["share"] = {
         "date": "2026-07-27",
         "cards": [
-            {"url": "https://example.org/a", "title": "A"},
+            {
+                "url": "https://example.org/a",
+                "title": "A",
+                "authors": ["Ada"],
+                "affiliations": ["Institute"],
+                "blurb": "Complete blurb.",
+            },
             {"url": "https://example.org/b", "title": "B"},
         ],
     }
@@ -2139,6 +2149,10 @@ def test_dashboard_day_maps_each_share_card_to_its_published_image(tmp_path):
     base = "https://cards.benchmark-radar.org/daily/2026-07-27"
     share = dashboard["days"][1]["share"]
     assert share["top3_image"] == f"{base}/top3.png"
+    assert share["cards"][0]["authors"] == ["Ada"]
+    assert share["cards"][0]["affiliations"] == ["Institute"]
+    assert share["cards"][0]["blurb"] == "Complete blurb."
+    assert share["cards"][1]["authors"] == []
     assert [(c["url"], c["image"]) for c in share["cards"]] == [
         ("https://example.org/a", f"{base}/card-01.png"),
         ("https://example.org/b", f"{base}/card-02.png"),
@@ -2320,7 +2334,14 @@ def test_today_items_name_their_catalog_record_only_by_exact_unique_url(tmp_path
         json.dumps(
             {
                 "benchmarks": [
-                    {"slug": "gpqa_diamond", "source_url": "https://arxiv.org/abs/2311.12022"},
+                    {
+                        "slug": "gpqa_diamond",
+                        "source_url": "https://arxiv.org/abs/2311.12022",
+                        "name": "GPQA Diamond",
+                        "authors": ["Creator"],
+                        "institutions": ["Institute"],
+                        "description": "Full catalog description.",
+                    },
                     # Two records share one URL: neither is named.
                     {"slug": "a-one", "source_url": "https://example.org/shared"},
                     {"slug": "a-two", "source_url": "https://example.org/shared"},
@@ -2340,4 +2361,14 @@ def test_today_items_name_their_catalog_record_only_by_exact_unique_url(tmp_path
 
     assert attach_catalog_cards(dashboard, index) == 1
     assert [item.get("catalog_slug") for item in items] == ["gpqa_diamond", None, None, None]
+    card = items[0]["catalog_card"]
+    assert card == {
+        "title": "GPQA Diamond",
+        "authors": ["Creator"],
+        "affiliations": ["Institute"],
+        "blurb": "Full catalog description.",
+        "publisher": "",
+    }
+    searchable = dashboard_search_index(dashboard)["observations"][0]
+    assert searchable["catalog_card"] == card
     assert attach_catalog_cards(dashboard, tmp_path / "missing.json") == 0
