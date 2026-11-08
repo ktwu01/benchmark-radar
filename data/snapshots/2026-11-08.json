@@ -84877,5 +84877,140 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "iSimplifyMe LLC"
+        ],
+        "authors": [
+          "Joseph W. Elstner"
+        ],
+        "blurb": "The newly released “The Ceiling Is Not the Model” study reports that output limits, decoding settings, and the serving stack changed local large language model scores enough to suppress measured capability, reverse a ranking, and create an apparent reasoning loop.",
+        "categories": [
+          "benchmark"
+        ],
+        "published_at": "2026-11-08T04:45:56+00:00",
+        "source": "DataCite",
+        "title": "The Ceiling Is Not the Model: How Harness Configuration Fabricates Local LLM Benchmark Results",
+        "url": "https://doi.org/10.5281/zenodo.24047877"
+      },
+      {
+        "affiliations": [
+          "Department of Pediatrics, Faculdade de Medicina, Universidade de São Paulo (USP), São Paulo, SP 01246-903, Brazil",
+          "Department of Anesthesiology, Hospital Unimed de Rondonópolis, Rondonópolis, MT 78750-793, Brazil",
+          "Department of Pediatrics, Hospital Sepaco, São Paulo, SP 04102-900, Brazil",
+          "Department of Internal Medicine, Irmandade Santa Casa de Piracicaba, Piracicaba, SP 13419-155, Brazil"
+        ],
+        "authors": [
+          "Marcelo Carvalho e Silva",
+          "Fernando Carvalho e Silva",
+          "Renata de Paula Gomes Nunes de Castro",
+          "Alex Gonçalves",
+          "Artur Figueiredo Delgado"
+        ],
+        "blurb": "A newly captured medical study tested ten large language models as autonomous judges on three structurally different clinical tasks, with human reference labels and three repeated judgments per case.",
+        "categories": [
+          "evaluation"
+        ],
+        "published_at": "2026-11-06T00:00:00+00:00",
+        "source": "Crossref",
+        "title": "Large language models are unstable as autonomous medical evaluators across clinical tasks",
+        "url": "https://doi.org/10.1093/jamia/ocag190"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Victor May"
+        ],
+        "blurb": "The new corpus-assay release scans large language model training collections for benchmark contamination using auditable n-grams—short, exact text fragments—and attributes matches to individual benchmarks and test items.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-07T21:10:52+00:00",
+        "source": "DataCite",
+        "title": "corpus-assay: benchmark contamination detection for LLM training corpora",
+        "url": "https://doi.org/10.5281/zenodo.24044240"
+      },
+      {
+        "affiliations": [
+          "Satbayev University Institute of Cybernetics and Information Technology",
+          "Казахская академия спорта и туризма"
+        ],
+        "authors": [
+          "Mussa Turdalyuly",
+          "Tolganay Turdalykyzy",
+          "Aidyn Doshybekov"
+        ],
+        "blurb": "The new Cross-Dataset Human Activity Recognition Benchmark package compares ten models across five sensor datasets using harmonized accelerometer inputs and five subject-disjoint folds per dataset, meaning the people represented in evaluation folds are separated.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-08T07:54:27+00:00",
+        "source": "DataCite",
+        "title": "Cross-Dataset HAR Benchmark: Verified Reproducibility Package",
+        "url": "https://doi.org/10.5281/zenodo.24050079"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "swethaos"
+        ],
+        "blurb": "The new agentic-safety-bench project evaluates whether agent security scanners detect behavior recorded in action logs rather than relying only on what an agent says it did.",
+        "categories": [
+          "benchmark",
+          "agentic"
+        ],
+        "published_at": "2026-11-08T09:35:56+00:00",
+        "source": "GitHub",
+        "title": "swethaops/agentic-safety-bench",
+        "url": "https://github.com/swethaops/agentic-safety-bench"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Tushar Kumar"
+        ],
+        "blurb": "The new Semantic Cache Adversarial Benchmark targets the cache that decides whether to reuse a previous answer.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-08T05:03:18+00:00",
+        "source": "Hugging Face",
+        "title": "Tushar29k/semantic-cache-adversarial-benchmark",
+        "url": "https://huggingface.co/datasets/Tushar29k/semantic-cache-adversarial-benchmark"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Andrew Peters"
+        ],
+        "blurb": "The new Tibetan Translation Benchmark reports modern and religious Tibetan separately and offers a companion balanced ranking that combines the two registers.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-07T19:19:22+00:00",
+        "source": "Hugging Face",
+        "title": "Apeters247/tibetan-translation-benchmark",
+        "url": "https://huggingface.co/datasets/Apeters247/tibetan-translation-benchmark"
+      }
+    ],
+    "date": "2026-11-08",
+    "schema_version": 1,
+    "top": [
+      "https://doi.org/10.5281/zenodo.24047877",
+      "https://doi.org/10.1093/jamia/ocag190",
+      "https://doi.org/10.5281/zenodo.24044240"
+    ]
+  },
   "since": "2026-11-06T11:36:00.968467+00:00"
 }
