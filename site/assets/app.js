@@ -6831,6 +6831,15 @@ function modelAverageValue(value, benchmark) {
   return benchmark.direction === "lower_is_better" ? 100 - value : value;
 }
 
+// Whether every column scores `key`, or another record of its reviewed
+// equivalent group (#904), so the shared-only filter keeps the rows behind
+// a joined average instead of hiding them.
+function modelHeldByAll(columns, key, benchmarks) {
+  const group = benchmarks.get(key)?.joined;
+  return columns.every((model) => model.cells.has(key)
+    || (group && [...model.cells.keys()].some((other) => benchmarks.get(other)?.joined === group)));
+}
+
 function modelSharedAverage(columns, benchmarks, joined) {
   if (!columns.length) return { means: [], shared: [] };
   if (joined) {
@@ -7120,7 +7129,7 @@ function modelAverageRow(columns, average) {
 
 function modelMatrixTable(columns, data, recordsByKey) {
   const keys = new Set(columns.flatMap((model) => [...model.cells.keys()]));
-  const shownKeys = [...keys].filter((key) => !state.modelsSharedOnly || columns.every((model) => model.cells.has(key)));
+  const shownKeys = [...keys].filter((key) => !state.modelsSharedOnly || modelHeldByAll(columns, key, data.benchmarks));
   const collisions = new Map();
   for (const key of shownKeys) {
     const record = recordsByKey.get(key);
@@ -7433,7 +7442,7 @@ function renderModels() {
   // shared-only toggle can hide its row.
   const panelRecord = state.modelsPanel?.record;
   const panelShown = columns.some((model) => model.key === state.modelsPanel?.model && model.cells.has(panelRecord))
-    && (!state.modelsSharedOnly || columns.every((model) => model.cells.has(panelRecord)));
+    && (!state.modelsSharedOnly || modelHeldByAll(columns, panelRecord, data.benchmarks));
   if (state.modelsPanel && !panelShown) closeModelPanel();
 }
 

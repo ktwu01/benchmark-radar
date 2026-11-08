@@ -154,7 +154,7 @@ const env = {
 };
 const names = [
   "modelDocuments", "modelFirstMentions", "modelCapabilityGroup", "modelFamily", "modelAverageValue",
-  "modelSharedAverage", "modelMatrixModels", "modelMatrixTable", "modelOrder", "modelMatches", "modelLabCounts",
+  "modelHeldByAll", "modelSharedAverage", "modelMatrixModels", "modelMatrixTable", "modelOrder", "modelMatches", "modelLabCounts",
   "renderModelLabs", "modelValueText", "modelSeriesScale", "modelLatestDate", "openModelPanel", "closeModelPanel", "renderModels", "initModels",
 ];
 const models = new Function(
@@ -352,6 +352,14 @@ const joinedAverage = joinedTable.querySelector("tbody.models-average").textCont
 assert.match(joinedAverage, /over the 1 benchmarks all 2 models share, 0–100/);
 assert.match(joinedAverage, /40/);
 assert.match(joinedAverage, /60/);
+// The shared-only filter keeps both rows behind the joined average.
+state.modelsSharedOnly = true;
+const sharedOnlyTable = models.modelMatrixTable(
+  joinedMatrix.models, joinedMatrix,
+  new Map(joinedRecords.map((entry) => [entry.key, entry])),
+);
+state.modelsSharedOnly = false;
+assert.equal((sharedOnlyTable.textContent.match(/GPQA/g) || []).length, (joinedTable.textContent.match(/GPQA/g) || []).length);
 
 // --- Rendering. ------------------------------------------------------------------
 function reset(scores) {
