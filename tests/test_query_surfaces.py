@@ -219,7 +219,7 @@ def test_catalog_search_is_deterministic_and_explains_matches(tmp_path: Path) ->
     assert result["total_matches"] == 2
     assert result["full_match_count"] == 2
     assert result["partial_match_count"] == 0
-    assert result["matching_policy"]["name"] == "lexical_candidates_v1"
+    assert result["matching_policy"]["name"] == "lexical_candidates_v2"
     assert result["matching_policy"]["ranking"] == "bm25f_v3"
     assert result["results"][0]["match"]["matched_fields"] == [
         "name",
@@ -331,6 +331,107 @@ def test_search_returns_partial_candidates_with_evidence_for_agent_judgment(
         set(item["match"]["score_components"]) == {"bm25f", "name_bonus", "phrase_bonus"}
         for item in result["results"]
     )
+
+
+def test_multi_word_query_drops_description_only_single_token_matches(tmp_path: Path) -> None:
+    # Issue #432: "protein structure prediction" returned a page of records
+    # matching one generic word ("prediction") in description only, ranked as
+    # confident matches while the rarer words matched nothing. A lone
+    # description-only token no longer qualifies for a multi-word query; a
+    # token in a name, category or other field still does.
+    service = QueryService(_catalog(tmp_path))
+
+    result = service.search("scientific protein prediction", scope="catalog", limit=10)
+
+    # "scientific" appears only in Science Discovery Suite's description.
+    assert result["search_status"] == "no_lexical_candidates"
+    assert result["candidate_count"] == 0
+    assert result["total_matches"] == 0
+    assert result["results"] == []
+    assert result["decision"] == "no_confident_match"
+    # Codex P2: the old reason ("no record matched any query token") was
+    # false here — one record did share "scientific", and the #432 floor
+    # hid it. The reason now says the policy hid weak hits, and the count
+    # lets a caller tell that apart from true zero overlap.
+    assert result["decision_reason"] == (
+        "no candidate passed the matching policy; 1 record shared a query "
+        "token but only a single token in description"
+    )
+    assert result["weak_filtered_count"] == 1
+
+    # True zero overlap keeps the old reason and a zero count.
+    empty = service.search("zzzzqqqq xxxxwwww", scope="catalog", limit=10)
+    assert empty["search_status"] == "no_lexical_candidates"
+    assert empty["decision"] == "no_confident_match"
+    assert empty["decision_reason"] == "no record matched any query token"
+    assert empty["weak_filtered_count"] == 0
+
+
+def test_filter_excluded_matches_are_not_reported_as_no_match(tmp_path: Path) -> None:
+    # Codex P2: an active filter skipped records before overlap was tracked,
+    # so a benchmark-name query with has_repo=false fell through to "no
+    # record matched any query token" even though the named record exists
+    # outside the filter. The reason now says the filter hid the match, and
+    # the count lets a caller tell that apart from true zero overlap.
+    service = QueryService(_catalog(tmp_path))
+
+    filtered = service.search("science discovery", scope="catalog", limit=10, has_repo=False)
+    assert filtered["search_status"] == "no_lexical_candidates"
+    assert filtered["decision"] == "no_confident_match"
+    assert filtered["decision_reason"] == (
+        "no candidate passed the matching policy; 1 record shared a query "
+        "token but was excluded by the active filters"
+    )
+    assert filtered["weak_filtered_count"] == 0
+    assert filtered["filter_excluded_match_count"] == 1
+
+    # A filter-excluded sharer and a policy-dropped weak hit are reported
+    # together, not one hiding the other: "evaluation scientific
+    # prediction" with modality=multimodal leaves Science Discovery Suite
+    # sharing only "scientific" in description (weak hit) while Agent
+    # Workbench shares "evaluation" but is filtered out as text modality.
+    combined = service.search(
+        "evaluation scientific prediction", scope="catalog", limit=10, modality="multimodal"
+    )
+    assert combined["search_status"] == "no_lexical_candidates"
+    assert combined["decision_reason"] == (
+        "no candidate passed the matching policy; 1 record shared a query "
+        "token but only a single token in description; 1 record shared a "
+        "query token but was excluded by the active filters"
+    )
+    assert combined["weak_filtered_count"] == 1
+    assert combined["filter_excluded_match_count"] == 1
+
+    # True zero overlap under a filter keeps the old reason and zero counts.
+    empty = service.search("zzzzqqqq xxxxwwww", scope="catalog", limit=10, has_repo=False)
+    assert empty["search_status"] == "no_lexical_candidates"
+    assert empty["decision_reason"] == "no record matched any query token"
+    assert empty["weak_filtered_count"] == 0
+    assert empty["filter_excluded_match_count"] == 0
+
+
+def test_search_decision_marks_full_and_partial_coverage(tmp_path: Path) -> None:
+    # Issue #432: the JSON contract carried a rank and prose but no signal a
+    # caller could threshold on. `decision` states whether any record covered
+    # every query token; the raw BM25 score is deliberately not called
+    # confidence, since it is not comparable across queries.
+    service = QueryService(_catalog(tmp_path))
+
+    full = service.search("agent workbench", scope="catalog", limit=10)
+    assert full["search_status"] == "full_matches_found"
+    assert full["decision"] == "matches"
+    assert full["decision_reason"] == "at least one record matched every query token"
+    assert full["matching_policy"]["name"] == "lexical_candidates_v2"
+
+    partial = service.search("protein agent prediction", scope="catalog", limit=10)
+    assert partial["search_status"] == "partial_candidates_only"
+    assert partial["decision"] == "no_confident_match"
+    assert partial["decision_reason"] == (
+        "no record matched every query token; partial candidates share only some query tokens"
+    )
+    # Name-field partials survive the floor: both records match "agent" in
+    # their name, so the agent still gets candidates to inspect.
+    assert partial["candidate_count"] == 2
 
 
 def test_exact_name_and_phrase_are_controlled_boosts(tmp_path: Path) -> None:
@@ -511,7 +612,7 @@ def test_radar_results_carry_derived_science_domains(tmp_path: Path) -> None:
     recent = service.recent(limit=5)
     searched = service.search("brainbench", scope="radar", limit=5)
 
-    assert recent["schema_version"] == 7
+    assert recent["schema_version"] == 8
     assert recent["results"][0]["science_domains"] == ["neuroscience"]
     radar_hits = [record for record in searched["results"] if record["kind"] == "radar"]
     assert radar_hits and radar_hits[0]["science_domains"] == ["neuroscience"]
@@ -710,6 +811,59 @@ def test_cli_labels_partial_candidates_without_hiding_them(
     assert name in output
 
 
+def test_cli_search_accepts_query_flag(tmp_path: Path, capsys) -> None:
+    # Issue #421: the request shows the query as `--query "..."`. The flag
+    # form must return the same contract as the positional form, including
+    # the issue's `--scope` / `--limit` / `--json` shape.
+    paths = _catalog(tmp_path)
+    common = ["--scope", "catalog", "--limit", "10", "--json"]
+    cases = [
+        ["search", "agent workbench", *common],
+        ["search", "--query", "agent workbench", *common],
+        ["search", "agent workbench", "--query", "agent workbench", *common],
+    ]
+    payloads = []
+    for arguments in cases:
+        exit_code = run_query_cli(
+            [
+                *arguments,
+                "--index",
+                str(paths.index),
+                "--shards",
+                str(paths.shards),
+                "--snapshots",
+                str(paths.snapshots),
+            ]
+        )
+        assert exit_code == 0
+        payloads.append(json.loads(capsys.readouterr().out))
+    assert payloads[0] == payloads[1] == payloads[2]
+    assert payloads[0]["query"] == "agent workbench"
+
+
+def test_cli_search_rejects_conflicting_or_missing_query(tmp_path: Path, capsys) -> None:
+    # Giving both forms with different values is an error, not a silent pick;
+    # giving neither is an error too. Both fail non-zero with the machine
+    # error contract on stderr.
+    paths = _catalog(tmp_path)
+    base = [
+        "--json",
+        "--index",
+        str(paths.index),
+        "--shards",
+        str(paths.shards),
+        "--snapshots",
+        str(paths.snapshots),
+    ]
+    for arguments in (
+        ["search", "agent workbench", "--query", "science discovery", *base],
+        ["search", *base],
+    ):
+        exit_code = run_query_cli(arguments)
+        assert exit_code == 2
+        assert json.loads(capsys.readouterr().err)["error"]["code"] == "invalid_query"
+
+
 def test_cli_and_http_return_the_same_non_search_contracts(tmp_path: Path, capsys) -> None:
     # Regression: shared search alone did not prevent detail/status serializers drifting.
     paths = _catalog(tmp_path)
@@ -768,7 +922,7 @@ def test_healthz_identifies_local_health_check_contract(tmp_path: Path) -> None:
         thread.join(timeout=5)
 
     assert payload == {
-        "schema_version": 7,
+        "schema_version": 8,
         "retrieval_mode": "health_check",
         "data": {"source": "local", "citation": citation_block()},
         "status": "ok",
@@ -850,7 +1004,7 @@ def test_http_errors_are_machine_readable(tmp_path: Path) -> None:
 
     assert captured.value.code == 400
     assert payload == {
-        "schema_version": 7,
+        "schema_version": 8,
         "error": {"code": "invalid_request", "message": "q is required"},
     }
 

@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import math
 import re
+import unicodedata
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -35,15 +36,153 @@ from urllib.parse import urlsplit
 
 import yaml
 
+from .affiliation_rank import affiliation_normalized, best_institution, institution_weights
 from .catalog_identity import DEFAULT_IDENTITY_PATH
 from .catalog_overrides import DEFAULT_LLM_STATS_IDENTITY_OVERRIDES_PATH
 from .corpus import artifact_alias_map, exact_artifact_key
 from .model_cards import DEFAULT_REGISTRY_PATH
+from .paper_institutions import SHOWN_INSTITUTIONS, arxiv_id
 from .release_kind import is_benchmark_release
+from .release_signals import ReleaseSignals
 
 METHOD_VERSION = "attention-ranking-v1"
+# Issue #1120: the default once release signals are loaded. Attention keeps its
+# internal split, scaled to 80%; the affiliation signal (affiliation_rank.py)
+# adds 20%. Unknown affiliation contributes nothing and is not redistributed.
+COMBINED_METHOD_VERSION = "attention-affiliation-v2"
+AFFILIATION_WEIGHT = 0.20
 MIN_OBSERVED_WEIGHT_RANK = 0.45
 DEFAULT_TOP_LIMIT = 10
+
+# One-line release summary (issue #348). A release row answers one question —
+# what does this benchmark measure, and for whom — in a single scannable
+# line, or it says nothing. The line is extractive, never generated: it is
+# the first sentence of the source record's own summary, so a line can only
+# state what the source already stated. No API call, no cache, nothing to
+# regenerate: the same record always yields the same line.
+ONE_LINE_SUMMARY_MAX_CHARS = 140
+# Box-drawing and block characters: one release's summary was a run of "═══"
+# that pushed a 720px column to 1349px (issue #333). They carry no meaning
+# here, so they are stripped rather than escaped around.
+_ONE_LINE_STRIP_RANGES = ((0x2500, 0x259F),)
+_SENTENCE_END_RE = re.compile(r"[.!?](?=\s+\S|\s*$)")
+# A sentence can start with lowercase text ("... platform. adaption-python
+# code preferences ..."), so the boundary lookahead must not require an
+# uppercase start. Abbreviation periods ("vs.", "Dr.", "U.S.") are still
+# guarded by the checks in _first_sentence_end, not by this regex.
+# Periods that do not end a sentence: "vs.", "Dr.", "e.g.", "U.S.".
+_SENTENCE_ABBREVIATIONS = frozenset(
+    {
+        "vs",
+        "dr",
+        "mr",
+        "mrs",
+        "ms",
+        "st",
+        "jr",
+        "sr",
+        "etc",
+        "al",
+        "e.g",
+        "i.e",
+        "u.s",
+        "u.k",
+        "no",
+        "fig",
+        "eq",
+        "approx",
+        "dept",
+        "inc",
+        "ltd",
+        "corp",
+        "jan",
+        "feb",
+        "mar",
+        "apr",
+        "jun",
+        "jul",
+        "aug",
+        "sep",
+        "sept",
+        "oct",
+        "nov",
+        "dec",
+    }
+)
+
+
+def _first_sentence_end(text: str) -> int | None:
+    """Return the end index of the first substantive sentence in ``text``.
+
+    Skips a period that belongs to an abbreviation (``vs.``, ``Dr.``,
+    ``U.S.``) and a period that ends a standalone label (``Background.``),
+    so the compact line still says what the release is about instead of
+    publishing a nearly meaningless fragment. A skipped candidate is only
+    skipped while a later candidate exists: when it is the last one, the
+    text ends there anyway and the whole line is the sentence.
+    """
+    matches = list(_SENTENCE_END_RE.finditer(text))
+    for index, match in enumerate(matches):
+        sentence = text[: match.end()]
+        before = text[: match.start()].rstrip()
+        token = before.rsplit(None, 1)[-1] if before else ""
+        token_lower = token.lower().rstrip(".")
+        is_abbreviation = (
+            token_lower in _SENTENCE_ABBREVIATIONS
+            or ("." in token and len(token.rsplit(".", 1)[-1]) == 1)
+            or (
+                len(token) == 1
+                and match.end() + 1 < len(text)
+                and text[match.end()].isalpha()
+                and text[match.end() + 1] == "."
+            )
+        )
+        is_label = " " not in sentence.strip()
+        if (is_abbreviation or is_label) and index < len(matches) - 1:
+            continue
+        return match.end()
+    return None
+
+
+def one_line_summary(value: Any) -> str:
+    """Derive a release row's one-line summary from the record's own text.
+
+    Takes the first sentence of ``value`` (the source record's summary),
+    capped at :data:`ONE_LINE_SUMMARY_MAX_CHARS` characters. Whitespace
+    controls become spaces and other control and box-drawing characters
+    are stripped, so nothing in the line can break the column. Returns
+    ``""`` when the record carries nothing usable: a
+    release with nothing to summarise keeps an honest empty state instead
+    of a manufactured line.
+    """
+    if not isinstance(value, str):
+        return ""
+    # Whitespace controls (\n, \t, \r, ...) separate words: turn them into
+    # spaces first, so "OBJECTIVE\nThis..." does not become
+    # "OBJECTIVEThis...". Every other control character is dropped.
+    spaced = "".join(
+        " " if char.isspace() and unicodedata.category(char) in ("Cc", "Zl", "Zp") else char
+        for char in value
+    )
+    cleaned = "".join(
+        char
+        for char in spaced
+        if unicodedata.category(char) not in ("Cc", "Cf", "Zl", "Zp")
+        and not any(start <= ord(char) <= end for start, end in _ONE_LINE_STRIP_RANGES)
+    )
+    text = " ".join(cleaned.split())
+    if not text:
+        return ""
+    end = _first_sentence_end(text)
+    if end is not None:
+        text = text[:end]
+    if len(text) <= ONE_LINE_SUMMARY_MAX_CHARS:
+        return text
+    cut = text.rfind(" ", 0, ONE_LINE_SUMMARY_MAX_CHARS - 1)
+    if cut <= 0:
+        return text[: ONE_LINE_SUMMARY_MAX_CHARS - 1] + "…"
+    return text[:cut] + "…"
+
 
 WINDOW_DAYS: dict[str, int] = {
     "7d": 7,
@@ -51,6 +190,10 @@ WINDOW_DAYS: dict[str, int] = {
     "90d": 90,
 }
 
+# github_forks is collected by benchmark_attention as a displayed counter
+# only (#659): it is not a ranking signal and must not be added here. The
+# ranking iterates WINDOW_WEIGHTS, so a signal absent from it can never
+# change a score, a weight, or the observed-weight floor.
 WINDOW_WEIGHTS: dict[str, float] = {
     "github_stars": 0.55,
     "hf_paper_upvotes": 0.30,
@@ -62,6 +205,8 @@ DURABLE_SIGNALS: frozenset[str] = frozenset({"github_stars", "hf_dataset_downloa
 METRIC_ALIASES: dict[str, str] = {
     "stars": "github_stars",
     "github_stars": "github_stars",
+    "forks": "github_forks",
+    "github_forks": "github_forks",
     "paper_upvotes": "hf_paper_upvotes",
     "hf_paper_upvotes": "hf_paper_upvotes",
     "upvotes": "hf_paper_upvotes",
@@ -72,12 +217,14 @@ METRIC_ALIASES: dict[str, str] = {
 
 SIGNAL_SOURCES: dict[str, str] = {
     "github_stars": "github",
+    "github_forks": "github",
     "hf_paper_upvotes": "huggingface",
     "hf_dataset_downloads": "huggingface",
 }
 
 SIGNAL_VALUE_KINDS: dict[str, str] = {
     "github_stars": "cumulative",
+    "github_forks": "cumulative",
     "hf_paper_upvotes": "cumulative",
     "hf_dataset_downloads": "rolling_30d",
 }
@@ -124,7 +271,7 @@ def is_exact_attention_source_url(signal: str, url: str | None) -> bool:
     """Whether a metric URL names the exact resource required by Ranking v1."""
     if not isinstance(url, str) or not url.strip():
         return False
-    if signal == "github_stars":
+    if signal in {"github_stars", "github_forks"}:
         return is_dedicated_benchmark_repo(url)
 
     parsed = urlsplit(url.strip())
@@ -268,6 +415,7 @@ def _is_reviewed_entity(
 
 FALLBACK_METRIC_CONFIG = {
     "github_stars": ("github.com", "stars", is_dedicated_benchmark_repo),
+    "github_forks": ("github.com", "forks", is_dedicated_benchmark_repo),
     "hf_paper_upvotes": ("huggingface.co", "upvotes", None),
     "hf_dataset_downloads": ("huggingface.co/datasets", "downloads", None),
 }
@@ -369,7 +517,11 @@ def _resolve_signals(
     snapshots: list[dict[str, Any]],
 ) -> dict[str, dict[str, Any]]:
     signals = {}
-    for key in WINDOW_WEIGHTS:
+    # github_forks is resolved exactly like a weighted signal so the daily
+    # count reaches the release row, but it is not a ranking signal: it is
+    # never added to WINDOW_WEIGHTS, so it cannot change a score, a weight,
+    # or the observed-weight floor.
+    for key in (*WINDOW_WEIGHTS, "github_forks"):
         key_obs = [
             pair for pair in ba_obs_pairs if canonical_metric_key(pair[0].get("metric")) == key
         ]
@@ -466,6 +618,16 @@ def filter_release_cohort(
         if not (window_start_dt <= earliest_dt <= as_of_dt):
             continue
 
+        # A later snapshot can enrich a record whose earliest occurrence
+        # has no summary (blanca-pueche/benchmark-complex-prediction:
+        # empty on 2026-10-08, substantive on 2026-10-09). Keep the
+        # earliest occurrence for the release date, but take the summary
+        # from the first occurrence that has one.
+        purpose_item = next(
+            (item for _, item in release_dates if one_line_summary(item.get("summary"))),
+            primary_item,
+        )
+
         name = primary_item.get("title") or primary_item.get("source_id") or canonical_id
         is_reviewed = _is_reviewed_entity(canonical_id, name, occurrences, reviewed_benchmark_ids)
         ba_obs = attention_by_canonical.get(canonical_id, [])
@@ -479,11 +641,12 @@ def filter_release_cohort(
             {
                 "canonical_artifact_id": canonical_id,
                 "name": name,
-                "purpose": (
-                    primary_item.get("summary")
-                    or primary_item.get("title")
-                    or "Benchmark and evaluation suite"
-                ),
+                # One line from the record's own summary (issue #348). No
+                # fallback to the title — the row already shows it — and no
+                # manufactured "Benchmark and evaluation suite": a record
+                # with nothing to summarise keeps an honest empty purpose,
+                # which the row renders as an explicit empty state.
+                "purpose": one_line_summary(purpose_item.get("summary")),
                 "release_date": earliest_dt.isoformat(),
                 "has_dated_attention": has_attention,
                 "is_reviewed_benchmark": is_reviewed,
@@ -499,8 +662,18 @@ def compute_window_ranking(
     *,
     window_days: int,
     top_limit: int | None = DEFAULT_TOP_LIMIT,
+    affiliation_weight: float | None = None,
 ) -> dict[str, Any]:
-    """Rank candidates for a window using Ranking v1 formulas."""
+    """Rank candidates for a window.
+
+    Without ``affiliation_weight`` this is Ranking v1. With it, every attention
+    weight is scaled by ``1 - affiliation_weight`` and a candidate's
+    ``affiliation`` (0 to 1, or None for unknown) adds the rest. The rank
+    threshold still reads attention alone: affiliation never qualifies a
+    release by itself. A placeholder, archived or gone repository keeps the release listed, but
+    unranked.
+    """
+    scale = 1.0 - (affiliation_weight or 0.0)
     window_maxes = {
         signal: max(
             [
@@ -508,6 +681,9 @@ def compute_window_ranking(
                 for c in candidates
                 if c.get("signals", {}).get(signal, {}).get("value") is not None
                 and c.get("signals", {}).get(signal, {}).get("status") == "fresh"
+                # A held-back release is unranked; it must not set the scale
+                # the ranked releases are normalized against either.
+                and not _held_back(c)
             ]
             or [0.0]
         )
@@ -533,7 +709,7 @@ def compute_window_ranking(
             entry = {
                 "value": val,
                 "normalized": norm,
-                "weight": weight,
+                "weight": round(weight * scale, 4),
                 "status": status,
                 "source_url": sig.get("source_url"),
             }
@@ -542,14 +718,30 @@ def compute_window_ranking(
             components[signal] = entry
 
             if norm is not None:
-                coverage += weight
+                coverage += weight * scale
                 observed_count += 1
                 if status == "fresh":
-                    composite_score += weight * norm
+                    composite_score += weight * scale * norm
                     fresh_count += 1
                     fresh_weight += weight
                     if signal in DURABLE_SIGNALS:
                         has_durable = True
+
+        if affiliation_weight is not None:
+            affiliation = c.get("affiliation")
+            components["affiliation"] = {
+                "value": c.get("affiliation_paper_count"),
+                "institution": c.get("affiliation_institution"),
+                "normalized": affiliation,
+                "weight": affiliation_weight,
+                "status": "fresh" if affiliation is not None else "unknown",
+                "source_url": c.get("institutions_source_url"),
+            }
+            if affiliation is not None:
+                # An observed signal like any other for the confidence tag.
+                observed_count += 1
+                coverage += affiliation_weight
+                composite_score += affiliation_weight * affiliation
 
         raw_score = 100.0 * composite_score if fresh_count > 0 else None
         score = round(raw_score + 1e-9) if raw_score is not None else None
@@ -569,7 +761,30 @@ def compute_window_ranking(
         sufficient_weight = round(fresh_weight, 4) >= MIN_OBSERVED_WEIGHT_RANK or fresh_weight >= (
             MIN_OBSERVED_WEIGHT_RANK - 1e-9
         )
-        qualifies = is_eligible and has_durable and sufficient_weight and score is not None
+        held_back = _held_back(c)
+        qualifies = (
+            is_eligible and has_durable and sufficient_weight and score is not None
+        ) and not held_back
+
+        extra: dict[str, Any] = {}
+        if c.get("institutions"):
+            extra["institutions"] = c["institutions"]
+            extra["institutions_basis"] = c.get("institutions_basis")
+            extra["institutions_source_url"] = c.get("institutions_source_url")
+        if held_back:
+            extra["limited_reason"] = held_back
+
+        # Forks are a displayed counter only (#659): carried through to the
+        # release row next to stars, never a score component, so no weight,
+        # no normalized contribution, and no effect on coverage or rank.
+        forks_sig = c.get("signals", {}).get("github_forks") or {}
+        forks = {
+            "value": forks_sig.get("value"),
+            "status": forks_sig.get("status", "unknown"),
+            "source_url": forks_sig.get("source_url"),
+        }
+        if forks_sig.get("last_successful_date"):
+            forks["last_successful_date"] = forks_sig["last_successful_date"]
 
         scored_entries.append(
             {
@@ -583,6 +798,8 @@ def compute_window_ranking(
                 "status": "ranked" if qualifies else "limited_signals",
                 "rank": None,
                 "components": components,
+                **extra,
+                "forks": forks,
                 "_ranking_score": raw_score,
             }
         )
@@ -631,8 +848,16 @@ def build_latest_releases_leaderboard(
     reviewed_benchmark_ids: set[str] | None = None,
     include_unconfirmed: bool = False,
     top_limit: int | None = DEFAULT_TOP_LIMIT,
+    signals: ReleaseSignals | None = None,
+    institution_counts: dict[str, int] | None = None,
 ) -> dict[str, Any]:
-    """Build the full multi-window latest releases leaderboard for radar.json."""
+    """Build the full multi-window latest releases leaderboard for radar.json.
+
+    ``signals`` (release_signals.py) switches the ranking to
+    ``attention-affiliation-v2``, attaches each paper's first three
+    institutions, and holds back placeholder, archived and gone repositories. Without it the payload
+    is Ranking v1 exactly.
+    """
     if not snapshots:
         return {
             "schema_version": 1,
@@ -651,6 +876,9 @@ def build_latest_releases_leaderboard(
 
     all_evidence = [item for snap in snapshots for item in snap.get("evidence_items", [])]
     shared_aliases = artifact_alias_map(all_evidence)
+    papers_by_canonical = _papers_by_canonical(shared_aliases) if signals is not None else {}
+    counts = dict(institution_counts or {})
+    weights = institution_weights(counts)
 
     windows_data: dict[str, Any] = {}
     for window_key, days in WINDOW_DAYS.items():
@@ -663,7 +891,15 @@ def build_latest_releases_leaderboard(
             aliases=shared_aliases,
             include_unconfirmed=include_unconfirmed,
         )
-        ranking = compute_window_ranking(cohort, window_days=days, top_limit=top_limit)
+        if signals is not None:
+            for candidate in cohort:
+                _attach_release_signals(candidate, signals, counts, weights, papers_by_canonical)
+        ranking = compute_window_ranking(
+            cohort,
+            window_days=days,
+            top_limit=top_limit,
+            affiliation_weight=AFFILIATION_WEIGHT if signals is not None else None,
+        )
         window_start = (as_of_dt - timedelta(days=days)).isoformat()
         windows_data[window_key] = {
             "window_start": window_start,
@@ -673,8 +909,95 @@ def build_latest_releases_leaderboard(
 
     return {
         "schema_version": 1,
-        "method_version": METHOD_VERSION,
+        "method_version": COMBINED_METHOD_VERSION if signals is not None else METHOD_VERSION,
         "generated_at": as_of_dt.isoformat(),
         "default_window": "30d",
         "windows": windows_data,
     }
+
+
+def _held_back(candidate: dict[str, Any]) -> str | None:
+    """Why a candidate is listed but not ranked: placeholder, archived or gone."""
+    if candidate.get("held_back"):
+        return str(candidate["held_back"])
+    return "placeholder_repository" if candidate.get("placeholder_repository") else None
+
+
+def _papers_by_canonical(aliases: dict[str, str]) -> dict[str, str]:
+    """The arXiv paper each canonical release is linked to through its aliases."""
+    papers: dict[str, str] = {}
+    for key, canonical in [*aliases.items(), *((c, c) for c in aliases.values())]:
+        paper = arxiv_id(key)
+        if paper:
+            papers.setdefault(canonical, paper)
+    return papers
+
+
+def release_signal_targets(
+    snapshots: list[dict[str, Any]],
+    *,
+    as_of: datetime | str | None = None,
+    registry_path: Path | None = None,
+) -> tuple[set[str], set[str]]:
+    """arXiv papers and GitHub star URLs of the widest window's cohort.
+
+    ``scripts/fetch_release_signals.py`` looks these up, so the build that
+    reads the files finds an entry for every release it ranks.
+    """
+    if not snapshots:
+        return set(), set()
+    all_evidence = [item for snap in snapshots for item in snap.get("evidence_items", [])]
+    aliases = artifact_alias_map(all_evidence)
+    papers_by_canonical = _papers_by_canonical(aliases)
+    as_of_dt = (
+        _parse_utc_datetime(as_of)
+        or _parse_utc_datetime(snapshots[-1].get("generated_at"))
+        or datetime.now(UTC)
+    )
+    cohort = filter_release_cohort(
+        snapshots,
+        window_days=max(WINDOW_DAYS.values()),
+        as_of=as_of_dt,
+        registry_path=registry_path,
+        aliases=aliases,
+    )
+    papers, repos = set(), set()
+    for candidate in cohort:
+        canonical = candidate["canonical_artifact_id"]
+        paper = papers_by_canonical.get(canonical) or arxiv_id(canonical)
+        if paper:
+            papers.add(paper)
+        url = (candidate.get("signals", {}).get("github_stars") or {}).get("source_url")
+        if url:
+            repos.add(str(url))
+    return papers, repos
+
+
+def _attach_release_signals(
+    candidate: dict[str, Any],
+    signals: ReleaseSignals,
+    counts: dict[str, int],
+    weights: dict[str, float],
+    papers_by_canonical: dict[str, str],
+) -> None:
+    """Add institutions, affiliation and the hold-back reason to one candidate."""
+    canonical = candidate["canonical_artifact_id"]
+    paper = papers_by_canonical.get(canonical) or arxiv_id(canonical)
+    row = signals.paper(paper)
+    if row and row.get("institutions"):
+        names = [str(name) for name in row["institutions"]]
+        candidate["institutions"] = names[:SHOWN_INSTITUTIONS]
+        candidate["institutions_basis"] = row.get("basis")
+        candidate["institutions_source_url"] = row.get("source_url")
+        # A paper OpenAlex has not indexed yet is scored on the names it
+        # prints that exactly match a counted OpenAlex name; never fuzzily.
+        candidate["affiliation"] = affiliation_normalized(names, weights)
+        best = best_institution(names, weights)
+        if best:
+            # The input a reader can check: which institution, on how many papers.
+            candidate["affiliation_institution"] = best
+            candidate["affiliation_paper_count"] = counts[best]
+    stars_url = (candidate.get("signals", {}).get("github_stars") or {}).get("source_url")
+    reason = signals.held_back(stars_url)
+    if reason:
+        candidate["held_back"] = reason

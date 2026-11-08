@@ -24,7 +24,6 @@ affiliation neither states is left off rather than guessed.
 
 from __future__ import annotations
 
-import html
 import http.client
 import json
 import os
@@ -38,6 +37,7 @@ from typing import Any
 from .cards import CARDS_SITE_URL
 from .corpus import organizations_for_item
 from .http import RequestError, get_json, get_text
+from .paper_institutions import arxiv_html_affiliations, arxiv_id, openalex_institutions
 from .snapshots import _write_json, load_snapshots, validate_snapshot
 
 # A lookup that fails in any of these ways costs the card one fact. An
@@ -57,9 +57,6 @@ _EXCLUDED_SOURCES = frozenset({"GitHub Release"})
 # institution the item reported.
 _HANDLE_SOURCES = frozenset({"Hugging Face", "GitHub", "GitHub Organization", "Kaggle Dataset"})
 
-_ARXIV_ID = re.compile(r"(\d{4}\.\d{4,5})")
-_AFFILIATION_SPAN = re.compile(r'<span class="ltx_contact ltx_role_affiliation">')
-_SPAN_TAG = re.compile(r"<(/?)span\b[^>]*>")
 
 Fetch = Callable[..., Any]
 
@@ -183,31 +180,14 @@ def _github_headers() -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"} if token else {}
 
 
-def _openalex_institutions(arxiv_id: str, fetch: Fetch) -> list[str]:
-    work = fetch(f"https://api.openalex.org/works/doi:10.48550/arXiv.{arxiv_id}")
-    return _unique(
-        [
-            str(institution.get("display_name") or "")
-            for authorship in work.get("authorships") or []
-            for institution in authorship.get("institutions") or []
-        ]
+def _openalex_institutions(paper: str, fetch: Fetch) -> list[str]:
+    return openalex_institutions(
+        fetch(f"https://api.openalex.org/works/doi:10.48550/arXiv.{paper}")
     )
 
 
-def _arxiv_html_affiliations(arxiv_id: str, fetch_text: Fetch) -> list[str]:
-    page = fetch_text(f"https://arxiv.org/html/{arxiv_id}")
-    affiliations: list[str] = []
-    for match in _AFFILIATION_SPAN.finditer(page):
-        depth, end = 1, match.end()
-        for tag in _SPAN_TAG.finditer(page, match.end()):
-            depth += -1 if tag.group(1) else 1
-            if depth == 0:
-                end = tag.start()
-                break
-        inner = re.sub(r'<span class="ltx_contact_name">.*?</span>', "", page[match.end() : end])
-        text = " ".join(html.unescape(re.sub(r"<[^>]+>", " ", inner)).split())
-        affiliations.append(text.removeprefix("Affiliation:").strip())
-    return _unique(affiliations)
+def _arxiv_html_affiliations(paper: str, fetch_text: Fetch) -> list[str]:
+    return arxiv_html_affiliations(str(fetch_text(f"https://arxiv.org/html/{paper}") or ""))
 
 
 def _huggingface_creator(handle: str, fetch: Fetch) -> tuple[list[str], list[str]]:
@@ -255,14 +235,17 @@ def _lookup_creators(
             return {"authors": authors or owner_authors, "affiliations": affiliations}
         if source in _HANDLE_SOURCES:
             return {"authors": authors, "affiliations": []}
-        match = _ARXIV_ID.search(url) if source in {"arXiv", "Hugging Face Papers"} else None
-        if match and not organizations:
+        # Any source that links an arXiv paper, not only arXiv itself: the
+        # same paper reaches the radar through DataCite (its 10.48550 DOI) and
+        # mirrors such as XBsleepy, and those cards showed no institution.
+        paper = arxiv_id(url)
+        if paper and not organizations:
             try:
-                organizations = _openalex_institutions(match.group(1), fetch)
+                organizations = _openalex_institutions(paper, fetch)
             except _LOOKUP_ERRORS:
                 organizations = []
             if not organizations:
-                organizations = _arxiv_html_affiliations(match.group(1), fetch_text)
+                organizations = _arxiv_html_affiliations(paper, fetch_text)
     except (*_LOOKUP_ERRORS, AttributeError, TypeError, ValueError) as error:
         print(f"warning: creator lookup failed for {url}: {error}", file=sys.stderr)
         if source in _HANDLE_SOURCES:

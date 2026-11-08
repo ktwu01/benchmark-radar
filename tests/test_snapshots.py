@@ -18,6 +18,7 @@ from benchmark_radar.models import (
 from benchmark_radar.snapshots import (
     SnapshotError,
     attach_catalog_cards,
+    dashboard_search_index,
     dashboard_trends,
     dashboard_window,
     load_snapshots,
@@ -321,6 +322,162 @@ def test_rebuild_writes_a_small_latest_day_bootstrap(tmp_path):
         assert window["latest_date"] == dashboard["latest_date"]
         assert "corpus" not in window
         assert window_path.stat().st_size < output.stat().st_size
+
+    search_path = output.with_name("radar-search.json")
+    search = json.loads(search_path.read_text(encoding="utf-8"))
+    assert search["schema_version"] == 1
+    assert search["generated_at"] == dashboard["generated_at"]
+    assert len(search["observations"]) == sum(
+        len(day["evidence_items"]) + len(day["attention"]["observations"])
+        for day in dashboard["days"]
+    )
+    # Only an expanded attention row lists its supporting submissions (#1170).
+    assert all(
+        "supporting_observations" not in item
+        for item in search["observations"]
+        if item["observation_kind"] != "attention"
+    )
+    assert search_path.stat().st_size < output.stat().st_size
+
+
+def test_search_index_keeps_only_latest_sighting_and_needed_fields():
+    dashboard = {
+        "generated_at": "build-1",
+        "latest_date": "2026-07-27",
+        "days": [
+            {
+                "date": "2026-07-26",
+                "generated_at": "2026-07-26T12:00:00Z",
+                "selection": {"recommendation_score": 40},
+                "evidence_items": [
+                    {
+                        "source": "GitHub",
+                        "source_id": "repo",
+                        "title": "Old",
+                        "summary": "Old summary",
+                        "total_score": 1,
+                        "supporting_observations": [{"source": "extra"}],
+                        "url": "https://github.com/example/repo",
+                    }
+                ],
+                "attention": {"observations": []},
+                "share": {
+                    "cards": [
+                        {
+                            "url": "https://github.com/example/repo",
+                            "image": "/cards/example.png",
+                            "authors": ["Creator"],
+                            "affiliations": ["Institute"],
+                        }
+                    ]
+                },
+            },
+            {
+                "date": "2026-07-27",
+                "generated_at": "2026-07-27T12:00:00Z",
+                "selection": {"recommendation_score": 40},
+                "evidence_items": [
+                    {
+                        "source": "GitHub",
+                        "source_id": "repo",
+                        "title": "New",
+                        "summary": "New summary",
+                        "total_score": 2,
+                        "supporting_observations": [{"source": "extra"}],
+                        "url": "https://github.com/example/repo",
+                    }
+                ],
+                "attention": {"observations": []},
+            },
+        ],
+    }
+
+    index = dashboard_search_index(dashboard)
+
+    assert len(index["observations"]) == 2
+    assert {item["title"] for item in index["observations"]} == {"Old", "New"}
+    assert all("supporting_observations" not in item for item in index["observations"])
+    assert index["observations"][0]["share_image"] == "/cards/example.png"
+    assert index["observations"][0]["share_card"]["authors"] == ["Creator"]
+    assert index["observations"][0]["share_card"]["affiliations"] == ["Institute"]
+
+
+def test_search_index_keeps_every_field_the_result_cards_read():
+    """An All dates hit served from radar-search.json renders like a radar.json one (#1170)."""
+    dashboard = {
+        "generated_at": "build-1",
+        "latest_date": "2026-07-27",
+        "days": [
+            {
+                "date": "2026-07-27",
+                "generated_at": "2026-07-27T12:00:00Z",
+                "selection": {"recommendation_score": 40, "minimum_score": 20},
+                "evidence_items": [
+                    {
+                        "source": "GitHub Release",
+                        "source_id": "org/repo@v1",
+                        "title": "Release",
+                        "summary": "A release",
+                        "url": "https://github.com/org/repo/releases/v1",
+                        "total_score": 55,
+                        "artifact_urls": ["https://huggingface.co/datasets/org/repo"],
+                        "catalog_slug": "org-repo",
+                        "parser_version": "github-releases/v2",
+                        "watchlist": True,
+                        "watchlist_note": "Tracked for the reader request in #555.",
+                        "supporting_observations": [{"source": "extra"}],
+                    },
+                    {
+                        "source": "arXiv",
+                        "source_id": "2611.00001",
+                        "title": "Paper",
+                        "summary": "A paper",
+                        "url": "https://arxiv.org/abs/2611.00001",
+                        "total_score": 10,
+                        "parser_version": "arxiv-rss/v3",
+                    },
+                ],
+                "attention": {
+                    "observations": [
+                        {
+                            "observation_id": "hn-1",
+                            "producer": "Hacker News",
+                            "source": "Hacker News",
+                            "source_id": "1",
+                            "title": "Discussion",
+                            "url": "https://news.ycombinator.com/item?id=1",
+                            "published_at": "2026-07-27T10:00:00Z",
+                            "event_kind": "discussed",
+                            "categories": [],
+                            "metrics": {"points": 9},
+                            "rationale": ["Linked twice"],
+                            "quality_scored": False,
+                            "supporting_observations": [{"url": "https://example.org/a"}],
+                        }
+                    ]
+                },
+            }
+        ],
+    }
+
+    rows = {row["source_id"]: row for row in dashboard_search_index(dashboard)["observations"]}
+
+    release = rows["org/repo@v1"]
+    assert release["artifact_urls"] == ["https://huggingface.co/datasets/org/repo"]
+    assert release["catalog_slug"] == "org-repo"
+    assert release["watchlist_note"] == "Tracked for the reader request in #555."
+    assert release["parser_version"] == "github-releases/v2"
+    assert (release["recommended"], release["recommendation_score"], release["minimum_score"]) == (
+        True,
+        40,
+        20,
+    )
+    assert rows["2611.00001"]["recommended"] is False
+    # Only GitHub-release detection reads parser_version, and only an
+    # expanded attention row lists supporting submissions.
+    assert "parser_version" not in rows["2611.00001"]
+    assert "supporting_observations" not in release
+    assert rows["1"]["supporting_observations"] == [{"url": "https://example.org/a"}]
 
 
 def test_rebuild_can_publish_the_feed_from_the_same_snapshot_history(tmp_path, site_shell):
@@ -1850,6 +2007,121 @@ def test_primary_revision_retains_previously_merged_digest_evidence(reverse):
     assert record["recommended"] is True
 
 
+@pytest.mark.parametrize("reverse", [False, True])
+def test_merged_evidence_metrics_do_not_depend_on_arrival_order(reverse):
+    # Issue #841: a digest adds citations 5000 to an arXiv record, and a later
+    # arXiv revision on the same day reports citations 12. The merged record
+    # showed 12 in both merge orders, and the digest's value was lost: a flat
+    # metrics dict cannot tell which source supplied a value.
+    from benchmark_radar.pipeline import score_item
+
+    taxonomy = {"benchmark": ["benchmark"]}
+    original_run = radar_run(27)
+    original_run.items[0].event_kind = "released"
+    score_item(original_run.items[0], taxonomy, now=original_run.generated_at)
+    digest_run = radar_run(27)
+    digest_run.generated_at += timedelta(hours=1)
+    digest = digest_run.items[0]
+    digest.source = "XBsleepy"
+    digest.metrics = {"citations": 5000}
+    score_item(digest, taxonomy, now=digest_run.generated_at)
+    merged = merge_snapshots(snapshot_for_run(original_run), snapshot_for_run(digest_run))
+    revision_run = radar_run(27)
+    revision_run.generated_at += timedelta(hours=2)
+    revision = revision_run.items[0]
+    revision.updated_at = revision_run.generated_at
+    revision.event_kind = "updated"
+    revision.metrics = {"citations": 12}
+    score_item(revision, taxonomy, now=revision_run.generated_at)
+    incoming = snapshot_for_run(revision_run)
+    incoming["selection"] = {"recommendation_score": 0}
+    result = merge_snapshots(incoming, merged) if reverse else merge_snapshots(merged, incoming)
+    record = result["evidence_items"][0]
+    assert record["metrics"] == {"citations": 5000}
+    assert record["metrics_by_source"] == {
+        "XBsleepy": {"citations": 5000},
+        "arXiv": {"citations": 12},
+    }
+    assert record["contributing_sources"] == ["XBsleepy", "arXiv"]
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_in_pass_dedup_keeps_per_source_metrics_for_later_revision(reverse):
+    # Issue #841 / Codex P1 on #1171: one pass observes an artifact through
+    # arXiv and XBsleepy, so deduplicate() merges them before the snapshot is
+    # written. The merged record used to carry only flat metrics, which the
+    # snapshot merge attributed wholesale to the envelope source; a later
+    # same-day arXiv revision omitting citations then dropped the digest's
+    # 5000. The merged record must carry metrics_by_source.
+    from benchmark_radar.pipeline import deduplicate, score_item
+
+    taxonomy = {"benchmark": ["benchmark"]}
+    run = radar_run(27)
+    primary = run.items[0]
+    primary.event_kind = "released"
+    primary.updated_at = run.generated_at
+    score_item(primary, taxonomy, now=run.generated_at)
+    digest_run = radar_run(27)
+    digest_run.generated_at += timedelta(hours=1)
+    digest = digest_run.items[0]
+    digest.source = "XBsleepy"
+    digest.source_id = "xbsleepy:2607.0027"
+    digest.metrics = {"citations": 5000}
+    digest.updated_at = run.generated_at - timedelta(hours=1)
+    digest.artifact_urls = ["https://arxiv.org/pdf/2607.0027"]
+    score_item(digest, taxonomy, now=digest_run.generated_at)
+    merged_items = deduplicate([primary, digest])
+    assert len(merged_items) == 1
+    run.items = merged_items
+    first = snapshot_for_run(run)
+    record = first["evidence_items"][0]
+    assert record["source"] == "arXiv"
+    assert record["metrics"] == {"citations": 5000}
+    assert record["metrics_by_source"] == {
+        "XBsleepy": {"citations": 5000},
+        "arXiv": {"citations": 2},
+    }
+    assert record["contributing_sources"] == ["XBsleepy", "arXiv"]
+
+    revision_run = radar_run(27)
+    revision_run.generated_at += timedelta(hours=2)
+    revision = revision_run.items[0]
+    revision.updated_at = revision_run.generated_at
+    revision.event_kind = "updated"
+    revision.metrics = {}
+    revision.artifact_urls = []
+    score_item(revision, taxonomy, now=revision_run.generated_at)
+    incoming = snapshot_for_run(revision_run)
+    incoming["selection"] = {"recommendation_score": 0}
+    result = merge_snapshots(incoming, first) if reverse else merge_snapshots(first, incoming)
+    record = result["evidence_items"][0]
+    assert record["metrics"] == {"citations": 5000}
+    assert record["metrics_by_source"] == {
+        "XBsleepy": {"citations": 5000},
+        "arXiv": {},
+    }
+    assert record["contributing_sources"] == ["XBsleepy", "arXiv"]
+
+
+def test_merge_keeps_other_source_metrics_from_legacy_merged_record():
+    # Snapshots written before in-pass attribution existed carry
+    # contributing_sources but no metrics_by_source; their flat metrics mix
+    # contributors, so a same-source revision omitting one must not drop it.
+    first = snapshot_for_run(radar_run(27))
+    record = first["evidence_items"][0]
+    record["metrics"] = {"citations": 5000}
+    record["contributing_sources"] = ["XBsleepy", "arXiv"]
+    assert "metrics_by_source" not in record
+    revision_run = radar_run(27)
+    revision_run.generated_at += timedelta(hours=1)
+    revision = revision_run.items[0]
+    revision.metrics = {}
+    revision.event_kind = "updated"
+    later = snapshot_for_run(revision_run)
+    merged = merge_snapshots(first, later)
+    assert merged["evidence_items"][0]["metrics"] == {"citations": 5000}
+
+
 def test_dashboard_day_maps_each_share_card_to_its_published_image(tmp_path):
     """Issue #671: the site reads image URLs from radar.json, never builds them."""
     snapshot_dir = tmp_path / "snapshots"
@@ -1860,7 +2132,13 @@ def test_dashboard_day_maps_each_share_card_to_its_published_image(tmp_path):
     raw["share"] = {
         "date": "2026-07-27",
         "cards": [
-            {"url": "https://example.org/a", "title": "A"},
+            {
+                "url": "https://example.org/a",
+                "title": "A",
+                "authors": ["Ada"],
+                "affiliations": ["Institute"],
+                "blurb": "Complete blurb.",
+            },
             {"url": "https://example.org/b", "title": "B"},
         ],
     }
@@ -1871,6 +2149,10 @@ def test_dashboard_day_maps_each_share_card_to_its_published_image(tmp_path):
     base = "https://cards.benchmark-radar.org/daily/2026-07-27"
     share = dashboard["days"][1]["share"]
     assert share["top3_image"] == f"{base}/top3.png"
+    assert share["cards"][0]["authors"] == ["Ada"]
+    assert share["cards"][0]["affiliations"] == ["Institute"]
+    assert share["cards"][0]["blurb"] == "Complete blurb."
+    assert share["cards"][1]["authors"] == []
     assert [(c["url"], c["image"]) for c in share["cards"]] == [
         ("https://example.org/a", f"{base}/card-01.png"),
         ("https://example.org/b", f"{base}/card-02.png"),
@@ -2052,7 +2334,14 @@ def test_today_items_name_their_catalog_record_only_by_exact_unique_url(tmp_path
         json.dumps(
             {
                 "benchmarks": [
-                    {"slug": "gpqa_diamond", "source_url": "https://arxiv.org/abs/2311.12022"},
+                    {
+                        "slug": "gpqa_diamond",
+                        "source_url": "https://arxiv.org/abs/2311.12022",
+                        "name": "GPQA Diamond",
+                        "authors": ["Creator"],
+                        "institutions": ["Institute"],
+                        "description": "Full catalog description.",
+                    },
                     # Two records share one URL: neither is named.
                     {"slug": "a-one", "source_url": "https://example.org/shared"},
                     {"slug": "a-two", "source_url": "https://example.org/shared"},
@@ -2072,4 +2361,14 @@ def test_today_items_name_their_catalog_record_only_by_exact_unique_url(tmp_path
 
     assert attach_catalog_cards(dashboard, index) == 1
     assert [item.get("catalog_slug") for item in items] == ["gpqa_diamond", None, None, None]
+    card = items[0]["catalog_card"]
+    assert card == {
+        "title": "GPQA Diamond",
+        "authors": ["Creator"],
+        "affiliations": ["Institute"],
+        "blurb": "Full catalog description.",
+        "publisher": "",
+    }
+    searchable = dashboard_search_index(dashboard)["observations"][0]
+    assert searchable["catalog_card"] == card
     assert attach_catalog_cards(dashboard, tmp_path / "missing.json") == 0

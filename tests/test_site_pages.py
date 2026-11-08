@@ -8,6 +8,7 @@ and fail loudly rather than silently writing an empty directory.
 
 import json
 import re
+from html.parser import HTMLParser
 from pathlib import Path
 
 import pytest
@@ -34,6 +35,7 @@ def _shard(
     modality: str | None = None,
     scores: list[dict] | None = None,
     provenance: dict | None = None,
+    source_metadata: dict | None = None,
 ) -> dict:
     record = {
         "slug": slug,
@@ -48,6 +50,8 @@ def _shard(
         "description": {"en": description} if description else {},
         "provenance": provenance or {},
     }
+    if source_metadata is not None:
+        record["source_metadata"] = source_metadata
     scores_by_source = {source: {"rows": scores or [], "series": {}}} if scores else {}
     return {
         "schema_version": 1,
@@ -94,6 +98,39 @@ def test_writes_one_page_per_shard_plus_directory(tmp_path):
     assert (output / "alpha-bench" / "index.html").exists()
     assert (output / "beta-bench" / "index.html").exists()
     assert (output / "index.html").exists()
+
+
+def test_generated_pages_give_every_image_an_alt_attribute(tmp_path):
+    """Issue #946: validate alt attributes by parsing generated output.
+
+    The homepage test used to ban "<img" in the generator source, which
+    would also fail a generated page that legitimately adds an accessible
+    <img alt="...">. Check the rendered pages instead: every image in
+    every generated page must carry an alt attribute. No generated page
+    emits an image today, so this guards the next one the generator adds.
+    """
+
+    class Images(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.images = []
+
+        def handle_starttag(self, tag, attrs):
+            if tag == "img":
+                self.images.append(dict(attrs))
+
+    output = _generated_pages(
+        tmp_path,
+        _shard("alpha-bench", "Alpha Bench"),
+        _shard("beta-bench", "Beta Bench"),
+    )
+    pages = sorted(output.rglob("*.html"))
+    assert pages, "the generator wrote no pages to check"
+    for page in pages:
+        parser = Images()
+        parser.feed(page.read_text(encoding="utf-8"))
+        for image in parser.images:
+            assert "alt" in image, f"{page}: image without alt: {image.get('src')}"
 
 
 def test_benchmark_pages_share_the_dashboard_shell_without_duplicate_navigation(tmp_path):
@@ -367,6 +404,54 @@ def test_benchmark_is_described_as_a_dataset_from_its_own_fields(tmp_path):
         assert missing not in beta["about"]
 
 
+def test_object_publisher_reaches_the_visible_facts(tmp_path):
+    """The Publisher fact reads publisher["name"]; an object is not a missing value (#982)."""
+    shard = _shard("alpha-bench", "Alpha Bench", categories=["math"])
+    shard["record"]["publisher"] = {
+        "name": "mbzuai",
+        "role": "hub_publisher",
+        "locator": "detail.basicInfo.publishOrg",
+    }
+    string_shard = _shard("beta-bench", "Beta Bench", publisher="Beta Lab")
+    output = _generated_pages(tmp_path, shard, string_shard)
+    alpha = _page_text(output, "alpha-bench")
+    # A hub card's publisher is often not the benchmark's creator (#982), so
+    # the page labels the role the way the dynamic site does.
+    assert "<dt>Publisher</dt><dd>mbzuai (published the hub card)</dd>" in alpha
+    assert "published by mbzuai" not in alpha
+    assert "<dt>Publisher</dt><dd>Beta Lab</dd>" in _page_text(output, "beta-bench")
+
+
+def test_stated_saturation_index_reaches_the_visible_facts(tmp_path):
+    """The study's stated index and label render as its own fact (#1085).
+
+    The value is the study's, as stated in source_metadata: shown, never
+    recomputed, and labelled with the study. A record the study did not
+    annotate shows no such row rather than a zero.
+    """
+    stated = {
+        "benchmark_saturation": {
+            "saturation_index": "0.916397111",
+            "saturation_index_interpreted": "Very high",
+            "test_samples": "500",
+        }
+    }
+    shard = _shard(
+        "math-500",
+        "MATH-500",
+        source="benchmark_saturation",
+        source_metadata=stated,
+    )
+    plain = _shard("alpha-bench", "Alpha Bench")
+    output = _generated_pages(tmp_path, shard, plain)
+    assert (
+        "<dt>Saturation index (study)</dt>"
+        "<dd>0.916397111 (Very high) — Benchmark Saturation study (arXiv:2602.16763)</dd>"
+        in _page_text(output, "math-500")
+    )
+    assert "Saturation index (study)" not in _page_text(output, "alpha-bench")
+
+
 def test_node_references_carry_their_own_type_so_they_resolve_off_the_homepage(tmp_path):
     """A bare `@id` resolves nowhere but the homepage, which Search Console rejects."""
     output = _generated_pages(tmp_path, _shard("alpha-bench", "Alpha Bench"))
@@ -505,12 +590,13 @@ def test_sitemap_includes_benchmark_pages_when_entries_are_passed(tmp_path):
     assert lastmods == ["2026-08-21"] * 11 + ["2025-05-22"]
 
 
-def test_benchmark_lastmod_comes_from_the_pages_own_evidence(tmp_path):
-    """A page is not modified by another benchmark's snapshot landing."""
+def test_benchmark_sitemap_omits_unverified_page_change_dates(tmp_path):
+    """Release/score dates describe evidence, not when the page changed (#987)."""
     shard_dir = _write_shards(
         tmp_path,
-        _shard("alpha-bench", "Alpha Bench", released="2024-02-01"),
         _shard("zeta-bench", "Zeta Bench", released=None),
+        _shard("release-only", "Release Only", released="2025-03-04"),
+        _shard("alpha-bench", "Alpha Bench", released="2024-02-01"),
     )
     alpha = json.loads((shard_dir / "alpha-bench.json").read_text(encoding="utf-8"))
     alpha["scores_by_source"] = {
@@ -526,11 +612,28 @@ def test_benchmark_lastmod_comes_from_the_pages_own_evidence(tmp_path):
     }
     (shard_dir / "alpha-bench.json").write_text(json.dumps(alpha), encoding="utf-8")
 
-    assert benchmark_sitemap_entries(shard_dir) == [
-        ("/benchmarks/alpha-bench/", "2026-01-09"),
+    entries = benchmark_sitemap_entries(shard_dir)
+    assert entries == [
+        ("/benchmarks/alpha-bench/", None),
+        ("/benchmarks/release-only/", None),
         ("/benchmarks/zeta-bench/", None),
     ]
+    # The serializer must not fill an unknown benchmark date with the global
+    # snapshot date. Keep every URL, including release-only and undated rows.
+    namespace = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+    tree = sitemap_tree([{"generated_at": "2026-10-26T00:00:00Z"}], entries)
+    expected_urls = {SITE_URL + path for path, _ in entries}
+    benchmark_nodes = [
+        node
+        for node in tree.getroot().findall("sm:url", namespace)
+        if node.findtext("sm:loc", namespaces=namespace) in expected_urls
+    ]
+    assert len(benchmark_nodes) == len(entries)
+    assert all(node.find("sm:lastmod", namespace) is None for node in benchmark_nodes)
     assert benchmark_sitemap_entries(tmp_path / "missing") == []
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    assert benchmark_sitemap_entries(empty) == []
 
 
 def test_write_benchmark_pages_fails_loudly_without_shards(tmp_path):

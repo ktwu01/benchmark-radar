@@ -165,6 +165,8 @@ Contains {catalog_count:,} normalized benchmark records.
 - `paper_url`: Associated paper URL (arXiv or DOI)
 - `repo_url`: Associated code repository URL (GitHub)
 - `dataset_url`: Direct dataset download or Hub URL
+- `saturation_index`: The study's stated saturation index, as stated (null when unannotated)
+- `saturation_index_interpreted`: Its stated label ("Very high"–"Very low"; null when unannotated)
 - `document_count`: Number of verified source documents citing this benchmark
 - `model_count`: Number of distinct models evaluated
 - `score_count`: Number of numeric scores recorded
@@ -390,6 +392,12 @@ def export_hf_dataset(
             (a["url"] for a in artifacts if a.get("kind") == "dataset"),
             None,
         )
+        # The Benchmark Saturation study's stated index and label, as stated
+        # (#1085). Read out of the shard's source_metadata, never recomputed;
+        # null on every record the study did not annotate.
+        saturation = (shard_record.get("source_metadata") or {}).get("benchmark_saturation") or {}
+        saturation_index = saturation.get("saturation_index") or None
+        saturation_index_interpreted = saturation.get("saturation_index_interpreted") or None
 
         catalog_rows.append(
             {
@@ -408,6 +416,8 @@ def export_hf_dataset(
                 "paper_url": paper_url,
                 "repo_url": repo_url,
                 "dataset_url": dataset_url,
+                "saturation_index": saturation_index,
+                "saturation_index_interpreted": saturation_index_interpreted,
                 "document_count": (b.get("evidence_summary") or {}).get("document_count", 0),
                 "model_count": (b.get("evidence_summary") or {}).get("model_count"),
                 "score_count": b.get("score_count", 0),

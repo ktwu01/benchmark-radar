@@ -14,6 +14,7 @@
 // so nothing here runs or renders until a reader asks for it.
 
 import { starPrompt } from "./star-prompt.js";
+import { radarCaption } from "./share-caption.js";
 
 export const CARDS_URL = "/cards";
 
@@ -98,12 +99,14 @@ function fileSlug(text) {
 // card for shares that card; any other item gets one drawn in the browser from
 // the facts it holds. The link is the item's own source, because a radar item
 // has no page here.
-export function openRadarShare({ item, day = "", title, image = "", pageUrl, t = identity }) {
+export function openRadarShare({ item, day = "", title, image = "", pageUrl, card = null, t = identity }) {
   const name = title || item.title || "";
+  const caption = radarCaption({ item, title: name, card, pageUrl });
   const fileName = `benchmark-radar-${day ? `${day}-` : ""}${fileSlug(name)}.png`;
   if (image) {
     openShareDialog({
       name,
+      caption,
       pageUrl,
       imageSrc: image,
       getBlob: cardBlob(image),
@@ -122,6 +125,7 @@ export function openRadarShare({ item, day = "", title, image = "", pageUrl, t =
   };
   openShareDialog({
     name,
+    caption,
     pageUrl,
     imageSrc: getBlob().then((blob) => URL.createObjectURL(blob)),
     getBlob,
@@ -131,11 +135,24 @@ export function openRadarShare({ item, day = "", title, image = "", pageUrl, t =
   });
 }
 
+export function openDailyShare({ name, image, caption, day, t = identity }) {
+  openShareDialog({
+    name, caption,
+    pageUrl: `https://benchmark-radar.org/?date=${day}`,
+    imageSrc: image,
+    getBlob: cardBlob(image),
+    fileName: `benchmark-radar-${day}-${fileSlug(name)}.png`,
+    missing: t("This card could not be loaded. You can still share its link."),
+    t,
+  });
+}
+
 // The dialog behind every Share button: the card, then the ways to send it.
 // ``imageSrc`` is a URL or a promise of one; ``getBlob`` returns the same image
 // as a blob for Share, Copy image and Download.
-function openShareDialog({ name, pageUrl, imageSrc, getBlob: blob, fileName, missing, t = identity }) {
+function openShareDialog({ name, pageUrl, caption = "", imageSrc, getBlob: blob, fileName, missing, t = identity }) {
   const title = t("{name} on Benchmark Radar", { name });
+  const fullText = caption || `${title}\n\n${pageUrl}`;
   const host = ensureDialog();
 
   const status = node("p", { className: "share-card-status", attrs: { role: "status" } });
@@ -179,7 +196,7 @@ function openShareDialog({ name, pageUrl, imageSrc, getBlob: blob, fileName, mis
       .then((data) => { file = new File([data], fileName, { type: "image/png" }); })
       .catch(() => {});
     buttons.push(action(t("Share…"), async () => {
-      const payload = { title, text: title, url: pageUrl };
+      const payload = { title, text: fullText };
       if (file && navigator.canShare?.({ files: [file] })) payload.files = [file];
       await navigator.share(payload);
     }, { needsImage: false }));
@@ -205,21 +222,30 @@ function openShareDialog({ name, pageUrl, imageSrc, getBlob: blob, fileName, mis
     await navigator.clipboard.writeText(pageUrl);
     flash(button, t("Copy link"), t("Copied"));
   }, { needsImage: false, promptTrigger: "card_copy_link" }));
+  buttons.push(action(t("Copy full text"), async (button) => {
+    await navigator.clipboard.writeText(fullText);
+    flash(button, t("Copy full text"), t("Copied"));
+  }, { needsImage: false }));
   const post = new URL("https://x.com/intent/post");
-  post.searchParams.set("text", title);
-  post.searchParams.set("url", pageUrl);
+  post.searchParams.set("text", fullText);
   // X's post link carries text and a URL but never a file (#1068). So the card
   // goes to the clipboard on the same click, and the reader pastes it into the
   // post. The write starts before the link opens X's tab: browsers allow it only
   // while this page has focus and the click still counts as user activation.
   // The label says so before the click, because X's tab covers this dialog.
   const canCopyCard = Boolean(navigator.clipboard?.write && window.ClipboardItem);
+  const help = node("p", { className: "share-card-help", text: t("X opens with the full text. Paste the image with Ctrl+V or Cmd+V.") });
+  const lengthNotice = node("p", { className: "share-card-help", text: t("Long caption: X Premium may be required. The full text is preserved.") });
+  help.hidden = true;
+  lengthNotice.hidden = true;
   const postOnX = node("a", {
     className: "secondary-link",
     text: canCopyCard ? t("Copy card and post on X ↗") : t("Post on X ↗"),
     attrs: { href: post.href, target: "_blank", rel: "noopener noreferrer" },
   });
   postOnX.addEventListener("click", () => {
+    help.hidden = false;
+    lengthNotice.hidden = [...fullText].length <= 280;
     // A missing card keeps its own notice; there is nothing to copy or download.
     if (image.hidden) return;
     if (!canCopyCard) {
@@ -267,6 +293,8 @@ function openShareDialog({ name, pageUrl, imageSrc, getBlob: blob, fileName, mis
       attrs: { id: "share-card-title" },
     }),
     image,
+    help,
+    lengthNotice,
     status,
     node("div", { className: "share-card-actions" }, buttons),
   );

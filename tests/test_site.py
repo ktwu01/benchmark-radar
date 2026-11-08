@@ -396,7 +396,7 @@ def test_search_defaults_to_all_dates_and_explains_the_scope():
     assert "const hadQuery = Boolean(state.q.trim());" in handler
     assert 'state.todayDate = "all";' in handler
     assert "!hadQuery && state.q.trim()" in handler
-    assert "ensureFullData()" in handler
+    assert "ensureSearchData()" in handler
 
     # The banner offers a real today link, and large result sets point to the
     # public CLI setup route for a complete export.
@@ -417,7 +417,7 @@ def test_dashboard_bounds_work_before_and_during_filtering():
     """Issue #222: hidden views and unbounded card lists must not block input."""
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
 
-    assert "state.observations = [...evidence, ...attention].sort" in script
+    assert "state.observations = sortObservations([...evidence, ...attention])" in script
     # The sorted rows stay cached between keystrokes; the cache is reused only
     # while it was built from the same days (a window file or the archive).
     assert "state.observations && state.observationsSource === days" in script
@@ -505,6 +505,74 @@ def test_top_right_utilities_use_shared_icon_geometry_and_contact_control():
     assert "height: 44px" in mobile_badge
     assert "flex: 0 0 1.5rem" in styles
     assert ".repo-badge svg," in styles
+
+
+def test_trends_table_stays_inside_the_320px_viewport():
+    """Issue #1002: the table scrolls inside its frame; the page must not.
+
+    The sparkline cells carry an absolutely positioned .visually-hidden text.
+    Unless the frame is its containing block, the frame's overflow cannot clip
+    it and its place at the table's far right widens documentElement past the
+    viewport. All seven columns stay: the frame scrolls, the page does not.
+    Checking the headings exist in the HTML is not enough on its own — the
+    old mobile rule hid the "Previous period" column with display: none —
+    so the test also asserts no rule hides any trends-table column.
+    """
+    html = Path("site/index.html").read_text(encoding="utf-8")
+    styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
+    frame = styles.split(".direction-trends-frame {", 1)[1].split("}", 1)[0]
+    assert "position: relative" in frame
+    assert "overflow-x: auto" in frame
+    assert ".direction-trends-table tr > :nth-child(3)" not in styles
+    assert (
+        '<div class="direction-trends-frame" tabindex="0" role="region" '
+        'aria-labelledby="direction-trends-heading">'
+    ) in html
+    for heading in (
+        "Research direction",
+        "New",
+        "Previous period",
+        "Change",
+        "Undated",
+        "Stars gained, 30 days",
+        "16-week trend",
+    ):
+        assert heading in html
+
+
+def test_every_homepage_image_carries_an_alt_attribute():
+    """Issue #946: Bing reported a missing image alt on the homepage.
+
+    The homepage's only image is the Hugging Face award badge, and it is
+    decorative inside a link whose aria-label already names the award, so
+    its empty alt is the correct value, not a missing one. This guards the
+    failure Bing reported: any image added without an alt fails here.
+    """
+
+    class Images(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.images = []
+
+        def handle_starttag(self, tag, attrs):
+            if tag == "img":
+                self.images.append(dict(attrs))
+
+    parser = Images()
+    parser.feed(Path("site/index.html").read_text(encoding="utf-8"))
+    assert parser.images, "the homepage declares no image to check"
+    for image in parser.images:
+        assert "alt" in image, f"image without alt: {image.get('src')}"
+    badge = parser.images[0]
+    assert badge["src"] == "/assets/hf-paper-of-the-day.svg"
+    assert badge["alt"] == ""
+    # The badge sits in a link that already names the award, so the empty
+    # alt is deliberate: a repeated alt would read the award twice.
+    html = Path("site/index.html").read_text(encoding="utf-8")
+    assert "Hugging Face: #1 Paper of the Day" in html
+    # Generated pages are checked by parsing their rendered output instead
+    # (tests/test_site_pages.py): a blanket ban on "<img" in the generator
+    # source would also block a future accessible image.
 
 
 def test_top_right_utilities_have_immediate_visible_feedback():
@@ -930,6 +998,32 @@ def test_initial_page_uses_small_bootstrap_and_lazy_loads_history():
     initialize = script.split("async function initialize()", 1)[1]
     assert 'fetch("/data/radar-bootstrap.json")' in initialize
     assert "await ensureDataForState();" in initialize
+    assert '"/data/radar-search.json"' in script
+    search_loader = script.split("async function ensureSearchData(", 1)[1].split(
+        "\nasync function ", 1
+    )[0]
+    assert 'fetchDashboardJson("/data/radar-search.json", cache)' in search_loader
+    search_state = script.split("function stateNeedsSearchData()", 1)[1].split(
+        "function stateNeedsWindowData", 1
+    )[0]
+    assert 'state.todayDate === "all"' in search_state
+    refresh = script.split("async function refreshData()", 1)[1].split(
+        "\nasync function initialize()", 1
+    )[0]
+    assert 'await ensureSearchData("reload").catch' in refresh
+    # The full archive answers All dates once loaded, so the index is released
+    # rather than held beside it (#1182).
+    apply = script.split("function applyDashboardData(", 1)[1].split("\n}\n", 1)[0]
+    assert "if (state.fullDataLoaded && state.searchData) {" in apply
+    assert "state.searchData = null;" in apply
+    # An index that arrives after the full archive is not kept either.
+    loader = script.split("async function ensureSearchData(", 1)[1].split("\n}\n", 1)[0]
+    assert loader.index("if (state.fullDataLoaded) return null;") < loader.index(
+        "state.searchData = data;"
+    )
+    assert "const previousSearchData = state.searchData;" in refresh
+    assert "state.searchData = previousSearchData;" in refresh
+    assert "await ensureDataForState();" in initialize
     loader = script.split("async function ensureFullData(", 1)[1].split("\nasync function ", 1)[0]
     assert 'fetchDashboardPayload("/data/radar.json", cache, requestSequence, true)' in loader
     trends_loader = script.split("async function ensureTrendsData(", 1)[1].split(
@@ -1037,6 +1131,12 @@ def test_trends_day_load_does_not_override_newer_today_navigation():
     import json
     import shutil
     import subprocess
+
+    script = Path("site/assets/app.js").read_text(encoding="utf-8")
+    assert (
+        'view === "today" && state.todayDate === "all" '
+        "&& !state.fullDataLoaded && !state.searchData"
+    ) in script
 
     node = shutil.which("node")
     if not node:
@@ -1147,6 +1247,7 @@ def test_today_toolbar_keeps_secondary_filters_in_a_popover():
     assert "function refreshData()" in script
     assert "state.fullDataLoaded || stateNeedsFullData()" in script
     assert '"/data/radar-trends.json"' in script
+    assert "safeHttpUrl(item.share_image)" in script
     assert '"/data/radar-bootstrap.json"' in script
     assert 'const response = await fetch(path, { cache: "reload" });' in script
     assert "drawer.hidden = true" in script
@@ -1218,6 +1319,22 @@ def test_evidence_cards_show_fetched_source_metadata_without_inventing_zeroes():
         ["Published", "date:2026-08-24T17:59:04Z"],
         ["Updated", "date:2026-08-25T17:59:04Z"],
     ]
+    # Issue #1016: a record dated by its deposition's created time says so
+    # next to Published, with the uploader's value as given.
+    assert facts["dates_with_basis"] == [
+        [
+            "Published",
+            "date:2026-10-27T02:01:03Z (dated by deposition created; "
+            "source publication_date was 2026-10-31)",
+        ],
+    ]
+    assert facts["published_note"] == {
+        "replaced": " (dated by deposition created; source publication_date was 2026-10-31)",
+        "replacedBareYear": " (dated by deposition created; source publication_date was 2027)",
+        "noSourceValue": " (dated by deposition created; no publication_date supplied)",
+        "normal": "",
+        "unknown": "",
+    }
     assert facts["rendered"] == {
         "tag": "div",
         "className": "record-facts",
@@ -3146,9 +3263,7 @@ def test_issue_332_a_release_outranks_a_same_day_update():
     assert "Date.now()" not in age
     assert script.count("snapshot_generated_at: day.generated_at,") == 2
 
-    sort_body = script.split("state.observations = [...evidence, ...attention].sort(", 1)[1].split(
-        "\n  });", 1
-    )[0]
+    sort_body = script.split("function sortObservations(observations)", 1)[1].split("\n  });", 1)[0]
     # Date still leads: the archive is a chronology before it is a ranking.
     assert sort_body.index("const dateOrder") < sort_body.index("const releaseOrder")
     # Then releases, scored recency, and only then priority. The v5 event-kind
@@ -3643,13 +3758,16 @@ def test_daily_briefing_share_control_appears_only_for_items_with_a_card():
     assert len(insights) == 2
 
     def share_links(insight):
-        return [n for n in _flatten(insight) if n["className"] == "share-link"]
+        return [n for n in _flatten(insight) if "share-link" in n["className"].split()]
 
     carded, uncarded = (share_links(i) for i in insights)
     assert len(carded) == 1
     assert carded[0]["tag"] == "a"
     assert carded[0]["href"].endswith("/daily/2026-10-25/card-01.png")
-    assert carded[0]["text"].startswith("Share image")
+    # An icon, not a repeated "Share image" line (issue #1097); the words live
+    # in its tooltip and accessible name.
+    assert carded[0]["text"] == ""
+    assert carded[0]["children"][0]["tag"] == "svg"
     # The item stays listed; it only has no image to offer, so no dead link.
     assert uncarded == []
     copy_buttons = [n for n in _flatten(insights[0]) if n["className"] == "share-copy"]
@@ -3740,3 +3858,26 @@ def test_top_share_label_follows_the_number_of_cards_in_the_image():
         "Share the top 3 benchmark of the day",
         "Share the top 3 benchmark of the day",
     ]
+
+
+def test_library_controls_meet_the_44px_touch_target():
+    styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
+
+    # #890: the sort select and Saved toggles were 36px, below the 44px
+    # touch-target rule design.md asks for (#886).
+    rule = styles.split(".library-sort,\n.library-saved-toggle {", 1)[1].split("}", 1)[0]
+    assert "min-height: var(--control-height);" in rule
+    assert "--control-height: 44px;" in styles
+
+
+def test_library_sidebar_clears_the_sticky_masthead():
+    styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
+
+    # #889: the sidebar stuck at top: 0.5rem, so the sticky masthead covered
+    # its first controls once the reader scrolled. The masthead is 64px on a
+    # wide screen and 108px once its nav wraps at 1280px.
+    rule = styles.split(".library-directions {", 1)[1].split("}", 1)[0]
+    assert "top: calc(64px + 0.5rem);" in rule
+    assert "max-height: calc(100vh - 64px - 1rem);" in rule
+    assert "top: calc(108px + 0.5rem);" in styles
+    assert "max-height: calc(100vh - 108px - 1rem);" in styles

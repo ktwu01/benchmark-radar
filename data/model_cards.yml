@@ -136,6 +136,27 @@ source_documents:
     published: 2026-04-24
     retrieved_at: 2026-11-04
 
+  - id: lifesci_diamond_arca_blog
+    name: LifeSci Diamond results (Arca blog)
+    publisher: Arca
+    document_type: benchmark_leaderboard
+    url: https://www.arca.inc/blog/lifesci-diamond
+    benchmarks: [lifesci_diamond]
+    retrieved_at: 2026-11-05
+
+  # Table 3 of the benchmark paper (arXiv:2608.23564), the results table the
+  # benchmark's own authors publish; registered like the SWE-bench Science
+  # results table, not as a vendor model card, because the paper reports
+  # scores for eight models it ran itself rather than one vendor's card.
+  - id: swe_refactor_bench_results_table
+    name: SWE Refactor Bench results table
+    publisher: Einsia.AI
+    document_type: benchmark_leaderboard
+    url: https://arxiv.org/abs/2608.23564
+    benchmarks: [swe_refactor_bench]
+    published: 2026-08-24
+    retrieved_at: 2026-11-05
+
 benchmarks:
   - id: gobench
     name: GoBench
@@ -1862,6 +1883,157 @@ benchmarks:
         receipts:
           - https://github.com/kimjune01/slopcodebench-audit
 
+  - id: swe_refactor_bench
+    name: SWE Refactor Bench
+    aliases: ["SWE-Refactor-Bench"]
+    domain: coding_agent
+    url: https://arxiv.org/abs/2608.23564
+    released: 2026-08-24
+    caveat: >-
+      20 whole-repository migrations only, so one task is 5 points of the
+      mean score; the composite score gates on Migration Audit and
+      all-or-nothing Behavioural Tests before Agentic Verification adds
+      partial credit, and the harness and effort level are part of the
+      result, so scores from different harnesses or effort levels are not
+      the same measurement.
+
+  - id: arc
+    name: ARC
+    aliases: ["ARC", "AI2 Reasoning Challenge"]
+    domain: reasoning
+    url: https://arxiv.org/abs/1803.05457
+    released: 2018-03-14
+    caveat: >-
+      3,550 questions is the sample count the study audited
+      (arXiv:2607.28801, Table 1), not the full corpus of 7,787 questions
+      (arXiv:1803.05457). A question-answering benchmark (arXiv:1803.05457,
+      "Think you have Solved Question Answering? Try ARC, the AI2 Reasoning
+      Challenge"). The study notes its small scale and multiple-choice format
+      limit its discriminative power (arXiv:2607.28801, section 2). The
+      annotating paper also reports full-split accuracies for Llama-3.2-1B
+      and SmolLM-1.7B-Instruct (arXiv:2607.28801, Table 4 / App. Table 9);
+      those rows are filed in benchmark_scores.yml.
+
+  - id: winogrande
+    name: WinoGrande
+    aliases: ["WinoGrande", "Winogrande"]
+    domain: reasoning
+    url: https://arxiv.org/abs/1907.10641
+    released: 2019-07-24
+    caveat: >-
+      1,270 problems is the sample count the study audited
+      (arXiv:2607.28801, Table 1), not the full dataset of 44k problems
+      (arXiv:1907.10641). An adversarial Winograd Schema challenge
+      (arXiv:1907.10641). The study notes analyses reveal persistent gender
+      and cultural biases (arXiv:2607.28801, section 2). The annotating paper
+      also reports full-split accuracies for Llama-3.2-1B and
+      SmolLM-1.7B-Instruct (arXiv:2607.28801, Table 4 / App. Table 9); those
+      rows are filed in benchmark_scores.yml.
+
+  - id: hellaswag
+    name: HellaSwag
+    aliases: ["HellaSwag"]
+    domain: reasoning
+    url: https://arxiv.org/abs/1905.07830
+    released: 2019-05-19
+    caveat: >-
+      10,000 questions is the sample count the study audited
+      (arXiv:2607.28801, Table 1), not the full dataset of 70k problems
+      (arXiv:1905.07830). Sentence-completion benchmark (arXiv:1905.07830,
+      "HellaSwag: Can a Machine Really Finish Your Sentence?"). The study
+      notes concerns persist about validity and data contamination
+      (arXiv:2607.28801, section 2). The annotating paper also reports
+      full-split accuracies for Llama-3.2-1B and SmolLM-1.7B-Instruct
+      (arXiv:2607.28801, Table 4 / App. Table 9); those rows are filed in
+      benchmark_scores.yml.
+
+  - id: truthfulqa
+    name: TruthfulQA
+    aliases: ["TruthfulQA"]
+    domain: factuality
+    url: https://arxiv.org/abs/2109.07958
+    released: 2021-09-08
+    caveat: >-
+      817 questions (arXiv:2607.28801, Table 1), the full benchmark. Measures
+      how models mimic human falsehoods (arXiv:2109.07958). The study notes
+      the difficulties of consistent human judgment (arXiv:2607.28801,
+      section 2). The paper reports 18.7 / 21.0 over TruthfulQA MC1+MC2
+      combined (n=1634), not the standard single TruthfulQA metric, so no
+      plain TruthfulQA rows are filed from it; the combined scores are filed
+      under benchmark_id truthfulqa with instrument truthfulqa_mc1_mc2.
+  - id: lifesci_diamond
+    name: LifeSci Diamond
+    aliases: ["LifeSci Diamond", "LifeSci-Diamond"]
+    domain: health
+    url: https://www.arca.inc/blog/lifesci-diamond
+    caveat: >-
+      55 life-science research tasks; 10 public, 45 held out. Strict pass
+      requires every rubric line fully met and no penalty fires. Scores are
+      publisher-reported by Arca, which publishes the benchmark and fields
+      evaluated systems, so they are not independent measurements. Sample
+      scores are not comparable to the full benchmark. Only 44 of 55 answer
+      keys are specialist-written or reviewed; 11 rest on primary sources
+      without expert review, and 6 November additions are not second-reviewed.
+
+  - id: airbench_2024
+    name: AirBench 2024
+    aliases: ["AirBench", "AirBench 2024"]
+    domain: security
+    caveat: >-
+      5,694 prompts across 314 risk categories (arXiv:2608.17183, §3.1).
+      Judged by GPT-4o under a ternary 0 / 0.5 / 1 rubric. The paper's own
+      finding is that mean-score leaderboards over these suites are unstable
+      under rubric ambiguity, so no per-model scores from the paper are filed
+      here; this entry records the suite so future runs can attach scores.
+
+  - id: salad_bench
+    name: SALAD-Bench
+    aliases: ["SALAD-Bench", "SALAD Bench"]
+    domain: security
+    caveat: >-
+      21,318 prompts (arXiv:2608.17183, §3.1). MD-Judge-v0.1 natively
+      produces an unsafe probability plus a binary safe/unsafe judgment,
+      not a ternary score: the paper derives ternary 0 / 0.5 / 1 outcomes
+      with model-specific Otsu thresholds (§3.2) to compare SALAD with the
+      HELM-style suites, so the ternary scale is the paper's derivation,
+      not SALAD-Bench's native protocol, and a future native MD-Judge
+      score must not be read as ternary. No per-model scores filed: the
+      paper reports ambiguity and rank instability across suites rather
+      than benchmark scores.
+
+  - id: harmbench
+    name: HarmBench
+    aliases: ["HarmBench"]
+    domain: security
+    caveat: >-
+      400 behavior prompts in HELM Safety v1.0 across 4 classes
+      (arXiv:2608.17183, §3.1). Judged by GPT-4o under a ternary 0 / 0.5 / 1
+      rubric. No per-model scores filed: the paper reports ambiguity and rank
+      instability across suites rather than benchmark scores.
+
+  - id: simple_safety_tests
+    name: Simple Safety Tests
+    aliases: ["Simple Safety Tests", "SST"]
+    domain: security
+    url: https://arxiv.org/abs/2311.08370
+    released: 2023-11-14
+    caveat: >-
+      100 prompts (arXiv:2608.17183, §3.1). Judged by GPT-4o under a ternary
+      0 / 0.5 / 1 rubric. No per-model scores filed: the paper reports
+      ambiguity and rank instability across suites rather than benchmark
+      scores.
+
+  - id: bbq
+    name: BBQ
+    aliases: ["BBQ", "Bias Benchmark for QA"]
+    domain: knowledge
+    caveat: >-
+      Multiple-choice social-bias question answering (arXiv:2608.17183, §3.1).
+      Scored by accuracy, unlike the ternary-judged suites in the same paper,
+      so its numbers are not comparable with theirs. No per-model scores
+      filed: the paper reports ambiguity and rank instability rather than
+      benchmark scores.
+
 # Model cards, technical reports and release posts.
 #
 # `organization` is the publisher of the document. `benchmarks` is the set of
@@ -2803,3 +2975,12 @@ model_cards:
     - aime
     - math_500
     - gpqa_diamond
+
+  - id: benchmarks_are_not_monolithic_results
+    organization: Aleph Alpha Research
+    model: Llama-3.2-1B and SmolLM-1.7B-Instruct
+    document_type: technical_report
+    published: 2026-07-30
+    url: https://arxiv.org/abs/2607.28801
+    retrieved_at: 2026-11-07
+    benchmarks: [mmlu, arc, winogrande, hellaswag, truthfulqa]

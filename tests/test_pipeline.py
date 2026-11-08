@@ -1371,6 +1371,43 @@ def test_dedupe_preserves_authors_and_summary_from_the_absorbed_copy():
     assert merged.summary == "A real card."
 
 
+def test_dedupe_keeps_metrics_split_by_contributing_source():
+    # Issue #841 / Codex P1 on #1171: one pass observes an artifact through
+    # arXiv and XBsleepy. The merged record must remember which source
+    # reported each metric, or a later same-day revision from the envelope
+    # source drops the other contributor's measurement it omits.
+    primary = item(
+        source_id="2607.0027",
+        title="A New Evaluation Benchmark For Merge Testing",
+        url="https://arxiv.org/abs/2607.0027",
+        metrics={"citations": 12, "stars": 3},
+        published_at=datetime(2026, 7, 27, 12, tzinfo=UTC),
+        updated_at=datetime(2026, 7, 27, 12, tzinfo=UTC),
+    )
+    digest = item(
+        source="XBsleepy",
+        source_id="xbsleepy:2607.0027",
+        title="A New Evaluation Benchmark For Merge Testing",
+        url="https://xbsleepy.example/2607.0027",
+        artifact_urls=["https://arxiv.org/abs/2607.0027"],
+        metrics={"citations": 5000},
+        published_at=datetime(2026, 7, 27, 11, tzinfo=UTC),
+        updated_at=datetime(2026, 7, 27, 11, tzinfo=UTC),
+    )
+    merged = deduplicate([digest, primary])[0]
+
+    assert merged.source == "arXiv"
+    assert merged.metrics == {"citations": 5000, "stars": 3}
+    assert merged.metrics_by_source == {
+        "XBsleepy": {"citations": 5000},
+        "arXiv": {"citations": 12, "stars": 3},
+    }
+    # And the split is on the record a snapshot serializes.
+    assert merged.to_dict()["metrics_by_source"] == merged.metrics_by_source
+    # Unmerged records carry no empty map.
+    assert "metrics_by_source" not in item().to_dict()
+
+
 def test_suppression_is_not_bypassed_by_the_watchlist():
     # `item.watchlist or (not item.suppression_reasons and ...)` short-circuited,
     # so a watchlisted record published even after matching a suppress rule.

@@ -1,0 +1,460 @@
+"""Release ranking beyond attention (#1120): institutions, affiliation, placeholders.
+
+Fixtures are shaped like the real files: data/catalog/benchmark_institutions.yml
+keys benchmarks by catalog key with an arXiv DOI, and data/release_institutions.yml
+keys papers by arXiv id. #1098 counted records through score fields the catalog
+does not use, so every benchmark came out unknown; these tests read the files.
+"""
+
+from __future__ import annotations
+
+import math
+from collections import Counter
+from pathlib import Path
+
+import yaml
+
+from benchmark_radar.affiliation_rank import (
+    affiliation_normalized,
+    catalog_paper_institutions,
+    institution_counts,
+    institution_ranking,
+    institution_weights,
+    paper_institutions,
+)
+from benchmark_radar.release_leaderboard import AFFILIATION_WEIGHT, compute_window_ranking
+from benchmark_radar.release_signals import (
+    ReleaseSignals,
+    is_placeholder_root,
+    load_release_signals,
+    needs_institution_refresh,
+    write_release_institutions,
+    write_release_repos,
+)
+
+
+def _catalog_file(tmp_path: Path) -> Path:
+    path = tmp_path / "benchmark_institutions.yml"
+    path.write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": 1,
+                "benchmarks": {
+                    "claire-radar:2605.00001": {
+                        "doi": "10.48550/arxiv.2605.00001",
+                        "institutions": ["Tsinghua University", "Peking University"],
+                    },
+                    "model-reports:x": {
+                        "doi": "10.48550/arxiv.2605.00002",
+                        "institutions": ["Tsinghua University"],
+                    },
+                    # The same paper under a second catalog key counts once.
+                    "claire-radar:dup": {
+                        "doi": "10.48550/arxiv.2605.00002",
+                        "institutions": ["Tsinghua University"],
+                    },
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def test_catalog_institutions_are_read_by_arxiv_id(tmp_path):
+    papers = catalog_paper_institutions(_catalog_file(tmp_path))
+    assert papers == {
+        "2605.00001": ["Tsinghua University", "Peking University"],
+        "2605.00002": ["Tsinghua University"],
+    }
+
+
+def test_only_openalex_names_are_counted(tmp_path):
+    signals = ReleaseSignals(
+        institutions={
+            "2610.00001": {"basis": "openalex_linked_institutions", "institutions": ["MIT"]},
+            # A paper's own spelling is shown, never counted.
+            "2610.00002": {"basis": "arxiv_html_affiliations", "institutions": ["Shanghai AI Lab"]},
+            # Already in the catalog: not counted twice.
+            "2605.00002": {
+                "basis": "openalex_linked_institutions",
+                "institutions": ["Tsinghua University"],
+            },
+        }
+    )
+    papers = paper_institutions(signals, _catalog_file(tmp_path))
+    counts = institution_counts(papers)
+    assert counts == Counter({"Tsinghua University": 2, "Peking University": 1, "MIT": 1})
+    ranking = institution_ranking(counts, paper_count=len(papers))
+    assert ranking["paper_count"] == 3
+    assert [(e["rank"], e["name"]) for e in ranking["entries"]] == [
+        (1, "Tsinghua University"),
+        (2, "MIT"),
+        (2, "Peking University"),
+    ]
+
+
+def test_affiliation_is_the_best_known_of_the_first_three():
+    weights = institution_weights(Counter({"A": 9, "B": 1}))
+    assert weights["A"] == 1.0
+    assert math.isclose(weights["B"], math.log1p(1) / math.log1p(9))
+    # A collaboration is not averaged down by a smaller partner.
+    assert affiliation_normalized(["B", "A"], weights) == 1.0
+    # Only the first three count, the same three the card shows.
+    assert affiliation_normalized(["X", "Y", "Z", "A"], weights) is None
+    assert affiliation_normalized([], weights) is None
+
+
+def _candidate(name, stars, *, affiliation=None, placeholder=False):
+    candidate = {
+        "canonical_artifact_id": f"artifact:arxiv:{name}",
+        "name": name,
+        "release_date": "2026-11-01T00:00:00+00:00",
+        "has_dated_attention": True,
+        "signals": {
+            "github_stars": {
+                "value": stars,
+                "status": "fresh",
+                "source_url": "https://github.com/a/b",
+            }
+        },
+    }
+    if affiliation is not None:
+        candidate["affiliation"] = affiliation
+    if placeholder:
+        candidate["placeholder_repository"] = True
+    return candidate
+
+
+def test_v1_is_unchanged_without_an_affiliation_weight():
+    ranking = compute_window_ranking([_candidate("a", 100)], window_days=30)
+    entry = ranking["entries"][0]
+    assert entry["score"] == 55
+    assert entry["components"]["github_stars"]["weight"] == 0.55
+    assert "affiliation" not in entry["components"]
+
+
+def test_affiliation_adds_twenty_percent_and_unknown_adds_nothing():
+    ranking = compute_window_ranking(
+        [_candidate("known", 100, affiliation=1.0), _candidate("unknown", 100)],
+        window_days=30,
+        affiliation_weight=AFFILIATION_WEIGHT,
+    )
+    by_name = {entry["name"]: entry for entry in ranking["entries"]}
+    assert by_name["known"]["score"] == 64  # 0.55 * 0.8 + 0.20
+    assert by_name["unknown"]["score"] == 44  # not redistributed
+    assert by_name["unknown"]["components"]["affiliation"]["status"] == "unknown"
+    assert by_name["known"]["rank"] == 1
+    # Stars alone still qualify: the threshold reads attention, not affiliation.
+    assert by_name["unknown"]["status"] == "ranked"
+
+
+def test_affiliation_alone_never_ranks_a_release():
+    candidate = _candidate("quiet", None, affiliation=1.0)
+    ranking = compute_window_ranking(
+        [candidate], window_days=30, affiliation_weight=AFFILIATION_WEIGHT
+    )
+    assert ranking["entries"][0]["status"] == "limited_signals"
+    assert ranking["entries"][0]["score"] is None
+
+
+def test_placeholder_repository_is_listed_but_not_ranked():
+    ranking = compute_window_ranking(
+        [_candidate("empty", 5000, placeholder=True), _candidate("ships", 10)],
+        window_days=30,
+        affiliation_weight=AFFILIATION_WEIGHT,
+    )
+    by_name = {entry["name"]: entry for entry in ranking["entries"]}
+    assert by_name["empty"]["status"] == "limited_signals"
+    assert by_name["empty"]["limited_reason"] == "placeholder_repository"
+    assert by_name["ships"]["rank"] == 1
+    assert ranking["total_cohort_count"] == 2
+
+
+def test_placeholder_root_detection():
+    assert is_placeholder_root(["README.md", "LICENSE", ".gitignore", "assets", "teaser.png"])
+    assert is_placeholder_root(["readme.md", "CITATION.cff", ".github", "figures"])
+    assert not is_placeholder_root(["README.md", "data"])
+    assert not is_placeholder_root(["README.md", "eval.py"])
+    assert not is_placeholder_root(["README.md", "docs"])
+    # An empty listing is a placeholder too: nothing shipped.
+    assert is_placeholder_root([])
+
+
+def test_signal_files_round_trip(tmp_path):
+    institutions = tmp_path / "release_institutions.yml"
+    repos = tmp_path / "release_repos.yml"
+    write_release_institutions(
+        institutions,
+        {
+            "2610.22131": {
+                "basis": "arxiv_html_affiliations",
+                "source_url": "https://arxiv.org/html/2610.22131",
+                "retrieved_at": "2026-11-05",
+                "institutions": ["Shanghai AI Lab"],
+            }
+        },
+    )
+    write_release_repos(
+        repos,
+        {"a/b": {"placeholder": True, "root": ["README.md"], "retrieved_at": "2026-11-05"}},
+    )
+    signals = load_release_signals(institutions, repos)
+    assert signals.paper("2610.22131")["institutions"] == ["Shanghai AI Lab"]
+    assert signals.is_placeholder("https://github.com/A/B")
+    assert not signals.is_placeholder("https://github.com/c/d")
+    assert load_release_signals(tmp_path / "none.yml", tmp_path / "none2.yml") == ReleaseSignals()
+
+
+def test_papers_are_retried_until_openalex_has_them():
+    from datetime import date
+
+    today = date(2026, 11, 5)
+    assert needs_institution_refresh(None, today)
+    assert not needs_institution_refresh(
+        {"basis": "openalex_linked_institutions", "retrieved_at": "2026-01-01"}, today
+    )
+    assert not needs_institution_refresh(
+        {"basis": "arxiv_html_affiliations", "retrieved_at": "2026-11-04"}, today
+    )
+    assert needs_institution_refresh({"basis": None, "retrieved_at": "2026-11-01"}, today)
+
+
+def test_committed_release_signals_load():
+    signals = load_release_signals()
+    for paper, row in signals.institutions.items():
+        for name in row["institutions"]:
+            assert any(ch.isalpha() for ch in name), (paper, name)
+
+
+def test_affiliation_counts_as_an_observed_signal_for_confidence():
+    # Stars (44%) plus a known affiliation (20%) are two observed signals
+    # covering 64% of the score: "Medium", not "Low".
+    ranking = compute_window_ranking(
+        [_candidate("known", 100, affiliation=0.5)],
+        window_days=30,
+        affiliation_weight=AFFILIATION_WEIGHT,
+    )
+    entry = ranking["entries"][0]
+    assert entry["coverage"] == 0.64
+    assert entry["confidence"] == "Medium"
+
+
+def test_the_affiliation_input_names_its_institution_and_count(tmp_path):
+    from benchmark_radar.release_leaderboard import _attach_release_signals
+
+    signals = ReleaseSignals(
+        institutions={
+            "2610.00001": {
+                "basis": "openalex_linked_institutions",
+                "source_url": "https://openalex.org/W1",
+                "institutions": ["Small Lab", "Big University"],
+            }
+        }
+    )
+    counts = {"Big University": 9, "Small Lab": 1}
+    candidate = _candidate("2610.00001", 100)
+    _attach_release_signals(candidate, signals, counts, institution_weights(counts), {})
+    assert candidate["affiliation_institution"] == "Big University"
+    assert candidate["affiliation_paper_count"] == 9
+    ranking = compute_window_ranking(
+        [candidate], window_days=30, affiliation_weight=AFFILIATION_WEIGHT
+    )
+    component = ranking["entries"][0]["components"]["affiliation"]
+    assert component["value"] == 9
+    assert component["institution"] == "Big University"
+    assert component["normalized"] == 1.0
+
+
+def _fetch_module():
+    import sys
+
+    sys.path.insert(0, "scripts")
+    import fetch_release_signals as fetch
+
+    return fetch
+
+
+def _meta(name, size, **extra):
+    return {
+        "full_name": name,
+        "size": size,
+        "stargazers_count": 3,
+        "archived": False,
+        "created_at": "2026-10-04T00:00:00Z",
+        "pushed_at": "2026-10-04T00:00:00Z",
+        **extra,
+    }
+
+
+def test_repository_checks_classify_every_case():
+    from datetime import date
+
+    fetch = _fetch_module()
+    found = {
+        "a/empty": _meta("a/empty", 0),
+        "a/readme": _meta("a/readme", 1),
+        "a/drive": _meta("a/drive", 17),
+        "a/ships": _meta("a/ships", 40),
+        "a/large": _meta("a/large", 50_000),
+        "a/old": _meta("a/old", 900, archived=True),
+    }
+    listed = []
+
+    def list_root(repo):
+        listed.append(repo)
+        return {
+            "a/readme": ["README.md", "teaser.png"],
+            "a/drive": ["README.md"],
+            "a/ships": ["README.md", "eval.py"],
+        }[repo]
+
+    readmes = {
+        "a/readme": "# Code coming soon",
+        # ShaohuaDong2021/RGBD20K: data on Google Drive, code "will be released".
+        "a/drive": "Download: https://drive.google.com/drive/folders/abc",
+    }
+
+    def confirm(repo):
+        # a/renamed moved; the repository endpoint follows the rename.
+        return _meta("b/new-name", 40) if repo == "a/renamed" else None
+
+    rows = {}
+    urls = [f"https://github.com/{r}" for r in [*found, "a/renamed", "a/gone"]]
+    fetch.refresh_repos(
+        urls,
+        rows,
+        today=date(2026, 11, 6),
+        limit=50,
+        search=lambda repos: {r: found[r] for r in repos if r in found},
+        confirm=confirm,
+        list_root=lambda repo: list_root(repo) if repo != "b/new-name" else ["src"],
+        read_readme=lambda repo, name: readmes.get(repo, ""),
+    )
+    assert rows["a/empty"]["placeholder"] is True
+    assert rows["a/readme"]["placeholder"] is True
+    # A README that links a dataset host has shipped its data.
+    assert rows["a/drive"]["placeholder"] is False
+    assert rows["a/drive"]["data_link"] == "drive.google.com"
+    assert rows["a/ships"]["placeholder"] is False
+    # Above LISTING_MAX_KB a repository is not README-only; no listing call.
+    assert rows["a/large"]["placeholder"] is False and "a/large" not in listed
+    assert rows["a/old"]["archived"] is True and "a/old" not in listed
+    assert rows["a/renamed"]["unavailable"] is False
+    assert rows["a/renamed"]["full_name"] == "b/new-name"
+    assert rows["a/gone"] == {
+        "unavailable": True,
+        "placeholder": None,
+        "retrieved_at": "2026-11-06",
+    }
+    assert rows["a/ships"]["stars_at_check"] == 3 and rows["a/ships"]["size_kb"] == 40
+
+
+def test_held_back_reasons_and_unknowns(tmp_path):
+    from benchmark_radar.release_signals import needs_repo_refresh
+
+    signals = ReleaseSignals(
+        repos={
+            "a/gone": {"unavailable": True},
+            "a/old": {"unavailable": False, "archived": True, "placeholder": None},
+            "a/readme": {"unavailable": False, "archived": False, "placeholder": True},
+            "a/ships": {"unavailable": False, "archived": False, "placeholder": False},
+            "a/unknown": {"unavailable": None, "placeholder": None},
+        }
+    )
+    reason = signals.held_back
+    assert reason("https://github.com/a/gone") == "repository_unavailable"
+    assert reason("https://github.com/a/old") == "repository_archived"
+    assert reason("https://github.com/a/readme") == "placeholder_repository"
+    assert reason("https://github.com/a/ships") is None
+    # Unknown is never a hold-back, and is checked again on the next run.
+    assert reason("https://github.com/a/unknown") is None
+    from datetime import date
+
+    today = date(2026, 11, 6)
+    fresh = {"retrieved_at": "2026-11-06"}
+    assert needs_repo_refresh({**fresh, "unavailable": None, "placeholder": None}, today)
+    assert needs_repo_refresh({**fresh, "unavailable": False, "placeholder": None}, today)
+    assert not needs_repo_refresh({**fresh, "unavailable": False, "placeholder": False}, today)
+    assert not needs_repo_refresh(
+        {**fresh, "unavailable": False, "archived": True, "placeholder": None}, today
+    )
+
+
+def test_held_back_releases_are_listed_unranked_and_off_the_scale():
+    viral = _candidate("archived-viral", 100000)
+    viral["held_back"] = "repository_archived"
+    ranking = compute_window_ranking(
+        [viral, _candidate("ships", 100)], window_days=30, affiliation_weight=AFFILIATION_WEIGHT
+    )
+    by_name = {entry["name"]: entry for entry in ranking["entries"]}
+    assert by_name["archived-viral"]["limited_reason"] == "repository_archived"
+    assert by_name["archived-viral"]["status"] == "limited_signals"
+    assert by_name["ships"]["components"]["github_stars"]["normalized"] == 1.0
+
+
+def test_a_placeholder_does_not_set_the_window_maximum():
+    ranking = compute_window_ranking(
+        [_candidate("viral", 100000, placeholder=True), _candidate("ships", 100)],
+        window_days=30,
+        affiliation_weight=AFFILIATION_WEIGHT,
+    )
+    by_name = {entry["name"]: entry for entry in ranking["entries"]}
+    # The shipping release is the window's top star count, not a fraction of
+    # the placeholder's.
+    assert by_name["ships"]["components"]["github_stars"]["normalized"] == 1.0
+    assert by_name["viral"]["status"] == "limited_signals"
+
+
+def test_readme_data_links():
+    from benchmark_radar.release_signals import readme_data_link, readme_name
+
+    assert readme_data_link("see https://huggingface.co/datasets/x/y") == "huggingface.co/datasets"
+    assert readme_data_link("Kaggle: https://www.kaggle.com/datasets/a/b") == "kaggle.com/datasets"
+    assert readme_data_link("Code coming soon. https://huggingface.co/x") is None
+    assert readme_name(["LICENSE", "readme.md", "assets"]) == "readme.md"
+    assert readme_name(["LICENSE"]) is None
+
+
+def test_s3_dataset_links_in_every_url_style():
+    from benchmark_radar.release_signals import readme_data_link
+
+    for url in (
+        "https://s3.amazonaws.com/bucket/data.zip",
+        "https://bucket.s3.us-east-1.amazonaws.com/data.zip",
+        "https://bucket.s3.amazonaws.com/data.zip",
+        "https://s3-us-west-2.amazonaws.com/bucket/data.zip",
+    ):
+        assert readme_data_link(url), url
+    assert readme_data_link("https://aws.amazon.com/") is None
+
+
+def test_a_failed_readme_read_keeps_the_previous_row():
+    from datetime import date
+
+    from benchmark_radar.http import RequestError
+
+    fetch = _fetch_module()
+    previous = {
+        "placeholder": False,
+        "data_link": "drive.google.com",
+        "unavailable": False,
+        "retrieved_at": "2026-10-01",
+    }
+    rows = {"a/data": dict(previous)}
+
+    def read_readme(repo, name):
+        raise RequestError("HTTP 503 from raw.githubusercontent.com")
+
+    fetch.refresh_repos(
+        ["https://github.com/a/data"],
+        rows,
+        today=date(2026, 11, 6),
+        limit=5,
+        search=lambda repos: {"a/data": _meta("a/data", 17)},
+        confirm=lambda repo: None,
+        list_root=lambda repo: ["README.md"],
+        read_readme=read_readme,
+    )
+    # Not evidence of a placeholder: the run keeps what it knew.
+    assert rows["a/data"] == previous

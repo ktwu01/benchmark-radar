@@ -286,6 +286,23 @@ def _latest_release_row(entry: dict[str, Any], top: float) -> str:
             f"normalized {esc(_latest_normalized_text(component))}</small>"
             f"{link}{weight_text}</dd></div>"
         )
+    # Forks are a displayed counter only (#659): the count reaches the row
+    # next to the stars, with the same status wording, but it is not a score
+    # component, so it carries no normalized contribution or weight.
+    forks = entry.get("forks") or {}
+    forks_html = ""
+    if forks.get("value") is not None or forks.get("status") == "unavailable":
+        forks_url = _safe_http_url(forks.get("source_url"))
+        forks_link = (
+            f'<a class="latest-release-source" href="{esc(forks_url)}" target="_blank" '
+            'rel="noopener noreferrer">source ↗</a>'
+            if forks_url
+            else ""
+        )
+        forks_html = (
+            '<p class="latest-release-forks">'
+            f"<span>GitHub forks: {esc(_latest_signal_text(forks))}</span>{forks_link}</p>"
+        )
     meta = " · ".join(
         part
         for part in (
@@ -296,7 +313,16 @@ def _latest_release_row(entry: dict[str, Any], top: float) -> str:
         if part
     )
     purpose = entry.get("purpose")
-    purpose_html = f'<p class="latest-release-purpose">{esc(purpose)}</p>' if purpose else ""
+    if purpose:
+        purpose_html = f'<p class="latest-release-purpose">{esc(purpose)}</p>'
+    else:
+        # An honest empty state (issue #348): the record carries nothing to
+        # summarise, so the row says so instead of showing nothing or
+        # repeating the title. The renderer draws the same markup.
+        purpose_html = (
+            '<p class="latest-release-purpose latest-release-purpose-empty">'
+            "No summary available.</p>"
+        )
     return (
         '<li class="latest-release"><details class="latest-release-details" '
         f'data-artifact="{esc(entry.get("canonical_artifact_id") or "")}">'
@@ -309,7 +335,7 @@ def _latest_release_row(entry: dict[str, Any], top: float) -> str:
         f'<span class="leaderboard-top-count"><span>{score_text}</span>{pill}</span>'
         "</summary>"
         f'<div class="latest-release-body">{purpose_html}'
-        f'<dl class="latest-release-signals">{"".join(signals)}</dl>'
+        f'<dl class="latest-release-signals">{"".join(signals)}</dl>{forks_html}'
         f'<p class="latest-release-meta">{esc(meta)}</p></div>'
         "</details></li>"
     )
@@ -556,15 +582,25 @@ def _has_reported_score(row: dict[str, Any]) -> bool:
 
 
 def _score_browser_seed(
-    dashboard: dict[str, Any], catalog_index: list[dict[str, Any]]
+    dashboard: dict[str, Any],
+    catalog_index: list[dict[str, Any]],
+    score_cutoff: int = DEFAULT_SCORE_CUTOFF,
 ) -> dict[str, str]:
-    """Saturation's empty-search browser, with the shared default cutoff."""
+    """Saturation's empty-search browser, with the caller's score cutoff.
+
+    The default is the shared 70; a caller that has read a reader's choice
+    passes it in, so the seed and the browser's `state.lscore` slice the same
+    population. 100 is the full range: the browser treats it as "All", so no
+    reported score is cut, including a genuine 100.
+    """
     if not catalog_index:
         return {}
     rows = [
         row
         for row in _catalog_score_rows(catalog_index)
-        if not _has_reported_score(row) or row["summary"]["display_max"] < DEFAULT_SCORE_CUTOFF
+        if not _has_reported_score(row)
+        or score_cutoff >= 100
+        or row["summary"]["display_max"] < score_cutoff
     ]
     shown = rows[:50]
     content = ""
@@ -910,6 +946,9 @@ def _library_seed(
         )
         if record.get("released"):
             facts.append(_medium_date(record["released"]))
+        # The first three institutions behind the record's paper (#1120).
+        if record.get("institutions"):
+            facts.append(" · ".join(str(name) for name in record["institutions"][:3]))
         facts.append(SOURCE_LABELS.get(record["source"], record["source"]))
         # The same artifact and star facts the live row shows.
         facts.extend(
@@ -1442,8 +1481,13 @@ def view_seeds(
     library_taxonomy: dict[str, Any] | None = None,
     model_scores: dict[str, Any] | None = None,
     documents: dict[str, Any] | None = None,
+    score_cutoff: int = DEFAULT_SCORE_CUTOFF,
 ) -> dict[str, dict[str, str]]:
-    """Every view's seed, keyed by view. An empty dict means nothing to publish."""
+    """Every view's seed, keyed by view. An empty dict means nothing to publish.
+
+    `score_cutoff` is the Pareto cutoff the Saturation browser seeds with
+    (#570); the default 70 is the shared default, and 100 is the full range.
+    """
     trends = _trends_seed(dashboard, palette)
     if trends:
         # The direction table rides on the Trends page; it never publishes the
@@ -1453,7 +1497,7 @@ def view_seeds(
         "library": _library_seed(catalog_index or [], library_taxonomy),
         "models": _models_seed(catalog_index or [], model_scores, documents),
         "leaderboard": _leaderboard_seed(dashboard, catalog_index or []),
-        "saturation": _score_browser_seed(dashboard, catalog_index or []),
+        "saturation": _score_browser_seed(dashboard, catalog_index or [], score_cutoff),
         "trends": trends,
         "map": _map_seed(dashboard),
     }

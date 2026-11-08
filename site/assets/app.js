@@ -53,6 +53,8 @@ const SOURCE_DISPLAY_NAMES = {
   huggingface: "Hugging Face",
   github: "GitHub",
   github_organizations: "GitHub Organization",
+  // Requested repositories are recorded as plain GitHub records (issue #555).
+  github_requested_repositories: "GitHub",
   huggingface_papers: "Hugging Face Papers",
   kaggle_datasets: "Kaggle Dataset",
   zenodo: "Zenodo",
@@ -404,6 +406,10 @@ const I18N = {
     "No numeric scores recorded for this benchmark.": "这条 benchmark 尚未记录数值成绩。",
     "Benchmark Frontier: {n} individual benchmarks from all sources. Dated benchmarks run left to right from 2024. Undated benchmarks remain visible by score. Gold rings mark the measured Pareto frontier.": "Benchmark 前沿：全部来源的 {n} 个独立标记。日期从 2024 年起向右排列，日期未知的仍按分数显示。金色环标出有测量依据的 Pareto 前沿。",
     "{unscored} without scores excluded · {older} before 2024 · {hidden} hidden by score": "未报告成绩的 {unscored} 个已排除 · {older} 个早于 2024 年 · 分数筛选隐藏 {hidden} 个",
+    "{from} to {to}": "{from} 至 {to}",
+    "from {from}": "自 {from} 起",
+    "to {to}": "截至 {to}",
+    "{n} outside {span}": "{n} 个不在 {span} 范围内",
     "Saturation": "饱和度",
     "Library": "Benchmark 库",
     "Search the library": "搜索 benchmark 库",
@@ -504,6 +510,14 @@ const I18N = {
     "Reasoning & Knowledge": "推理与知识",
     "Close": "关闭",
     "Loading scores…": "正在加载成绩…",
+    "Loading the full archive…": "正在加载完整档案…",
+    "Loading search results…": "正在加载搜索结果…",
+    "Search data could not be loaded. Refresh to retry.": "无法加载搜索数据，请刷新后重试。",
+    "Loading the benchmark catalog…": "正在加载 benchmark 目录…",
+    "Loading the latest scan…": "正在加载最新扫描…",
+    "Loading trends…": "正在加载趋势…",
+    "Loading…": "正在加载…",
+    "{s} s": "{s} 秒",
     "Score details could not be loaded.": "无法加载成绩详情。",
     "Scores for this model": "该模型的成绩",
     "announced {date}": "{date} 发布",
@@ -550,7 +564,9 @@ const I18N = {
     "Benchmark Frontier": "Benchmark 前沿",
     "Benchmark Frontier chart": "Benchmark 前沿图",
     "Which difficult benchmarks have been tested most": "哪些难题，已有更多模型参加测试",
-    "Show benchmarks with highest reported score below:": "只看最高报告分数低于此值的 benchmark：",
+    "Show benchmarks with highest reported score below (default 70; 100 = full range):": "只看最高报告分数低于此值的 benchmark（默认 70；100 = 全部）:",
+    "Date from": "开始日期",
+    "Date to": "结束日期",
     "How to read the frontier": "怎样读这张前沿图",
     "skyline.reading": "每个点代表一条 benchmark 记录。默认高度表示有数值成绩的独立模型数，按来源的模型 ID 去重，保留单独评测的配置；重复成绩不增加模型数。“来源文档数”统计引用的独立报告或登记页面，所有来源按同一规则计数。悬停可查看两种数量。",
     "skyline.pareto": "侧视图把报告分数和当前选择的数量投影到左侧墙面，省略时间。金色阶梯线只比较分数刻度已核实的 benchmark。在日期不早于 2024 年的范围内，如果没有另一个符合计算条件的 benchmark 标准化分数不高于它、所选数量不低于它，且至少一项严格占优，它就位于 Pareto 前沿。日期只用于筛选范围，不参与支配关系计算；分数和数量也不相乘。拖动分数上限，不会把原本被支配的点变成前沿点。",
@@ -671,6 +687,9 @@ const I18N = {
     "Time window": "时间范围",
     "Sort by": "排序方式",
     "Sort: Newest": "排序：最新",
+    "How this list is sorted": "列表如何排序",
+    "How to read this table": "如何阅读此表",
+    "How this ranking works": "这个排名如何计算",
     "Sort: Releases first, then recorded stars + likes + downloads + points; missing signals last": "排序：新发布的排在前面，其余按已记录的星标、点赞、下载和积分总数；缺少数据的记录排在最后",
     "Search benchmarks…": "搜索benchmark…",
     "Refresh data": "刷新数据",
@@ -1124,7 +1143,7 @@ const I18N = {
     Discord: "Discord",
     "The complete dataset is free to download. If it saves you research time, star the repository so other eval builders can find it.":
       "完整数据集可以免费下载。如果它帮你节省了研究时间，请给仓库点个 Star，让更多评测开发者找到它。",
-    Download: "下载",
+    "Hugging Face Data": "Hugging Face 数据",
     "Star the repository": "给仓库点 Star",
     "If this saved you research time, cite the work, star the repo and help other eval builders find it.":
       "如果它帮你节省了研究时间，请引用这项工作、给仓库点 Star，让更多评测开发者找到它。",
@@ -1166,6 +1185,9 @@ const I18N = {
     "Share card for {name}": "{name} 的分享卡片",
     "Share…": "分享…",
     "Copy image": "复制图片",
+    "Copy full text": "复制完整文字",
+    "X opens with the full text. Paste the image with Ctrl+V or Cmd+V.": "打开 X 后会填好完整文字，再按 Ctrl+V 或 Cmd+V 粘贴图片。",
+    "Long caption: X Premium may be required. The full text is preserved.": "文字较长，可能需要 X Premium 才能发布。文字已完整保留。",
     "Copy link": "复制链接",
     "Post on X ↗": "发布到 X ↗",
     "Copy card and post on X ↗": "复制卡片并发布到 X ↗",
@@ -1307,6 +1329,7 @@ const I18N = {
     "90 days": "90 天",
     "Attention score": "关注度得分",
     "GitHub stars": "GitHub star 数",
+    "GitHub forks": "GitHub 复刻数",
     "Hugging Face paper upvotes": "Hugging Face 论文点赞数",
     "Hugging Face dataset downloads, last 30 days": "Hugging Face 数据集下载量（最近 30 天）",
     unavailable: "资源已不可用",
@@ -1317,6 +1340,10 @@ const I18N = {
     "{value} · unverified": "{value} · 未经核验",
     "source ↗": "来源 ↗",
     "Coverage {coverage}": "覆盖率 {coverage}",
+    "Recently released benchmarks, ranked by the attention they are receiving now (GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days, together 80%) and by how often their institutions appear on benchmark papers in the corpus (20%). Repositories holding only a README, licence or images, and archived or deleted repositories, are listed but not ranked.":
+      "近期发布的benchmark，按当前获得的关注度（GitHub star、Hugging Face 论文点赞以及最近 30 天的 Hugging Face 数据集下载量，合计 80%）以及其机构在语料 benchmark 论文中出现的频次（20%）排序。只含 README、许可证或图片的仓库，以及已归档或已删除的仓库，仅列出，不参与排名。",
+    "The number is the score, out of 100. The tag under it is a separate check: how much of the score is backed by observed data. A high tag means at least two signals were found and they cover 75% or more of the score; a low tag means fewer than two signals were found, or they cover less than 40% of the score. It says nothing about how good the benchmark is.":
+      "数字是得分（满分 100）。下方的标签是另一回事：得分有多少来自实际观察到的数据。“高”表示至少找到两类信号，且合计覆盖得分的 75% 以上；“低”表示找到的信号少于两类，或合计覆盖不到得分的 40%。它不代表 benchmark 本身的好坏。",
     "latest.legend":
       "数字是关注度得分（满分 100）。下方的标签是另一回事：得分有多少来自实际观察到的数据。“高”表示至少找到两类信号，且合计覆盖得分的 75% 以上；“低”表示找到的信号少于两类，或合计覆盖不到得分的 40%。它不代表 benchmark 本身的好坏。",
     "{level} data": "数据支撑：{level}",
@@ -1329,6 +1356,19 @@ const I18N = {
     "limited signals: not enough fresh durable signal to rank":
       "信号有限：缺少足够新鲜的持久信号，未纳入排名",
     "no score": "无得分",
+    "Institution frequency": "机构出现频次",
+    "limited signals: the repository has no code or data yet": "信号有限：仓库尚无代码或数据",
+    "limited signals: the repository is archived": "信号有限：仓库已归档",
+    "limited signals: the repository is no longer available": "信号有限：仓库已不可访问",
+    "as written in the paper": "按论文原文",
+    "Institutions linked by OpenAlex": "OpenAlex 关联的机构",
+    "Plus {weight}% institution frequency: how many benchmark papers in the whole corpus list the release's best-known institution among its first three, normalized as log1p(count) / log1p(the most frequent institution's count), not by the window. A release with no institution on file gets no affiliation credit. A repository holding only a README, licence or images, or one that is archived or deleted, is listed but not ranked.":
+      "另加 {weight}% 的机构出现频次：在整个语料中，该发布前三个机构里最常出现者被多少篇 benchmark 论文列出，按 log1p(该数) / log1p(出现最多的机构的篇数) 归一化，而非按时间窗口。没有机构记录的发布不获得机构分。只含 README、许可证或图片的仓库，以及已归档或已删除的仓库，仅列出，不参与排名。",
+    "Top institutions": "机构排行",
+    "{count} papers": "{count} 篇论文",
+    "Institutions ranked by how many benchmark papers in the corpus list them, from OpenAlex's linked institutions for {papers} arXiv papers. A count of papers, not a grade.":
+      "按语料中列出该机构的 benchmark 论文数量排序，数据来自 OpenAlex 为 {papers} 篇 arXiv 论文关联的机构。这是论文计数，不是评级。",
+    Institutions: "机构",
     "No benchmark released in the last {days} days has a measurable attention signal yet.":
       "最近 {days} 天内发布的benchmark尚无可测量的关注度信号。",
     "Try {window}": "试试 {window}",
@@ -1336,6 +1376,7 @@ const I18N = {
     "Loading this window…": "正在加载该时间窗口…",
     "This window could not be loaded. Refresh to try again.": "无法加载该时间窗口，请刷新重试。",
     "The {window} window is not in this build.": "此版本未提供 {window} 的时间窗口。",
+    "No summary available.": "暂无摘要。",
     "The latest releases ranking is not available in this build.": "此版本未提供最新发布排行。",
     "{ranked} of {total} releases in this window are ranked; the rest are listed with limited signals.":
       "该时间窗口内 {total} 个发布中有 {ranked} 个进入排名；其余因信号有限仅列出。",
@@ -1450,6 +1491,8 @@ const state = {
   lera: "",
   lscore: 70,
   lheight: "models",
+  ldateFrom: null,
+  ldateTo: null,
   benchmarkVisibleLimit: 50,
   scoreRankingExpanded: false,
   lfrontier: "",
@@ -1505,6 +1548,8 @@ const state = {
   todayRenderedDate: "",
   todayPage: 1,
   observations: null,
+  searchData: null,
+  searchDataPromise: null,
   fullDataLoaded: false,
   fullDataPromise: null,
   // One entry per Today window ("30d"), holding the file for that window:
@@ -1582,6 +1627,13 @@ function applyDashboardData(data, requestSequence, fullPayload) {
   if (payloadHasObservations(data)) {
     state.observations = null;
   }
+  // Once the full archive is installed it answers All dates searches itself.
+  // Holding the compact index next to it kept both parsed copies alive, which
+  // is the memory the index exists to save (#1182).
+  if (state.fullDataLoaded && state.searchData) {
+    state.searchData = null;
+    state.observations = null;
+  }
   return true;
 }
 
@@ -1615,6 +1667,44 @@ function infoDisclosure(text) {
   ]);
 }
 
+// A closed (i) whose only state is the toggle's aria-expanded; CSS shows the
+// note when it is "true" and never on its own, so what is shown and what
+// assistive tech is told cannot disagree. Hover and focus open it and leaving
+// closes it; a click or tap pins it open, a second one closes it; Escape
+// closes it only while it is open; a click elsewhere closes it.
+function bindInfoTip(wrapper, toggle) {
+  if (!wrapper || !toggle) return;
+  let pinned = false;
+  const isOpen = () => toggle.getAttribute("aria-expanded") === "true";
+  const setOpen = (open) => {
+    if (!open) pinned = false;
+    toggle.setAttribute("aria-expanded", String(open));
+  };
+  wrapper.addEventListener("mouseenter", () => setOpen(true));
+  wrapper.addEventListener("mouseleave", () => {
+    if (!pinned) setOpen(false);
+  });
+  toggle.addEventListener("focus", () => setOpen(true));
+  toggle.addEventListener("blur", () => {
+    if (!pinned) setOpen(false);
+  });
+  toggle.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (pinned) {
+      setOpen(false);
+    } else {
+      pinned = true;
+      setOpen(true);
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && isOpen()) setOpen(false);
+  });
+  document.addEventListener("click", () => {
+    if (isOpen()) setOpen(false);
+  });
+}
+
 // Coalesce bursts of input (typing in a filter box) into a single trailing
 // render, so the corpus is not re-filtered and the DOM rebuilt on every
 // keystroke. Used by the filter panels that re-render their whole view.
@@ -1633,6 +1723,108 @@ function debounce(fn, waitMs = 80) {
     fn(...args);
   };
   return debounced;
+}
+
+// --- Data-load feedback -----------------------------------------------------
+// Some routes download a lot before they can answer: the first homepage search
+// pulls the full archive (radar.json, tens of megabytes), and the Library,
+// Scores, Models and Ranking views wait on the benchmark catalog. Without a
+// visible cue the page looked frozen for seconds, and readers took it for dead
+// (issue #1128). Every such load goes through trackLoad, which shows one
+// status pill naming what is loading with a ticking seconds counter, and marks
+// the views waiting on it as busy, so their stale results dim instead of
+// posing as the answer.
+//
+// The body is still read with the browser's own response.json(). Streaming it
+// through JavaScript to count megabytes kept a second copy of the archive and
+// raised Chromium's peak renderer memory from 1.40 GB to 1.76-1.93 GB, enough
+// to kill the tab on a phone (#1142 review). Elapsed time costs nothing.
+const LOAD_INDICATOR_DELAY_MS = 250;
+const activeLoads = new Set();
+let loadIndicatorTimer = null;
+let loadIndicatorFrame = null;
+
+function trackLoad(label, views, run) {
+  const load = { label, views, startedAt: Date.now() };
+  activeLoads.add(load);
+  syncLoadIndicator();
+  let promise;
+  try {
+    promise = Promise.resolve(run());
+  } catch (error) {
+    promise = Promise.reject(error);
+  }
+  const finish = () => {
+    activeLoads.delete(load);
+    syncLoadIndicator();
+  };
+  promise.then(finish, finish);
+  return promise;
+}
+
+function loadIsRelevant(load) {
+  return !load.views || load.views.includes(state.view);
+}
+
+let loadIndicator = null;
+
+function loadIndicatorParts() {
+  if (loadIndicator) return loadIndicator;
+  if (!document.body) return null;
+  // The seconds counter changes every second, so it stays out of the
+  // accessibility tree; a screen reader hears the label once instead.
+  const label = element("span", { className: "data-loading-label" });
+  const elapsed = element("span", { className: "data-loading-elapsed", attrs: { "aria-hidden": "true" } });
+  const node = element("div", { className: "data-loading", attrs: { id: "data-loading", role: "status" } }, [
+    element("span", { className: "data-loading-spinner", attrs: { "aria-hidden": "true" } }),
+    label,
+    elapsed,
+    element("span", { className: "data-loading-bar", attrs: { "aria-hidden": "true" } }),
+  ]);
+  node.hidden = true;
+  document.body.append(node);
+  loadIndicator = { node, label, elapsed };
+  return loadIndicator;
+}
+
+function renderLoadIndicator() {
+  loadIndicatorFrame = null;
+  clearTimeout(loadIndicatorTimer);
+  const relevant = [...activeLoads].filter(loadIsRelevant);
+  document.querySelectorAll(".view").forEach((section) => {
+    const view = section.id.replace(/-view$/, "");
+    const busy = relevant.some((load) => !load.views || load.views.includes(view));
+    if (busy) section.setAttribute("aria-busy", "true");
+    else section.removeAttribute("aria-busy");
+  });
+  if (!relevant.length) {
+    if (loadIndicator) loadIndicator.node.hidden = true;
+    return;
+  }
+  const now = Date.now();
+  // The oldest load is the one the reader has waited on longest.
+  const lead = relevant.reduce((a, b) => (b.startedAt < a.startedAt ? b : a));
+  const waited = now - lead.startedAt;
+  if (waited < LOAD_INDICATOR_DELAY_MS) {
+    // A cached or fast response should not flash a banner.
+    loadIndicatorTimer = setTimeout(syncLoadIndicator, LOAD_INDICATOR_DELAY_MS - waited);
+    return;
+  }
+  const parts = loadIndicatorParts();
+  if (!parts) return;
+  const { node, label, elapsed } = parts;
+  const labelText = t(lead.label);
+  if (label.textContent !== labelText) label.textContent = labelText;
+  const seconds = Math.floor(waited / 1000);
+  elapsed.textContent = seconds >= 1 ? t("{s} s", { s: seconds }) : "";
+  node.hidden = false;
+  // Tick once a second so a long wait visibly counts up.
+  loadIndicatorTimer = setTimeout(syncLoadIndicator, 1000 - (waited % 1000));
+}
+
+function syncLoadIndicator() {
+  if (loadIndicatorFrame !== null) return;
+  loadIndicatorFrame = (window.requestAnimationFrame || ((fn) => setTimeout(fn, 16)))(renderLoadIndicator);
 }
 
 function svgElement(tag, attrs = {}, text = null) {
@@ -1745,6 +1937,10 @@ function readUrl() {
   state.lwindow = LATEST_WINDOWS.includes(params.get("lwindow")) ? params.get("lwindow") : "";
   state.lscore = scoreCutoff(params.get("lscore"));
   state.lheight = ["cards", "documents"].includes(params.get("lheight")) ? "documents" : "models";
+  // A malformed date is no filter, not an error: the range is optional and
+  // the figure keeps its default span.
+  state.ldateFrom = urlDate(params.get("ldate_from"));
+  state.ldateTo = urlDate(params.get("ldate_to"));
   state.benchmarkVisibleLimit = BENCHMARK_SEARCH_LIMIT;
   state.benchmarkQuery = (params.get("bq") || "").trim();
   state.benchmarkModel = (params.get("bmodel") || "").trim();
@@ -1859,6 +2055,8 @@ function writeUrl(mode = "replace") {
       if (state.ldomain) params.set("ldomain", state.ldomain);
       if (state.lorg) params.set("lorg", state.lorg);
       if (state.lera) params.set("lera", state.lera);
+      if (state.ldateFrom) params.set("ldate_from", state.ldateFrom);
+      if (state.ldateTo) params.set("ldate_to", state.ldateTo);
     } else {
       if (state.lwindow && state.lwindow !== latestReleasesDefaultWindow()) {
         params.set("lwindow", state.lwindow);
@@ -2231,6 +2429,7 @@ function setView(view, update = true, mode = "push") {
   });
   syncPageHeading();
   syncNavState();
+  syncLoadIndicator();
   if (update) writeUrl(mode);
 }
 
@@ -2525,10 +2724,24 @@ function recordFactEntries(item) {
   return facts;
 }
 
+// A Zenodo record dated by its deposition's created time, because the
+// uploader's publication_date was in the future or unreadable (#1016). The
+// source value is shown as given; a record dated by its own publication
+// date carries no note.
+function publishedDateNote(item) {
+  if (item.published_basis !== "created") return "";
+  return item.published_source_value
+    ? ` (dated by deposition created; source publication_date was ${item.published_source_value})`
+    : " (dated by deposition created; no publication_date supplied)";
+}
+
 function recordDateEntries(item) {
   const entries = [];
   if (item.published_at) {
-    entries.push([t("Published"), formatDate(item.published_at, { dateStyle: "medium" })]);
+    entries.push([
+      t("Published"),
+      formatDate(item.published_at, { dateStyle: "medium" }) + publishedDateNote(item),
+    ]);
   }
   if (
     item.updated_at &&
@@ -2546,20 +2759,33 @@ function recordFacts(item, { quietUnreported = false } = {}) {
     ([label]) => !(quietUnreported && label === t("Activity counters")),
   );
   if (!facts.length) return null;
+  const metricIcons = Object.fromEntries(
+    RECORD_METRIC_ICONS.map((key) => [t(RECORD_METRIC_LABELS[key]), key]),
+  );
   return element(
     "div",
     {
       className: "record-facts",
       attrs: { role: "group", "aria-label": t("Source metadata") },
     },
-    facts.map(([label, value, emphasize]) =>
-      element("span", {}, [
-        document.createTextNode(`${label} `),
-        emphasize ? element("strong", { text: value }) : document.createTextNode(value),
-      ]),
-    ),
+    facts.map(([label, value, emphasize]) => {
+      const valueNode = emphasize ? element("strong", { text: value }) : document.createTextNode(value);
+      const icon = metricIcons[label];
+      if (!icon) return element("span", {}, [document.createTextNode(`${label} `), valueNode]);
+      // A count's label is an icon (issue #1097): "Likes 0  Downloads 591"
+      // repeated on every card. Hover shows the word; a screen reader reads it.
+      return element("span", { className: "record-fact-metric", attrs: { title: label } }, [
+        element("span", { className: `fact-icon fact-icon-${icon}`, attrs: { "aria-hidden": "true" } }),
+        element("span", { className: "visually-hidden", text: `${label} ` }),
+        valueNode,
+      ]);
+    }),
   );
 }
+
+// Counts with a widely read icon. "Influential citations" has none a reader
+// would recognise, so it keeps its words.
+const RECORD_METRIC_ICONS = ["stars", "forks", "likes", "downloads", "citations"];
 
 
 // A card is tinted gold by a count its source published (issue #994): the
@@ -2718,31 +2944,63 @@ function briefingMeta(parts, citations) {
   return element("p", { className: "briefing-insight-meta" }, chips);
 }
 
-// Share images (issue #671) are rendered by the daily pipeline and published
-// per day, so the page only links to one. An item the day did not make a card
-// for gets no control: a link to an image that was never rendered would be a
-// dead end, and the item stays listed either way.
+// Published images and their caption metadata come from the same daily block.
 function shareCardFor(day, url) {
   const href = safeHttpUrl(url);
   if (!href) return null;
   const card = (day?.share?.cards || []).find((entry) => safeHttpUrl(entry.url) === href);
   const image = card ? safeHttpUrl(card.image) : "";
-  return image ? { image } : null;
+  return image ? { ...card, image } : null;
 }
 
-function shareControl(image, label, linkLabel = t("Share image")) {
-  return element("div", { className: "share-control" }, [
-    element("a", {
-      className: "share-link",
-      text: `${linkLabel} \u2197`,
+// Share is an icon wherever it appears (issue #1097): "Share image" and
+// "Share card" repeated under every briefing item and every card, as loud as
+// the content they share. The tooltip and the accessible name keep the words.
+const SHARE_ICON_PATHS = [
+  "M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7",
+  "M16 6l-4-4-4 4",
+  "M12 2v13",
+];
+
+function shareIcon() {
+  const svg = svgElement("svg", { viewBox: "0 0 24 24", "aria-hidden": "true" });
+  SHARE_ICON_PATHS.forEach((d) => svg.append(svgElement("path", { d })));
+  return svg;
+}
+
+function shareControl(image, label, linkLabel = t("Share image"), share = null) {
+  // Every caller passes a URL it already checked, but this control navigates
+  // to it on failure, so it checks again: only an http(s) image is a link.
+  const href = safeHttpUrl(image);
+  if (!href) return null;
+  const link = element("a", {
+      className: "share-link share-icon",
       attrs: {
-        href: image,
+        href,
         target: "_blank",
         rel: "noopener noreferrer",
-        "aria-label": `${linkLabel === label ? linkLabel : `${linkLabel}: ${label}`} (${t("opens in a new tab")})`,
+        title: linkLabel,
+        "aria-label": `${linkLabel === label ? linkLabel : `${linkLabel}: ${label}`}${share ? "" : ` (${t("opens in a new tab")})`}`,
       },
-    }),
-  ]);
+    }, [shareIcon()]);
+  if (share) link.addEventListener("click", async (event) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    try {
+      const [{ openDailyShare }, { briefingCaption, summaryCaption }] = await Promise.all([
+        import("./share-card.js"), import("./share-caption.js"),
+      ]);
+      const caption = share.cards ? summaryCaption(share) : briefingCaption(share);
+      openDailyShare({
+        name: share.cards ? caption.split("\n")[0] : label,
+        image: href, day: share.day, caption, t,
+      });
+    } catch (error) {
+      console.error(error);
+      window.location.assign(href);
+    }
+  });
+  return element("div", { className: "share-control" }, [link]);
 }
 
 function briefingShare(parts, citations, day) {
@@ -2750,7 +3008,13 @@ function briefingShare(parts, citations, day) {
     .map((id) => citations.find((entry) => entry.id === id))
     .find(Boolean);
   const card = citation ? shareCardFor(day, citation.href) : null;
-  return card ? shareControl(card.image, citation.title) : null;
+  const sourceUrl = (id) => citations.find((entry) => entry.id === id)?.href || "";
+  const resolve = (text) => text.replace(/\bE\d{3}\b/g, (id) => sourceUrl(id) || id);
+  return card ? shareControl(card.image, card.title || citation.title, t("Share card"), {
+    day: day.date, card,
+    finding: resolve(parts.head), implication: resolve(parts.body),
+    sources: parts.evidenceIds.map(sourceUrl).filter(Boolean),
+  }) : null;
 }
 
 // top3.png holds the first three cards, or fewer when the day has fewer, so
@@ -2769,7 +3033,9 @@ function renderTopShare(day, visible) {
   replaceChildren(
     host,
     image
-      ? [shareControl(image, topShareLabel(count), topShareLabel(count))]
+      ? [shareControl(image, topShareLabel(count), topShareLabel(count), count ? {
+        day: day.date, cards: day.share.cards,
+      } : null)]
       : [],
   );
 }
@@ -3201,7 +3467,9 @@ function renderTodayBenchmarks() {
     : indexPending
       ? t("Still checking the benchmark registry\u2026")
       : "";
-  byId("today-benchmarks-note").textContent = [note, warning].filter(Boolean).join(" ");
+  byId("today-benchmarks-note").textContent = [
+    note, partialMatchNote(matches, query, (record) => record.slug), warning,
+  ].filter(Boolean).join(" ");
   replaceChildren(byId("today-benchmarks-results"), rows);
   return !total && indexPending ? "pending" : total;
 }
@@ -3272,6 +3540,17 @@ function renderSearchScopeBanner(observationCount, benchmarkMatches) {
 
   replaceChildren(banner, [scopeMessage, cliMessage]);
   banner.hidden = false;
+}
+
+function clearTodayResultsForLoadError() {
+  replaceChildren(byId("today-list"), []);
+  replaceChildren(byId("today-benchmarks-results"), []);
+  byId("today-benchmarks").hidden = true;
+  byId("search-scope-banner").hidden = true;
+  byId("today-breakdown").textContent = "";
+  byId("today-page-status").textContent = "";
+  byId("today-page-prev").disabled = true;
+  byId("today-page-next").disabled = true;
 }
 
 function renderToday({ resultsOnly = false } = {}) {
@@ -4136,6 +4415,12 @@ function freshWindowData(key) {
 }
 
 function allObservations() {
+  if (state.searchData && state.todayDate === "all" && !state.fullDataLoaded) {
+    if (state.observations && state.observationsSource === state.searchData) return state.observations;
+    state.observationsSource = state.searchData;
+    state.observations = sortObservations([...state.searchData.observations]);
+    return state.observations;
+  }
   const days = observationDays();
   // The cache belongs to one source: a window file, or the days in state.data.
   if (state.observations && state.observationsSource === days) return state.observations;
@@ -4169,7 +4454,12 @@ function allObservations() {
       observation_kind: "attention",
     })),
   );
-  state.observations = [...evidence, ...attention].sort((a, b) => {
+  state.observations = sortObservations([...evidence, ...attention]);
+  return state.observations;
+}
+
+function sortObservations(observations) {
+  return observations.sort((a, b) => {
     const dateOrder = String(b.snapshot_date).localeCompare(String(a.snapshot_date));
     if (dateOrder) return dateOrder;
     // A release outranks every non-release from the same day, whatever the
@@ -4191,9 +4481,16 @@ function allObservations() {
     // Attention rows carry no priority, so within a day they order by the
     // event timestamp the row displays, keeping the visible order consistent
     // with the "Sort: Date ↓" caption.
-    return String(eventTimestamp(b)).localeCompare(String(eventTimestamp(a)));
+    const timeOrder = String(eventTimestamp(b)).localeCompare(String(eventTimestamp(a)));
+    if (timeOrder) return timeOrder;
+    // Rows that tie on everything above would otherwise keep their input
+    // order, which differs between radar.json and radar-search.json, so the
+    // two paths paged the same results differently (#1143). Break the tie on
+    // the record's identity so both produce one order.
+    const keyOrder = observationRecordKey(a).localeCompare(observationRecordKey(b));
+    if (keyOrder) return keyOrder;
+    return `${a.url || ""}\u0000${a.title || ""}`.localeCompare(`${b.url || ""}\u0000${b.title || ""}`);
   });
-  return state.observations;
 }
 
 // All dates is a record finder, not a replay of every overlapping crawl
@@ -5175,16 +5472,18 @@ function taskShape(entry) {
 const BENCHMARK_SEARCH_LIMIT = 50;
 
 let benchmarkIndexPromise = null;
+// Views whose content waits on the benchmark catalog.
+const CATALOG_VIEWS = ["library", "saturation", "leaderboard", "models", "trends"];
 
 function loadBenchmarkIndex() {
   if (!benchmarkIndexPromise) {
     // Revalidate on page load so newly recovered dates reach the figure.
     // The promise still shares one request across all views in this page.
-    benchmarkIndexPromise = fetch("/data/benchmark-index.json", { cache: "no-cache" })
+    benchmarkIndexPromise = trackLoad("Loading the benchmark catalog…", CATALOG_VIEWS, () => fetch("/data/benchmark-index.json", { cache: "no-cache" })
       .then((response) => {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return response.json();
-      })
+      }))
       .then((payload) => {
         if (!Array.isArray(payload.benchmarks)) throw new Error("Invalid benchmark catalog");
         state.catalogDocuments = payload.document_registry || null;
@@ -5311,6 +5610,16 @@ function scoreCutoff(value) {
   const raw = Number(value);
   if (!Number.isFinite(raw) || raw < 10 || raw > 100) return 70;
   return Math.round(raw / 10) * 10;
+}
+
+// A YYYY-MM-DD calendar date, or null. Mirrors skyline.js validDate, and is
+// defined here rather than imported: the render harnesses evaluate app.js
+// with its imports stripped, and readUrl runs on boot, so an imported name
+// on that path breaks every harness that boots the app.
+function urlDate(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const time = Date.parse(`${value}T00:00:00Z`);
+  return Number.isFinite(time) && new Date(time).toISOString().slice(0, 10) === value ? value : null;
 }
 
 function matchesScoreFilter(summary) {
@@ -5856,6 +6165,8 @@ function renderBenchmarkSkyline(cutoff = state.lscore) {
   const host = byId("benchmark-skyline-chart");
   if (!host) return;
   byId("benchmark-skyline-height").value = state.lheight;
+  byId("benchmark-skyline-date-from").value = state.ldateFrom || "";
+  byId("benchmark-skyline-date-to").value = state.ldateTo || "";
   // Do not briefly present the small registry as the whole population while
   // the catalog is loading, or turn a failed load into a plausible tiny chart.
   if (!state.benchmarkIndex) {
@@ -5867,7 +6178,7 @@ function renderBenchmarkSkyline(cutoff = state.lscore) {
   }
   // Selection in another chart survives a slider preview.
   if (host.contains(selectedFrontierPoint) || host.contains(describedFrontierPoint)) clearFrontierPointSelection();
-  const model = skylineModel(state.benchmarkIndex, cutoff, null, state.lheight);
+  const model = skylineModel(state.benchmarkIndex, cutoff, null, state.lheight, { from: state.ldateFrom, to: state.ldateTo });
   const svg = skylineChart(model, cutoff);
   const sourceCounts = [...new Set(model.all.map((row) => row.source))].map((source) =>
     `${scoreSourceLabel(source)}: ${model.visible.filter((row) => row.source === source).length.toLocaleString()} / ${model.all.filter((row) => row.source === source).length.toLocaleString()}`);
@@ -5893,10 +6204,22 @@ function renderBenchmarkSkyline(cutoff = state.lscore) {
   byId("benchmark-skyline-count").textContent = t("{visible} of {n} benchmarks shown · {s} sources in total", {
     visible: model.visible.length.toLocaleString(), n: model.population.toLocaleString(), s: model.sources,
   });
-  byId("benchmark-skyline-note").textContent = t("{unscored} without scores excluded · {older} before 2024 · {hidden} hidden by score", {
+  // The date range hides its own share, so the score count stays a score
+  // count; the note names the span the figure is actually showing.
+  const hiddenByScore = model.hidden - model.beforeStart - model.unscored - model.dateHidden;
+  let skylineNote = t("{unscored} without scores excluded · {older} before 2024 · {hidden} hidden by score", {
     unscored: model.unscored.toLocaleString(), older: model.beforeStart.toLocaleString(),
-    hidden: (model.hidden - model.beforeStart - model.unscored).toLocaleString(),
+    hidden: hiddenByScore.toLocaleString(),
   });
+  if (model.dateRange.from || model.dateRange.to) {
+    const span = model.dateRange.from && model.dateRange.to
+      ? t("{from} to {to}", { from: model.dateRange.from, to: model.dateRange.to })
+      : model.dateRange.from
+        ? t("from {from}", { from: model.dateRange.from })
+        : t("to {to}", { to: model.dateRange.to });
+    skylineNote += ` · ${t("{n} outside {span}", { n: model.dateHidden.toLocaleString(), span })}`;
+  }
+  byId("benchmark-skyline-note").textContent = skylineNote;
 }
 
 function initBenchmarkSearch() {
@@ -6191,6 +6514,14 @@ function libraryRow(record, names, saved) {
         + (direction.basis === "keyword-provisional" ? ` (${t("provisional")})` : ""),
     }) : null,
     record.released ? element("span", { text: formatDate(record.released, { dateStyle: "medium" }) }) : null,
+    // The first three institutions behind the record's own paper (#1120).
+    (record.institutions || []).length
+      ? element("span", {
+          className: "library-institutions",
+          text: record.institutions.slice(0, 3).join(" · "),
+          attrs: { title: t("Institutions linked by OpenAlex") },
+        })
+      : null,
     element("span", { text: scoreSourceLabel(record.source) }),
     ...libraryArtifactLinks(record),
     librarySignalFact(record),
@@ -6984,8 +7315,8 @@ function modelRowSetting(row) {
 let modelScoresPromise = null;
 function loadModelScores() {
   if (!modelScoresPromise) {
-    modelScoresPromise = fetch("/data/model-scores.json", { cache: "no-cache" })
-      .then((response) => (response.ok ? response.json() : null))
+    modelScoresPromise = trackLoad("Loading scores…", ["models"], () => fetch("/data/model-scores.json", { cache: "no-cache" })
+      .then((response) => (response.ok ? response.json() : null)))
       .then((payload) => (Array.isArray(payload?.models) && Array.isArray(payload?.benchmarks) ? payload : null))
       .catch(() => null);
   }
@@ -7661,11 +7992,11 @@ function loadBenchmarkShard(slug) {
   if (!benchmarkShardCache.has(slug)) {
     benchmarkShardCache.set(
       slug,
-      fetch(`/data/benchmarks/${slug}.json`, { cache: "no-cache" })
+      trackLoad("Loading benchmark details…", ["saturation", "models"], () => fetch(`/data/benchmarks/${slug}.json`, { cache: "no-cache" })
         .then((response) => {
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           return response.json();
-        })
+        }))
         .catch(() => null),
     );
   }
@@ -7835,12 +8166,32 @@ function benchmarkResourceChip(resource) {
   return chip;
 }
 
+// The Benchmark Saturation study's stated saturation index, as stated, never
+// recomputed (#1085). A fact, not a rank, filter, or colour: the value and
+// its label are the study's own words from the record's source_metadata.
+function saturationIndexFact(detail) {
+  const stated = detail.source_metadata?.benchmark_saturation || {};
+  const index =
+    typeof stated.saturation_index === "string" ? stated.saturation_index.trim() : "";
+  if (!index) return null;
+  const label =
+    typeof stated.saturation_index_interpreted === "string"
+      ? stated.saturation_index_interpreted.trim()
+      : "";
+  const value = label ? `${index} (${label})` : index;
+  return [
+    t("Saturation index (study)"),
+    `${value} — Benchmark Saturation study (arXiv:2602.16763)`,
+  ];
+}
+
 function catalogIdentityBlock(detail) {
   const publisher = detail.publisher;
   const description = l10nProse(detail.description?.en, detail.description?.zh);
   const provenance = detail.provenance || {};
   const importer = catalogSourceMeta(detail.source).name;
   const resources = catalogResourceLinks(detail);
+  const saturation = saturationIndexFact(detail);
   return element("section", { className: "catalog-block" }, [
     element("h3", { text: t("About this benchmark") }),
     // Crawled descriptions are third-party text. They only ever go through
@@ -7863,6 +8214,7 @@ function catalogIdentityBlock(detail) {
           ? formatDate(detail.released, { dateStyle: "medium" })
           : t("release date not established"),
       ],
+      ...(saturation ? [saturation] : []),
       [t("Modality"), detail.modality || t("modality not established")],
       [t("Importer"), importer],
       ...(provenance.review_state
@@ -8306,14 +8658,24 @@ function catalogScoreChart(source, payload) {
     // fall strictly inside the observed span are drawn, and only where they
     // clear the endpoint labels: the extremes stay the real first and last
     // release date, never a rounded range.
-    const quarterGap = 46;
+    // A "Mon YYYY" label is about 64 units wide, so labels are spaced at
+    // least that far apart: every quarter when they fit, every second or
+    // fourth quarter on a long span or a narrow chart. Overlapping labels
+    // ("Mar 2023Jul 2023") read as nothing at all (issue #1097).
+    const quarterGap = 72;
+    const quarterWidth = (plotWidth * 91.3 * 86400000) / span;
+    const labelEvery = [1, 2, 4, 8].find((step) => step * quarterWidth >= quarterGap) || 8;
+    let quarterIndex = 0;
     const first = new Date(firstTime);
     const cursor = new Date(
       Date.UTC(first.getUTCFullYear(), Math.ceil((first.getUTCMonth() + 1) / 3) * 3, 1),
     );
     while (cursor.getTime() < lastTime) {
       const tickX = x(cursor.getTime());
+      const labelled = Number.isInteger(quarterIndex / labelEvery);
+      quarterIndex += 1;
       if (
+        labelled &&
         tickX - margin.left > quarterGap &&
         margin.left + plotWidth - tickX > quarterGap
       ) {
@@ -8636,11 +8998,18 @@ let catalogRenderSeq = 0;
 // Every catalog benchmark has a share card (issue #671). The module loads on
 // the first press, so a reader who never shares never downloads it.
 function benchmarkShareButton(record) {
-  const button = element("button", {
-    className: "secondary-link benchmark-share",
-    text: t("Share card"),
-    attrs: { type: "button", "aria-label": t("Share {name} as a card", { name: record.name }) },
-  });
+  const button = element(
+    "button",
+    {
+      className: "share-icon benchmark-share",
+      attrs: {
+        type: "button",
+        title: t("Share card"),
+        "aria-label": t("Share {name} as a card", { name: record.name }),
+      },
+    },
+    [shareIcon()],
+  );
   button.addEventListener("click", async () => {
     const { openBenchmarkShare } = await import("./share-card.js");
     openBenchmarkShare({ slug: record.slug, name: record.name, t });
@@ -10196,10 +10565,18 @@ const LATEST_SIGNALS = [
   { key: "github_stars", label: "GitHub stars" },
   { key: "hf_paper_upvotes", label: "Hugging Face paper upvotes" },
   { key: "hf_dataset_downloads", label: "Hugging Face dataset downloads, last 30 days" },
+  // attention-affiliation-v2 (#1120) only; a v1 payload has no such component.
+  { key: "affiliation", label: "Institution frequency", optional: true },
 ];
+
+function latestSignalsFor(entries) {
+  return LATEST_SIGNALS.filter(
+    ({ key, optional }) => !optional || entries.some((entry) => entry.components?.[key]),
+  );
+}
 // The adoption view's own filters. A permalink carrying one was written when
 // the page had no modes, and must keep opening the view it filtered.
-const LEADERBOARD_ADOPTION_PARAMS = ["lscore", "lheight", "lq", "ldomain", "lorg", "lera"];
+const LEADERBOARD_ADOPTION_PARAMS = ["lscore", "lheight", "lq", "ldomain", "lorg", "lera", "ldate_from", "ldate_to"];
 
 // The cutoff is shared with Saturation, whose every address carries it, so on
 // its own it marks the adoption mode only on a leaderboard address: a reader
@@ -10307,8 +10684,10 @@ function latestReleasesEmptyState(windowKey, payload) {
 
 function latestReleasesWeights(entries) {
   const weights = {};
-  for (const { key } of LATEST_SIGNALS) {
+  for (const { key, optional } of LATEST_SIGNALS) {
     const published = entries.find((entry) => entry.components?.[key]?.weight !== undefined);
+    // A signal outside this payload's method is absent, not "weight unknown".
+    if (optional && !published) continue;
     weights[key] = published ? Number(published.components[key].weight) : null;
   }
   return weights;
@@ -10316,18 +10695,96 @@ function latestReleasesWeights(entries) {
 
 function latestReleasesMethodNote(payload, windowData) {
   const weights = latestReleasesWeights(windowData.entries || []);
-  const signals = LATEST_SIGNALS.map(({ key, label }) =>
-    weights[key] === null ? t(label) : `${Math.round(weights[key] * 100)}% ${t(label)}`,
-  ).join(", ");
+  const attention = LATEST_SIGNALS.filter(({ optional }) => !optional)
+    .map(({ key, label }) =>
+      weights[key] === null ? t(label) : `${Math.round(weights[key] * 100)}% ${t(label)}`,
+    )
+    .join(", ");
+  // Affiliation is normalized over the corpus, not the window, so it gets its
+  // own sentence after the attention one.
+  const affiliation =
+    weights.affiliation === null || weights.affiliation === undefined
+      ? ""
+      : ` ${t("Plus {weight}% institution frequency: how many benchmark papers in the whole corpus list the release's best-known institution among its first three, normalized as log1p(count) / log1p(the most frequent institution's count), not by the window. A release with no institution on file gets no affiliation credit. A repository holding only a README, licence or images, or one that is archived or deleted, is listed but not ranked.", { weight: Math.round(weights.affiliation * 100) })}`;
   return t(
     "Ranking {method}: {signals}, each normalized as log1p(value) / log1p(window maximum) and summed to a 0 to 100 score. A release is ranked only when enough of its weight comes from fresh, durable signals; the rest are listed with limited signals. Dataset downloads are a rolling 30-day figure, never a cumulative total. Stars come from the benchmark's own repository, never a parent framework. Window {start} to {end}, UTC.",
     {
       method: payload.method_version || "",
-      signals,
+      signals: attention,
       start: formatDate(windowData.window_start, { dateStyle: "medium" }),
       end: formatDate(windowData.window_end, { dateStyle: "medium" }),
     },
+  ) + affiliation;
+}
+
+const DECK_V2 =
+  "Recently released benchmarks, ranked by the attention they are receiving now (GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days, together 80%) and by how often their institutions appear on benchmark papers in the corpus (20%). Repositories holding only a README, licence or images, and archived or deleted repositories, are listed but not ranked.";
+const LEGEND_V2 =
+  "The number is the score, out of 100. The tag under it is a separate check: how much of the score is backed by observed data. A high tag means at least two signals were found and they cover 75% or more of the score; a low tag means fewer than two signals were found, or they cover less than 40% of the score. It says nothing about how good the benchmark is.";
+
+// Why a release is listed but not ranked (#1120): the repository holds no
+// code or data yet, is archived, or is gone; otherwise too little signal.
+const LIMITED_REASONS = {
+  placeholder_repository: "limited signals: the repository has no code or data yet",
+  repository_archived: "limited signals: the repository is archived",
+  repository_unavailable: "limited signals: the repository is no longer available",
+  default: "limited signals: not enough fresh durable signal to rank",
+};
+
+// The first three institutions behind the release's paper (#1120). OpenAlex's
+// linked names are shown as they are; a paper OpenAlex has not indexed yet
+// shows its own printed affiliations, labelled as such.
+function latestReleaseInstitutions(entry) {
+  const names = (entry.institutions || []).filter(Boolean).slice(0, 3);
+  if (!names.length) return null;
+  const fromPaper = entry.institutions_basis === "arxiv_html_affiliations";
+  return element("small", {
+    className: "latest-release-institutions",
+    text: fromPaper ? `${names.join(" · ")} (${t("as written in the paper")})` : names.join(" · "),
+    attrs: { title: fromPaper ? t("as written in the paper") : t("Institutions linked by OpenAlex") },
+  });
+}
+
+// Institutions by the number of benchmark papers that list them (#1120): a
+// count a reader can check against OpenAlex, not a grade.
+function renderInstitutionRanking() {
+  const section = byId("institution-ranking");
+  const host = byId("institution-ranking-list");
+  if (!section || !host) return;
+  const ranking = state.data?.institution_ranking;
+  const entries = ranking?.entries || [];
+  section.hidden = !entries.length || state.lmode === "adoption";
+  if (!entries.length) {
+    replaceChildren(host, []);
+    return;
+  }
+  const max = Math.max(...entries.map((entry) => Number(entry.benchmark_count) || 0), 1);
+  replaceChildren(
+    host,
+    entries.map((entry) =>
+      element("li", { className: "leaderboard-top-row" }, [
+        element("span", { className: "leaderboard-top-rank", text: String(entry.rank).padStart(2, "0") }),
+        element("span", { className: "leaderboard-top-name", text: entry.name }),
+        element("span", { className: "leaderboard-top-bar" }, [
+          element("span", {
+            className: "leaderboard-top-bar-fill",
+            attrs: { style: `width:${((Number(entry.benchmark_count) / max) * 100).toFixed(1)}%` },
+          }),
+        ]),
+        element("span", {
+          className: "leaderboard-top-count",
+          text: t("{count} papers", { count: entry.benchmark_count }),
+        }),
+      ]),
+    ),
   );
+  const note = byId("institution-ranking-note");
+  if (note) {
+    note.textContent = t(
+      "Institutions ranked by how many benchmark papers in the corpus list them, from OpenAlex's linked institutions for {papers} arXiv papers. A count of papers, not a grade.",
+      { papers: Number(ranking.paper_count || 0).toLocaleString() },
+    );
+  }
 }
 
 // One row per release: the rank line, and behind it every input the rank was
@@ -10349,6 +10806,7 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
         ]),
     element("span", { className: "leaderboard-top-name" }, [
       element("span", { text: entry.name }),
+      latestReleaseInstitutions(entry),
       entry.release_date
         ? element("small", {
             className: "latest-release-date",
@@ -10380,13 +10838,22 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
   const signals = element(
     "dl",
     { className: "latest-release-signals" },
-    LATEST_SIGNALS.map(({ key, label }) => {
+    latestSignalsFor([entry]).map(({ key, label }) => {
       const component = entry.components?.[key] || {};
       const url = safeHttpUrl(component.source_url);
       return element("div", { className: "latest-release-signal" }, [
         element("dt", { text: t(label) }),
         element("dd", {}, [
-          element("span", { text: latestSignalText(component) }),
+          element("span", {
+            // The affiliation input is an institution and its paper count
+            // (#1120), not a counter: name both so the reader can check them.
+            text:
+              key === "affiliation" && component.institution
+                ? `${component.institution} · ${t("{count} papers", {
+                    count: Number(component.value).toLocaleString(),
+                  })}`
+                : latestSignalText(component),
+          }),
           element("small", {
             className: "latest-release-normalized",
             text: `${t("normalized")} ${latestNormalizedText(component)}`,
@@ -10408,10 +10875,28 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
       ]);
     }),
   );
+  // Forks are a displayed counter only (#659): the count reaches the row
+  // next to the stars, with the same status wording, but it is not a score
+  // component, so it carries no normalized contribution or weight.
+  const forks = entry.forks || {};
+  const forksUrl = safeHttpUrl(forks.source_url);
+  const forksLine =
+    (forks.value === null || forks.value === undefined) && forks.status !== "unavailable"
+      ? null
+      : element("p", { className: "latest-release-forks" }, [
+          element("span", { text: `${t("GitHub forks")}: ${latestSignalText(forks)}` }),
+          forksUrl
+            ? element("a", {
+                className: "latest-release-source",
+                text: t("source ↗"),
+                attrs: { href: forksUrl, target: "_blank", rel: "noopener noreferrer" },
+              })
+            : null,
+        ]);
   const meta = [
     t("Coverage {coverage}", { coverage: Number(entry.coverage || 0).toFixed(2) }),
     confidence ? `${t("confidence")} ${t(confidence)}` : "",
-    ranked ? "" : t("limited signals: not enough fresh durable signal to rank"),
+    ranked ? "" : t(LIMITED_REASONS[entry.limited_reason] || LIMITED_REASONS.default),
   ]
     .filter(Boolean)
     .join(" · ");
@@ -10422,8 +10907,14 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
     }, [
       summary,
       element("div", { className: "latest-release-body" }, [
-        entry.purpose ? element("p", { className: "latest-release-purpose", text: entry.purpose }) : null,
+        entry.purpose
+          ? element("p", { className: "latest-release-purpose", text: entry.purpose })
+          : element("p", {
+              className: "latest-release-purpose latest-release-purpose-empty",
+              text: t("No summary available."),
+            }),
         signals,
+        forksLine,
         element("p", { className: "latest-release-meta", text: meta }),
       ]),
     ]),
@@ -10431,6 +10922,27 @@ function latestReleaseRow(entry, maxScore, open = new Set()) {
 }
 
 function renderLatestReleases() {
+  renderInstitutionRanking();
+  // attention-affiliation-v2 is no longer attention alone (#1120).
+  const scoreHeader = document.querySelector("#latest-releases .leaderboard-top-columns-count");
+  const method = String(latestReleasesPayload()?.method_version || "");
+  const combined = method.includes("affiliation");
+  // The header, deck and legend describe the method the payload carries.
+  [
+    [scoreHeader, "Attention score", "Score", "Score"],
+    [document.querySelector("#latest-about .latest-releases-deck"), "latest.deck", DECK_V2, DECK_V2],
+    [document.querySelector("#latest-about .latest-releases-legend"), "latest.legend", LEGEND_V2, LEGEND_V2],
+  ].forEach(([node, v1Key, v2Key, v2English]) => {
+    if (!node) return;
+    // applyStaticI18n caches the HTML's English in data-i18n-en; keep the v1
+    // copy so a v1 payload still reads as it always did.
+    if (node.dataset.i18nV1 === undefined) node.dataset.i18nV1 = node.dataset.i18nEn ?? node.textContent;
+    const key = combined ? v2Key : v1Key;
+    const english = combined ? v2English : node.dataset.i18nV1;
+    node.dataset.i18n = key;
+    node.dataset.i18nEn = english;
+    node.textContent = I18N[getLang()]?.[key] ?? english;
+  });
   const host = byId("latest-releases-list");
   if (!host) return;
   const payload = latestReleasesPayload();
@@ -10595,6 +11107,9 @@ function syncLeaderboardMode() {
   const adoption = byId("leaderboard-adoption");
   if (latestSection) latestSection.hidden = !latest;
   if (adoption) adoption.hidden = latest;
+  // Top institutions belongs to the Latest releases mode (#1120).
+  const institutions = byId("institution-ranking");
+  if (institutions && !latest) institutions.hidden = true;
   document.querySelectorAll("[data-lmode]").forEach((control) => {
     if (control.hasAttribute("aria-pressed")) {
       control.setAttribute("aria-pressed", String(control.dataset.lmode === state.lmode));
@@ -11290,11 +11805,18 @@ function itemDay(item, day) {
 }
 
 function radarShareButton(item, day, title, image, pageUrl = "") {
-  const button = element("button", {
-    className: "share-link radar-share",
-    text: t("Share card"),
-    attrs: { type: "button", "aria-label": t("Share {name} as a card", { name: title }) },
-  });
+  const button = element(
+    "button",
+    {
+      className: "share-link share-icon radar-share",
+      attrs: {
+        type: "button",
+        "aria-label": t("Share {name} as a card", { name: title }),
+        title: t("Share card"),
+      },
+    },
+    [shareIcon()],
+  );
   button.addEventListener("click", async (event) => {
     // An attention card is a <details>; pressing Share must not also toggle it.
     event.preventDefault();
@@ -11306,6 +11828,7 @@ function radarShareButton(item, day, title, image, pageUrl = "") {
       title,
       image,
       pageUrl: pageUrl || safeHttpUrl(item.url) || window.location.href,
+      card: shareCardFor(day, item.url) || item.share_card || item.catalog_card || null,
       t,
     });
   });
@@ -11324,9 +11847,25 @@ function catalogCardFor(item) {
     : { image: "", page: "" };
 }
 
+// The name is what a reader clicks (issue #1097). Before, only the small
+// source chip was a link, so the biggest words on the card led nowhere. A
+// catalog match opens its benchmark page on this site; anything else opens
+// the source, like the chip. No usable URL leaves the name as plain text.
+function radarTitleLink(name, catalogPage, sourceHref) {
+  if (catalogPage) return element("a", { text: name, attrs: { href: catalogPage } });
+  if (sourceHref) {
+    return element("a", {
+      text: name,
+      attrs: { href: sourceHref, target: "_blank", rel: "noopener noreferrer" },
+    });
+  }
+  return document.createTextNode(name);
+}
+
 function evidenceCard(item, day) {
   const ownDay = itemDay(item, day);
-  const shareCard = shareCardFor(ownDay, item.url);
+  const shareCard = shareCardFor(ownDay, item.url)
+    || (safeHttpUrl(item.share_image) ? { image: safeHttpUrl(item.share_image) } : null);
   const catalog = catalogCardFor(item);
   const fullTitle = displayTitle(item);
   const { name, subtitle } = splitBenchmarkTitle(fullTitle);
@@ -11347,11 +11886,14 @@ function evidenceCard(item, day) {
             ...(item.watchlist ? [element("span", { text: `★ ${item.watchlist}` })] : []),
           ])
         : null,
-      element("h3", {
-        className: "radar-title",
-        text: name,
-        attrs: name !== item.title ? { title: item.title } : {},
-      }),
+      element(
+        "h3",
+        {
+          className: "radar-title",
+          attrs: name !== item.title ? { title: item.title } : {},
+        },
+        [radarTitleLink(name, catalog.page, sourceHref)],
+      ),
       subtitle ? element("p", { className: "radar-subtitle", text: subtitle }) : null,
       recordFacts(item, { quietUnreported: true }),
       ...(item.watchlist && item.watchlist_note
@@ -11362,11 +11904,14 @@ function evidenceCard(item, day) {
         text: item.summary || t("No description published at the source."),
       }),
       artifactLinks(item),
+    ]),
+    // Share sits above the score in the right column, so it adds no line.
+    element("div", { className: "radar-aside" }, [
       shareCard
         ? radarShareButton(item, ownDay, fullTitle, shareCard.image, catalog.page)
         : radarShareButton(item, ownDay, fullTitle, catalog.image, catalog.page),
+      scoreBlock(item),
     ]),
-    scoreBlock(item),
   ]);
 }
 
@@ -11520,7 +12065,7 @@ function openContact(updateUrl = true) {
       }),
       element("a", {
         className: "primary-link",
-        text: t("Download"),
+        text: t("Hugging Face Data"),
         attrs: {
           href: "https://huggingface.co/datasets/ktwu01/benchmark-radar",
           target: "_blank",
@@ -11918,15 +12463,11 @@ function bindEvents() {
         state.todayDate = state.data.latest_date || "";
       }
       setView(view);
-      if (view === "today") renderToday();
-      if (view === "leaderboard") renderLeaderboard();
-      if (view === "saturation") renderSaturation();
-      if (view === "library") renderLibrary();
-      if (view === "models") renderModels();
-      if (view === "trends") renderTrends();
-      if (view === "map") renderTrendMap();
       try {
-        if (view === "trends") await ensureTrendsData();
+        if (view === "today" && state.todayDate === "all" && !state.fullDataLoaded && !state.searchData) {
+          await ensureSearchData();
+        }
+        else if (view === "trends") await ensureTrendsData();
         // A trends response can supersede an in-flight /data/radar.json fetch
         // while the relationship explorer is open. The <details> element never
         // closed, so no toggle event fires again and the explorer would stay
@@ -11937,10 +12478,22 @@ function bindEvents() {
       } catch (error) {
         console.error(error);
         if (navigationSequence !== viewNavigationSequence) return;
+        if (view === "today" && state.todayDate === "all" && !state.fullDataLoaded && !state.searchData) {
+          clearTodayResultsForLoadError();
+          const notice = byId("today-load-error");
+          notice.hidden = false;
+          notice.textContent = t("Search data could not be loaded. Refresh to retry.");
+          return;
+        }
         window.location.assign(anchor?.href || VIEW_PATHS[view] || "/");
         return;
       }
       if (navigationSequence !== viewNavigationSequence) return;
+      if (view === "today") renderToday();
+      if (view === "leaderboard") renderLeaderboard();
+      if (view === "saturation") renderSaturation();
+      if (view === "library") renderLibrary();
+      if (view === "models") renderModels();
       if (view === "trends") renderTrends();
       if (view === "map") renderTrendMap();
     });
@@ -12027,6 +12580,15 @@ function bindEvents() {
     renderBenchmarkSkyline();
     writeUrl();
   });
+  // A date range is a Frontier filter (#570): it narrows the figure, is
+  // carried in the shared address, and clears when the field is emptied.
+  for (const [inputId, stateKey] of [["benchmark-skyline-date-from", "ldateFrom"], ["benchmark-skyline-date-to", "ldateTo"]]) {
+    byId(inputId).addEventListener("change", (event) => {
+      state[stateKey] = urlDate(event.target.value);
+      renderBenchmarkSkyline();
+      writeUrl();
+    });
+  }
   byId("benchmark-search-more").addEventListener("click", () => {
     state.benchmarkVisibleLimit += BENCHMARK_SEARCH_LIMIT;
     renderBenchmarkSearch();
@@ -12039,6 +12601,9 @@ function bindEvents() {
       select.dispatchEvent(new Event("change"));
     });
   });
+  bindInfoTip(byId("today-sort-info"), byId("today-sort-toggle"));
+  bindInfoTip(byId("models-info"), byId("models-info-toggle"));
+  bindInfoTip(byId("latest-about"), byId("latest-about-toggle"));
   document.querySelectorAll("[data-today-sort]").forEach((button) => {
     button.addEventListener("click", () => {
       state.todaySort = button.dataset.todaySort;
@@ -12143,9 +12708,24 @@ function bindEvents() {
       viewNavigationSequence += 1;
       state.todayDate = "all";
       state.todayPage = 1;
-      ensureFullData()
-        .then(() => renderToday())
-        .catch((error) => console.error(error));
+      const searchNavigationSequence = viewNavigationSequence;
+      ensureSearchData()
+        .then(() => {
+          if (
+            viewNavigationSequence !== searchNavigationSequence
+            || state.todayDate !== "all"
+          ) return;
+          renderToday();
+        })
+        .catch((error) => {
+          console.error(error);
+          if (
+            viewNavigationSequence !== searchNavigationSequence
+            || state.todayDate !== "all"
+          ) return;
+          byId("today-load-error").hidden = false;
+          byId("today-load-error").textContent = t("Search data could not be loaded. Refresh to retry.");
+        });
       return;
     }
     scheduleTodayRender();
@@ -12167,7 +12747,7 @@ function bindEvents() {
     state.organization = "";
     state.event = "";
     try {
-      await ensureFullData();
+      await ensureSearchData();
     } catch (error) {
       console.error(error);
       return;
@@ -12435,10 +13015,19 @@ function stateNeedsFullData() {
     && !latest.windows?.[state.lwindow]
   ) return true;
   return state.view === "today" && Boolean(
-    state.todayDate === "all" ||
     (state.todayDate
       && state.todayDate !== state.data?.latest_date
+      && state.todayDate !== "all"
       && !TODAY_WINDOWS[state.todayDate])
+  );
+}
+
+function stateNeedsSearchData() {
+  return Boolean(
+    state.view === "today"
+    && state.todayDate === "all"
+    && !state.fullDataLoaded
+    && !state.searchData
   );
 }
 
@@ -12459,9 +13048,11 @@ async function ensureWindowData(cache = "default") {
   if (!state.windowPromises[key]) {
     state.windowPromises[key] = (async () => {
       try {
-        const response = await fetch(`/data/radar-window-${key}.json`, { cache });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
+        const data = await trackLoad("Loading this window…", ["today"], async () => {
+          const response = await fetch(`/data/radar-window-${key}.json`, { cache });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.json();
+        });
         // A window file from another build than the page's own would list a
         // different range. Use the full archive rather than a mixed view.
         if (
@@ -12491,10 +13082,27 @@ function stateNeedsTrendsData() {
   return state.view === "trends";
 }
 
+// What each dashboard payload is called while it downloads, and which views
+// wait on it. The full archive is the large one: a reader's first homepage
+// search or an All-dates pick waits on it (issue #1128).
+const DASHBOARD_LOADS = {
+  "/data/radar.json": ["Loading the full archive…", ["today", "map", "leaderboard", "trends"]],
+  "/data/radar-search.json": ["Loading search results…", ["today"]],
+  "/data/radar-trends.json": ["Loading trends…", ["trends"]],
+  "/data/radar-bootstrap.json": ["Loading the latest scan…", null],
+};
+
+function fetchDashboardJson(path, cache) {
+  const [label, views] = DASHBOARD_LOADS[path] || ["Loading…", null];
+  return trackLoad(label, views, async () => {
+    const response = await fetch(path, { cache });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return response.json();
+  });
+}
+
 async function fetchDashboardPayload(path, cache, requestSequence, fullPayload) {
-  const response = await fetch(path, { cache });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  const data = await response.json();
+  const data = await fetchDashboardJson(path, cache);
   if (!compatibleDashboard(data)) throw new Error("No compatible snapshots");
   const applied = applyDashboardData(data, requestSequence, fullPayload);
   if (!applied && fullPayload && !state.fullDataLoaded) {
@@ -12539,8 +13147,36 @@ async function ensureFullData(cache = "default") {
   }
 }
 
+async function ensureSearchData(cache = "default") {
+  if (state.fullDataLoaded || state.searchData) return state.searchData;
+  if (state.searchDataPromise) return state.searchDataPromise;
+  state.searchDataPromise = (async () => {
+    const data = await fetchDashboardJson("/data/radar-search.json", cache);
+    if (
+      data?.schema_version !== 1
+      || data.generated_at !== state.data?.generated_at
+      || !Array.isArray(data.observations)
+    ) {
+      throw new Error("No compatible search index");
+    }
+    byId("today-load-error").hidden = true;
+    // The full archive may have landed while this request was in flight; it
+    // already answers All dates, so keeping the index too would hold both.
+    if (state.fullDataLoaded) return null;
+    state.searchData = data;
+    state.observations = null;
+    return data;
+  })();
+  try {
+    return await state.searchDataPromise;
+  } finally {
+    state.searchDataPromise = null;
+  }
+}
+
 async function ensureDataForState() {
   if (stateNeedsFullData()) await ensureFullData();
+  else if (stateNeedsSearchData()) await ensureSearchData();
   else if (stateNeedsWindowData()) await ensureWindowData();
   else if (stateNeedsTrendsData()) await ensureTrendsData();
 }
@@ -12559,13 +13195,33 @@ async function refreshData() {
       : needsTrendsPayload
         ? "/data/radar-trends.json"
         : "/data/radar-bootstrap.json";
-    const response = await fetch(path, { cache: "reload" });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
+    const [label, views] = DASHBOARD_LOADS[path];
+    const data = await trackLoad(label, views, async () => {
+      const response = await fetch(path, { cache: "reload" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    });
     if (!compatibleDashboard(data)) throw new Error("No compatible snapshots");
     if (!applyDashboardData(data, requestSequence, path === "/data/radar.json")) return;
+    if (state.searchData && state.searchData.generated_at !== state.data.generated_at) {
+      state.searchData = null;
+      state.observations = null;
+    }
     if (!validTodayDate()) {
       state.todayDate = state.data.latest_date;
+    }
+    if (state.view === "today" && state.todayDate === "all" && !state.fullDataLoaded) {
+      const previousSearchData = state.searchData;
+      const previousObservations = state.observations;
+      const previousObservationsSource = state.observationsSource;
+      state.searchData = null;
+      state.observations = null;
+      await ensureSearchData("reload").catch((error) => {
+        state.searchData = previousSearchData;
+        state.observations = previousObservations;
+        state.observationsSource = previousObservationsSource;
+        throw error;
+      });
     }
     // Re-evaluate against the payload just received. This is normally a no-op,
     // but guarantees the error is not retired if a future bootstrap shape lacks
@@ -12643,9 +13299,11 @@ async function initialize() {
     // leaderboard. Trends, Explore, All dates, and historical permalinks lazily
     // upgrade to the full public corpus only when the reader asks for them.
     const requestSequence = ++nextDashboardRequestSequence;
-    const response = await fetch("/data/radar-bootstrap.json");
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
+    const data = await trackLoad("Loading the latest scan…", null, async () => {
+      const response = await fetch("/data/radar-bootstrap.json");
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    });
     if (!compatibleDashboard(data)) throw new Error("No compatible snapshots");
     if (!applyDashboardData(data, requestSequence, false)) return;
     await ensureDataForState();
@@ -12685,6 +13343,7 @@ async function initialize() {
       initializationWasSuperseded
       && compatibleDashboard(state.data)
       && !stateNeedsFullData()
+      && !stateNeedsSearchData()
       && !stateNeedsWindowData()
     ) {
       syncLeaderboardNav();

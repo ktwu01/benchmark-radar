@@ -110,6 +110,11 @@ models, adding counts, averaging scores or assuming matching test protocols.
 
 ## Put the figure first; collect explanations in one information note
 
+Show action-specific details only after the reader chooses that action.
+Keep X caption-length, Premium, and image-paste guidance hidden until the
+reader clicks Post on X. These details must not compete with benchmark content
+or appear by default in the share preview.
+
 Place **all legends below the main figure** they explain, including domain
 colors, organization colors and mark shapes. Keep only the keys needed to read
 the visible marks expanded. Axis names, units, ticks and essential missing-data
@@ -189,6 +194,32 @@ Before adding or tightening such a rule, run it against every record in the
 committed snapshots and list each record it would remove. If one of them is a
 benchmark, a benchmark paper, or an evaluation tool, reject the rule or narrow
 it. Say which inputs the test could not cover. #1011 is an example.
+
+## No quality judgement is not no judgement
+
+Benchmark Radar does not grade a benchmark's merit. It never says a benchmark
+is good or bad, and it leaves comparing scores to the people who use the data.
+
+That is not permission to hand readers hundreds of unsorted releases a day. A
+reader who opens the Leaderboard needs a short, defensible list. Benchmark
+Radar therefore triages:
+
+- **Rank by disclosed signals.** Attention (stars, upvotes, downloads) and the
+  institutions behind the paper are signals a reader can check. Print every
+  input, its weight and its source next to the rank, so the order can be
+  disputed, not just trusted.
+- **Demote placeholders.** A repository that holds only a README, a licence or
+  images has announced a benchmark, not shipped one. Keep it listed and
+  unranked, with the reason, below the releases that ship code or data.
+- **Demote, never delete.** Triage moves a record down or flags it. It does
+  not remove it from the corpus, search or exports (see the rule above).
+- **Missing stays unknown.** A release with no institution on file gets no
+  affiliation credit; it is not given an average and its weight is not
+  redistributed.
+
+The harm this prevents: an unranked firehose pushes the sorting onto every
+reader, and an attention-only ranking lets an empty repository with a viral
+announcement outrank a benchmark that ships its data.
 
 ## Calculate only what the evidence supports
 

@@ -136,6 +136,55 @@ def _text(record: dict[str, Any], key: str) -> str | None:
     return None
 
 
+# The same role labels the dynamic site prints (`publisherRoleLabel` in
+# site/assets/app.js). OpenCompass `publishOrg` names whoever published the hub
+# card, which is frequently not the benchmark's creator, so a hub publisher is
+# never written as "published by".
+_PUBLISHER_ROLE_LABELS = {
+    "hub_publisher": "published the hub card",
+    "paper_org": "organization behind the paper",
+    "maintainer": "maintainer",
+}
+
+
+def _publisher(record: dict[str, Any]) -> tuple[str, str | None] | None:
+    """The publisher's name and role, whether stored as an object or a string.
+
+    Shards store the publisher as {"name", "role", "locator"}; a plain string
+    is accepted too so a hand-built record still says who published it.
+    """
+    raw_publisher = record.get("publisher")
+    if isinstance(raw_publisher, dict):
+        name = _text(raw_publisher, "name")
+        role = raw_publisher.get("role")
+        return (name, role if isinstance(role, str) else None) if name else None
+    name = _text(record, "publisher")
+    return (name, None) if name else None
+
+
+def _publisher_name(record: dict[str, Any]) -> str | None:
+    publisher = _publisher(record)
+    return publisher[0] if publisher else None
+
+
+def _creator_publisher(record: dict[str, Any]) -> str | None:
+    """The publisher only when it can be read as who published the benchmark."""
+    publisher = _publisher(record)
+    if not publisher or publisher[1] == "hub_publisher":
+        return None
+    return publisher[0]
+
+
+def _publisher_fact(record: dict[str, Any]) -> str | None:
+    """`name (role)`, as the dynamic site shows it, so attribution never overstates."""
+    publisher = _publisher(record)
+    if not publisher:
+        return None
+    name, role = publisher
+    label = _PUBLISHER_ROLE_LABELS.get(role, role) if role else None
+    return f"{name} ({label})" if label else name
+
+
 @dataclass(frozen=True)
 class CatalogContext:
     """What one page can only know by looking at the whole catalog.
@@ -267,7 +316,7 @@ def _evidence_sentence(
 def _summary_sentence(name: str, record: dict[str, Any]) -> str:
     """A first sentence for a record that carries no description of its own."""
     categories = _category_words(record)
-    publisher = _text(record, "publisher")
+    publisher = _creator_publisher(record)
     if categories and publisher:
         return f"{name} is a {categories} benchmark published by {publisher}."
     if categories:
@@ -315,17 +364,45 @@ def _canonical(slug: str) -> str:
     return f"{SITE_URL}/benchmarks/{slug}/"
 
 
+def _saturation_index_fact(record: dict[str, Any]) -> tuple[str, str] | None:
+    """The Benchmark Saturation study's stated index, as stated (#1085).
+
+    The value and its label come from the study's own annotation in
+    ``source_metadata``; nothing here recomputes, ranks, filters, or colours
+    by it, and it is labelled as the study's value.
+    """
+    metadata = record.get("source_metadata") or {}
+    stated = metadata.get("benchmark_saturation") or {}
+    index = _text(stated, "saturation_index")
+    if not index:
+        return None
+    label = _text(stated, "saturation_index_interpreted")
+    value = f"{index} ({label})" if label else index
+    return (
+        "Saturation index (study)",
+        f"{value} — Benchmark Saturation study (arXiv:2602.16763)",
+    )
+
+
 def _facts(record: dict[str, Any]) -> list[tuple[str, str]]:
     facts: list[tuple[str, str]] = []
-    publisher = _text(record, "publisher")
+    publisher = _publisher_fact(record)
     if publisher:
         facts.append(("Publisher", publisher))
     released = _text(record, "released")
     if released:
         facts.append(("Released", released))
+    saturation = _saturation_index_fact(record)
+    if saturation:
+        facts.append(saturation)
     modality = _text(record, "modality")
     if modality:
         facts.append(("Modality", modality))
+    # OpenAlex's linked institutions for the record's own paper (#933, #1120),
+    # the first three, the same as the Library card and the release ranking.
+    institutions = [str(name) for name in record.get("institutions") or [] if str(name).strip()]
+    if institutions:
+        facts.append(("Institutions", " · ".join(institutions[:3])))
     categories = _category_words(record)
     if categories:
         facts.append(("Evaluates", categories))
@@ -386,14 +463,7 @@ def _benchmark_entity(
     same_as = [url for kind, _, url in artifacts if kind != "paper" and _http_url(url)]
     if same_as:
         entity["sameAs"] = same_as
-    # Shards store the publisher as {"name", "role", "locator"}; a plain string
-    # is accepted too so a hand-built record still says who published it.
-    raw_publisher = record.get("publisher")
-    publisher = (
-        _text(raw_publisher, "name")
-        if isinstance(raw_publisher, dict)
-        else _text(record, "publisher")
-    )
+    publisher = _publisher_name(record)
     if publisher:
         entity["publisher"] = {"@type": "Organization", "name": publisher}
     released = _text(record, "released")
@@ -853,8 +923,8 @@ def _is_calendar_date(value: str) -> bool:
     """True only for a real `YYYY-MM-DD` day.
 
     Shape alone is not enough: `2023-02-29` matches the pattern and would reach
-    the sitemap as an invalid `lastmod`. The round trip also rejects the forms
-    `date.fromisoformat` accepts but the sitemap spec does not, such as
+    structured data as an invalid `datePublished`. The round trip also rejects the forms
+    `date.fromisoformat` accepts but our date fields do not, such as
     `20230101`.
     """
     try:
@@ -863,33 +933,13 @@ def _is_calendar_date(value: str) -> bool:
         return False
 
 
-def _shard_lastmod(shard: dict[str, Any]) -> str | None:
-    """Newest date the page's own evidence carries, or None when it carries none.
-
-    A page changes when a score lands on it or when the record itself is dated,
-    not when some other benchmark's snapshot arrives. Both fields are stored as
-    plain `YYYY-MM-DD`, so the newest one sorts lexically; anything a calendar
-    rejects is dropped rather than passed through to the sitemap.
-    """
-    dates = {
-        row.get("reported_date")
-        for source in (shard.get("scores_by_source") or {}).values()
-        for row in (source or {}).get("rows") or ()
-    }
-    dates.add((shard.get("record") or {}).get("released"))
-    dated = {value for value in dates if isinstance(value, str) and _is_calendar_date(value)}
-    return max(dated) if dated else None
-
-
 def benchmark_sitemap_entries(shard_dir: Path) -> list[tuple[str, str | None]]:
-    """Benchmark page paths in stable slug order, each with its own lastmod."""
-    if not shard_dir.is_dir():
-        return []
-    entries = []
-    for path in sorted(shard_dir.glob("*.json")):
-        shard = json.loads(path.read_text(encoding="utf-8"))
-        entries.append((f"/benchmarks/{path.stem}/", _shard_lastmod(shard)))
-    return entries
+    """Benchmark paths without lastmod until page-change dates are tracked.
+
+    Release and score dates describe the evidence, not the page's last
+    significant change. A rebuild timestamp does not establish that either.
+    """
+    return [(f"/benchmarks/{slug}/", None) for slug in benchmark_slugs(shard_dir)]
 
 
 def benchmark_page_urls(shard_dir: Path) -> list[str]:

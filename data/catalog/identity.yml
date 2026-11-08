@@ -58,6 +58,24 @@ equivalent:
     reviewed_at: 2026-11-04
     note: Both are MirrorCode (Adamczewski et al., 2026).
 
+  # The registry's SWE Refactor Bench entry and the Claire import are the same
+  # benchmark: both name SWE Refactor Bench, both cite the introducing paper,
+  # arXiv:2608.23564, and both record the 2026-08-24 release of the 20
+  # whole-repository migration benchmark. Left unlinked the catalog published
+  # two SWE Refactor Bench rows whose detail shards did not name each other,
+  # and the registry row carrying the 26 Table 3 scores sat apart from the
+  # crawl's record. Siblings only, like the MirrorCode link above: neither
+  # record inherits fields or scores from the other. Single shared anchor:
+  # both records cite the introducing paper, and the reviewer supplies the
+  # second warrant.
+  - group_id: swe-refactor-bench
+    basis: reviewer_asserted
+    members: [claire-radar:2608.23564, model-reports:swe_refactor_bench]
+    anchors: [arxiv:2608.23564]
+    reviewed_by: ktwu01
+    reviewed_at: 2026-11-06
+    note: Both are SWE Refactor Bench (Hong et al., 2026).
+
   # Same instrument across the two crawls, confirmed by hand. These 21 groups
   # pair score-dense llm-stats records with identity-rich OpenCompass records.
   - group_id: gpqa

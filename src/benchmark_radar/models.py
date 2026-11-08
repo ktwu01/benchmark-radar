@@ -15,6 +15,13 @@ class RadarItem:
     url: str
     published_at: datetime
     updated_at: datetime | None = None
+    # What published_at is dated by, and the source's own value when it was
+    # replaced (#1016). Zenodo records it: "publication_date" when the
+    # uploader's value dates the record, "created" when the deposition's
+    # created time stands in because that value was in the future or
+    # unreadable (#907, #1013). Other sources leave both unset.
+    published_basis: str | None = None
+    published_source_value: str | None = None
     discovered_at: datetime | None = None
     retrieved_at: datetime | None = None
     # Digest activity drives collection without replacing publication provenance.
@@ -38,6 +45,12 @@ class RadarItem:
     # Corroborating discovery sources preserved when copies merge. The primary
     # source and unique-record counts remain independent of this provenance.
     contributing_sources: list[str] = field(default_factory=list)
+    # Metrics split by the source that reported each value, populated when
+    # copies of one artifact merge in a pass (#841). The snapshot merge
+    # replaces one source's map wholesale, so without this a later revision
+    # from the envelope source drops every other contributor's measurement
+    # it omits. Empty for unmerged records; `to_dict` omits it then.
+    metrics_by_source: dict[str, dict[str, float]] = field(default_factory=dict)
     evidence_score: float = 0.0
     relevance_score: float = 0.0
     recency_score: float = 0.0
@@ -92,6 +105,8 @@ class RadarItem:
             self.retrieved_at.astimezone(UTC).isoformat() if self.retrieved_at else None
         )
         value.pop("raw", None)
+        if not value["metrics_by_source"]:
+            value.pop("metrics_by_source")
         return value
 
 

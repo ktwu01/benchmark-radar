@@ -10,6 +10,11 @@ from pathlib import Path
 from typing import Any
 
 from . import kw_bench, rubric
+from .affiliation_rank import (
+    institution_counts,
+    institution_ranking,
+    paper_institutions,
+)
 from .app_pages import write_app_pages
 from .attention import fetch_attention_feeds
 from .benchmark_attention import merge_benchmark_attention
@@ -34,6 +39,7 @@ from .release_leaderboard import (
     canonical_metric_key,
     is_exact_attention_source_url,
 )
+from .release_signals import ReleaseSignals, load_release_signals
 from .rubric import (
     SCORING_VERSION,
     legacy_rubric_reference,
@@ -115,10 +121,18 @@ def snapshot_for_run(run: RadarRun) -> dict[str, Any]:
     }
 
 
-def _write_json(path: Path, value: dict[str, Any]) -> None:
+def _write_json(path: Path, value: dict[str, Any], *, indent: int | None = 2) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    separators = (",", ":") if indent is None else None
     path.write_text(
-        json.dumps(value, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
+        json.dumps(
+            value,
+            indent=indent,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=separators,
+        )
+        + "\n",
         encoding="utf-8",
     )
 
@@ -166,6 +180,20 @@ def _validate_evidence_items(items: Any, *, source: str) -> None:
             raise SnapshotError(
                 f"{source}: evidence item {index} contributing_sources must be names"
             )
+        if "metrics_by_source" in item:
+            by_source = item["metrics_by_source"]
+            if not isinstance(by_source, dict) or any(
+                not isinstance(metrics, dict)
+                or any(
+                    isinstance(value, bool) or not isinstance(value, (int, float))
+                    for value in metrics.values()
+                )
+                for metrics in by_source.values()
+            ):
+                raise SnapshotError(
+                    f"{source}: evidence item {index} metrics_by_source must map "
+                    "sources to numeric metrics"
+                )
         if "recommended" in item and not isinstance(item["recommended"], bool):
             raise SnapshotError(f"{source}: evidence item {index} recommended must be a boolean")
         item_missing = sorted(item_fields - item.keys())
@@ -661,6 +689,36 @@ def _evidence_rank(record):
     )
 
 
+def _metrics_by_source(record: dict[str, Any]) -> dict[str, dict[str, float]]:
+    """This record's metrics, split by the source that reported each value.
+
+    A merged record already carries its per-source map; a plain record's
+    metrics all belong to its own source. The maps are copied, so merging
+    never mutates a record another snapshot still holds.
+    """
+    stored = record.get("metrics_by_source")
+    if isinstance(stored, dict) and stored:
+        return {str(source): dict(metrics or {}) for source, metrics in sorted(stored.items())}
+    return {record["source"]: dict(record.get("metrics") or {})}
+
+
+def _combined_metrics(by_source: dict[str, dict[str, float]]) -> dict[str, float]:
+    """One value per metric, combined from the contributing sources (#841).
+
+    Within a source the newer record already replaced that source's map, so
+    the only merge left is across sources, where the combined value is the
+    highest any source reported — the rule the old cross-source branch used.
+    Max is commutative, so the result no longer depends on arrival order.
+    """
+    combined: dict[str, float] = {}
+    for source in sorted(by_source):
+        for metric in sorted(by_source[source]):
+            value = by_source[source][metric]
+            if metric not in combined or value > combined[metric]:
+                combined[metric] = value
+    return combined
+
+
 def merge_snapshots(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[str, Any]:
     """Union two passes over the same UTC day into one snapshot.
 
@@ -681,6 +739,9 @@ def merge_snapshots(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[
     (newer) record wins within a source. Cross-source copies compare artifact
     activity and prefer primary release evidence when that activity is tied.
     Supplementary evidence is merged before affected scores are recomputed.
+    Metrics are stored per contributing source and combined when the record is
+    displayed or scored (#841), so a newer revision from one source cannot
+    overwrite another source's measurement.
     """
     # A delayed retry can arrive after a newer pass. All "incoming wins"
     # decisions below must mean chronologically newer, not merely whichever
@@ -736,21 +797,47 @@ def merge_snapshots(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[
                 if cross_source and _evidence_rank(previous) > _evidence_rank(item)
                 else (item, previous)
             )
+            # Metrics are stored per contributing source and combined when the
+            # record is displayed or scored (#841). A flat dict cannot tell
+            # which source supplied a value, so a newer same-source revision
+            # overwrote another source's measurement: a digest's citations of
+            # 5000 was lost to a later arXiv revision reporting 12. Within a
+            # source the newer record replaces that source's map; across
+            # sources the combined value is the highest reported. This removes
+            # the cross_source special case the old loop below used.
+            by_source = _metrics_by_source(previous)
+            incoming_by_source = _metrics_by_source(item)
+            if not previous.get("metrics_by_source") and previous.get("contributing_sources"):
+                # Legacy merged record, written before in-pass attribution
+                # existed: its flat metrics mix its contributors, so
+                # replacing the envelope source's map would drop the other
+                # contributors' measurements. Union with the incoming
+                # revision instead; the next pass that sees the other source
+                # again re-attributes properly.
+                for source, metrics in incoming_by_source.items():
+                    combined_source = dict(by_source.get(source) or {})
+                    for metric, value in metrics.items():
+                        if metric not in combined_source or value > combined_source[metric]:
+                            combined_source[metric] = value
+                    by_source[source] = combined_source
+            else:
+                # Within a source the newer record replaces that source's
+                # map; across sources the maps union. An incoming merged
+                # record carries its own map, so update with it rather than
+                # attributing its flat combined metrics to its envelope.
+                by_source.update(incoming_by_source)
+            by_source = dict(sorted(by_source.items()))
             merged = {
                 **selected,
                 "source_tags": item.get("source_tags") or [],
                 "contributing_sources": item["contributing_sources"],
-                "metrics": dict(selected.get("metrics") or {}),
+                "metrics": _combined_metrics(by_source),
+                "metrics_by_source": by_source,
             }
             for field in ("authors", "organizations", "artifact_urls"):
                 merged[field] = sorted(set(selected.get(field) or []) | set(other.get(field) or []))
             if other["url"] != selected["url"] and other["url"] not in merged["artifact_urls"]:
                 merged["artifact_urls"].append(other["url"])
-            for metric, measurement in (other.get("metrics") or {}).items():
-                if metric not in merged["metrics"]:
-                    merged["metrics"][metric] = measurement
-                elif cross_source:
-                    merged["metrics"][metric] = max(measurement, merged["metrics"][metric])
             merged["rationale"] = list(selected.get("rationale") or [])
             for source in merged["contributing_sources"]:
                 note = f"Also found via {source}"
@@ -1144,6 +1231,7 @@ def dashboard_data(
     registry_path: Path | None = None,
     scores_path: Path | None = None,
     kw_bench_store_path: Path | None = None,
+    release_signals: ReleaseSignals | None = None,
 ) -> dict[str, Any]:
     days: list[dict[str, Any]] = []
     categories: set[str] = set()
@@ -1276,6 +1364,8 @@ def dashboard_data(
     last_successful = next(
         (day for day in reversed(days) if day["required_coverage_complete"]), None
     )
+    papers = paper_institutions(release_signals) if release_signals else {}
+    counts = institution_counts(papers)
     return {
         "schema_version": SCHEMA_VERSION,
         "latest_date": days[-1]["date"] if days else None,
@@ -1316,6 +1406,14 @@ def dashboard_data(
         "latest_releases_leaderboard": build_latest_releases_leaderboard(
             snapshots,
             registry_path=registry_path,
+            signals=release_signals,
+            institution_counts=counts if release_signals else None,
+        ),
+        # Issue #1120: institutions by the number of benchmark papers they
+        # appear on, OpenAlex names only. Triage by a disclosed count, not a
+        # grade of any institution.
+        "institution_ranking": (
+            institution_ranking(counts, paper_count=len(papers)) if release_signals else None
         ),
         # Curated and versioned in the repository rather than collected daily:
         # they answer "which benchmarks do vendors report", "how have the
@@ -1397,8 +1495,8 @@ def _share_images(share: dict[str, Any] | None) -> dict[str, Any]:
     """Public image URLs for a snapshot's ``share`` block, keyed by card URL.
 
     The images themselves are rendered by the daily pipeline from this block,
-    so the file names follow the card order. The card text stays in the
-    snapshot; the dashboard only needs to know which item has which image.
+    so the file names follow the card order. Keep the same creator and blurb
+    fields beside each image so X captions do not lose the names in the PNG.
     """
     # Imported here because daily_top imports this module.
     from .daily_top import card_image_name, daily_image_url
@@ -1413,6 +1511,9 @@ def _share_images(share: dict[str, Any] | None) -> dict[str, Any]:
             {
                 "url": str(card["url"]),
                 "title": str(card.get("title") or ""),
+                "authors": list(card.get("authors") or []),
+                "affiliations": list(card.get("affiliations") or []),
+                "blurb": str(card.get("blurb") or ""),
                 "image": daily_image_url(day, card_image_name(index)),
             }
             for index, card in enumerate(cards, start=1)
@@ -1453,6 +1554,8 @@ def dashboard_bootstrap(dashboard: dict[str, Any]) -> dict[str, Any]:
                 def_win: lrl.get("windows", {}).get(def_win, {}),
             },
         }
+    if dashboard.get("institution_ranking"):
+        bootstrap["institution_ranking"] = dashboard["institution_ranking"]
     return bootstrap
 
 
@@ -1598,6 +1701,133 @@ def dashboard_window(dashboard: dict[str, Any], window_days: int) -> dict[str, A
     }
 
 
+def dashboard_search_index(dashboard: dict[str, Any]) -> dict[str, Any]:
+    """Return the compact latest-sighting payload used by archive-wide search."""
+    latest: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for day in dashboard.get("days") or []:
+        selection = day.get("selection") or {}
+        entries = [(item, "evidence") for item in day.get("evidence_items") or []] + [
+            (item, "attention") for item in (day.get("attention") or {}).get("observations") or []
+        ]
+        for item, kind in entries:
+            observation = {
+                **item,
+                "recommendation_score": selection.get("recommendation_score"),
+                "minimum_score": selection.get("minimum_score"),
+                "snapshot_date": day["date"],
+                "snapshot_generated_at": day.get("generated_at"),
+                "observation_kind": kind,
+            }
+            if kind == "attention":
+                observation["artifact_urls"] = (
+                    [item["primary_artifact_url"]] if item.get("primary_artifact_url") else []
+                )
+                observation["organizations"] = [item["producer"]] if item.get("producer") else []
+                key = ("attention", str(item.get("observation_id") or item.get("source_id")))
+            else:
+                share_card = next(
+                    (
+                        card
+                        for card in (day.get("share") or {}).get("cards") or []
+                        if card.get("url") == item.get("url")
+                    ),
+                    None,
+                )
+                if share_card and share_card.get("image"):
+                    observation["share_image"] = share_card["image"]
+                    observation["share_card"] = share_card
+                threshold = selection.get("recommendation_score")
+                if observation.get("recommended") is None:
+                    observation["recommended"] = threshold is not None and float(
+                        item.get("total_score") or 0
+                    ) >= float(threshold)
+                key = ("evidence", f"{item.get('source')}\0{item.get('source_id')}")
+            filter_key = json.dumps(
+                [
+                    key,
+                    observation.get("event_kind"),
+                    observation.get("categories"),
+                    observation.get("organizations"),
+                    observation.get("producer"),
+                    observation.get("title"),
+                    observation.get("summary"),
+                ],
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+            previous = latest.get((key[0], filter_key)) or []
+            previous_date = previous[0]["snapshot_date"] if previous else ""
+            if observation["snapshot_date"] > previous_date:
+                latest[(key[0], filter_key)] = [observation]
+            elif observation["snapshot_date"] == previous_date:
+                latest.setdefault((key[0], filter_key), []).append(observation)
+    searchable_fields = {
+        "source",
+        "source_id",
+        "observation_id",
+        "producer",
+        "title",
+        "summary",
+        "url",
+        "categories",
+        "organizations",
+        "event_kind",
+        "published_at",
+        "updated_at",
+        "discovered_at",
+        "observed_at",
+        "metrics",
+        "total_score",
+        "recency_score",
+        "score_version",
+        "score_max",
+        "relevance_score",
+        "evidence_score",
+        "adoption_score",
+        "snapshot_date",
+        "snapshot_generated_at",
+        "observation_kind",
+        "primary_artifact_url",
+        "share_image",
+        "share_card",
+        "authors",
+        "rationale",
+        "watchlist",
+        # Read by the result cards, so an index-backed hit must render the
+        # same as a radar.json one: artifact links, the catalog card Share
+        # uses, the recommended badge and the scan's cutoffs, GitHub-release
+        # detection, Hacker News submissions, and the watchlist note.
+        "artifact_urls",
+        "catalog_slug",
+        "catalog_card",
+        "recommended",
+        "recommendation_score",
+        "minimum_score",
+        "parser_version",
+        "supporting_observations",
+        "watchlist_note",
+    }
+    observations = [
+        {key: item[key] for key in searchable_fields if key in item}
+        for items in latest.values()
+        for item in items
+    ]
+    for observation in observations:
+        # The page reads parser_version only to recognise a GitHub release;
+        # every other value is about 70 KB of gzip that changes nothing shown.
+        if not str(observation.get("parser_version") or "").startswith("github-releases/"):
+            observation.pop("parser_version", None)
+        # Only an expanded attention row lists its supporting submissions.
+        if observation.get("observation_kind") != "attention":
+            observation.pop("supporting_observations", None)
+    return {
+        "schema_version": 1,
+        "generated_at": dashboard.get("generated_at"),
+        "latest_date": dashboard.get("latest_date"),
+        "observations": observations,
+    }
+
+
 def catalog_pages_by_url(index_path: Path) -> dict[str, str]:
     """Map each URL that exactly one catalog record cites as its source to that slug.
 
@@ -1625,12 +1855,27 @@ def attach_catalog_cards(dashboard: dict[str, Any], index_path: Path) -> int:
     and nothing is matched by name. Returns how many items were tagged.
     """
     unique = catalog_pages_by_url(index_path)
+    records = (
+        json.loads(index_path.read_text(encoding="utf-8")).get("benchmarks") or [] if unique else []
+    )
+    cards = {
+        record["slug"]: {
+            "title": record.get("name") or record["slug"],
+            "authors": list(record.get("authors") or []),
+            "affiliations": list(record.get("institutions") or []),
+            "blurb": record.get("description") or "",
+            "publisher": record.get("publisher") or "",
+        }
+        for record in records
+        if record.get("slug")
+    }
     tagged = 0
     for day in dashboard.get("days") or []:
         for item in day.get("evidence_items") or []:
             slug = unique.get(str(item.get("url") or ""))
             if slug:
                 item["catalog_slug"] = slug
+                item["catalog_card"] = cards[slug]
                 tagged += 1
     return tagged
 
@@ -1645,6 +1890,7 @@ def rebuild_dashboard(
     kw_bench_store_path: Path | None = None,
     benchmark_shard_dir: Path = DEFAULT_SHARD_DIR,
     equivalences: list[dict[str, Any]] | None = None,
+    release_signals: ReleaseSignals | None = None,
 ) -> dict[str, Any]:
     snapshots = load_snapshots(snapshot_dir)
     value = dashboard_data(
@@ -1652,20 +1898,23 @@ def rebuild_dashboard(
         registry_path=registry_path,
         scores_path=scores_path,
         kw_bench_store_path=kw_bench_store_path,
+        release_signals=release_signals or load_release_signals(),
     )
     # normalize-catalog writes the index beside the shard directory.
     attach_catalog_cards(value, benchmark_shard_dir.parent / "benchmark-index.json")
     _write_json(output, value)
     # The browser starts here.  Historical views lazily upgrade: Trends reads
     # the chart payload, Today-all-dates and Explore's canvas still use the
-    # full public dataset. radar.json remains the stable one-click export.
+    # the search index. radar.json remains the stable one-click export.
     bootstrap_path = output.with_name(f"{output.stem}-bootstrap{output.suffix}")
-    _write_json(bootstrap_path, dashboard_bootstrap(value))
+    _write_json(bootstrap_path, dashboard_bootstrap(value), indent=None)
     trends_path = output.with_name(f"{output.stem}-trends{output.suffix}")
-    _write_json(trends_path, dashboard_trends(value))
+    _write_json(trends_path, dashboard_trends(value), indent=None)
     for window_days in TODAY_WINDOW_DAYS:
         window_path = output.with_name(f"{output.stem}-window-{window_days}d{output.suffix}")
-        _write_json(window_path, dashboard_window(value, window_days))
+        _write_json(window_path, dashboard_window(value, window_days), indent=None)
+    search_path = output.with_name(f"{output.stem}-search{output.suffix}")
+    _write_json(search_path, dashboard_search_index(value), indent=None)
     # The record-count badge lives beside radar.json so it deploys with the same
     # dashboard build and can never report a corpus newer than the page it sits
     # on. It is the single self-describing "how much have we collected" signal

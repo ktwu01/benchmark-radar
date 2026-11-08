@@ -9,6 +9,7 @@ from pathlib import Path
 
 import pytest
 
+from benchmark_radar.benchmark_scores import load_scores
 from benchmark_radar.catalog import _observation
 from benchmark_radar.catalog_evidence import attach_evidence, document_registry
 from benchmark_radar.export import write_exports
@@ -138,3 +139,28 @@ def test_export_refuses_a_document_registry_missing_catalog_records(catalog, tmp
     path.write_text(json.dumps(incomplete))
     with pytest.raises(ValueError, match="complete benchmark catalog"):
         write_exports(tmp_path / "out", catalog_path=path)
+
+
+def test_swe_refactor_bench_results_table_reports_all_table_3_scores():
+    """Issue #379: Table 3 of arXiv:2608.23564 has 26 configurations; every
+    Score is filed, and the best (Claude Opus 5, xhigh effort) is 47.0."""
+    registry = load_registry(Path("data/model_cards.yml"))
+    assert any(row["id"] == "swe_refactor_bench" for row in registry["benchmarks"])
+    scores = load_scores(Path("data/benchmark_scores.yml"))
+    rows = [row for row in scores["results"] if row["benchmark_id"] == "swe_refactor_bench"]
+    assert len(rows) == 26
+    assert {row["model"] for row in rows} == {
+        "Claude Opus 5",
+        "GPT-5.6 Sol",
+        "Kimi K3",
+        "Claude Sonnet 5",
+        "GPT-5.6 Luna",
+        "Qwen 3.8 Max",
+        "DeepSeek V4 Flash",
+        "GLM 5.2",
+    }
+    assert all(row["source_id"] == "swe_refactor_bench_results_table" for row in rows)
+    assert all(row["measurement_kind"] == "benchmark_publisher_run" for row in rows)
+    best = max(rows, key=lambda row: row["value"])
+    assert (best["model"], best["value"]) == ("Claude Opus 5", 47.0)
+    assert "xhigh" in best["protocol"]

@@ -219,6 +219,18 @@
     <script src="/assets/clarity.js" defer></script>
     <script src="/assets/app.js" type="module"></script>
     <link rel="stylesheet" href="/assets/design-system.css">
+    <!-- Without script nothing sets aria-expanded, so each (i) note opens on
+         hover or focus instead, and a tap focuses the button. The
+         server-seeded Landscape ranking stays readable with its legend. -->
+    <noscript>
+      <style>
+        .info-tip:hover .info-tip-body,
+        .info-tip:focus-within .info-tip-body {
+          visibility: visible;
+          opacity: 1;
+        }
+      </style>
+    </noscript>
   </head>
   <body>
     <a class="skip-link" href="#main-content" data-i18n="Skip to content">Skip to content</a>
@@ -487,15 +499,30 @@
           <div>
             <div class="section-title">
               <h2 id="today-heading" class="today-heading" data-i18n="Today's radar">Today's radar</h2>
+              <!-- One picture of the day's top 3 benchmarks, rendered by the
+                   daily pipeline, offered as a share icon beside the heading.
+                   Filled only on days that have one. -->
+              <div id="today-share" class="today-share" hidden></div>
               <div class="results-meta" aria-live="polite">
                 <span id="today-breakdown"></span>
-                <span id="today-sort"></span>
+                <!-- How the list is ordered is method, not the answer
+                     (design.md, "Keep page titles close and quiet"): a closed
+                     (i) that opens on hover, keyboard focus or a tap. -->
+                <span class="info-tip sort-info" id="today-sort-info">
+                  <button
+                    type="button"
+                    class="info-tip-toggle"
+                    id="today-sort-toggle"
+                    aria-expanded="false"
+                    aria-controls="today-sort"
+                    aria-label="How this list is sorted"
+                    data-i18n-aria="How this list is sorted"
+                  ><span aria-hidden="true">i</span></button>
+                  <span id="today-sort" class="info-tip-body" role="note"></span>
+                </span>
               </div>
             </div>
             <p id="today-range" class="section-note" hidden></p>
-            <!-- One picture of the day's top 3 benchmarks, rendered by the
-                 daily pipeline. Filled only on days that have one. -->
-            <div id="today-share" class="today-share" hidden></div>
             <p id="today-load-error" class="empty-state" role="status" hidden></p>
             <!-- Search is archive-wide by default even though browsing opens
                  on the newest scan. This first result row makes that scope
@@ -625,7 +652,20 @@
       <section class="view" id="models-view" aria-labelledby="models-heading" hidden>
         <div class="library-toolbar">
           <h2 id="models-heading" class="library-heading view-title" data-i18n="Models">Models</h2>
-          <p class="models-note" data-i18n="models.note">Every model with a reported score in the catalog, side by side: models are columns, benchmarks are rows. Select a score to see its setting and source.</p>
+          <!-- How to read the matrix is method, not the answer, so it sits in
+               a closed (i) beside the title instead of a line of its own. -->
+          <span class="info-tip info-tip-start" id="models-info">
+            <button
+              type="button"
+              class="info-tip-toggle"
+              id="models-info-toggle"
+              aria-expanded="false"
+              aria-controls="models-note"
+              aria-label="How to read this table"
+              data-i18n-aria="How to read this table"
+            ><span aria-hidden="true">i</span></button>
+            <span class="info-tip-body" id="models-note" role="note" data-i18n="models.note">Every model with a reported score in the catalog, side by side: models are columns, benchmarks are rows. Select a score to see its setting and source.</span>
+          </span>
           <p id="models-status" class="library-status" aria-live="polite"></p>
         </div>
         <div class="library-layout">
@@ -687,7 +727,6 @@
             <h2 id="latest-releases-heading"><span data-i18n="Latest releases">Latest releases</span> <span class="latest-releases-window" id="latest-releases-window">· 30 days</span></h2>
             <span id="latest-releases-info"></span>
           </div>
-          <p class="section-note latest-releases-deck" data-i18n="latest.deck">Recently released benchmarks, ranked by the attention they are receiving now: GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days.</p>
           <div class="latest-releases-windows" role="group" aria-label="Release window" data-i18n-aria="Release window">
             <button type="button" class="latest-releases-window-button" data-lwindow="7d" aria-pressed="false" data-i18n="7 days">7 days</button>
             <button type="button" class="latest-releases-window-button" data-lwindow="30d" aria-pressed="true" data-i18n="30 days">30 days</button>
@@ -705,15 +744,43 @@
               aria-controls="latest-releases-list"
             >
           </label>
-          <div class="leaderboard-top-columns" aria-hidden="true">
-            <span class="leaderboard-top-columns-rank" data-i18n="Rank">Rank</span>
-            <span class="leaderboard-top-columns-name" data-i18n="Benchmark">Benchmark</span>
-            <span class="leaderboard-top-columns-count" data-i18n="Attention score">Attention score</span>
+          <!-- What the ranking measures and how to read the score and its tag
+               is method, not the answer, so it sits in a closed (i) after the
+               "Attention score" header instead of two open paragraphs around
+               the list. -->
+          <div class="latest-releases-columns">
+            <div class="leaderboard-top-columns" aria-hidden="true">
+              <span class="leaderboard-top-columns-rank" data-i18n="Rank">Rank</span>
+              <span class="leaderboard-top-columns-name" data-i18n="Benchmark">Benchmark</span>
+              <span class="leaderboard-top-columns-count" data-i18n="Attention score">Attention score</span>
+            </div>
+            <span class="info-tip latest-releases-about" id="latest-about">
+              <button
+                type="button"
+                class="info-tip-toggle"
+                id="latest-about-toggle"
+                aria-expanded="false"
+                aria-controls="latest-about-note"
+                aria-label="How this ranking works"
+                data-i18n-aria="How this ranking works"
+              ><span aria-hidden="true">i</span></button>
+              <span class="info-tip-body" id="latest-about-note" role="note">
+                <span class="latest-releases-deck" data-i18n="latest.deck">Recently released benchmarks, ranked by the attention they are receiving now: GitHub stars, Hugging Face paper upvotes and Hugging Face dataset downloads over the last 30 days.</span>
+                <span class="latest-releases-legend" data-i18n="latest.legend">The number is the attention score, out of 100. The tag under it is a separate check: how much of the score is backed by observed data. A high tag means at least two signals were found and they cover 75% or more of the score; a low tag means fewer than two signals were found, or they cover less than 40% of the score. It says nothing about how good the benchmark is.</span>
+              </span>
+            </span>
           </div>
           <ol class="leaderboard-top-list latest-releases-list" id="latest-releases-list"></ol>
           <p class="empty-state latest-releases-empty" id="latest-releases-empty" aria-live="polite" hidden></p>
           <p class="section-note" id="latest-releases-note" aria-live="polite"></p>
-          <p class="section-note latest-releases-legend" data-i18n="latest.legend">The number is the attention score, out of 100. The tag under it is a separate check: how much of the score is backed by observed data. A high tag means at least two signals were found and they cover 75% or more of the score; a low tag means fewer than two signals were found, or they cover less than 40% of the score. It says nothing about how good the benchmark is.</p>
+        </section>
+
+        <section class="leaderboard-top institution-ranking" id="institution-ranking" aria-labelledby="institution-ranking-heading" hidden>
+          <div class="leaderboard-top-heading">
+            <h2 id="institution-ranking-heading" data-i18n="Top institutions">Top institutions</h2>
+          </div>
+          <ol class="leaderboard-top-list" id="institution-ranking-list"></ol>
+          <p class="section-note" id="institution-ranking-note"></p>
         </section>
 
         <!-- The adoption view, shown when the reader picks it or follows a
@@ -730,7 +797,7 @@
           </div>
           <div class="skyline-toolbar">
             <label class="score-filter" for="leaderboard-score-filter">
-              <span data-i18n="Show benchmarks with highest reported score below:">Show benchmarks with highest reported score below:</span>
+              <span data-i18n="Show benchmarks with highest reported score below (default 70; 100 = full range):">Show benchmarks with highest reported score below (default 70; 100 = full range):</span>
               <input id="leaderboard-score-filter" name="lscore" type="range" min="10" max="100" step="10" value="70" list="score-filter-steps" data-score-filter aria-controls="benchmark-skyline-chart">
               <output id="leaderboard-score-value" for="leaderboard-score-filter">70</output>
             </label>
@@ -746,6 +813,14 @@
                 <option value="models" data-i18n="Models with reported scores">Models with reported scores</option>
                 <option value="documents" data-i18n="Source documents">Source documents</option>
               </select>
+            </label>
+            <label class="skyline-date-control" for="benchmark-skyline-date-from">
+              <span data-i18n="Date from">Date from</span>
+              <input id="benchmark-skyline-date-from" type="date" min="2024-01-01">
+            </label>
+            <label class="skyline-date-control" for="benchmark-skyline-date-to">
+              <span data-i18n="Date to">Date to</span>
+              <input id="benchmark-skyline-date-to" type="date" min="2024-01-01">
             </label>
           </div>
           <div class="frontier-chart skyline-chart" id="benchmark-skyline-chart" tabindex="0" role="region" aria-label="Benchmark Frontier chart" data-i18n-aria="Benchmark Frontier chart"></div>
@@ -937,7 +1012,7 @@
         <div class="score-browse-header">
           <h2 id="saturation-heading" class="view-title" data-i18n="Saturation">Saturation</h2>
           <label class="score-filter" for="saturation-score-filter">
-            <span data-i18n="Show benchmarks with highest reported score below:">Show benchmarks with highest reported score below:</span>
+            <span data-i18n="Show benchmarks with highest reported score below (default 70; 100 = full range):">Show benchmarks with highest reported score below (default 70; 100 = full range):</span>
             <input id="saturation-score-filter" name="lscore" type="range" min="10" max="100" step="10" value="70" list="score-filter-steps" data-score-filter aria-controls="benchmark-search-results">
             <output id="saturation-score-value" for="saturation-score-filter">70</output>
           </label>
@@ -1058,7 +1133,7 @@
           </div>
           <p class="library-status" id="direction-trends-status" aria-live="polite"></p>
           <div class="direction-trends-layout">
-            <div class="direction-trends-frame">
+            <div class="direction-trends-frame" tabindex="0" role="region" aria-labelledby="direction-trends-heading">
               <table class="direction-trends-table" id="direction-trends-table">
                 <thead>
                   <tr>
