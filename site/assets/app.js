@@ -12333,7 +12333,7 @@ function bindEvents() {
       } catch (error) {
         console.error(error);
         if (navigationSequence !== viewNavigationSequence) return;
-        if (view === "today" && state.todayDate === "all" && !state.searchData) {
+        if (view === "today" && state.todayDate === "all" && !state.fullDataLoaded && !state.searchData) {
           const notice = byId("today-load-error");
           notice.hidden = false;
           notice.textContent = t("Search data could not be loaded. Refresh to retry.");
