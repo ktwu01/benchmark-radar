@@ -304,6 +304,16 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
   assert.equal(dialog.attrs["data-share-image"], "");
 }
 {
+  // A card that fails to load leaves nothing for an agent to fetch.
+  const page = await load();
+  page.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
+  const dialog = page.body.find((node) => node.tag === "dialog");
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(dialog.attrs["data-share-image"], "/cards/test-bench.png");
+  page.body.find((node) => node.className === "share-card-image").listeners.error();
+  assert.equal(dialog.attrs["data-share-image"], "");
+}
+{
   // Card A is still being drawn when card B opens: B keeps its own attributes.
   const page = await load();
   page.openRadarShare({ item: { title: "A", source: "Hugging Face" }, title: "A", pageUrl: "https://huggingface.co/x" });

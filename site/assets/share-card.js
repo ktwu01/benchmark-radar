@@ -326,6 +326,8 @@ function openShareDialog({ name, pageUrl, caption = "", imageSrc, getBlob: blob,
     for (const button of imageActions) button.hidden = true;
     note.textContent = t("Opens X in a new window with the full text.");
     status.textContent = missing;
+    // An agent must not be handed an image address the dialog just called dead.
+    if (opening === openings) host.setAttribute("data-share-image", "");
   };
   image.addEventListener("error", unavailable);
   Promise.resolve(imageSrc).then((src) => {
