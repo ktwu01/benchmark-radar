@@ -1693,11 +1693,11 @@ def test_repo_badge_counts_are_visible():
     assert ".repo-badge-count" in css
     assert (
         "clip-path: inset(50%)"
-        not in css[css.index(".repo-badge-count") : css.index(".feed-badge svg")]
+        not in css[css.index(".repo-badge-count") : css.index(".repo-badge-label")]
     )
     assert (
         "background: var(--panel)"
-        in css[css.index(".repo-badge-count") : css.index(".feed-badge svg")]
+        in css[css.index(".repo-badge-count") : css.index(".repo-badge-label")]
     )
 
 
@@ -3875,7 +3875,7 @@ def test_library_sidebar_clears_the_sticky_masthead():
 
     # #889: the sidebar stuck at top: 0.5rem, so the sticky masthead covered
     # its first controls once the reader scrolled. The masthead is 64px on a
-    # wide screen and 108px once its nav wraps at 1280px.
+    # wide screen and 108px once its nav wraps at 1500px.
     rule = styles.split(".library-directions {", 1)[1].split("}", 1)[0]
     assert "top: calc(64px + 0.5rem);" in rule
     assert "max-height: calc(100vh - 64px - 1rem);" in rule
