@@ -226,12 +226,6 @@ papers:
     institutions:
     - Hong Kong Polytechnic University
     - Nanjing University of Science and Technology
-  '2609.10016':
-    basis: arxiv_html_affiliations
-    source_url: https://arxiv.org/html/2609.10016
-    retrieved_at: '2026-11-08'
-    institutions:
-    - Continker
   '2609.10226':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7204453326
@@ -1520,11 +1514,11 @@ papers:
     retrieved_at: '2026-11-08'
     institutions: []
   '2611.00883':
-    basis: arxiv_html_affiliations
-    source_url: https://arxiv.org/html/2611.00883
-    retrieved_at: '2026-11-06'
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7225161329
+    retrieved_at: '2026-11-09'
     institutions:
-    - Bosch Research
+    - Carnegie Mellon University
   '2611.01484':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7225172422
@@ -1599,13 +1593,34 @@ papers:
     source_url: null
     retrieved_at: '2026-11-08'
     institutions: []
+  '2611.06808':
+    basis: null
+    source_url: null
+    retrieved_at: '2026-11-09'
+    institutions: []
+  '2611.06844':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.06844
+    retrieved_at: '2026-11-09'
+    institutions:
+    - Northwestern Polytechnical University, Xi’an, China
+    - Hong Kong University of Science and Technology, Hong Kong, China
+  '2611.06856':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.06856
+    retrieved_at: '2026-11-09'
+    institutions:
+    - South China Normal University University of British Columbia
+    - Vector Institute Canada CIFAR AI Chair Carnegie Mellon University
+    - University of Waterloo KlingAI Research University of Maryland
+    - Tsinghua University HKUST HKU
   '2611.08089':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-06'
+    retrieved_at: '2026-11-09'
     institutions: []
   '2611.08369':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-06'
+    retrieved_at: '2026-11-09'
     institutions: []
