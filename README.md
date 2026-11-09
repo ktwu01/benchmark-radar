@@ -1,4 +1,8 @@
 <div align="left">
+<!-- Trust row (issue #553): only badges whose target page works. The OpenSSF
+Scorecard badge stays out until the Scorecard API publishes a result for this
+repository, and the Best Practices badge until the project is registered. -->
+  <a href="https://github.com/ktwu01/benchmark-radar/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/ktwu01/benchmark-radar/actions/workflows/ci.yml/badge.svg"></a>
 
 [中文](README.zh-CN.md)
 
@@ -25,14 +29,6 @@ connector, a first-party feed, or the Hacker News attention source. -->
   <a href="https://x.com/ktwu01"><img alt="X" src="https://img.shields.io/badge/-000000?style=for-the-badge&amp;logo=x&amp;logoColor=white"></a>
   <a href="https://www.linkedin.com/in/ktwu01"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&amp;logo=linkedin&amp;logoColor=white"></a>
   <a href="https://scholar.google.com/citations?user=s9w1k-cAAAAJ&amp;hl=en"><img alt="Google Scholar" src="https://img.shields.io/badge/Google%20Scholar-4285F4?style=for-the-badge&amp;logo=googlescholar&amp;logoColor=white"></a>
-</p>
-
-<!-- Trust row (issue #553): only badges whose target page works. The OpenSSF
-Scorecard badge stays out until the Scorecard API publishes a result for this
-repository, and the Best Practices badge until the project is registered. -->
-<p align="center">
-  <a href="https://github.com/ktwu01/benchmark-radar/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/ktwu01/benchmark-radar/actions/workflows/ci.yml/badge.svg"></a>
-
 </p>
 
 Researchers and evaluation engineers from these institutions use Benchmark
