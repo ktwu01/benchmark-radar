@@ -331,7 +331,7 @@ jobs:
 
   deploy-retry:
     needs: deploy
-    if: ${{ needs.deploy.result == 'failure' }}
+    if: ${{ always() && needs.deploy.result == 'failure' }}
     permissions:
       pages: write
       id-token: write
