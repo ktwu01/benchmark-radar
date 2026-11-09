@@ -303,6 +303,16 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
   dialog.listeners.close();
   assert.equal(dialog.attrs["data-share-image"], "");
 }
+{
+  // Card A is still being drawn when card B opens: B keeps its own attributes.
+  const page = await load();
+  page.openRadarShare({ item: { title: "A", source: "Hugging Face" }, title: "A", pageUrl: "https://huggingface.co/x" });
+  page.openDailyShare({ name: "B", image: "https://example.org/b.png", caption: "B caption", day: "2026-11-07" });
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  const dialog = page.body.find((node) => node.tag === "dialog");
+  assert.equal(dialog.attrs["data-share-caption"], "B caption");
+  assert.equal(dialog.attrs["data-share-image"], "https://example.org/b.png");
+}
 
 assert.match(readFileSync("site/assets/app.js", "utf8"), /import \{ starPrompt \} from "\.\/star-prompt.js"/);
 

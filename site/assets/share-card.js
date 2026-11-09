@@ -42,6 +42,8 @@ function node(tag, props = {}, children = []) {
 }
 
 let dialog = null;
+// Counts openings of the shared dialog, so a slow card can tell it was replaced.
+let openings = 0;
 
 function ensureDialog() {
   if (dialog?.isConnected) return dialog;
@@ -193,6 +195,7 @@ function openShareDialog({ name, pageUrl, caption = "", imageSrc, getBlob: blob,
   host.setAttribute("data-share-caption", fullText);
   host.setAttribute("data-share-link", pageUrl);
   host.setAttribute("data-share-image", "");
+  const opening = ++openings;
 
   const status = node("p", { className: "share-card-status", attrs: { role: "status" } });
   const image = node("img", {
@@ -327,13 +330,15 @@ function openShareDialog({ name, pageUrl, caption = "", imageSrc, getBlob: blob,
   image.addEventListener("error", unavailable);
   Promise.resolve(imageSrc).then((src) => {
     image.src = src;
-    host.setAttribute("data-share-image", src);
+    // The dialog is reused, so a card still drawing when the reader opens
+    // another must not write its image over the newer card's attributes.
+    if (opening === openings) host.setAttribute("data-share-image", src);
     if (src.startsWith("blob:")) {
       // A drawn card is a blob URL that dies with the dialog, so the attribute
       // goes with it rather than naming an address that no longer loads.
       host.addEventListener("close", () => {
         URL.revokeObjectURL(src);
-        host.setAttribute("data-share-image", "");
+        if (opening === openings) host.setAttribute("data-share-image", "");
       }, { once: true });
     }
   }, unavailable);
