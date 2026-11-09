@@ -327,10 +327,14 @@ function openShareDialog({ name, pageUrl, caption = "", imageSrc, getBlob: blob,
   image.addEventListener("error", unavailable);
   Promise.resolve(imageSrc).then((src) => {
     image.src = src;
+    host.setAttribute("data-share-image", src);
     if (src.startsWith("blob:")) {
-      host.addEventListener("close", () => URL.revokeObjectURL(src), { once: true });
-    } else {
-      host.setAttribute("data-share-image", src);
+      // A drawn card is a blob URL that dies with the dialog, so the attribute
+      // goes with it rather than naming an address that no longer loads.
+      host.addEventListener("close", () => {
+        URL.revokeObjectURL(src);
+        host.setAttribute("data-share-image", "");
+      }, { once: true });
     }
   }, unavailable);
 

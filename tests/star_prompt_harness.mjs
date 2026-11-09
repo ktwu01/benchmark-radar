@@ -5,6 +5,9 @@ import { readFileSync } from "node:fs";
 const shareSource = readFileSync("site/assets/share-card.js", "utf8");
 const key = "benchmark-radar:star-prompt:v1";
 let sequence = 0;
+const drawnCardStub = `data:text/javascript,${encodeURIComponent(
+  'export const cardFacts = () => ({}); export const cardBlob = async () => new Blob(["card"], { type: "image/png" });',
+)}`;
 
 class Node {
   constructor(tag) {
@@ -68,7 +71,9 @@ async function load({ store = {}, lang = "en", blocked = false, consent = true, 
   const promptUrl = new URL(`../site/assets/star-prompt.js?case=${++sequence}`, import.meta.url).href;
   const { starPrompt } = await import(promptUrl);
   const shareModule = shareSource.replace('"./star-prompt.js"', JSON.stringify(promptUrl))
-    .replace('"./share-caption.js"', JSON.stringify(new URL("../site/assets/share-caption.js", import.meta.url).href));
+    .replace('"./share-caption.js"', JSON.stringify(new URL("../site/assets/share-caption.js", import.meta.url).href))
+    // The canvas drawing needs a browser; a card drawn on demand is a blob here.
+    .replace('"./radar-card.js"', JSON.stringify(drawnCardStub));
   const shares = await import(`data:text/javascript;base64,${Buffer.from(shareModule).toString("base64")}`);
   return { starPrompt, ...shares, events, store, body };
 }
@@ -286,6 +291,17 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
   assert.equal(dialog.attrs["data-share-caption"], "Full caption");
   assert.equal(dialog.attrs["data-share-link"], "https://benchmark-radar.org/?date=2026-11-07");
   assert.equal(dialog.attrs["data-share-image"], "https://example.org/card.png");
+}
+{
+  // A card drawn on demand is a blob URL: it is named while the dialog is open
+  // and cleared once the blob is revoked.
+  const page = await load();
+  page.openRadarShare({ item: { title: "A", source: "Hugging Face" }, title: "A", pageUrl: "https://huggingface.co/x" });
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  const dialog = page.body.find((node) => node.tag === "dialog");
+  assert.match(dialog.attrs["data-share-image"], /^blob:/);
+  dialog.listeners.close();
+  assert.equal(dialog.attrs["data-share-image"], "");
 }
 
 assert.match(readFileSync("site/assets/app.js", "utf8"), /import \{ starPrompt \} from "\.\/star-prompt.js"/);
