@@ -191,6 +191,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          asset_path="$(find cli-data-release -maxdepth 1 -type f \
+            -name 'benchmark-radar-data-*.zip' -print -quit)"
+          asset_name="${asset_path##*/}"
           if ! gh release view cli-data --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             # --latest=false keeps this rolling data drop out of the "Latest"
             # slot. GitHub picks the latest release by creation date, so without
@@ -203,14 +206,31 @@ jobs:
               --title "Benchmark Radar CLI data" \
               --notes "Checksummed data used by benchmark-radar init and sync."
           fi
-          gh release upload cli-data \
-            cli-data-release/benchmark-radar-data-*.zip \
-            --repo "$GITHUB_REPOSITORY"
+          if gh release view cli-data --repo "$GITHUB_REPOSITORY" --json assets \
+            --jq '.assets[].name' | grep -Fxq "$asset_name"; then
+            echo "CLI data asset ${asset_name} already exists"
+          else
+            gh release upload cli-data "$asset_path" --repo "$GITHUB_REPOSITORY"
+          fi
+
+  prune-cli-data:
+    needs: deploy-complete
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Keep the newest CLI data assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
           old_assets="$(
             gh release view cli-data \
               --repo "$GITHUB_REPOSITORY" \
               --json assets \
-              --jq '.assets | sort_by(.createdAt) | reverse | .[3:][]?.name'
+              --jq '.assets
+                | map(select(.name | startswith("benchmark-radar-data-")))
+                | sort_by(.createdAt) | reverse | .[3:][]?.name'
           )"
           while IFS= read -r asset; do
             [[ -z "$asset" ]] || gh release delete-asset cli-data "$asset" \
