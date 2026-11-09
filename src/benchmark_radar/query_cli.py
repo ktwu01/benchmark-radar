@@ -22,6 +22,7 @@ from .query import (
     QueryPaths,
     QueryService,
     error_payload,
+    validate_search_query,
 )
 from .query_http import serve_query_api
 from .related_work import ManuscriptContext, append_missing_bibtex
@@ -157,7 +158,7 @@ def _search_query(args: argparse.Namespace) -> str:
             code="invalid_query",
             status=400,
         )
-    return query
+    return validate_search_query(query)
 
 
 def _print_json(payload: dict[str, Any]) -> None:

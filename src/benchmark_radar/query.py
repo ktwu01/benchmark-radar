@@ -273,6 +273,18 @@ def _unique_query_tokens(query: str) -> tuple[str, ...]:
     return tuple(unique)
 
 
+def validate_search_query(query: str) -> str:
+    """Normalize and validate a search query without loading catalog data."""
+    normalized = " ".join(str(query).split())
+    if not _unique_query_tokens(normalized):
+        raise QueryError(
+            "query must contain at least one letter or number",
+            code="invalid_query",
+            status=400,
+        )
+    return normalized
+
+
 def _prefix_term(query_tokens: tuple[str, ...]) -> str | None:
     """The word still being typed. The search box searches as you type, so the
     last query word also matches the words that start with it. Only ASCII words
@@ -638,14 +650,8 @@ class QueryService:
         source: str | None = None,
         sources: frozenset[str] | None = None,
     ) -> dict[str, Any]:
-        query = " ".join(str(query).split())
+        query = validate_search_query(query)
         query_tokens = _unique_query_tokens(query)
-        if not query_tokens:
-            raise QueryError(
-                "query must contain at least one letter or number",
-                code="invalid_query",
-                status=400,
-            )
         if scope not in SEARCH_SCOPES:
             raise QueryError(
                 f"scope must be one of {', '.join(SEARCH_SCOPES)}",

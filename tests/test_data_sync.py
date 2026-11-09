@@ -175,7 +175,9 @@ def test_release_bundle_is_complete_deterministic_and_self_describing(tmp_path: 
     assert first_bytes == second_bytes
     assert first["benchmark_count"] == 1
     assert first["snapshot_count"] == 1
-    assert first["artifact"]["filename"] == DEFAULT_RELEASE_FILENAME
+    assert first["artifact"]["filename"].startswith("benchmark-radar-data-")
+    assert first["artifact"]["filename"].endswith(".zip")
+    assert DEFAULT_RELEASE_FILENAME == "benchmark-radar-data-{digest}.zip"
     assert first["artifact"]["sha256"] == hashlib.sha256(first_bytes).hexdigest()
     with zipfile.ZipFile(io.BytesIO(first_bytes)) as archive:
         assert sorted(archive.namelist()) == [

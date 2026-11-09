@@ -15,7 +15,7 @@ from .snapshots import load_snapshots
 DATA_RELEASE_SCHEMA_VERSION = 1
 DEFAULT_RELEASE_DIR = Path("site/data/cli")
 DEFAULT_RELEASE_BASE_URL = "https://github.com/ktwu01/benchmark-radar/releases/download/cli-data"
-DEFAULT_RELEASE_FILENAME = "benchmark-radar-data.zip"
+DEFAULT_RELEASE_FILENAME = "benchmark-radar-data-{digest}.zip"
 _ZIP_TIMESTAMP = (2020, 1, 1, 0, 0, 0)
 
 
@@ -60,7 +60,7 @@ def build_data_release(
     members.extend(
         (f"snapshots/{path.name}", path) for path in sorted(paths.snapshots.glob("*.json"))
     )
-    temporary = output_dir / f".{DEFAULT_RELEASE_FILENAME}.tmp"
+    temporary = output_dir / ".benchmark-radar-data.zip.tmp"
     try:
         with zipfile.ZipFile(temporary, "w") as archive:
             for archive_name, source in members:
@@ -68,7 +68,7 @@ def build_data_release(
         payload = temporary.read_bytes()
         digest = hashlib.sha256(payload).hexdigest()
         data_version = f"{timestamp_version}-{digest[:12]}"
-        filename = DEFAULT_RELEASE_FILENAME
+        filename = DEFAULT_RELEASE_FILENAME.format(digest=digest[:12])
         bundle_path = output_dir / filename
         temporary.replace(bundle_path)
     finally:

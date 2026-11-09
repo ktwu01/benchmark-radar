@@ -39,7 +39,9 @@ def test_index_shards_offline_release_and_exports_have_identical_records(catalog
     expected = {row["slug"] for row in catalog["benchmarks"]}
     assert len(expected) == catalog["count"]
     assert {path.stem for path in Path("site/data/benchmarks").glob("*.json")} == expected
-    with zipfile.ZipFile("site/data/cli/benchmark-radar-data.zip") as archive:
+    bundles = list(Path("site/data/cli").glob("benchmark-radar-data-*.zip"))
+    assert len(bundles) == 1
+    with zipfile.ZipFile(bundles[0]) as archive:
         offline = json.loads(archive.read("benchmark-index.json"))
         assert offline == catalog
         assert {

@@ -167,7 +167,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
       - name: Remove CLI archive from Pages artifact
-        run: rm site/data/cli/benchmark-radar-data.zip
+        run: rm site/data/cli/benchmark-radar-data-*.zip
       - name: Configure Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
       - name: Upload Pages artifact
@@ -204,7 +204,7 @@ jobs:
               --notes "Checksummed data used by benchmark-radar init and sync."
           fi
           gh release upload cli-data \
-            cli-data-release/benchmark-radar-data.zip \
+            cli-data-release/benchmark-radar-data-*.zip \
             --clobber \
             --repo "$GITHUB_REPOSITORY"
 
