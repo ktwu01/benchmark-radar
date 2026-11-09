@@ -176,7 +176,7 @@ jobs:
           path: site/
 
   publish-cli-data:
-    needs: deploy-complete
+    needs: build
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -205,8 +205,17 @@ jobs:
           fi
           gh release upload cli-data \
             cli-data-release/benchmark-radar-data-*.zip \
-            --clobber \
             --repo "$GITHUB_REPOSITORY"
+          old_assets="$(
+            gh release view cli-data \
+              --repo "$GITHUB_REPOSITORY" \
+              --json assets \
+              --jq '.assets | sort_by(.createdAt) | reverse | .[3:][]?.name'
+          )"
+          while IFS= read -r asset; do
+            [[ -z "$asset" ]] || gh release delete-asset cli-data "$asset" \
+              --repo "$GITHUB_REPOSITORY" --yes
+          done <<< "$old_assets"
 
   publish-hf-dataset:
     needs: deploy-complete
@@ -315,7 +324,7 @@ jobs:
           done
 
   deploy:
-    needs: build
+    needs: [build, publish-cli-data]
     permissions:
       pages: write
       id-token: write

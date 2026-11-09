@@ -200,10 +200,12 @@ def test_deploy_and_ci_build_the_downloadable_release_after_its_inputs() -> None
     assert "gh release upload cli-data" in pages
     # The rolling data drop must never take the "Latest" slot from a versioned release.
     assert "--latest=false" in pages
-    assert "needs: build" in pages
+    assert "publish-cli-data:\n    needs: build" in pages
+    assert "deploy:\n    needs: [build, publish-cli-data]" in pages
     assert "deploy-retry:" in pages
     assert "needs: deploy-complete" in pages
     assert "needs: [deploy, deploy-retry]" in pages
+    assert "gh release delete-asset cli-data" in pages
     assert (
         pages.index("Upload CLI data release for publishing")
         < pages.index("Remove CLI archive from Pages artifact")
