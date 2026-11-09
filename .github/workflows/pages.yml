@@ -177,6 +177,8 @@ jobs:
 
   publish-cli-data:
     needs: build
+    outputs:
+      asset-name: ${{ steps.publish.outputs.asset_name }}
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -188,12 +190,16 @@ jobs:
           name: cli-data-release
           path: cli-data-release
       - name: Publish rolling CLI data release
+        id: publish
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           asset_path="$(find cli-data-release -maxdepth 1 -type f \
             -name 'benchmark-radar-data-*.zip' -print -quit)"
           asset_name="${asset_path##*/}"
+          asset_size="$(stat -c '%s' "$asset_path")"
+          asset_sha256="$(sha256sum "$asset_path" | cut -d ' ' -f1)"
+          echo "asset_name=${asset_name}" >> "$GITHUB_OUTPUT"
           if ! gh release view cli-data --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             # --latest=false keeps this rolling data drop out of the "Latest"
             # slot. GitHub picks the latest release by creation date, so without
@@ -206,15 +212,30 @@ jobs:
               --title "Benchmark Radar CLI data" \
               --notes "Checksummed data used by benchmark-radar init and sync."
           fi
-          if gh release view cli-data --repo "$GITHUB_REPOSITORY" --json assets \
-            --jq '.assets[].name' | grep -Fxq "$asset_name"; then
-            echo "CLI data asset ${asset_name} already exists"
+          existing_asset="$(
+            gh release view cli-data \
+              --repo "$GITHUB_REPOSITORY" \
+              --json assets | jq -r --arg name "$asset_name" --arg size "$asset_size" \
+                --arg digest "sha256:$asset_sha256" \
+                '.assets[]
+                | select(.name == $name)
+                | select(.state == "uploaded" and (.size | tostring) == $size and .digest == $digest)
+                | .name'
+          )"
+          if [[ "$existing_asset" == "$asset_name" ]]; then
+            echo "Verified CLI data asset ${asset_name} already exists"
           else
+            if gh release view cli-data --repo "$GITHUB_REPOSITORY" --json assets \
+              | jq -r --arg name "$asset_name" '.assets[] | select(.name == $name) | .name' \
+              | grep -Fxq "$asset_name"; then
+              gh release delete-asset cli-data "$asset_name" \
+                --repo "$GITHUB_REPOSITORY" --yes
+            fi
             gh release upload cli-data "$asset_path" --repo "$GITHUB_REPOSITORY"
           fi
 
   prune-cli-data:
-    needs: deploy-complete
+    needs: [deploy-complete, publish-cli-data]
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -227,9 +248,10 @@ jobs:
           old_assets="$(
             gh release view cli-data \
               --repo "$GITHUB_REPOSITORY" \
-              --json assets \
-              --jq '.assets
+              --json assets | jq -r --arg current "${{ needs.publish-cli-data.outputs.asset-name }}" \
+                '.assets
                 | map(select(.name | startswith("benchmark-radar-data-")))
+                | map(select(.name != $current))
                 | sort_by(.createdAt) | reverse | .[3:][]?.name'
           )"
           while IFS= read -r asset; do

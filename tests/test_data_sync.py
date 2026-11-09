@@ -206,8 +206,9 @@ def test_deploy_and_ci_build_the_downloadable_release_after_its_inputs() -> None
     assert "needs: deploy-complete" in pages
     assert "needs: [deploy, deploy-retry]" in pages
     assert "prune-cli-data:" in pages
-    assert "prune-cli-data:\n    needs: deploy-complete" in pages
+    assert "prune-cli-data:\n    needs: [deploy-complete, publish-cli-data]" in pages
     assert "already exists" in pages
+    assert "sha256sum" in pages
     assert "gh release delete-asset cli-data" in pages
     assert (
         pages.index("Upload CLI data release for publishing")
