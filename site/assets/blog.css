@@ -2,7 +2,13 @@
    and only compose its existing tokens into a reading layout. Nothing here
    applies to the dashboard: every rule is scoped to .blog-page, which only the
    generated blog documents carry. */
+/* Reading pages (blog, About, Media) sit in one centered column, the usual
+   layout for prose (issue #1097): a capped line length keeps text readable,
+   and centering keeps a wide screen from leaving a blank right half. The
+   masthead and footer stay full width. */
 .blog-page .blog-view {
+  max-width: 880px;
+  margin-inline: auto;
   padding: var(--space-4) 0 3rem;
 }
 
@@ -194,7 +200,7 @@
 }
 
 .blog-page .blog-prose {
-  max-width: 820px;
+  max-width: none;
   font-size: 1rem;
   line-height: 1.7;
 }
@@ -292,4 +298,99 @@
   font-size: 0.78rem;
   color: var(--muted);
   letter-spacing: 0.04em;
+}
+
+/* Link lists on /about/ and /media/ (issue #1097) render as cards: a small
+   kicker (coverage type or site), the title, and one muted line, so a reader
+   scans by kind and outlet instead of reading a wall of underlined links. */
+.blog-page .link-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.blog-page .link-cards li {
+  margin: 0;
+}
+
+.blog-page .link-card {
+  display: grid;
+  align-content: start;
+  gap: 0.25rem;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  line-height: 1.4;
+  text-decoration: none;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.blog-page .link-card:hover {
+  border-color: var(--blue);
+  background: var(--panel);
+}
+
+.blog-page .link-card-kicker {
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+.blog-page .link-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.blog-page .link-card-note {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* The brief list (issue #1097): a readable column of quiet cards. The title
+   is the link and reads as a heading, not an underlined sentence; the summary
+   stops at two lines so thirty days scan as a list, not a wall. */
+.blog-page .blog-index {
+  gap: 0.75rem;
+}
+
+.blog-page .blog-index .blog-card {
+  border-color: var(--line);
+  box-shadow: none;
+  transition: border-color 140ms ease;
+}
+
+.blog-page .blog-index .blog-card:hover {
+  border-color: var(--blue);
+}
+
+.blog-page .blog-index .blog-card h2 {
+  margin-bottom: 0.35rem;
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+
+.blog-page .blog-index .blog-card h2 a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.blog-page .blog-index .blog-card h2 a:hover {
+  color: var(--blue);
+  text-decoration: underline;
+}
+
+.blog-page .blog-index .blog-card p {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
