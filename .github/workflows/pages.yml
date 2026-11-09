@@ -176,7 +176,7 @@ jobs:
           path: site/
 
   publish-cli-data:
-    needs: build
+    needs: deploy-complete
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -209,7 +209,7 @@ jobs:
             --repo "$GITHUB_REPOSITORY"
 
   publish-hf-dataset:
-    needs: build
+    needs: deploy-complete
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -315,7 +315,7 @@ jobs:
           done
 
   deploy:
-    needs: [build, publish-cli-data, publish-hf-dataset]
+    needs: build
     permissions:
       pages: write
       id-token: write
@@ -328,3 +328,29 @@ jobs:
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
+
+  deploy-retry:
+    needs: deploy
+    if: ${{ needs.deploy.result == 'failure' }}
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Retry GitHub Pages deployment
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
+
+  deploy-complete:
+    needs: [deploy, deploy-retry]
+    if: >-
+      ${{ always() &&
+        (needs.deploy.result == 'success' || needs.deploy-retry.result == 'success') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm Pages deployment succeeded
+        run: echo "GitHub Pages deployment completed"

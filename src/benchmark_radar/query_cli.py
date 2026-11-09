@@ -143,6 +143,23 @@ def _service(args: argparse.Namespace) -> QueryService:
     return QueryService(DataStore(root=args.data_dir).query_paths())
 
 
+def _search_query(args: argparse.Namespace) -> str:
+    if args.query_flag is not None and args.query is not None and args.query_flag != args.query:
+        raise QueryError(
+            "search query was given twice with different values",
+            code="invalid_query",
+            status=400,
+        )
+    query = args.query_flag if args.query_flag is not None else args.query
+    if query is None:
+        raise QueryError(
+            "search query is required; pass a query or --query",
+            code="invalid_query",
+            status=400,
+        )
+    return query
+
+
 def _print_json(payload: dict[str, Any]) -> None:
     print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
 
@@ -410,22 +427,9 @@ def run_query_cli(argv: Sequence[str] | None = None) -> int:
             payload = DataStore(root=args.data_dir).sync()
             printer = _print_json if args.json else _print_sync
         else:
+            query = _search_query(args) if args.command == "search" else None
             service = _service(args)
             if args.command == "search":
-                if args.query_flag is not None and args.query is not None:
-                    if args.query_flag != args.query:
-                        raise QueryError(
-                            "search query was given twice with different values",
-                            code="invalid_query",
-                            status=400,
-                        )
-                query = args.query_flag if args.query_flag is not None else args.query
-                if query is None:
-                    raise QueryError(
-                        "search query is required; pass a query or --query",
-                        code="invalid_query",
-                        status=400,
-                    )
                 payload = service.search(
                     query,
                     scope=args.scope,
