@@ -5,6 +5,9 @@ import { readFileSync } from "node:fs";
 const shareSource = readFileSync("site/assets/share-card.js", "utf8");
 const key = "benchmark-radar:star-prompt:v1";
 let sequence = 0;
+const drawnCardStub = `data:text/javascript,${encodeURIComponent(
+  'export const cardFacts = () => ({}); export const cardBlob = async () => new Blob(["card"], { type: "image/png" });',
+)}`;
 
 class Node {
   constructor(tag) {
@@ -68,7 +71,9 @@ async function load({ store = {}, lang = "en", blocked = false, consent = true, 
   const promptUrl = new URL(`../site/assets/star-prompt.js?case=${++sequence}`, import.meta.url).href;
   const { starPrompt } = await import(promptUrl);
   const shareModule = shareSource.replace('"./star-prompt.js"', JSON.stringify(promptUrl))
-    .replace('"./share-caption.js"', JSON.stringify(new URL("../site/assets/share-caption.js", import.meta.url).href));
+    .replace('"./share-caption.js"', JSON.stringify(new URL("../site/assets/share-caption.js", import.meta.url).href))
+    // The canvas drawing needs a browser; a card drawn on demand is a blob here.
+    .replace('"./radar-card.js"', JSON.stringify(drawnCardStub));
   const shares = await import(`data:text/javascript;base64,${Buffer.from(shareModule).toString("base64")}`);
   return { starPrompt, ...shares, events, store, body };
 }
@@ -110,7 +115,7 @@ for (const trigger of triggers) {
 
 const cases = [
   ["Copy image", "card_copy_image"],
-  ["Copy link", "card_copy_link"],
+  ["Copy benchmark link", "card_copy_link"],
   ["Download", "card_download"],
 ];
 for (const [label, trigger] of cases) {
@@ -127,7 +132,7 @@ for (const [label, trigger] of cases) {
 const earlier = await load();
 earlier.starPrompt("subscribe");
 earlier.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
-await earlier.body.find((node) => node.textContent === "Copy link").click();
+await earlier.body.find((node) => node.textContent === "Copy benchmark link").click();
 assert.equal(earlier.events.length, 1, "an earlier app prompt suppresses the card prompt");
 assert(!earlier.body.find((node) => node.className === "star-prompt"));
 
@@ -135,14 +140,14 @@ const left = await load();
 let finishCopy;
 navigator.clipboard.writeText = () => new Promise((resolve) => { finishCopy = resolve; });
 left.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
-const copying = left.body.find((node) => node.textContent === "Copy link").click();
+const copying = left.body.find((node) => node.textContent === "Copy benchmark link").click();
 left.body.find((node) => node.tag === "dialog").close();
 finishCopy();
 await copying;
 assert.equal(left.store[key], undefined, "a hidden dialog must not consume the prompt");
 
 // A denied clipboard or missing card must leave the budget for a later action.
-for (const [label, failure] of [["Copy link", "clipboard"], ["Copy image", "clipboard"], ["Download", "fetch"]]) {
+for (const [label, failure] of [["Copy benchmark link", "clipboard"], ["Copy image", "clipboard"], ["Download", "fetch"]]) {
   const page = await load({ failure });
   page.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
   const originalError = console.error;
@@ -156,6 +161,9 @@ for (const [label, failure] of [["Copy link", "clipboard"], ["Copy image", "clip
 
 // #1068: X's post link cannot attach a file, so Post on X copies the card on the
 // same click and says to paste it; the link itself still opens X.
+const hintOf = (page) => page.body.find((node) => node.className === "share-card-hint");
+const noteOf = (page) => page.body.find((node) => node.className === "share-card-note");
+const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 {
   const page = await load();
   let written = null;
@@ -163,39 +171,63 @@ for (const [label, failure] of [["Copy link", "clipboard"], ["Copy image", "clip
     written = await Promise.all(Object.values(items[0].data));
   };
   page.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
-  const x = page.body.find((node) => node.textContent === "Copy card and post on X ↗");
-  assert(x, "the label says the card is copied before X's tab covers the dialog");
+  const x = page.body.find((node) => node.textContent === "Post on X ↗");
+  assert(x, "one plain main action");
   assert.equal(x.tag, "a");
   assert.match(x.attrs.href, /^https:\/\/x\.com\/intent\/post\?/);
   assert.equal(x.attrs.target, "_blank");
+  assert.equal(noteOf(page).textContent, "Copies the card image and opens X in a new window.",
+    "the note says what the click does before X's tab covers the dialog");
+  assert(hintOf(page).hidden, "the hint waits for the click");
   x.click();
-  await new Promise((resolve) => setTimeout(resolve, 0));
+  await tick();
   assert(written && written[0] instanceof Blob, "the card image reaches the clipboard");
-  const status = page.body.find((node) => node.className === "share-card-status");
-  assert.equal(status.textContent, "Card copied. Paste it into your post (Ctrl+V or Cmd+V).");
+  assert(noteOf(page).hidden);
+  assert.equal(hintOf(page).hidden, false);
+  assert.equal(hintOf(page).textContent, "X is open in a new window. Press Ctrl+V in X to add the image.");
+}
+{
+  // Only Apple devices paste with Cmd.
+  const page = await load();
+  Object.defineProperty(navigator, "platform", { configurable: true, value: "MacIntel" });
+  page.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
+  page.body.find((node) => node.textContent === "Post on X ↗").click();
+  await tick();
+  assert.equal(hintOf(page).textContent, "X is open in a new window. Press ⌘V in X to add the image.");
+}
+{
+  // A touch screen has no shortcut: the hint says tap and hold.
+  const page = await load();
+  window.matchMedia = (query) => ({ matches: query === "(pointer: coarse)" });
+  page.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
+  page.body.find((node) => node.textContent === "Post on X ↗").click();
+  await tick();
+  assert.equal(hintOf(page).textContent,
+    "X is open in a new window. In X, tap and hold, then choose Paste to add the image.");
+  delete window.matchMedia;
 }
 {
   const page = await load({ failure: "clipboard" });
   page.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
-  page.body.find((node) => node.textContent === "Copy card and post on X ↗").click();
-  await new Promise((resolve) => setTimeout(resolve, 0));
-  const status = page.body.find((node) => node.className === "share-card-status");
-  assert.equal(status.textContent, "Download the card and attach it to your post.");
+  page.body.find((node) => node.textContent === "Post on X ↗").click();
+  await tick();
+  assert.equal(hintOf(page).textContent,
+    "X is open in a new window. The image was not copied. Download it, then attach it in X.");
 }
 {
-  // A card that failed to load keeps its notice and its plain label.
+  // A card that failed to load keeps its notice and does not promise a copy.
   const page = await load();
   page.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
   const image = page.body.find((node) => node.className === "share-card-image");
   image.listeners.error();
   const status = page.body.find((node) => node.className === "share-card-status");
   const notice = status.textContent;
-  const x = page.body.find((node) => node.textContent === "Post on X ↗");
-  assert(x, "a missing card does not promise to copy it");
-  x.click();
-  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(noteOf(page).textContent, "Opens X in a new window with the full text.");
+  page.body.find((node) => node.textContent === "Post on X ↗").click();
+  await tick();
   assert.equal(status.textContent, notice);
   assert.match(notice, /not ready yet/);
+  assert.equal(hintOf(page).textContent, "X is open in a new window.");
 }
 
 {
@@ -204,13 +236,92 @@ for (const [label, failure] of [["Copy link", "clipboard"], ["Copy image", "clip
   let rejectCopy;
   navigator.clipboard.write = () => new Promise((_, reject) => { rejectCopy = reject; });
   page.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
-  page.body.find((node) => node.textContent === "Copy card and post on X ↗").click();
+  page.body.find((node) => node.textContent === "Post on X ↗").click();
   page.body.find((node) => node.className === "share-card-image").listeners.error();
   const status = page.body.find((node) => node.className === "share-card-status");
   const notice = status.textContent;
   rejectCopy(new Error("card 404"));
-  await new Promise((resolve) => setTimeout(resolve, 0));
+  await tick();
   assert.equal(status.textContent, notice);
+  assert.equal(hintOf(page).textContent, "X is open in a new window.");
+}
+
+// One main action and four tools; Share… belongs to phones.
+{
+  const toolLabels = (page) => page.body
+    .find((node) => node.className === "share-card-actions").children.map((node) => node.textContent);
+  const desktop = await load();
+  Object.defineProperty(navigator, "share", { configurable: true, value: async () => {} });
+  desktop.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
+  assert.deepEqual(toolLabels(desktop), ["Copy text", "Copy image", "Download", "Copy benchmark link"],
+    "a desktop browser with navigator.share still shows four tools");
+  const phone = await load();
+  Object.defineProperty(navigator, "share", { configurable: true, value: async () => {} });
+  window.matchMedia = (query) => ({ matches: query === "(pointer: coarse)" });
+  phone.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
+  assert.deepEqual(toolLabels(phone),
+    ["Copy text", "Copy image", "Download", "Copy benchmark link", "Share…"]);
+  assert(phone.body.find((node) => node.textContent === "Post on X ↗"), "Post on X stays the main action");
+  delete navigator.share;
+  delete window.matchMedia;
+}
+
+// The link button names what it copies.
+{
+  const labelFor = async (pageUrl) => {
+    const page = await load();
+    page.openRadarShare({ item: { title: "A", source: "Hugging Face" }, title: "A", pageUrl,
+      image: "https://example.org/card.png" });
+    return page.body.find((node) => node.className === "share-card-actions").children.at(-1).textContent;
+  };
+  assert.equal(await labelFor("https://benchmark-radar.org/benchmarks/gpqa/"), "Copy benchmark link");
+  assert.equal(await labelFor("https://huggingface.co/datasets/owner/name"), "Copy source link");
+  const day = await load();
+  day.openDailyShare({ name: "Card", image: "https://example.org/card.png", caption: "Caption", day: "2026-11-07" });
+  assert.equal(day.body.find((node) => node.className === "share-card-actions").children.at(-1).textContent,
+    "Copy page link");
+}
+
+// Agents read the caption, link and image from the open dialog.
+{
+  const page = await load();
+  page.openDailyShare({ name: "Card", image: "https://example.org/card.png", caption: "Full caption", day: "2026-11-07" });
+  await tick();
+  const dialog = page.body.find((node) => node.tag === "dialog");
+  assert.equal(dialog.attrs["data-share-caption"], "Full caption");
+  assert.equal(dialog.attrs["data-share-link"], "https://benchmark-radar.org/?date=2026-11-07");
+  assert.equal(dialog.attrs["data-share-image"], "https://example.org/card.png");
+}
+{
+  // A card drawn on demand is a blob URL: it is named while the dialog is open
+  // and cleared once the blob is revoked.
+  const page = await load();
+  page.openRadarShare({ item: { title: "A", source: "Hugging Face" }, title: "A", pageUrl: "https://huggingface.co/x" });
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  const dialog = page.body.find((node) => node.tag === "dialog");
+  assert.match(dialog.attrs["data-share-image"], /^blob:/);
+  dialog.listeners.close();
+  assert.equal(dialog.attrs["data-share-image"], "");
+}
+{
+  // A card that fails to load leaves nothing for an agent to fetch.
+  const page = await load();
+  page.openBenchmarkShare({ slug: "test-bench", name: "Test Bench" });
+  const dialog = page.body.find((node) => node.tag === "dialog");
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(dialog.attrs["data-share-image"], "/cards/test-bench.png");
+  page.body.find((node) => node.className === "share-card-image").listeners.error();
+  assert.equal(dialog.attrs["data-share-image"], "");
+}
+{
+  // Card A is still being drawn when card B opens: B keeps its own attributes.
+  const page = await load();
+  page.openRadarShare({ item: { title: "A", source: "Hugging Face" }, title: "A", pageUrl: "https://huggingface.co/x" });
+  page.openDailyShare({ name: "B", image: "https://example.org/b.png", caption: "B caption", day: "2026-11-07" });
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  const dialog = page.body.find((node) => node.tag === "dialog");
+  assert.equal(dialog.attrs["data-share-caption"], "B caption");
+  assert.equal(dialog.attrs["data-share-image"], "https://example.org/b.png");
 }
 
 assert.match(readFileSync("site/assets/app.js", "utf8"), /import \{ starPrompt \} from "\.\/star-prompt.js"/);
@@ -245,13 +356,13 @@ assert.match(readFileSync("site/assets/app.js", "utf8"), /import \{ starPrompt \
     if (caption === radar) page.openRadarShare({ item, title: "Full Benchmark", card,
       day: "2026-11-07", image: "https://example.org/card.png", pageUrl: item.url });
     else page.openDailyShare({ name: card.title, image: "https://example.org/card.png", caption, day: "2026-11-07" });
-    const link = page.body.find((node) => node.textContent === "Copy card and post on X ↗");
+    const link = page.body.find((node) => node.textContent === "Post on X ↗");
     const url = new URL(link.attrs.href);
     assert.equal(url.searchParams.get("text"), caption, "the intent preserves the entire caption, including URL encoding");
     assert.equal(url.searchParams.get("url"), null, "the site link is not appended twice");
     let copied;
     navigator.clipboard.writeText = async (text) => { copied = text; };
-    await page.body.find((node) => node.textContent === "Copy full text").click();
+    await page.body.find((node) => node.textContent === "Copy text").click();
     assert.equal(copied, caption);
     const notice = page.body.find((node) => node.textContent?.includes("X Premium may be required"));
     assert(notice.hidden, "X details stay hidden until Post on X is clicked");
