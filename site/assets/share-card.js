@@ -73,6 +73,39 @@ function flash(button, label, done) {
   setTimeout(() => { button.textContent = label; }, 1600);
 }
 
+const coarsePointer = () => Boolean(window.matchMedia?.("(pointer: coarse)")?.matches);
+
+// How to paste the card into X. A touch screen has no shortcut, and only Apple
+// computers paste with Cmd.
+function pasteHint(t) {
+  if (coarsePointer()) return t("X is open in a new window. In X, tap and hold, then choose Paste to add the image.");
+  const platform = navigator.userAgentData?.platform || navigator.platform || navigator.userAgent || "";
+  const key = /Mac/i.test(platform) ? "⌘V" : "Ctrl+V";
+  return t("X is open in a new window. Press {key} in X to add the image.", { key });
+}
+
+// A desktop browser such as Safari also offers navigator.share, and its system
+// menu only added a sixth control to choose from. Phones and tablets have a
+// coarse pointer and a share sheet worth opening.
+function hasShareSheet() {
+  return Boolean(navigator.share) && coarsePointer();
+}
+
+// The link button names what it copies. One label for three different links
+// (a benchmark page, a day of the radar, a source) left readers guessing.
+function linkLabel(pageUrl, t) {
+  let url;
+  try {
+    url = new URL(pageUrl, window.location.origin);
+  } catch {
+    return t("Copy source link");
+  }
+  if (url.host !== "benchmark-radar.org" && url.host !== window.location.host) {
+    return t("Copy source link");
+  }
+  return /^\/benchmarks\/[^/]+\/?$/.test(url.pathname) ? t("Copy benchmark link") : t("Copy page link");
+}
+
 export function openBenchmarkShare({ slug, name, t = identity }) {
   const imageUrl = benchmarkCardUrl(slug);
   if (!imageUrl) return;
@@ -147,13 +180,19 @@ export function openDailyShare({ name, image, caption, day, t = identity }) {
   });
 }
 
-// The dialog behind every Share button: the card, then the ways to send it.
-// ``imageSrc`` is a URL or a promise of one; ``getBlob`` returns the same image
-// as a blob for Share, Copy image and Download.
+// The dialog behind every Share button: the card, one main action (Post on X),
+// then the smaller ways to take the card elsewhere. ``imageSrc`` is a URL or a
+// promise of one; ``getBlob`` returns the same image as a blob for Share, Copy
+// image and Download.
 function openShareDialog({ name, pageUrl, caption = "", imageSrc, getBlob: blob, fileName, missing, t = identity }) {
   const title = t("{name} on Benchmark Radar", { name });
   const fullText = caption || `${title}\n\n${pageUrl}`;
   const host = ensureDialog();
+  // Agents read the caption and link here instead of working out which of the
+  // buttons to press. The dialog is reused, so each open overwrites them.
+  host.setAttribute("data-share-caption", fullText);
+  host.setAttribute("data-share-link", pageUrl);
+  host.setAttribute("data-share-image", "");
 
   const status = node("p", { className: "share-card-status", attrs: { role: "status" } });
   const image = node("img", {
@@ -166,8 +205,10 @@ function openShareDialog({ name, pageUrl, caption = "", imageSrc, getBlob: blob,
     },
   });
   const imageActions = [];
-  const action = (label, onClick, { needsImage = true, promptTrigger } = {}) => {
-    const button = node("button", { className: "secondary-link", text: label, attrs: { type: "button" } });
+  // ``icon`` names a share-card-tool-* class; styles.css draws it as a mask, so
+  // the button's own text stays the label that flash() swaps.
+  const action = (label, onClick, { needsImage = true, promptTrigger, icon } = {}) => {
+    const button = node("button", { className: `secondary-link share-card-tool share-card-tool-${icon}`, text: label, attrs: { type: "button" } });
     button.addEventListener("click", async () => {
       try {
         await onClick(button);
@@ -179,15 +220,43 @@ function openShareDialog({ name, pageUrl, caption = "", imageSrc, getBlob: blob,
       } catch (error) {
         if (error?.name === "AbortError") return;
         console.error(error);
-        status.textContent = t("That did not work here. Copy the link instead.");
+        status.textContent = t("That did not work here. Copy the text instead.");
       }
     });
     if (needsImage) imageActions.push(button);
     return button;
   };
 
+  // Copy text, Copy image, Download and the link, in that order; Share… ends the
+  // row on phones only.
   const buttons = [];
-  if (navigator.share) {
+  buttons.push(action(t("Copy text"), async (button) => {
+    await navigator.clipboard.writeText(fullText);
+    flash(button, t("Copy text"), t("Copied"));
+  }, { needsImage: false, icon: "text" }));
+  if (navigator.clipboard?.write && window.ClipboardItem) {
+    buttons.push(action(t("Copy image"), async (button) => {
+      // Safari only allows the write while the click is still active, so the
+      // item takes the pending blob rather than waiting for it first.
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob() })]);
+      flash(button, t("Copy image"), t("Copied"));
+    }, { promptTrigger: "card_copy_image", icon: "image" }));
+  }
+  buttons.push(action(t("Download"), async () => {
+    // A download attribute is ignored across origins, so save a local copy.
+    const href = URL.createObjectURL(await blob());
+    const link = node("a", { attrs: { href, download: fileName } });
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(href), 1000);
+  }, { promptTrigger: "card_download", icon: "download" }));
+  const copyLabel = linkLabel(pageUrl, t);
+  buttons.push(action(copyLabel, async (button) => {
+    await navigator.clipboard.writeText(pageUrl);
+    flash(button, copyLabel, t("Copied"));
+  }, { needsImage: false, promptTrigger: "card_copy_link", icon: "link" }));
+  if (hasShareSheet()) {
     // share() must run while the tap still counts as user activation, which a
     // slow fetch outlasts. The card is fetched as the dialog opens and shared
     // only once it is here; until then, or without file sharing, the link goes.
@@ -199,75 +268,60 @@ function openShareDialog({ name, pageUrl, caption = "", imageSrc, getBlob: blob,
       const payload = { title, text: fullText };
       if (file && navigator.canShare?.({ files: [file] })) payload.files = [file];
       await navigator.share(payload);
-    }, { needsImage: false }));
+    }, { needsImage: false, icon: "share" }));
   }
-  if (navigator.clipboard?.write && window.ClipboardItem) {
-    buttons.push(action(t("Copy image"), async (button) => {
-      // Safari only allows the write while the click is still active, so the
-      // item takes the pending blob rather than waiting for it first.
-      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob() })]);
-      flash(button, t("Copy image"), t("Copied"));
-    }, { promptTrigger: "card_copy_image" }));
-  }
-  buttons.push(action(t("Download"), async () => {
-    // A download attribute is ignored across origins, so save a local copy.
-    const href = URL.createObjectURL(await blob());
-    const link = node("a", { attrs: { href, download: fileName } });
-    document.body.append(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(href), 1000);
-  }, { promptTrigger: "card_download" }));
-  buttons.push(action(t("Copy link"), async (button) => {
-    await navigator.clipboard.writeText(pageUrl);
-    flash(button, t("Copy link"), t("Copied"));
-  }, { needsImage: false, promptTrigger: "card_copy_link" }));
-  buttons.push(action(t("Copy full text"), async (button) => {
-    await navigator.clipboard.writeText(fullText);
-    flash(button, t("Copy full text"), t("Copied"));
-  }, { needsImage: false }));
+
   const post = new URL("https://x.com/intent/post");
   post.searchParams.set("text", fullText);
   // X's post link carries text and a URL but never a file (#1068). So the card
   // goes to the clipboard on the same click, and the reader pastes it into the
   // post. The write starts before the link opens X's tab: browsers allow it only
   // while this page has focus and the click still counts as user activation.
-  // The label says so before the click, because X's tab covers this dialog.
+  // X opens in a new window that covers this dialog, so the note says what the
+  // click does before it happens, and the hint says what to do once X is open.
   const canCopyCard = Boolean(navigator.clipboard?.write && window.ClipboardItem);
-  const help = node("p", { className: "share-card-help", text: t("X opens with the full text. Paste the image with Ctrl+V or Cmd+V.") });
+  const note = node("p", {
+    className: "share-card-note",
+    text: canCopyCard
+      ? t("Copies the card image and opens X in a new window.")
+      : t("Opens X in a new window with the full text."),
+  });
+  const hint = node("p", { className: "share-card-hint", attrs: { role: "status" } });
   const lengthNotice = node("p", { className: "share-card-help", text: t("Long caption: X Premium may be required. The full text is preserved.") });
-  help.hidden = true;
+  hint.hidden = true;
   lengthNotice.hidden = true;
   const postOnX = node("a", {
-    className: "secondary-link",
-    text: canCopyCard ? t("Copy card and post on X ↗") : t("Post on X ↗"),
+    className: "secondary-link share-card-primary",
+    text: t("Post on X ↗"),
     attrs: { href: post.href, target: "_blank", rel: "noopener noreferrer" },
   });
   postOnX.addEventListener("click", () => {
-    help.hidden = false;
+    note.hidden = true;
+    hint.hidden = false;
+    hint.textContent = t("X is open in a new window.");
     lengthNotice.hidden = [...fullText].length <= 280;
     // A missing card keeps its own notice; there is nothing to copy or download.
     if (image.hidden) return;
+    const notCopied = () => t("X is open in a new window. The image was not copied. Download it, then attach it in X.");
     if (!canCopyCard) {
-      status.textContent = t("Download the card and attach it to your post.");
+      hint.textContent = notCopied();
       return;
     }
     navigator.clipboard
       .write([new ClipboardItem({ "image/png": blob() })])
       .then(() => {
-        status.textContent = t("Card copied. Paste it into your post (Ctrl+V or Cmd+V).");
+        hint.textContent = pasteHint(t);
       })
       .catch(() => {
         // The card may have failed while the copy was pending; keep its notice.
-        if (!image.hidden) status.textContent = t("Download the card and attach it to your post.");
+        if (!image.hidden) hint.textContent = notCopied();
       });
   });
-  buttons.push(postOnX);
 
   const unavailable = () => {
     image.hidden = true;
     for (const button of imageActions) button.hidden = true;
-    postOnX.textContent = t("Post on X ↗");
+    note.textContent = t("Opens X in a new window with the full text.");
     status.textContent = missing;
   };
   image.addEventListener("error", unavailable);
@@ -275,6 +329,8 @@ function openShareDialog({ name, pageUrl, caption = "", imageSrc, getBlob: blob,
     image.src = src;
     if (src.startsWith("blob:")) {
       host.addEventListener("close", () => URL.revokeObjectURL(src), { once: true });
+    } else {
+      host.setAttribute("data-share-image", src);
     }
   }, unavailable);
 
@@ -293,7 +349,9 @@ function openShareDialog({ name, pageUrl, caption = "", imageSrc, getBlob: blob,
       attrs: { id: "share-card-title" },
     }),
     image,
-    help,
+    postOnX,
+    note,
+    hint,
     lengthNotice,
     status,
     node("div", { className: "share-card-actions" }, buttons),
