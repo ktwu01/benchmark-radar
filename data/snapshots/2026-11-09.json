@@ -88273,5 +88273,183 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "Stanford University"
+        ],
+        "authors": [
+          "Ayush Sawarni",
+          "Wenqian Xing",
+          "Tijana Zrnic",
+          "Ramesh Johari",
+          "Vasilis Syrgkanis"
+        ],
+        "blurb": "Knowing When to Intervene is a new evaluation framework that treats deployment-time oversight as a causal question: at a particular point in an agent’s sequence of actions, would human review, model verification, or steering improve the final outcome compared with letting the agent continue?",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-09T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Knowing When to Intervene: Causal Evaluation of AI Agents",
+        "url": "https://arxiv.org/abs/2611.09792"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Jingdong Zhang",
+          "Jionghao Wang",
+          "Zhengming Yu",
+          "Yancheng Cai",
+          "Wei Chow",
+          "Chris Choy",
+          "Zhiyang Dou",
+          "Hang Hua",
+          "Jiachen Li",
+          "Zhixuan Liu",
+          "Chen Wang",
+          "Songlin Wei",
+          "Siyuan Yang",
+          "Yu Yuan",
+          "Xiaohang Zhan",
+          "Yucheng Zhang",
+          "Shuhong Zheng",
+          "Xin Li",
+          "Lingjie Liu",
+          "Wojciech Matusik",
+          "Zhengzhong Tu",
+          "Wenping Wang"
+        ],
+        "blurb": "Flex-RSI is a new benchmark in which an agent can revise its own harness—the prompts, tools, memory, and control loop around the model—over repeated rounds while operating under a fixed budget.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-09T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Flex-RSI: Benchmarking Recursive Self-Improvement of Frontier Agents",
+        "url": "https://arxiv.org/abs/2611.08946"
+      },
+      {
+        "affiliations": [
+          "Rensselaer Polytechnic Institute",
+          "Microsoft"
+        ],
+        "authors": [
+          "David H. Yang",
+          "Blake Bullwinkel",
+          "Amanda Minnich",
+          "Mohammad Mohammadi Amiri",
+          "Giorgio Severi"
+        ],
+        "blurb": "MemoryDojo is a new benchmark that follows malicious instructions through the full lifecycle of agent memory: storage in one session, later retrieval, and influence on behavior in another.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-09T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "MemoryDojo: Benchmarking Poisoning Through LLM Agent Memory",
+        "url": "https://arxiv.org/abs/2611.09721"
+      },
+      {
+        "affiliations": [
+          "National University of Singapore, Singapore"
+        ],
+        "authors": [
+          "Ruoyu Zhou",
+          "Shuyao Jiang",
+          "Haifeng Ruan",
+          "Abhik Roychoudhury"
+        ],
+        "blurb": "GreyZone is a new benchmark for automated red-teaming services operating against production-style agent applications.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-09T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "GreyZone: Production-quality Agentic Application Threats",
+        "url": "https://arxiv.org/abs/2611.09161"
+      },
+      {
+        "affiliations": [
+          "The Chinese University of Hong Kong, Hong Kong, China"
+        ],
+        "authors": [
+          "Zhongyi Zhang",
+          "Jingyu Xiao",
+          "Shuqing Li",
+          "Michael R. Lyu"
+        ],
+        "blurb": "AnimWeb-Bench is a new benchmark for generating complete animated webpage code from reference videos.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-09T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "AnimWeb-Bench: Benchmarking Animated Webpage Code Generation from Videos",
+        "url": "https://arxiv.org/abs/2611.09769"
+      },
+      {
+        "affiliations": [
+          "Malt, Paris, France"
+        ],
+        "authors": [
+          "Warren Jouanneau",
+          "Morgane Hoffmann",
+          "Emma Jouffroy",
+          "Marc Palyart"
+        ],
+        "blurb": "A new synthetic hiring benchmark evaluates candidate retrieval and demographic fairness together.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-09T05:01:09+00:00",
+        "source": "DataCite",
+        "title": "A Taxonomy-Driven Synthetic Dataset for Retrieval Effectiveness and Fairness Evaluation in Hiring",
+        "url": "https://doi.org/10.48550/arxiv.2611.09178"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Kamran Gholizadeh HamlAbadi",
+          "M. Vahdati",
+          "Ali Etemad",
+          "Abdulmotaleb El-Saddik"
+        ],
+        "blurb": "Benchmarking the Physical Fidelity of Feed-Forward 3D Reconstruction evaluates five reconstruction methods on 42 scenes using a shared PyBullet physics pipeline.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-09T00:00:00+00:00",
+        "source": "Semantic Scholar",
+        "title": "Benchmarking the Physical Fidelity of Feed-Forward 3D Reconstruction for Physical AI",
+        "url": "https://www.semanticscholar.org/paper/d37a5f73e3de1f42bc081564913898f5387329bb"
+      }
+    ],
+    "date": "2026-11-09",
+    "schema_version": 1,
+    "top": [
+      "https://arxiv.org/abs/2611.09792",
+      "https://arxiv.org/abs/2611.08946",
+      "https://arxiv.org/abs/2611.09721"
+    ]
+  },
   "since": "2026-11-07T13:28:22.037903+00:00"
 }
