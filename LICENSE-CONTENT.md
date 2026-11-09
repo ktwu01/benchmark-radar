@@ -1,6 +1,11 @@
 # Benchmark Radar content license
 
-Software: MIT License.
+Web UI (everything under `site/`): GNU AGPL-3.0-only, see
+[`site/LICENSE`](site/LICENSE). If you run a modified copy as a public website,
+you must offer your visitors its source code.
+
+Other software (pipeline, CLI, query service, generators) and the data files:
+MIT License, see [`LICENSE`](LICENSE).
 
 Technical report and original editorial content: CC BY-NC-SA 4.0. Commercial
 republication, resale, paid newsletters, dataset packaging, or commercial

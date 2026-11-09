@@ -92,7 +92,7 @@ npx skills add ktwu01/benchmark-radar
 - **开发环境：** `python -m pip install -e '.[dev]' && benchmark-radar normalize-catalog`
 - **支持 / 反馈：** [提交 issue](https://github.com/ktwu01/benchmark-radar/issues)
 - **联系：** [@ktwu01](https://github.com/ktwu01)
-- **开源协议：** MIT
+- **开源协议：** 网站前端（`site/`）为 [AGPL-3.0](site/LICENSE)；其余代码与数据为 [MIT](LICENSE)；报告与编辑内容见 [CC BY-NC-SA 4.0](LICENSE-CONTENT.md)
 
 ## 加入微信群
 
