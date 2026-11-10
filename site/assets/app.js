@@ -607,7 +607,6 @@ const I18N = {
     "3D skyline of {n} benchmarks. Time runs left to right from 2022. Earlier dates have a separate segment. Stems show recorded model-card adoption; hollow marks show unknown adoption or score scales. Gold rings mark the measured Pareto frontier.": "{n} 个 benchmark 的三维天际线。时间从 2022 年起向右延伸，更早的日期单独保留。细柱表示已记录的模型卡采用量；空心点表示采用量或分数刻度未知。金色圆环标出有测量依据的 Pareto 前沿。",
     // --- Brackets and chrome -------------------------------------------------
     "Skip to content": "跳到主要内容",
-    "Subscribe to Benchmark Radar via RSS": "通过 RSS 订阅 Benchmark Radar",
     "Site utilities": "网站工具",
     "Switch to Chinese (中文)": "切换到中文",
     "Switch to English": "切换到英文",

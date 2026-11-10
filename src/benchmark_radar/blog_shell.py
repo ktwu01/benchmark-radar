@@ -151,7 +151,9 @@ def _today_link(button: str) -> str:
             f"into a link: {button[:120]!r}"
         )
     href = _TODAY_HREFS[view.group(1)]
-    return f'<a href="{href}" data-i18n="{esc(label)}">{esc(label)}</a>'
+    # Keep the icon and the translatable label span the button carries.
+    inner = re.search(r">(.*)</button>", button, re.S).group(1).strip()
+    return f'<a href="{href}">{inner}</a>'
 
 
 def _mark_active(html: str, active_path: str) -> tuple[str, bool]:
@@ -186,10 +188,6 @@ def _adapt_header(header: str, active_path: str) -> tuple[str, bool]:
     navigation = _region(header, r'<nav class="view-nav".*?</nav>', "section nav")
     marked, in_nav = _adapt_navigation(navigation, active_path)
     header = header.replace(navigation, marked, 1)
-    # Same host-relative rule as the section nav: the badge keeps the site
-    # feed, but a local preview or mirror must not eject to the canonical
-    # domain on click.
-    header = header.replace(f'href="{SITE_URL}/feed.xml"', 'href="/feed.xml"', 1)
     contact = re.search(r'<button\b([^>]*\bid="badge-contact"[^>]*)>(.*?)</button>', header, re.S)
     if not contact:
         raise ValueError(

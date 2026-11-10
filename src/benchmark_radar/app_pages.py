@@ -58,12 +58,9 @@ HEAD_SEO_CLOSE = "<!-- /br:head-seo -->"
 PAGE_JSONLD = "<!-- br:page-jsonld -->"
 HOME_NAV_ACTIVE = (
     '<button type="button" class="nav-active" data-view="today" '
-    'aria-controls="today-view" aria-current="page" data-i18n="Today">Today</button>'
+    'aria-controls="today-view" aria-current="page">'
 )
-HOME_NAV_INACTIVE = (
-    '<button type="button" data-view="today" aria-controls="today-view" '
-    'data-i18n="Today">Today</button>'
-)
+HOME_NAV_INACTIVE = '<button type="button" data-view="today" aria-controls="today-view">'
 
 # Breadcrumb names, matching the navigation labels a reader clicked to get here.
 VIEW_LABELS = {
