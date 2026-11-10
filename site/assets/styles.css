@@ -512,13 +512,6 @@ button.repo-badge svg {
   font-weight: 700;
 }
 
-.feed-badge svg {
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-width: 2;
-}
-
 .repo-badge-label {
   position: absolute;
   width: 1px;
@@ -535,11 +528,6 @@ button.repo-badge svg {
   font-size: 1.2rem;
   font-weight: 700;
   line-height: 1;
-}
-
-.feed-badge svg circle {
-  fill: currentColor;
-  stroke: none;
 }
 
 .view-nav {
@@ -6318,6 +6306,26 @@ dialog {
   outline-offset: -3px;
 }
 
+/* One line icon per tab (issue #1097), drawn in the label's colour so the
+   active tab's icon inverts with its text. The tabs give back the icon's
+   width in padding so the bar still fits beside the brand at desktop width. */
+.view-nav button,
+.view-nav a {
+  padding: 0 7px;
+}
+
+.view-nav .nav-icon {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 1rem;
+  margin-right: 4px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
 .brand-mark {
   flex-shrink: 0;
 }
@@ -6414,7 +6422,7 @@ dialog {
   margin-top: 0;
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1500px) {
   .masthead {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -6565,7 +6573,7 @@ dialog {
 .library-directions {
   position: sticky;
   /* Clear the sticky masthead, which is 64px on a wide screen where it is
-     one row. At 1280px and below it wraps to two rows (108px); the override
+     one row. At 1500px and below it wraps to two rows (108px); the override
      below carries that height. Without the offset the masthead covered the
      sidebar's first controls once the reader scrolled. */
   top: calc(64px + 0.5rem);
@@ -6576,7 +6584,7 @@ dialog {
   gap: 0.15rem;
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1500px) {
   /* The masthead wraps to two rows here, so the sidebar needs the taller
      offset or its first controls slide under the masthead while scrolling. */
   .library-directions {
