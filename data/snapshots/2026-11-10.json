@@ -94895,5 +94895,185 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "University of California, Los Angeles",
+          "NVIDIA",
+          "University of California, Berkeley",
+          "National University of Singapore"
+        ],
+        "authors": [
+          "Peiran Wang",
+          "Chong Xiang",
+          "Wenjie Qu",
+          "Ying Li",
+          "Jiaheng Zhang",
+          "G. Edward Suh",
+          "Yuan Tian"
+        ],
+        "blurb": "MetaPI is a new toolkit that converts existing agent utility benchmarks into end-to-end indirect prompt-injection tests.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-10T08:36:22+00:00",
+        "source": "DataCite",
+        "title": "MetaPI: Constructing Prompt Injection Benchmarks from LLM Agent Benchmark",
+        "url": "https://doi.org/10.48550/arxiv.2611.10026"
+      },
+      {
+        "affiliations": [
+          "The Hong Kong University of Science and Technology (Guangzhou)"
+        ],
+        "authors": [
+          "Siyuan Li",
+          "Ke Wan",
+          "Boyong Hou",
+          "Yujie Deng",
+          "Zixuan Yuan"
+        ],
+        "blurb": "FinCutBench is a new, monthly updated benchmark for locating the calendar boundary of a model’s financial knowledge.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-10T09:17:51+00:00",
+        "source": "DataCite",
+        "title": "FinCutBench: A Continually Updated Benchmark for Measuring the Temporal Boundaries of LLM Financial Knowledge",
+        "url": "https://doi.org/10.48550/arxiv.2611.11588"
+      },
+      {
+        "affiliations": [
+          "University College London"
+        ],
+        "authors": [
+          "Halimat Afolabi",
+          "Daeyoung Lee"
+        ],
+        "blurb": "RankShift is a new audit of document-parsing rankings across three dataset configurations, six output-matching strategies, and three scoring metrics for 16 optical character recognition and vision-language models.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-10T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "RankShift: Evaluating Ranking Instability Across Benchmark Dimensions in Document Parsing",
+        "url": "https://arxiv.org/abs/2611.10679"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Xiangheng He",
+          "Mingjun Zhao",
+          "Zhehao Fan",
+          "Zhengjia Li",
+          "Xiaopeng Sun",
+          "Qingqing Xiao",
+          "Haolan Chen",
+          "Yu Xu"
+        ],
+        "blurb": "Joi-Bench-Task is a new interactive benchmark for full-duplex voice agents, which can listen and respond while continuing tool-based work.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-10T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Joi-Bench-Task: Benchmarking Task Coordination in Full-duplex Voice Agents through Interactive Simulation",
+        "url": "https://arxiv.org/abs/2611.12118"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "You Liu",
+          "Quanchao Lu"
+        ],
+        "blurb": "Replay Fidelity in Large Language Model Agent Evaluation is a new audit of 71 failed AppWorld executions using 284 isolated replays.",
+        "categories": [
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-10T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Replay Fidelity in LLM Agent Evaluation: Randomness, Hidden State, and Test Oracles in AppWorld",
+        "url": "https://arxiv.org/abs/2611.11216"
+      },
+      {
+        "affiliations": [
+          "Pivotal Research",
+          "University of Bath",
+          "National University Philippines",
+          "University of Notre Dame",
+          "Hebrew University of Jerusalem"
+        ],
+        "authors": [
+          "Joseph Marvin Imperial",
+          "Daniel Slate",
+          "Noam Kolt"
+        ],
+        "blurb": "ScrapeBench is a new agent benchmark that tests compliance with website terms of service and robots.txt directives across 1,626 sites that explicitly prohibit scraping.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-10T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "ScrapeBench: Evaluating Legal Compliance of AI Agents in Website Scraping",
+        "url": "https://arxiv.org/abs/2611.11306"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Zhengyu Hu",
+          "Zheyuan Xiao",
+          "Yike Wang",
+          "Hamish Ivison",
+          "Haoyu Wang",
+          "Yige Yuan",
+          "Rulin Shao",
+          "Yuetai Li",
+          "Niqi Lyu",
+          "Yicheng Ding",
+          "Shu Yang",
+          "Zhichen Zeng",
+          "Banghua Zhu",
+          "Jiaxin Pei",
+          "Kaize Ding",
+          "Pradeep Dasigi",
+          "Dan Roth",
+          "Hannaneh Hajishirzi",
+          "Noah A. Smith",
+          "Teng Xiao",
+          "Radha Poovendran"
+        ],
+        "blurb": "Infrathon is a newly discovered benchmark that gives agents 24-hour budgets for 150 runs on long-horizon artificial-intelligence infrastructure optimization.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-09T07:24:54+00:00",
+        "source": "XBsleepy",
+        "title": "Infrathon: Benchmarking Language Agents for Real-World, Long-Horizon AI Infra Optimization",
+        "url": "https://arxiv.org/abs/2611.11995v1"
+      }
+    ],
+    "date": "2026-11-10",
+    "schema_version": 1,
+    "top": [
+      "https://doi.org/10.48550/arxiv.2611.10026",
+      "https://doi.org/10.48550/arxiv.2611.11588",
+      "https://arxiv.org/abs/2611.10679"
+    ]
+  },
   "since": "2026-11-08T13:07:33.253679+00:00"
 }
