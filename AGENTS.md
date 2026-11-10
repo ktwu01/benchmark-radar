@@ -94,6 +94,7 @@ Applies to `README*`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `site/**`,
 ## Branches and pull requests
 
 - Never push to `main`. Every change goes through a pull request.
+- Open every pull request as ready for review, try not open as a draft.
 - Start each branch from the latest `main`. It need not track `main` after
   that; it only needs no merge conflict with `main` before it merges. Re-read
   the diff before you push.
