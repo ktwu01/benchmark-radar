@@ -94,8 +94,9 @@ Applies to `README*`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `site/**`,
 ## Branches and pull requests
 
 - Never push to `main`. Every change goes through a pull request.
-- Start each branch from the latest `main`, and keep it on the latest `main`
-  until it merges. Re-read the diff before you push.
+- Start each branch from the latest `main`. It need not track `main` after
+  that; it only needs no merge conflict with `main` before it merges. Re-read
+  the diff before you push.
 - Every pull request links an existing issue with `Closes #N` or `Related to #N`
   and fills in the pull request template. Automation closes a PR with no link.
 - Never merge a pull request unless the user asks. When asked, use a merge
