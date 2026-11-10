@@ -202,7 +202,7 @@ benchmark-radar rebuild
 pytest -q
 ```
 
-Before opening the pull request, run the full CI sequence from `AGENTS.md`
+Before opening the pull request, run the steps in `.github/workflows/ci.yml`
 against a clean checkout.
 
 ## What the loader rejects
