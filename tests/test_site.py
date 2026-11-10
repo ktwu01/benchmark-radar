@@ -476,11 +476,14 @@ def test_site_has_an_icon():
     assert parser.icon_hrefs, "index.html declares no icon"
 
 
-def test_top_right_utilities_use_shared_icon_geometry_and_contact_control():
+def test_top_right_utilities_use_shared_icon_geometry_without_a_contact_button():
     html = Path("site/index.html").read_text(encoding="utf-8")
     styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
 
-    assert 'id="badge-contact"' in html
+    # The header contact button is gone (#1097): the contact sheet opens from
+    # the footer and the stale-data banner instead.
+    assert 'id="badge-contact"' not in html
+    assert 'id="contact-dialog"' in html
     # The export badge is gone (issue #311): dataset requests go through the
     # contact sheet and the footer note, not a header button.
     assert 'id="badge-export"' not in html
@@ -489,13 +492,13 @@ def test_top_right_utilities_use_shared_icon_geometry_and_contact_control():
     assert 'id="badge-discord"' not in html
     assert 'id="lang-toggle"' in html
     assert 'class="repo-badge"' in html
-    assert "grid-template-columns: repeat(4, 2.6rem)" in styles
+    assert "grid-template-columns: repeat(2, 2.6rem)" in styles
     assert "width: 2.6rem" in styles
     assert "height: 2.6rem" in styles
     assert ".repo-badges" not in styles
     assert 'class="repo-badge-glyph" id="lang-toggle-label">中<' in html
     assert 'class="brand-icon github-icon"' in html
-    assert "grid-template-columns: repeat(4, 44px)" in styles
+    assert "grid-template-columns: repeat(2, 44px)" in styles
     mobile_badge = (
         styles.split("@media (max-width: 760px)", 1)[1]
         .split(".repo-badge {", 1)[1]
@@ -3875,7 +3878,7 @@ def test_library_sidebar_clears_the_sticky_masthead():
 
     # #889: the sidebar stuck at top: 0.5rem, so the sticky masthead covered
     # its first controls once the reader scrolled. The masthead is 64px on a
-    # wide screen and 108px once its nav wraps at 1500px.
+    # wide screen and 108px once its nav wraps at 1280px.
     rule = styles.split(".library-directions {", 1)[1].split("}", 1)[0]
     assert "top: calc(64px + 0.5rem);" in rule
     assert "max-height: calc(100vh - 64px - 1rem);" in rule
