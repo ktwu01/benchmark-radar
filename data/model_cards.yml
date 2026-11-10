@@ -156,6 +156,15 @@ source_documents:
     benchmarks: [swe_refactor_bench]
     published: 2026-08-24
     retrieved_at: 2026-11-05
+      - id: clawbench_v1_paper_results
+          name: ClawBench V1 paper results table
+    publisher: TIGER-AI-Lab
+    document_type: benchmark_leaderboard
+    url: https://github.com/TIGER-AI-Lab/ClawBench/blob/c8409629f4f2f9768731350d764aeb3035946c5d/README.md#results
+    benchmarks: [clawbench]
+    # arXiv v1 submission date of the paper whose results the table reports.
+    published: 2026-04-09
+    retrieved_at: 2026-11-10
 
 benchmarks:
   - id: gobench
@@ -2033,6 +2042,33 @@ benchmarks:
       so its numbers are not comparable with theirs. No per-model scores
       filed: the paper reports ambiguity and rank instability rather than
       benchmark scores.
+  - id: clawbench
+          name: ClawBench
+          aliases: ["ClawBench", "ClawBench: Can AI Agents Complete Everyday Online Tasks?"]
+          domain: agent
+          url: https://arxiv.org/abs/2604.08523
+          released: 2026-04-09
+          caveat: >-
+            Tasks run on live production websites, so the instrument changes as
+            sites change and a score is not reproducible against a frozen task
+            set. V1 (152 tasks) is scored by trajectory evaluation against human
+            references; V2 (129 tasks) uses request interception plus an LLM
+            judge under lenient and strict rubrics, and the harness is part of
+            the result. Numbers from the two versions, or from different
+            harnesses and judges, are not the same measurement.
+    - id: websitebench
+        name: WebsiteBench
+        aliases: ["WebsiteBench", "WebsiteBench: Can AI Agents Rebuild Websites through Browser Exploration?"]
+        domain: coding_agent
+        url: https://github.com/TIGER-AI-Lab/WebsiteBench
+        released: 2026-11-04
+        caveat: >-
+          A task's reward is the share of its hidden cases that pass, and a
+          case passes only when its functional checks pass and every visual
+          checkpoint reaches a normalized SSIM of 0.99 against a snapshot of a
+          third-party production site. Tasks carry 302 to 2,016 cases each, so
+          one reward number aggregates very different amounts of evidence, and
+          scores move when the reference site or its snapshot changes.
 
 # Model cards, technical reports and release posts.
 #
@@ -2046,6 +2082,7 @@ model_cards:
     model: GPT-5
     document_type: system_card
     published: 2025-08-07
+  
     url: https://openai.com/index/gpt-5-system-card/
     retrieved_at: 2026-08-02
     benchmarks:
