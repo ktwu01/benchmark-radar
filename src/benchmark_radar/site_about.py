@@ -25,6 +25,7 @@ import json
 import shutil
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 from .blog_shell import SiteChrome, chrome_i18n_table, extract_site_chrome, render_page
 from .feed import SITE_URL
@@ -117,16 +118,24 @@ _ELSEWHERE: tuple[tuple[str, str, str], ...] = (
 
 # Where a reader goes next, inside the site. The about page is a hub, so it
 # links to the surfaces a first-time visitor would otherwise have to find.
-_INSIDE: tuple[tuple[str, str], ...] = (
-    ("/benchmarks/", "Browse every benchmark in the catalog, one page each"),
-    ("/library/", "Browse benchmarks by research direction and save the ones you follow"),
-    ("/models/", "Compare AI models' reported benchmark scores side by side, by lab"),
-    ("/leaderboard/", "Compare reported scores across the benchmark frontier"),
-    ("/saturation/", "Watch scores on a benchmark climb toward saturation"),
-    ("/blog/", "Read the daily brief: what appeared today and what it means"),
-    ("/cli/", "Query the whole catalog offline from the command line"),
-    (CITE_PATH, "Cite the technical report, or read the publications behind it"),
-    (MEDIA_PATH, "Read press, paper summaries, and community posts about the project"),
+_INSIDE: tuple[tuple[str, str, str], ...] = (
+    ("/benchmarks/", "All benchmarks", "Browse every benchmark in the catalog, one page each"),
+    (
+        "/library/",
+        "Library",
+        "Browse benchmarks by research direction and save the ones you follow",
+    ),
+    ("/models/", "Models", "Compare AI models' reported benchmark scores side by side, by lab"),
+    ("/leaderboard/", "Landscape", "Compare reported scores across the benchmark frontier"),
+    ("/saturation/", "Saturation", "Watch scores on a benchmark climb toward saturation"),
+    ("/blog/", "Blog", "Read the daily brief: what appeared today and what it means"),
+    ("/cli/", "CLI", "Query the whole catalog offline from the command line"),
+    (CITE_PATH, "Publications", "Cite the technical report, or read the publications behind it"),
+    (
+        MEDIA_PATH,
+        "Media",
+        "Read press, paper summaries, and community posts about the project",
+    ),
 )
 
 _STORY = (
@@ -168,18 +177,42 @@ def _section(heading: str, body: str) -> str:
     return f"<section><h2>{esc(heading)}</h2><p>{esc(body)}</p></section>"
 
 
-def _link_list(items: tuple[tuple[str, str, str], ...]) -> str:
-    rows = "".join(
-        f'<li><a href="{esc(url)}" rel="noopener">{esc(label)}</a>'
-        f' <span class="blog-meta">{esc(note)}</span></li>'
-        for label, url, note in items
+def _host(url: str) -> str:
+    host = urlsplit(url).netloc
+    return host.removeprefix("www.")
+
+
+def _card(href: str, title: str, note: str, *, kicker: str = "", external: bool) -> str:
+    rel = ' rel="noopener"' if external else ""
+    top = f'<span class="link-card-kicker">{esc(kicker)}</span>' if kicker else ""
+    return (
+        f'<li><a class="link-card" href="{esc(href)}"{rel}>{top}'
+        f'<strong class="link-card-title">{esc(title)}</strong>'
+        f'<span class="link-card-note">{esc(note)}</span></a></li>'
     )
-    return f'<ul class="blog-links">{rows}</ul>'
+
+
+def _link_list(items: tuple[tuple[str, str, str], ...], *, note_first: bool = False) -> str:
+    """Render outside links as cards.
+
+    ``note_first`` puts a short note (a coverage type such as "Article") above
+    the title and the link's site below it, so a reader can scan by kind and
+    by outlet; a sentence-long note stays under the title instead.
+    """
+    if note_first:
+        cards = (
+            _card(url, label, _host(url), kicker=note, external=True) for label, url, note in items
+        )
+    else:
+        cards = (
+            _card(url, label, note, kicker=_host(url), external=True) for label, url, note in items
+        )
+    return f'<ul class="link-cards">{"".join(cards)}</ul>'
 
 
 def _inside_list() -> str:
-    rows = "".join(f'<li><a href="{esc(path)}">{esc(note)}</a></li>' for path, note in _INSIDE)
-    return f'<ul class="blog-links">{rows}</ul>'
+    cards = "".join(_card(path, title, note, external=False) for path, title, note in _INSIDE)
+    return f'<ul class="link-cards">{cards}</ul>'
 
 
 def about_body() -> str:
@@ -240,7 +273,7 @@ def media_body() -> str:
   For press and media inquiries, contact {contact}.</p>
 </header>
 <div class="blog-prose">
-<section id="coverage"><h2>Coverage</h2>{_link_list(MEDIA_COVERAGE)}</section>
+<section id="coverage"><h2>Coverage</h2>{_link_list(MEDIA_COVERAGE, note_first=True)}</section>
 <section id="contact"><h2>Media contact</h2>
 <p>For interviews, quotes, or data for a story, email {contact}.</p></section>
 </div>"""
