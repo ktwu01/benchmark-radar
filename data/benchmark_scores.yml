@@ -579,6 +579,10 @@ benchmarks:
     metric: strict_pass_rate
     direction: higher_is_better
     unit: percent
+- benchmark_id: clawbench
+  metric: task_completion
+  direction: higher_is_better
+  unit: percent
 results:
   # Brain-to-Text '24's official challenge summary names the top three final
   # submissions and the PyTorch baseline. The challenge used 1,200 held-out
@@ -7529,3 +7533,63 @@ results:
     reported_at: 2026-07-30
     value: 21.0
     read_from: html_text
+    - benchmark_id: clawbench
+      instrument: clawbench_v1_152_tasks
+      protocol: "V1 trajectory evaluation against human references; live websites; Findings of EMNLP 2026 paper evaluation"
+      model: Claude Sonnet 4.6
+      organization: Anthropic
+      source_id: clawbench_v1_paper_results
+      reported_at: 2026-04-09
+      value: 33.3
+      read_from: html_text
+      measurement_kind: benchmark_publisher_run
+  - benchmark_id: clawbench
+    instrument: clawbench_v1_152_tasks
+    protocol: "V1 trajectory evaluation against human references; live websites; Findings of EMNLP 2026 paper evaluation"
+    model: GLM-5
+    organization: Z.ai
+    source_id: clawbench_v1_paper_results
+    reported_at: 2026-04-09
+    value: 24.2
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+- benchmark_id: clawbench
+  instrument: clawbench_v1_152_tasks
+  protocol: "V1 trajectory evaluation against human references; live websites; Findings of EMNLP 2026 paper evaluation"
+  model: Gemini 3 Flash
+  organization: Google
+  source_id: clawbench_v1_paper_results
+  reported_at: 2026-04-09
+  value: 19.0
+  read_from: html_text
+  measurement_kind: benchmark_publisher_run
+  - benchmark_id: clawbench
+    instrument: clawbench_v1_152_tasks
+    protocol: "V1 trajectory evaluation against human references; live websites; Findings of EMNLP 2026 paper evaluation"
+    model: Claude Haiku 4.5
+    organization: Anthropic
+    source_id: clawbench_v1_paper_results
+    reported_at: 2026-04-09
+    value: 18.3
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+- benchmark_id: clawbench
+  instrument: clawbench_v1_152_tasks
+  protocol: "V1 trajectory evaluation against human references; live websites; Findings of EMNLP 2026 paper evaluation"
+  model: GPT-5.4
+  organization: OpenAI
+  source_id: clawbench_v1_paper_results
+  reported_at: 2026-04-09
+  value: 6.5
+  read_from: html_text
+  measurement_kind: benchmark_publisher_run
+  - benchmark_id: clawbench
+    instrument: clawbench_v1_152_tasks
+    protocol: "V1 trajectory evaluation against human references; live websites; Findings of EMNLP 2026 paper evaluation"
+    model: Gemini 3.1 Flash Lite
+    organization: Google
+    source_id: clawbench_v1_paper_results
+    reported_at: 2026-04-09
+    value: 3.3
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
