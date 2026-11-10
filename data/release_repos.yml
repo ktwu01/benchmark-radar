@@ -19,15 +19,25 @@ repos:
     retrieved_at: '2026-11-06'
   08-charan/code-sentinel:
     full_name: 08-charan/code-sentinel
-    size_kb: 0
+    size_kb: 20
     stars_at_check: 0
     archived: false
     created_at: '2026-11-09'
     pushed_at: '2026-11-09'
     unavailable: false
-    placeholder: true
-    retrieved_at: '2026-11-09'
-    root: []
+    placeholder: false
+    retrieved_at: '2026-11-10'
+    root:
+    - .github
+    - .gitignore
+    - LICENSE
+    - README.md
+    - push_to_github.bat
+    - push_to_github.ps1
+    - pyproject.toml
+    - requirements.txt
+    - sentinel
+    - tests
   0xf1d0/opencode-agent-benchmark:
     full_name: 0xf1d0/opencode-agent-benchmark
     size_kb: 289
@@ -174,6 +184,17 @@ repos:
     unavailable: false
     placeholder: false
     retrieved_at: '2026-11-06'
+  aakankshajadhav2006/hireflow-ai:
+    full_name: aakankshajadhav2006/HireFlow-AI
+    size_kb: 0
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-11-10'
+    pushed_at: '2026-11-10'
+    unavailable: false
+    placeholder: true
+    retrieved_at: '2026-11-10'
+    root: []
   aarnarathod114-lab/fake-voice-detector:
     full_name: aarnarathod114-lab/fake-voice-detector
     size_kb: 312
@@ -813,7 +834,7 @@ repos:
     pushed_at: '2026-10-17'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - README.md
   alexjacobs08/poople-bench:
@@ -913,7 +934,7 @@ repos:
     pushed_at: '2026-10-05'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - README.md
   allophylus/llmbench:
@@ -983,7 +1004,7 @@ repos:
     pushed_at: '2026-08-28'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - README.md
     - case-study-1-grok-maya.pdf
@@ -1017,7 +1038,7 @@ repos:
     pushed_at: '2026-10-25'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root: []
   amathislab/soma:
     size_kb: 67365
@@ -1107,14 +1128,14 @@ repos:
     retrieved_at: '2026-11-06'
   amitshekhariitbhu/ai-engineering-course:
     full_name: amitshekhariitbhu/ai-engineering-course
-    size_kb: 146
-    stars_at_check: 674
+    size_kb: 149
+    stars_at_check: 694
     archived: false
     created_at: '2026-09-23'
-    pushed_at: '2026-11-09'
+    pushed_at: '2026-11-10'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - .gitattributes
     - LICENSE
@@ -1138,7 +1159,7 @@ repos:
     pushed_at: '2026-09-12'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - README.md
   anandpiyush21/visual_computing:
@@ -1566,7 +1587,7 @@ repos:
     pushed_at: '2026-11-05'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - LICENSE
     - README.md
@@ -2344,7 +2365,7 @@ repos:
     pushed_at: '2026-10-23'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - .DS_Store
     - Assets
@@ -2410,10 +2431,6 @@ repos:
     - src
     - tests
     - tsconfig.json
-  berbyte/berbench:
-    unavailable: true
-    placeholder: null
-    retrieved_at: '2026-11-06'
   berkertun/historiographical-framing-evaluator:
     size_kb: 10262
     stars_at_check: 0
@@ -2458,7 +2475,7 @@ repos:
     pushed_at: '2026-11-05'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - README.md
   bhargs24/plumbline:
@@ -2673,7 +2690,7 @@ repos:
     pushed_at: '2026-09-17'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - README.md
   blickandmorty/epistemos-prompt-lab:
@@ -2981,31 +2998,6 @@ repos:
     unavailable: true
     placeholder: null
     retrieved_at: '2026-11-06'
-  carlacasaroti/slm-doc-extract-bench:
-    full_name: carlacasaroti/slm-doc-extract-bench
-    size_kb: 69
-    stars_at_check: 0
-    archived: false
-    created_at: '2026-08-11'
-    pushed_at: '2026-08-25'
-    unavailable: false
-    placeholder: false
-    retrieved_at: '2026-11-06'
-    root:
-    - .env.example
-    - .github
-    - .gitignore
-    - CONTRIBUTING.md
-    - LICENSE
-    - README.md
-    - configs
-    - docker
-    - docs
-    - pyproject.toml
-    - results
-    - scripts
-    - src
-    - tests
   cartman28/ai-coding-agents-benchmark:
     full_name: cartman28/ai-coding-agents-benchmark
     size_kb: 140
@@ -4357,25 +4349,6 @@ repos:
     - run.sh
     - tasks
     - tasks.json
-  dg1001/local-agentic-coding-128gb:
-    full_name: DG1001/local-agentic-coding-128gb
-    size_kb: 589
-    stars_at_check: 2
-    archived: false
-    created_at: '2026-08-10'
-    pushed_at: '2026-10-25'
-    unavailable: false
-    placeholder: false
-    retrieved_at: '2026-11-06'
-    root:
-    - .gitignore
-    - LICENSE
-    - README.md
-    - bench
-    - configs
-    - docs
-    - results
-    - tools
   dgskywalker/gcc-consumer-research-kit:
     full_name: DGskywalker/gcc-consumer-research-kit
     size_kb: 199
@@ -4460,27 +4433,11 @@ repos:
     pushed_at: '2026-09-08'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - .gitignore
     - LICENSE
     - README.md
-  dineshmv/xsmc_ai_evaluator:
-    full_name: DineshMv/XSMC_AI_Evaluator
-    size_kb: 25
-    stars_at_check: 0
-    archived: false
-    created_at: '2026-08-12'
-    pushed_at: '2026-08-12'
-    unavailable: false
-    placeholder: false
-    retrieved_at: '2026-11-06'
-    root:
-    - README.md
-    - api
-    - index.html
-    - package.json
-    - vercel.json
   discoailab/osworld-science:
     full_name: DiscoAILab/OSWorld-Science
     size_kb: 487
@@ -4715,37 +4672,6 @@ repos:
     - llm_48k_f16_hermes_toolcall.xlsx
     - results
     - scripts
-  drwjkirkpatrick-web/jetson-llm-benchmark:
-    full_name: drwjkirkpatrick-web/jetson-llm-benchmark
-    size_kb: 440
-    stars_at_check: 0
-    archived: false
-    created_at: '2026-08-12'
-    pushed_at: '2026-08-19'
-    unavailable: false
-    placeholder: false
-    retrieved_at: '2026-11-06'
-    root:
-    - AGENTS.md
-    - Coding_Benchmark_Report.pdf
-    - Hermes3_3B_50_Details.pdf
-    - Jetson_Edge_LLM_Model_Guide.pdf
-    - Multi_Prompt_Benchmark_Report.pdf
-    - README.md
-    - auto_bench_results.txt
-    - bench_coding.py
-    - bench_deepseek.py
-    - bench_deepseek_full.py
-    - bench_new3.py
-    - bench_new_models.py
-    - benchmark.py
-    - build_coding_pdf.py
-    - build_guide_pdf.py
-    - build_multiprompt_pdf.py
-    - coding_benchmark_results.json
-    - coding_quality_scores.json
-    - deepseek_coding_full.json
-    - deepseek_coding_results.json
   dt-09/ai-evaluation-evidence-validator:
     full_name: DT-09/DealTie
     size_kb: 347
@@ -4820,7 +4746,7 @@ repos:
     pushed_at: '2026-09-02'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - .gitignore
     - LICENSE
@@ -5956,7 +5882,7 @@ repos:
     pushed_at: '2026-09-26'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - CITATION.bib
     - README.md
@@ -6261,15 +6187,6 @@ repos:
     - pyproject.toml
     - requirements
     - vtr_bench
-  hariniramesh123/synapse:
-    size_kb: 3593
-    stars_at_check: 0
-    archived: false
-    created_at: '2026-08-11'
-    pushed_at: '2026-08-12'
-    unavailable: false
-    placeholder: false
-    retrieved_at: '2026-11-06'
   harishmasabu/agentic-benchmark-environment-n8n:
     full_name: harishmasabu/agentic-benchmark-environment-n8n
     size_kb: 23
@@ -6524,32 +6441,6 @@ repos:
     - summarize_results.py
     - total_benchmark.py
     - try.py
-  hello-yunshu/vica-starter:
-    full_name: hello-yunshu/vica-starter
-    size_kb: 1241
-    stars_at_check: 0
-    archived: false
-    created_at: '2026-08-10'
-    pushed_at: '2026-11-06'
-    unavailable: false
-    placeholder: false
-    retrieved_at: '2026-11-06'
-    root:
-    - .env.example
-    - .github
-    - .gitignore
-    - AGENTS.md
-    - CHANGELOG.md
-    - LICENSE
-    - README.md
-    - README.zh-CN.md
-    - SECURITY.md
-    - VICA 项目说明与实施规划.md
-    - docs
-    - pyproject.toml
-    - scripts
-    - src
-    - tests
   heretek-ai/harness-benchmark:
     size_kb: 463
     stars_at_check: 0
@@ -6594,7 +6485,7 @@ repos:
     pushed_at: '2026-10-04'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - .gitignore
     - README.md
@@ -6862,15 +6753,16 @@ repos:
     - tests
   ianalloway/eval-casework:
     full_name: ianalloway/eval-casework
-    size_kb: 0
+    size_kb: 1
     stars_at_check: 0
     archived: false
     created_at: '2026-11-09'
     pushed_at: '2026-11-09'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
-    root: []
+    retrieved_at: '2026-11-10'
+    root:
+    - README.md
   ianho-oai/codex-eval-plugin:
     full_name: ianho-oai/codex-eval-plugin
     size_kb: 1462
@@ -6924,6 +6816,27 @@ repos:
     unavailable: false
     placeholder: false
     retrieved_at: '2026-11-06'
+  ibm/swe-kernel-bench:
+    full_name: IBM/swe-kernel-bench
+    size_kb: 10
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-11-10'
+    pushed_at: '2026-11-10'
+    unavailable: false
+    placeholder: false
+    retrieved_at: '2026-11-10'
+    root:
+    - .github
+    - .travis.yml
+    - .whitesource
+    - CHANGELOG.md
+    - CODE_OF_CONDUCT.md
+    - CONTRIBUTING.md
+    - LICENSE
+    - MAINTAINERS.md
+    - README.md
+    - SECURITY.md
   ictinnovations/telephony-voice-agent-benchmark:
     full_name: ictinnovations/telephony-voice-agent-benchmark
     size_kb: 27
@@ -7059,7 +6972,7 @@ repos:
     pushed_at: '2026-09-23'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - README.md
     - assets
@@ -7530,20 +7443,6 @@ repos:
     - package.json
     - pyproject.toml
     - scripts
-  jeevangoli007/local-llm-benchmarker:
-    full_name: jeevangoli007/Local-LLM-Benchmarker
-    size_kb: 11
-    stars_at_check: 0
-    archived: false
-    created_at: '2026-08-11'
-    pushed_at: '2026-08-11'
-    unavailable: false
-    placeholder: false
-    retrieved_at: '2026-11-06'
-    root:
-    - Local_LLM_Benchmarker.ipynb
-    - OPEN-SOURCE LLMS.py
-    - README.md
   jenoyrex/vigil:
     size_kb: 2390
     stars_at_check: 1
@@ -7562,7 +7461,7 @@ repos:
     pushed_at: '2026-08-23'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root: []
   jessezzzzz/spatialscout:
     size_kb: 4902
@@ -8142,15 +8041,25 @@ repos:
     retrieved_at: '2026-11-06'
   kaulastudies/indic-structured-output-evals:
     full_name: kaulastudies/indic-structured-output-evals
-    size_kb: 0
+    size_kb: 21
     stars_at_check: 0
     archived: false
     created_at: '2026-11-09'
     pushed_at: '2026-11-09'
     unavailable: false
-    placeholder: true
-    retrieved_at: '2026-11-09'
-    root: []
+    placeholder: false
+    retrieved_at: '2026-11-10'
+    root:
+    - .gitignore
+    - AGENTS.md
+    - LICENSE
+    - MANIFEST.json
+    - README.md
+    - data
+    - docs
+    - evalkit.py
+    - evidence
+    - tests
   kaulastudies/proofagent-neathack-2026:
     full_name: kaulastudies/proofagent-neathack-2026
     size_kb: 973
@@ -8360,7 +8269,7 @@ repos:
     pushed_at: '2026-09-29'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - README.md
   kishanraj460/llm-evaluation-dashboard:
@@ -8372,7 +8281,7 @@ repos:
     pushed_at: '2026-10-31'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - README.md
   kittimzhe/blockblast-bench:
@@ -8388,37 +8297,6 @@ repos:
     unavailable: true
     placeholder: null
     retrieved_at: '2026-11-06'
-  kizz-tech/agentic-evidence-lab:
-    full_name: kizz-tech/agentic-evidence-lab
-    size_kb: 1362
-    stars_at_check: 1
-    archived: false
-    created_at: '2026-08-12'
-    pushed_at: '2026-11-04'
-    unavailable: false
-    placeholder: false
-    retrieved_at: '2026-11-06'
-    root:
-    - .gitattributes
-    - .github
-    - .gitignore
-    - AGENTS.md
-    - CHANGELOG.md
-    - CITATION.cff
-    - CODE_OF_CONDUCT.md
-    - CONTRIBUTING.md
-    - GOVERNANCE.md
-    - LICENSE
-    - NOTICE
-    - README.md
-    - RESULTS.md
-    - ROADMAP.md
-    - SECURITY.md
-    - SUPPORT.md
-    - docker
-    - docs
-    - examples
-    - pyproject.toml
   klingairesearch/longbanana:
     full_name: KlingAIResearch/LongBanana
     size_kb: 78419
@@ -8711,7 +8589,7 @@ repos:
     pushed_at: '2026-09-09'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - .gitignore
     - LICENSE
@@ -10181,7 +10059,7 @@ repos:
     pushed_at: '2026-11-08'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - README.md
   mkmanoj30/llm-guardrail-automated-evaluation-gateway:
@@ -10790,15 +10668,16 @@ repos:
     retrieved_at: '2026-11-06'
   nimishamothsra-dev/nimishamothsra-dev:
     full_name: nimishamothsra-dev/nimishamothsra-dev
-    size_kb: 0
+    size_kb: 6
     stars_at_check: 0
     archived: false
     created_at: '2026-11-09'
     pushed_at: '2026-11-09'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
-    root: []
+    retrieved_at: '2026-11-10'
+    root:
+    - README.md
   nishankkhadpe7-afk/synpassport:
     size_kb: 4913
     stars_at_check: 0
@@ -10860,7 +10739,7 @@ repos:
     pushed_at: '2026-10-25'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - .gitignore
     - README.md
@@ -11090,7 +10969,7 @@ repos:
     pushed_at: '2026-10-07'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - README.md
   omarfaruk16/ai-evaluation-system:
@@ -11329,7 +11208,7 @@ repos:
     pushed_at: '2026-09-26'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - README.md
   orvii/bench-notes:
@@ -11691,15 +11570,6 @@ repos:
     - requirements.txt
     - src
     - start-web.sh
-  pkulkarni245/llm-benchmark-proj:
-    size_kb: 3279
-    stars_at_check: 0
-    archived: false
-    created_at: '2026-08-11'
-    pushed_at: '2026-08-12'
-    unavailable: false
-    placeholder: false
-    retrieved_at: '2026-11-06'
   polyu-vclab/omnicompass:
     size_kb: 37817
     stars_at_check: 151
@@ -11830,21 +11700,6 @@ repos:
     unavailable: true
     placeholder: null
     retrieved_at: '2026-11-06'
-  prachiparab43/os3-ai-evaluation:
-    full_name: prachiparab43/os3-ai-evaluation
-    size_kb: 386
-    stars_at_check: 0
-    archived: false
-    created_at: '2026-08-11'
-    pushed_at: '2026-08-11'
-    unavailable: false
-    placeholder: false
-    retrieved_at: '2026-11-06'
-    root:
-    - .gitignore
-    - L1-02-chat-api-webui
-    - L2-01-rag-chatbot
-    - L3-04-hybrid-llm-routing-gateway
   prakhar10101/saucedemo-playwright-ai:
     full_name: Prakhar10101/saucedemo-playwright-ai
     size_kb: 24
@@ -11990,10 +11845,6 @@ repos:
     - backend
     - frontend
     - render.yaml
-  priyatham9/ehs-benchmarks:
-    unavailable: true
-    placeholder: null
-    retrieved_at: '2026-11-06'
   procrastinine/versionbench:
     size_kb: 4109
     stars_at_check: 0
@@ -12209,6 +12060,18 @@ repos:
     unavailable: false
     placeholder: false
     retrieved_at: '2026-11-06'
+  raghdafathi/requirement-tracing-text-mining:
+    full_name: raghdafathi/Requirement-Tracing-Text-Mining
+    size_kb: 5
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-11-10'
+    pushed_at: '2026-11-10'
+    unavailable: false
+    placeholder: true
+    retrieved_at: '2026-11-10'
+    root:
+    - README.md
   ragulmaran07/speechscore-ai:
     full_name: ragulmaran07/SpeechScore-AI
     size_kb: 753
@@ -12350,7 +12213,7 @@ repos:
     pushed_at: '2026-10-28'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - .gitignore
     - LICENSE
@@ -12882,7 +12745,7 @@ repos:
     pushed_at: '2026-10-22'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - README.md
     - fig
@@ -13096,6 +12959,26 @@ repos:
     unavailable: false
     placeholder: false
     retrieved_at: '2026-11-06'
+  salah-sh/solidityrag:
+    full_name: Salah-SH/SolidityRAG
+    size_kb: 110
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-11-09'
+    pushed_at: '2026-11-10'
+    unavailable: false
+    placeholder: false
+    retrieved_at: '2026-11-10'
+    root:
+    - .gitignore
+    - .python-version
+    - README.md
+    - benchmarks
+    - pyproject.toml
+    - scripts
+    - src
+    - tests
+    - uv.lock
   salesforce-misc/crm-agent-bench:
     full_name: salesforce-misc/crm-agent-bench
     size_kb: 1005
@@ -13125,15 +13008,6 @@ repos:
     - src
     - tests
     - uv.lock
-  salmabadrr/peptide-docking-benchmark:
-    size_kb: 3201
-    stars_at_check: 0
-    archived: false
-    created_at: '2026-08-11'
-    pushed_at: '2026-09-22'
-    unavailable: false
-    placeholder: false
-    retrieved_at: '2026-11-06'
   salomaopena/suspiciouslogindataset:
     size_kb: 13930
     stars_at_check: 0
@@ -13163,6 +13037,19 @@ repos:
     - experiments
     - requirements.txt
     - tests
+  sameethurisma88-cpu/learning-to-code:
+    full_name: sameethurisma88-cpu/learning-to-code
+    size_kb: 12
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-11-10'
+    pushed_at: '2026-11-10'
+    unavailable: false
+    placeholder: false
+    retrieved_at: '2026-11-10'
+    root:
+    - 01-university-learning
+    - README.md
   samim9090/essay-gradeing-system-with-the-integration-of-ai:
     full_name: samim9090/Essay-Gradeing-System-With-the-Integration-of-AI
     size_kb: 250
@@ -13218,7 +13105,7 @@ repos:
     pushed_at: '2026-09-17'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root: []
   sanketbisne/scalfod-langgraph-agentscli:
     full_name: sanketbisne/scalfod-langgraph-agentscli
@@ -13244,21 +13131,6 @@ repos:
     - reports
     - scripts
     - tests
-  santhi2609/ai-interview-platform:
-    full_name: santhi2609/AI-Interview-Platform
-    size_kb: 108
-    stars_at_check: 0
-    archived: false
-    created_at: '2026-08-11'
-    pushed_at: '2026-08-22'
-    unavailable: false
-    placeholder: false
-    retrieved_at: '2026-11-06'
-    root:
-    - .gitignore
-    - README.md
-    - client
-    - server
   santhoshkumar020/smart-interview-prep:
     full_name: SanthoshKumar020/smart-interview-prep
     size_kb: 48
@@ -13380,36 +13252,6 @@ repos:
     unavailable: false
     placeholder: false
     retrieved_at: '2026-11-06'
-  sauravbhattacharya001/maf-evals:
-    full_name: sauravbhattacharya001/maf-evals
-    size_kb: 468
-    stars_at_check: 2
-    archived: false
-    created_at: '2026-08-11'
-    pushed_at: '2026-08-12'
-    unavailable: false
-    placeholder: false
-    retrieved_at: '2026-11-06'
-    root:
-    - .editorconfig
-    - .env.example
-    - .github
-    - .gitignore
-    - Directory.Build.props
-    - Directory.Packages.props
-    - README.md
-    - ThreeTierEvals.sln
-    - artifacts
-    - config
-    - corpus
-    - corpus-adversarial
-    - datasets
-    - global.json
-    - incidents
-    - rubrics
-    - src
-    - testdata
-    - tests
   sboersma3/lettucegreenhousemodelsysid2027:
     size_kb: 28828
     stars_at_check: 0
@@ -13703,28 +13545,6 @@ repos:
     root:
     - README.md
     data_link: drive.google.com
-  sharif-gpt/persian-ai-evaluation-prompts:
-    full_name: Sharif-GPT/persian-ai-evaluation-prompts
-    size_kb: 33
-    stars_at_check: 0
-    archived: false
-    created_at: '2026-08-11'
-    pushed_at: '2026-08-11'
-    unavailable: false
-    placeholder: false
-    retrieved_at: '2026-11-06'
-    root:
-    - .gitignore
-    - CODE_OF_CONDUCT.md
-    - CONTRIBUTING.md
-    - LICENSE
-    - METHODOLOGY.md
-    - README.md
-    - data
-    - docs
-    - schema
-    - scripts
-    - tests
   sharlyne-agini/ai-project-management-benchmark:
     full_name: sharlyne-agini/ai-project-management-benchmark
     size_kb: 43
@@ -14130,7 +13950,7 @@ repos:
     pushed_at: '2026-09-05'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root: []
   sivasaikrishnasuryadevara/llm-devops-remediation-benchmark:
     full_name: SivaSaiKrishnaSuryadevara/llm-devops-remediation-benchmark
@@ -14267,6 +14087,17 @@ repos:
     - package.json
     - scripts
     - test
+  souravdebnath109/jev-bbq-bias-evaluation:
+    full_name: souravdebnath109/jev-bbq-bias-evaluation
+    size_kb: 0
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-11-10'
+    pushed_at: '2026-11-10'
+    unavailable: false
+    placeholder: true
+    retrieved_at: '2026-11-10'
+    root: []
   spatialvision/pumpire:
     full_name: SpatialVision/Pumpire
     size_kb: 978
@@ -14625,6 +14456,20 @@ repos:
     - train_llm.py
     - training.py
     - utils.py
+  susecrichard-cyber/ai-evaluation-toolkit:
+    full_name: susecrichard-cyber/ai-evaluation-toolkit
+    size_kb: 4
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-11-10'
+    pushed_at: '2026-11-10'
+    unavailable: false
+    placeholder: false
+    retrieved_at: '2026-11-10'
+    root:
+    - README.md
+    - evaluate.py
+    - examples
   swaroopduba/graph-database-cloud-benchmark:
     size_kb: 2381
     stars_at_check: 0
@@ -14749,7 +14594,7 @@ repos:
     pushed_at: '2026-10-03'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - README.md
   tanish-o9/quantora:
@@ -15190,6 +15035,27 @@ repos:
     - data
     - index.html
     - scripts
+  third-intelligence/warc:
+    full_name: third-intelligence/WARC
+    size_kb: 387
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-10-30'
+    pushed_at: '2026-11-10'
+    unavailable: false
+    placeholder: false
+    retrieved_at: '2026-11-10'
+    root:
+    - .gitignore
+    - LICENSE
+    - MODEL_CARD.md
+    - README.md
+    - agent
+    - data
+    - docs
+    - incl_licenses
+    - requirements.txt
+    - warc
   thorgnt12/ai-evaluation:
     full_name: thorgnt12/Ai-Evaluation
     size_kb: 521
@@ -16670,7 +16536,7 @@ repos:
     pushed_at: '2026-09-25'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - LICENSE
     - README.md
@@ -16761,6 +16627,36 @@ repos:
     - configs
     - docs
     - scripts
+  xixin9988-sys/nanomemory:
+    full_name: xixin9988-sys/nanomemory
+    size_kb: 421
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-11-10'
+    pushed_at: '2026-11-10'
+    unavailable: false
+    placeholder: false
+    retrieved_at: '2026-11-10'
+    root:
+    - .dockerignore
+    - .env.example
+    - .gitignore
+    - CHANGELOG.md
+    - Dockerfile
+    - IMPLEMENTATION_PLAN.md
+    - LICENSE
+    - README.md
+    - REVIEW_REPORT.md
+    - benchmarks
+    - docker-compose.yml
+    - docs
+    - dsh-plugin
+    - nanomemory
+    - pyproject.toml
+    - reports
+    - scripts
+    - sdk-zhqw_5pw
+    - tests
   xiziphus/np2-llm-bench:
     full_name: xiziphus/np2-llm-bench
     size_kb: 13
@@ -16839,7 +16735,7 @@ repos:
     pushed_at: '2026-11-05'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - README.md
   yangxijia111/ai-escape-lab:
@@ -16985,7 +16881,7 @@ repos:
     pushed_at: '2026-10-11'
     unavailable: false
     placeholder: true
-    retrieved_at: '2026-11-09'
+    retrieved_at: '2026-11-10'
     root:
     - README.md
   yrmfernandez/cognodb-cloud-benchmark:

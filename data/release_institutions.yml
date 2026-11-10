@@ -1624,3 +1624,10 @@ papers:
     source_url: null
     retrieved_at: '2026-11-09'
     institutions: []
+  '2611.12324':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.12324
+    retrieved_at: '2026-11-10'
+    institutions:
+    - Third Intelligence, Inc
+    - The University of Tokyo
