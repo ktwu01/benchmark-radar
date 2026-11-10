@@ -6418,6 +6418,8 @@ dialog {
 
 @media (max-width: 1280px) {
   .masthead {
+    /* Two-row header stays in flow on narrow screens, so it never covers the search field below; sticky returns on wide screens, where the header is one row. */
+    position: static;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 4px var(--space-3);
