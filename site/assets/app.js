@@ -12798,7 +12798,6 @@ function bindEvents() {
     rubricOwnsHistoryEntry = false;
     finishUtilityClose("rubric", owned);
   });
-  byId("badge-contact").addEventListener("click", openContact);
   byId("contact-close").addEventListener("click", () => byId("contact-dialog").close());
   byId("contact-dialog").addEventListener("click", (event) => {
     if (event.target === byId("contact-dialog")) byId("contact-dialog").close();

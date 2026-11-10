@@ -15,12 +15,6 @@ exists because the SPA machinery it referenced is absent:
 * view-only attributes (``data-view``, ``aria-controls``, ``aria-expanded``)
   are dropped from the section nav, and the blog's own link is marked active.
   The CLI id stays because styles.css uses it for the dialog-trigger treatment;
-* the Contact button opens a sheet that only exists inside the SPA, so it
-  becomes a link to ``/#contact`` — the dashboard deep link that opens the
-  same sheet on load;
-* the masthead RSS badge keeps the site-wide feed but with a root-relative
-  href, so a locally served preview (or any non-canonical mirror) stays on
-  the serving host; canonical and ``og:`` URLs keep the absolute SITE_URL;
 * the language toggle ships on every page, because the chrome itself is
   always translatable: ``blog.js`` drives it with the same visible
   contract ``app.js`` uses (title, glyph, aria-pressed) and applies the
@@ -119,29 +113,6 @@ def _drop_spa_attributes(fragment: str) -> str:
     return re.sub(r'\s(?:data-view|aria-controls|aria-expanded)="[^"]*"', "", fragment)
 
 
-def _ensure_outline_icon(inner: str) -> str:
-    """Guarantee the first SVG in ``inner`` carries ``outline-icon``.
-
-    Matches the class anywhere in the attribute so extra classes or a
-    different attribute order do not look like a missing icon. If the SVG
-    already has a class list, append; if it has none, add one.
-    """
-    svg = re.search(r"<svg\b([^>]*)>", inner)
-    if not svg:
-        raise ValueError("the contact button has no svg to carry outline-icon")
-    attrs = svg.group(1)
-    class_attr = re.search(r'\bclass="([^"]*)"', attrs)
-    if class_attr:
-        classes = class_attr.group(1).split()
-        if "outline-icon" in classes:
-            return inner
-        replacement = f'class="{class_attr.group(1)} outline-icon"'
-        tagged_attrs = attrs[: class_attr.start()] + replacement + attrs[class_attr.end() :]
-    else:
-        tagged_attrs = attrs + ' class="outline-icon"'
-    return inner[: svg.start()] + f"<svg{tagged_attrs}>" + inner[svg.end() :]
-
-
 def _today_link(button: str) -> str:
     view = re.search(r'data-view="([^"]*)"', button)
     label = re.sub(r"<[^>]+>", "", button).strip()
@@ -188,26 +159,6 @@ def _adapt_header(header: str, active_path: str) -> tuple[str, bool]:
     navigation = _region(header, r'<nav class="view-nav".*?</nav>', "section nav")
     marked, in_nav = _adapt_navigation(navigation, active_path)
     header = header.replace(navigation, marked, 1)
-    contact = re.search(r'<button\b([^>]*\bid="badge-contact"[^>]*)>(.*?)</button>', header, re.S)
-    if not contact:
-        raise ValueError(
-            "the dashboard masthead no longer carries the contact button; "
-            "the blog chrome cannot link to /#contact"
-        )
-    attrs, inner = contact.group(1), contact.group(2)
-    title = re.search(r'title="([^"]*)"', attrs)
-    i18n_title = re.search(r'data-i18n-title="([^"]*)"', attrs)
-    # The chat-bubble svg carries the outline-icon class from index.html. Ensure
-    # it is present when the button is transformed into an anchor badge.
-    inner = _ensure_outline_icon(inner)
-    header = header.replace(
-        contact.group(0),
-        '<a class="repo-badge" href="/#contact" aria-haspopup="dialog"'
-        + (f' title="{esc(title.group(1))}"' if title else "")
-        + (f' data-i18n-title="{esc(i18n_title.group(1))}"' if i18n_title else "")
-        + f">{inner}</a>",
-        1,
-    )
     return header, in_nav
 
 
