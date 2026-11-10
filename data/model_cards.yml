@@ -2082,7 +2082,7 @@ model_cards:
     model: GPT-5
     document_type: system_card
     published: 2025-08-07
-      url: https://openai.com/index/gpt-5-system-card/
+    url: https://openai.com/index/gpt-5-system-card/
     retrieved_at: 2026-08-02
     benchmarks:
       - gpqa_diamond
