@@ -93591,5 +93591,172 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "Lenovo Group",
+          "Marquette University",
+          "Cornell University"
+        ],
+        "authors": [
+          "Zihan Dong",
+          "Qishi Zhan",
+          "Minxuan Hu"
+        ],
+        "blurb": "A new study, “Agent Benchmarks Stop Ranking Before They Run Out of Tasks,” re-scores released runs from eight benchmarks and finds that binary pass/fail scoring can hide useful differences.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-11T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Agent Benchmarks Stop Ranking Before They Run Out of Tasks",
+        "url": "https://arxiv.org/abs/2611.13541"
+      },
+      {
+        "affiliations": [
+          "1 Waseda University, Tokyo, Japan 2 Karlsruhe Institute of Technology (KIT), Germany 3 Adelaide University, Adelaide, Australia"
+        ],
+        "authors": [
+          "Haowei Cheng",
+          "Milhan Kim",
+          "Bowen Jiang",
+          "Weixing Zhang",
+          "Yuhong Fu",
+          "Zhixu Liu",
+          "Naoyasu Ubayashi",
+          "Hironori Washizaki"
+        ],
+        "blurb": "OpenRE-Bench is a new open-source comparison harness for multi-agent requirements engineering, where agents turn software needs into specifications.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-11T05:16:43+00:00",
+        "source": "DataCite",
+        "title": "OpenRE-Bench: A Benchmark Harness for Multi-Agent Requirements Engineering with Mined GitHub Issues",
+        "url": "https://doi.org/10.48550/arxiv.2611.13925"
+      },
+      {
+        "affiliations": [
+          "Information Systems and Technology, Universitas OSO, Pontianak, Indonesia"
+        ],
+        "authors": [
+          "Agustino Halim"
+        ],
+        "blurb": "The new tenantbench release tests validators for language-model-generated Structured Query Language against cross-customer data leakage.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-11T05:33:14+00:00",
+        "source": "DataCite",
+        "title": "tenantbench: a leakage benchmark for tenant validators of language-model-generated SQL",
+        "url": "https://doi.org/10.5281/zenodo.24126240"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Jiahang Lin",
+          "Wanying Ren",
+          "Wanghan Xu",
+          "Huayu Sha",
+          "Yang Shu",
+          "Zhonghang Lu",
+          "Chengjun Pan",
+          "Yi Dong",
+          "Shichun Liu",
+          "Yuyang Hu",
+          "Shihan Dou",
+          "Honglin Guo",
+          "Huijie Lv",
+          "Pujun Zheng",
+          "Zhe Sun",
+          "Yuankai Ying",
+          "Yiding Wang",
+          "Jiahao Chen",
+          "Zhixiong Yang",
+          "Dingbo Yuan",
+          "Yicheng Zou",
+          "Zhecan Wang",
+          "Guoxiu He",
+          "Xiaoyu Xing",
+          "Qi Zhang",
+          "Tao Gui",
+          "Xuanjing Huang"
+        ],
+        "blurb": "ARE-bench is a new benchmark for research agents working inside ongoing projects rather than clean, standalone tasks.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-11T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "ARE-bench: Benchmarking Agents' Research Ability in Real-World Researcher Sessions and Workspaces",
+        "url": "https://arxiv.org/abs/2611.14364"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Dong Bo",
+          "Fanjin Zhang",
+          "Ke Cheng",
+          "Xinxin Zhao",
+          "Xiaowei Su",
+          "Yang Wang",
+          "Jinghang Xu",
+          "Cuiping Li",
+          "Hong Chen",
+          "Jing Zhang"
+        ],
+        "blurb": "BuySideFlow is a new benchmark of 408 Chinese-language investment-research tasks covering equities, funds, fixed income, and macroeconomics.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-11T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "BuySideFlow: A Point-in-Time Benchmark for LLM Agents in Investment Research",
+        "url": "https://arxiv.org/abs/2611.12966"
+      },
+      {
+        "affiliations": [
+          "Stevens Institute of Technology",
+          "Hoboken, NJ, USA",
+          "University of Massachusetts Boston",
+          "Boston, MA, USA"
+        ],
+        "authors": [
+          "Zihan Chen",
+          "Lei Nico Zheng",
+          "Di Zhu"
+        ],
+        "blurb": "A new analysis of 1,260,967 blind Chatbot Arena votes holds model versions fixed and finds that the share of judgments saying both answers were bad rose by 1.71 percentage points per month from May 2023 to August 2024.",
+        "categories": [
+          "benchmark",
+          "evaluation"
+        ],
+        "published_at": "2026-11-11T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "AI Isn't Getting Dumber, We're Getting Pickier: Rising Standards in Human Evaluation of Large Language Models",
+        "url": "https://arxiv.org/abs/2611.14333"
+      }
+    ],
+    "date": "2026-11-11",
+    "schema_version": 1,
+    "top": [
+      "https://arxiv.org/abs/2611.13541",
+      "https://doi.org/10.48550/arxiv.2611.13925",
+      "https://doi.org/10.5281/zenodo.24126240"
+    ]
+  },
   "since": "2026-11-09T12:17:15.307949+00:00"
 }
