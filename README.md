@@ -31,11 +31,10 @@ connector, a first-party feed, or the Hacker News attention source. -->
   <a href="https://scholar.google.com/citations?user=s9w1k-cAAAAJ&amp;hl=en"><img alt="Google Scholar" src="https://img.shields.io/badge/Google%20Scholar-4285F4?style=for-the-badge&amp;logo=googlescholar&amp;logoColor=white"></a>
 </p>
 
-Researchers and evaluation engineers from these institutions use Benchmark
-Radar for benchmark discovery and score tracking:
+Researchers and evaluation engineers from these institutions viewed/using it for benchmark discovery and score tracking:
 
 <p align="center">
-  <img src="assets/researchers.svg" alt="Institutions whose researchers use Benchmark Radar: Google, Amazon, AWS, IBM, Tesla, Carnegie Mellon, Harvard, MIT, UC Berkeley, NUS, Auckland, Xtracta, Alibaba, Tencent Hunyuan, Qwen, ByteDance, Ant Group, StepFun, Kuaishou, Zhihu, Tsinghua, SJTU, Tencent, Z.ai, Hebrew University of Jerusalem, Fudan, Chungnam National University, RISE, York" />
+  <img src="assets/researchers.svg" alt="Institutions whose researchers viewed/using Benchmark Radar: Google, Amazon, AWS, IBM, Tesla, Carnegie Mellon, Harvard, MIT, UC Berkeley, NUS, Auckland, Xtracta, Alibaba, Tencent Hunyuan, Qwen, ByteDance, Ant Group, StepFun, Kuaishou, Zhihu, Tsinghua, SJTU, Tencent, Z.ai, Hebrew University of Jerusalem, Fudan, Chungnam National University, RISE, York, Meta, Microsoft, NVIDIA, OpenAI, Anthropic, UCLA, UC San Diego, Unitree" />
 </p>
 
 I kept running into new benchmarks while doing benchmark research, so I built a
