@@ -89,7 +89,7 @@ website as not applicable.
 
 A "verified head" in the description goes stale with each new commit. Merge the
 current head onto the latest `main` in a clean worktree with its own venv. Run
-the full CI sequence from [`AGENTS.md`](AGENTS.md). When the user asks you to
+the steps in [`.github/workflows/ci.yml`](.github/workflows/ci.yml). When the user asks you to
 merge, run `gh pr merge --merge --admin --match-head-commit <sha>`. A push after
 your check then cannot slip in. Never squash.
 
