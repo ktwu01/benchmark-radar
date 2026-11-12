@@ -179,6 +179,8 @@ jobs:
     needs: build
     outputs:
       asset-name: ${{ steps.publish.outputs.asset_name }}
+      previous-asset: ${{ steps.previous.outputs.asset_name }}
+      manifest-read: ${{ steps.previous.outputs.valid }}
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -189,6 +191,18 @@ jobs:
         with:
           name: cli-data-release
           path: cli-data-release
+      - name: Record the currently deployed CLI archive
+        id: previous
+        run: |
+          if curl --fail --silent --show-error --max-time 20 \
+            https://benchmark-radar.org/data/cli/manifest.json -o deployed-cli-manifest.json \
+            && previous_asset="$(jq -er '.artifact.filename | select(type == "string" and test("^benchmark-radar-data(-[0-9a-f]{12})?\\.zip$"))' deployed-cli-manifest.json)"; then
+            echo "asset_name=${previous_asset}" >> "$GITHUB_OUTPUT"
+            echo "valid=true" >> "$GITHUB_OUTPUT"
+          else
+            # An unavailable manifest must delay cleanup, not the deployment.
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Publish rolling CLI data release
         id: publish
         env:
@@ -247,14 +261,21 @@ jobs:
       - name: Keep the newest CLI data assets
         env:
           GH_TOKEN: ${{ github.token }}
+          PREVIOUS_ASSET: ${{ needs.publish-cli-data.outputs.previous-asset }}
+          MANIFEST_READ: ${{ needs.publish-cli-data.outputs.manifest-read }}
         run: |
+          if [[ "$MANIFEST_READ" != true ]]; then
+            echo "Keeping existing CLI assets because the previous manifest was unavailable"
+            exit 0
+          fi
           old_assets="$(
             gh release view cli-data \
               --repo "$GITHUB_REPOSITORY" \
               --json assets | jq -r --arg current "${{ needs.publish-cli-data.outputs.asset-name }}" \
+                --arg previous "$PREVIOUS_ASSET" \
                 '.assets
                 | map(select(.name | startswith("benchmark-radar-data-")))
-                | map(select(.name != $current))
+                | map(select(.name != $current and .name != $previous))
                 | sort_by(.createdAt) | reverse | .[3:][]?.name'
           )"
           while IFS= read -r asset; do
