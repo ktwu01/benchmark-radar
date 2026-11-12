@@ -1,0 +1,47 @@
+name: Submit or backfill a benchmark / 提交或补录 Benchmark
+description: Submit a benchmark the site has not tracked yet, or backfill missing results for one it already has. / 提交站点尚未收录的 Benchmark，或补录已有 Benchmark 缺失的成绩。
+labels: ["enhancement", "good first issue"]
+body:
+  - type: markdown
+    attributes:
+      value: "English or Chinese is fine. Say which benchmark it is and where the scores come from. / 中英文均可。请写清楚是哪个 Benchmark，以及分数来自哪里。"
+  - type: dropdown
+    id: type
+    attributes:
+      label: What is this / 这是什么
+      options:
+        - Add a new benchmark / 新增 Benchmark
+        - Backfill results for an existing benchmark / 补录已有 Benchmark 的成绩
+    validations:
+      required: true
+  - type: input
+    id: benchmark
+    attributes:
+      label: Benchmark name / Benchmark 名称
+      description: The benchmark as its paper or official site names it. / 按论文或官网的名称填写。
+      placeholder: SWE-bench Verified
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source link / 来源链接
+      description: Paper, official site, or leaderboard URL. / 论文、官网或排行榜链接。
+      placeholder: https://example.com/benchmark
+    validations:
+      required: true
+  - type: input
+    id: results
+    attributes:
+      label: Results link or results to add / 成绩链接或要补录的成绩
+      description: Optional. A link to the results, or the model names and scores to add. / 可选：成绩链接，或直接写出要补录的模型名称与分数。
+      placeholder: Frontier-1 — 72.3, Frontier-2 — 68.1
+    validations:
+      required: false
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else / 其他说明
+      description: Optional. / 可选。
+    validations:
+      required: false
