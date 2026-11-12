@@ -7622,7 +7622,7 @@ results:
   # reported_at records that source date, not an inferred model run date.
   - benchmark_id: websitebench
     instrument: websitebench_70_20261017
-    protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model run dates, harnesses and budgets unstated"
+    protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model configuration: Claude Opus 5.5; exact context, reasoning, harness and run dates unavailable in current publisher metadata"
     model: Claude Opus 5.5
     organization: Anthropic
     source_id: websitebench_leaderboard_2026_10_17
@@ -7632,7 +7632,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: websitebench
     instrument: websitebench_70_20261017
-    protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model run dates, harnesses and budgets unstated"
+    protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model configuration: GPT 6.1 Sol; exact context, reasoning, harness and run dates unavailable in current publisher metadata"
     model: GPT 6.1 Sol
     organization: OpenAI
     source_id: websitebench_leaderboard_2026_10_17
@@ -7642,7 +7642,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: websitebench
     instrument: websitebench_70_20261017
-    protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model run dates, harnesses and budgets unstated"
+    protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model configuration: Claude Opus 5; exact context, reasoning, harness and run dates unavailable in current publisher metadata"
     model: Claude Opus 5
     organization: Anthropic
     source_id: websitebench_leaderboard_2026_10_17
@@ -7652,7 +7652,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: websitebench
     instrument: websitebench_70_20261017
-    protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model run dates, harnesses and budgets unstated"
+    protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model configuration: GLM 5.3 Flash; exact context, reasoning, harness and run dates unavailable in current publisher metadata"
     model: GLM 5.3 Flash
     organization: Z.ai
     source_id: websitebench_leaderboard_2026_10_17
@@ -7662,7 +7662,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: websitebench
     instrument: websitebench_70_20261017
-    protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model run dates, harnesses and budgets unstated"
+    protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model configuration: DeepSeek V4.1 Flash; exact context, reasoning, harness and run dates unavailable in current publisher metadata"
     model: DeepSeek V4.1 Flash
     organization: DeepSeek
     source_id: websitebench_leaderboard_2026_10_17
@@ -7672,7 +7672,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: websitebench
     instrument: websitebench_70_20261017
-    protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model run dates, harnesses and budgets unstated"
+    protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model configuration: Grok 4.6; exact context, reasoning, harness and run dates unavailable in current publisher metadata"
     model: Grok 4.6
     organization: xAI
     source_id: websitebench_leaderboard_2026_10_17
@@ -7682,7 +7682,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: websitebench
     instrument: websitebench_70_20261017
-    protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model run dates, harnesses and budgets unstated"
+    protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model configuration: Kimi K3; exact context, reasoning, harness and run dates unavailable in current publisher metadata"
     model: Kimi K3
     organization: Moonshot AI
     source_id: websitebench_leaderboard_2026_10_17
@@ -7692,7 +7692,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: websitebench
     instrument: websitebench_70_20261017
-    protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model run dates, harnesses and budgets unstated"
+    protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model configuration: Qwen 3.8 Max; exact context, reasoning, harness and run dates unavailable in current publisher metadata"
     model: Qwen 3.8 Max
     organization: Qwen Team
     source_id: websitebench_leaderboard_2026_10_17
