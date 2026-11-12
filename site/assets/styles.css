@@ -4890,6 +4890,10 @@ footer {
     row-gap: 0.5rem;
   }
 
+  html {
+    scroll-padding-top: 1rem;
+  }
+
   .masthead-main {
     display: contents;
   }
@@ -6418,12 +6422,16 @@ dialog {
 
 @media (max-width: 1280px) {
   .masthead {
-    /* Two-row header stays in flow on narrow screens, so it never covers the search field below; sticky returns on wide screens, where the header is one row. */
+    /* Keep the two-row header from covering the search field while scrolling. */
     position: static;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 4px var(--space-3);
     padding-block: var(--space-2);
+  }
+
+  html {
+    scroll-padding-top: 1rem;
   }
 
   .masthead-main {
@@ -6446,6 +6454,13 @@ dialog {
     grid-row: 2;
     width: 100%;
     padding-block: 0;
+  }
+}
+
+@media (min-width: 1051px) and (max-width: 1280px) {
+  .benchmark-navigator {
+    top: 0.5rem;
+    max-height: calc(100vh - 1rem);
   }
 }
 
@@ -6568,10 +6583,7 @@ dialog {
 
 .library-directions {
   position: sticky;
-  /* Clear the sticky masthead, which is 64px on a wide screen where it is
-     one row. At 1280px and below it wraps to two rows (108px); the override
-     below carries that height. Without the offset the masthead covered the
-     sidebar's first controls once the reader scrolled. */
+  /* Clear the one-row sticky masthead on wide screens. */
   top: calc(64px + 0.5rem);
   max-height: calc(100vh - 64px - 1rem);
   overflow-y: auto;
@@ -6581,11 +6593,10 @@ dialog {
 }
 
 @media (max-width: 1280px) {
-  /* The masthead wraps to two rows here, so the sidebar needs the taller
-     offset or its first controls slide under the masthead while scrolling. */
+  /* Reclaim the space once the narrow-screen masthead scrolls away. */
   .library-directions {
-    top: calc(108px + 0.5rem);
-    max-height: calc(100vh - 108px - 1rem);
+    top: 0.5rem;
+    max-height: calc(100vh - 1rem);
   }
 }
 
