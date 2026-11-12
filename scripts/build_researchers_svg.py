@@ -33,9 +33,12 @@ LOGO_DIR = REPO_ROOT / "assets" / "researchers-logos"
 OUT = REPO_ROOT / "assets" / "researchers.svg"
 
 ROWS = [
-    ["google.svg", "amazon.svg", "aws.svg", "microsoft.svg", "meta.svg", "ibm.svg", "tesla.svg"],
-    ["openai.svg", "anthropic.svg", "nvidia.svg", "cmu.svg", "harvard.svg", "mit.svg", "berkeley.svg"],
-    ["nus.svg", "auckland.svg", "xtracta.svg", "ucla.svg", "ucsd.svg", "unitree.svg"],
+    # Row 1: OpenAI and Anthropic lead the strip.
+    ["openai.svg", "anthropic.svg", "google.svg", "microsoft.svg", "meta.svg"],
+    # Row 2 rebalanced from 7 logos down to 5.
+    ["amazon.svg", "aws.svg", "ibm.svg", "tesla.svg", "nvidia.svg"],
+    ["cmu.svg", "harvard.svg", "mit.svg", "berkeley.svg", "ucla.svg", "ucsd.svg"],
+    ["nus.svg", "auckland.svg", "xtracta.svg", "unitree.svg"],
     ["alibaba.svg", "hunyuan.svg", "qwen.svg", "bytedance.svg", "antgroup.png", "zai.svg"],
     [
         "stepfun.png",
