@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "model_count": 1004,
+  "model_count": 998,
   "source_counts": {
     "artificial_analysis": 595,
     "llm_stats": 339,
-    "model_reports": 183
+    "model_reports": 178
   },
   "multiple_sources": 108,
   "organizations": [
@@ -71,7 +71,6 @@
     "Poolside",
     "Prime Intellect",
     "Qwen",
-    "Qwen Team",
     "Reka AI",
     "SK Telecom",
     "Sakana AI",
@@ -2331,6 +2330,17 @@
       }
     },
     {
+      "key": "deepseek-deepseek-v4-1-flash",
+      "model": "DeepSeek-V4.1-Flash",
+      "organization": "DeepSeek",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 22
+      }
+    },
+    {
       "key": "deepseek-deepseek-v4-1-flash-1017",
       "model": "DeepSeek-V4.1-Flash-1017",
       "organization": "DeepSeek",
@@ -2339,28 +2349,6 @@
       ],
       "source_counts": {
         "model_reports": 1
-      }
-    },
-    {
-      "key": "deepseek-deepseek-v4-1-flash-98fe6bfbbbfb5db55a0d25a8bd3ac64b93edaf15904ce16f778325c7afef4d71",
-      "model": "DeepSeek V4.1 Flash",
-      "organization": "DeepSeek",
-      "provenance_sources": [
-        "model_reports"
-      ],
-      "source_counts": {
-        "model_reports": 1
-      }
-    },
-    {
-      "key": "deepseek-deepseek-v4-1-flash-b561ec0839f71383b5362f27427aa7bfc9449eddc5b0dafc1f1dbab885d084b7",
-      "model": "DeepSeek-V4.1-Flash",
-      "organization": "DeepSeek",
-      "provenance_sources": [
-        "model_reports"
-      ],
-      "source_counts": {
-        "model_reports": 21
       }
     },
     {
@@ -3097,26 +3085,17 @@
       }
     },
     {
-      "key": "google-gemini-3-1-flash-lite-37eb8af4337da156923111e2cb3222bcf12d77de24ef23b3787d8ac6ed985d94",
+      "key": "google-gemini-3-1-flash-lite",
       "model": "Gemini 3.1 Flash-Lite",
       "organization": "Google",
       "provenance_sources": [
         "artificial_analysis",
-        "llm_stats"
-      ],
-      "source_counts": {
-        "artificial_analysis": 22,
-        "llm_stats": 11
-      }
-    },
-    {
-      "key": "google-gemini-3-1-flash-lite-ea7d3fd097f66cc4e9540d3605ff1cb3adb62a83ea00e6b7fe59281331ec4b76",
-      "model": "Gemini 3.1 Flash Lite",
-      "organization": "Google",
-      "provenance_sources": [
+        "llm_stats",
         "model_reports"
       ],
       "source_counts": {
+        "artificial_analysis": 22,
+        "llm_stats": 11,
         "model_reports": 1
       }
     },
@@ -7897,25 +7876,14 @@
       }
     },
     {
-      "key": "openai-gpt-6-1-sol-5b58a5d442d7268eb36e277974238e3c4a921b5833475ef81deb08f62247aa6c",
+      "key": "openai-gpt-6-1-sol",
       "model": "GPT-6.1 Sol",
       "organization": "OpenAI",
       "provenance_sources": [
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 3
-      }
-    },
-    {
-      "key": "openai-gpt-6-1-sol-ebe16eaec1410612367da8cc6aeada57f8584dac0bc00940b8debf21badbca8a",
-      "model": "GPT 6.1 Sol",
-      "organization": "OpenAI",
-      "provenance_sources": [
-        "model_reports"
-      ],
-      "source_counts": {
-        "model_reports": 1
+        "model_reports": 4
       }
     },
     {
@@ -8360,17 +8328,6 @@
       }
     },
     {
-      "key": "qwen-qwen-3-5",
-      "model": "Qwen 3.5",
-      "organization": "Qwen",
-      "provenance_sources": [
-        "model_reports"
-      ],
-      "source_counts": {
-        "model_reports": 1
-      }
-    },
-    {
       "key": "qwen-qwen-3-8-max",
       "model": "Qwen 3.8 Max",
       "organization": "Qwen",
@@ -8378,7 +8335,7 @@
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 2
+        "model_reports": 3
       }
     },
     {
@@ -9106,7 +9063,7 @@
       ],
       "source_counts": {
         "llm_stats": 38,
-        "model_reports": 40
+        "model_reports": 41
       }
     },
     {
@@ -9820,17 +9777,6 @@
       ],
       "source_counts": {
         "artificial_analysis": 4
-      }
-    },
-    {
-      "key": "qwen-team-qwen-3-8-max",
-      "model": "Qwen 3.8 Max",
-      "organization": "Qwen Team",
-      "provenance_sources": [
-        "model_reports"
-      ],
-      "source_counts": {
-        "model_reports": 1
       }
     },
     {
@@ -11239,25 +11185,14 @@
       }
     },
     {
-      "key": "z-ai-glm-5-3-flash-57a6292b9805a20bee8236b47674e196c85a41d179231b7507c0b6405ec92f13",
+      "key": "z-ai-glm-5-3-flash",
       "model": "GLM-5.3-Flash",
       "organization": "Z.ai",
       "provenance_sources": [
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 15
-      }
-    },
-    {
-      "key": "z-ai-glm-5-3-flash-88e344291bcfbbf92e49e2d1d4c3ec33696e680fa64b0c3f4f8e241b80024c4e",
-      "model": "GLM 5.3 Flash",
-      "organization": "Z.ai",
-      "provenance_sources": [
-        "model_reports"
-      ],
-      "source_counts": {
-        "model_reports": 1
+        "model_reports": 16
       }
     },
     {

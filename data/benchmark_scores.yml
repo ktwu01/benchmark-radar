@@ -7538,6 +7538,12 @@ results:
     reported_at: 2026-07-30
     value: 21.0
     read_from: html_text
+  # The paper identifies Qwen 3.5 as 397B (Appendix C); the publisher's API
+  # configuration names qwen3.5-397b-a17b, matching the existing model card:
+  # https://github.com/TIGER-AI-Lab/ClawBench/blob/c8409629f4f2f9768731350d764aeb3035946c5d/models/models.example.yaml
+  # WebsiteBench's explicit source_id values identify existing model releases;
+  # preserve canonical registry labels rather than introducing punctuation twins:
+  # https://github.com/WebsiteBench/websitebench.github.io/blob/ab6ed67d2369efa4ce9c7ce35e87b54156206ac8/data/cohort.json
   - benchmark_id: clawbench
     instrument: clawbench_paper_153_tasks
     protocol: "OpenClaw harness; 153 live-web tasks; trajectory Agent-as-Judge (Claude Sonnet 4.6) against human references; paper Table 3 overall success rate; high reasoning effort; provider-default top_p (1.0); 8192 output tokens per turn; 1800s wall-clock limit; 5min idle timeout"
@@ -7551,7 +7557,7 @@ results:
   - benchmark_id: clawbench
     instrument: clawbench_paper_153_tasks
     protocol: "OpenClaw harness; 153 live-web tasks; trajectory Agent-as-Judge (Claude Sonnet 4.6) against human references; paper Table 3 overall success rate; greedy decoding at provider default; provider-default top_p (1.0); 8192 output tokens per turn; 1800s wall-clock limit; 5min idle timeout"
-    model: Qwen 3.5
+    model: Qwen3.5-397B-A17B
     organization: Qwen
     source_id: clawbench_v1_paper_results
     reported_at: 2026-07-20
@@ -7611,7 +7617,7 @@ results:
   - benchmark_id: clawbench
     instrument: clawbench_paper_153_tasks
     protocol: "OpenClaw harness; 153 live-web tasks; trajectory Agent-as-Judge (Claude Sonnet 4.6) against human references; paper Table 3 overall success rate; greedy decoding at provider default; provider-default top_p (1.0); 8192 output tokens per turn; 1800s wall-clock limit; 5min idle timeout"
-    model: Gemini 3.1 Flash Lite
+    model: Gemini 3.1 Flash-Lite
     organization: Google
     source_id: clawbench_v1_paper_results
     reported_at: 2026-07-20
@@ -7633,7 +7639,7 @@ results:
   - benchmark_id: websitebench
     instrument: websitebench_70_20261017
     protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model configuration: GPT 6.1 Sol; exact context, reasoning, harness and run dates unavailable in current publisher metadata"
-    model: GPT 6.1 Sol
+    model: GPT-6.1 Sol
     organization: OpenAI
     source_id: websitebench_leaderboard_2026_10_17
     reported_at: 2026-10-17
@@ -7653,7 +7659,7 @@ results:
   - benchmark_id: websitebench
     instrument: websitebench_70_20261017
     protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model configuration: GLM 5.3 Flash; exact context, reasoning, harness and run dates unavailable in current publisher metadata"
-    model: GLM 5.3 Flash
+    model: GLM-5.3-Flash
     organization: Z.ai
     source_id: websitebench_leaderboard_2026_10_17
     reported_at: 2026-10-17
@@ -7663,7 +7669,7 @@ results:
   - benchmark_id: websitebench
     instrument: websitebench_70_20261017
     protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model configuration: DeepSeek V4.1 Flash; exact context, reasoning, harness and run dates unavailable in current publisher metadata"
-    model: DeepSeek V4.1 Flash
+    model: DeepSeek-V4.1-Flash
     organization: DeepSeek
     source_id: websitebench_leaderboard_2026_10_17
     reported_at: 2026-10-17
@@ -7694,7 +7700,7 @@ results:
     instrument: websitebench_70_20261017
     protocol: "websitebench-70-20261017 cohort; 70 tasks; test-pooled 100 * sum(passed tests) / sum(total tests); Overall; model configuration: Qwen 3.8 Max; exact context, reasoning, harness and run dates unavailable in current publisher metadata"
     model: Qwen 3.8 Max
-    organization: Qwen Team
+    organization: Qwen
     source_id: websitebench_leaderboard_2026_10_17
     reported_at: 2026-10-17
     value: 7.3
