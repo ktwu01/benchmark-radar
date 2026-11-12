@@ -864,6 +864,18 @@ def test_cli_search_rejects_conflicting_or_missing_query(tmp_path: Path, capsys)
         assert json.loads(capsys.readouterr().err)["error"]["code"] == "invalid_query"
 
 
+def test_cli_search_validates_query_before_loading_uninitialized_data(
+    tmp_path: Path, capsys
+) -> None:
+    for query_arguments in (["--query", "   "], ["!!!"]):
+        exit_code = run_query_cli(
+            ["search", *query_arguments, "--data-dir", str(tmp_path / "not-initialized"), "--json"]
+        )
+
+        assert exit_code == 2
+        assert json.loads(capsys.readouterr().err)["error"]["code"] == "invalid_query"
+
+
 def test_cli_and_http_return_the_same_non_search_contracts(tmp_path: Path, capsys) -> None:
     # Regression: shared search alone did not prevent detail/status serializers drifting.
     paths = _catalog(tmp_path)

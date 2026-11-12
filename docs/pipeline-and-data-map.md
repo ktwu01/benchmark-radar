@@ -102,9 +102,10 @@ Run these from the repository root, in this order:
    each source record and only the fields needed to filter and render Today
    results; the full history remains in `radar.json`.
 3. `benchmark-radar build-data-release` validates the local corpus through
-   `QueryService` and writes `site/data/cli/manifest.json` plus the checksummed
-   `site/data/cli/benchmark-radar-data.zip`. The manifest is published on Pages;
-   the complete archive is uploaded to the rolling `cli-data` GitHub Release.
+   `QueryService` and writes `site/data/cli/manifest.json` plus a checksummed,
+   content-versioned archive under `site/data/cli/`. The manifest is published
+   on Pages; the complete archive is uploaded to the rolling `cli-data` GitHub
+   Release without replacing an earlier versioned asset.
 4. `benchmark-radar export` writes the full-catalog documentation ranking as JSON,
    CSV, Markdown, and badge files under `site/data/`. It does not write
    `radar.json`; after changing the release signals or the leaderboard code,

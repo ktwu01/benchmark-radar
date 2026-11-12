@@ -167,7 +167,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
       - name: Remove CLI archive from Pages artifact
-        run: rm site/data/cli/benchmark-radar-data.zip
+        run: rm site/data/cli/benchmark-radar-data-*.zip
       - name: Configure Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
       - name: Upload Pages artifact
@@ -177,6 +177,10 @@ jobs:
 
   publish-cli-data:
     needs: build
+    outputs:
+      asset-name: ${{ steps.publish.outputs.asset_name }}
+      previous-asset: ${{ steps.previous.outputs.asset_name }}
+      manifest-read: ${{ steps.previous.outputs.valid }}
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -187,10 +191,29 @@ jobs:
         with:
           name: cli-data-release
           path: cli-data-release
+      - name: Record the currently deployed CLI archive
+        id: previous
+        run: |
+          if curl --fail --silent --show-error --max-time 20 \
+            https://benchmark-radar.org/data/cli/manifest.json -o deployed-cli-manifest.json \
+            && previous_asset="$(jq -er '.artifact.filename | select(type == "string" and test("^benchmark-radar-data(-[0-9a-f]{12})?\\.zip$"))' deployed-cli-manifest.json)"; then
+            echo "asset_name=${previous_asset}" >> "$GITHUB_OUTPUT"
+            echo "valid=true" >> "$GITHUB_OUTPUT"
+          else
+            # An unavailable manifest must delay cleanup, not the deployment.
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Publish rolling CLI data release
+        id: publish
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          asset_path="$(find cli-data-release -maxdepth 1 -type f \
+            -name 'benchmark-radar-data-*.zip' -print -quit)"
+          asset_name="${asset_path##*/}"
+          asset_size="$(stat -c '%s' "$asset_path")"
+          asset_sha256="$(sha256sum "$asset_path" | cut -d ' ' -f1)"
+          echo "asset_name=${asset_name}" >> "$GITHUB_OUTPUT"
           if ! gh release view cli-data --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             # --latest=false keeps this rolling data drop out of the "Latest"
             # slot. GitHub picks the latest release by creation date, so without
@@ -203,13 +226,66 @@ jobs:
               --title "Benchmark Radar CLI data" \
               --notes "Checksummed data used by benchmark-radar init and sync."
           fi
-          gh release upload cli-data \
-            cli-data-release/benchmark-radar-data.zip \
-            --clobber \
-            --repo "$GITHUB_REPOSITORY"
+          existing_asset="$(
+            gh release view cli-data \
+              --repo "$GITHUB_REPOSITORY" \
+              --json assets | jq -r --arg name "$asset_name" --arg size "$asset_size" \
+                --arg digest "sha256:$asset_sha256" \
+                '.assets[]
+                | select(.name == $name)
+                | select(.state == "uploaded" and (.size | tostring) == $size and .digest == $digest)
+                | .name'
+          )"
+          if [[ "$existing_asset" == "$asset_name" ]]; then
+            echo "Verified CLI data asset ${asset_name} already exists"
+          else
+            if gh release view cli-data --repo "$GITHUB_REPOSITORY" --json assets \
+              | jq -r --arg name "$asset_name" '.assets[] | select(.name == $name) | .name' \
+              | grep -Fxq "$asset_name"; then
+              gh release delete-asset cli-data "$asset_name" \
+                --repo "$GITHUB_REPOSITORY" --yes
+            fi
+            gh release upload cli-data "$asset_path" --repo "$GITHUB_REPOSITORY"
+          fi
+
+  prune-cli-data:
+    needs: [deploy-complete, publish-cli-data]
+    if: >-
+      ${{ !cancelled() && needs.deploy-complete.result == 'success' &&
+        needs.publish-cli-data.result == 'success' }}
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Keep the newest CLI data assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIOUS_ASSET: ${{ needs.publish-cli-data.outputs.previous-asset }}
+          MANIFEST_READ: ${{ needs.publish-cli-data.outputs.manifest-read }}
+        run: |
+          if [[ "$MANIFEST_READ" != true ]]; then
+            echo "Keeping existing CLI assets because the previous manifest was unavailable"
+            exit 0
+          fi
+          old_assets="$(
+            gh release view cli-data \
+              --repo "$GITHUB_REPOSITORY" \
+              --json assets | jq -r --arg current "${{ needs.publish-cli-data.outputs.asset-name }}" \
+                --arg previous "$PREVIOUS_ASSET" \
+                '.assets
+                | map(select(.name | startswith("benchmark-radar-data-")))
+                | map(select(.name != $current and .name != $previous))
+                | sort_by(.createdAt) | reverse | .[3:][]?.name'
+          )"
+          while IFS= read -r asset; do
+            [[ -z "$asset" ]] || gh release delete-asset cli-data "$asset" \
+              --repo "$GITHUB_REPOSITORY" --yes
+          done <<< "$old_assets"
 
   publish-hf-dataset:
-    needs: build
+    needs: deploy-complete
+    if: ${{ !cancelled() && needs.deploy-complete.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -315,7 +391,7 @@ jobs:
           done
 
   deploy:
-    needs: [build, publish-cli-data, publish-hf-dataset]
+    needs: [build, publish-cli-data]
     permissions:
       pages: write
       id-token: write
@@ -328,3 +404,29 @@ jobs:
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
+
+  deploy-retry:
+    needs: deploy
+    if: ${{ !cancelled() && needs.deploy.result == 'failure' }}
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Retry GitHub Pages deployment
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
+
+  deploy-complete:
+    needs: [deploy, deploy-retry]
+    if: >-
+      ${{ !cancelled() &&
+        (needs.deploy.result == 'success' || needs.deploy-retry.result == 'success') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm Pages deployment succeeded
+        run: echo "GitHub Pages deployment completed"

@@ -22,6 +22,7 @@ from .query import (
     QueryPaths,
     QueryService,
     error_payload,
+    validate_search_query,
 )
 from .query_http import serve_query_api
 from .related_work import ManuscriptContext, append_missing_bibtex
@@ -141,6 +142,23 @@ def _service(args: argparse.Namespace) -> QueryService:
             QueryPaths(index=args.index, shards=args.shards, snapshots=args.snapshots)
         )
     return QueryService(DataStore(root=args.data_dir).query_paths())
+
+
+def _search_query(args: argparse.Namespace) -> str:
+    if args.query_flag is not None and args.query is not None and args.query_flag != args.query:
+        raise QueryError(
+            "search query was given twice with different values",
+            code="invalid_query",
+            status=400,
+        )
+    query = args.query_flag if args.query_flag is not None else args.query
+    if query is None:
+        raise QueryError(
+            "search query is required; pass a query or --query",
+            code="invalid_query",
+            status=400,
+        )
+    return validate_search_query(query)
 
 
 def _print_json(payload: dict[str, Any]) -> None:
@@ -410,22 +428,9 @@ def run_query_cli(argv: Sequence[str] | None = None) -> int:
             payload = DataStore(root=args.data_dir).sync()
             printer = _print_json if args.json else _print_sync
         else:
+            query = _search_query(args) if args.command == "search" else None
             service = _service(args)
             if args.command == "search":
-                if args.query_flag is not None and args.query is not None:
-                    if args.query_flag != args.query:
-                        raise QueryError(
-                            "search query was given twice with different values",
-                            code="invalid_query",
-                            status=400,
-                        )
-                query = args.query_flag if args.query_flag is not None else args.query
-                if query is None:
-                    raise QueryError(
-                        "search query is required; pass a query or --query",
-                        code="invalid_query",
-                        status=400,
-                    )
                 payload = service.search(
                     query,
                     scope=args.scope,

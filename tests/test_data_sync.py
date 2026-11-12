@@ -4,6 +4,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import shutil
 import urllib.error
 import zipfile
@@ -11,6 +12,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
+import yaml
 
 from benchmark_radar.data_release import (
     DEFAULT_RELEASE_BASE_URL,
@@ -175,7 +177,9 @@ def test_release_bundle_is_complete_deterministic_and_self_describing(tmp_path: 
     assert first_bytes == second_bytes
     assert first["benchmark_count"] == 1
     assert first["snapshot_count"] == 1
-    assert first["artifact"]["filename"] == DEFAULT_RELEASE_FILENAME
+    assert first["artifact"]["filename"].startswith("benchmark-radar-data-")
+    assert first["artifact"]["filename"].endswith(".zip")
+    assert DEFAULT_RELEASE_FILENAME == "benchmark-radar-data-{digest}.zip"
     assert first["artifact"]["sha256"] == hashlib.sha256(first_bytes).hexdigest()
     with zipfile.ZipFile(io.BytesIO(first_bytes)) as archive:
         assert sorted(archive.namelist()) == [
@@ -198,12 +202,60 @@ def test_deploy_and_ci_build_the_downloadable_release_after_its_inputs() -> None
     assert "gh release upload cli-data" in pages
     # The rolling data drop must never take the "Latest" slot from a versioned release.
     assert "--latest=false" in pages
-    assert "needs: [build, publish-cli-data, publish-hf-dataset]" in pages
+    assert "publish-cli-data:\n    needs: build" in pages
+    assert "deploy:\n    needs: [build, publish-cli-data]" in pages
+    assert "deploy-retry:" in pages
+    assert "needs: deploy-complete" in pages
+    assert "needs: [deploy, deploy-retry]" in pages
+    assert "prune-cli-data:" in pages
+    assert "prune-cli-data:\n    needs: [deploy-complete, publish-cli-data]" in pages
+    assert "already exists" in pages
+    assert "sha256sum" in pages
+    assert "gh release delete-asset cli-data" in pages
     assert (
         pages.index("Upload CLI data release for publishing")
         < pages.index("Remove CLI archive from Pages artifact")
         < pages.index("Upload Pages artifact")
     )
+
+
+@pytest.mark.parametrize(
+    ("deploy", "retry", "cancelled", "expected"),
+    [
+        ("success", "skipped", False, True),
+        ("failure", "success", False, True),
+        ("failure", "failure", False, False),
+        ("cancelled", "skipped", True, False),
+        ("success", "skipped", True, False),
+    ],
+)
+def test_post_deploy_jobs_run_only_after_success(deploy, retry, cancelled, expected):
+    # A skipped retry or failed first attempt propagates through needs unless
+    # every downstream consumer overrides the default success() condition.
+    jobs = yaml.safe_load(Path(".github/workflows/pages.yml").read_text())["jobs"]
+    results = {"deploy": deploy, "deploy-retry": retry, "publish-cli-data": "success"}
+
+    def permits(job):
+        expression = jobs[job].get("if", "success()")
+        expression = expression.removeprefix("${{").removesuffix("}}").strip()
+        expression = expression.replace("!cancelled()", str(not cancelled))
+        expression = expression.replace("always()", "True")
+        expression = expression.replace("success()", str(deploy == retry == "success"))
+        expression = re.sub(
+            r"needs\.([\w-]+)\.result",
+            lambda match: repr(results[match[1]]),
+            expression,
+        )
+        expression = " ".join(expression.split()).replace("&&", "and").replace("||", "or")
+        return eval(expression, {"__builtins__": {}}, {})
+
+    complete = permits("deploy-complete")
+    assert complete == expected
+    results["deploy-complete"] = "success" if complete else "skipped"
+    for job in ("publish-hf-dataset", "prune-cli-data"):
+        assert permits(job) == expected
+    results["publish-cli-data"] = "failure"
+    assert not permits("prune-cli-data")
 
 
 def test_public_defaults_keep_bulk_downloads_off_pages() -> None:
