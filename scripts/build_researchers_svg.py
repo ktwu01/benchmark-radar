@@ -33,8 +33,9 @@ LOGO_DIR = REPO_ROOT / "assets" / "researchers-logos"
 OUT = REPO_ROOT / "assets" / "researchers.svg"
 
 ROWS = [
-    ["google.svg", "amazon.svg", "aws.svg", "ibm.svg", "tesla.svg"],
-    ["cmu.svg", "harvard.svg", "mit.svg", "berkeley.svg", "nus.svg", "auckland.svg", "xtracta.svg"],
+    ["google.svg", "amazon.svg", "aws.svg", "microsoft.svg", "meta.svg", "ibm.svg", "tesla.svg"],
+    ["openai.svg", "anthropic.svg", "nvidia.svg", "cmu.svg", "harvard.svg", "mit.svg", "berkeley.svg"],
+    ["nus.svg", "auckland.svg", "xtracta.svg", "ucla.svg", "ucsd.svg", "unitree.svg"],
     ["alibaba.svg", "hunyuan.svg", "qwen.svg", "bytedance.svg", "antgroup.png", "zai.svg"],
     [
         "stepfun.png",
@@ -44,7 +45,7 @@ ROWS = [
         "sjtu.png",
         "tencent.svg",
     ],
-    # Row 5 (issue #735): the remaining verified institutions. moreGeo and
+    # Row 6 (issue #735): the remaining verified institutions. moreGeo and
     # Kultiva have no official logo on Wikimedia Commons, so they stay out.
     [
         "hebrew-university.svg",
