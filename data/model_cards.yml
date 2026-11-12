@@ -156,15 +156,25 @@ source_documents:
     benchmarks: [swe_refactor_bench]
     published: 2026-08-24
     retrieved_at: 2026-11-05
-      - id: clawbench_v1_paper_results
-          name: ClawBench V1 paper results table
+
+  - id: clawbench_v1_paper_results
+    name: ClawBench paper Table 3 (arXiv v2)
     publisher: TIGER-AI-Lab
     document_type: benchmark_leaderboard
-    url: https://github.com/TIGER-AI-Lab/ClawBench/blob/c8409629f4f2f9768731350d764aeb3035946c5d/README.md#results
+    url: https://arxiv.org/html/2604.08523v2#S3.T3
     benchmarks: [clawbench]
-    # arXiv v1 submission date of the paper whose results the table reports.
-    published: 2026-04-09
-    retrieved_at: 2026-11-10
+    published: 2026-07-20
+    retrieved_at: 2026-11-12
+
+  - id: websitebench_leaderboard_2026_10_17
+    name: WebsiteBench official leaderboard (2026-10-17 cohort)
+    publisher: TIGER-AI-Lab
+    document_type: benchmark_leaderboard
+    url: https://website-bench.com/#results
+    benchmarks: [websitebench]
+    # The embedded waffle-data dates this cohort update; model run dates are unstated.
+    published: 2026-10-17
+    retrieved_at: 2026-11-12
 
 benchmarks:
   - id: gobench
@@ -2042,33 +2052,34 @@ benchmarks:
       so its numbers are not comparable with theirs. No per-model scores
       filed: the paper reports ambiguity and rank instability rather than
       benchmark scores.
+
   - id: clawbench
-          name: ClawBench
-          aliases: ["ClawBench", "ClawBench: Can AI Agents Complete Everyday Online Tasks?"]
-          domain: agent
-          url: https://arxiv.org/abs/2604.08523
-          released: 2026-04-09
-          caveat: >-
-            Tasks run on live production websites, so the instrument changes as
-            sites change and a score is not reproducible against a frozen task
-            set. V1 (152 tasks) is scored by trajectory evaluation against human
-            references; V2 (129 tasks) uses request interception plus an LLM
-            judge under lenient and strict rubrics, and the harness is part of
-            the result. Numbers from the two versions, or from different
-            harnesses and judges, are not the same measurement.
-    - id: websitebench
-        name: WebsiteBench
-        aliases: ["WebsiteBench", "WebsiteBench: Can AI Agents Rebuild Websites through Browser Exploration?"]
-        domain: coding_agent
-        url: https://github.com/TIGER-AI-Lab/WebsiteBench
-        released: 2026-11-04
-        caveat: >-
-          A task's reward is the share of its hidden cases that pass, and a
-          case passes only when its functional checks pass and every visual
-          checkpoint reaches a normalized SSIM of 0.99 against a snapshot of a
-          third-party production site. Tasks carry 302 to 2,016 cases each, so
-          one reward number aggregates very different amounts of evidence, and
-          scores move when the reference site or its snapshot changes.
+    name: ClawBench
+    aliases: ["ClawBench", "ClawBench: Can AI Agents Complete Everyday Online Tasks?"]
+    domain: agent
+    url: https://arxiv.org/abs/2604.08523
+    released: 2026-04-09
+    caveat: >-
+      Agents complete everyday tasks on live production websites. The paper
+      evaluates 153 tasks with trajectory judging against human references;
+      the current repository lists a changed 152-task V1 corpus. V2 uses
+      request interception and separate lenient and strict judge rubrics.
+      Corpus revision, harness and judge change the measurement, and live
+      websites can change between runs.
+
+  - id: websitebench
+    name: WebsiteBench
+    aliases: ["WebsiteBench", "WebsiteBench: Can AI Agents Rebuild Websites through Browser Exploration?"]
+    domain: coding_agent
+    url: https://website-bench.com/
+    caveat: >-
+      Agents rebuild production websites after exploring them in a browser.
+      The leaderboard reports hidden-test pass rates across 70 tasks. Each
+      task has 302 to 2,016 cases; a case passes only when its functional
+      checks pass and every visual checkpoint reaches normalized SSIM 0.99.
+      Overall pools passed and total tests across tasks rather than averaging
+      task rewards. The table does not state model run dates, harnesses or
+      execution budgets.
 
 # Model cards, technical reports and release posts.
 #

@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
-  "model_count": 998,
+  "model_count": 1004,
   "source_counts": {
     "artificial_analysis": 595,
     "llm_stats": 339,
-    "model_reports": 173
+    "model_reports": 183
   },
-  "multiple_sources": 104,
+  "multiple_sources": 108,
   "organizations": [
     "AI21 Labs",
     "AI9Stars",
@@ -71,6 +71,7 @@
     "Poolside",
     "Prime Intellect",
     "Qwen",
+    "Qwen Team",
     "Reka AI",
     "SK Telecom",
     "Sakana AI",
@@ -995,10 +996,12 @@
       "model": "Claude Haiku 4.5",
       "organization": "Anthropic",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 12
+        "llm_stats": 12,
+        "model_reports": 1
       }
     },
     {
@@ -1191,7 +1194,7 @@
       ],
       "source_counts": {
         "llm_stats": 12,
-        "model_reports": 17
+        "model_reports": 18
       }
     },
     {
@@ -1202,7 +1205,7 @@
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 4
+        "model_reports": 5
       }
     },
     {
@@ -1300,10 +1303,12 @@
       "model": "Claude Sonnet 4.6",
       "organization": "Anthropic",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 17
+        "llm_stats": 17,
+        "model_reports": 1
       }
     },
     {
@@ -2326,17 +2331,6 @@
       }
     },
     {
-      "key": "deepseek-deepseek-v4-1-flash",
-      "model": "DeepSeek-V4.1-Flash",
-      "organization": "DeepSeek",
-      "provenance_sources": [
-        "model_reports"
-      ],
-      "source_counts": {
-        "model_reports": 21
-      }
-    },
-    {
       "key": "deepseek-deepseek-v4-1-flash-1017",
       "model": "DeepSeek-V4.1-Flash-1017",
       "organization": "DeepSeek",
@@ -2345,6 +2339,28 @@
       ],
       "source_counts": {
         "model_reports": 1
+      }
+    },
+    {
+      "key": "deepseek-deepseek-v4-1-flash-98fe6bfbbbfb5db55a0d25a8bd3ac64b93edaf15904ce16f778325c7afef4d71",
+      "model": "DeepSeek V4.1 Flash",
+      "organization": "DeepSeek",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "deepseek-deepseek-v4-1-flash-b561ec0839f71383b5362f27427aa7bfc9449eddc5b0dafc1f1dbab885d084b7",
+      "model": "DeepSeek-V4.1-Flash",
+      "organization": "DeepSeek",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 21
       }
     },
     {
@@ -3081,7 +3097,7 @@
       }
     },
     {
-      "key": "google-gemini-3-1-flash-lite",
+      "key": "google-gemini-3-1-flash-lite-37eb8af4337da156923111e2cb3222bcf12d77de24ef23b3787d8ac6ed985d94",
       "model": "Gemini 3.1 Flash-Lite",
       "organization": "Google",
       "provenance_sources": [
@@ -3094,6 +3110,17 @@
       }
     },
     {
+      "key": "google-gemini-3-1-flash-lite-ea7d3fd097f66cc4e9540d3605ff1cb3adb62a83ea00e6b7fe59281331ec4b76",
+      "model": "Gemini 3.1 Flash Lite",
+      "organization": "Google",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "google-gemini-3-1-pro",
       "model": "Gemini 3.1 Pro",
       "organization": "Google",
@@ -3103,7 +3130,7 @@
       ],
       "source_counts": {
         "llm_stats": 20,
-        "model_reports": 20
+        "model_reports": 21
       }
     },
     {
@@ -3284,10 +3311,12 @@
       "model": "Gemini 3 Flash",
       "organization": "Google",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 24
+        "llm_stats": 24,
+        "model_reports": 1
       }
     },
     {
@@ -6070,7 +6099,7 @@
       ],
       "source_counts": {
         "llm_stats": 31,
-        "model_reports": 30
+        "model_reports": 31
       }
     },
     {
@@ -7110,10 +7139,12 @@
       "model": "GPT-5.4",
       "organization": "OpenAI",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 23
+        "llm_stats": 23,
+        "model_reports": 1
       }
     },
     {
@@ -7866,7 +7897,7 @@
       }
     },
     {
-      "key": "openai-gpt-6-1-sol",
+      "key": "openai-gpt-6-1-sol-5b58a5d442d7268eb36e277974238e3c4a921b5833475ef81deb08f62247aa6c",
       "model": "GPT-6.1 Sol",
       "organization": "OpenAI",
       "provenance_sources": [
@@ -7874,6 +7905,17 @@
       ],
       "source_counts": {
         "model_reports": 3
+      }
+    },
+    {
+      "key": "openai-gpt-6-1-sol-ebe16eaec1410612367da8cc6aeada57f8584dac0bc00940b8debf21badbca8a",
+      "model": "GPT 6.1 Sol",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -8315,6 +8357,17 @@
       ],
       "source_counts": {
         "llm_stats": 4
+      }
+    },
+    {
+      "key": "qwen-qwen-3-5",
+      "model": "Qwen 3.5",
+      "organization": "Qwen",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -9770,6 +9823,17 @@
       }
     },
     {
+      "key": "qwen-team-qwen-3-8-max",
+      "model": "Qwen 3.8 Max",
+      "organization": "Qwen Team",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "reka-ai-reka-flash-3",
       "model": "Reka Flash 3",
       "organization": "Reka AI",
@@ -10621,7 +10685,7 @@
       ],
       "source_counts": {
         "llm_stats": 10,
-        "model_reports": 4
+        "model_reports": 5
       }
     },
     {
@@ -11079,7 +11143,7 @@
       ],
       "source_counts": {
         "llm_stats": 5,
-        "model_reports": 16
+        "model_reports": 17
       }
     },
     {
@@ -11175,7 +11239,7 @@
       }
     },
     {
-      "key": "z-ai-glm-5-3-flash",
+      "key": "z-ai-glm-5-3-flash-57a6292b9805a20bee8236b47674e196c85a41d179231b7507c0b6405ec92f13",
       "model": "GLM-5.3-Flash",
       "organization": "Z.ai",
       "provenance_sources": [
@@ -11183,6 +11247,17 @@
       ],
       "source_counts": {
         "model_reports": 15
+      }
+    },
+    {
+      "key": "z-ai-glm-5-3-flash-88e344291bcfbbf92e49e2d1d4c3ec33696e680fa64b0c3f4f8e241b80024c4e",
+      "model": "GLM 5.3 Flash",
+      "organization": "Z.ai",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
