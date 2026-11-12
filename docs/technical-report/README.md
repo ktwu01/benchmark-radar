@@ -24,7 +24,7 @@ The exporter stays in this software repository. It reads
 to `docs/technical-report/latex/figure-data.tex` inside the paper submodule.
 
 Use a clean checkout at the release commit above, then rebuild the inputs using the
-[clean-checkout CI sequence](../../AGENTS.md#before-opening-a-pull-request).
+[clean-checkout CI steps](../../.github/workflows/ci.yml).
 From that Benchmark Radar checkout's root:
 
 ```bash

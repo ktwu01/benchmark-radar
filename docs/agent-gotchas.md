@@ -6,7 +6,8 @@ Known traps in this repo. Each entry states the trap and what to do.
 
 - **Stale artifacts lie both ways.** Gitignored files such as `site/data/radar.json`
   can make a working copy pass a test that CI fails. Stale files can also invent
-  failures. Trust only the clean-worktree run that `AGENTS.md` describes.
+  failures. Trust only a clean-worktree run of the steps in
+  `.github/workflows/ci.yml`.
 - **The clean worktree needs its own venv.** Run `python3 -m venv .venv`, then
   `.venv/bin/pip install -e ".[dev]"`, and put `.venv/bin` on `PATH`. The bare
   install omits pytest and Pillow. A global `pipx` install of `benchmark-radar`
