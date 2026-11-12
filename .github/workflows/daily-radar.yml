@@ -31,7 +31,11 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # The collect step grew past 20 minutes on 2026-11-12 (run 43227208776).
+    # Benchmark attention reads about 1,500 counters one request at a time,
+    # and the 90-day cohort it covers grows daily; GitHub organizations and
+    # the GPT briefing add about 9 more minutes. 40 leaves room for that drift.
+    timeout-minutes: 40
     steps:
       - name: Report schedule latency
         if: github.event_name == 'schedule'
