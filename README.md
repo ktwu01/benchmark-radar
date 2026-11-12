@@ -35,7 +35,7 @@ Researchers and evaluation engineers from these institutions use Benchmark
 Radar for benchmark discovery and score tracking:
 
 <p align="center">
-  <img src="assets/researchers.svg" alt="Institutions whose researchers use Benchmark Radar: Google, Amazon, AWS, IBM, Tesla, Carnegie Mellon, Harvard, MIT, UC Berkeley, NUS, Auckland, Xtracta, Alibaba, Tencent Hunyuan, Qwen, ByteDance, Ant Group, StepFun, Kuaishou, Zhihu, Tsinghua, SJTU, Tencent, Z.ai, Hebrew University of Jerusalem, Fudan, Chungnam National University, RISE, York" />
+  <img src="assets/researchers.svg" alt="Institutions whose researchers use Benchmark Radar: Google, Amazon, AWS, IBM, Tesla, Carnegie Mellon, Harvard, MIT, UC Berkeley, NUS, Auckland, Xtracta, Alibaba, Tencent Hunyuan, Qwen, ByteDance, Ant Group, StepFun, Kuaishou, Zhihu, Tsinghua, SJTU, Tencent, Z.ai, Hebrew University of Jerusalem, Fudan, Chungnam National University, RISE, York, Meta, Microsoft, NVIDIA, OpenAI, Anthropic, UCLA, UC San Diego, Unitree" />
 </p>
 
 I kept running into new benchmarks while doing benchmark research, so I built a
