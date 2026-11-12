@@ -59,6 +59,6 @@ def test_site_advertises_and_visibly_links_the_feed():
     html = Path("site/index.html").read_text(encoding="utf-8")
 
     assert 'rel="alternate" type="application/rss+xml"' in html
-    assert 'class="repo-badge feed-badge"' in html
-    assert 'href="/feed.xml"' in html
-    assert "Subscribe to Benchmark Radar via RSS" in html
+    # The header badge is gone (#1097); the footer link keeps the feed visible.
+    assert 'class="repo-badge feed-badge"' not in html
+    assert '<a href="/feed.xml" data-i18n="RSS feed">RSS feed</a>' in html

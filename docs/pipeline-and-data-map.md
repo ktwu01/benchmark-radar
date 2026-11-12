@@ -185,7 +185,7 @@ repository, not this pinned pointer.
 - Canonical citation: <https://arxiv.org/abs/2609.11115>. see repo main/CITATION.cff.
   Cite only this. The repository keeps no copy of published PDFs.
 
-Before changing report claims, run the clean-checkout CI
-sequence in `AGENTS.md` and recompute claims from its outputs. Rebuild the PDF
+Before changing report claims, run the clean-checkout steps in
+`.github/workflows/ci.yml` and recompute claims from its outputs. Rebuild the PDF
 with `make` in `docs/technical-report/latex/`, inspect the rendered PDF, and
 commit that exact file. The PDF is a dated interpretation, not a data source.

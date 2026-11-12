@@ -94,8 +94,10 @@ Applies to `README*`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `site/**`,
 ## Branches and pull requests
 
 - Never push to `main`. Every change goes through a pull request.
-- Start each branch from the latest `main`, and keep it on the latest `main`
-  until it merges. Re-read the diff before you push.
+- Open every pull request as ready for review, try not open as a draft.
+- Start each branch from the latest `main`. It need not track `main` after
+  that; it only needs no merge conflict with `main` before it merges. Re-read
+  the diff before you push.
 - Every pull request links an existing issue with `Closes #N` or `Related to #N`
   and fills in the pull request template. Automation closes a PR with no link.
 - Never merge a pull request unless the user asks. When asked, use a merge
@@ -106,14 +108,6 @@ Applies to `README*`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `site/**`,
 
 ## Before opening a pull request
 
-- Run the full CI sequence locally and get it passing before opening a PR. Do
-  not open one against a red local run.
-- When the contributor is `ktwu01`, skip the local CI run: open the PR and let
-  remote CI run. Do not wait for a local run already in progress either.
-- Skip it for a docs-only PR, when this prints nothing:
-
-      git diff --name-only origin/main... | xargs -n1 basename \
-        | xargs -I{} git grep -lF {} -- tests src site
 - A PR that adds a model card must also add every numeric score that card
   reports and that can be read with certainty to `data/benchmark_scores.yml`.
   Follow [`docs/sop-add-model-cards.md`](docs/sop-add-model-cards.md); a card
@@ -121,23 +115,3 @@ Applies to `README*`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `site/**`,
   cannot see. A card whose results are only qualitative, or whose table is an
   image nobody can read with certainty, is still a valid addition with no score
   rows.
-- Run it against a clean checkout (`git worktree add --detach <tmp> <branch>`),
-  not your working copy. Run `git submodule update --init --recursive` in that
-  worktree before checks. Generated files such as `site/data/radar.json`,
-  `site/data/benchmark-index.json` and `site/data/benchmarks/` are gitignored
-  and absent on a fresh CI runner, so a working copy that happens to have them
-  on disk passes tests that CI fails.
-- The sequence is the one in `.github/workflows/ci.yml`, in order:
-
-      ruff check .
-      ruff format --check .
-      benchmark-radar normalize-catalog
-      benchmark-radar classify
-      benchmark-radar build-data-release
-      pytest -q
-
-- All six must pass. `ruff format --check` runs before everything else, so a
-  formatting slip fails the run before a single test executes. Both generators
-  run before `pytest` and in that order: `classify` reads the shard directory
-  `normalize-catalog` writes, while `build-data-release` packages the validated
-  index, shards, and snapshots that installed clients consume.

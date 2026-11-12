@@ -302,8 +302,8 @@ th {
 
 .masthead-end {
   display: grid;
-  /* RSS, language, contact, and GitHub stars. */
-  grid-template-columns: repeat(4, 2.6rem);
+  /* Language and GitHub stars. */
+  grid-template-columns: repeat(2, 2.6rem);
   gap: 0.7rem;
   align-items: center;
   justify-content: flex-end;
@@ -446,8 +446,8 @@ th {
   transform: translate(0, 0);
 }
 
-/* The language and contact controls are <button>s, not <a>s, because they
-   open dialogs and toggle state instead of navigating. Without these resets a
+/* The language control is a <button>, not an <a>, because it
+   toggles state instead of navigating. Without these resets a
    button renders with the user agent's default chrome (grey background,
    distinct font) over the repo-badge styling shared with the links beside it. */
 button.repo-badge {
@@ -512,13 +512,6 @@ button.repo-badge svg {
   font-weight: 700;
 }
 
-.feed-badge svg {
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-width: 2;
-}
-
 .repo-badge-label {
   position: absolute;
   width: 1px;
@@ -535,11 +528,6 @@ button.repo-badge svg {
   font-size: 1.2rem;
   font-weight: 700;
   line-height: 1;
-}
-
-.feed-badge svg circle {
-  fill: currentColor;
-  stroke: none;
 }
 
 .view-nav {
@@ -4913,7 +4901,7 @@ footer {
 
   .masthead-end {
     grid-column: 2;
-    grid-template-columns: repeat(4, 44px);
+    grid-template-columns: repeat(2, 44px);
     gap: 0.5rem;
   }
 
@@ -6056,16 +6044,6 @@ dialog {
 .score-ranking-link small { font-size: .7rem; font-weight: 400; color: var(--muted); }
 .score-ranking-link:hover > span { text-decoration: underline; }
 
-/* The contact tooltip can overhang even when the final badge is clamped. */
-#badge-contact::after {
-  right: 0;
-  left: auto;
-  transform: translate(0, -0.2rem);
-}
-#badge-contact:hover::after,
-#badge-contact:focus-visible::after {
-  transform: translate(0, 0);
-}
 @media (min-width: 761px) {
   .score-ranking .leaderboard-top-row,
   .score-ranking .leaderboard-top-columns {
@@ -6318,12 +6296,36 @@ dialog {
   outline-offset: -3px;
 }
 
+/* One line icon per tab (issue #1097), drawn in the label's colour so the
+   active tab's icon inverts with its text. The tabs give back the icon's
+   width in padding so the bar still fits beside the brand at desktop width. */
+.view-nav button,
+.view-nav a {
+  padding: 0 7px;
+}
+
+.view-nav [hidden] {
+  display: none;
+}
+
+.view-nav .nav-icon {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 1rem;
+  margin-right: 4px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
 .brand-mark {
   flex-shrink: 0;
 }
 
 .masthead-end {
-  grid-template-columns: repeat(4, var(--control-height));
+  grid-template-columns: repeat(2, var(--control-height));
   gap: var(--space-2);
 }
 

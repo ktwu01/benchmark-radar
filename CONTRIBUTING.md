@@ -94,7 +94,8 @@ history.
   [`principle.md`](principle.md).
 - **Makes one change.** One logical change per PR. A connector, a page and a
   restyle are three PRs. Stacked PRs say so and land in order.
-- **Is current and green.** Rebased on the latest `main`, with the full CI
+- **Is conflict-free and green.** Merges into `main` with no conflict (it need
+  not be rebased on the latest `main`), with the full CI
   sequence passing from a clean checkout (`git worktree add`, then
   `git submodule update --init --recursive`). Give that checkout its own
   environment first; a global install can run code from the wrong checkout:

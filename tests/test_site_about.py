@@ -178,7 +178,7 @@ def test_the_menu_bar_says_publications_and_keeps_the_cite_path():
     nav = re.search(r'<nav class="view-nav".*?</nav>', dashboard, re.S).group(0)
     assert 'href="/cite/"' in nav
     assert 'data-i18n="Publications"' in nav
-    assert "Publications\n" in nav
+    assert '<span data-i18n="Publications">Publications</span>' in nav
     assert 'data-i18n="Cite"' not in nav
 
 

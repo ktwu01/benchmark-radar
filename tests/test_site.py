@@ -476,11 +476,14 @@ def test_site_has_an_icon():
     assert parser.icon_hrefs, "index.html declares no icon"
 
 
-def test_top_right_utilities_use_shared_icon_geometry_and_contact_control():
+def test_top_right_utilities_use_shared_icon_geometry_without_a_contact_button():
     html = Path("site/index.html").read_text(encoding="utf-8")
     styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
 
-    assert 'id="badge-contact"' in html
+    # The header contact button is gone (#1097): the contact sheet opens from
+    # the footer and the stale-data banner instead.
+    assert 'id="badge-contact"' not in html
+    assert 'id="contact-dialog"' in html
     # The export badge is gone (issue #311): dataset requests go through the
     # contact sheet and the footer note, not a header button.
     assert 'id="badge-export"' not in html
@@ -489,13 +492,13 @@ def test_top_right_utilities_use_shared_icon_geometry_and_contact_control():
     assert 'id="badge-discord"' not in html
     assert 'id="lang-toggle"' in html
     assert 'class="repo-badge"' in html
-    assert "grid-template-columns: repeat(4, 2.6rem)" in styles
+    assert "grid-template-columns: repeat(2, 2.6rem)" in styles
     assert "width: 2.6rem" in styles
     assert "height: 2.6rem" in styles
     assert ".repo-badges" not in styles
     assert 'class="repo-badge-glyph" id="lang-toggle-label">中<' in html
     assert 'class="brand-icon github-icon"' in html
-    assert "grid-template-columns: repeat(4, 44px)" in styles
+    assert "grid-template-columns: repeat(2, 44px)" in styles
     mobile_badge = (
         styles.split("@media (max-width: 760px)", 1)[1]
         .split(".repo-badge {", 1)[1]
@@ -1693,11 +1696,11 @@ def test_repo_badge_counts_are_visible():
     assert ".repo-badge-count" in css
     assert (
         "clip-path: inset(50%)"
-        not in css[css.index(".repo-badge-count") : css.index(".feed-badge svg")]
+        not in css[css.index(".repo-badge-count") : css.index(".repo-badge-label")]
     )
     assert (
         "background: var(--panel)"
-        in css[css.index(".repo-badge-count") : css.index(".feed-badge svg")]
+        in css[css.index(".repo-badge-count") : css.index(".repo-badge-label")]
     )
 
 
