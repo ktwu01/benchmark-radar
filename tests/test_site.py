@@ -3877,10 +3877,13 @@ def test_library_sidebar_clears_the_sticky_masthead():
     styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
 
     # #889: the sidebar stuck at top: 0.5rem, so the sticky masthead covered
-    # its first controls once the reader scrolled. The masthead is 64px on a
-    # wide screen and 108px once its nav wraps at 1280px.
+    # its first controls once the reader scrolled. Only wide screens keep
+    # a sticky masthead; narrow screens must reclaim that space.
     rule = styles.split(".library-directions {", 1)[1].split("}", 1)[0]
     assert "top: calc(64px + 0.5rem);" in rule
     assert "max-height: calc(100vh - 64px - 1rem);" in rule
-    assert "top: calc(108px + 0.5rem);" in styles
-    assert "max-height: calc(100vh - 108px - 1rem);" in styles
+    narrow = styles.rsplit("@media (max-width: 1280px) {", 1)[1].split("\n}", 1)[0]
+    assert "top: 0.5rem;" in narrow
+    assert "max-height: calc(100vh - 1rem);" in narrow
+    assert "top: calc(108px + 0.5rem);" not in styles
+    assert ".benchmark-navigator {\n    top: 0.5rem;" in styles
