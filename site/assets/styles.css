@@ -4890,10 +4890,6 @@ footer {
     row-gap: 0.5rem;
   }
 
-  html {
-    scroll-padding-top: 1rem;
-  }
-
   .masthead-main {
     display: contents;
   }
