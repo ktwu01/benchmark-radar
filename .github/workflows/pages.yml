@@ -236,6 +236,9 @@ jobs:
 
   prune-cli-data:
     needs: [deploy-complete, publish-cli-data]
+    if: >-
+      ${{ !cancelled() && needs.deploy-complete.result == 'success' &&
+        needs.publish-cli-data.result == 'success' }}
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -261,6 +264,7 @@ jobs:
 
   publish-hf-dataset:
     needs: deploy-complete
+    if: ${{ !cancelled() && needs.deploy-complete.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -382,7 +386,7 @@ jobs:
 
   deploy-retry:
     needs: deploy
-    if: ${{ always() && needs.deploy.result == 'failure' }}
+    if: ${{ !cancelled() && needs.deploy.result == 'failure' }}
     permissions:
       pages: write
       id-token: write
@@ -399,7 +403,7 @@ jobs:
   deploy-complete:
     needs: [deploy, deploy-retry]
     if: >-
-      ${{ always() &&
+      ${{ !cancelled() &&
         (needs.deploy.result == 'success' || needs.deploy-retry.result == 'success') }}
     runs-on: ubuntu-latest
     steps:
