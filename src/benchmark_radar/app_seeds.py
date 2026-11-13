@@ -1515,7 +1515,7 @@ CITE_CFF_URL = "https://github.com/ktwu01/benchmark-radar/blob/main/CITATION.cff
 CITE_APA = apa_citation()
 CITE_BIBTEX = """@misc{wu2026benchmarkradarlivingdatabase,
       title={Benchmark Radar: A Living Database and Search Engine for AI Benchmarks and Evaluation},
-      author={Koutian Wu and Wenjun Zhang and Junjie Zhou and Pengqian Han and
+      author={Koutian Wu and Wenjun Zhang and Junjie Zhou and Pengqian Han and Qiming Bao and
               Ergan Shang and Jiayu Wang and Junkai Wang and Wanghan Xu and
               Songyuanyi Lu and Yixuan Li and Rudy {Mizrahi Celekli} and
               Lazizbek Ravshanov and Yaoliang Bian and Xudong Han and Lin Shi},
