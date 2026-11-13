@@ -2354,6 +2354,17 @@ repos:
     - dashboard_overview_2.png
     - dashboard_overview_3.png
     - startup_dataset_100_records.csv
+  ayushman125/colorectal-polyp-detection:
+    full_name: Ayushman125/colorectal-polyp-detection
+    size_kb: 0
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-11-13'
+    pushed_at: '2026-11-13'
+    unavailable: false
+    placeholder: true
+    retrieved_at: '2026-11-13'
+    root: []
   ayushmishra-02/agent-evaluation:
     full_name: AyushMishra-02/agent-evaluation
     size_kb: 34
@@ -3234,6 +3245,24 @@ repos:
     root:
     - .gitkeep
     - README.md
+  charlesmatrix350/near-agent-trust:
+    full_name: CharlesMatrix350/near-agent-trust
+    size_kb: 28
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-11-13'
+    pushed_at: '2026-11-13'
+    unavailable: false
+    placeholder: false
+    retrieved_at: '2026-11-13'
+    root:
+    - .gitignore
+    - README.md
+    - judge.mjs
+    - package-lock.json
+    - package.json
+    - public
+    - server.js
   charon621/high-stakes-ai-evaluation:
     full_name: Charon621/high-stakes-ai-evaluation
     size_kb: 49
@@ -9499,6 +9528,17 @@ repos:
     unavailable: false
     placeholder: false
     retrieved_at: '2026-11-13'
+  macampsdev-sys/macampsdev-sys:
+    full_name: macampsdev-sys/macampsdev-sys
+    size_kb: 0
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-11-13'
+    pushed_at: '2026-11-13'
+    unavailable: false
+    placeholder: true
+    retrieved_at: '2026-11-13'
+    root: []
   macanderson/arenabench:
     full_name: macanderson/arenabench
     size_kb: 2860
@@ -9708,6 +9748,17 @@ repos:
     unavailable: false
     placeholder: false
     retrieved_at: '2026-11-13'
+  marbdalftah72-spec/statistical-data-analysis-python:
+    full_name: marbdalftah72-spec/Statistical-Data-Analysis-Python
+    size_kb: 0
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-11-13'
+    pushed_at: '2026-11-13'
+    unavailable: false
+    placeholder: true
+    retrieved_at: '2026-11-13'
+    root: []
   mariaaziz074-web/photocatalysis-research-benchmark:
     full_name: mariaaziz074-web/photocatalysis-research-benchmark
     size_kb: 4199
@@ -11053,6 +11104,30 @@ repos:
     root:
     - .gitignore
     - README.md
+  nomulabhargavachaitanya-gif/two-stage-rag-chatbot:
+    full_name: nomulabhargavachaitanya-gif/Two-Stage-RAG-Chatbot
+    size_kb: 8
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-11-13'
+    pushed_at: '2026-11-13'
+    unavailable: false
+    placeholder: false
+    retrieved_at: '2026-11-13'
+    root:
+    - .env.example
+    - .gitignore
+    - My_progress
+    - README.md
+    - data
+    - engine.py
+    - evaluate.py
+    - generate_benchmark.py
+    - golden_dataset.json
+    - ingest.py
+    - main.py
+    - requirements.txt
+    - sample_data.txt
   noname22/quickbench:
     full_name: noname22/QuickBench
     size_kb: 17766
@@ -12745,6 +12820,17 @@ repos:
     - scripts
     - src
     - tsconfig.json
+  rislantrs/telagentbench-id:
+    full_name: Rislantrs/TelAgentBench-ID
+    size_kb: 0
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-11-13'
+    pushed_at: '2026-11-13'
+    unavailable: false
+    placeholder: true
+    retrieved_at: '2026-11-13'
+    root: []
   risys-lab/kalibench:
     full_name: RISys-Lab/KaliBench
     size_kb: 11739
@@ -13352,6 +13438,17 @@ repos:
     - install.sh
     - ollama-monitor.py
     - ollama-monitored-run
+  sangoonthego/recut-research-lab:
+    full_name: sangoonthego/recut-research-lab
+    size_kb: 0
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-11-13'
+    pushed_at: '2026-11-13'
+    unavailable: false
+    placeholder: true
+    retrieved_at: '2026-11-13'
+    root: []
   sanjanasah069/ai-vs-human-text-dataset:
     full_name: sanjanasah069/AI-vs-Human-Text-Dataset
     size_kb: 46
@@ -14872,6 +14969,17 @@ repos:
     - questions.json
     - requirements.txt
     - results.json
+  taiwofakuade/llm-evaluation-lab:
+    full_name: TaiwoFakuade/llm-evaluation-lab
+    size_kb: 0
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-11-13'
+    pushed_at: '2026-11-13'
+    unavailable: false
+    placeholder: true
+    retrieved_at: '2026-11-13'
+    root: []
   tamnd/ai:
     full_name: tamnd/ai
     size_kb: 0

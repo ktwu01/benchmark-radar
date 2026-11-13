@@ -1521,6 +1521,13 @@ papers:
     source_url: null
     retrieved_at: '2026-11-11'
     institutions: []
+  '2611.00359':
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7225186442
+    retrieved_at: '2026-11-13'
+    institutions:
+    - Georgia Institute of Technology
+    - University of Massachusetts Amherst
   '2611.00883':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7225161329
