@@ -121,7 +121,7 @@ Wu, K., Zhang, W., Zhou, J., Han, P., Shang, E., Wang, J., Wang, J., Xu, W., Lu,
 ```bibtex
 @misc{wu2026benchmarkradarlivingdatabase,
       title={Benchmark Radar: A Living Database and Search Engine for AI Benchmarks and Evaluation},
-      author={Koutian Wu and Wenjun Zhang and Junjie Zhou and Pengqian Han and Ergan Shang and Jiayu Wang and Junkai Wang and Wanghan Xu and Songyuanyi Lu and Yixuan Li and Rudy {Mizrahi Celekli} and Lazizbek Ravshanov and Yaoliang Bian and Xudong Han and Lin Shi},
+      author={Koutian Wu and Wenjun Zhang and Junjie Zhou and Pengqian Han and Qiming Bao and Ergan Shang and Jiayu Wang and Junkai Wang and Wanghan Xu and Songyuanyi Lu and Yixuan Li and Rudy {Mizrahi Celekli} and Lazizbek Ravshanov and Yaoliang Bian and Xudong Han and Lin Shi},
       year={2026},
       eprint={2609.11115},
       archivePrefix={arXiv},
