@@ -8026,6 +8026,16 @@ repos:
     root:
     - AI Evaluation & Certification Specification v1.7.md
     - README.md
+  jshahbazi/llmbench:
+    full_name: jshahbazi/llmbench
+    size_kb: 3101
+    stars_at_check: 0
+    archived: false
+    created_at: '2026-11-12'
+    pushed_at: '2026-11-13'
+    unavailable: false
+    placeholder: false
+    retrieved_at: '2026-11-13'
   json604/silentbug-bench:
     full_name: Json604/silentbug-bench
     size_kb: 144
