@@ -193,8 +193,8 @@ def test_citation_formats_are_one_click_away_behind_a_short_link():
         'Lu, S., Li, Y., Mizrahi Celekli, R., Ravshanov, L., Bian, Y., Han, X., & Shi, L. (2026). "'
     ) in script
     assert (
-        '"      author={Koutian Wu and Wenjun Zhang and Junjie Zhou and Pengqian Han and Qiming Bao and '
-        "Ergan Shang and Jiayu Wang and Junkai Wang and Wanghan Xu and "
+        '"      author={Koutian Wu and Wenjun Zhang and Junjie Zhou and Pengqian Han and '
+        "Qiming Bao and Ergan Shang and Jiayu Wang and Junkai Wang and Wanghan Xu and "
         "Songyuanyi Lu and Yixuan Li and Rudy {Mizrahi Celekli} and "
         'Lazizbek Ravshanov and Yaoliang Bian and Xudong Han and Lin Shi},"'
     ) in script
