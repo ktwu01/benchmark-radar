@@ -109469,6 +109469,166 @@
         "source": "DataCite",
         "title": "Headroom Decision Procedure Examples: dataset for \"Headroom Before Protocol Effects: A Decision Procedure for Human-Agent Evaluation\"",
         "url": "https://doi.org/10.5281/zenodo.24179019"
+      },
+      {
+        "affiliations": [
+          "Iowa State University, Ames, Iowa, USA"
+        ],
+        "authors": [
+          "Pranava Sai Maganti",
+          "Meghasyam Peddireddy",
+          "Muzakker Hossain",
+          "Kaining Gao",
+          "Farhan Ahmed",
+          "Ali Jannesari"
+        ],
+        "blurb": "MLIRBench is a new benchmark and dataset for testing whether large language models understand Multi-Level Intermediate Representation programs—the compiler-level code between source code and machine instructions.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-13T07:46:02+00:00",
+        "source": "DataCite",
+        "title": "MLIRBench - A Benchmark and Dataset for Compiler and Hardware-Aware Reasoning",
+        "url": "https://doi.org/10.48550/arxiv.2611.14881"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Pengcheng Zhou",
+          "Xuanyu Liu",
+          "Yanchen Yin",
+          "Tianjie Ju",
+          "Bobo Li",
+          "Shengqiong Wu",
+          "Hao Fei",
+          "Mong-Li Lee",
+          "Wynne Hsu"
+        ],
+        "blurb": "LiveGeo is a new benchmark that places geographic agents in an environment whose external state changes over time and retains verifiable state histories.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-13T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "LiveGeo: Benchmarking Geographic Agents in Continuously Evolving Worlds",
+        "url": "https://arxiv.org/abs/2611.17267"
+      },
+      {
+        "affiliations": [
+          "1 Bilkent University, Ankara, Turkey",
+          "2 Evalium, Yerevan, Armenia",
+          "3 Technical University of Munich, Munich, Germany"
+        ],
+        "authors": [
+          "Vahid Haratian",
+          "Vahid Ansari",
+          "Mohammadhossein Malmir",
+          "Alois Knoll"
+        ],
+        "blurb": "Robo-SWE is a new executable issue-resolution dataset with 236 tasks from merged pull requests across 28 robotics repositories.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-13T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Robo-SWE: An Executable Issue-Resolution Dataset Mined from Robot Software Repositories",
+        "url": "https://arxiv.org/abs/2611.16116"
+      },
+      {
+        "affiliations": [
+          "DAMTP, University of Cambridge",
+          "Kavli Institute for Cosmology, University of Cambridge",
+          "Cavendish Astrophysics, University of Cambridge",
+          "Center for Computational Astrophysics, Flatiron Institute",
+          "Computer Vision Center, Universitat Autònoma de Barcelona",
+          "Polymathic AI"
+        ],
+        "authors": [
+          "\\'I\\~nigo Zubeldia",
+          "Boris Bolliet",
+          "Francisco Villaescusa-Navarro",
+          "Pablo Villanueva-Domingo",
+          "Miles Cranmer"
+        ],
+        "blurb": "A new benchmark for auditing artificial-intelligence peer reviewers injects localizable errors into real papers across mathematics, numerics, citations, and general issues, with three severity levels.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-13T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Auditing AI peer reviewers: a benchmark on real scientific papers",
+        "url": "https://arxiv.org/abs/2611.17052"
+      },
+      {
+        "affiliations": [
+          "Carnegie Mellon University",
+          "NVIDIA",
+          "The University of Texas at Austin",
+          "HKUST",
+          "University of Chicago",
+          "Together AI",
+          "University of California, Santa Barbara",
+          "University of Illinois Urbana-Champaign"
+        ],
+        "authors": [
+          "Yang Zhou",
+          "Krish Agarwal",
+          "Zhuoming Chen",
+          "Zerui Wang",
+          "Zhenyu Zhang",
+          "Wenshuang Li",
+          "Xinpeng Wei",
+          "Zhichen Zeng",
+          "Jingyu Liu",
+          "Jue Wang",
+          "Sen Wu",
+          "Ziheng Jiang",
+          "Zhen Dong",
+          "Han Cai",
+          "Binhang Yuan",
+          "Ying Sheng",
+          "Ce Zhang",
+          "Bo Li",
+          "Beidi Chen"
+        ],
+        "blurb": "Singularity-Bench is a new open-ended benchmark for agents that build artificial-intelligence systems.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-13T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Singularity-Bench: Can Agents Build Agents?",
+        "url": "https://arxiv.org/abs/2611.16591"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Chandra N Sekharan",
+          "Vishakan Umapathy",
+          "Abhishek Phadke"
+        ],
+        "blurb": "SAGE-QA is a new evaluation method for closed-context question answering, where answers must be supported by a supplied passage or the model must abstain.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-13T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "SAGE-QA: Semantic-Aware, Grounded Evaluation for Closed-Context Question Answering on SQuAD 2.0",
+        "url": "https://arxiv.org/abs/2611.16300"
       }
     ],
     "date": "2026-11-13",
