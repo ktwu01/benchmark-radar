@@ -115,7 +115,7 @@ npx skills add ktwu01/benchmark-radar
 如果 Benchmark Radar 对你的研究或评测工作有帮助，欢迎引用这份技术报告：
 
 ```text
-Wu, K., Zhang, W., Zhou, J., Han, P., Shang, E., Wang, J., Wang, J., Xu, W., Lu, S., Li, Y., Mizrahi Celekli, R., Ravshanov, L., Bian, Y., Han, X., & Shi, L. (2026). Benchmark Radar: A living database and search engine for AI benchmarks and evaluation. arXiv:2609.11115. https://arxiv.org/abs/2609.11115
+Wu, K., Zhang, W., Zhou, J., Han, P., Bao, Q., Shang, E., Wang, J., Wang, J., Xu, W., Lu, S., Li, Y., Mizrahi Celekli, R., Ravshanov, L., Bian, Y., Han, X., & Shi, L. (2026). Benchmark Radar: A living database and search engine for AI benchmarks and evaluation. arXiv:2609.11115. https://arxiv.org/abs/2609.11115
 ```
 
 ```bibtex
