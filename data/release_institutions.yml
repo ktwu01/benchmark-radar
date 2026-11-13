@@ -6,6 +6,13 @@
 # basis is counted in the institution ranking.
 schema_version: 1
 papers:
+  '2603.27343':
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7147400221
+    retrieved_at: '2026-11-13'
+    institutions:
+    - Tohoku University
+    - Lappeenranta-Lahti University of Technology
   '2606.05405':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7163679042
@@ -1589,6 +1596,15 @@ papers:
     source_url: null
     retrieved_at: '2026-11-11'
     institutions: []
+  '2611.05862':
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7225290365
+    retrieved_at: '2026-11-13'
+    institutions:
+    - Tsinghua University
+    - Xiaohongshu (Little Red Book) (China)
+    - Shanghai Jiao Tong University
+    - Zhejiang University
   '2611.06083':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7225289993
@@ -1598,36 +1614,61 @@ papers:
     - Ant Group (China)
     - Tsinghua University
   '2611.06808':
-    basis: null
-    source_url: null
-    retrieved_at: '2026-11-09'
-    institutions: []
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7225334639
+    retrieved_at: '2026-11-13'
+    institutions:
+    - University of Manchester
+    - Mohamed bin Zayed University of Artificial Intelligence
+    - University of Florida
+    - Université de Montréal
   '2611.06844':
-    basis: arxiv_html_affiliations
-    source_url: https://arxiv.org/html/2611.06844
-    retrieved_at: '2026-11-09'
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7225292161
+    retrieved_at: '2026-11-13'
     institutions:
-    - Northwestern Polytechnical University, Xi’an, China
-    - Hong Kong University of Science and Technology, Hong Kong, China
+    - Northwestern Polytechnical University
+    - Hong Kong University of Science and Technology
   '2611.06856':
-    basis: arxiv_html_affiliations
-    source_url: https://arxiv.org/html/2611.06856
-    retrieved_at: '2026-11-09'
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7225320024
+    retrieved_at: '2026-11-13'
     institutions:
-    - South China Normal University University of British Columbia
-    - Vector Institute Canada CIFAR AI Chair Carnegie Mellon University
-    - University of Waterloo KlingAI Research University of Maryland
-    - Tsinghua University HKUST HKU
+    - South China Normal University
+    - University of British Columbia
+    - Vector Institute
+    - University of Maryland, College Park
+    - Tsinghua University
+    - Hong Kong University of Science and Technology
+    - The Hong Kong University of Science and Technology (Guangzhou)
+    - Carnegie Mellon University
+    - University of Waterloo
+    - University of Hong Kong
   '2611.08089':
-    basis: null
-    source_url: null
-    retrieved_at: '2026-11-09'
-    institutions: []
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7225394122
+    retrieved_at: '2026-11-13'
+    institutions:
+    - Shanghai University of Finance and Economics
   '2611.08369':
-    basis: null
-    source_url: null
-    retrieved_at: '2026-11-09'
-    institutions: []
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7225407671
+    retrieved_at: '2026-11-13'
+    institutions:
+    - Hong Kong Polytechnic University
+    - Sun Yat-sen University
+    - Sun Yat-sen University Cancer Center
+    - Monash University
+  '2611.11306':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.11306
+    retrieved_at: '2026-11-13'
+    institutions:
+    - Pivotal Research
+    - University of Bath
+    - National University Philippines
+    - University of Notre Dame
+    - Hebrew University of Jerusalem
   '2611.12167':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2611.12167
@@ -1649,9 +1690,20 @@ papers:
     - Fordham University School of Law
     - Hebrew University Faculty of Law & School of Computer Science and Engineering
   '2611.12324':
-    basis: arxiv_html_affiliations
-    source_url: https://arxiv.org/html/2611.12324
-    retrieved_at: '2026-11-10'
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7225761610
+    retrieved_at: '2026-11-13'
     institutions:
-    - Third Intelligence, Inc
     - The University of Tokyo
+  '2611.13028':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.13028
+    retrieved_at: '2026-11-13'
+    institutions:
+    - Shanghai Innovation Institute
+    - Fudan University
+  '2611.13843':
+    basis: null
+    source_url: null
+    retrieved_at: '2026-11-13'
+    institutions: []
