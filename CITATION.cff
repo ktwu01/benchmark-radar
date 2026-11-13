@@ -11,6 +11,8 @@ authors:
     given-names: Junjie
   - family-names: Han
     given-names: Pengqian
+  - family-names: Bao
+    given-names: Qiming
   - family-names: Shang
     given-names: Ergan
   - family-names: Wang
@@ -53,6 +55,8 @@ preferred-citation:
       given-names: Junjie
     - family-names: Han
       given-names: Pengqian
+    - family-names: Bao
+      given-names: Qiming
     - family-names: Shang
       given-names: Ergan
     - family-names: Wang

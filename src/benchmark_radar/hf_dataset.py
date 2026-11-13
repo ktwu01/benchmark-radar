@@ -244,7 +244,7 @@ before reuse, especially for commercial dataset packaging.
 @misc{{wu2026benchmarkradarlivingdatabase,
   title={{Benchmark Radar: A Living Database and Search Engine
          for AI Benchmarks and Evaluation}},
-  author={{Wu, Koutian and Zhang, Wenjun and Zhou, Junjie and Han, Pengqian
+  author={{Wu, Koutian and Zhang, Wenjun and Zhou, Junjie and Han, Pengqian and Bao, Qiming
           and Shang, Ergan and Wang, Jiayu and Wang, Junkai and Xu, Wanghan
           and Lu, Songyuanyi and Li, Yixuan and Mizrahi Celekli, Rudy
           and Ravshanov, Lazizbek and Bian, Yaoliang and Han, Xudong
