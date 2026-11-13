@@ -88923,5 +88923,129 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "Kalaris Labs"
+        ],
+        "authors": [
+          "Sayan Chowdhury"
+        ],
+        "blurb": "PrincipalBench v2 is a new audit and replacement effort for evaluating the model that coordinates a multi-agent pipeline.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-11T19:47:35+00:00",
+        "source": "DataCite",
+        "title": "PrincipalBench v2: A Validity-First Benchmark for LLM Orchestrators in Multi-Agent Pipelines",
+        "url": "https://doi.org/10.5281/zenodo.24144842"
+      },
+      {
+        "affiliations": [
+          "Codechu"
+        ],
+        "authors": [
+          "Onur Barlık"
+        ],
+        "blurb": "Journeyman is a new agent benchmark that scores the work process rather than only the final pass or fail.",
+        "categories": [
+          "benchmark",
+          "agentic"
+        ],
+        "published_at": "2026-11-12T23:02:34+00:00",
+        "source": "DataCite",
+        "title": "Journeyman: a process-quality benchmark for LLM agents",
+        "url": "https://doi.org/10.5281/zenodo.24179487"
+      },
+      {
+        "affiliations": [
+          "Metacognition Institute",
+          "Clemson University"
+        ],
+        "authors": [
+          "Manuel Delaflor",
+          "Carlos Toxtli"
+        ],
+        "blurb": "The new Headroom Decision Procedure package formalizes a prerequisite for human-agent protocol experiments: compare against a matched no-protocol baseline and verify that enough improvement is possible to interpret the protocol’s effect.",
+        "categories": [
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-12T22:54:19+00:00",
+        "source": "DataCite",
+        "title": "Headroom Decision Procedure Examples: dataset for \"Headroom Before Protocol Effects: A Decision Procedure for Human-Agent Evaluation\"",
+        "url": "https://doi.org/10.5281/zenodo.24179018"
+      },
+      {
+        "affiliations": [
+          "Clemson University",
+          "Metacognition Institute"
+        ],
+        "authors": [
+          "Carlos Toxtli",
+          "Manuel Delaflor"
+        ],
+        "blurb": "The Trust-Calibration Benchmark is a new, auditable qualification package for admitting language models to human-computation tasks.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-12T22:54:31+00:00",
+        "source": "DataCite",
+        "title": "Trust-Calibration Benchmark (TCB): dataset for \"Qualification by Calibration: A Readable Benchmark for Admitting Language Models to Human-Computation Tasks\"",
+        "url": "https://doi.org/10.5281/zenodo.24179040"
+      },
+      {
+        "affiliations": [
+          "Department of Electrical Engineering and Informatics, Vocational College, Universitas Gadjah Mada",
+          "Department of Electrical Engineering and Information Technology, Universitas Gadjah Mada"
+        ],
+        "authors": [
+          "Achmad Solaeman",
+          "Sunu Wibirama"
+        ],
+        "blurb": "ReconRAG is a new benchmark and code release for retrieval-augmented generation, where a model answers using retrieved documents, when regulations change over time.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-12T03:05:47+00:00",
+        "source": "DataCite",
+        "title": "ReconRAG: Ingest-Time Version Reconciliation for Retrieval-Augmented Generation over Evolving Regulations (Code and Benchmark Dataset)",
+        "url": "https://doi.org/10.5281/zenodo.24150470"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Selin Vulga Işık",
+          "Atakan Işık"
+        ],
+        "blurb": "A new biomedical-waste benchmark study directly addresses duplicate leakage: pre-augmented image collections can place transformed copies of the same source photograph in both training and test sets, allowing memorization to inflate measured accuracy.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-12T00:00:00+00:00",
+        "source": "Crossref",
+        "title": "Automated Biomedical Waste Segregation Using\nDeep Learning: A Duplicate-Aware Classification\nBenchmark and Disposal-Safety Assessment",
+        "url": "https://doi.org/10.15244/pjoes/237574"
+      }
+    ],
+    "date": "2026-11-13",
+    "schema_version": 1,
+    "top": [
+      "https://doi.org/10.5281/zenodo.24144842",
+      "https://doi.org/10.5281/zenodo.24179487",
+      "https://doi.org/10.5281/zenodo.24179018"
+    ]
+  },
   "since": "2026-11-11T02:39:36.315873+00:00"
 }
