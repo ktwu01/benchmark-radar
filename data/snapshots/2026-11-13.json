@@ -90089,6 +90089,57 @@
         "source": "Crossref",
         "title": "Automated Biomedical Waste Segregation Using\nDeep Learning: A Duplicate-Aware Classification\nBenchmark and Disposal-Safety Assessment",
         "url": "https://doi.org/10.15244/pjoes/237574"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Anonymous Authors"
+        ],
+        "blurb": "The new TWINE benchmark evaluates proactive robotic agents with 360 cases arranged as 180 controlled pairs across 60 held-out kitchen-scene families.",
+        "categories": [
+          "benchmark",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-12T06:45:57+00:00",
+        "source": "Hugging Face",
+        "title": "twill-iclr2027/twine-benchmark",
+        "url": "https://huggingface.co/datasets/twill-iclr2027/twine-benchmark"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Muzammal Hussain"
+        ],
+        "blurb": "The new Agent Decomposition Granularity Benchmark tests 512 clinical forms while splitting extraction into one, two, four, or eight model calls.",
+        "categories": [
+          "benchmark",
+          "agentic"
+        ],
+        "published_at": "2026-11-12T16:13:55+00:00",
+        "source": "DataCite",
+        "title": "Agent Decomposition Granularity Benchmark (ADGB)",
+        "url": "https://doi.org/10.5281/zenodo.24167595"
+      },
+      {
+        "affiliations": [
+          "Metacognition Institute",
+          "Clemson University"
+        ],
+        "authors": [
+          "Manuel Delaflor",
+          "Carlos Toxtli"
+        ],
+        "blurb": "Headroom Decision Procedure Examples is a new worked evaluation artifact for human-agent team protocols.",
+        "categories": [
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-12T22:54:19+00:00",
+        "source": "DataCite",
+        "title": "Headroom Decision Procedure Examples: dataset for \"Headroom Before Protocol Effects: A Decision Procedure for Human-Agent Evaluation\"",
+        "url": "https://doi.org/10.5281/zenodo.24179019"
       }
     ],
     "date": "2026-11-13",
