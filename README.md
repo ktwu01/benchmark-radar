@@ -139,7 +139,7 @@ If Benchmark Radar supports your research or evaluation work, please cite the
 technical report:
 
 ```text
-Wu, K., Zhang, W., Zhou, J., Han, P., Shang, E., Wang, J., Wang, J., Xu, W., Lu, S., Li, Y., Mizrahi Celekli, R., Ravshanov, L., Bian, Y., Han, X., & Shi, L. (2026). Benchmark Radar: A living database and search engine for AI benchmarks and evaluation. arXiv:2609.11115. https://arxiv.org/abs/2609.11115
+Wu, K., Zhang, W., Zhou, J., Han, P., Bao, Q., Shang, E., Wang, J., Wang, J., Xu, W., Lu, S., Li, Y., Mizrahi Celekli, R., Ravshanov, L., Bian, Y., Han, X., & Shi, L. (2026). Benchmark Radar: A living database and search engine for AI benchmarks and evaluation. arXiv:2609.11115. https://arxiv.org/abs/2609.11115
 ```
 
 ```bibtex
