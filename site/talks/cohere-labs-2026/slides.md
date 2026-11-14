@@ -64,9 +64,9 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 *The pipeline*
 
-- DiscoverNew benchmarks are found as they appear in papers, repos, datasets, and leaderboards.
-- ExtractEach record keeps its original source, the reported score, who reported it, and the date.
-- TrackScore history is followed over time, so new results and new versions stay visible.
+- Discover. New benchmarks are found as they appear in papers, repos, datasets, and leaderboards.
+- Extract. Each record keeps its original source, the reported score, who reported it, and the date.
+- Track. Score history is followed over time, so new results and new versions stay visible.
 - The live site: search at the top, today's new benchmarks ranked below, each linked to its source.
 
 ![Benchmark Radar homepage: search bar, ranked new benchmarks, daily briefing](assets/home.jpg)
@@ -84,7 +84,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ![Saturation page with a search for SWE-bench Verified and its LLM Stats score history](assets/demo-swe-search.jpg)
 
-> **Speaker notes:** Switch to the browser, Saturation page. Type SWE-bench Verified and open its score history: show where the best score flattens. Then show the Benchmark Frontier: the gold staircase marks the benchmarks that are still hard for the number of models tested on them. If the network fails, this screenshot is the fallback.
+> **Speaker notes:** Switch to the browser, Saturation page. Type SWE-bench Verified and open its score history: show where the best score flattens. If the network fails, this screenshot is the fallback.
 
 ---
 
