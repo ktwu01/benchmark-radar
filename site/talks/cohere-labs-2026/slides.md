@@ -190,20 +190,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 14. What lands in your inbox
-
-*Every morning*
-
-- What is new. The benchmarks, datasets, and evaluation tools that arrived that day.
-- Why each one matters. Who should care, and what changes for them.
-- Evidence for every claim. An evidence ID and a confidence level, linked to the full brief.
-- Screenshot: the daily brief email for Nov 14, 2026 (`assets/email-brief.png`).
-
-> **Speaker notes:** This is the daily brief from this morning. Each item says what arrived, why it matters to someone choosing an evaluation, and the evidence behind it.
-
----
-
-## 15. Let your agent draft Related Work
+## 14. Let your agent draft Related Work
 
 *For your paper*
 
@@ -216,7 +203,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 16. Search for it. If it is missing, add it.
+## 15. Search for it. If it is missing, add it.
 
 *For your benchmark*
 
@@ -229,7 +216,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 17. Get new benchmarks by email
+## 16. Get new benchmarks by email
 
 *For your inbox*
 
@@ -242,7 +229,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 18. Get involved
+## 17. Get involved
 
 *Join in*
 
@@ -257,7 +244,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 19. Questions
+## 18. Questions
 
 *Q&A*
 
