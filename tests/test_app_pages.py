@@ -17,8 +17,10 @@ from pathlib import Path
 import pytest
 
 from benchmark_radar.app_pages import (
+    APP_VIEWS,
     SATURATION_CARD,
     SATURATION_CARD_ALT,
+    UTILITY_PAGES,
     AppPageError,
     load_category_colors,
     load_utility_seo,
@@ -278,16 +280,11 @@ def test_utility_seo_parser_does_not_depend_on_two_space_indentation(tmp_path):
 
 def test_every_view_is_published_at_its_own_path(tmp_path):
     report = _write(tmp_path, _dashboard())
+    view_seo = load_view_seo(SITE / "assets" / "app.js")
+    utility_seo = load_utility_seo(SITE / "assets" / "app.js")
     assert report["paths"] == [
-        "/library/",
-        "/models/",
-        "/leaderboard/",
-        "/saturation/",
-        "/trends/",
-        "/explore/",
-        "/cli/",
-        "/cite/",
-        "/rubric/",
+        *(view_seo[view]["canonical"] for view in APP_VIEWS),
+        *(utility_seo[page]["canonical"] for page in UTILITY_PAGES),
     ]
     for path in report["paths"]:
         assert (tmp_path / path.strip("/") / "index.html").exists()

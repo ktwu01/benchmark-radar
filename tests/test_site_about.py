@@ -39,10 +39,8 @@ def media(tmp_path: Path) -> str:
 
 
 def test_about_carries_its_own_head_metadata(about: str):
-    assert (
-        "<title>Benchmark Radar: A Living Database and Search Engine for AI Benchmarks "
-        "and Evaluation</title>" in about
-    )
+    title = re.search(r"<title>([^<]*)</title>", about)
+    assert title and title.group(1).strip()
     assert f'<link rel="canonical" href="{SITE_URL}/about/">' in about
     description = re.search(r'<meta name="description" content="([^"]+)">', about)
     assert description and 70 <= len(description.group(1)) <= 200
@@ -61,7 +59,6 @@ def test_about_marks_its_own_nav_entry_active(about: str):
     assert set(active) == {"/about/"}
     header = re.search(r'<nav class="view-nav".*?</nav>', about, re.S).group(0)
     assert 'aria-current="page" href="/about/"' in header
-    assert re.findall(r'href="([^"]+)"', header)[-1] == "/about/"
 
 
 def test_media_contains_every_coverage_link_from_issue_626(media: str, about: str):

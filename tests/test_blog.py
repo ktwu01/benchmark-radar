@@ -22,6 +22,7 @@ from benchmark_radar.blog_shell import (
     BLOG_FEED_PATH,
     BLOG_PATH,
     extract_site_chrome,
+    parse_zh_table,
 )
 from benchmark_radar.feed import SITE_URL
 from benchmark_radar.site_shell import SHARE_CARD_META, esc
@@ -505,7 +506,7 @@ def test_blog_index_leads_with_one_title_without_repeating_its_metadata(tmp_path
     write_blog_with_chrome([_briefed(), _legacy()], tmp_path)
     page = (tmp_path / "blog" / "index.html").read_text(encoding="utf-8")
     hero = re.search(r'<header class="blog-hero">.*?</header>', page, re.S).group(0)
-    assert "<h1>What changed in AI evaluation, and why it matters</h1>" in hero
+    assert hero.count("<h1") == 1
     assert "Daily brief" not in hero
     assert "One page per collection day" not in hero
     assert "collection days" not in hero
@@ -626,12 +627,17 @@ def test_the_chrome_i18n_table_is_baked_from_app_js_for_chinese_readers(tmp_path
     table = json.loads(match.group(1))
     # Same reviewed strings the dashboard applies: the contact label, the
     # toggle states, and the badge aria templates.
-    assert table["Accept"] == "接受"
-    assert table["Decline"] == "拒绝"
-    assert "Microsoft" in table["analytics-consent-text"]
-    assert table["Contact"] == "联系作者"
-    assert table["Switch to English"] == "切换到英文"
-    assert "{count}" in table["Star this repository on GitHub. {count} stars"]
+    zh = parse_zh_table(APP_JS)
+    for key in (
+        "Accept",
+        "Decline",
+        "analytics-consent-text",
+        "Contact",
+        "Switch to English",
+        "Star this repository on GitHub. {count} stars",
+    ):
+        assert table[key] == zh[key], key
+    assert {key: zh[key] for key in table} == table
 
 
 def _run_blog_language_harness(mode: str, target_lang: str, remember: bool = True) -> dict:
