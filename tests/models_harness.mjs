@@ -154,7 +154,7 @@ const env = {
 };
 const names = [
   "modelDocuments", "modelFirstMentions", "modelCapabilityGroup", "modelFamily", "modelAverageValue",
-  "modelHeldByAll", "modelSharedAverage", "modelMatrixModels", "modelMatrixTable", "modelOrder", "modelMatches", "modelLabCounts",
+  "modelJoinedShare", "modelHeldFilter", "modelSharedAverage", "modelMatrixModels", "modelMatrixTable", "modelOrder", "modelMatches", "modelLabCounts",
   "renderModelLabs", "modelValueText", "modelSeriesScale", "modelLatestDate", "openModelPanel", "closeModelPanel", "renderModels", "initModels",
 ];
 const models = new Function(
@@ -236,8 +236,36 @@ assert.deepEqual(models.modelSharedAverage([cells({ hard: 0.25 })], benchmarks).
 // Joined benchmarks (#904): columns scoring different records of one reviewed
 // equivalent group share that benchmark; different groups do not share.
 const joined = new Map([["hard", "gpqa"], ["easy", "gpqa"]]);
+// A joined record with one protocol carries it as `group` (#1195).
+const sole = (label) => ({ ...pct, group: label });
+const std = new Map([["hard", sole("std")], ["easy", sole("std")]]);
+assert.deepEqual(
+  models.modelSharedAverage([cells({ hard: 40 }), cells({ easy: 60 })], std, joined),
+  { means: [40, 60], shared: ["gpqa"] },
+);
+// A missing label never joins another record's missing label, and different
+// sole labels do not join either (#1195).
 assert.deepEqual(
   models.modelSharedAverage([cells({ hard: 40 }), cells({ easy: 60 })], benchmarks, joined),
+  { means: [null, null], shared: [] },
+);
+assert.deepEqual(
+  models.modelSharedAverage(
+    [cells({ hard: 40 }), cells({ easy: 60 })],
+    new Map([["hard", sole("5-shot")], ["easy", sole("0-shot")]]),
+    joined,
+  ),
+  { means: [null, null], shared: [] },
+);
+// The protocol is chosen across the columns: A scores two records of the
+// group under different protocols, B only one, and they share on that one
+// (#1195). Key order alone would pick A's "easy" and reject the group.
+assert.deepEqual(
+  models.modelSharedAverage(
+    [cells({ easy: 20, hard: 40 }), cells({ hard: 60 })],
+    new Map([["hard", sole("0-shot")], ["easy", sole("5-shot")]]),
+    joined,
+  ),
   { means: [40, 60], shared: ["gpqa"] },
 );
 assert.deepEqual(
@@ -335,8 +363,8 @@ const joinedRecords = [
 const joinedPayload = {
   schema_version: 1,
   benchmarks: [
-    { key: "llm-stats:gpqa", direction: "higher_is_better", multiplier: 1, percent: true, unit: "%", joined: "gpqa" },
-    { key: "opencompass:1135", direction: "higher_is_better", multiplier: 1, percent: true, unit: "%", joined: "gpqa" },
+    { key: "llm-stats:gpqa", direction: "higher_is_better", multiplier: 1, percent: true, unit: "%", joined: "gpqa", group: "std" },
+    { key: "opencompass:1135", direction: "higher_is_better", multiplier: 1, percent: true, unit: "%", joined: "gpqa", group: "std" },
   ],
   models: [
     { key: "a", model: "A", organization: "Lab", dates: {}, scores: [[0, 40]] },
@@ -360,6 +388,22 @@ const sharedOnlyTable = models.modelMatrixTable(
 );
 state.modelsSharedOnly = false;
 assert.equal((sharedOnlyTable.textContent.match(/GPQA/g) || []).length, (joinedTable.textContent.match(/GPQA/g) || []).length);
+
+// The filter follows the average's protocol rule (#1195): records of one group
+// with no protocol label are not shared, so the shared-only view drops them.
+const unlabelledPayload = {
+  ...joinedPayload,
+  benchmarks: joinedPayload.benchmarks.map(({ group, ...benchmark }) => benchmark),
+};
+const unlabelledMatrix = models.modelMatrixModels(joinedRecords, unlabelledPayload);
+state.modelsSharedOnly = true;
+const unlabelledTable = models.modelMatrixTable(
+  unlabelledMatrix.models, unlabelledMatrix,
+  new Map(joinedRecords.map((entry) => [entry.key, entry])),
+);
+state.modelsSharedOnly = false;
+assert.match(unlabelledTable.querySelector("tbody.models-average").textContent, /share no benchmark/);
+assert.equal((unlabelledTable.textContent.match(/GPQA/g) || []).length, 0);
 
 // --- Rendering. ------------------------------------------------------------------
 function reset(scores) {
