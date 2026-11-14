@@ -109,7 +109,8 @@ def test_oauth1_signature_matches_reference_implementation():
 def test_upload_media_sends_multipart_form(monkeypatch):
     captured = {}
 
-    def fake_request_json(request):
+    def fake_request_json(make_request, **_):
+        request = make_request()
         captured["data"] = request.data
         headers = {key.lower(): value for key, value in request.header_items()}
         captured["content_type"] = headers.get("content-type", "")
@@ -139,3 +140,70 @@ def test_ledger_round_trip(tmp_path, monkeypatch):
     post_x.record_post(ledger, "2026-11-01", "en", "12345")
     assert post_x.already_posted(post_x.load_ledger(), "2026-11-01", "en")
     assert not post_x.already_posted(post_x.load_ledger(), "2026-11-01", "zh")
+
+
+class _FakeResponse:
+    def __init__(self, payload: str) -> None:
+        self._payload = payload.encode()
+
+    def read(self) -> bytes:
+        return self._payload
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+def _http_error(status: int, body: str):
+    import io
+    import urllib.error
+
+    return urllib.error.HTTPError("https://api.x.com", status, "x", {}, io.BytesIO(body.encode()))
+
+
+_CREDS = {"api_key": "k", "api_secret": "s", "access_token": "t", "access_token_secret": "ts"}
+
+
+def test_client_not_enrolled_names_the_portal_fix(monkeypatch):
+    import pytest
+
+    body = '{"reason":"client-not-enrolled"}'
+
+    def fake_urlopen(request, timeout):
+        raise _http_error(403, body)
+
+    monkeypatch.setattr(post_x.urllib.request, "urlopen", fake_urlopen)
+    with pytest.raises(RuntimeError, match="not attached to a Project"):
+        post_x.check_credentials(_CREDS, sleep=lambda _: None)
+
+
+def test_upload_retries_503_then_succeeds(monkeypatch):
+    calls = []
+
+    def fake_urlopen(request, timeout):
+        calls.append(request.get_header("Authorization"))
+        if len(calls) < 3:
+            raise _http_error(503, "{}")
+        return _FakeResponse('{"data": {"id": "42"}}')
+
+    monkeypatch.setattr(post_x.urllib.request, "urlopen", fake_urlopen)
+    assert post_x.upload_media(b"png", _CREDS, sleep=lambda _: None) == "42"
+    assert len(calls) == 3
+    assert len(set(calls)) == 3  # each attempt is signed with a fresh nonce
+
+
+def test_create_post_is_never_retried(monkeypatch):
+    import pytest
+
+    calls = []
+
+    def fake_urlopen(request, timeout):
+        calls.append(1)
+        raise _http_error(503, "{}")
+
+    monkeypatch.setattr(post_x.urllib.request, "urlopen", fake_urlopen)
+    with pytest.raises(post_x.XApiError):
+        post_x.create_post("hi", None, _CREDS)
+    assert len(calls) == 1

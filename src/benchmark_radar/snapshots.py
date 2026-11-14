@@ -1499,6 +1499,7 @@ def _share_images(share: dict[str, Any] | None) -> dict[str, Any]:
     fields beside each image so X captions do not lose the names in the PNG.
     """
     # Imported here because daily_top imports this module.
+    from .creator_names import clean_creators
     from .daily_top import card_image_name, daily_image_url
 
     cards = [card for card in (share or {}).get("cards") or [] if card.get("url")]
@@ -1511,8 +1512,12 @@ def _share_images(share: dict[str, Any] | None) -> dict[str, Any]:
             {
                 "url": str(card["url"]),
                 "title": str(card.get("title") or ""),
-                "authors": list(card.get("authors") or []),
-                "affiliations": list(card.get("affiliations") or []),
+                # Days written before the cleanup still carry duplicate and
+                # LaTeX-escaped names; captions read these lists, the PNG
+                # already rendered for that day does not change.
+                **clean_creators(
+                    list(card.get("authors") or []), list(card.get("affiliations") or [])
+                ),
                 "blurb": str(card.get("blurb") or ""),
                 "image": daily_image_url(day, card_image_name(index)),
             }

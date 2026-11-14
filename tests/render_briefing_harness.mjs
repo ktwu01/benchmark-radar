@@ -95,6 +95,9 @@ globalThis.window = {
   location: { pathname: "/", search: "", hash: "" },
 };
 globalThis.fetch = () => new Promise(() => {});
+// The import lines are stripped above, so the caption builders that app.js
+// renders each card's share data with come from the real module, as globals.
+Object.assign(globalThis, await import("../site/assets/share-caption.js"));
 
 const harness =
   `globalThis.__render = { renderDailyBriefing, setLang, getLang };\n${source}`;

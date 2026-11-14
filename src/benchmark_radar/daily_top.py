@@ -36,6 +36,7 @@ from typing import Any
 
 from .cards import CARDS_SITE_URL
 from .corpus import organizations_for_item
+from .creator_names import clean_creators
 from .http import RequestError, get_json, get_text
 from .paper_institutions import arxiv_html_affiliations, arxiv_id, openalex_institutions
 from .snapshots import _write_json, load_snapshots, validate_snapshot
@@ -218,7 +219,8 @@ def resolve_creators(
     A failed lookup keeps whatever the item already carried. The image then
     shows fewer facts, never a guessed one.
     """
-    return _shown(_lookup_creators(item, fetch=fetch, fetch_text=fetch_text))
+    found = _lookup_creators(item, fetch=fetch, fetch_text=fetch_text)
+    return _shown(clean_creators(found["authors"], found["affiliations"]))
 
 
 def _lookup_creators(

@@ -2,7 +2,23 @@
 import { cardFacts } from "./radar-card.js";
 
 const HOME = "https://benchmark-radar.org";
-const unique = (values) => [...new Set((values || []).filter(Boolean))];
+// Merged lists name one person two ways ("Yi-Zhen Jiang", "Yizhen Jiang"), and
+// the server cleans only the card's own list, so names compare by letters.
+const nameKey = (value) => String(value).normalize("NFKD").replace(/[^\p{L}]/gu, "").toLowerCase();
+const uniqueBy = (key) => (values) => {
+  const seen = new Set();
+  return (values || []).filter((value) => {
+    if (!value) return false;
+    const id = key(value) || value;
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+};
+const unique = uniqueBy(nameKey);
+// URLs differ in digits and punctuation ("arxiv.org/abs/2611.17267" and
+// ".../2611.15262"), so they compare exactly.
+const uniqueUrls = uniqueBy(String);
 // Domain-like text is not an X handle. Keep genuine handles such as @ktwu01.
 const postText = (text) => text.split(/(https?:\/\/\S+)/g)
   .map((part, index) => index % 2 ? part : part
@@ -46,7 +62,7 @@ export function briefingCaption({ card, finding = "", implication = "", sources 
     finding || card.blurb,
     finding && card.blurb && !finding.includes(card.blurb) ? card.blurb : "",
     implication ? `Why it matters: ${implication}` : "",
-    unique([card.url, ...sources].map(sourceUrl)).map((url) => `Source: ${url}`).join("\n"),
+    uniqueUrls([card.url, ...sources].map(sourceUrl)).map((url) => `Source: ${url}`).join("\n"),
     HOME,
   ]);
 }
