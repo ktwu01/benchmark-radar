@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Talks · Benchmark Radar</title>
+<meta name="description" content="Talks about Benchmark Radar: what a living record of AI benchmarks shows about attention, saturation, and audits. Slides and speaker notes.">
+<link rel="canonical" href="https://benchmark-radar.org/talks/">
+<meta property="og:title" content="Talks · Benchmark Radar">
+<meta property="og:description" content="Slides and speaker notes from Benchmark Radar talks.">
+<meta property="og:url" content="https://benchmark-radar.org/talks/">
+<meta property="og:image" content="https://benchmark-radar.org/assets/og-card.png">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  /* Same palette as the talk decks, so the list and the slides read as one place. */
+  :root { --paper: #f3efe6; --card: #fffdf8; --ink: #142120; --ink-soft: #4a5856; --teal: #1d6b66; --amber: #d9892b; --line: rgba(20, 33, 32, 0.14); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--paper); color: var(--ink); font-family: 'IBM Plex Sans', sans-serif; line-height: 1.5; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 48px 24px 96px; }
+  .home { font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--teal); text-decoration: none; }
+  .home:hover { text-decoration: underline; }
+  h1 { font-size: 56px; font-weight: 700; letter-spacing: -0.025em; margin: 40px 0 12px; }
+  .lede { font-size: 20px; color: var(--ink-soft); max-width: 680px; }
+  .talks { list-style: none; margin-top: 48px; display: grid; gap: 24px; }
+  .talk { background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: grid; grid-template-columns: 340px 1fr; }
+  .talk > a { display: flex; align-items: center; background: var(--paper); border-right: 1px solid var(--line); }
+  .talk img { width: 100%; height: auto; aspect-ratio: 16 / 9; display: block; }
+  .body { padding: 26px 30px; }
+  .venue { font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); }
+  .talk h2 { font-size: 26px; font-weight: 700; letter-spacing: -0.015em; margin: 8px 0 6px; }
+  .talk h2 a { color: inherit; text-decoration: none; }
+  .talk h2 a:hover { color: var(--teal); }
+  .meta { color: var(--ink-soft); font-size: 16px; }
+  .links { margin-top: 16px; display: flex; gap: 18px; flex-wrap: wrap; font-size: 16px; }
+  .links a { color: var(--teal); font-weight: 600; }
+  @media (max-width: 720px) {
+    h1 { font-size: 40px; }
+    .talk { grid-template-columns: 1fr; }
+    .talk > a { border-right: 0; border-bottom: 1px solid var(--line); }
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <a class="home" href="/">← benchmark-radar.org</a>
+  <h1>Talks</h1>
+  <p class="lede">Slides and speaker notes from talks about Benchmark Radar and what its record of AI benchmarks shows.</p>
+
+  <!-- Add each new talk as one <li>, newest first. Each talk lives in its own folder: /talks/<venue>-<year>/ -->
+  <ul class="talks">
+    <li class="talk">
+      <a href="/talks/cohere-labs-2026/"><img src="/talks/cohere-labs-2026/assets/title.jpg" alt="Title slide: Benchmark Radar, Keeping a Living Map of AI Evaluation"></a>
+      <div class="body">
+        <div class="venue">Cohere Labs Open Science Community · 2026</div>
+        <h2><a href="/talks/cohere-labs-2026/">Benchmark Radar: Keeping a Living Map of AI Evaluation</a></h2>
+        <p class="meta">Koutian Wu, UT Austin. How new benchmarks get noticed or forgotten, how they saturate, what audits find, and a five-step check before a team trusts an eval.</p>
+        <div class="links"><a href="/talks/cohere-labs-2026/">Slides</a><a href="/talks/cohere-labs-2026/slides.md">Text and speaker notes</a></div>
+      </div>
+    </li>
+  </ul>
+</main>
+</body>
+</html>
