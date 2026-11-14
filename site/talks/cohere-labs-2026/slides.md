@@ -39,7 +39,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 - 396 · GitHub stars
 - 300+ · users
 - Every record keeps its original source and its score history.
-- Open: code on GitHub (pipeline MIT, web UI AGPL-3.0), dataset on Hugging Face (CC BY-NC-SA 4.0; third-party data keeps its own terms).
+- Open: code on GitHub (pipeline MIT, web UI AGPL-3.0), dataset on Hugging Face (MIT; third-party data keeps its own terms).
 - Records: benchmark-radar.org records badge, Nov 13, 2026. Stars: GitHub, Nov 13, 2026.
 
 > **Speaker notes:** One line: a living database and search engine for AI benchmarks. The numbers are from today. 49,679 is records collected, not distinct benchmarks; many records point at the same benchmark from different sources. Everything is open: the code and the dataset.
