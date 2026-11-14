@@ -75,18 +75,16 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 6. Demo: SWE-bench Verified
+## 6. Demo: Saturation
 
 *Live demo*
 
-- Search it. Every source, every year, no score cutoff: 9 records match the full name.
-- Open the record. One record per source: LLM Stats, model reports, and variants.
-- Read each point. Model, organization, date, and whether the score was self-reported.
-- Watch the history. How the best reported score moved as new models arrived.
+- Saturation. The best reported score over time. When it flattens near the top, the benchmark stops telling models apart.
+- Pareto frontier. Benchmarks that many models have tried and none has topped: still hard, and widely used.
 
 ![Saturation page with a search for SWE-bench Verified and its LLM Stats score history](assets/demo-swe-search.jpg)
 
-> **Speaker notes:** Switch to the browser. Saturation page, type SWE-bench Verified. Point at the list: the same benchmark appears once per source, and variants such as Agentless stay separate rather than being merged. Click the LLM Stats record. Hover a point: model, organization, date, self-reported. If the network fails, this screenshot is the fallback.
+> **Speaker notes:** Switch to the browser, Saturation page. Type SWE-bench Verified and open its score history: show where the best score flattens. Then show the Benchmark Frontier: the gold staircase marks the benchmarks that are still hard for the number of models tested on them. If the network fails, this screenshot is the fallback.
 
 ---
 

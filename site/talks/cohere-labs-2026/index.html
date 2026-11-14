@@ -351,19 +351,17 @@ body.export .all-talks { display: none; }
 <section class="slide" data-title="Demo">
   <div class="frame">
     <div class="kicker reveal">Live demo</div>
-    <h2 class="reveal">Demo: SWE-bench Verified</h2>
+    <h2 class="reveal">Demo: Saturation</h2>
     <div class="split" style="grid-template-columns:560px 1fr">
-      <ul class="points reveal" style="margin-top:0;gap:26px">
-        <li><b>Search it.</b> Every source, every year, no score cutoff: 9 records match the full name.</li>
-        <li><b>Open the record.</b> One record per source: LLM Stats, model reports, and variants.</li>
-        <li><b>Read each point.</b> Model, organization, date, and whether the score was self-reported.</li>
-        <li><b>Watch the history.</b> How the best reported score moved as new models arrived.</li>
+      <ul class="points reveal" style="margin-top:0;gap:40px;align-content:start">
+        <li><b>Saturation.</b> The best reported score over time. When it flattens near the top, the benchmark stops telling models apart.</li>
+        <li><b>Pareto frontier.</b> Benchmarks that many models have tried and none has topped: still hard, and widely used.</li>
       </ul>
       <div class="shot reveal"><img src="assets/demo-swe-search.jpg" alt="Saturation page with a search for SWE-bench Verified and its LLM Stats score history"></div>
     </div>
   </div>
   <div class="footer"><span>benchmark-radar.org/saturation</span><span class="pg"></span></div>
-  <aside class="notes">Switch to the browser. Saturation page, type SWE-bench Verified. Point at the list: the same benchmark appears once per source, and variants such as Agentless stay separate rather than being merged. Click the LLM Stats record. Hover a point: model, organization, date, self-reported. If the network fails, this screenshot is the fallback.</aside>
+  <aside class="notes">Switch to the browser, Saturation page. Type SWE-bench Verified and open its score history: show where the best score flattens. Then show the Benchmark Frontier: the gold staircase marks the benchmarks that are still hard for the number of models tested on them. If the network fails, this screenshot is the fallback.</aside>
 </section>
 
 <!-- === 7. FINDING 1: ATTENTION === -->
