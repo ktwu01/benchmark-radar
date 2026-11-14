@@ -2,7 +2,19 @@
 import { cardFacts } from "./radar-card.js";
 
 const HOME = "https://benchmark-radar.org";
-const unique = (values) => [...new Set((values || []).filter(Boolean))];
+// Merged lists name one person two ways ("Yi-Zhen Jiang", "Yizhen Jiang"), and
+// the server cleans only the card's own list, so names compare by letters.
+const nameKey = (value) => String(value).normalize("NFKD").replace(/[^\p{L}]/gu, "").toLowerCase();
+const unique = (values) => {
+  const seen = new Set();
+  return (values || []).filter((value) => {
+    if (!value) return false;
+    const key = nameKey(value) || value;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
 // Domain-like text is not an X handle. Keep genuine handles such as @ktwu01.
 const postText = (text) => text.split(/(https?:\/\/\S+)/g)
   .map((part, index) => index % 2 ? part : part

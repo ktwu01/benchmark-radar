@@ -7912,3 +7912,115 @@ a.radar-source::after {
     animation-duration: 3s;
   }
 }
+
+/* Daily share queue (?share=queue, issue #1162): a side panel that stays open
+   while the page scrolls, so each card's own Share dialog opens beside it. */
+dialog.share-queue[open] {
+  position: fixed;
+  inset: 0 0 0 auto;
+  z-index: 30;
+  width: min(440px, 100%);
+  max-height: none;
+  height: 100%;
+  margin: 0;
+  padding: var(--space-5, 1.5rem);
+}
+
+.share-queue-scope,
+.share-queue-progress {
+  margin: var(--space-2, 0.5rem) 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.share-queue-progress {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.share-queue-list {
+  display: grid;
+  gap: var(--space-3, 0.75rem);
+  margin: var(--space-4, 1rem) 0;
+  padding: 0;
+  list-style: none;
+}
+
+.share-queue-item {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-3, 0.75rem);
+  border: 1px solid var(--edge);
+}
+
+.share-queue-item:not(:has(.share-queue-thumb)) {
+  grid-template-columns: 1fr;
+}
+
+.share-queue-item.is-posted {
+  opacity: 0.7;
+}
+
+.share-queue-thumb {
+  width: 120px;
+  height: auto;
+  border: 1px solid var(--edge);
+}
+
+.share-queue-body {
+  min-width: 0;
+}
+
+.share-queue-kind {
+  margin: 0;
+  color: var(--blue);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.share-queue-title {
+  margin: 0.2rem 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.share-queue-caption {
+  max-height: 14rem;
+  overflow: auto;
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+}
+
+.share-queue-actions,
+.share-queue-record,
+.share-queue-posted {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 0.5rem);
+  align-items: center;
+  margin: var(--space-2, 0.5rem) 0 0;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+.share-queue-actions .share-card-primary {
+  width: auto;
+  padding-inline: var(--space-4, 1rem);
+}
+
+.share-queue-record input {
+  flex: 1 1 12rem;
+  min-height: 2rem;
+}
+
+.share-queue-error {
+  color: var(--danger, #b42318);
+}
+
+.share-queue-log {
+  width: 100%;
+  margin-top: var(--space-2, 0.5rem);
+  font-family: var(--utility, monospace);
+  font-size: 0.75rem;
+}

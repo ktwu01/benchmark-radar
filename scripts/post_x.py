@@ -21,7 +21,11 @@ owner's account. Every request is signed with HMAC-SHA1; the tokens do not
 expire unless they are regenerated in the console, so there is no refresh
 flow at all. A ledger at data/x-posts.json records each
 {date, lang, post id} so a re-run never posts the same briefing twice.
-There are no retries: one attempt, then the run fails loudly.
+Post creation is one attempt, so a lost response can never double-post.
+The credential check and the media upload retry on 429 and 5xx with
+exponential backoff. The credential check runs first because X answers a
+key from an App outside a Project with 403 client-not-enrolled on most
+endpoints but a bare 503 on media upload, which reads like an outage.
 """
 
 from __future__ import annotations
@@ -51,6 +55,8 @@ CARDS_IMAGE_URL = "https://cards.benchmark-radar.org/daily/{date}/top3.png"
 BADGE_URL = "https://benchmark-radar.org/data/records-badge.json"
 MEDIA_UPLOAD_URL = "https://api.x.com/2/media/upload"
 TWEETS_URL = "https://api.x.com/2/tweets"
+ME_URL = "https://api.x.com/2/users/me"
+RETRY_STATUSES = {429, 500, 502, 503, 504}
 MAX_POST_CHARS = 4_000
 
 _MONTHS_EN = [
@@ -283,13 +289,52 @@ def record_post(ledger: dict[str, Any], date: str, lang: str, post_id: str) -> N
     )
 
 
-def _request_json(request: urllib.request.Request) -> dict[str, Any]:
+class XApiError(RuntimeError):
+    def __init__(self, status: int, body: str) -> None:
+        super().__init__(f"X API {status}: {body}")
+        self.status = status
+        self.body = body
+
+
+def _request_json(
+    make_request: Any, *, retries: int = 0, sleep: Any = time.sleep
+) -> dict[str, Any]:
+    """Send a request built by ``make_request``; rebuilt per attempt so each
+    retry gets a fresh OAuth nonce and timestamp."""
+    for attempt in range(retries + 1):
+        try:
+            with urllib.request.urlopen(make_request(), timeout=30) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as error:
+            body = error.read().decode("utf-8", errors="replace")
+            if error.code in RETRY_STATUSES and attempt < retries:
+                sleep(min(60, 2**attempt))
+                continue
+            raise XApiError(error.code, body) from error
+    raise AssertionError("unreachable")
+
+
+def check_credentials(credentials: dict[str, str], *, sleep: Any = time.sleep) -> str:
+    """Return the authenticated username, or raise with the fix to apply."""
+
+    def make() -> urllib.request.Request:
+        return urllib.request.Request(
+            ME_URL,
+            headers={"Authorization": oauth1_authorization_header("GET", ME_URL, credentials)},
+        )
+
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
-            return json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as error:
-        body = error.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"X API {error.code}: {body}") from error
+        payload = _request_json(make, retries=3, sleep=sleep)
+    except XApiError as error:
+        if "client-not-enrolled" in error.body:
+            raise RuntimeError(
+                "X rejected the keys with client-not-enrolled: the developer App "
+                "behind X_API_KEY is not attached to a Project. In the X developer "
+                "portal, move the App into a Project, regenerate the four keys and "
+                "tokens, and update the repository secrets."
+            ) from error
+        raise
+    return str((payload.get("data") or {}).get("username") or "")
 
 
 def _pct(value: str) -> str:
@@ -366,7 +411,7 @@ def _multipart_form_body(
     return b"".join(chunks), f"multipart/form-data; boundary={boundary}"
 
 
-def upload_media(image: bytes, credentials: dict[str, str]) -> str:
+def upload_media(image: bytes, credentials: dict[str, str], *, sleep: Any = time.sleep) -> str:
     # The v2 one-shot upload takes multipart/form-data with the raw image in
     # a "media" field. A JSON body with base64 "media_data" is the retired
     # v1.1 shape; the v2 endpoint answers it with a bare 503.
@@ -377,16 +422,19 @@ def upload_media(image: bytes, credentials: dict[str, str]) -> str:
         "image/png",
         image,
     )
-    request = urllib.request.Request(
-        MEDIA_UPLOAD_URL,
-        data=body,
-        method="POST",
-        headers={
-            "Authorization": oauth1_authorization_header("POST", MEDIA_UPLOAD_URL, credentials),
-            "Content-Type": content_type,
-        },
-    )
-    payload = _request_json(request)
+
+    def make() -> urllib.request.Request:
+        return urllib.request.Request(
+            MEDIA_UPLOAD_URL,
+            data=body,
+            method="POST",
+            headers={
+                "Authorization": oauth1_authorization_header("POST", MEDIA_UPLOAD_URL, credentials),
+                "Content-Type": content_type,
+            },
+        )
+
+    payload = _request_json(make, retries=4, sleep=sleep)
     media_id = (payload.get("data") or {}).get("id") or payload.get("media_id_string")
     if not media_id:
         raise RuntimeError(f"X media upload returned no media id: {payload}")
@@ -397,16 +445,17 @@ def create_post(text: str, media_id: str | None, credentials: dict[str, str]) ->
     payload: dict[str, Any] = {"text": text}
     if media_id:
         payload["media"] = {"media_ids": [media_id]}
-    request = urllib.request.Request(
-        TWEETS_URL,
-        data=json.dumps(payload).encode("utf-8"),
-        method="POST",
-        headers={
-            "Authorization": oauth1_authorization_header("POST", TWEETS_URL, credentials),
-            "Content-Type": "application/json",
-        },
+    result = _request_json(
+        lambda: urllib.request.Request(
+            TWEETS_URL,
+            data=json.dumps(payload).encode("utf-8"),
+            method="POST",
+            headers={
+                "Authorization": oauth1_authorization_header("POST", TWEETS_URL, credentials),
+                "Content-Type": "application/json",
+            },
+        )
     )
-    result = _request_json(request)
     post_id = (result.get("data") or {}).get("id")
     if not post_id:
         raise RuntimeError(f"X post creation returned no id: {result}")
@@ -472,6 +521,12 @@ def main(argv: list[str] | None = None) -> int:
         _emit_output(posted="false", snapshot_date=date)
         return 0
 
+    try:
+        username = check_credentials(credentials)
+    except RuntimeError as error:
+        print(f"::error::{error}", file=sys.stderr)
+        return 1
+    print(f"Authenticated as @{username}.")
     image = fetch_image(date)
     media_id = upload_media(image, credentials) if image else None
     post_id = create_post(text, media_id, credentials)

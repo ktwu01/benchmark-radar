@@ -384,6 +384,11 @@ assert.match(readFileSync("site/assets/app.js", "utf8"), /import \{ starPrompt \
   const start = app.indexOf("function radarShareButton(");
   const source = app.slice(start, app.indexOf("\n}\n", start) + 2)
     .replace('await import("./share-card.js")', '({ openRadarShare: capture })');
+  // The sliced functions name these module-level helpers; new Function finds
+  // them on the global object. The stub Node has no setAttribute.
+  Object.assign(globalThis, await import("../site/assets/share-caption.js"), {
+    markShareable: (wrapper) => wrapper,
+  });
   let captured;
   const make = new Function("element", "shareIcon", "t", "shareCardFor", "safeHttpUrl", "window", "capture", `return (${source});`);
   const element = (tag, props, children) => Object.assign(new Node(tag), { props, children });
@@ -403,8 +408,7 @@ assert.match(readFileSync("site/assets/app.js", "utf8"), /import \{ starPrompt \
   // A failed module load must retain the old image fallback; modifier clicks stay native.
   const controlStart = app.indexOf("function shareControl(");
   const controlSource = app.slice(controlStart, app.indexOf("function briefingShare(", controlStart))
-    .replace('import("./share-card.js")', 'Promise.reject(new Error("chunk missing"))')
-    .replace('import("./share-caption.js")', 'Promise.resolve({})');
+    .replace('import("./share-card.js")', 'Promise.reject(new Error("chunk missing"))');
   let fallback;
   const safeHttpSource = app.slice(app.indexOf("function safeHttpUrl("), app.indexOf("\n}\n", app.indexOf("function safeHttpUrl(")) + 2);
   const makeControl = new Function("element", "shareIcon", "t", "window",

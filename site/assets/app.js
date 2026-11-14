@@ -1,4 +1,5 @@
 import { starPrompt } from "./star-prompt.js";
+import { briefingCaption, radarCaption, summaryCaption } from "./share-caption.js";
 import { searchCatalog, searchCatalogMatches } from "./catalog-search.js";
 import { SKYLINE_DOMAINS, SKYLINE_START_DATE, benchmarkDateLabel, skylineModel, skylineGeometry, skylineDateLanes, skylineScoreLanes, skylineCapPositions, skylineFrontierSteps, scorePopulation, matchesScoreCutoff, scoreBrowserSummary } from "./skyline.js";
 import {
@@ -2973,6 +2974,26 @@ function shareIcon() {
   return svg;
 }
 
+// Each card carries what its Share dialog would hand over, so an agent or the
+// share queue (?share=queue) reads the caption, link and image without
+// opening the dialog. ``key`` is how a post is matched later: a left-panel or
+// briefing card by type and source, a summary by its day, as in the posting log.
+function markShareable(wrapper, { kind, day, title, source = "", caption, link, image = "" }) {
+  const key = kind === "summary" ? `summary|${day}` : `${kind}|${source}`;
+  const attrs = {
+    "data-share-key": key,
+    "data-share-kind": kind,
+    "data-share-date": day || "",
+    "data-share-title": title || "",
+    "data-share-source": source,
+    "data-share-caption": caption,
+    "data-share-link": link,
+    "data-share-image": image,
+  };
+  for (const [name, value] of Object.entries(attrs)) wrapper.setAttribute(name, value);
+  return wrapper;
+}
+
 function shareControl(image, label, linkLabel = t("Share image"), share = null) {
   // Every caller passes a URL it already checked, but this control navigates
   // to it on failure, so it checks again: only an http(s) image is a link.
@@ -2988,14 +3009,12 @@ function shareControl(image, label, linkLabel = t("Share image"), share = null) 
         "aria-label": `${linkLabel === label ? linkLabel : `${linkLabel}: ${label}`}${share ? "" : ` (${t("opens in a new tab")})`}`,
       },
     }, [shareIcon()]);
+  const caption = share ? (share.cards ? summaryCaption(share) : briefingCaption(share)) : "";
   if (share) link.addEventListener("click", async (event) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
     try {
-      const [{ openDailyShare }, { briefingCaption, summaryCaption }] = await Promise.all([
-        import("./share-card.js"), import("./share-caption.js"),
-      ]);
-      const caption = share.cards ? summaryCaption(share) : briefingCaption(share);
+      const { openDailyShare } = await import("./share-card.js");
       openDailyShare({
         name: share.cards ? caption.split("\n")[0] : label,
         image: href, day: share.day, caption, t,
@@ -3005,7 +3024,17 @@ function shareControl(image, label, linkLabel = t("Share image"), share = null) 
       window.location.assign(href);
     }
   });
-  return element("div", { className: "share-control" }, [link]);
+  const wrapper = element("div", { className: "share-control" }, [link]);
+  if (!share) return wrapper;
+  return markShareable(wrapper, {
+    kind: share.cards ? "summary" : "briefing",
+    day: share.day,
+    title: share.cards ? caption.split("\n")[0] : (share.card?.title || label),
+    source: share.cards ? "" : safeHttpUrl(share.card?.url) || "",
+    caption,
+    link: `https://benchmark-radar.org/?date=${share.day}`,
+    image: href,
+  });
 }
 
 function briefingShare(parts, citations, day) {
@@ -11857,22 +11886,32 @@ function radarShareButton(item, day, title, image, pageUrl = "") {
     },
     [shareIcon()],
   );
+  const share = {
+    item,
+    day: item.snapshot_date || day?.date || "",
+    title,
+    image,
+    pageUrl: pageUrl || safeHttpUrl(item.url) || window.location.href,
+    card: shareCardFor(day, item.url) || item.share_card || item.catalog_card || null,
+  };
   button.addEventListener("click", async (event) => {
     // An attention card is a <details>; pressing Share must not also toggle it.
     event.preventDefault();
     event.stopPropagation();
     const { openRadarShare } = await import("./share-card.js");
-    openRadarShare({
-      item,
-      day: item.snapshot_date || day?.date || "",
-      title,
-      image,
-      pageUrl: pageUrl || safeHttpUrl(item.url) || window.location.href,
-      card: shareCardFor(day, item.url) || item.share_card || item.catalog_card || null,
-      t,
-    });
+    openRadarShare({ ...share, t });
   });
-  return element("div", { className: "share-control" }, [button]);
+  // A card without a published image is drawn in the browser on Share, so it
+  // has no image address until then.
+  return markShareable(element("div", { className: "share-control" }, [button]), {
+    kind: "left",
+    day: share.day,
+    title,
+    source: safeHttpUrl(item.url) || "",
+    caption: radarCaption({ item, title, card: share.card, pageUrl: share.pageUrl }),
+    link: share.pageUrl,
+    image: safeHttpUrl(image) || (image?.startsWith("/") ? new URL(image, window.location.origin).href : ""),
+  });
 }
 
 // A Today item that is exactly one catalog record (the build matched its URL,
@@ -13304,6 +13343,9 @@ async function initialize() {
   // so a directly opened legacy link still closes to the homepage rather than
   // sending the reader back off-site.
   const initialParams = new URLSearchParams(window.location.search);
+  if (initialParams.get("share") === "queue") {
+    import("./share-queue.js").then(({ openShareQueue }) => openShareQueue({ t }));
+  }
   const initialHash = window.location.hash.slice(1);
   const initialHashParams = new URLSearchParams(initialHash);
   const legacyUtilityHash = ["cli", "cite", "rubric"].some(
