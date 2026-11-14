@@ -345,6 +345,10 @@ assert.match(readFileSync("site/assets/app.js", "utf8"), /import \{ starPrompt \
   assert(briefing.includes("Why it matters: Complete implication."));
   assert(briefing.split("\n").includes("Source: https://example.org/extra"));
   assert(briefing.includes(card.blurb), "a revised finding retains the immutable PNG blurb");
+  // Name-style dedupe would read these two arXiv links as one.
+  const twoPapers = briefingCaption({ card: { title: "LiveGeo", url: "https://arxiv.org/abs/2611.17267" },
+    sources: ["https://arxiv.org/abs/2611.15262"] });
+  assert(twoPapers.includes("Source: https://arxiv.org/abs/2611.15262"));
   const summary = summaryCaption({ day: "2026-11-07", cards: [card, { ...card, title: "Second" },
     { ...card, title: "Third" }, { ...card, title: "Not on summary" }] });
   assert(summary.includes("3. Third"));
