@@ -26,7 +26,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 - A wrong eval costs more than no eval. It gives a team confidence in the wrong direction.
 - 2,940 = releases in Benchmark Radar's 90-day window, retrieved Nov 13, 2026 (scripts/release_repo_findings.py).
 
-> **Speaker notes:** Open with the scale. 2,940 is not a guess: it is how many new benchmark releases Radar picked up in the last 90 days. Nobody reads that many. So teams fall back to habit, and a number reaches a slide without its source or date. The last bullet is the stake: a bad eval is worse than none, because it points the team the wrong way with confidence.
+> **Speaker notes:** Open with the scale: Radar picked up 2,940 new benchmark releases in the last 90 days. Nobody reads that many. So teams fall back to habit, and a number reaches a slide without its source or date. The last bullet is the stake: a bad eval is worse than none, because it points the team the wrong way with confidence.
 
 ---
 
@@ -39,7 +39,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 - 396 · GitHub stars
 - 300+ · users
 - Every record keeps its original source and its score history.
-- Open: code on GitHub (pipeline MIT, web UI AGPL-3.0), dataset on Hugging Face.
+- Open: code on GitHub (pipeline MIT, web UI AGPL-3.0), dataset on Hugging Face (MIT; third-party data keeps its own terms).
 - Records: benchmark-radar.org records badge, Nov 13, 2026. Stars: GitHub, Nov 13, 2026.
 
 > **Speaker notes:** One line: a living database and search engine for AI benchmarks. The numbers are from today. 49,679 is records collected, not distinct benchmarks; many records point at the same benchmark from different sources. Everything is open: the code and the dataset.
@@ -51,7 +51,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 *Reach*
 
 - Researchers at OpenAI, Anthropic, Google, Meta, Microsoft, NVIDIA, Amazon, IBM, ByteDance, and Unitree viewed/using it.
-- 300+ users across labs, companies, and universities, found through search and the open dataset, not paid promotion.
+- 300+ users across labs, companies, and universities.
 
 ![Logos of 37 institutions whose researchers viewed/using Benchmark Radar](assets/researchers.svg)
 
@@ -115,7 +115,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 - For your team: a paper-less benchmark is not wrong, but its setup is harder to check.
 - Benchmark Radar insight #1131; re-run Nov 13, 2026 (146 paper repos, 878 without).
 
-> **Speaker notes:** Paper repos are one in seven of the cohort but 21 of the 29 that reached 100 stars. Say releases versus repos clearly: 2,940 releases come from 1,081 repos. Median 8.5 versus 0. Say the caveat out loud: association. The practical reading for industry is about checkability, not prestige.
+> **Speaker notes:** Paper repos are one in seven of the cohort but 21 of the 29 that reached 100 stars. Say releases versus repos clearly: 2,940 releases come from 1,081 repos. Median 8.5 versus 0. Say the caveat out loud: association. The practical reading for industry: a paper makes the setup easier to check.
 
 ---
 
@@ -209,6 +209,6 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 - Which eval does your team trust most, and when did you last check it?
 - I am looking for my next role in AI evaluation, starting Feb '27. If your team is hiring, or you can refer me, please email me: ktwu@utexas.edu
-- Thanks to my co-authors and contributors: Wenjun Zhang, Junjie Zhou, Pengqian Han, Qiming Bao, Ergan Shang, Jiayu Wang, Junkai Wang, Wanghan Xu, Songyuanyi Lu, Yixuan Li, Rudy Mizrahi Celekli, Lazizbek Ravshanov, Yaoliang Bian, Xudong Han, and Lin Shi. And thanks to Prahitha Movva and Cohere Labs for hosting this talk.
+- Thanks to my co-authors and contributors: Wenjun Zhang, Junjie Zhou, Pengqian Han, Qiming Bao, Ergan Shang, Jiayu Wang, Junkai Wang, Wanghan Xu, Songyuanyi Lu, Yixuan Li, Rudy Mizrahi Celekli, Lazizbek Ravshanov, Yaoliang Bian, Xudong Han, and Lin Shi.
 
 > **Speaker notes:** Say the job callout out loud, then leave this slide up for the whole Q&A. Read the acknowledgment. Thank Prahitha and Cohere Labs.
