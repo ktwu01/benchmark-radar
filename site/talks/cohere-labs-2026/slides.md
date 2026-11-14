@@ -194,13 +194,12 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 *For your paper*
 
-- Install once. One pip command, or let your coding agent run the Benchmark Radar Skill.
-- Give one query per theme. Write each as "Label=query", one per paragraph you need.
+- Install once. One command adds the Benchmark Radar Skill to your coding agent.
+- Name your themes. Ask your agent for a Related Work section, one paragraph per theme.
 - Get LaTeX and BibTeX. A cited Related Work draft and the missing BibTeX entries, ready to edit.
-- `pip install git+https://github.com/ktwu01/benchmark-radar.git`
-- `benchmark-radar related-work "Agents=agent benchmark" "Saturation=benchmark saturation" --tex related.tex --bib refs.bib`
+- `npx skills add ktwu01/benchmark-radar`
 
-> **Speaker notes:** First ask, for anyone writing a paper. One command gives your agent a cited Related Work draft and the BibTeX to go with it. It searches the Radar catalog plus arXiv, Hugging Face Papers, Semantic Scholar, OpenAlex, and Crossref. Read every entry before you keep it.
+> **Speaker notes:** First ask, for anyone writing a paper. One command gives your agent the Skill to write a cited Related Work draft and the BibTeX to go with it. It searches the Radar catalog plus arXiv, Hugging Face Papers, Semantic Scholar, OpenAlex, and Crossref. Read every entry before you keep it.
 
 ---
 
