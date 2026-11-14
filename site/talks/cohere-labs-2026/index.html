@@ -179,6 +179,7 @@ body.export .progress { display: none; }
 .card h3 { font-family: var(--font-display); font-size: 40px; font-weight: 600; }
 .card .big { font-family: var(--font-display); font-weight: 700; font-size: 64px; color: var(--amber); margin: 14px 0 8px; }
 .card p { font-size: 24px; line-height: 1.45; color: var(--ink-soft); }
+.card p.first { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--teal); font-weight: 600; }
 
 /* ===========================================
    REACH: logo strip
@@ -421,7 +422,7 @@ body.export .all-talks { display: none; }
     <div class="kicker reveal">Finding 5 of 5</div>
     <h2 class="reveal">Audits</h2>
     <div class="cards">
-      <div class="card reveal"><h3>SWE-bench Pro</h3><div class="big">109 of 728</div><p>public tasks underdetermined (15.0% floor); 3 gold patches fail the benchmark's own verifier.</p></div>
+      <div class="card reveal"><h3>SWE-bench Pro</h3><div class="big">109 of 728</div><p>public tasks underdetermined (15.0% floor); 3 gold patches fail the benchmark's own verifier.</p><p class="first">Published June 21, 2026: 17 days before OpenAI's audit (July 8) estimated ~30% of tasks broken.</p></div>
       <div class="card reveal"><h3>Terminal-Bench 2.1</h3><div class="big">40 of 83</div><p>gold-passing tasks still pass after a careless in-workspace deletion.</p></div>
       <div class="card reveal"><h3>DeepSWE</h3><div class="big">4 of 113</div><p>reference solutions fail their own verifiers (v1.0). The v1.1 re-grade fixed 3 of them.</p></div>
     </div>
@@ -431,7 +432,7 @@ body.export .all-talks { display: none; }
     <div class="source reveal">Findings as reported by each audit, linked from the benchmark's Radar record (june.kim, GitHub, Zenodo).</div>
   </div>
   <div class="footer"><span>benchmark-radar.org</span><span class="pg"></span></div>
-  <aside class="notes">How a score was produced matters as much as the number. Independent audits re-run the setup. These are the audit's findings, not Radar's. SWE-bench Pro: at least 15% of public tasks underdetermined. Terminal-Bench 2.1: a careless deletion goes unnoticed on 40 of 83 tasks. DeepSWE: four reference solutions failed their own verifiers, and the v1.1 re-grade fixed three. Radar shows the audit next to the scores it examines. Credit June Kim.</aside>
+  <aside class="notes">How a score was produced matters as much as the number. Independent audits re-run the setup. These are the audit's findings, not Radar's. SWE-bench Pro: at least 15% of public tasks underdetermined. June published this on June 21, 2026, 17 days before OpenAI's own audit on July 8 estimated about 30% of tasks broken. The two measure different defect types, so do not add or compare the percentages. Terminal-Bench 2.1: a careless deletion goes unnoticed on 40 of 83 tasks. DeepSWE: four reference solutions failed their own verifiers, and the v1.1 re-grade fixed three. Radar shows the audit next to the scores it examines. Credit June Kim.</aside>
 </section>
 
 <!-- === 12. TAKE HOME === -->
