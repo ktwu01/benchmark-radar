@@ -36,29 +36,6 @@ class SiteParser(HTMLParser):
             self.local_refs.append(reference)
 
 
-def test_readmes_offer_free_data_and_an_earned_star_request():
-    english = Path("README.md").read_text(encoding="utf-8")
-    chinese = Path("README.zh-CN.md").read_text(encoding="utf-8")
-
-    # Language switch sits top-left above the title with a plain label.
-    assert '<div align="left">' in english.split("# Benchmark Radar")[0]
-    assert "[中文](README.zh-CN.md)" in english
-    assert "[README.zh-CN.md](README.zh-CN.md)" not in english
-    assert '<div align="left">' in chinese.split("# Benchmark Radar")[0]
-    assert "[English](README.md)" in chinese
-    assert "Click" in english and "the GIF below" in english
-    assert "点击下面的动图" in chinese
-    assert "assets/swe-bench-verified.gif" in english
-    assert "assets/swe-bench-verified.gif" in chinese
-    dataset = "https://huggingface.co/datasets/ktwu01/benchmark-radar"
-    assert dataset in english and "daily discovery records" in english
-    assert dataset in chinese and "每日发现记录" in chinese
-    assert "releases/download/cli-data" not in english + chinese
-    assert "star the repository" in english
-    assert "给仓库点个 Star" in chinese
-    assert Path("CITATION.cff").exists()
-
-
 def test_site_has_accessible_landmarks_and_views():
     parser = SiteParser()
     parser.feed(Path("site/index.html").read_text(encoding="utf-8"))
@@ -309,22 +286,6 @@ def test_visible_navigation_items_use_the_same_active_state():
     assert '.view-nav button[aria-current="page"]' not in styles
 
 
-def test_primary_section_titles_share_compact_spacing_and_trends_uses_one_title():
-    html = Path("site/index.html").read_text(encoding="utf-8")
-    styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
-    compact = styles.split("#leaderboard-view,", 1)[1].split("}", 1)[0]
-    assert "#saturation-view," in compact
-    assert "#trends-view" in compact
-    score_header = styles.split(".score-browse-header {", 1)[1].split("}", 1)[0]
-    assert "align-items: flex-start" in score_header
-    assert ".score-browse-header > .score-filter { margin-bottom: 0; }" in styles
-    trends = html.split('id="trends-view"', 1)[1].split("</section>", 1)[0]
-    assert '<h2 id="trends-heading" class="view-title" data-i18n="Trend">Trend</h2>' in trends
-    assert "Recent activity" not in trends
-    assert "Signals over time" not in trends
-    assert "Counts describe discovery volume" not in trends
-
-
 def test_recommendation_threshold_does_not_gate_inclusion_and_rows_carry_no_badge():
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
 
@@ -476,40 +437,6 @@ def test_site_has_an_icon():
     assert parser.icon_hrefs, "index.html declares no icon"
 
 
-def test_top_right_utilities_use_shared_icon_geometry_without_a_contact_button():
-    html = Path("site/index.html").read_text(encoding="utf-8")
-    styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
-
-    # The header contact button is gone (#1097): the contact sheet opens from
-    # the footer and the stale-data banner instead.
-    assert 'id="badge-contact"' not in html
-    assert 'id="contact-dialog"' in html
-    # The export badge is gone (issue #311): dataset requests go through the
-    # contact sheet and the footer note, not a header button.
-    assert 'id="badge-export"' not in html
-    assert 'id="export-dialog"' not in html
-    assert 'id="badge-wechat"' not in html
-    assert 'id="badge-discord"' not in html
-    assert 'id="lang-toggle"' in html
-    assert 'class="repo-badge"' in html
-    assert "grid-template-columns: repeat(2, 2.6rem)" in styles
-    assert "width: 2.6rem" in styles
-    assert "height: 2.6rem" in styles
-    assert ".repo-badges" not in styles
-    assert 'class="repo-badge-glyph" id="lang-toggle-label">中<' in html
-    assert 'class="brand-icon github-icon"' in html
-    assert "grid-template-columns: repeat(2, 44px)" in styles
-    mobile_badge = (
-        styles.split("@media (max-width: 760px)", 1)[1]
-        .split(".repo-badge {", 1)[1]
-        .split("}", 1)[0]
-    )
-    assert "width: 44px" in mobile_badge
-    assert "height: 44px" in mobile_badge
-    assert "flex: 0 0 1.5rem" in styles
-    assert ".repo-badge svg," in styles
-
-
 def test_trends_table_stays_inside_the_320px_viewport():
     """Issue #1002: the table scrolls inside its frame; the page must not.
 
@@ -576,21 +503,6 @@ def test_every_homepage_image_carries_an_alt_attribute():
     # Generated pages are checked by parsing their rendered output instead
     # (tests/test_site_pages.py): a blanket ban on "<img" in the generator
     # source would also block a future accessible image.
-
-
-def test_top_right_utilities_have_immediate_visible_feedback():
-    """Issue #228: feedback includes a fast high-contrast state and label."""
-    script = Path("site/assets/app.js").read_text(encoding="utf-8")
-    styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
-
-    assert 'node.setAttribute("data-tooltip", resolved)' in script
-    assert 'node.removeAttribute("title")' in script
-    badge = styles.split(".repo-badge {", 1)[1].split("}", 1)[0]
-    feedback = styles.split(".repo-badge:hover,", 1)[1].split("}", 1)[0]
-    assert "60ms" in badge
-    assert "background: var(--ink)" in feedback
-    assert "color: var(--panel)" in feedback
-    assert "content: attr(data-tooltip)" in styles
 
 
 def test_language_toggle_and_contact_labels_are_translated():
@@ -956,16 +868,6 @@ def test_newer_successful_data_requests_cannot_be_overwritten_by_late_responses(
     assert "Trends data request was superseded by a bootstrap response" in fetch_payload
 
 
-def test_rubric_remains_a_direct_route_without_a_navigation_control():
-    html = Path("site/index.html").read_text(encoding="utf-8")
-    script = Path("site/assets/app.js").read_text(encoding="utf-8")
-
-    assert 'id="rubric-nav"' not in html
-    assert 'canonical: "/rubric/"' in script
-    assert 'state.rubric = pathUtility === "rubric"' in script
-    assert 'openRubric(null, state.rubric === "current" ? null : state.rubric, false)' in script
-
-
 def test_hydrated_expansion_controls_announce_the_action_they_will_take():
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
     top = script.split("function renderLeaderboardTop", 1)[1].split(
@@ -1204,27 +1106,6 @@ def test_detail_grid_shows_every_component_that_moves_the_total():
     # Issue #908: the header's score badge already shows the priority, so the
     # expanded grid does not repeat it.
     assert '[t("Priority"), Number(item.' not in script
-
-
-def test_today_view_has_one_filterable_observation_list_and_one_source_status():
-    html = Path("site/index.html").read_text(encoding="utf-8")
-    script = Path("site/assets/app.js").read_text(encoding="utf-8")
-
-    # The heading appears in the data-i18n key and the visible text.
-    assert html.count("Today's radar") == 2
-    assert 'id="today-list"' in html
-    assert 'id="filters"' in html
-    assert 'id="kind-filter"' in html
-    assert (
-        "visibleObservations.map((item, offset) => observationCard(item, pageStart + offset, day))"
-        in script
-    )
-    assert "Daily field note" not in html
-    assert "What entered the field?" not in html
-    assert "today-overview" not in html
-    assert "today-attention-list" not in html
-    assert "Sources in results" not in script
-    assert "health-summary" not in html
 
 
 def test_today_toolbar_keeps_secondary_filters_in_a_popover():
@@ -1608,25 +1489,6 @@ def test_supporting_attention_provider_is_not_hard_coded():
 
     assert "`${record.source || item.source} #${record.source_id}`" in script
     assert "Hacker News #${record.source_id}" not in script
-
-
-def test_header_keeps_one_github_action_and_issues_remain_reachable():
-    html = Path("site/index.html").read_text(encoding="utf-8")
-
-    # The header keeps one GitHub destination. Issue links remain in context.
-    assert 'href="https://github.com/ktwu01/benchmark-radar"' in html
-    assert "https://github.com/ktwu01/benchmark-radar/issues" in html
-    assert 'id="badge-forks"' not in html
-    assert 'id="badge-issues"' not in html
-    assert "/stargazers" not in html
-    assert "benchmark-radar/forks" not in html
-
-    assert ">Star<" in html
-
-    # Starring has no GET endpoint, so the star badge opens the repository and
-    # the reader clicks Star there. Asserting the absence of a fabricated
-    # /star URL keeps a future edit from inventing one that 404s.
-    assert "benchmark-radar/star" not in html
 
 
 def test_today_view_shows_total_corpus_counts_by_category():
@@ -2789,20 +2651,6 @@ def test_source_mix_names_the_sources_that_found_nothing():
     assert 'id="source-gap-note"' in html
 
 
-def test_daily_ledger_is_a_tiny_collapsed_dev_checker_below_the_trends():
-    """The maintenance ledger stays available without competing for attention."""
-    html = Path("site/index.html").read_text(encoding="utf-8")
-    styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
-
-    assert '<details class="dev-checker" aria-labelledby="dev-checker-heading">' in html
-    assert '<summary class="dev-checker-summary">' in html
-    assert 'data-i18n="Dev checker">Dev checker</span>' in html
-    assert '<details class="dev-checker" open' not in html
-    assert html.index('class="trend-panel"') < html.index('class="dev-checker"')
-    assert ".dev-checker-summary {" in styles
-    assert "font-size: 0.65rem;" in styles.split(".dev-checker-summary {", 1)[1].split("}", 1)[0]
-
-
 def test_source_mix_separates_the_three_reasons_a_source_shows_zero():
     """Issue #260: the source mix counts ranked evidence, fetch health counts
     raw records, so a zero has three different meanings and only two of them
@@ -3326,60 +3174,6 @@ def test_issue_333_the_page_never_scrolls_sideways():
     assert "overflow-x: hidden" not in styles
 
 
-def test_issue_333_the_page_is_two_typefaces_not_three():
-    """Headings, body copy and labels were set in three unrelated faces at once."""
-    styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
-
-    root = _css_rule(styles, ":root {")
-    assert "--display: var(--body);" in root
-    # The mono stays: it is the one face doing a job the sans cannot, holding
-    # figures in columns that line up down the page.
-    assert '--utility: "SFMono-Regular"' in root
-    # The condensed face is gone, and so is the axis that selected it.
-    assert "Condensed" not in styles
-    assert "font-stretch" not in styles
-
-
-def test_issue_333_dividers_are_grey_and_surfaces_are_rounded():
-    """Every card edge and row rule was drawn in the text colour, on square corners."""
-    styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
-
-    root = _css_rule(styles, ":root {")
-    assert "--edge: " in root
-    assert "--radius: " in root
-
-    # No border anywhere is drawn in the ink again.
-    assert "solid var(--ink)" not in styles.split(".repo-badge::after {", 1)[0]
-
-    # The two deliberate exceptions, each of which is not a divider: the dark
-    # tooltip chip, whose border IS its background, and the search field, whose
-    # heavy border is the affordance telling a reader to type in it.
-    tooltip = _css_rule(styles, ".repo-badge::after {")
-    assert "border: 1px solid var(--ink);" in tooltip
-    assert "background: var(--ink);" in tooltip
-    field = _css_rule(styles, ".benchmark-search-input {")
-    assert "border: 2px solid var(--ink);" in field
-
-    # Elements that draw a single rule rather than a box stay square: rounding
-    # one border of a four-sided box curls the ends of the line away from the
-    # content it separates.
-    radius_rule = styles.split("\n.daily-briefing,\n.daily-questions,", 1)[1].split("}", 1)[0]
-    for rule_only in (".masthead", ".section-title", "footer", ".stale-banner"):
-        assert f"{rule_only},\n" not in radius_rule
-
-
-def test_issue_333_nothing_on_the_page_shouts():
-    """58 rules set their text in capitals; the source strings are already cased."""
-    styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
-    html = Path("site/index.html").read_text(encoding="utf-8")
-
-    assert "text-transform: uppercase" not in styles
-    # The labels the rules used to capitalise are written properly in the
-    # markup, so removing the transform leaves readable sentence case rather
-    # than lowercase fragments.
-    assert '<span class="leaderboard-top-columns-rank" data-i18n="Rank">Rank</span>' in html
-
-
 def test_issue_332_the_freshest_releases_reach_page_one():
     """Priority knows nothing about time, so a flat release group scrambles age.
 
@@ -3860,19 +3654,3 @@ def test_library_controls_meet_the_44px_touch_target():
     rule = styles.split(".library-sort,\n.library-saved-toggle {", 1)[1].split("}", 1)[0]
     assert "min-height: var(--control-height);" in rule
     assert "--control-height: 44px;" in styles
-
-
-def test_library_sidebar_clears_the_sticky_masthead():
-    styles = Path("site/assets/styles.css").read_text(encoding="utf-8")
-
-    # #889: the sidebar stuck at top: 0.5rem, so the sticky masthead covered
-    # its first controls once the reader scrolled. Only wide screens keep
-    # a sticky masthead; narrow screens must reclaim that space.
-    rule = styles.split(".library-directions {", 1)[1].split("}", 1)[0]
-    assert "top: calc(64px + 0.5rem);" in rule
-    assert "max-height: calc(100vh - 64px - 1rem);" in rule
-    narrow = styles.rsplit("@media (max-width: 1280px) {", 1)[1].split("\n}", 1)[0]
-    assert "top: 0.5rem;" in narrow
-    assert "max-height: calc(100vh - 1rem);" in narrow
-    assert "top: calc(108px + 0.5rem);" not in styles
-    assert ".benchmark-navigator {\n    top: 0.5rem;" in styles

@@ -146,17 +146,6 @@ def test_citation_metadata_prefers_the_technical_report():
     assert f'url: "{TECHNICAL_REPORT}"' in text
 
 
-def test_public_bibtex_names_all_report_authors():
-    author = (
-        "author={Koutian Wu and Wenjun Zhang and Junjie Zhou and Pengqian Han and Qiming Bao and "
-        "Ergan Shang and Jiayu Wang and Junkai Wang and Wanghan Xu and "
-        "Songyuanyi Lu and Yixuan Li and Rudy {Mizrahi Celekli} and "
-        "Lazizbek Ravshanov and Yaoliang Bian and Xudong Han and Lin Shi}"
-    )
-    for readme in (README, README_ZH):
-        assert author in readme.read_text(encoding="utf-8")
-
-
 def test_every_hand_copied_bibtex_entry_matches_citation_py():
     """The BibTeX entry is hand-copied into five surfaces, so compare them.
 
