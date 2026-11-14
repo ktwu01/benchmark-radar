@@ -127,7 +127,8 @@ def test_generate_dataset_card():
     assert "2609.11115" in card
     assert "1,284" in card
     assert "12,929" in card
-    assert "license: other" in card
+    assert "license: mit" in card
+    assert "MIT License" in card
     assert "license: apache-2.0" not in card
     assert "LICENSE-CONTENT.md" in card
     frontmatter = yaml.safe_load(card.split("---", 2)[1])

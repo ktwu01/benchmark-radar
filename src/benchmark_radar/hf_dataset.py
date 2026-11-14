@@ -49,9 +49,7 @@ def generate_dataset_card(
     source_list = ", ".join(f"`{source}`" for source in sorted(catalog_sources))
     card = f"""---
 pretty_name: "Benchmark Radar: AI Benchmarks and Evaluation Scores"
-license: other
-license_name: benchmark-radar-mixed-terms
-license_link: https://github.com/ktwu01/benchmark-radar/blob/main/LICENSE-CONTENT.md
+license: mit
 task_categories:
   - text-generation
   - question-answering
@@ -231,12 +229,14 @@ Contains {observations_count:,} discrete daily discovery events.
 
 ## Licensing
 
-The technical report and Benchmark Radar's original editorial content are
-available under CC BY-NC-SA 4.0. Commercial dataset packaging or product
-integration requires prior written permission. Third-party benchmark metadata
-and source material retain their original terms. Review the
-[repository licensing notice](https://github.com/ktwu01/benchmark-radar/blob/main/LICENSE-CONTENT.md)
-before reuse, especially for commercial dataset packaging.
+The data files in this dataset are released under the
+[MIT License](https://github.com/ktwu01/benchmark-radar/blob/main/LICENSE), the
+same terms as the data files in the repository. Third-party benchmark metadata
+and source material retain their original terms; see the
+[third-party notices](https://github.com/ktwu01/benchmark-radar/blob/main/LICENSE-CONTENT.md#third-party-notices).
+The technical report and Benchmark Radar's original editorial content are under
+CC BY-NC-SA 4.0, as stated in the
+[repository licensing notice](https://github.com/ktwu01/benchmark-radar/blob/main/LICENSE-CONTENT.md).
 
 ## Citation
 
