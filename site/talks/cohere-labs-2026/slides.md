@@ -152,13 +152,13 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 *Finding 5 of 5*
 
-- SWE-bench Pro · 109 of 728 · public tasks underdetermined (15.0% floor); 3 gold patches fail the benchmark's own verifier.
+- SWE-bench Pro · 109 of 728 · public tasks underdetermined (15.0% floor); 3 gold patches fail the benchmark's own verifier. · Published June 21, 2026: 17 days before OpenAI's audit (July 8) estimated ~30% of tasks broken.
 - Terminal-Bench 2.1 · 40 of 83 · gold-passing tasks still pass after a careless in-workspace deletion.
 - DeepSWE · 4 of 113 · reference solutions fail their own verifiers (v1.0). The v1.1 re-grade fixed 3 of them.
 - Radar lists 9 audits of 8 benchmarks, all by June Kim: also ProgramBench, MirrorCode, FrontierCode, SlopCodeBench, and Frontier-Bench.
 - Findings as reported by each audit, linked from the benchmark's Radar record (june.kim, GitHub, Zenodo).
 
-> **Speaker notes:** How a score was produced matters as much as the number. Independent audits re-run the setup. These are the audit's findings, not Radar's. SWE-bench Pro: at least 15% of public tasks underdetermined. Terminal-Bench 2.1: a careless deletion goes unnoticed on 40 of 83 tasks. DeepSWE: four reference solutions failed their own verifiers, and the v1.1 re-grade fixed three. Radar shows the audit next to the scores it examines. Credit June Kim.
+> **Speaker notes:** How a score was produced matters as much as the number. Independent audits re-run the setup. These are the audit's findings, not Radar's. SWE-bench Pro: at least 15% of public tasks underdetermined. June published this on June 21, 2026, 17 days before OpenAI's own audit on July 8 estimated about 30% of tasks broken. The two measure different defect types, so do not add or compare the percentages. Terminal-Bench 2.1: a careless deletion goes unnoticed on 40 of 83 tasks. DeepSWE: four reference solutions failed their own verifiers, and the v1.1 re-grade fixed three. Radar shows the audit next to the scores it examines. Credit June Kim.
 
 ---
 
