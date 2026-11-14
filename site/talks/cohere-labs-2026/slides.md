@@ -223,7 +223,8 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 - Open the homepage. The signup box sits next to the search results.
 - Pick daily or weekly. Daily brings the latest each day; weekly arrives every Monday.
 - Leave anytime. Every email has an unsubscribe link.
-- benchmark-radar.org (screenshot: homepage email signup box)
+- No email needed. The same Daily briefing is on the homepage.
+- benchmark-radar.org (screenshots: homepage email signup box; below it, the Nov 14, 2026 daily brief email)
 
 > **Speaker notes:** Third ask. If you want to keep up without checking the site, the email brings new benchmarks to you, daily or weekly.
 
