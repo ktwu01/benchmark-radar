@@ -627,6 +627,7 @@ const I18N = {
     Trend: "趋势",
     Explore: "探索",
     Blog: "博客",
+    Talks: "演讲",
     Media: "媒体报道",
     "Get benchmark updates by email": "通过邮件获取 benchmark 更新",
     "Email address": "邮箱地址",

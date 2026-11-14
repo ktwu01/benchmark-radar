@@ -87,6 +87,7 @@ npx skills add ktwu01/benchmark-radar
 - [模型报告登记册](data/model_cards.yml)
 - [公开语料 schema](docs/cumulative-corpus.schema.json)
 - [引用信息](https://benchmark-radar.org/cite/)
+- [演讲：幻灯片与讲稿](https://benchmark-radar.org/talks/)
 - [技术报告](https://arxiv.org/abs/2609.11115)（LaTeX 源文件：[`main.tex`](https://github.com/ktwu01/benchmark-radar-paper/blob/main/main.tex)）
 - [配置](config.yml)
 - **开发环境：** `python -m pip install -e '.[dev]' && benchmark-radar normalize-catalog`
