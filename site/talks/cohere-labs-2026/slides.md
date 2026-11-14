@@ -9,7 +9,8 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 - Cohere Labs Open Science Community
 - Keeping a Living Map of AI Evaluation
 - Koutian Wu · M.A. candidate in AI for Sciences, UT Austin
-- Koutian Wu, Wenjun Zhang, Junjie Zhou, Pengqian Han, Qiming Bao, Ergan Shang, Jiayu Wang, Junkai Wang, Wanghan Xu, Songyuanyi Lu, Yixuan Li, Rudy Mizrahi Celekli, Lazizbek Ravshanov, Yaoliang Bian, Xudong Han, Lin Shi
+- Koutian Wu\*, Wenjun Zhang\*, Junjie Zhou, Pengqian Han, Qiming Bao, Ergan Shang, Jiayu Wang, Junkai Wang, Wanghan Xu, Songyuanyi Lu, Yixuan Li, Rudy Mizrahi Celekli, Lazizbek Ravshanov, Yaoliang Bian, Xudong Han, Lin Shi
+- \*Equal contribution to the paper and the code.
 - benchmark-radar.org · ktwu@utexas.edu
 
 > **Speaker notes:** Thank the host and Cohere Labs. One sentence on who I am. Benchmark Radar is the work of the sixteen people on this slide. Today: what a living record of AI benchmarks shows, and a method your team can use on Monday.
@@ -63,9 +64,9 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 *The pipeline*
 
-- DiscoverNew benchmarks are found as they appear in papers, repos, datasets, and leaderboards.
-- ExtractEach record keeps its original source, the reported score, who reported it, and the date.
-- TrackScore history is followed over time, so new results and new versions stay visible.
+- Discover. New benchmarks are found as they appear in papers, repos, datasets, and leaderboards.
+- Extract. Each record keeps its original source, the reported score, who reported it, and the date.
+- Track. Score history is followed over time, so new results and new versions stay visible.
 - The live site: search at the top, today's new benchmarks ranked below, each linked to its source.
 
 ![Benchmark Radar homepage: search bar, ranked new benchmarks, daily briefing](assets/home.jpg)
@@ -74,22 +75,32 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 6. Demo: SWE-bench Verified
+## 6. Demo: Saturation
 
 *Live demo*
 
-- Search it. Every source, every year, no score cutoff: 9 records match the full name.
-- Open the record. One record per source: LLM Stats, model reports, and variants.
-- Read each point. Model, organization, date, and whether the score was self-reported.
-- Watch the history. How the best reported score moved as new models arrived.
+- Saturation. The best reported score over time. When it flattens near the top, the benchmark stops telling models apart.
+- Pareto frontier. Benchmarks that many models have tried and none has topped: still hard, and widely used.
 
 ![Saturation page with a search for SWE-bench Verified and its LLM Stats score history](assets/demo-swe-search.jpg)
 
-> **Speaker notes:** Switch to the browser. Saturation page, type SWE-bench Verified. Point at the list: the same benchmark appears once per source, and variants such as Agentless stay separate rather than being merged. Click the LLM Stats record. Hover a point: model, organization, date, self-reported. If the network fails, this screenshot is the fallback.
+> **Speaker notes:** Switch to the browser, Saturation page. Type SWE-bench Verified and open its score history: show where the best score flattens. If the network fails, this screenshot is the fallback.
 
 ---
 
-## 7. Attention
+## 7. Benchmark Frontier
+
+*Live demo*
+
+Which difficult benchmarks have been tested most? Compare reported scores, release dates, and the number of models tested.
+
+![Benchmark Frontier chart: each benchmark plotted by release date, reported score, and number of models with reported scores; Humanity's Last Exam, APEX-Agents, CritPt, and HorizonMath are marked on the Pareto frontier](assets/benchmark-frontier.png)
+
+> **Speaker notes:** Same page, the Benchmark Frontier. Each stick is one benchmark: left to right is release date, depth is the best reported score, height is how many models have a reported score. The gold rings are the Pareto frontier: Humanity's Last Exam, APEX-Agents, CritPt, HorizonMath. No other benchmark has both a lower best score and more models tested.
+
+---
+
+## 8. Attention
 
 *Finding 1 of 5*
 
@@ -104,7 +115,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 8. Papers
+## 9. Papers
 
 *Finding 2 of 5*
 
@@ -119,7 +130,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 9. Abandoned repos
+## 10. Abandoned repos
 
 *Finding 3 of 5*
 
@@ -133,7 +144,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 10. Saturation
+## 11. Saturation
 
 *Finding 4 of 5*
 
@@ -148,7 +159,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 11. Audits
+## 12. Audits
 
 *Finding 5 of 5*
 
@@ -162,7 +173,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 12. A five-step check
+## 13. A five-step check
 
 *Take home*
 
@@ -176,7 +187,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 13. What is next
+## 14. What is next
 
 *Roadmap*
 
@@ -189,21 +200,20 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 14. Let your agent draft Related Work
+## 15. Let your agent draft Related Work
 
 *For your paper*
 
-- Install once. One pip command, or let your coding agent run the Benchmark Radar Skill.
-- Give one query per theme. Write each as "Label=query", one per paragraph you need.
+- Install once. One command adds the Benchmark Radar Skill to your coding agent.
+- Name your themes. Ask your agent for a Related Work section, one paragraph per theme.
 - Get LaTeX and BibTeX. A cited Related Work draft and the missing BibTeX entries, ready to edit.
-- `pip install git+https://github.com/ktwu01/benchmark-radar.git`
-- `benchmark-radar related-work "Agents=agent benchmark" "Saturation=benchmark saturation" --tex related.tex --bib refs.bib`
+- `npx skills add ktwu01/benchmark-radar --skill benchmark-radar`
 
-> **Speaker notes:** First ask, for anyone writing a paper. One command gives your agent a cited Related Work draft and the BibTeX to go with it. It searches the Radar catalog plus arXiv, Hugging Face Papers, Semantic Scholar, OpenAlex, and Crossref. Read every entry before you keep it.
+> **Speaker notes:** First ask, for anyone writing a paper. One command gives your agent the Skill to write a cited Related Work draft and the BibTeX to go with it. It searches the Radar catalog plus arXiv, Hugging Face Papers, Semantic Scholar, OpenAlex, and Crossref. Read every entry before you keep it.
 
 ---
 
-## 15. Search for it. If it is missing, add it.
+## 16. Search for it. If it is missing, add it.
 
 *For your benchmark*
 
@@ -216,25 +226,26 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 16. Get new benchmarks by email
+## 17. Get new benchmarks by email
 
 *For your inbox*
 
 - Open the homepage. The signup box sits next to the search results.
 - Pick daily or weekly. Daily brings the latest each day; weekly arrives every Monday.
 - Leave anytime. Every email has an unsubscribe link.
-- benchmark-radar.org (screenshot: homepage email signup box)
+- No email needed. The same Daily briefing is on the homepage.
+- benchmark-radar.org (screenshots: homepage email signup box; below it, the Nov 14, 2026 daily brief email)
 
 > **Speaker notes:** Third ask. If you want to keep up without checking the site, the email brings new benchmarks to you, daily or weekly.
 
 ---
 
-## 17. Get involved
+## 18. Get involved
 
 *Join in*
 
 - Use the dataset. The full record set is open: huggingface.co/datasets/ktwu01/benchmark-radar
-- Contribute a benchmark. If Radar missed one you care about, adding it is a small pull request.
+- Contribute a benchmark. If Radar missed one you care about, adding it is a small issue.
 - Report an error. A wrong score or a missing source is worth a flag.
 - Publish an audit. Radar links it next to the scores it examines.
 - Start at benchmark-radar.org. Code and issues: github.com/ktwu01/benchmark-radar
@@ -244,7 +255,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 18. Questions
+## 19. Questions
 
 *Q&A*
 
