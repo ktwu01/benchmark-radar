@@ -88,7 +88,19 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 7. Attention
+## 7. Benchmark Frontier
+
+*Live demo*
+
+Which difficult benchmarks have been tested most? Compare reported scores, release dates, and the number of models tested.
+
+![Benchmark Frontier chart: each benchmark plotted by release date, reported score, and number of models with reported scores; Humanity's Last Exam, APEX-Agents, CritPt, and HorizonMath are marked on the Pareto frontier](assets/benchmark-frontier.png)
+
+> **Speaker notes:** Same page, the Benchmark Frontier. Each stick is one benchmark: left to right is release date, depth is the best reported score, height is how many models have a reported score. The gold rings are the Pareto frontier: Humanity's Last Exam, APEX-Agents, CritPt, HorizonMath. No other benchmark has both a lower best score and more models tested.
+
+---
+
+## 8. Attention
 
 *Finding 1 of 5*
 
@@ -103,7 +115,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 8. Papers
+## 9. Papers
 
 *Finding 2 of 5*
 
@@ -118,7 +130,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 9. Abandoned repos
+## 10. Abandoned repos
 
 *Finding 3 of 5*
 
@@ -132,7 +144,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 10. Saturation
+## 11. Saturation
 
 *Finding 4 of 5*
 
@@ -147,7 +159,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 11. Audits
+## 12. Audits
 
 *Finding 5 of 5*
 
@@ -161,7 +173,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 12. A five-step check
+## 13. A five-step check
 
 *Take home*
 
@@ -175,7 +187,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 13. What is next
+## 14. What is next
 
 *Roadmap*
 
@@ -188,7 +200,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 14. Let your agent draft Related Work
+## 15. Let your agent draft Related Work
 
 *For your paper*
 
@@ -201,7 +213,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 15. Search for it. If it is missing, add it.
+## 16. Search for it. If it is missing, add it.
 
 *For your benchmark*
 
@@ -214,7 +226,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 16. Get new benchmarks by email
+## 17. Get new benchmarks by email
 
 *For your inbox*
 
@@ -228,12 +240,12 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 17. Get involved
+## 18. Get involved
 
 *Join in*
 
 - Use the dataset. The full record set is open: huggingface.co/datasets/ktwu01/benchmark-radar
-- Contribute a benchmark. If Radar missed one you care about, adding it is a small pull request.
+- Contribute a benchmark. If Radar missed one you care about, adding it is a small issue.
 - Report an error. A wrong score or a missing source is worth a flag.
 - Publish an audit. Radar links it next to the scores it examines.
 - Start at benchmark-radar.org. Code and issues: github.com/ktwu01/benchmark-radar
@@ -243,7 +255,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 18. Questions
+## 19. Questions
 
 *Q&A*
 
