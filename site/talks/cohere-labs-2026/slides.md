@@ -189,7 +189,21 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 14. Get involved
+## 14. Take it with you
+
+*Three things you can do tonight*
+
+- For your paper: let your agent draft Related Work. One command returns a cited Related Work section and BibTeX. Your coding agent can run it through the Benchmark Radar Skill.
+  `pip install git+https://github.com/ktwu01/benchmark-radar.git`
+  `benchmark-radar related-work "Agents=agent benchmark" --tex related.tex --bib refs.bib`
+- For your benchmark: search it, and if it is missing, add it. Search 49,679 benchmark records from 41 public sources. If yours is not there, submit it with one short form (GitHub issue "Submit a benchmark"). English or Chinese is fine. Every benchmark you add helps the next team find it.
+- For your inbox: get new benchmarks by email, daily or weekly. The signup box is on the benchmark-radar.org homepage (screenshot on the slide). Unsubscribe anytime.
+
+> **Speaker notes:** Three asks that help the people in the room, not just the project. One: if you are writing a paper, the related-work command gives your agent a cited draft and BibTeX in one run. Two: search for your own benchmark; if Radar missed it, the form takes two minutes, and the next team will find it. Three: the email brings new benchmarks to you, daily or weekly.
+
+---
+
+## 15. Get involved
 
 *Join in*
 
@@ -198,17 +212,19 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 - Report an error. A wrong score or a missing source is worth a flag.
 - Publish an audit. Radar links it next to the scores it examines.
 - Start at benchmark-radar.org. Code and issues: github.com/ktwu01/benchmark-radar
+- QR codes: Discord (Benchmark Radar) and WeChat (Koutian Wu).
 
 > **Speaker notes:** Concrete asks. The audit ask is new: if your team rechecks a benchmark, publish it and Radar will link it.
 
 ---
 
-## 15. Questions
+## 16. Questions
 
 *Q&A*
 
 - Which eval does your team trust most, and when did you last check it?
 - I am looking for my next role in AI evaluation, starting Feb '27. If your team is hiring, or you can refer me, please email me: ktwu@utexas.edu
+- QR codes: Discord and WeChat.
 - Thanks to my co-authors and contributors: Wenjun Zhang, Junjie Zhou, Pengqian Han, Qiming Bao, Ergan Shang, Jiayu Wang, Junkai Wang, Wanghan Xu, Songyuanyi Lu, Yixuan Li, Rudy Mizrahi Celekli, Lazizbek Ravshanov, Yaoliang Bian, Xudong Han, and Lin Shi.
 
 > **Speaker notes:** Say the job callout out loud, then leave this slide up for the whole Q&A. Read the acknowledgment. Thank Prahitha and Cohere Labs.
