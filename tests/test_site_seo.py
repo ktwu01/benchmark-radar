@@ -24,17 +24,8 @@ def test_sitemap_covers_every_indexable_view():
     root = tree.getroot()
     urls = [node.text for node in root.findall("sm:url/sm:loc", NS)]
     assert urls == [
-        f"{SITE_URL}/",
-        f"{SITE_URL}/library/",
-        f"{SITE_URL}/models/",
-        f"{SITE_URL}/trends/",
-        f"{SITE_URL}/saturation/",
-        f"{SITE_URL}/leaderboard/",
-        f"{SITE_URL}/explore/",
-        f"{SITE_URL}/cli/",
-        f"{SITE_URL}/cite/",
-        f"{SITE_URL}/rubric/",
-        f"{SITE_URL}/benchmarks/",
+        *(f"{SITE_URL}{path}" for _, path in INDEXABLE_VIEWS),
+        f"{SITE_URL}{BENCHMARK_DIRECTORY_PATH}",
     ]
 
 

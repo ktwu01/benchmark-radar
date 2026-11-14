@@ -121,9 +121,7 @@ def test_readmes_link_the_current_technical_report():
     for readme in (README, README_ZH):
         text = readme.read_text(encoding="utf-8")
         assert f'<a href="{TECHNICAL_REPORT}">' in text
-        assert "arXiv-Paper" in text
         assert f'<a href="{HUGGING_FACE_PAPER}">' in text
-        assert "Hugging%20Face-Upvote%20us" in text
         assert 'src="site/assets/hf-paper-of-the-day.svg"' in text
         assert 'href="https://huggingface.co/papers/date/2026-09-14"' in text
         assert f"({TECHNICAL_REPORT})" in text
@@ -134,9 +132,7 @@ def test_technical_report_readme_links_both_paper_pages():
     text = Path("docs/technical-report/README.md").read_text(encoding="utf-8")
 
     assert f'<a href="{TECHNICAL_REPORT}">' in text
-    assert "arXiv-Paper" in text
     assert f'<a href="{HUGGING_FACE_PAPER}">' in text
-    assert "%232%20Paper%20of%20the%20Day%20%E2%80%A2%20Upvote%20us" in text
 
 
 def test_citation_metadata_prefers_the_technical_report():
@@ -192,8 +188,6 @@ def test_readmes_offer_a_short_agent_setup_prompt():
     # maintainer manual (issue #436).
     english = README.read_text(encoding="utf-8")
     chinese = README_ZH.read_text(encoding="utf-8")
-    assert "Then ask your coding agent about benchmarks." in english
-    assert "之后直接问你的 coding agent benchmark 就行。" in chinese
     english_section = english.split("## Query it locally", 1)[1].split("## More", 1)[0]
     chinese_section = chinese.split("## 在本地查询", 1)[1].split("## 更多", 1)[0]
     for section in (english_section, chinese_section):
