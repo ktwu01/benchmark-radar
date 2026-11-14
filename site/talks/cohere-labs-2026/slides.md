@@ -189,21 +189,47 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 14. Take it with you
+## 14. Let your agent draft Related Work
 
-*Three things you can do tonight*
+*For your paper*
 
-- For your paper: let your agent draft Related Work. One command returns a cited Related Work section and BibTeX. Your coding agent can run it through the Benchmark Radar Skill.
-  `pip install git+https://github.com/ktwu01/benchmark-radar.git`
-  `benchmark-radar related-work "Agents=agent benchmark" --tex related.tex --bib refs.bib`
-- For your benchmark: search it, and if it is missing, add it. Search 49,679 benchmark records from 41 public sources. If yours is not there, submit it with one short form (GitHub issue "Submit a benchmark"). English or Chinese is fine. Every benchmark you add helps the next team find it.
-- For your inbox: get new benchmarks by email, daily or weekly. The signup box is on the benchmark-radar.org homepage (screenshot on the slide). Unsubscribe anytime.
+- Install once. One pip command, or let your coding agent run the Benchmark Radar Skill.
+- Give one query per theme. Write each as "Label=query", one per paragraph you need.
+- Get LaTeX and BibTeX. A cited Related Work draft and the missing BibTeX entries, ready to edit.
+- `pip install git+https://github.com/ktwu01/benchmark-radar.git`
+- `benchmark-radar related-work "Agents=agent benchmark" "Saturation=benchmark saturation" --tex related.tex --bib refs.bib`
 
-> **Speaker notes:** Three asks that help the people in the room, not just the project. One: if you are writing a paper, the related-work command gives your agent a cited draft and BibTeX in one run. Two: search for your own benchmark; if Radar missed it, the form takes two minutes, and the next team will find it. Three: the email brings new benchmarks to you, daily or weekly.
+> **Speaker notes:** First ask, for anyone writing a paper. One command gives your agent a cited Related Work draft and the BibTeX to go with it. It searches the Radar catalog plus arXiv, Hugging Face Papers, Semantic Scholar, OpenAlex, and Crossref. Read every entry before you keep it.
 
 ---
 
-## 15. Get involved
+## 15. Search for it. If it is missing, add it.
+
+*For your benchmark*
+
+- Search. 49,679 benchmark records from 41 public sources, one search box.
+- Not there? Open the "Submit a benchmark" form on GitHub. English or Chinese is fine.
+- Help the next team. Every benchmark you add is one more that others can find.
+- benchmark-radar.org (screenshot: search for "agent")
+
+> **Speaker notes:** Second ask. Search for the benchmark you built or the one you rely on. If Radar missed it, the form takes two minutes, and the next team will find it.
+
+---
+
+## 16. Get new benchmarks by email
+
+*For your inbox*
+
+- Open the homepage. The signup box sits next to the search results.
+- Pick daily or weekly. Daily brings the latest each day; weekly arrives every Monday.
+- Leave anytime. Every email has an unsubscribe link.
+- benchmark-radar.org (screenshot: homepage email signup box)
+
+> **Speaker notes:** Third ask. If you want to keep up without checking the site, the email brings new benchmarks to you, daily or weekly.
+
+---
+
+## 17. Get involved
 
 *Join in*
 
@@ -218,7 +244,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 16. Questions
+## 18. Questions
 
 *Q&A*
 

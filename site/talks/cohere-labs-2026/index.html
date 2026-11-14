@@ -214,16 +214,12 @@ body.export .progress { display: none; }
 .footer .cta::before { content: '→ '; color: var(--amber); }
 .footer .cta code { font-family: var(--font-mono); background: var(--paper-2); padding: 2px 8px; border-radius: 6px; }
 
-/* TAKE IT WITH YOU: three cards, one action each */
-.cta-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 28px; margin-top: 52px; flex: 1; min-height: 0; }
-.cta-card { background: #fffdf8; border: 1px solid var(--line); border-radius: 18px; padding: 36px; display: flex; flex-direction: column; gap: 18px; }
-.cta-card .k { font-family: var(--font-mono); font-size: 22px; color: var(--amber); letter-spacing: 0.1em; text-transform: uppercase; }
-.cta-card h3 { font-family: var(--font-display); font-size: 40px; font-weight: 600; line-height: 1.12; }
-.cta-card p { font-size: 25px; line-height: 1.45; color: var(--ink-soft); }
-.cta-card pre { font-family: var(--font-mono); font-size: 18px; line-height: 1.55; background: var(--panel); color: #d8ece8; border-radius: 12px; padding: 20px 22px; white-space: pre-wrap; word-break: break-word; }
-.cta-card pre .c { color: #7f9995; }
-.cta-card .url { font-family: var(--font-mono); font-size: 22px; color: var(--teal); margin-top: auto; }
-.cta-card img { display: block; width: 100%; height: auto; max-height: none; border-radius: 10px; box-shadow: 0 18px 40px -24px rgba(20,33,32,0.5); }
+/* ONE ASK PER SLIDE: text left, proof right */
+.ask .steps { margin-top: 8px; align-content: start; }
+.ask .url { font-family: var(--font-mono); font-size: 28px; color: var(--teal); margin-top: 40px; }
+.code { background: var(--panel); color: #d8ece8; border-radius: 16px; padding: 40px 44px; font-family: var(--font-mono); font-size: 23px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; box-shadow: 0 30px 60px -30px rgba(20,33,32,0.45); align-self: start; }
+.code .c { color: #7f9995; }
+.code .p { color: var(--amber); }
 
 /* QR CODES: white tile so phones can scan from a projector */
 .qr-row { display: flex; gap: 36px; }
@@ -504,44 +500,74 @@ body.export .all-talks { display: none; }
   <aside class="notes">Four directions. The audit layer is the one with the most leverage, and it depends on people like June Kim publishing audits. Interop: we would rather feed shared efforts than build a silo.</aside>
 </section>
 
-<!-- === 14. TAKE IT WITH YOU === -->
-<section class="slide" data-title="Take it with you">
+<!-- === 14. ASK 1: RELATED WORK FROM THE CLI === -->
+<section class="slide" data-title="Ask 1: Related Work">
   <div class="frame">
-    <div class="kicker reveal">Take it with you</div>
-    <h2 class="reveal">Three things you can do tonight</h2>
-    <div class="cta-grid">
-      <div class="cta-card reveal">
-        <div class="k">01 · For your paper</div>
-        <h3>Let your agent draft Related Work</h3>
-        <p>One command returns a cited Related Work section and BibTeX. Your coding agent can run it through the Benchmark Radar Skill.</p>
-<pre><span class="c"># install once</span>
-pip install git+https://github.com/ktwu01/benchmark-radar.git
+    <div class="kicker reveal">For your paper</div>
+    <h2 class="reveal">Let your agent draft Related Work</h2>
+    <div class="split ask">
+      <ul class="steps reveal">
+        <li><div><b>Install once.</b>One pip command, or let your coding agent run the Benchmark Radar Skill.</div></li>
+        <li><div><b>Give one query per theme.</b>Write each as “Label=query”, one per paragraph you need.</div></li>
+        <li><div><b>Get LaTeX and BibTeX.</b>A cited Related Work draft and the missing BibTeX entries, ready to edit.</div></li>
+      </ul>
+<pre class="code reveal"><span class="c"># install once</span>
+<span class="p">$</span> pip install git+https://github.com/ktwu01/benchmark-radar.git
+
 <span class="c"># one "Label=query" per theme</span>
-benchmark-radar related-work \
-  "Agents=agent benchmark" \
-  --tex related.tex --bib refs.bib</pre>
-      </div>
-      <div class="cta-card reveal">
-        <div class="k">02 · For your benchmark</div>
-        <h3>Search it. If it is missing, add it.</h3>
-        <p>Search 49,679 benchmark records from 41 public sources. If yours is not there, submit it with one short form. English or Chinese is fine.</p>
-        <p>Every benchmark you add helps the next team find it.</p>
-        <div class="url">benchmark-radar.org<br>→ GitHub issue: “Submit a benchmark”</div>
-      </div>
-      <div class="cta-card reveal">
-        <div class="k">03 · For your inbox</div>
-        <h3>Get new benchmarks by email</h3>
-        <p>Daily or weekly, your choice. The signup box is on the homepage. Unsubscribe anytime.</p>
-        <img src="assets/email-signup.png" alt="Email signup box on the benchmark-radar.org homepage: Get benchmark updates by email, an email field, and a Subscribe button">
+<span class="p">$</span> benchmark-radar related-work \
+    "Agents=agent benchmark" \
+    "Saturation=benchmark saturation" \
+    --tex related.tex --bib refs.bib</pre>
+    </div>
+  </div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="cta">Next: is your benchmark on Radar?</span><span class="pg"></span></div>
+  <aside class="notes">First ask, for anyone writing a paper. One command gives your agent a cited Related Work draft and the BibTeX to go with it. It searches the Radar catalog plus arXiv, Hugging Face Papers, Semantic Scholar, OpenAlex, and Crossref. Read every entry before you keep it.</aside>
+</section>
+
+<!-- === 15. ASK 2: SEARCH AND ADD A BENCHMARK === -->
+<section class="slide" data-title="Ask 2: Add your benchmark">
+  <div class="frame">
+    <div class="kicker reveal">For your benchmark</div>
+    <h2 class="reveal">Search for it. If it is missing, add it.</h2>
+    <div class="split ask">
+      <div class="reveal">
+        <ul class="steps">
+          <li><div><b>Search.</b>49,679 benchmark records from 41 public sources, one search box.</div></li>
+          <li><div><b>Not there?</b>Open the “Submit a benchmark” form on GitHub. English or Chinese is fine.</div></li>
+          <li><div><b>Help the next team.</b>Every benchmark you add is one more that others can find.</div></li>
+        </ul>
         <div class="url">benchmark-radar.org</div>
       </div>
+      <div class="shot reveal"><img src="assets/search-agent.png" alt="Benchmark Radar search for “agent”, showing 1,034 matching benchmark records"></div>
+    </div>
+  </div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="cta">Next: new benchmarks in your inbox</span><span class="pg"></span></div>
+  <aside class="notes">Second ask. Search for the benchmark you built or the one you rely on. If Radar missed it, the form takes two minutes, and the next team will find it.</aside>
+</section>
+
+<!-- === 16. ASK 3: EMAIL === -->
+<section class="slide" data-title="Ask 3: Email">
+  <div class="frame">
+    <div class="kicker reveal">For your inbox</div>
+    <h2 class="reveal">Get new benchmarks by email</h2>
+    <div class="split ask">
+      <div class="reveal">
+        <ul class="steps">
+          <li><div><b>Open the homepage.</b>The signup box sits next to the search results.</div></li>
+          <li><div><b>Pick daily or weekly.</b>Daily brings the latest each day; weekly arrives every Monday.</div></li>
+          <li><div><b>Leave anytime.</b>Every email has an unsubscribe link.</div></li>
+        </ul>
+        <div class="url">benchmark-radar.org</div>
+      </div>
+      <div class="shot reveal" style="align-self:center"><img src="assets/email-signup.png" alt="Email signup box on the benchmark-radar.org homepage: Get benchmark updates by email, an email field, and a Subscribe button"></div>
     </div>
   </div>
   <div class="footer"><span>benchmark-radar.org</span><span class="cta">Join the Benchmark Radar Discord: QR code on the next slide</span><span class="pg"></span></div>
-  <aside class="notes">Three asks that help the people in the room, not just the project. One: if you are writing a paper, the related-work command gives your agent a cited draft and BibTeX in one run. Two: search for your own benchmark; if Radar missed it, the form takes two minutes, and the next team will find it. Three: the email brings new benchmarks to you, daily or weekly.</aside>
+  <aside class="notes">Third ask. If you want to keep up without checking the site, the email brings new benchmarks to you, daily or weekly.</aside>
 </section>
 
-<!-- === 15. GET INVOLVED === -->
+<!-- === 17. GET INVOLVED === -->
 <section class="slide" data-title="Get involved">
   <div class="frame">
     <div class="kicker reveal">Join in</div>
@@ -564,7 +590,7 @@ benchmark-radar related-work \
   <aside class="notes">Concrete asks. The audit ask is new: if your team rechecks a benchmark, publish it and Radar will link it.</aside>
 </section>
 
-<!-- === 16. Q&A + ACKNOWLEDGMENT === -->
+<!-- === 18. Q&A + ACKNOWLEDGMENT === -->
 <section class="slide dark" data-title="Questions">
   <div class="frame">
     <div class="kicker reveal">Q&amp;A</div>
