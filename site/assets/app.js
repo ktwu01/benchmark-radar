@@ -6836,59 +6836,67 @@ function modelAverageValue(value, benchmark) {
   return benchmark.direction === "lower_is_better" ? 100 - value : value;
 }
 
-// Whether every column scores `key`, or another record of its reviewed
-// equivalent group (#904), so the shared-only filter keeps the rows behind
-// a joined average instead of hiding them.
-function modelHeldByAll(columns, key, benchmarks) {
-  const group = benchmarks.get(key)?.joined;
-  return columns.every((model) => model.cells.has(key)
-    || (group && [...model.cells.keys()].some((other) => benchmarks.get(other)?.joined === group)));
+// Joined keys (#904): columns scoring different records of one reviewed
+// equivalent group share that benchmark. The join counts shared benchmarks, it
+// does not merge scores across records. `joined` is a Map (or plain object)
+// from record key to group id.
+// A cell's `group` is only an index into its own record's `benchmark.groups`
+// list, so index 0 can mean `cot` on one record and `plain` on another: cells
+// match on a token built from the label (a record with one protocol carries it
+// as `benchmark.group`). A cell with no label matches only the same record's
+// cells of the same index, since a null group never joins another null (#1195).
+// Per column and joined key, the first record in sorted key order for each
+// token; then one protocol per joined key, chosen across the columns: the
+// first token (in string order) every column can score, so a column's first
+// record by key order cannot hide a comparable pair. The average and the
+// shared-only filter both read this, so they cannot disagree.
+function modelJoinedShare(cellMaps, benchmarks, joined, averageableOnly) {
+  const groupOf = (key) => (joined instanceof Map ? joined.get(key) : joined[key]) ?? key;
+  const tokenOf = (key, cell) => {
+    const benchmark = benchmarks.get(key);
+    const label = benchmark?.groups?.[cell.group] ?? benchmark?.group ?? null;
+    return label !== null && label !== "None" ? `L\u0000${label}` : `R\u0000${key}\u0000${cell.group ?? ""}`;
+  };
+  const candidates = cellMaps.map((cells) => {
+    const byJoined = new Map();
+    for (const key of [...cells.keys()].sort(compareText)) {
+      const cell = cells.get(key);
+      if (averageableOnly && modelAverageValue(cell.value, benchmarks.get(key)) === null) continue;
+      const groupKey = groupOf(key);
+      if (!byJoined.has(groupKey)) byJoined.set(groupKey, new Map());
+      const byToken = byJoined.get(groupKey);
+      const token = tokenOf(key, cell);
+      if (!byToken.has(token)) byToken.set(token, { ...cell, key });
+    }
+    return byJoined;
+  });
+  const chosen = new Map();
+  for (const key of [...(candidates[0]?.keys() ?? [])].sort(compareText)) {
+    const common = [...candidates[0].get(key).keys()]
+      .filter((token) => candidates.every((byJoined) => byJoined.get(key)?.has(token)))
+      .sort(compareText);
+    if (common.length) chosen.set(key, common[0]);
+  }
+  return { candidates, chosen };
+}
+
+// Whether a record's row stays under the shared-only filter: every column
+// scores it, or, for a reviewed equivalent group, every column scores the
+// group on one comparable protocol (the same rule the average uses).
+function modelHeldFilter(columns, benchmarks) {
+  const joined = new Map([...benchmarks]
+    .filter(([, benchmark]) => benchmark.joined)
+    .map(([key, benchmark]) => [key, benchmark.joined]));
+  const held = (key) => columns.every((model) => model.cells.has(key));
+  if (!joined.size) return held;
+  const { chosen } = modelJoinedShare(columns.map((model) => model.cells), benchmarks, joined, false);
+  return (key) => (joined.has(key) ? chosen.has(joined.get(key)) : held(key));
 }
 
 function modelSharedAverage(columns, benchmarks, joined) {
   if (!columns.length) return { means: [], shared: [] };
   if (joined) {
-    // Joined keys (#904): columns scoring different records of one reviewed
-    // equivalent group share that benchmark. The join counts shared
-    // benchmarks, it does not merge scores across records. `joined` is a Map
-    // (or plain object) from record key to group id.
-    // A cell's `group` is only an index into its own record's
-    // `benchmark.groups` list, so index 0 can mean `cot` on one record and
-    // `plain` on another: cells match on a token built from the label (a
-    // record with one protocol carries it as `benchmark.group`). A cell with
-    // no label matches only the same record's cells of the same index, since
-    // a null group never joins another null (#1195).
-    const groupOf = (key) => (joined instanceof Map ? joined.get(key) : joined[key]) ?? key;
-    const tokenOf = (key, cell) => {
-      const benchmark = benchmarks.get(key);
-      const label = benchmark?.groups?.[cell.group] ?? benchmark?.group ?? null;
-      return label !== null && label !== "None" ? `L\u0000${label}` : `R\u0000${key}\u0000${cell.group ?? ""}`;
-    };
-    // Per column and joined key: its first averageable record, in sorted key
-    // order, for each token.
-    const candidates = columns.map((cells) => {
-      const byJoined = new Map();
-      for (const key of [...cells.keys()].sort(compareText)) {
-        const cell = cells.get(key);
-        if (modelAverageValue(cell.value, benchmarks.get(key)) === null) continue;
-        const groupKey = groupOf(key);
-        if (!byJoined.has(groupKey)) byJoined.set(groupKey, new Map());
-        const byToken = byJoined.get(groupKey);
-        const token = tokenOf(key, cell);
-        if (!byToken.has(token)) byToken.set(token, { ...cell, key });
-      }
-      return byJoined;
-    });
-    // One protocol per joined benchmark, chosen across the columns: the first
-    // token (in string order) every column can score, so a column's first
-    // record by key order cannot hide a comparable pair.
-    const chosen = new Map();
-    for (const key of [...candidates[0].keys()].sort(compareText)) {
-      const common = [...candidates[0].get(key).keys()]
-        .filter((token) => candidates.every((byJoined) => byJoined.get(key)?.has(token)))
-        .sort(compareText);
-      if (common.length) chosen.set(key, common[0]);
-    }
+    const { candidates, chosen } = modelJoinedShare(columns, benchmarks, joined, true);
     const shared = [...chosen.keys()];
     if (!shared.length) return { means: columns.map(() => null), shared };
     const means = candidates.map((byJoined) => {
@@ -7151,7 +7159,8 @@ function modelAverageRow(columns, average) {
 
 function modelMatrixTable(columns, data, recordsByKey) {
   const keys = new Set(columns.flatMap((model) => [...model.cells.keys()]));
-  const shownKeys = [...keys].filter((key) => !state.modelsSharedOnly || modelHeldByAll(columns, key, data.benchmarks));
+  const held = state.modelsSharedOnly ? modelHeldFilter(columns, data.benchmarks) : null;
+  const shownKeys = [...keys].filter((key) => !held || held(key));
   const collisions = new Map();
   for (const key of shownKeys) {
     const record = recordsByKey.get(key);
@@ -7464,7 +7473,7 @@ function renderModels() {
   // shared-only toggle can hide its row.
   const panelRecord = state.modelsPanel?.record;
   const panelShown = columns.some((model) => model.key === state.modelsPanel?.model && model.cells.has(panelRecord))
-    && (!state.modelsSharedOnly || modelHeldByAll(columns, panelRecord, data.benchmarks));
+    && (!state.modelsSharedOnly || modelHeldFilter(columns, data.benchmarks)(panelRecord));
   if (state.modelsPanel && !panelShown) closeModelPanel();
 }
 

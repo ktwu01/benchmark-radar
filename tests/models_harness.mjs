@@ -154,7 +154,7 @@ const env = {
 };
 const names = [
   "modelDocuments", "modelFirstMentions", "modelCapabilityGroup", "modelFamily", "modelAverageValue",
-  "modelHeldByAll", "modelSharedAverage", "modelMatrixModels", "modelMatrixTable", "modelOrder", "modelMatches", "modelLabCounts",
+  "modelJoinedShare", "modelHeldFilter", "modelSharedAverage", "modelMatrixModels", "modelMatrixTable", "modelOrder", "modelMatches", "modelLabCounts",
   "renderModelLabs", "modelValueText", "modelSeriesScale", "modelLatestDate", "openModelPanel", "closeModelPanel", "renderModels", "initModels",
 ];
 const models = new Function(
@@ -388,6 +388,22 @@ const sharedOnlyTable = models.modelMatrixTable(
 );
 state.modelsSharedOnly = false;
 assert.equal((sharedOnlyTable.textContent.match(/GPQA/g) || []).length, (joinedTable.textContent.match(/GPQA/g) || []).length);
+
+// The filter follows the average's protocol rule (#1195): records of one group
+// with no protocol label are not shared, so the shared-only view drops them.
+const unlabelledPayload = {
+  ...joinedPayload,
+  benchmarks: joinedPayload.benchmarks.map(({ group, ...benchmark }) => benchmark),
+};
+const unlabelledMatrix = models.modelMatrixModels(joinedRecords, unlabelledPayload);
+state.modelsSharedOnly = true;
+const unlabelledTable = models.modelMatrixTable(
+  unlabelledMatrix.models, unlabelledMatrix,
+  new Map(joinedRecords.map((entry) => [entry.key, entry])),
+);
+state.modelsSharedOnly = false;
+assert.match(unlabelledTable.querySelector("tbody.models-average").textContent, /share no benchmark/);
+assert.equal((unlabelledTable.textContent.match(/GPQA/g) || []).length, 0);
 
 // --- Rendering. ------------------------------------------------------------------
 function reset(scores) {
