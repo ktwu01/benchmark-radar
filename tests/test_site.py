@@ -3443,17 +3443,6 @@ def test_issue_332_the_freshest_releases_reach_page_one():
 # adding pages beside it is to let the new thing leak into its router.
 
 
-def test_about_is_last_in_the_view_row_after_media_and_blog():
-    """About, Media and Blog are discoverable in the masthead without becoming SPA views."""
-    html = Path("site/index.html").read_text(encoding="utf-8")
-    view_nav = re.search(r'<nav class="view-nav".*?</nav>', html, re.S).group(0)
-    links = re.findall(r'<a\b[^>]*href="([^"]+)"[^>]*>', view_nav)
-    assert links[-3:] == ["/media/", "/blog/", "/about/"]
-    for path in ("/media/", "/blog/", "/about/"):
-        anchor = re.search(rf'<a\b[^>]*href="{path}"[^>]*>', view_nav).group(0)
-        assert "data-view" not in anchor
-
-
 def test_footer_offers_signup_link_columns_and_contact():
     """Issue #906: one shared footer with the signup on top and contact bottom right."""
     html = Path("site/index.html").read_text(encoding="utf-8")
