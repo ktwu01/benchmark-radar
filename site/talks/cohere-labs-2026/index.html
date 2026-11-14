@@ -207,6 +207,35 @@ body.export .progress { display: none; }
 .host-thanks { margin-top: 34px; font-family: var(--font-display); font-size: 44px; font-weight: 600; color: #fff; line-height: 1.25; max-width: 1640px; }
 .ack { margin-top: 40px; font-size: 25px; line-height: 1.6; color: #a9bdb9; max-width: 1640px; }
 
+/* ===========================================
+   CTA: one audience ask per slide, in the footer
+   =========================================== */
+.footer .cta { color: var(--teal); font-weight: 600; text-align: center; flex: 1; padding: 0 32px; }
+.footer .cta::before { content: '→ '; color: var(--amber); }
+.footer .cta code { font-family: var(--font-mono); background: var(--paper-2); padding: 2px 8px; border-radius: 6px; }
+
+/* ONE ASK PER SLIDE: text left, proof right */
+.ask .steps { margin-top: 8px; align-content: start; }
+.ask .url { font-family: var(--font-mono); font-size: 28px; color: var(--teal); margin-top: 40px; }
+.code { background: var(--panel); color: #d8ece8; border-radius: 16px; padding: 40px 44px; font-family: var(--font-mono); font-size: 23px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; box-shadow: 0 30px 60px -30px rgba(20,33,32,0.45); align-self: start; }
+.code .c { color: #7f9995; }
+.code .p { color: var(--amber); }
+
+/* QR CODES: white tile so phones can scan from a projector */
+.qr-row { display: flex; gap: 36px; }
+.qr { text-align: center; }
+.qr img { display: block; background: #fff; padding: 18px; border-radius: 16px; max-height: none; }
+.qr span { display: block; font-family: var(--font-mono); font-size: 22px; margin-top: 12px; color: var(--ink-soft); }
+.dark .qr span { color: #b9cbc7; }
+.involved { display: grid; grid-template-columns: 1fr auto; gap: 64px; align-items: center; flex: 1; }
+.involved .points { margin-top: 0; gap: 26px; }
+.involved .points li { font-size: 30px; }
+.involved .qr img { width: 300px; height: 300px; }
+.qa-grid { display: grid; grid-template-columns: 1fr auto; gap: 56px; align-items: start; }
+.qa-grid .question, .qa-grid .job { max-width: none; }
+.qa-grid .qr img { width: 180px; height: 180px; padding: 10px; }
+.qa-grid .qr-row { gap: 24px; margin-top: 48px; }
+
 /* Speaker notes: kept in the DOM for export, never shown on the slide. */
 .notes { display: none; }
 
@@ -240,6 +269,7 @@ body.export .all-talks { display: none; }
     <div class="authors reveal">Koutian Wu, Wenjun Zhang, Junjie Zhou, Pengqian Han, Qiming Bao, Ergan Shang, Jiayu Wang, Junkai Wang, Wanghan Xu, Songyuanyi Lu, Yixuan Li, Rudy Mizrahi Celekli, Lazizbek Ravshanov, Yaoliang Bian, Xudong Han, Lin Shi</div>
     <div class="contact reveal">benchmark-radar.org · ktwu@utexas.edu</div>
   </div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="cta">Draft a cited Related Work with your agent: <code>benchmark-radar related-work</code></span><span class="pg"></span></div>
   <aside class="notes">Thank the host and Cohere Labs. One sentence on who I am. Benchmark Radar is the work of the sixteen people on this slide. Today: what a living record of AI benchmarks shows, and a method your team can use on Monday.</aside>
 </section>
 
@@ -256,7 +286,7 @@ body.export .all-talks { display: none; }
     </ul>
     <div class="source reveal">2,940 = releases in Benchmark Radar's 90-day window, retrieved Nov 13, 2026 (scripts/release_repo_findings.py).</div>
   </div>
-  <div class="footer"><span>benchmark-radar.org</span><span class="pg"></span></div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="cta">Missing a benchmark? Search it, then add it at benchmark-radar.org</span><span class="pg"></span></div>
   <aside class="notes">Open with the scale: Radar picked up 2,940 new benchmark releases in the last 90 days. Nobody reads that many. So teams fall back to habit, and a number reaches a slide without its source or date. The last bullet is the stake: a bad eval is worse than none, because it points the team the wrong way with confidence.</aside>
 </section>
 
@@ -277,7 +307,7 @@ body.export .all-talks { display: none; }
     </ul>
     <div class="source reveal">Records: benchmark-radar.org records badge, Nov 13, 2026. Stars: GitHub, Nov 13, 2026.</div>
   </div>
-  <div class="footer"><span>benchmark-radar.org</span><span class="pg"></span></div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="cta">New benchmarks by email, daily or weekly: subscribe at benchmark-radar.org</span><span class="pg"></span></div>
   <aside class="notes">One line: a living database and search engine for AI benchmarks. The numbers are from today. 49,679 is records collected, not distinct benchmarks; many records point at the same benchmark from different sources. Everything is open: the code and the dataset.</aside>
 </section>
 
@@ -292,7 +322,7 @@ body.export .all-talks { display: none; }
     </ul>
     <div class="logos reveal"><img src="assets/researchers.svg" alt="Logos of 37 institutions whose researchers viewed/using Benchmark Radar"></div>
   </div>
-  <div class="footer"><span>benchmark-radar.org</span><span class="pg"></span></div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="cta">Join the Benchmark Radar Discord: QR code on the last slide</span><span class="pg"></span></div>
   <aside class="notes">Keep this short. The point is not the logos; it is that the people who build and report on benchmarks already look things up here. 37 institutions on the strip. Wording is deliberate: viewed or using.</aside>
 </section>
 
@@ -313,7 +343,7 @@ body.export .all-talks { display: none; }
       </div>
     </div>
   </div>
-  <div class="footer"><span>benchmark-radar.org</span><span class="pg"></span></div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="cta">Draft a cited Related Work with your agent: <code>benchmark-radar related-work</code></span><span class="pg"></span></div>
   <aside class="notes">Three steps. Discover: 41 sources every day. Extract: the score never travels without its source, reporter, and date. Track: the history stays. The screenshot is the front door; the demo starts here.</aside>
 </section>
 
@@ -332,7 +362,7 @@ body.export .all-talks { display: none; }
       <div class="shot reveal"><img src="assets/demo-swe-search.jpg" alt="Saturation page with a search for SWE-bench Verified and its LLM Stats score history"></div>
     </div>
   </div>
-  <div class="footer"><span>benchmark-radar.org/saturation</span><span class="pg"></span></div>
+  <div class="footer"><span>benchmark-radar.org/saturation</span><span class="cta">Missing a benchmark? Search it, then add it at benchmark-radar.org</span><span class="pg"></span></div>
   <aside class="notes">Switch to the browser. Saturation page, type SWE-bench Verified. Point at the list: the same benchmark appears once per source, and variants such as Agentless stay separate rather than being merged. Click the LLM Stats record. Hover a point: model, organization, date, self-reported. If the network fails, this screenshot is the fallback.</aside>
 </section>
 
@@ -354,7 +384,7 @@ body.export .all-talks { display: none; }
     </div>
     <div class="source reveal">Benchmark Radar insights #1130, #1132; re-run Nov 13, 2026 on the 90-day window.</div>
   </div>
-  <div class="footer"><span>benchmark-radar.org</span><span class="pg"></span></div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="cta">New benchmarks by email, daily or weekly: subscribe at benchmark-radar.org</span><span class="pg"></span></div>
   <aside class="notes">This is where the record starts to say something. Of the 1,024 repos we have facts for, 70% have zero stars. The top 1%, about ten repos, hold 78% of all stars. If your team discovers benchmarks through what is trending, you are sampling the top 1%. Careful: stars are attention, not quality.</aside>
 </section>
 
@@ -374,7 +404,7 @@ body.export .all-talks { display: none; }
     </ul>
     <div class="source reveal">Benchmark Radar insight #1131; re-run Nov 13, 2026 (146 paper repos, 878 without).</div>
   </div>
-  <div class="footer"><span>benchmark-radar.org</span><span class="pg"></span></div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="cta">Join the Benchmark Radar Discord: QR code on the last slide</span><span class="pg"></span></div>
   <aside class="notes">Paper repos are one in seven of the cohort but 21 of the 29 that reached 100 stars. Say releases versus repos clearly: 2,940 releases come from 1,081 repos. Median 8.5 versus 0. Say the caveat out loud: association. The practical reading for industry: a paper makes the setup easier to check.</aside>
 </section>
 
@@ -393,7 +423,7 @@ body.export .all-talks { display: none; }
     </ul>
     <div class="source reveal">Benchmark Radar insights #1130, #1133. Gone = 404 on the GitHub repository endpoint, which follows renames.</div>
   </div>
-  <div class="footer"><span>benchmark-radar.org</span><span class="pg"></span></div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="cta">Draft a cited Related Work with your agent: <code>benchmark-radar related-work</code></span><span class="pg"></span></div>
   <aside class="notes">One in three new benchmark repos never gets a second day of commits. And 57 of 1,081 repos are gone: a 404 on the endpoint that follows renames, so these are not renames. They were deleted or made private. If a decision rests on a benchmark, check that its repo still exists.</aside>
 </section>
 
@@ -414,7 +444,7 @@ body.export .all-talks { display: none; }
       </div>
     </div>
   </div>
-  <div class="footer"><span>benchmark-radar.org/saturation</span><span class="pg"></span></div>
+  <div class="footer"><span>benchmark-radar.org/saturation</span><span class="cta">Missing a benchmark? Search it, then add it at benchmark-radar.org</span><span class="pg"></span></div>
   <aside class="notes">One leaderboard, LLM Stats, 111 reported scores. The best reported score went from 16.8 in May 2024 to 95.0 in June 2026, as dated by LLM Stats. 65 of the 111 are 70 or higher, so the top is crowded. Saturated does not mean solved; it can mean the test stopped measuring the hard part. These are reported scores from one source, not a cross-source saturation metric.</aside>
 </section>
 
@@ -433,7 +463,7 @@ body.export .all-talks { display: none; }
     </ul>
     <div class="source reveal">Findings as reported by each audit, linked from the benchmark's Radar record (june.kim, GitHub, Zenodo).</div>
   </div>
-  <div class="footer"><span>benchmark-radar.org</span><span class="pg"></span></div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="cta">New benchmarks by email, daily or weekly: subscribe at benchmark-radar.org</span><span class="pg"></span></div>
   <aside class="notes">How a score was produced matters as much as the number. Independent audits re-run the setup. These are the audit's findings, not Radar's. SWE-bench Pro: at least 15% of public tasks underdetermined. June published this on June 21, 2026, 17 days before OpenAI's own audit on July 8 estimated about 30% of tasks broken. The two measure different defect types, so do not add or compare the percentages. Terminal-Bench 2.1: a careless deletion goes unnoticed on 40 of 83 tasks. DeepSWE: four reference solutions failed their own verifiers, and the v1.1 re-grade fixed three. Radar shows the audit next to the scores it examines. Credit June Kim.</aside>
 </section>
 
@@ -450,7 +480,7 @@ body.export .all-talks { display: none; }
       <div class="reveal"><div class="k">05</div><h3>Schedule retirement</h3><p>Decide in advance when the eval gets dropped, and write the date down.</p></div>
     </div>
   </div>
-  <div class="footer"><span>benchmark-radar.org</span><span class="pg"></span></div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="cta">Join the Benchmark Radar Discord: QR code on the last slide</span><span class="pg"></span></div>
   <aside class="notes">Each step maps to a finding. Discover wide, because attention is a power law. Check provenance, because many repos go quiet or disappear. Check saturation. Check audits. Then schedule retirement: the step teams skip. Radar helps with the first four; the fifth is a team decision.</aside>
 </section>
 
@@ -466,34 +496,115 @@ body.export .all-talks { display: none; }
       <li class="reveal"><b>Better history views.</b> Score movement over time, readable at a glance.</li>
     </ul>
   </div>
-  <div class="footer"><span>benchmark-radar.org</span><span class="pg"></span></div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="cta">Draft a cited Related Work with your agent: <code>benchmark-radar related-work</code></span><span class="pg"></span></div>
   <aside class="notes">Four directions. The audit layer is the one with the most leverage, and it depends on people like June Kim publishing audits. Interop: we would rather feed shared efforts than build a silo.</aside>
 </section>
 
-<!-- === 14. GET INVOLVED === -->
+<!-- === 14. ASK 1: RELATED WORK FROM THE CLI === -->
+<section class="slide" data-title="Ask 1: Related Work">
+  <div class="frame">
+    <div class="kicker reveal">For your paper</div>
+    <h2 class="reveal">Let your agent draft Related Work</h2>
+    <div class="split ask">
+      <ul class="steps reveal">
+        <li><div><b>Install once.</b>One pip command, or let your coding agent run the Benchmark Radar Skill.</div></li>
+        <li><div><b>Give one query per theme.</b>Write each as “Label=query”, one per paragraph you need.</div></li>
+        <li><div><b>Get LaTeX and BibTeX.</b>A cited Related Work draft and the missing BibTeX entries, ready to edit.</div></li>
+      </ul>
+<pre class="code reveal"><span class="c"># install once</span>
+<span class="p">$</span> pip install git+https://github.com/ktwu01/benchmark-radar.git
+
+<span class="c"># one "Label=query" per theme</span>
+<span class="p">$</span> benchmark-radar related-work \
+    "Agents=agent benchmark" \
+    "Saturation=benchmark saturation" \
+    --tex related.tex --bib refs.bib</pre>
+    </div>
+  </div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="cta">Next: is your benchmark on Radar?</span><span class="pg"></span></div>
+  <aside class="notes">First ask, for anyone writing a paper. One command gives your agent a cited Related Work draft and the BibTeX to go with it. It searches the Radar catalog plus arXiv, Hugging Face Papers, Semantic Scholar, OpenAlex, and Crossref. Read every entry before you keep it.</aside>
+</section>
+
+<!-- === 15. ASK 2: SEARCH AND ADD A BENCHMARK === -->
+<section class="slide" data-title="Ask 2: Add your benchmark">
+  <div class="frame">
+    <div class="kicker reveal">For your benchmark</div>
+    <h2 class="reveal">Search for it. If it is missing, add it.</h2>
+    <div class="split ask">
+      <div class="reveal">
+        <ul class="steps">
+          <li><div><b>Search.</b>49,679 benchmark records from 41 public sources, one search box.</div></li>
+          <li><div><b>Not there?</b>Open the “Submit a benchmark” form on GitHub. English or Chinese is fine.</div></li>
+          <li><div><b>Help the next team.</b>Every benchmark you add is one more that others can find.</div></li>
+        </ul>
+        <div class="url">benchmark-radar.org</div>
+      </div>
+      <div class="shot reveal"><img src="assets/search-agent.png" alt="Benchmark Radar search for “agent”, showing 1,034 matching benchmark records"></div>
+    </div>
+  </div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="cta">Next: new benchmarks in your inbox</span><span class="pg"></span></div>
+  <aside class="notes">Second ask. Search for the benchmark you built or the one you rely on. If Radar missed it, the form takes two minutes, and the next team will find it.</aside>
+</section>
+
+<!-- === 16. ASK 3: EMAIL === -->
+<section class="slide" data-title="Ask 3: Email">
+  <div class="frame">
+    <div class="kicker reveal">For your inbox</div>
+    <h2 class="reveal">Get new benchmarks by email</h2>
+    <div class="split ask">
+      <div class="reveal">
+        <ul class="steps">
+          <li><div><b>Open the homepage.</b>The signup box sits next to the search results.</div></li>
+          <li><div><b>Pick daily or weekly.</b>Daily brings the latest each day; weekly arrives every Monday.</div></li>
+          <li><div><b>Leave anytime.</b>Every email has an unsubscribe link.</div></li>
+        </ul>
+        <div class="url">benchmark-radar.org</div>
+      </div>
+      <div class="shot reveal" style="align-self:center"><img src="assets/email-signup.png" alt="Email signup box on the benchmark-radar.org homepage: Get benchmark updates by email, an email field, and a Subscribe button"></div>
+    </div>
+  </div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="cta">Join the Benchmark Radar Discord: QR code on the next slide</span><span class="pg"></span></div>
+  <aside class="notes">Third ask. If you want to keep up without checking the site, the email brings new benchmarks to you, daily or weekly.</aside>
+</section>
+
+<!-- === 17. GET INVOLVED === -->
 <section class="slide" data-title="Get involved">
   <div class="frame">
     <div class="kicker reveal">Join in</div>
     <h2 class="reveal">Get involved</h2>
-    <ul class="points">
+    <div class="involved">
+      <ul class="points">
       <li class="reveal"><b>Use the dataset.</b> The full record set is open: huggingface.co/datasets/ktwu01/benchmark-radar</li>
       <li class="reveal"><b>Contribute a benchmark.</b> If Radar missed one you care about, adding it is a small pull request.</li>
       <li class="reveal"><b>Report an error.</b> A wrong score or a missing source is worth a flag.</li>
       <li class="reveal"><b>Publish an audit.</b> Radar links it next to the scores it examines.</li>
       <li class="reveal"><b>Start at benchmark-radar.org.</b> Code and issues: github.com/ktwu01/benchmark-radar</li>
     </ul>
+      <div class="qr-row reveal">
+        <div class="qr"><img src="assets/discord-qr.png" alt="QR code to join the Benchmark Radar Discord"><span>Discord: Benchmark Radar</span></div>
+        <div class="qr"><img src="assets/wechat-qr.png" alt="QR code to add Koutian Wu on WeChat"><span>WeChat: Koutian Wu</span></div>
+      </div>
+    </div>
   </div>
   <div class="footer"><span>Koutian Wu, M.A. candidate in AI for Sciences, UT Austin · benchmark-radar.org</span><span class="pg"></span></div>
   <aside class="notes">Concrete asks. The audit ask is new: if your team rechecks a benchmark, publish it and Radar will link it.</aside>
 </section>
 
-<!-- === 15. Q&A + ACKNOWLEDGMENT === -->
+<!-- === 18. Q&A + ACKNOWLEDGMENT === -->
 <section class="slide dark" data-title="Questions">
   <div class="frame">
     <div class="kicker reveal">Q&amp;A</div>
     <h2 class="reveal" style="color:#fff">Questions</h2>
-    <div class="question reveal">Which eval does your team trust most, and when did you last check it?</div>
-    <div class="job reveal"><b>I am looking for my next role in AI evaluation, starting Feb '27.</b> If your team is hiring, or you can refer me, please email me: <b>ktwu@utexas.edu</b></div>
+    <div class="qa-grid">
+      <div>
+      <div class="question reveal">Which eval does your team trust most, and when did you last check it?</div>
+      <div class="job reveal"><b>I am looking for my next role in AI evaluation, starting Feb '27.</b> If your team is hiring, or you can refer me, please email me: <b>ktwu@utexas.edu</b></div>
+      </div>
+      <div class="qr-row reveal">
+        <div class="qr"><img src="assets/discord-qr.png" alt="QR code to join the Benchmark Radar Discord"><span>Discord</span></div>
+        <div class="qr"><img src="assets/wechat-qr.png" alt="QR code to add Koutian Wu on WeChat"><span>WeChat</span></div>
+      </div>
+    </div>
     <div class="ack reveal">Thanks to my co-authors and contributors: Wenjun Zhang, Junjie Zhou, Pengqian Han, Qiming Bao, Ergan Shang, Jiayu Wang, Junkai Wang, Wanghan Xu, Songyuanyi Lu, Yixuan Li, Rudy Mizrahi Celekli, Lazizbek Ravshanov, Yaoliang Bian, Xudong Han, and Lin Shi.</div>
     <div class="host-thanks reveal">Thanks to Prahitha Movva and Cohere Labs for hosting this talk.</div>
   </div>

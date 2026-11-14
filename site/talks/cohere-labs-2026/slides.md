@@ -189,7 +189,47 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 14. Get involved
+## 14. Let your agent draft Related Work
+
+*For your paper*
+
+- Install once. One pip command, or let your coding agent run the Benchmark Radar Skill.
+- Give one query per theme. Write each as "Label=query", one per paragraph you need.
+- Get LaTeX and BibTeX. A cited Related Work draft and the missing BibTeX entries, ready to edit.
+- `pip install git+https://github.com/ktwu01/benchmark-radar.git`
+- `benchmark-radar related-work "Agents=agent benchmark" "Saturation=benchmark saturation" --tex related.tex --bib refs.bib`
+
+> **Speaker notes:** First ask, for anyone writing a paper. One command gives your agent a cited Related Work draft and the BibTeX to go with it. It searches the Radar catalog plus arXiv, Hugging Face Papers, Semantic Scholar, OpenAlex, and Crossref. Read every entry before you keep it.
+
+---
+
+## 15. Search for it. If it is missing, add it.
+
+*For your benchmark*
+
+- Search. 49,679 benchmark records from 41 public sources, one search box.
+- Not there? Open the "Submit a benchmark" form on GitHub. English or Chinese is fine.
+- Help the next team. Every benchmark you add is one more that others can find.
+- benchmark-radar.org (screenshot: search for "agent")
+
+> **Speaker notes:** Second ask. Search for the benchmark you built or the one you rely on. If Radar missed it, the form takes two minutes, and the next team will find it.
+
+---
+
+## 16. Get new benchmarks by email
+
+*For your inbox*
+
+- Open the homepage. The signup box sits next to the search results.
+- Pick daily or weekly. Daily brings the latest each day; weekly arrives every Monday.
+- Leave anytime. Every email has an unsubscribe link.
+- benchmark-radar.org (screenshot: homepage email signup box)
+
+> **Speaker notes:** Third ask. If you want to keep up without checking the site, the email brings new benchmarks to you, daily or weekly.
+
+---
+
+## 17. Get involved
 
 *Join in*
 
@@ -198,17 +238,19 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 - Report an error. A wrong score or a missing source is worth a flag.
 - Publish an audit. Radar links it next to the scores it examines.
 - Start at benchmark-radar.org. Code and issues: github.com/ktwu01/benchmark-radar
+- QR codes: Discord (Benchmark Radar) and WeChat (Koutian Wu).
 
 > **Speaker notes:** Concrete asks. The audit ask is new: if your team rechecks a benchmark, publish it and Radar will link it.
 
 ---
 
-## 15. Questions
+## 18. Questions
 
 *Q&A*
 
 - Which eval does your team trust most, and when did you last check it?
 - I am looking for my next role in AI evaluation, starting Feb '27. If your team is hiring, or you can refer me, please email me: ktwu@utexas.edu
+- QR codes: Discord and WeChat.
 - Thanks to my co-authors and contributors: Wenjun Zhang, Junjie Zhou, Pengqian Han, Qiming Bao, Ergan Shang, Jiayu Wang, Junkai Wang, Wanghan Xu, Songyuanyi Lu, Yixuan Li, Rudy Mizrahi Celekli, Lazizbek Ravshanov, Yaoliang Bian, Xudong Han, and Lin Shi.
 
 > **Speaker notes:** Say the job callout out loud, then leave this slide up for the whole Q&A. Read the acknowledgment. Thank Prahitha and Cohere Labs.
