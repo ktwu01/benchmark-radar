@@ -1,0 +1,214 @@
+# Benchmark Radar: Keeping a Living Map of AI Evaluation
+
+Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.org
+
+---
+
+## 1. Benchmark Radar
+
+- Cohere Labs Open Science Community
+- Keeping a Living Map of AI Evaluation
+- Koutian Wu · M.A. candidate in AI for Sciences, UT Austin
+- Koutian Wu, Wenjun Zhang, Junjie Zhou, Pengqian Han, Qiming Bao, Ergan Shang, Jiayu Wang, Junkai Wang, Wanghan Xu, Songyuanyi Lu, Yixuan Li, Rudy Mizrahi Celekli, Lazizbek Ravshanov, Yaoliang Bian, Xudong Han, Lin Shi
+- benchmark-radar.org · ktwu@utexas.edu
+
+> **Speaker notes:** Thank the host and Cohere Labs. One sentence on who I am. Benchmark Radar is the work of the sixteen people on this slide. Today: what a living record of AI benchmarks shows, and a method your team can use on Monday.
+
+---
+
+## 2. The problem
+
+*Why this talk*
+
+- 2,940 new benchmark releases in 90 days. No single place tracked what exists, who reported it, or how scores moved.
+- Teams pick evals by habit. The familiar names win, not the ones that fit the product.
+- Headline scores travel alone. The source, the reporter, and the date get dropped along the way.
+- A wrong eval costs more than no eval. It gives a team confidence in the wrong direction.
+- 2,940 = releases in Benchmark Radar's 90-day window, retrieved Nov 13, 2026 (scripts/release_repo_findings.py).
+
+> **Speaker notes:** Open with the scale. 2,940 is not a guess: it is how many new benchmark releases Radar picked up in the last 90 days. Nobody reads that many. So teams fall back to habit, and a number reaches a slide without its source or date. The last bullet is the stake: a bad eval is worse than none, because it points the team the wrong way with confidence.
+
+---
+
+## 3. What Benchmark Radar is
+
+*The project*
+
+- 49,679 · benchmark records collected
+- 41 · public sources, crawled daily
+- 396 · GitHub stars
+- 300+ · users
+- Every record keeps its original source and its score history.
+- Open: code on GitHub (pipeline MIT, web UI AGPL-3.0), dataset on Hugging Face.
+- Records: benchmark-radar.org records badge, Nov 13, 2026. Stars: GitHub, Nov 13, 2026.
+
+> **Speaker notes:** One line: a living database and search engine for AI benchmarks. The numbers are from today. 49,679 is records collected, not distinct benchmarks; many records point at the same benchmark from different sources. Everything is open: the code and the dataset.
+
+---
+
+## 4. Who is viewing and using it
+
+*Reach*
+
+- Researchers at OpenAI, Anthropic, Google, Meta, Microsoft, NVIDIA, Amazon, IBM, ByteDance, and Unitree viewed/using it.
+- 300+ users across labs, companies, and universities, found through search and the open dataset, not paid promotion.
+
+![Logos of 37 institutions whose researchers viewed/using Benchmark Radar](assets/researchers.svg)
+
+> **Speaker notes:** Keep this short. The point is not the logos; it is that the people who build and report on benchmarks already look things up here. 37 institutions on the strip. Wording is deliberate: viewed or using.
+
+---
+
+## 5. How it works
+
+*The pipeline*
+
+- DiscoverNew benchmarks are found as they appear in papers, repos, datasets, and leaderboards.
+- ExtractEach record keeps its original source, the reported score, who reported it, and the date.
+- TrackScore history is followed over time, so new results and new versions stay visible.
+- The live site: search at the top, today's new benchmarks ranked below, each linked to its source.
+
+![Benchmark Radar homepage: search bar, ranked new benchmarks, daily briefing](assets/home.jpg)
+
+> **Speaker notes:** Three steps. Discover: 41 sources every day. Extract: the score never travels without its source, reporter, and date. Track: the history stays. The screenshot is the front door; the demo starts here.
+
+---
+
+## 6. Demo: SWE-bench Verified
+
+*Live demo*
+
+- Search it. Every source, every year, no score cutoff: 9 records match the full name.
+- Open the record. One record per source: LLM Stats, model reports, and variants.
+- Read each point. Model, organization, date, and whether the score was self-reported.
+- Watch the history. How the best reported score moved as new models arrived.
+
+![Saturation page with a search for SWE-bench Verified and its LLM Stats score history](assets/demo-swe-search.jpg)
+
+> **Speaker notes:** Switch to the browser. Saturation page, type SWE-bench Verified. Point at the list: the same benchmark appears once per source, and variants such as Agentless stay separate rather than being merged. Click the LLM Stats record. Hover a point: model, organization, date, self-reported. If the network fails, this screenshot is the fallback.
+
+---
+
+## 7. Attention
+
+*Finding 1 of 5*
+
+- Repos with zero GitHub stars · 70%
+- Stars held by the top 1% of repos · 78%
+- Stars held by the top 10% of repos · 98%
+- 1,024 GitHub repos behind 2,940 new benchmark releases from the last 90 days. Attention is a power law: a handful of benchmarks get almost all of it.
+- Stars measure attention, not quality. The benchmark your product needs may be in the 70%.
+- Benchmark Radar insights #1130, #1132; re-run Nov 13, 2026 on the 90-day window.
+
+> **Speaker notes:** This is where the record starts to say something. Of the 1,024 repos we have facts for, 70% have zero stars. The top 1%, about ten repos, hold 78% of all stars. If your team discovers benchmarks through what is trending, you are sampling the top 1%. Careful: stars are attention, not quality.
+
+---
+
+## 8. Papers
+
+*Finding 2 of 5*
+
+- 8.5★ vs 0★ · median stars, repos with an arXiv paper vs without
+- 21 of 29 · repos with 100+ stars have a paper
+- 14% · of repos in the cohort have a paper
+- This is an association, not a cause. A paper and stars can both come from a well-resourced team.
+- For your team: a paper-less benchmark is not wrong, but its setup is harder to check.
+- Benchmark Radar insight #1131; re-run Nov 13, 2026 (146 paper repos, 878 without).
+
+> **Speaker notes:** Paper repos are one in seven of the cohort but 21 of the 29 that reached 100 stars. Say releases versus repos clearly: 2,940 releases come from 1,081 repos. Median 8.5 versus 0. Say the caveat out loud: association. The practical reading for industry is about checkability, not prestige.
+
+---
+
+## 9. Abandoned repos
+
+*Finding 3 of 5*
+
+- 35% · never pushed again after the day they were created (363 of 1,024)
+- 5.3% · of repos are gone or made private: GitHub returns 404 (57 of 1,081)
+- A finished benchmark can be pushed once. One-day repos measure activity, not quality.
+- A missing repo is a dead citation. Radar now lists gone and archived repos without ranking them.
+- Benchmark Radar insights #1130, #1133. Gone = 404 on the GitHub repository endpoint, which follows renames.
+
+> **Speaker notes:** One in three new benchmark repos never gets a second day of commits. And 57 of 1,081 repos are gone: a 404 on the endpoint that follows renames, so these are not renames. They were deleted or made private. If a decision rests on a benchmark, check that its repo still exists.
+
+---
+
+## 10. Saturation
+
+*Finding 4 of 5*
+
+- 16.8 → 95.0 · best reported SWE-bench Verified score, May 2024 → June 2026
+- 65 of 111 · reported scores are 70 or higher
+- Saturated is not solved. A crowded top means the test separates fewer models, not that the task is done.
+- SWE-Bench Verified, LLM Stats leaderboard, Benchmark Radar Saturation page, Nov 13, 2026.
+
+![SWE-Bench Verified score history on LLM Stats, 111 reported scores, best 95](assets/swe-verified-saturation.jpg)
+
+> **Speaker notes:** One leaderboard, LLM Stats, 111 reported scores. The best reported score went from 16.8 in May 2024 to 95.0 in June 2026, as dated by LLM Stats. 65 of the 111 are 70 or higher, so the top is crowded. Saturated does not mean solved; it can mean the test stopped measuring the hard part. These are reported scores from one source, not a cross-source saturation metric.
+
+---
+
+## 11. Audits
+
+*Finding 5 of 5*
+
+- SWE-bench Pro · 109 of 728 · public tasks underdetermined (15.0% floor); 3 gold patches fail the benchmark's own verifier.
+- Terminal-Bench 2.1 · 40 of 83 · gold-passing tasks still pass after a careless in-workspace deletion.
+- DeepSWE · 4 of 113 · reference solutions fail their own verifiers (v1.0). The v1.1 re-grade fixed 3 of them.
+- Radar lists 9 audits of 8 benchmarks, all by June Kim: also ProgramBench, MirrorCode, FrontierCode, SlopCodeBench, and Frontier-Bench.
+- Findings as reported by each audit, linked from the benchmark's Radar record (june.kim, GitHub, Zenodo).
+
+> **Speaker notes:** How a score was produced matters as much as the number. Independent audits re-run the setup. These are the audit's findings, not Radar's. SWE-bench Pro: at least 15% of public tasks underdetermined. Terminal-Bench 2.1: a careless deletion goes unnoticed on 40 of 83 tasks. DeepSWE: four reference solutions failed their own verifiers, and the v1.1 re-grade fixed three. Radar shows the audit next to the scores it examines. Credit June Kim.
+
+---
+
+## 12. A five-step check
+
+*Take home*
+
+- 01 · Finding 1 · Discover wide · Start from the full landscape, not from what is trending.
+- 02 · Findings 2–3 · Check provenance · Find the paper, the repo, and who reported each score. Confirm the repo still exists.
+- 03 · Finding 4 · Check saturation · Ask whether it still separates your candidate models.
+- 04 · Finding 5 · Check audits · Look for an independent recheck before you rely on it.
+- 05 · Schedule retirement · Decide in advance when the eval gets dropped, and write the date down.
+
+> **Speaker notes:** Each step maps to a finding. Discover wide, because attention is a power law. Check provenance, because many repos go quiet or disappear. Check saturation. Check audits. Then schedule retirement: the step teams skip. Radar helps with the first four; the fifth is a team decision.
+
+---
+
+## 13. What is next
+
+*Roadmap*
+
+- Wider coverage. More sources, more benchmarks, and faster pickup of new releases.
+- A deeper audit layer. More audit records linked to the scores they examine.
+- Interop with community efforts. Radar's records should flow into shared efforts such as Every Eval Ever, not sit in a silo.
+- Better history views. Score movement over time, readable at a glance.
+
+> **Speaker notes:** Four directions. The audit layer is the one with the most leverage, and it depends on people like June Kim publishing audits. Interop: we would rather feed shared efforts than build a silo.
+
+---
+
+## 14. Get involved
+
+*Join in*
+
+- Use the dataset. The full record set is open: huggingface.co/datasets/ktwu01/benchmark-radar
+- Contribute a benchmark. If Radar missed one you care about, adding it is a small pull request.
+- Report an error. A wrong score or a missing source is worth a flag.
+- Publish an audit. Radar links it next to the scores it examines.
+- Start at benchmark-radar.org. Code and issues: github.com/ktwu01/benchmark-radar
+
+> **Speaker notes:** Concrete asks. The audit ask is new: if your team rechecks a benchmark, publish it and Radar will link it.
+
+---
+
+## 15. Questions
+
+*Q&A*
+
+- Which eval does your team trust most, and when did you last check it?
+- I am looking for my next role in AI evaluation, starting Feb '27. If your team is hiring, or you can refer me, please email me: ktwu@utexas.edu
+- Thanks to my co-authors and contributors: Wenjun Zhang, Junjie Zhou, Pengqian Han, Qiming Bao, Ergan Shang, Jiayu Wang, Junkai Wang, Wanghan Xu, Songyuanyi Lu, Yixuan Li, Rudy Mizrahi Celekli, Lazizbek Ravshanov, Yaoliang Bian, Xudong Han, and Lin Shi. And thanks to Prahitha Movva and Cohere Labs for hosting this talk.
+
+> **Speaker notes:** Say the job callout out loud, then leave this slide up for the whole Q&A. Read the acknowledgment. Thank Prahitha and Cohere Labs.
