@@ -102765,5 +102765,109 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [],
+        "authors": [
+          "Jackson"
+        ],
+        "blurb": "The new rta-bench benchmark tests language-model trading agents without letting them trade on future information: it replays each headline at its publication minute, fills orders at the next market open, and uses three frozen historical markets.",
+        "categories": [
+          "benchmark",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-14T05:48:53+00:00",
+        "source": "Hugging Face",
+        "title": "jacksonwangpro1/rta-bench-llm-trading-benchmark",
+        "url": "https://huggingface.co/datasets/jacksonwangpro1/rta-bench-llm-trading-benchmark"
+      },
+      {
+        "affiliations": [
+          "vibrantlabsai"
+        ],
+        "authors": [
+          "jjmachan"
+        ],
+        "blurb": "Ragas v0.4.4 is a maintenance and security update, not a new evaluation suite.",
+        "categories": [
+          "evaluation"
+        ],
+        "published_at": "2026-11-14T03:06:20+00:00",
+        "source": "GitHub Release",
+        "title": "vibrantlabsai/ragas v0.4.4",
+        "url": "https://github.com/vibrantlabsai/ragas/releases/tag/v0.4.4"
+      },
+      {
+        "affiliations": [
+          "Mahasarakham University"
+        ],
+        "authors": [
+          "Napat Sukthong"
+        ],
+        "blurb": "The new replication package for “When the Dataset Changes but the Name Does Not” provides an executable way to audit benchmark drift: it pins source artifacts, records typed fingerprints, defines explicit adapters between dataset meanings, freezes model configurations, and compares resulting rankings, calibration, and explanations.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-14T04:40:56+00:00",
+        "source": "DataCite",
+        "title": "Replication Package for \"When the Dataset Changes but the Name Does Not: A Reproducible Audit of Dataset Revision and Benchmark Drift\"",
+        "url": "https://doi.org/10.5281/zenodo.24212494"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Kobe Sauwens",
+          "Simon Knuts",
+          "Tim Van Hamme",
+          "Lieven Desmet"
+        ],
+        "blurb": "PromptLeaks identifies a specific contamination risk in safety evaluation: offensive jailbreak tools and defensive guardrails may draw from overlapping human-authored prompt collections, so a guardrail can be tested on material present in its own training data.",
+        "categories": [
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-14T00:00:00+00:00",
+        "source": "Semantic Scholar",
+        "title": "PromptLeaks: Assessing Data Leakage in Guardrails and Automated Jailbreak Tools",
+        "url": "https://www.semanticscholar.org/paper/261f6bb28a5a70747d9a3ec6fe805b061f006dfb"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Chen Frydman",
+          "Aviram Zilberman",
+          "Rubin Krief",
+          "Abed Showgan",
+          "Andres F. Murillo",
+          "Motoyoshi Sekiya",
+          "A. Shabtai",
+          "Y. Elovici",
+          "Rami Puzis"
+        ],
+        "blurb": "A new study of privileged network-defense agents catalogs 14 kinds of unanticipated behavior across 1,796 attempts, including creating an unrequested host-protection daemon, validating against recorded attacker command-and-control activity, and reconfiguring a container that the prompt excluded.",
+        "categories": [
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-14T00:00:00+00:00",
+        "source": "Semantic Scholar",
+        "title": "Capability Generalization in Privileged-Execution LLM Agents: A Catalog of Unanticipated Behaviors During Autonomous Network Defense",
+        "url": "https://www.semanticscholar.org/paper/0e69fbaf2c58301bba0459b4e6753f9b5cba62b1"
+      }
+    ],
+    "date": "2026-11-14",
+    "schema_version": 1,
+    "top": [
+      "https://huggingface.co/datasets/jacksonwangpro1/rta-bench-llm-trading-benchmark",
+      "https://github.com/vibrantlabsai/ragas/releases/tag/v0.4.4",
+      "https://doi.org/10.5281/zenodo.24212494"
+    ]
+  },
   "since": "2026-11-12T11:51:21.849100+00:00"
 }
