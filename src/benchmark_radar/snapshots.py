@@ -53,7 +53,7 @@ from .rubric import (
 from .science_domains import science_domains_for_record
 from .site_about import write_about
 from .site_pages import DEFAULT_SHARD_DIR, benchmark_sitemap_entries
-from .site_seo import site_lastmod, write_sitemap
+from .site_seo import site_lastmod, talk_page_entries, write_sitemap
 from .sources import github_release_title
 
 SCHEMA_VERSION = 2
@@ -1951,6 +1951,7 @@ def rebuild_dashboard(
         site_updated = site_lastmod(snapshots)
         about = write_about(sitemap_output.parent)
         page_entries = [(path, site_updated) for path in about["paths"]]
+        page_entries.extend(talk_page_entries(sitemap_output.parent))
         write_feed(snapshots, feed_output)
         # One page per collection day, plus the blog's own feed. Built from the
         # same validated snapshots the dashboard is, in the same run, so a

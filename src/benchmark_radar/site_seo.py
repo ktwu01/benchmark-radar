@@ -42,6 +42,10 @@ INDEXABLE_VIEWS: tuple[tuple[str, str], ...] = (
 
 BENCHMARK_DIRECTORY_PATH = "/benchmarks/"
 
+# Talks are hand-written static pages committed under site/talks/, one folder per
+# talk. Nothing in the build writes them, so the sitemap finds them on disk.
+TALKS_PATH = "/talks/"
+
 ET.register_namespace("sm", SITEMAP_NAMESPACE)
 
 
@@ -112,6 +116,19 @@ def sitemap_tree(
         if entry_lastmod:
             ET.SubElement(url, _q("lastmod")).text = entry_lastmod
     return ET.ElementTree(root)
+
+
+def talk_page_entries(site_dir: Path) -> list[tuple[str, str | None]]:
+    """List /talks/ and every /talks/<slug>/ that has an index.html.
+
+    No lastmod: a talk page changes only when someone edits it, and a checkout's
+    file times say nothing about that.
+    """
+    talks = site_dir / TALKS_PATH.strip("/")
+    if not (talks / "index.html").is_file():
+        return []
+    slugs = sorted(page.parent.name for page in talks.glob("*/index.html"))
+    return [(TALKS_PATH, None), *((f"{TALKS_PATH}{slug}/", None) for slug in slugs)]
 
 
 def write_sitemap(
