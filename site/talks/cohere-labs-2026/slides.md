@@ -9,7 +9,8 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 - Cohere Labs Open Science Community
 - Keeping a Living Map of AI Evaluation
 - Koutian Wu · M.A. candidate in AI for Sciences, UT Austin
-- Koutian Wu, Wenjun Zhang, Junjie Zhou, Pengqian Han, Qiming Bao, Ergan Shang, Jiayu Wang, Junkai Wang, Wanghan Xu, Songyuanyi Lu, Yixuan Li, Rudy Mizrahi Celekli, Lazizbek Ravshanov, Yaoliang Bian, Xudong Han, Lin Shi
+- Koutian Wu\*, Wenjun Zhang\*, Junjie Zhou, Pengqian Han, Qiming Bao, Ergan Shang, Jiayu Wang, Junkai Wang, Wanghan Xu, Songyuanyi Lu, Yixuan Li, Rudy Mizrahi Celekli, Lazizbek Ravshanov, Yaoliang Bian, Xudong Han, Lin Shi
+- \*Equal contribution to the paper and the code.
 - benchmark-radar.org · ktwu@utexas.edu
 
 > **Speaker notes:** Thank the host and Cohere Labs. One sentence on who I am. Benchmark Radar is the work of the sixteen people on this slide. Today: what a living record of AI benchmarks shows, and a method your team can use on Monday.
