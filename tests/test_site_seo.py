@@ -10,7 +10,9 @@ from benchmark_radar.site_about import ABOUT_PATH, ALIAS_PATHS
 from benchmark_radar.site_seo import (
     BENCHMARK_DIRECTORY_PATH,
     INDEXABLE_VIEWS,
+    TALKS_PATH,
     sitemap_tree,
+    talk_page_entries,
     write_sitemap,
 )
 
@@ -262,3 +264,25 @@ def test_llms_txt_names_the_paper_it_asks_agents_to_cite():
     # Written in arXiv's title case, so compare against citation.py's APA
     # sentence case without pinning the exact casing in two places.
     assert TITLE.lower() in llms.lower()
+
+
+def test_sitemap_lists_each_committed_talk_page(tmp_path):
+    (tmp_path / "talks" / "venue-2026").mkdir(parents=True)
+    (tmp_path / "talks" / "index.html").write_text("list", encoding="utf-8")
+    (tmp_path / "talks" / "venue-2026" / "index.html").write_text("deck", encoding="utf-8")
+    (tmp_path / "talks" / "draft-without-page").mkdir()
+    entries = talk_page_entries(tmp_path)
+    assert entries == [(TALKS_PATH, None), (f"{TALKS_PATH}venue-2026/", None)]
+    tree = sitemap_tree([], page_entries=entries)
+    urls = [node.text for node in tree.getroot().findall("sm:url/sm:loc", NS)]
+    assert f"{SITE_URL}/talks/venue-2026/" in urls
+
+
+def test_sitemap_lists_no_talks_when_the_folder_is_absent(tmp_path):
+    assert talk_page_entries(tmp_path) == []
+
+
+def test_the_committed_talks_are_found():
+    paths = [path for path, _ in talk_page_entries(Path("site"))]
+    assert paths[0] == TALKS_PATH
+    assert len(paths) >= 2
