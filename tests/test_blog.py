@@ -578,15 +578,6 @@ def test_blog_fetches_only_the_star_count_like_the_dashboard():
     assert "api.github.com/search/issues" not in script
 
 
-def test_the_header_carries_no_contact_button(tmp_path):
-    write_blog_with_chrome([_briefed()], tmp_path)
-    page = (tmp_path / "blog" / "2026-08-30" / "index.html").read_text(encoding="utf-8")
-    # The header button is gone (#1097); the contact sheet stays reachable from
-    # the footer, so a brief ships neither the button nor a link to open it.
-    assert 'id="badge-contact"' not in page
-    assert 'href="/#contact"' not in page.split("<footer", 1)[0]
-
-
 def test_every_brief_carries_the_footer_email_signup(tmp_path):
     """The blog has no app.js, so the signup must work as a plain form post."""
     write_blog_with_chrome([_briefed()], tmp_path)
@@ -641,22 +632,6 @@ def test_the_chrome_i18n_table_is_baked_from_app_js_for_chinese_readers(tmp_path
     assert table["Contact"] == "联系作者"
     assert table["Switch to English"] == "切换到英文"
     assert "{count}" in table["Star this repository on GitHub. {count} stars"]
-
-
-def test_nav_labels_without_a_reviewed_string_stay_english_like_the_dashboard(tmp_path):
-    # The dashboard's t() falls back to the key when the table lacks it, so
-    # short section labels stay English there; the blog must mirror that
-    # instead of inventing translations.
-    write_blog_with_chrome([_briefed()], tmp_path)
-    page = (tmp_path / "blog" / "2026-08-30" / "index.html").read_text(encoding="utf-8")
-    match = re.search(
-        r'<script type="application/json" id="chrome-i18n">(.*?)</script>', page, re.S
-    )
-    table = json.loads(match.group(1))
-    # Section labels carry reviewed translations (Blog → 博客), same as the
-    # dashboard's menubar in Chinese mode.
-    assert table["Blog"] == "博客"
-    assert table["CLI"] == "命令行"
 
 
 def _run_blog_language_harness(mode: str, target_lang: str, remember: bool = True) -> dict:

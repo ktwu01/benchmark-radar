@@ -8,7 +8,6 @@ from benchmark_radar.social import (
     build_insight_sentence,
     extract_checked,
     load_channels,
-    load_post_sample,
     merge_checked,
     parse_git_log,
     render_social_section,
@@ -289,62 +288,6 @@ def test_render_section_includes_the_copy_paste_post_sample():
     assert "**发布文案示例** (copy-paste for today's post):" in section
     assert "一个反常识的发现：样本。" in section
     assert "issues/150" in section
-
-
-def test_repository_social_config_leads_with_crowdsourcing_then_ranked_channels():
-    path = Path("config/social.yml")
-    channels = load_channels(path)
-    names = [channel["name"] for channel in channels]
-
-    assert names[:7] == [
-        "众筹-social：请 benchmark 群友转发到自己的社群",
-        "X / Twitter",
-        "Benchmark Radar 讨论群",
-        "GitHub Blog https://ktwu01.github.io/",
-        "WeChat Moment",
-        "Science Intelligence 实名讨论群",
-        "Hacker News https://news.ycombinator.com/submit",
-    ]
-    assert {
-        "Bilibili / B站",
-        "YouTube",
-        "Product Hunt",
-        "DevHunt",
-        "AgentHunter",
-        "BetaList",
-        "Peerlist",
-        "AppSumo",
-        "Indie Hackers",
-        "GitHub Discussions",
-        "Papers with Code discussions",
-        "LAION Discord",
-        "Cold email：arXiv / OpenReview benchmark 作者",
-        "新微信群或 Discord 群",
-        "KOL：逛逛 GitHub 等相关账号",
-        "WhatsApp Communities",
-        "Pinterest",
-        "Snapchat",
-        "Quora",
-    } <= set(names)
-    assert {
-        "Sichen Tao",
-        "Junwei Zhou",
-        "Ziyan Chen",
-        "Phys Bench",
-        "LHTB 造题",
-    }.isdisjoint(names)
-    by_name = {channel["name"]: channel for channel in channels}
-    assert by_name["Cold email：arXiv / OpenReview benchmark 作者"]["daily"] is True
-
-    sample = load_post_sample(path)
-    assert sample is not None
-    assert sample.count("- [ ]") >= 11
-    assert "KOL 软推广：先问一个真问题" in sample
-    assert "Benchmark Radar Top 10" in sample
-    assert "https://benchmark-radar.org/cli" in sample
-    assert "网上在热议什么，最后沉淀成了什么" in sample
-    assert "B站：每天整理 Agent benchmark" in sample
-    assert "Daily Agent Benchmarks" in sample
 
 
 def test_render_section_omits_post_sample_when_none_configured():

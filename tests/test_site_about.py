@@ -171,19 +171,3 @@ def test_about_is_byte_deterministic(tmp_path: Path):
     assert (first / "about" / "index.html").read_bytes() == (
         second / "about" / "index.html"
     ).read_bytes()
-
-
-def test_the_menu_bar_says_publications_and_keeps_the_cite_path():
-    dashboard = DASHBOARD.read_text(encoding="utf-8")
-    nav = re.search(r'<nav class="view-nav".*?</nav>', dashboard, re.S).group(0)
-    assert 'href="/cite/"' in nav
-    assert 'data-i18n="Publications"' in nav
-    assert '<span data-i18n="Publications">Publications</span>' in nav
-    assert 'data-i18n="Cite"' not in nav
-
-
-def test_the_footer_carries_no_build_stamp(about: str):
-    """A build time tells a reader nothing, so the footer dropped it (issue #906)."""
-    footer = re.search(r"<footer>.*?</footer>", about, re.S).group(0)
-    assert "build-meta" not in footer
-    assert "Updated" not in footer

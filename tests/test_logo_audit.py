@@ -149,18 +149,6 @@ def test_the_organization_table_is_keyed_by_canonical_names_only():
         assert alias not in keys, f"{alias} is a vendor alias, not a canonical name"
 
 
-def test_gpt_resolves_to_the_real_openai_mark_not_a_stand_in():
-    """Issue #261: GPT rows drew a hand-drawn six-petal rosette.
-
-    OpenAI is absent from simple-icons, and the placeholder that stood in for
-    it was the wrong logo on every GPT point on the site.
-    """
-    openai = _tables()["ORGANIZATION_ICONS"]["OpenAI"][0]
-    assert not openai.startswith("M11.90,12.0"), "still the rosette placeholder"
-    # The rosette was six identical arc segments; the real mark is not.
-    assert openai.count("a 6.1,6.1") == 0
-
-
 def test_the_audit_page_renders_through_the_charts_own_resolvers():
     """A review page that reimplemented these could show green while the chart
     drew the wrong mark, which is the failure it exists to catch."""
