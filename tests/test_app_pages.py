@@ -316,7 +316,14 @@ def test_models_page_seed_averages_joined_benchmarks(tmp_path):
             }
         },
     }
+    # Both records name their one protocol: a join compares labels, and a
+    # missing label never joins another record's missing label (#1195).
+    shard["scores_by_source"]["model_reports"]["rows"][0]["comparable_group"] = "std"
     (tmp_path / "data" / "benchmarks" / "benchmark-1.json").write_text(json.dumps(shard))
+    first_path = tmp_path / "data" / "benchmarks" / "benchmark-0.json"
+    first = json.loads(first_path.read_text())
+    first["scores_by_source"]["model_reports"]["rows"][0]["comparable_group"] = "std"
+    first_path.write_text(json.dumps(first))
     write_app_pages(
         _dashboard(),
         tmp_path,

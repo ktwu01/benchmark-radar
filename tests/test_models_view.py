@@ -144,7 +144,10 @@ def test_averages_round_half_up_like_the_page():
 def test_joined_records_share_one_benchmark():
     # Two columns score different records of one reviewed equivalent group.
     joined = {"llm-stats:gpqa": "gpqa", "opencompass:1135": "gpqa"}
-    benchmarks = {"llm-stats:gpqa": PERCENT, "opencompass:1135": PERCENT}
+    benchmarks = {
+        "llm-stats:gpqa": {**PERCENT, "group": "std"},
+        "opencompass:1135": {**PERCENT, "group": "std"},
+    }
     means, shared = shared_average(
         [{"llm-stats:gpqa": 40.0}, {"opencompass:1135": 60.0}],
         benchmarks,
@@ -165,11 +168,50 @@ def test_joined_records_do_not_share_across_different_groups():
 
 def test_joined_records_still_require_one_comparable_group():
     joined = {"a": "g", "b": "g"}
-    benchmarks = {"a": PERCENT, "b": PERCENT}
+    benchmarks = {
+        "a": {**PERCENT, "groups": ["cot", "plain"]},
+        "b": {**PERCENT, "groups": ["cot", "plain"]},
+    }
     columns = [{"a": 40.0}, {"b": 60.0}]
     means, shared = shared_average(columns, benchmarks, [{"a": 0}, {"b": 1}], joined=joined)
     assert (means, shared) == ([None, None], [])
     means, shared = shared_average(columns, benchmarks, [{"a": 0}, {"b": 0}], joined=joined)
+    assert (means, shared) == ([40.0, 60.0], ["g"])
+
+
+def test_joined_records_without_a_group_label_never_join_each_other():
+    # #1195: a null group never joins another null, so two different records
+    # with no recorded protocol are not one benchmark.
+    joined = {"a": "g", "b": "g"}
+    benchmarks = {"a": PERCENT, "b": PERCENT}
+    assert shared_average([{"a": 40.0}, {"b": 60.0}], benchmarks, joined=joined) == (
+        [None, None],
+        [],
+    )
+
+
+def test_joined_records_with_different_sole_labels_do_not_share():
+    joined = {"a": "g", "b": "g"}
+    benchmarks = {
+        "a": {**PERCENT, "group": "5-shot"},
+        "b": {**PERCENT, "group": "0-shot"},
+    }
+    assert shared_average([{"a": 40.0}, {"b": 60.0}], benchmarks, joined=joined) == (
+        [None, None],
+        [],
+    )
+
+
+def test_joined_protocol_is_chosen_across_columns_not_by_key_order():
+    # #1195: A scores record a (5-shot) and b (0-shot); B scores only b. Key
+    # order alone would pick A's a and reject the group, though both have a
+    # comparable score on b.
+    joined = {"a": "g", "b": "g"}
+    benchmarks = {
+        "a": {**PERCENT, "group": "5-shot"},
+        "b": {**PERCENT, "group": "0-shot"},
+    }
+    means, shared = shared_average([{"a": 20.0, "b": 40.0}, {"b": 60.0}], benchmarks, joined=joined)
     assert (means, shared) == ([40.0, 60.0], ["g"])
 
 
@@ -207,7 +249,7 @@ def test_build_model_scores_marks_joined_benchmarks(tmp_path):
     shards.mkdir()
     for name, key in {"a": "llm-stats:aime", "b": "model-reports:aime"}.items():
         (shards / f"{name}.json").write_text(
-            json.dumps(_shard(key, [("M", "Lab", 50.0, "2026-01-01")]))
+            json.dumps(_shard(key, [("M", "Lab", 50.0, "2026-01-01")], group="std"))
         )
     payload = build_model_scores(
         shards,
@@ -217,9 +259,13 @@ def test_build_model_scores_marks_joined_benchmarks(tmp_path):
         "llm-stats:aime": "aime",
         "model-reports:aime": "aime",
     }
-    # Without equivalences the payload is unchanged: no joined field appears.
+    # A joined record with one protocol carries its label (#1195).
+    assert all(benchmark["group"] == "std" for benchmark in payload["benchmarks"])
+    # Without equivalences the payload is unchanged: no joined or group field.
     plain = build_model_scores(shards)
-    assert all("joined" not in benchmark for benchmark in plain["benchmarks"])
+    assert all(
+        "joined" not in benchmark and "group" not in benchmark for benchmark in plain["benchmarks"]
+    )
 
 
 def _gpqa_shards(tmp_path):
@@ -227,10 +273,10 @@ def _gpqa_shards(tmp_path):
     shards = tmp_path / "benchmarks"
     shards.mkdir()
     (shards / "gpqa.json").write_text(
-        json.dumps(_shard("llm-stats:gpqa", [("M-A", "Lab", 40.0, "2026-01-01")]))
+        json.dumps(_shard("llm-stats:gpqa", [("M-A", "Lab", 40.0, "2026-01-01")], group="std"))
     )
     (shards / "gpqa-oc.json").write_text(
-        json.dumps(_shard("opencompass:1135", [("M-B", "Lab", 60.0, "2026-01-01")]))
+        json.dumps(_shard("opencompass:1135", [("M-B", "Lab", 60.0, "2026-01-01")], group="std"))
     )
     return shards
 
@@ -312,7 +358,9 @@ def test_seed_averages_joined_benchmarks_from_generated_payload(tmp_path):
 # --- Data -------------------------------------------------------------------------
 
 
-def _shard(key, rows, *, multiplier=1, unit="percent", direction="higher_is_better", **series):
+def _shard(
+    key, rows, *, multiplier=1, unit="percent", direction="higher_is_better", group=None, **series
+):
     return {
         "record": {"key": key},
         "scores_by_source": {
@@ -330,6 +378,7 @@ def _shard(key, rows, *, multiplier=1, unit="percent", direction="higher_is_bett
                         "value": value,
                         "reported_date": date,
                         "date_precision": "model_announcement",
+                        **({"comparable_group": group} if group else {}),
                     }
                     for index, (model, org, value, date) in enumerate(rows)
                 ],

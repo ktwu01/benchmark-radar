@@ -168,6 +168,12 @@ def build_model_scores(
             }
             if record_key in joined:
                 benchmark["joined"] = joined[record_key]
+                # A joined record with one protocol omits `groups`, so carry
+                # its label: the join compares labels across records, and a
+                # missing one ("None" is how a null group is stringified)
+                # must never match another record's missing one (#1195).
+                if len(groups) == 1 and groups[0] != "None":
+                    benchmark["group"] = groups[0]
             if len(groups) > 1:
                 benchmark["groups"] = groups
             benchmarks.append(benchmark)
@@ -275,48 +281,52 @@ def round_tenth(value: float) -> float:
     return math.floor(10 * value + 0.5) / 10
 
 
-def _joined_columns(
-    columns: list[dict[str, float]],
-    benchmarks: dict[str, dict[str, Any]],
-    joined: dict[str, str],
-) -> list[dict[str, tuple[str, float]]]:
-    """Collapse each column onto joined keys, one record's score per group.
-
-    A column scores a joined benchmark through its first averageable record
-    in sorted record-key order. The join counts shared benchmarks; it does
-    not merge scores across records, so no value is averaged across sources
-    to make a cell.
-    """
-    collapsed: list[dict[str, tuple[str, float]]] = []
-    for column in columns:
-        by_joined: dict[str, tuple[str, float]] = {}
-        for key in sorted(column):
-            group_key = joined.get(key, key)
-            if group_key in by_joined:
-                continue
-            if average_value(column[key], benchmarks.get(key) or {}) is None:
-                continue
-            by_joined[group_key] = (key, column[key])
-        collapsed.append(by_joined)
-    return collapsed
-
-
-def _joined_group_label(
-    record_key: str,
-    index: int | None,
-    benchmarks: dict[str, dict[str, Any]],
-) -> str | int | None:
-    """Comparable-group label for one joined record's cell.
+def _comparable_token(key: str, index: int | None, benchmark: dict[str, Any]) -> str:
+    """What a cell's protocol is, for comparing cells of different records.
 
     ``index`` is local to the record's own ``benchmark["groups"]`` list, so
     index 0 can mean ``cot`` on one record and ``plain`` on another; resolve
-    it to the label before comparing across records. A record without a
-    groups list keeps its index, which preserves the single-group behaviour.
+    it to the label. A record with one protocol carries it as
+    ``benchmark["group"]``. Equal labels are one protocol across records. A
+    cell with no label is comparable only with the same record's cells of
+    the same index, because a null group never joins another null (#1195).
+    Tokens are strings so Python and app.js order them alike.
     """
-    groups = (benchmarks.get(record_key) or {}).get("groups")
+    groups = benchmark.get("groups")
+    label = None
     if isinstance(groups, list) and index is not None and 0 <= index < len(groups):
-        return groups[index]
-    return index
+        label = groups[index]
+    elif benchmark.get("group"):
+        label = benchmark["group"]
+    if label not in (None, "None"):
+        return f"L\0{label}"
+    return f"R\0{key}\0{'' if index is None else index}"
+
+
+def _joined_candidates(
+    columns: list[dict[str, float]],
+    benchmarks: dict[str, dict[str, Any]],
+    groups: list[dict[str, int | None]],
+    joined: dict[str, str],
+) -> list[dict[str, dict[str, tuple[str, float]]]]:
+    """Each column's scores per joined key, by comparable token.
+
+    A column offers, for each token of a joined benchmark, its first
+    averageable record in sorted record-key order. The join counts shared
+    benchmarks; it does not merge scores across records, so no value is
+    averaged across sources to make a cell.
+    """
+    candidates: list[dict[str, dict[str, tuple[str, float]]]] = []
+    for column, column_groups in zip(columns, groups, strict=True):
+        by_joined: dict[str, dict[str, tuple[str, float]]] = {}
+        for key in sorted(column):
+            benchmark = benchmarks.get(key) or {}
+            if average_value(column[key], benchmark) is None:
+                continue
+            token = _comparable_token(key, column_groups.get(key), benchmark)
+            by_joined.setdefault(joined.get(key, key), {}).setdefault(token, (key, column[key]))
+        candidates.append(by_joined)
+    return candidates
 
 
 def shared_average(
@@ -339,38 +349,33 @@ def shared_average(
     :func:`joined_map_from_groups`), the intersection is on joined keys
     instead of raw record keys: two columns scoring different records of
     one group share that benchmark. The returned keys are the joined keys,
-    and the comparable-group rule still applies, now to the records each
-    column scored the group through, comparing each record's group label
-    (not its local index into its own groups list). Without ``joined`` the
-    behaviour is unchanged.
+    and the comparable-group rule still applies across records: cells match
+    on their group label (not a local index), a cell with no label matches
+    only itself, and the protocol is chosen across the columns, not per
+    column. Without ``joined`` the behaviour is unchanged.
     """
     if not columns:
         return [], []
     if joined:
-        collapsed = _joined_columns(columns, benchmarks, joined)
-        shared = sorted(
-            key
-            for key in collapsed[0]
-            if all(key in column for column in collapsed)
-            and len(
-                {
-                    _joined_group_label(
-                        collapsed[i][key][0],
-                        (groups or [{}] * len(columns))[i].get(collapsed[i][key][0]),
-                        benchmarks,
-                    )
-                    for i in range(len(columns))
-                }
-            )
-            == 1
-        )
+        candidates = _joined_candidates(columns, benchmarks, groups or [{}] * len(columns), joined)
+        # One protocol per joined benchmark, chosen across the columns: the
+        # first token (in string order) every column can score, so a column's
+        # first record by key order cannot hide a comparable pair (#1195).
+        chosen: dict[str, dict[str, str]] = {}
+        for key in sorted(candidates[0]):
+            common = set(candidates[0][key])
+            for column in candidates[1:]:
+                common &= set(column.get(key) or {})
+            if common:
+                chosen[key] = min(common)
+        shared = sorted(chosen)
         if not shared:
             return [None] * len(columns), []
         means: list[float | None] = []
-        for column in collapsed:
+        for column in candidates:
             total = 0.0
             for key in shared:
-                record_key, value = column[key]
+                record_key, value = column[key][chosen[key]]
                 total += average_value(value, benchmarks[record_key])
             means.append(round_tenth(total / len(shared)))
         return means, shared

@@ -6849,34 +6849,51 @@ function modelSharedAverage(columns, benchmarks, joined) {
   if (!columns.length) return { means: [], shared: [] };
   if (joined) {
     // Joined keys (#904): columns scoring different records of one reviewed
-    // equivalent group share that benchmark. Each column contributes the
-    // first averageable record of the group in sorted key order; the join
-    // counts shared benchmarks, it does not merge scores across records.
-    // `joined` is a Map (or plain object) from record key to group id.
+    // equivalent group share that benchmark. The join counts shared
+    // benchmarks, it does not merge scores across records. `joined` is a Map
+    // (or plain object) from record key to group id.
     // A cell's `group` is only an index into its own record's
     // `benchmark.groups` list, so index 0 can mean `cot` on one record and
-    // `plain` on another; resolve it to the per-record label before
-    // comparing across joined records.
+    // `plain` on another: cells match on a token built from the label (a
+    // record with one protocol carries it as `benchmark.group`). A cell with
+    // no label matches only the same record's cells of the same index, since
+    // a null group never joins another null (#1195).
     const groupOf = (key) => (joined instanceof Map ? joined.get(key) : joined[key]) ?? key;
-    const groupLabel = (entry) => benchmarks.get(entry.key)?.groups?.[entry.group] ?? entry.group ?? null;
-    const grouped = columns.map((cells) => {
+    const tokenOf = (key, cell) => {
+      const benchmark = benchmarks.get(key);
+      const label = benchmark?.groups?.[cell.group] ?? benchmark?.group ?? null;
+      return label !== null && label !== "None" ? `L\u0000${label}` : `R\u0000${key}\u0000${cell.group ?? ""}`;
+    };
+    // Per column and joined key: its first averageable record, in sorted key
+    // order, for each token.
+    const candidates = columns.map((cells) => {
       const byJoined = new Map();
       for (const key of [...cells.keys()].sort(compareText)) {
-        const groupKey = groupOf(key);
-        if (byJoined.has(groupKey)) continue;
         const cell = cells.get(key);
         if (modelAverageValue(cell.value, benchmarks.get(key)) === null) continue;
-        byJoined.set(groupKey, { ...cell, key });
+        const groupKey = groupOf(key);
+        if (!byJoined.has(groupKey)) byJoined.set(groupKey, new Map());
+        const byToken = byJoined.get(groupKey);
+        const token = tokenOf(key, cell);
+        if (!byToken.has(token)) byToken.set(token, { ...cell, key });
       }
       return byJoined;
     });
-    const shared = [...grouped[0].keys()]
-      .filter((key) => grouped.every((cells) => cells.has(key) && groupLabel(cells.get(key)) === groupLabel(grouped[0].get(key))))
-      .sort(compareText);
+    // One protocol per joined benchmark, chosen across the columns: the first
+    // token (in string order) every column can score, so a column's first
+    // record by key order cannot hide a comparable pair.
+    const chosen = new Map();
+    for (const key of [...candidates[0].keys()].sort(compareText)) {
+      const common = [...candidates[0].get(key).keys()]
+        .filter((token) => candidates.every((byJoined) => byJoined.get(key)?.has(token)))
+        .sort(compareText);
+      if (common.length) chosen.set(key, common[0]);
+    }
+    const shared = [...chosen.keys()];
     if (!shared.length) return { means: columns.map(() => null), shared };
-    const means = grouped.map((cells) => {
+    const means = candidates.map((byJoined) => {
       const total = shared.reduce((sum, key) => {
-        const entry = cells.get(key);
+        const entry = byJoined.get(key).get(chosen.get(key));
         return sum + modelAverageValue(entry.value, benchmarks.get(entry.key));
       }, 0);
       return Math.round(10 * (total / shared.length)) / 10;
