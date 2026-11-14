@@ -65,7 +65,10 @@ def findings(window: str, snapshot_dir: Path) -> list[str]:
             repos[repo] = entry
     rows = {repo: signals.repos.get(repo) or {} for repo in repos}
     checked = {r: row for r, row in rows.items() if row.get("stars_at_check") is not None}
-    missing = [r for r, row in rows.items() if row.get("unavailable") is not False]
+    # unavailable is True only after the repository endpoint, which follows renames,
+    # returned 404; None means the daily check has not reached that repo yet.
+    gone = [r for r, row in rows.items() if row.get("unavailable") is True]
+    unchecked = [r for r, row in rows.items() if row.get("unavailable") is None]
     retrieved = sorted({row.get("retrieved_at") for row in rows.values() if row})
 
     stars = sorted((row["stars_at_check"] for row in checked.values()), reverse=True)
@@ -93,9 +96,9 @@ def findings(window: str, snapshot_dir: Path) -> list[str]:
     return [
         f"Window {window}: {len(entries)} releases, {len(repos)} distinct GitHub repositories, "
         f"facts retrieved {', '.join(str(d) for d in retrieved if d)}.",
-        f"Repositories with facts: {len(checked)}; not found by search or confirmed gone: "
-        f"{len(missing)} ({len(missing) / len(repos):.1%}, an upper bound until renames "
-        "are ruled out).",
+        f"Repositories with facts: {len(checked)}; gone (404 on the repository endpoint, "
+        f"deleted or made private): {len(gone)} ({len(gone) / len(repos):.1%}); "
+        f"not yet checked: {len(unchecked)}.",
         f"Stars: {_summary(stars)}; top 1% hold {share(0.01):.0%} of all stars, "
         f"top 10% hold {share(0.10):.0%}.",
         f"Repository size: median {statistics.median(sizes):g} KB, "
