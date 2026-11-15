@@ -118,7 +118,7 @@ def test_score_points_carry_recognizable_model_family_marks():
     assert 'r: size.face,\n          class: "score-point-face"' in chart
     assert "const size = frontierPointSizes(offTheLine);" in chart
     assert ".score-point-glyph" in styles
-    assert "stroke: #6ea8dc" in styles.split(".score-point-face", 1)[1][:120]
+    assert "stroke: var(--blue)" in styles.split(".score-point-face", 1)[1][:120]
 
 
 def test_the_reading_gap_is_labelled_rather_than_drawn_through():
@@ -834,7 +834,8 @@ def test_issue_345_a_reading_off_the_line_stays_legible():
 .score-point-dim:focus .score-point-face,
 .score-point-dim.is-selected .score-point-face {""",
     )
-    assert "stroke: #6ea8dc;" in restore
+    face_stroke = _css_rule(styles, ".score-point-face {").split("stroke:", 1)[1].split(";", 1)[0]
+    assert f"stroke:{face_stroke};" in restore
     assert "stroke-opacity: 1;" in restore
 
 
