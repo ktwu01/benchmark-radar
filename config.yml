@@ -540,6 +540,8 @@ sources:
       - OpenMOSS/VLABench
       - EmbodiedBench/EmbodiedBench
       - thu-coai/SafetyBench
+      # Issue #1240: AI Professions publishes each results round as a release.
+      - aiprofessions/prompt-benchmark
       # First-party model and agent repositories from Alina's feed audit.
       # Their releases enter the radar only when the normal benchmark/data
       # taxonomy finds relevant source text; ordinary model releases drop out.
