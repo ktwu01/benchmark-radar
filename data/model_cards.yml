@@ -2081,6 +2081,21 @@ benchmarks:
       task rewards. The table does not state model run dates, harnesses or
       execution budgets.
 
+  - id: yapbench
+    name: YapBench
+    aliases: ["YapBench", "Do Chatbot LLMs Talk Too Much? The YapBench Benchmark"]
+    domain: general
+    url: https://arxiv.org/abs/2601.00624
+    released: 2026-01-02
+    caveat: >-
+      Lower is better. YapScore counts characters a response adds beyond a
+      curated minimal-sufficient answer, and YapIndex is the equal-weight mean
+      of the three category medians (arXiv:2601.00624). It measures verbosity
+      on brevity-ideal prompts, not correctness: a shorter answer can be a
+      worse one. The paper evaluates 76 configurations on version 0.1, and the
+      live leaderboard updates separately, so prompt-set version and reasoning
+      mode change the number.
+
 # Model cards, technical reports and release posts.
 #
 # `organization` is the publisher of the document. `benchmarks` is the set of
