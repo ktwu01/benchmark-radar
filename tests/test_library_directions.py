@@ -138,6 +138,40 @@ def test_reviews_fill_gaps_but_never_override_an_exact_join():
     assert directions["model-reports:aime"]["basis"] == "reviewer_asserted"
 
 
+def test_an_entry_review_is_credited_to_its_own_reviewer():
+    records = [
+        {"key": "model-reports:aime", "source": "model_reports"},
+        {"key": "model-reports:new", "source": "model_reports"},
+    ]
+    reviews = {
+        "reviewed_by": "reviewer",
+        "reviewed_at": "2026-10-15",
+        "directions": {
+            "model-reports:aime": "math",
+            "model-reports:new": {
+                "primary": "science",
+                "reviewed_by": "other",
+                "reviewed_at": "2026-11-15",
+            },
+        },
+    }
+    directions = assign_library_directions(records, document({}), reviews=reviews)
+    assert directions["model-reports:aime"]["join"] == "review:reviewer:2026-10-15"
+    assert directions["model-reports:new"]["primary"] == "science"
+    assert directions["model-reports:new"]["join"] == "review:other:2026-11-15"
+
+
+def test_an_entry_review_without_its_reviewer_fails_loudly():
+    records = [{"key": "model-reports:new", "source": "model_reports"}]
+    reviews = {
+        "reviewed_by": "reviewer",
+        "reviewed_at": "2026-10-15",
+        "directions": {"model-reports:new": {"primary": "science"}},
+    }
+    with pytest.raises(LibraryDirectionError):
+        assign_library_directions(records, document({}), reviews=reviews)
+
+
 @pytest.mark.parametrize(
     ("key", "primary"), [("model-reports:gone", "math"), ("model-reports:aime", "not-a-direction")]
 )
@@ -155,7 +189,11 @@ def test_committed_inputs_load_and_reference_the_taxonomy():
     assert exported["source"]["commit"]
     categories = {category["id"] for category in exported["taxonomy"]["categories"]}
     assert categories
-    assert set(reviews["directions"].values()) <= categories
+    primaries = {
+        entry["primary"] if isinstance(entry, dict) else entry
+        for entry in reviews["directions"].values()
+    }
+    assert primaries <= categories
 
 
 def test_export_keeps_only_assigned_records_with_their_exact_anchors():

@@ -13,6 +13,10 @@
 # one benchmark at a time; a registry `domain` is not mapped mechanically,
 # because "multimodal", "agent" and "reasoning" each span several directions.
 # An exact join always wins over an entry here, so this file only fills gaps.
+#
+# `reviewed_by` and `reviewed_at` below credit every plain entry. An entry
+# reviewed by someone else is a mapping that names its own reviewer, so the
+# published join never credits a person with a review they did not do.
 schema_version: 1
 reviewed_by: 14H034160212
 reviewed_at: 2026-10-15
@@ -126,6 +130,11 @@ directions:
   model-reports:vibench: agentic-coding
   model-reports:video_mme: video-understanding
   model-reports:widesearch: deep-research
+  # Issue #1267: everyday-work prompts from ten professions.
+  model-reports:ai_professions_prompt_benchmark:
+    primary: professional-work
+    reviewed_by: ktwu01
+    reviewed_at: 2026-11-15
 
   # Artificial Analysis snapshot
   artificial-analysis:aa-analystagent: professional-work

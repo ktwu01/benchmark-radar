@@ -215,7 +215,21 @@ def assign_library_directions(
         # skip would leave a reviewed record unclassified with no signal.
         known = {record["key"] for record in records}
         categories = {category["id"] for category in document["taxonomy"]["categories"]}
-        for key, primary in (reviews.get("directions") or {}).items():
+        for key, entry in (reviews.get("directions") or {}).items():
+            # An entry that names its own reviewer is credited to that person;
+            # crediting it to the file-level reviewer would publish a review
+            # they never did.
+            if isinstance(entry, dict):
+                primary = entry.get("primary")
+                reviewed_by = entry.get("reviewed_by")
+                reviewed_at = entry.get("reviewed_at")
+                if not reviewed_by or not reviewed_at:
+                    raise LibraryDirectionError(
+                        f"direction review for {key!r} needs reviewed_by and reviewed_at"
+                    )
+            else:
+                primary = entry
+                reviewed_by, reviewed_at = reviews["reviewed_by"], reviews["reviewed_at"]
             if key not in known:
                 raise LibraryDirectionError(f"direction review names unknown record {key!r}")
             if primary not in categories:
@@ -226,7 +240,7 @@ def assign_library_directions(
                     "primary": primary,
                     "categories": [primary],
                     "basis": "reviewer_asserted",
-                    "join": f"review:{reviews['reviewed_by']}:{reviews['reviewed_at']}",
+                    "join": f"review:{reviewed_by}:{reviewed_at}",
                     "source_record": None,
                 },
             )
