@@ -587,6 +587,10 @@ benchmarks:
     metric: hidden_test_pass_rate
     direction: higher_is_better
     unit: percent
+  - benchmark_id: nafbench
+    metric: joint_accuracy
+    direction: higher_is_better
+    unit: percent
 
 results:
   # Brain-to-Text '24's official challenge summary names the top three final
@@ -7704,5 +7708,69 @@ results:
     source_id: websitebench_leaderboard_2026_10_17
     reported_at: 2026-10-17
     value: 7.3
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # Issue #1249: NAF-Bench leaderboard at revision 83ede91. Model names are
+  # the leaderboard's team labels; the three that do not name an exact
+  # checkpoint (deepseek-r1-32b, qwen2.5-coder-32b, llama3-8b) are kept as
+  # printed. The constant-baseline row (22.1) is not a model and is not filed.
+  - benchmark_id: nafbench
+    instrument: nafbench_hard_hidden_385
+    protocol: "Hidden hard test split (385 prompts over 77 programs; 3-SAT instances cnf_n14 and cnf_n22 excluded); JOINT accuracy, a program counts only if all four specified negation readings are correct; predictions scored server-side against hidden gold; decoding settings not stated on the leaderboard"
+    model: Claude Sonnet 5
+    organization: Anthropic
+    source_id: nafbench_leaderboard_83ede91
+    reported_at: 2026-09-14
+    value: 89.6
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: nafbench
+    instrument: nafbench_hard_hidden_385
+    protocol: "Hidden hard test split (385 prompts over 77 programs; 3-SAT instances cnf_n14 and cnf_n22 excluded); JOINT accuracy, a program counts only if all four specified negation readings are correct; predictions scored server-side against hidden gold; decoding settings not stated on the leaderboard"
+    model: Gemma 4 (31B)
+    organization: Google
+    source_id: nafbench_leaderboard_83ede91
+    reported_at: 2026-09-14
+    value: 75.3
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: nafbench
+    instrument: nafbench_hard_hidden_385
+    protocol: "Hidden hard test split (385 prompts over 77 programs; 3-SAT instances cnf_n14 and cnf_n22 excluded); JOINT accuracy, a program counts only if all four specified negation readings are correct; predictions scored server-side against hidden gold; decoding settings not stated on the leaderboard"
+    model: o4-mini
+    organization: OpenAI
+    source_id: nafbench_leaderboard_83ede91
+    reported_at: 2026-09-14
+    value: 74.0
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: nafbench
+    instrument: nafbench_hard_hidden_385
+    protocol: "Hidden hard test split (385 prompts over 77 programs; 3-SAT instances cnf_n14 and cnf_n22 excluded); JOINT accuracy, a program counts only if all four specified negation readings are correct; predictions scored server-side against hidden gold; decoding settings not stated on the leaderboard"
+    model: deepseek-r1-32b
+    organization: DeepSeek
+    source_id: nafbench_leaderboard_83ede91
+    reported_at: 2026-09-14
+    value: 41.6
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: nafbench
+    instrument: nafbench_hard_hidden_385
+    protocol: "Hidden hard test split (385 prompts over 77 programs; 3-SAT instances cnf_n14 and cnf_n22 excluded); JOINT accuracy, a program counts only if all four specified negation readings are correct; predictions scored server-side against hidden gold; decoding settings not stated on the leaderboard"
+    model: qwen2.5-coder-32b
+    organization: Qwen
+    source_id: nafbench_leaderboard_83ede91
+    reported_at: 2026-09-14
+    value: 31.2
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: nafbench
+    instrument: nafbench_hard_hidden_385
+    protocol: "Hidden hard test split (385 prompts over 77 programs; 3-SAT instances cnf_n14 and cnf_n22 excluded); JOINT accuracy, a program counts only if all four specified negation readings are correct; predictions scored server-side against hidden gold; decoding settings not stated on the leaderboard"
+    model: llama3-8b
+    organization: Meta
+    source_id: nafbench_leaderboard_83ede91
+    reported_at: 2026-09-14
+    value: 2.6
     read_from: html_text
     measurement_kind: benchmark_publisher_run
