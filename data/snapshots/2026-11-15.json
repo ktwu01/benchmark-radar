@@ -98295,5 +98295,107 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [],
+        "authors": [
+          "Anmol Rajpoot"
+        ],
+        "blurb": "AgentShield Multi-Turn Agent Attack Benchmark is a new release that tests whether security frameworks prevent unauthorized tool execution across realistic, multi-turn adversarial interactions.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-15T09:46:57+00:00",
+        "source": "Hugging Face",
+        "title": "Anmol2507/agentshield-attack-benchmark",
+        "url": "https://huggingface.co/datasets/Anmol2507/agentshield-attack-benchmark"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Zhi Li",
+          "Changming Li",
+          "Siavash Shams",
+          "Han Wang",
+          "Qingyi Yang",
+          "Yuanhang Liu",
+          "Taiqi Lian",
+          "Xin Lan",
+          "Shunan Zhou",
+          "Binlan Zhang",
+          "Siddik Barbhuiya",
+          "Songkun Yan",
+          "Bing Li",
+          "Jinlong Hu",
+          "Yaji Wang",
+          "Zhenjiang Wu",
+          "Mofan Zhang",
+          "Kaihao Long",
+          "Jingzhi Chen",
+          "Yuan-Heng Wang"
+        ],
+        "blurb": "HydroTuring is a new black-box benchmark with 37 probes for mass, energy, and momentum conservation in hydrologic models.",
+        "categories": [
+          "benchmark",
+          "evaluation"
+        ],
+        "published_at": "2026-11-14T00:00:00+00:00",
+        "source": "Crossref",
+        "title": "HydroTuring: A physics probe benchmark testing mass, energy and momentum conservation in hydrologic models",
+        "url": "https://doi.org/10.66977/xsci.2611.0029"
+      },
+      {
+        "affiliations": [
+          "Iowa State University"
+        ],
+        "authors": [
+          "Pranava Sai Maganti",
+          "Meghasyam Peddireddy",
+          "Md. Muzakker Hossain",
+          "Kaining Gao",
+          "Farhan Ahmed",
+          "Ali Jannesari"
+        ],
+        "blurb": "MLIRBench is a new benchmark for reasoning about Multi-Level Intermediate Representation, a compiler format used to express and transform programs.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-15T03:34:34+00:00",
+        "source": "DataCite",
+        "title": "MLIRBench - A Benchmark and Dataset for Compiler and Hardware-Aware Reasoning",
+        "url": "https://doi.org/10.5281/zenodo.24237192"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Adnan Agha"
+        ],
+        "blurb": "DiabCite-700 is a new, temporally stratified benchmark of citation fidelity built from 700 citation-anchored clinical claims across 35 diabetes publications.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-14T15:03:01+00:00",
+        "source": "DataCite",
+        "title": "DiabCite-700: A Temporally-Stratified Benchmark of Citation Fidelity Across Fast, Pro, and Thinking Tiers of Four Large Language Model Ecosystems in Diabetes Literature",
+        "url": "https://doi.org/10.17605/osf.io/e9r3x"
+      }
+    ],
+    "date": "2026-11-15",
+    "schema_version": 1,
+    "top": [
+      "https://huggingface.co/datasets/Anmol2507/agentshield-attack-benchmark",
+      "https://doi.org/10.66977/xsci.2611.0029",
+      "https://doi.org/10.5281/zenodo.24237192"
+    ]
+  },
   "since": "2026-11-13T12:21:32.485556+00:00"
 }
