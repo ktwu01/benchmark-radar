@@ -2105,6 +2105,7 @@ benchmarks:
       worse one. The paper evaluates 76 configurations on version 0.1, and the
       live leaderboard updates separately, so prompt-set version and reasoning
       mode change the number.
+
   - id: ai_professions_prompt_benchmark
     name: AI Professions Prompt Benchmark
     aliases: ["AI Professions Prompt Benchmark", "aiprofessions/prompt-benchmark", "AI Professions prompt benchmark: profession prompts, hash-locked rubrics and graded LLM runs"]
