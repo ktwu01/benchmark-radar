@@ -2081,6 +2081,20 @@ benchmarks:
       task rewards. The table does not state model run dates, harnesses or
       execution budgets.
 
+  - id: ai_professions_prompt_benchmark
+    name: AI Professions Prompt Benchmark
+    aliases: ["AI Professions Prompt Benchmark", "aiprofessions/prompt-benchmark", "AI Professions prompt benchmark: profession prompts, hash-locked rubrics and graded LLM runs"]
+    domain: professional
+    url: https://github.com/aiprofessions/prompt-benchmark
+    released: 2026-10-22
+    caveat: >-
+      100 prompts with fictional inputs, five pass/fail criteria each, scored
+      as the share of criteria met over three plain-chat runs without tools.
+      Claude and Gemini outputs are graded by gpt-6-astra and gpt-6-astra
+      outputs by claude-opus-5-5; the README warns the two judges differ in
+      strictness, so only models graded by the same judge compare directly.
+      Results grow in rounds, so the model set depends on the release read.
+
 # Model cards, technical reports and release posts.
 #
 # `organization` is the publisher of the document. `benchmarks` is the set of
