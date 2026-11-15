@@ -627,15 +627,6 @@ def test_cite_card_lists_the_media_coverage_in_both_renderers(tmp_path):
     assert "citeMedia()," in script
 
 
-def test_cite_credit_strings_are_translated():
-    """Nothing else catches an untranslated t() key: it falls back to English
-    silently, so the zh reader sees a stray English sentence.
-    """
-    script = (SITE / "assets" / "app.js").read_text(encoding="utf-8")
-    assert '"Benchmark score data comes from lab model reports and from":' in script
-    assert "benchmark 分数数据来自各家实验室的模型报告，以及" in script
-
-
 def test_no_page_ships_a_second_url_for_itself(tmp_path):
     _write(tmp_path, _dashboard())
     for path in ("leaderboard", "saturation", "trends", "explore", "cli", "cite", "rubric"):

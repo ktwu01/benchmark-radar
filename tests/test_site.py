@@ -490,65 +490,6 @@ def test_every_homepage_image_carries_an_alt_attribute():
     # source would also block a future accessible image.
 
 
-def test_language_toggle_and_contact_labels_are_translated():
-    html = Path("site/index.html").read_text(encoding="utf-8")
-    script = Path("site/assets/app.js").read_text(encoding="utf-8")
-
-    assert 'data-i18n-title="Switch to Chinese (中文)"' in html
-    for key in (
-        '"Site utilities": "网站工具"',
-        '"Switch to Chinese (中文)": "切换到中文"',
-        'Contact: "联系作者"',
-    ):
-        assert key in script
-
-
-def test_issue_316_benchmark_detail_labels_are_translated():
-    # The crawled benchmark detail panel (identity / openness / size) rendered
-    # its headings, field labels and "not established" placeholders through t(),
-    # but only "Released" had a zh entry -- so under Chinese the whole panel
-    # except that one line fell back to English. Every label the panel draws
-    # must have a zh translation.
-    script = Path("site/assets/app.js").read_text(encoding="utf-8")
-
-    for key in (
-        'Identity: "基本信息"',
-        'Publisher: "发布方"',
-        'Modality: "模态"',
-        'Openness: "开放性"',
-        'Size: "规模"',
-        '"Code licence": "代码许可证"',
-        '"Data licence": "数据许可证"',
-        '"not established": "尚未确定"',
-        '"description not established": "简介尚未确定"',
-        '"publisher not established": "发布方尚未确定"',
-        '"release date not established": "发布日期尚未确定"',
-        '"modality not established": "模态尚未确定"',
-        '"openness not established": "开放性尚未确定"',
-        '"size not established": "规模尚未确定"',
-        '"No openness evidence recorded.": "未记录开放性证据。"',
-        'open: "开放"',
-        'restricted: "受限"',
-        'Paper: "论文"',
-        '"Code repository": "代码仓库"',
-        'Dataset: "数据集"',
-        '"Project site": "项目站点"',
-        'maintainer: "维护者"',
-        '"published the hub card": "发布了 Hub 卡片"',
-        '"organization behind the paper": "论文背后的机构"',
-        '"counts the": "统计的是"',
-        '"what it counts is unclear": "统计对象不明"',
-        '"evidence ↗": "证据 ↗"',
-    ):
-        assert key in script, f"missing zh translation for {key!r}"
-
-    # The longest placeholder wraps onto its own line in the source, so assert
-    # the value rather than a single-line "key": "value" pair.
-    assert "尚未确定论文、代码仓库、数据集或站点链接。" in script
-    # The #262 inheritance note also wraps onto its own line.
-    assert "人工核对确认它指向同一个benchmark" in script
-
-
 def test_language_toggle_click_handler_is_wired():
     script = Path("site/assets/app.js").read_text(encoding="utf-8")
 
@@ -2652,23 +2593,6 @@ def test_source_mix_separates_the_three_reasons_a_source_shows_zero():
     assert "if (found.length || !gaps.length) {" in script
 
 
-def test_every_new_source_gap_string_has_a_chinese_rendering():
-    """Issue #260 strings are user-facing, so the zh table must carry them."""
-    script = Path("site/assets/app.js").read_text(encoding="utf-8")
-    zh = script.split("  zh: {", 1)[1]
-    for phrase in (
-        "On {date} these sources found nothing at all: {sources}.",
-        "On {date} these sources could not be reached: {sources}.",
-        "On {date} these sources returned something, but none of it scored "
-        "high enough to be listed: {sources}.",
-        "A source that stays at zero for several days is usually broken, not quiet.",
-        "This source was checked and found nothing at all on this day.",
-        "This source could not be reached on this day.",
-        "This source returned something, but none of it scored high enough to be listed.",
-    ):
-        assert f'"{phrase}":' in zh, phrase
-
-
 def test_jargon_audit_reads_only_user_facing_text():
     """The weekly jargon audit (issue #241) must not flag code identifiers.
 
@@ -3266,24 +3190,37 @@ def test_signup_panel_opens_only_after_an_address_is_typed():
     assert "@supports not selector(:has(*))" in styles
 
 
-def test_footer_and_signup_strings_are_translated():
+def test_every_interface_string_has_a_chinese_entry():
+    """An untranslated key falls back to English silently, so a zh reader
+    sees a mixed page and no other check notices (#1253).
+
+    Reads every literal t("...") and sentence("...") key and every
+    SOURCE_GAP_REASONS value in app.js, plus every data-i18n* attribute in
+    index.html. Escapes are decoded on both sides, so "\\u2026" in a key
+    matches "…" in the table.
+    """
+    import json
+
     app_js = Path("site/assets/app.js").read_text(encoding="utf-8")
-    table = app_js.split("const I18N = {", 1)[1]
-    for key in (
-        "Get benchmark updates by email",
-        "email.signup.consent",
-        "How often?",
-        "Weekly",
-        "Daily",
-        "the latest each day",
-        "every Monday",
-        "Email address",
-        "Subscribe",
-        "Contribute",
-        "Report a mistake",
-        "In the media",
-    ):
-        assert f'"{key}":' in table or f"    {key}:" in table, key
+    html = Path("site/index.html").read_text(encoding="utf-8")
+    table = app_js.split("const I18N = {", 1)[1].split("\nconst state = {", 1)[0]
+    literal = r'"((?:[^"\\]|\\.)*)"'
+
+    def decode(text: str) -> str:
+        return json.loads(f'"{text}"')
+
+    zh = {
+        decode(quoted) if quoted else bare
+        for quoted, bare in re.findall(
+            r"^ {4}(?:" + literal + r"|([A-Za-z_$][\w$]*))\s*:", table, re.M
+        )
+    }
+    used = {decode(key) for key in re.findall(r"\b(?:t|sentence)\(\s*" + literal, app_js)}
+    reasons = app_js.split("const SOURCE_GAP_REASONS = {", 1)[1].split("};", 1)[0]
+    used |= {decode(value) for value in re.findall(r":\s*" + literal, reasons)}
+    used |= set(re.findall(r'\bdata-i18n(?:-[a-z]+)?="([^"]*)"', html))
+    assert len(used) > 500
+    assert sorted(used - zh) == []
 
 
 def test_the_translation_table_has_no_repeated_keys():
