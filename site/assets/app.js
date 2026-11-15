@@ -10286,8 +10286,18 @@ function renderAdoptionFrontier(board) {
     });
     return;
   }
-  const record = state.benchmarkIndex.find((row) => row.slug === state.lfrontier);
+  // Catalog slugs are lowercase, so a hand-typed "Clawbench" names the same
+  // record as "clawbench" (#1236). Accept a case-insensitive match only when it
+  // is unique, so a link never paints a different benchmark.
+  const wanted = state.lfrontier.toLowerCase();
+  const folded = state.benchmarkIndex.filter((row) => row.slug.toLowerCase() === wanted);
+  const record =
+    state.benchmarkIndex.find((row) => row.slug === state.lfrontier) ||
+    (folded.length === 1 ? folded[0] : null);
   if (record) {
+    // The shard loader and the selected-row markers compare against the
+    // canonical slug.
+    state.lfrontier = record.slug;
     renderCatalogBenchmark(board, record);
     return;
   }
