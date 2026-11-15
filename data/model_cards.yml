@@ -2091,6 +2091,20 @@ benchmarks:
       task rewards. The table does not state model run dates, harnesses or
       execution budgets.
 
+  - id: yapbench
+    name: YapBench
+    aliases: ["YapBench", "Do Chatbot LLMs Talk Too Much? The YapBench Benchmark"]
+    domain: general
+    url: https://arxiv.org/abs/2601.00624
+    released: 2026-01-02
+    caveat: >-
+      Lower is better. YapScore counts characters a response adds beyond a
+      curated minimal-sufficient answer, and YapIndex is the equal-weight mean
+      of the three category medians (arXiv:2601.00624). It measures verbosity
+      on brevity-ideal prompts, not correctness: a shorter answer can be a
+      worse one. The paper evaluates 76 configurations on version 0.1, and the
+      live leaderboard updates separately, so prompt-set version and reasoning
+      mode change the number.
   - id: ai_professions_prompt_benchmark
     name: AI Professions Prompt Benchmark
     aliases: ["AI Professions Prompt Benchmark", "aiprofessions/prompt-benchmark", "AI Professions prompt benchmark: profession prompts, hash-locked rubrics and graded LLM runs"]
