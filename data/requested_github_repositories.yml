@@ -73,6 +73,9 @@ repositories:
   - full_name: hitz-zentroa/This-is-not-a-Dataset
     issue: https://github.com/ktwu01/benchmark-radar/issues/832
     requested_at: 2026-11-06
+  - full_name: WeightLang/benchmark
+    issue: https://github.com/ktwu01/benchmark-radar/issues/1215
+    requested_at: 2026-11-15
   - full_name: aiprofessions/prompt-benchmark
     issue: https://github.com/ktwu01/benchmark-radar/issues/1267
     requested_at: 2026-11-15

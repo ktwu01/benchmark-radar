@@ -166,6 +166,16 @@ source_documents:
     published: 2026-07-20
     retrieved_at: 2026-11-12
 
+  - id: nafbench_leaderboard_83ede91
+    name: NAF-Bench leaderboard (hidden hard test, revision 83ede91)
+    publisher: NAF-Bench authors
+    document_type: benchmark_leaderboard
+    url: https://github.com/14H034160212/NAFBench/blob/83ede91a98ad93382376335e76847b7763bc7a19/leaderboard/LEADERBOARD.md
+    benchmarks: [nafbench]
+    # Commit date of the pinned leaderboard revision.
+    published: 2026-09-14
+    retrieved_at: 2026-11-15
+
   - id: websitebench_leaderboard_2026_10_17
     name: WebsiteBench official leaderboard (2026-10-17 cohort)
     publisher: TIGER-AI-Lab
