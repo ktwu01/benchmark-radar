@@ -217,6 +217,11 @@ def test_deploy_and_ci_build_the_downloadable_release_after_its_inputs() -> None
         < pages.index("Remove CLI archive from Pages artifact")
         < pages.index("Upload Pages artifact")
     )
+    assert (
+        pages.index("Upload Hugging Face dataset release")
+        < pages.index("Remove Hugging Face export from Pages artifact")
+        < pages.index("Upload Pages artifact")
+    )
 
 
 @pytest.mark.parametrize(
