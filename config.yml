@@ -169,6 +169,11 @@ watchlist:
   - name: selenashe/ScoNe
     aliases: [selenashe/ScoNe]
     note: ScoNe — Scoped Negation benchmark for negation reasoning (issue #832).
+  # Issue #1215: author submission of an early-stage repository. Name and
+  # alias are the exact owner/name; "benchmark" alone would pin everything.
+  - name: WeightLang/benchmark
+    aliases: [WeightLang/benchmark]
+    note: Weight Initialization Benchmark v0.1.0 — agents write architecture-aware weight initializers, compared with random-init controls; 96 train and 96 test examples per task, no LLM agent evaluated yet (issue #1215).
 
 sources:
   arxiv:
