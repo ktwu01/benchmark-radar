@@ -4339,3 +4339,13 @@ def test_openaire_real_response_does_not_fabricate_usage_counts(monkeypatch):
     assert items[0].metrics == {"citations": 4.0}
     score_item(items[0], {"benchmark": ["benchmark"]}, datetime(2026, 10, 11, tzinfo=UTC))
     assert items[0].to_dict()["metrics"] == {"citations": 4.0}
+
+
+def test_release_budget_reaches_every_allowlisted_repository():
+    """fetch_github_releases stops at max_requests in allowlist order, so a
+    repository past the budget is never fetched and nothing reports it (#1240).
+    """
+    config = yaml.safe_load(Path("config.yml").read_text(encoding="utf-8"))
+    releases = config["sources"]["github_releases"]
+    pages = releases["max_pages_per_repository"]
+    assert releases["max_requests"] >= len(releases["repositories"]) * pages
