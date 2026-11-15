@@ -987,6 +987,17 @@ def test_an_unresolved_permalink_reports_the_missing_record_without_substitution
     assert "writeUrl(" not in unresolved
 
 
+def test_a_permalink_resolves_its_slug_case_insensitively_only_when_unique():
+    """lfrontier=Clawbench reported a missing record while clawbench loaded (#1236)."""
+    script = source("site/assets/app.js")
+    dispatch = script.split("function renderAdoptionFrontier(board)", 1)[1].split("\n// ---", 1)[0]
+    lookup = dispatch.split("if (record)", 1)[0]
+    assert "row.slug.toLowerCase() === wanted" in lookup
+    assert "folded.length === 1 ? folded[0] : null" in lookup
+    resolved = dispatch.split("if (record)", 1)[1].split("return;", 1)[0]
+    assert "state.lfrontier = record.slug;" in resolved
+
+
 def test_document_ranking_keeps_a_compact_heading_and_its_note_below():
     """Show the ranked evidence first, with its explanation below the figure."""
     styles = source("site/assets/styles.css")
