@@ -169,6 +169,12 @@ watchlist:
   - name: selenashe/ScoNe
     aliases: [selenashe/ScoNe]
     note: ScoNe — Scoped Negation benchmark for negation reasoning (issue #832).
+  # Issue #1267: the Hugging Face dataset and Zenodo record are already in the
+  # corpus. The exact owner/name alias matches the GitHub repository and the
+  # Hugging Face dataset id, so a new results round on either is pinned.
+  - name: AI Professions Prompt Benchmark
+    aliases: [aiprofessions/prompt-benchmark]
+    note: 100 everyday-work prompts from 10 professions in four languages; scores are the share of five pre-locked pass/fail criteria met, graded by a cross-family LLM judge (issue #1267).
 
 sources:
   arxiv:
