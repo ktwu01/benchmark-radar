@@ -7710,10 +7710,13 @@ results:
     value: 7.3
     read_from: html_text
     measurement_kind: benchmark_publisher_run
-  # Issue #1249: NAF-Bench leaderboard at revision 83ede91. Model names are
-  # the leaderboard's team labels; the three that do not name an exact
-  # checkpoint (deepseek-r1-32b, qwen2.5-coder-32b, llama3-8b) are kept as
-  # printed. The constant-baseline row (22.1) is not a model and is not filed.
+  # Issue #1249: NAF-Bench leaderboard at revision 83ede91. The paper
+  # (arXiv:2609.27517v1, Implementation and Table 8) says the authors ran these
+  # baselines and served the open models locally with ollama v0.5.7 at
+  # temperature 0, single pass; the repository's answer files are named by
+  # ollama tag. Each tag resolves on ollama.com/library to one checkpoint and
+  # quantization, recorded in the protocol because quantization moves scores.
+  # The constant-baseline row (22.1) is not a model and is not filed.
   - benchmark_id: nafbench
     instrument: nafbench_hard_hidden_385
     protocol: "Hidden hard test split (385 prompts over 77 programs; 3-SAT instances cnf_n14 and cnf_n22 excluded); JOINT accuracy, a program counts only if all four specified negation readings are correct; predictions scored server-side against hidden gold; decoding settings not stated on the leaderboard"
@@ -7746,8 +7749,8 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: nafbench
     instrument: nafbench_hard_hidden_385
-    protocol: "Hidden hard test split (385 prompts over 77 programs; 3-SAT instances cnf_n14 and cnf_n22 excluded); JOINT accuracy, a program counts only if all four specified negation readings are correct; predictions scored server-side against hidden gold; decoding settings not stated on the leaderboard"
-    model: deepseek-r1-32b
+    protocol: "Hidden hard test split (385 prompts over 77 programs; 3-SAT instances cnf_n14 and cnf_n22 excluded); JOINT accuracy, a program counts only if all four specified negation readings are correct; predictions scored server-side against hidden gold; served locally with ollama v0.5.7 (tag deepseek-r1:32b, Q4_K_M), temperature 0, single pass"
+    model: DeepSeek R1 Distill Qwen 32B
     organization: DeepSeek
     source_id: nafbench_leaderboard_83ede91
     reported_at: 2026-09-14
@@ -7756,8 +7759,8 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: nafbench
     instrument: nafbench_hard_hidden_385
-    protocol: "Hidden hard test split (385 prompts over 77 programs; 3-SAT instances cnf_n14 and cnf_n22 excluded); JOINT accuracy, a program counts only if all four specified negation readings are correct; predictions scored server-side against hidden gold; decoding settings not stated on the leaderboard"
-    model: qwen2.5-coder-32b
+    protocol: "Hidden hard test split (385 prompts over 77 programs; 3-SAT instances cnf_n14 and cnf_n22 excluded); JOINT accuracy, a program counts only if all four specified negation readings are correct; predictions scored server-side against hidden gold; served locally with ollama v0.5.7 (tag qwen2.5-coder:32b, Q4_K_M), temperature 0, single pass"
+    model: Qwen2.5-Coder-32B-Instruct
     organization: Qwen
     source_id: nafbench_leaderboard_83ede91
     reported_at: 2026-09-14
@@ -7766,8 +7769,8 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: nafbench
     instrument: nafbench_hard_hidden_385
-    protocol: "Hidden hard test split (385 prompts over 77 programs; 3-SAT instances cnf_n14 and cnf_n22 excluded); JOINT accuracy, a program counts only if all four specified negation readings are correct; predictions scored server-side against hidden gold; decoding settings not stated on the leaderboard"
-    model: llama3-8b
+    protocol: "Hidden hard test split (385 prompts over 77 programs; 3-SAT instances cnf_n14 and cnf_n22 excluded); JOINT accuracy, a program counts only if all four specified negation readings are correct; predictions scored server-side against hidden gold; served locally with ollama v0.5.7 (tag llama3:8b, Q4_0), temperature 0, single pass"
+    model: Llama 3 Instruct 8B
     organization: Meta
     source_id: nafbench_leaderboard_83ede91
     reported_at: 2026-09-14

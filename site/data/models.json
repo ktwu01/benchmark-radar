@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
-  "model_count": 1001,
+  "model_count": 998,
   "source_counts": {
     "artificial_analysis": 595,
     "llm_stats": 339,
-    "model_reports": 182
+    "model_reports": 181
   },
-  "multiple_sources": 109,
+  "multiple_sources": 110,
   "organizations": [
     "AI21 Labs",
     "AI9Stars",
@@ -1975,17 +1975,6 @@
       }
     },
     {
-      "key": "deepseek-deepseek-r1-32b",
-      "model": "deepseek-r1-32b",
-      "organization": "DeepSeek",
-      "provenance_sources": [
-        "model_reports"
-      ],
-      "source_counts": {
-        "model_reports": 1
-      }
-    },
-    {
       "key": "deepseek-deepseek-r1-distill-llama-70b",
       "model": "DeepSeek R1 Distill Llama 70B",
       "organization": "DeepSeek",
@@ -2054,11 +2043,13 @@
       "organization": "DeepSeek",
       "provenance_sources": [
         "artificial_analysis",
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
         "artificial_analysis": 7,
-        "llm_stats": 4
+        "llm_stats": 4,
+        "model_reports": 1
       }
     },
     {
@@ -4726,10 +4717,12 @@
       "model": "Llama 3 Instruct 8B",
       "organization": "Meta",
       "provenance_sources": [
-        "artificial_analysis"
+        "artificial_analysis",
+        "model_reports"
       ],
       "source_counts": {
-        "artificial_analysis": 11
+        "artificial_analysis": 11,
+        "model_reports": 1
       }
     },
     {
@@ -4767,17 +4760,6 @@
       "source_counts": {
         "artificial_analysis": 17,
         "llm_stats": 12
-      }
-    },
-    {
-      "key": "meta-llama3-8b",
-      "model": "llama3-8b",
-      "organization": "Meta",
-      "provenance_sources": [
-        "model_reports"
-      ],
-      "source_counts": {
-        "model_reports": 1
       }
     },
     {
@@ -8429,17 +8411,6 @@
       }
     },
     {
-      "key": "qwen-qwen2-5-coder-32b",
-      "model": "qwen2.5-coder-32b",
-      "organization": "Qwen",
-      "provenance_sources": [
-        "model_reports"
-      ],
-      "source_counts": {
-        "model_reports": 1
-      }
-    },
-    {
       "key": "qwen-qwen2-5-coder-32b-instruct-1633b56d5abf71c8a5e496bbef70edcc973922410492d264bcec70cfe629abea",
       "model": "Qwen2.5-Coder-32B-Instruct",
       "organization": "Qwen",
@@ -8447,7 +8418,7 @@
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 3
+        "model_reports": 4
       }
     },
     {
