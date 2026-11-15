@@ -1067,6 +1067,18 @@ const I18N = {
     "Reported score": "报告的分数",
     "Score as reported": "报告的分数",
     "self reported": "自行报告",
+    "benchmark publisher": "benchmark 发布方",
+    "Measured by": "测量方",
+    "Listed by": "收录方",
+    "Importer": "导入方",
+    "Review status": "审核状态",
+    "Original evidence": "原始证据",
+    "Saturation index (study)": "饱和度指数（研究）",
+    "0–100": "0–100",
+    Open: "打开",
+    "Show more": "显示更多",
+    "Tied markers are separated horizontally for selection; connectors lead to their recorded date. Score heights are unchanged.":
+      "重合的标记在水平方向错开，便于选择；连线指向各自的记录日期。分数高度不变。",
     "model release date": "模型发布日期",
     "Best reported score:": "报告的最高分:",
     "{n} row(s) have no release date, so they carry no position on this axis and are not drawn.":
