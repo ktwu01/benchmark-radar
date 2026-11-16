@@ -93239,5 +93239,132 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "Sakana AI",
+          "Institute of Science Tokyo"
+        ],
+        "authors": [
+          "Issa Sugiura",
+          "Taro Makino",
+          "Takashi Ishida"
+        ],
+        "blurb": "JFinBench is a new, refreshable Japanese finance benchmark built from 321 questions in the 2026 editions of six recurring certification exams.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "data_quality"
+        ],
+        "published_at": "2026-11-16T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "JFinBench: A Continuously Refreshable Japanese Financial Benchmark from the Latest Certification Exams",
+        "url": "https://arxiv.org/abs/2611.18130"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Ibragim Badertdinov",
+          "Alexander Golubev"
+        ],
+        "blurb": "Interpreting Coding Agents Through Their Behavioral Trajectories analyzes 143,209 execution traces from 125 agent configurations and maps raw events into actions such as searching repositories, editing files, and running tests.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-16T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Interpreting Coding Agents Through Their Behavioral Trajectories",
+        "url": "https://arxiv.org/abs/2611.17440"
+      },
+      {
+        "affiliations": [
+          "Independent Researcher"
+        ],
+        "authors": [
+          "Pulkit Yadav"
+        ],
+        "blurb": "Generated Evaluation Suites as Diversity-Driven Search tests automatically generated agent evaluations by injecting seven controlled defects.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-16T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Generated Evaluation Suites as Diversity-Driven Search for Real Agent Regressions",
+        "url": "https://arxiv.org/abs/2611.17632"
+      },
+      {
+        "affiliations": [
+          "Manipal University Jaipur"
+        ],
+        "authors": [
+          "Disha Sheshanarayana",
+          "Sai Linisha Reddy Goli"
+        ],
+        "blurb": "Verification Transport introduces matched native, abstracted, and restored views of the same agent execution to test whether a language-model verifier keeps its judgment when tool composition, delegation, or history compaction changes which evidence remains visible.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-16T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Do Verifier Judgments Survive Abstraction? Measuring Verification Transport for LLM Agent Evaluation",
+        "url": "https://arxiv.org/abs/2611.18471"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Cosimo Galeone",
+          "Anna Ettorre",
+          "Ginevra Mariani",
+          "Minsu Park",
+          "Giuseppe Ettorre",
+          "Daniele Ligorio"
+        ],
+        "blurb": "Can You Trust Your Finance Agent?",
+        "categories": [
+          "benchmark",
+          "agentic"
+        ],
+        "published_at": "2026-11-16T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Can You Trust Your Finance Agent? Drift, Diagnosis and Auditable Intervention on One Shipped Financial Research Agent",
+        "url": "https://arxiv.org/abs/2611.17939"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Rui Rua",
+          "Hailemariam Mersha",
+          "Joao Paulo Fernandes",
+          "Karim Ali"
+        ],
+        "blurb": "PerfArena is a new reproducible arena that evaluates generated code across multiple programming languages using execution time, memory, and energy alongside correctness.",
+        "categories": [
+          "benchmark",
+          "evaluation"
+        ],
+        "published_at": "2026-11-16T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "PerfArena: Ranking LLMs by Code Performance",
+        "url": "https://arxiv.org/abs/2611.18030"
+      }
+    ],
+    "date": "2026-11-16",
+    "schema_version": 1,
+    "top": [
+      "https://arxiv.org/abs/2611.18130",
+      "https://arxiv.org/abs/2611.17440",
+      "https://arxiv.org/abs/2611.17632"
+    ]
+  },
   "since": "2026-11-14T13:13:48.315613+00:00"
 }
