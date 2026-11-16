@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
-  "model_count": 998,
+  "model_count": 1058,
   "source_counts": {
     "artificial_analysis": 595,
     "llm_stats": 339,
-    "model_reports": 181
+    "model_reports": 251
   },
-  "multiple_sources": 110,
+  "multiple_sources": 117,
   "organizations": [
     "AI21 Labs",
     "AI9Stars",
@@ -401,6 +401,17 @@
       }
     },
     {
+      "key": "allen-institute-for-ai-olmo-2-0325-32b-instruct",
+      "model": "olmo-2-0325-32b-instruct",
+      "organization": "Allen Institute for AI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "allen-institute-for-ai-olmo-2-32b",
       "model": "OLMo 2 32B",
       "organization": "Allen Institute for AI",
@@ -442,6 +453,17 @@
       ],
       "source_counts": {
         "artificial_analysis": 12
+      }
+    },
+    {
+      "key": "allen-institute-for-ai-olmo-3-1-32b-think-free",
+      "model": "olmo-3.1-32b-think:free",
+      "organization": "Allen Institute for AI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -599,6 +621,28 @@
       }
     },
     {
+      "key": "amazon-nova-2-lite-v1",
+      "model": "nova-2-lite-v1",
+      "organization": "Amazon",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "amazon-nova-2-lite-v1-reasoning",
+      "model": "nova-2-lite-v1 (reasoning)",
+      "organization": "Amazon",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "amazon-nova-2-omni",
       "model": "Nova 2 Omni",
       "organization": "Amazon",
@@ -704,7 +748,18 @@
       }
     },
     {
-      "key": "anthropic-claude-3-5-haiku",
+      "key": "anthropic-claude-3-5-haiku-0638b56a9f778a2822f33b7c1af3547b08c79b02c07749272d594b48178c90d0",
+      "model": "claude-3.5-haiku",
+      "organization": "Anthropic",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "anthropic-claude-3-5-haiku-b6d165edfe4c603081e10d234e7ec7d3d21a5117151c7366ad169b5f59bf13f1",
       "model": "Claude 3.5 Haiku",
       "organization": "Anthropic",
       "provenance_sources": [
@@ -717,7 +772,7 @@
       }
     },
     {
-      "key": "anthropic-claude-3-5-sonnet",
+      "key": "anthropic-claude-3-5-sonnet-4d6f8b03a4fa7e12b6dd9506c67ccc814a3331b32500f4c336d28d668ca77a90",
       "model": "Claude 3.5 Sonnet",
       "organization": "Anthropic",
       "provenance_sources": [
@@ -725,6 +780,17 @@
       ],
       "source_counts": {
         "llm_stats": 28
+      }
+    },
+    {
+      "key": "anthropic-claude-3-5-sonnet-78f08d73bdfa15a07c29fce7ae518a1e33bea15ce775366b183be4ca18ad66cf",
+      "model": "claude-3.5-sonnet",
+      "organization": "Anthropic",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -991,7 +1057,18 @@
       }
     },
     {
-      "key": "anthropic-claude-haiku-4-5",
+      "key": "anthropic-claude-haiku-4-5-1f4b558d2b7a22651e98d86be14b124fd2b9ed7ab130528600525a118abfd579",
+      "model": "claude-haiku-4.5",
+      "organization": "Anthropic",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "anthropic-claude-haiku-4-5-524204d7512c02074e18a3a8fdc7575e7b4bf00f615edadd61bfd2eec5670d02",
       "model": "Claude Haiku 4.5",
       "organization": "Anthropic",
       "provenance_sources": [
@@ -1000,6 +1077,17 @@
       ],
       "source_counts": {
         "llm_stats": 12,
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "anthropic-claude-haiku-4-5-reasoning",
+      "model": "claude-haiku-4.5 (reasoning)",
+      "organization": "Anthropic",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
         "model_reports": 1
       }
     },
@@ -1050,7 +1138,7 @@
       }
     },
     {
-      "key": "anthropic-claude-opus-4-5",
+      "key": "anthropic-claude-opus-4-5-15329fb6c2951d670c9c3b3aea231b5d8cf96905e297a65ffbbca803a94f886a",
       "model": "Claude Opus 4.5",
       "organization": "Anthropic",
       "provenance_sources": [
@@ -1058,6 +1146,17 @@
       ],
       "source_counts": {
         "llm_stats": 11
+      }
+    },
+    {
+      "key": "anthropic-claude-opus-4-5-853dea744ba4370eabdfd8144e91eadf3e679f699f188662d9478f636c4a82e4",
+      "model": "claude-opus-4.5",
+      "organization": "Anthropic",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -1072,7 +1171,7 @@
       }
     },
     {
-      "key": "anthropic-claude-opus-4-5-reasoning",
+      "key": "anthropic-claude-opus-4-5-reasoning-6596c51af68091088e4c8e8726b42884d2bd3e84f77f1013a977662fe9b7513c",
       "model": "Claude Opus 4.5 (Reasoning)",
       "organization": "Anthropic",
       "provenance_sources": [
@@ -1080,6 +1179,17 @@
       ],
       "source_counts": {
         "artificial_analysis": 13
+      }
+    },
+    {
+      "key": "anthropic-claude-opus-4-5-reasoning-c0d3436fcdfe92a78823ce81bef49b827a75ef403ed0882770aac8249ef4dd4d",
+      "model": "claude-opus-4.5 (reasoning)",
+      "organization": "Anthropic",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -1287,7 +1397,7 @@
       }
     },
     {
-      "key": "anthropic-claude-sonnet-4-5",
+      "key": "anthropic-claude-sonnet-4-5-ac44286d3dfee88856ed1855597facd12e17d6b92a5f4ed44778946f9664ad1e",
       "model": "Claude Sonnet 4.5",
       "organization": "Anthropic",
       "provenance_sources": [
@@ -1295,6 +1405,28 @@
       ],
       "source_counts": {
         "llm_stats": 9
+      }
+    },
+    {
+      "key": "anthropic-claude-sonnet-4-5-c5a06e2457518c758e85a74fa73361a568f02498d5b0eb52131f1f0233d88a37",
+      "model": "claude-sonnet-4.5",
+      "organization": "Anthropic",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "anthropic-claude-sonnet-4-5-reasoning",
+      "model": "claude-sonnet-4.5 (reasoning)",
+      "organization": "Anthropic",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -1920,6 +2052,17 @@
       }
     },
     {
+      "key": "deepseek-deepseek-chat",
+      "model": "deepseek-chat",
+      "organization": "DeepSeek",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "deepseek-deepseek-coder-v2-lite-instruct",
       "model": "DeepSeek Coder V2 Lite Instruct",
       "organization": "DeepSeek",
@@ -2215,10 +2358,12 @@
       "model": "DeepSeek-V3.2",
       "organization": "DeepSeek",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 17
+        "llm_stats": 17,
+        "model_reports": 1
       }
     },
     {
@@ -2266,7 +2411,18 @@
       }
     },
     {
-      "key": "deepseek-deepseek-v3-2-reasoning",
+      "key": "deepseek-deepseek-v3-2-reasoning-34a2e51ac6da820215d8347b947e8b809985f53ed548b080b08a81fffd6f8417",
+      "model": "deepseek-v3.2 (reasoning)",
+      "organization": "DeepSeek",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "deepseek-deepseek-v3-2-reasoning-6663b02214cb11d2f3e05dc2aecff889086a907529d71e974ab3c0e78574603e",
       "model": "DeepSeek V3.2 (Reasoning)",
       "organization": "DeepSeek",
       "provenance_sources": [
@@ -2751,6 +2907,17 @@
       }
     },
     {
+      "key": "google-gemini-2-0-flash-001",
+      "model": "gemini-2.0-flash-001",
+      "organization": "Google",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "google-gemini-2-0-flash-403f4a47e355062a719f42bc51c904d5d63e2ba9a016900d7dbb2b66879c12eb",
       "model": "Gemini 2.0 Flash",
       "organization": "Google",
@@ -2803,6 +2970,17 @@
       ],
       "source_counts": {
         "llm_stats": 13
+      }
+    },
+    {
+      "key": "google-gemini-2-0-flash-lite-001",
+      "model": "gemini-2.0-flash-lite-001",
+      "organization": "Google",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -2881,11 +3059,22 @@
         "model_reports"
       ],
       "source_counts": {
+        "model_reports": 2
+      }
+    },
+    {
+      "key": "google-gemini-2-5-flash-lite-4b14c5553e3759369ba2845ecd444577ff448d0bd100c91cf1e6a49de550c109",
+      "model": "gemini-2.5-flash-lite",
+      "organization": "Google",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
         "model_reports": 1
       }
     },
     {
-      "key": "google-gemini-2-5-flash-lite",
+      "key": "google-gemini-2-5-flash-lite-dcca459f2754aaa12ee78966c630ee09c861b4ed81806f9b7c2f0a2a57d91be9",
       "model": "Gemini 2.5 Flash-Lite",
       "organization": "Google",
       "provenance_sources": [
@@ -2929,7 +3118,7 @@
       }
     },
     {
-      "key": "google-gemini-2-5-flash-lite-reasoning",
+      "key": "google-gemini-2-5-flash-lite-reasoning-94357df67f4dd8f88e8d3c96a81862bf58efb2d249c241f814105f3d172187d5",
       "model": "Gemini 2.5 Flash-Lite (Reasoning)",
       "organization": "Google",
       "provenance_sources": [
@@ -2937,6 +3126,17 @@
       ],
       "source_counts": {
         "artificial_analysis": 14
+      }
+    },
+    {
+      "key": "google-gemini-2-5-flash-lite-reasoning-a749eaacadcf577bfc5fa414ca0c68c2fda80e2e4e9c6a984d065a9286230c25",
+      "model": "gemini-2.5-flash-lite (reasoning)",
+      "organization": "Google",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -2995,7 +3195,18 @@
       }
     },
     {
-      "key": "google-gemini-2-5-flash-reasoning",
+      "key": "google-gemini-2-5-flash-reasoning-4a499fdcb1f96b9ed8ccd0ed9fbfb67aedfe94d573724b71501329cfe2f52fc5",
+      "model": "gemini-2.5-flash (reasoning)",
+      "organization": "Google",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "google-gemini-2-5-flash-reasoning-96c60c3891bc42a42eb71d3f15e6399bd653182fcc380123a12cc1e19e740182",
       "model": "Gemini 2.5 Flash (Reasoning)",
       "organization": "Google",
       "provenance_sources": [
@@ -3013,7 +3224,7 @@
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 1
+        "model_reports": 2
       }
     },
     {
@@ -3301,6 +3512,17 @@
       }
     },
     {
+      "key": "google-gemini-3-flash-preview",
+      "model": "gemini-3-flash-preview",
+      "organization": "Google",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "google-gemini-3-flash-preview-non-reasoning",
       "model": "Gemini 3 Flash Preview (Non-reasoning)",
       "organization": "Google",
@@ -3312,7 +3534,18 @@
       }
     },
     {
-      "key": "google-gemini-3-flash-preview-reasoning",
+      "key": "google-gemini-3-flash-preview-reasoning-01a1df5bcfbe6b7299eb70255936e11108bdddebf7144fe2fb4cf2358b3150eb",
+      "model": "gemini-3-flash-preview (reasoning)",
+      "organization": "Google",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "google-gemini-3-flash-preview-reasoning-86e8f66e77703c2b1d0d0e59a7dcf74fe4372f544d628b6a03c426a30256f2f4",
       "model": "Gemini 3 Flash Preview (Reasoning)",
       "organization": "Google",
       "provenance_sources": [
@@ -3331,6 +3564,17 @@
       ],
       "source_counts": {
         "llm_stats": 21
+      }
+    },
+    {
+      "key": "google-gemini-3-pro-preview",
+      "model": "gemini-3-pro-preview",
+      "organization": "Google",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -4537,7 +4781,7 @@
       }
     },
     {
-      "key": "meta-llama-3-1-8b-instruct",
+      "key": "meta-llama-3-1-8b-instruct-1c0d23f7dafda6fbaf236d1cce94fee32ecacd4a12f35ca2349e31c668b99b7c",
       "model": "Llama 3.1 8B Instruct",
       "organization": "Meta",
       "provenance_sources": [
@@ -4545,6 +4789,17 @@
       ],
       "source_counts": {
         "llm_stats": 18
+      }
+    },
+    {
+      "key": "meta-llama-3-1-8b-instruct-58314a243e41c801f835301d22dccd99c8156c04a117d55da0a74a629a12a2ac",
+      "model": "llama-3.1-8b-instruct",
+      "organization": "Meta",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -4680,7 +4935,18 @@
       }
     },
     {
-      "key": "meta-llama-3-3-70b-instruct",
+      "key": "meta-llama-3-3-70b-instruct-2c8442f03d02e993bd228c0cb4b88d216ede593b9bcc0b37a00abfe834a1a042",
+      "model": "llama-3.3-70b-instruct",
+      "organization": "Meta",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "meta-llama-3-3-70b-instruct-6964c783c90802084b1d2b9f5d6c5ef6928f8d3790589679032c339e5c83fcc7",
       "model": "Llama 3.3 70B Instruct",
       "organization": "Meta",
       "provenance_sources": [
@@ -4737,7 +5003,7 @@
       }
     },
     {
-      "key": "meta-llama-4-maverick",
+      "key": "meta-llama-4-maverick-2c44913c306ad84936b6051b7f3c4991a189c2d05e145dc4a2cafed8c4b89484",
       "model": "Llama 4 Maverick",
       "organization": "Meta",
       "provenance_sources": [
@@ -4750,7 +5016,18 @@
       }
     },
     {
-      "key": "meta-llama-4-scout",
+      "key": "meta-llama-4-maverick-b315047fcb9fb9941b2cdc7037646792a403c05a755ac2836ac719bfd070f6c8",
+      "model": "llama-4-maverick",
+      "organization": "Meta",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "meta-llama-4-scout-744aa2149b39ea6db6d8daac34e1864fae939fcb7127e37f9bf39c3e337d0aa0",
       "model": "Llama 4 Scout",
       "organization": "Meta",
       "provenance_sources": [
@@ -4760,6 +5037,17 @@
       "source_counts": {
         "artificial_analysis": 17,
         "llm_stats": 12
+      }
+    },
+    {
+      "key": "meta-llama-4-scout-b89f7b7e44ca631780788417a75cf74461c6f4fbc52cfda2f2c0205aad9e976b",
+      "model": "llama-4-scout",
+      "organization": "Meta",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -5053,7 +5341,7 @@
       }
     },
     {
-      "key": "microsoft-phi-4-reasoning-plus",
+      "key": "microsoft-phi-4-reasoning-plus-48c962a642100251d93acdbe2ab7c89ea1ecaa6c18b20e76a2fd39de52d5edb3",
       "model": "Phi 4 Reasoning Plus",
       "organization": "Microsoft",
       "provenance_sources": [
@@ -5061,6 +5349,28 @@
       ],
       "source_counts": {
         "llm_stats": 11
+      }
+    },
+    {
+      "key": "microsoft-phi-4-reasoning-plus-b16cedbc74991b42a5f9885f208b405ea49bd6fd2424cffa557e94fdaf7bf26a",
+      "model": "phi-4-reasoning-plus",
+      "organization": "Microsoft",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "microsoft-phi-4-reasoning-plus-reasoning",
+      "model": "phi-4-reasoning-plus (reasoning)",
+      "organization": "Microsoft",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -5173,10 +5483,12 @@
       "model": "MiniMax-M2",
       "organization": "MiniMax",
       "provenance_sources": [
-        "artificial_analysis"
+        "artificial_analysis",
+        "model_reports"
       ],
       "source_counts": {
-        "artificial_analysis": 12
+        "artificial_analysis": 12,
+        "model_reports": 1
       }
     },
     {
@@ -5223,6 +5535,17 @@
       ],
       "source_counts": {
         "artificial_analysis": 16
+      }
+    },
+    {
+      "key": "mistral-devstral-2512",
+      "model": "devstral-2512",
+      "organization": "Mistral",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -5538,6 +5861,17 @@
       }
     },
     {
+      "key": "mistral-mistral-large-2512",
+      "model": "mistral-large-2512",
+      "organization": "Mistral",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "mistral-mistral-large-3",
       "model": "Mistral Large 3",
       "organization": "Mistral",
@@ -5628,19 +5962,6 @@
       }
     },
     {
-      "key": "mistral-mistral-medium-3",
-      "model": "Mistral Medium 3",
-      "organization": "Mistral",
-      "provenance_sources": [
-        "artificial_analysis",
-        "model_reports"
-      ],
-      "source_counts": {
-        "artificial_analysis": 13,
-        "model_reports": 1
-      }
-    },
-    {
       "key": "mistral-mistral-medium-3-1",
       "model": "Mistral Medium 3.1",
       "organization": "Mistral",
@@ -5662,6 +5983,30 @@
       "source_counts": {
         "artificial_analysis": 21,
         "llm_stats": 11
+      }
+    },
+    {
+      "key": "mistral-mistral-medium-3-56f99b40ec21959ed4839101b871e43396f148147566ab66b29ae1ae80bb152f",
+      "model": "Mistral Medium 3",
+      "organization": "Mistral",
+      "provenance_sources": [
+        "artificial_analysis",
+        "model_reports"
+      ],
+      "source_counts": {
+        "artificial_analysis": 13,
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "mistral-mistral-medium-3-5fac51f54e4340498033f4e5faadd68e8f9e4a922ede86dd3c55aa3609128151",
+      "model": "mistral-medium-3",
+      "organization": "Mistral",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -5720,7 +6065,18 @@
       }
     },
     {
-      "key": "mistral-mistral-small-3-1-24b-instruct",
+      "key": "mistral-mistral-small-3-1-24b-instruct-a1c4aa24bd11763a721b4fd43130cdc7c7429d9482262897127f2a466b2ddb1c",
+      "model": "mistral-small-3.1-24b-instruct",
+      "organization": "Mistral",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "mistral-mistral-small-3-1-24b-instruct-c59352534f14cc9519e2f09b54f3104b648668bffe671bf27199b69fb02c98fa",
       "model": "Mistral Small 3.1 24B Instruct",
       "organization": "Mistral",
       "provenance_sources": [
@@ -5920,7 +6276,7 @@
       }
     },
     {
-      "key": "moonshot-ai-kimi-k2-0905",
+      "key": "moonshot-ai-kimi-k2-0905-0b1de4e44516a1bd14b2dcdf389872d6eafd1b4b5e5fd0f3f56ddb520c16af50",
       "model": "Kimi K2 0905",
       "organization": "Moonshot AI",
       "provenance_sources": [
@@ -5930,6 +6286,17 @@
       "source_counts": {
         "artificial_analysis": 12,
         "llm_stats": 6
+      }
+    },
+    {
+      "key": "moonshot-ai-kimi-k2-0905-8978a98ec0f317dd710ced29731ffe73f889838856114da4fd8a196e4be38cef",
+      "model": "kimi-k2-0905",
+      "organization": "Moonshot AI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -6647,7 +7014,18 @@
       }
     },
     {
-      "key": "openai-gpt-3-5-turbo",
+      "key": "openai-gpt-3-5-turbo-01980bfe1c59b0a30a5b43179af678564dd5803680a39da2d2f548e38fe18e15",
+      "model": "gpt-3.5-turbo",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "openai-gpt-3-5-turbo-d9679efea85c2ad3b488641481b3b7ee0563809dfaf0d952c3786cf576e98a0e",
       "model": "GPT-3.5 Turbo",
       "organization": "OpenAI",
       "provenance_sources": [
@@ -6665,11 +7043,13 @@
       "organization": "OpenAI",
       "provenance_sources": [
         "artificial_analysis",
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
         "artificial_analysis": 6,
-        "llm_stats": 12
+        "llm_stats": 12,
+        "model_reports": 1
       }
     },
     {
@@ -6684,11 +7064,11 @@
       "source_counts": {
         "artificial_analysis": 13,
         "llm_stats": 29,
-        "model_reports": 1
+        "model_reports": 2
       }
     },
     {
-      "key": "openai-gpt-4-1-mini",
+      "key": "openai-gpt-4-1-mini-403eba9b11ea58e0d15d3fbfe3585cf93fb76f77ebaf81ce7e3e9734d221acfe",
       "model": "GPT-4.1 mini",
       "organization": "OpenAI",
       "provenance_sources": [
@@ -6701,7 +7081,29 @@
       }
     },
     {
-      "key": "openai-gpt-4-1-nano",
+      "key": "openai-gpt-4-1-mini-e1cea97a88cac7c6d9332f49213f5cbad05d32c5c2162ea21804240813d1e1d8",
+      "model": "gpt-4.1-mini",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "openai-gpt-4-1-nano-1bd56f99e74f8bc1e3bd662b71f10620026baf580118f21b9012902c8dc53487",
+      "model": "gpt-4.1-nano",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "openai-gpt-4-1-nano-8a51746e45d7a17b87473d650a5e7dbaa739a8219a467e228acc6870be325e34",
       "model": "GPT-4.1 nano",
       "organization": "OpenAI",
       "provenance_sources": [
@@ -6725,7 +7127,18 @@
       }
     },
     {
-      "key": "openai-gpt-4-turbo",
+      "key": "openai-gpt-4-turbo-88072ed3e066d589ff02994b6a5d3459d94a9c0e68b12dff5cab3b7ff209d5e0",
+      "model": "gpt-4-turbo",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "openai-gpt-4-turbo-f573ca1329d45ee5d2e3481a336b3f25dc6ca4d28f85ea68425732f0832ff2d8",
       "model": "GPT-4 Turbo",
       "organization": "OpenAI",
       "provenance_sources": [
@@ -6747,7 +7160,7 @@
       ],
       "source_counts": {
         "llm_stats": 46,
-        "model_reports": 1
+        "model_reports": 2
       }
     },
     {
@@ -6795,7 +7208,7 @@
       }
     },
     {
-      "key": "openai-gpt-4o-mini",
+      "key": "openai-gpt-4o-mini-3b7d016d3c66933cc12fd57e8f8c674c8a1cc496a6384236a39291dd0b9a70ac",
       "model": "GPT-4o mini",
       "organization": "OpenAI",
       "provenance_sources": [
@@ -6805,6 +7218,17 @@
       "source_counts": {
         "artificial_analysis": 12,
         "llm_stats": 9
+      }
+    },
+    {
+      "key": "openai-gpt-4o-mini-597b3c58d1700924c92ffa5a07e959372e0687c2ee91bf3220c1b8bc39d887ed",
+      "model": "gpt-4o-mini",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -6828,7 +7252,7 @@
       ],
       "source_counts": {
         "llm_stats": 34,
-        "model_reports": 1
+        "model_reports": 2
       }
     },
     {
@@ -6836,14 +7260,16 @@
       "model": "GPT-5.1",
       "organization": "OpenAI",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 9
+        "llm_stats": 9,
+        "model_reports": 1
       }
     },
     {
-      "key": "openai-gpt-5-1-codex",
+      "key": "openai-gpt-5-1-codex-6f822644a2cab4068d54bc8471d47c4a2782bdd28d01c67608e06cae2c4851a6",
       "model": "GPT-5.1 Codex",
       "organization": "OpenAI",
       "provenance_sources": [
@@ -6851,6 +7277,17 @@
       ],
       "source_counts": {
         "llm_stats": 3
+      }
+    },
+    {
+      "key": "openai-gpt-5-1-codex-fe15988b27c015d123c5e4e6873fc543759d333bff347172be2f728fd71f3ee8",
+      "model": "gpt-5.1-codex",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -6953,6 +7390,17 @@
       }
     },
     {
+      "key": "openai-gpt-5-1-reasoning",
+      "model": "gpt-5.1 (reasoning)",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "openai-gpt-5-1-thinking",
       "model": "GPT-5.1 Thinking",
       "organization": "OpenAI",
@@ -6968,10 +7416,12 @@
       "model": "GPT-5.2",
       "organization": "OpenAI",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 24
+        "llm_stats": 24,
+        "model_reports": 1
       }
     },
     {
@@ -7038,6 +7488,17 @@
       ],
       "source_counts": {
         "llm_stats": 7
+      }
+    },
+    {
+      "key": "openai-gpt-5-2-reasoning",
+      "model": "gpt-5.2 (reasoning)",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -7781,7 +8242,7 @@
       }
     },
     {
-      "key": "openai-gpt-5-mini",
+      "key": "openai-gpt-5-mini-203039131b49f4e6dd976aa01a8d26f77b4e29480500d56d63a12484591fd9c0",
       "model": "GPT-5 mini",
       "organization": "OpenAI",
       "provenance_sources": [
@@ -7789,6 +8250,17 @@
       ],
       "source_counts": {
         "llm_stats": 5
+      }
+    },
+    {
+      "key": "openai-gpt-5-mini-e86a0b6f85e924baf2651c1f16b5efd3c9c724dd6dc82531afccce8d9b299ff3",
+      "model": "gpt-5-mini",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -7836,7 +8308,7 @@
       }
     },
     {
-      "key": "openai-gpt-5-nano",
+      "key": "openai-gpt-5-nano-4078330d70af9d20a7d5bb681bfb5d5b991e502e5aec1ca8bc2ec0ed0f81c3b3",
       "model": "GPT-5 nano",
       "organization": "OpenAI",
       "provenance_sources": [
@@ -7844,6 +8316,17 @@
       ],
       "source_counts": {
         "llm_stats": 5
+      }
+    },
+    {
+      "key": "openai-gpt-5-nano-96c5ebeb2e9be303050e860b830123c34018b12695ff9ed2428e1d61bf01fef0",
+      "model": "gpt-5-nano",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -7935,7 +8418,7 @@
       }
     },
     {
-      "key": "openai-gpt-oss-120b",
+      "key": "openai-gpt-oss-120b-3ddcab3448222e7f5981e7cd0e25e3e95be251c6c6d657c015dd05f01a96de0a",
       "model": "GPT OSS 120B",
       "organization": "OpenAI",
       "provenance_sources": [
@@ -7943,6 +8426,17 @@
       ],
       "source_counts": {
         "llm_stats": 7
+      }
+    },
+    {
+      "key": "openai-gpt-oss-120b-dd931ffdded6b40fb2f1fd80a7ab484419ec7d3f3c242beff186fe6934780c3d",
+      "model": "gpt-oss-120b",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -7979,7 +8473,7 @@
       }
     },
     {
-      "key": "openai-gpt-oss-20b",
+      "key": "openai-gpt-oss-20b-e643106cd43679432748da805e89bbe4484878b9add4a30f0850e0ddde3046b7",
       "model": "GPT OSS 20B",
       "organization": "OpenAI",
       "provenance_sources": [
@@ -7987,6 +8481,17 @@
       ],
       "source_counts": {
         "llm_stats": 7
+      }
+    },
+    {
+      "key": "openai-gpt-oss-20b-f0cad100dd780ab8c7de8202a7e7824b9b216ab24c851f3f884e3e14b110205e",
+      "model": "gpt-oss-20b",
+      "organization": "OpenAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -8080,11 +8585,13 @@
       "organization": "OpenAI",
       "provenance_sources": [
         "artificial_analysis",
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
         "artificial_analysis": 13,
-        "llm_stats": 22
+        "llm_stats": 22,
+        "model_reports": 1
       }
     },
     {
@@ -8115,11 +8622,13 @@
       "organization": "OpenAI",
       "provenance_sources": [
         "artificial_analysis",
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
         "artificial_analysis": 6,
-        "llm_stats": 25
+        "llm_stats": 25,
+        "model_reports": 1
       }
     },
     {
@@ -8154,7 +8663,7 @@
       ],
       "source_counts": {
         "llm_stats": 14,
-        "model_reports": 1
+        "model_reports": 2
       }
     },
     {
@@ -8342,6 +8851,28 @@
       ],
       "source_counts": {
         "model_reports": 3
+      }
+    },
+    {
+      "key": "qwen-qwen-plus",
+      "model": "qwen-plus",
+      "organization": "Qwen",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "qwen-qwen-plus-reasoning",
+      "model": "qwen-plus (reasoning)",
+      "organization": "Qwen",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -8653,6 +9184,17 @@
       }
     },
     {
+      "key": "qwen-qwen3-14b",
+      "model": "qwen3-14b",
+      "organization": "Qwen",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "qwen-qwen3-14b-non-reasoning",
       "model": "Qwen3 14B (Non-reasoning)",
       "organization": "Qwen",
@@ -8686,6 +9228,17 @@
       }
     },
     {
+      "key": "qwen-qwen3-235b-a22b-2507",
+      "model": "qwen3-235b-a22b-2507",
+      "organization": "Qwen",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "qwen-qwen3-235b-a22b-2507-instruct",
       "model": "Qwen3 235B A22B 2507 Instruct",
       "organization": "Qwen",
@@ -8697,7 +9250,18 @@
       }
     },
     {
-      "key": "qwen-qwen3-235b-a22b-2507-reasoning",
+      "key": "qwen-qwen3-235b-a22b-2507-reasoning-0257b20595debb84ee70cc34f5819436eaeb8cc095a5bd1db82b84ee8cab4361",
+      "model": "qwen3-235b-a22b-2507 (reasoning)",
+      "organization": "Qwen",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "qwen-qwen3-235b-a22b-2507-reasoning-cf57e24660a2bc52d3afe7b7da2c261396277a0cf3c00e0d96e6242ef738c722",
       "model": "Qwen3 235B A22B 2507 (Reasoning)",
       "organization": "Qwen",
       "provenance_sources": [
@@ -8818,7 +9382,18 @@
       }
     },
     {
-      "key": "qwen-qwen3-32b",
+      "key": "qwen-qwen3-32b-60022957aaa42230d42ec9f68d40f6cb84a7f02d868d086489f8dffb778388bb",
+      "model": "qwen3-32b",
+      "organization": "Qwen",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "qwen-qwen3-32b-bb147e3137b4585114b132977f284de64a4ed1ae97e3a0397eb900603911be9b",
       "model": "Qwen3 32B",
       "organization": "Qwen",
       "provenance_sources": [
@@ -9411,6 +9986,17 @@
       }
     },
     {
+      "key": "qwen-qwen3-coder",
+      "model": "qwen3-coder",
+      "organization": "Qwen",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "qwen-qwen3-coder-30b-a3b-instruct",
       "model": "Qwen3 Coder 30B A3B Instruct",
       "organization": "Qwen",
@@ -9452,6 +10038,17 @@
       ],
       "source_counts": {
         "artificial_analysis": 14
+      }
+    },
+    {
+      "key": "qwen-qwen3-coder-reasoning",
+      "model": "qwen3-coder (reasoning)",
+      "organization": "Qwen",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -9591,7 +10188,18 @@
       }
     },
     {
-      "key": "qwen-qwen3-vl-235b-a22b-thinking",
+      "key": "qwen-qwen3-vl-235b-a22b-thinking-101fac8339da9878344ccf0dd7125dc2ee96b9a92a37dd0c733516c413fe7ffe",
+      "model": "qwen3-vl-235b-a22b-thinking",
+      "organization": "Qwen",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "qwen-qwen3-vl-235b-a22b-thinking-7c3d395e3ac4038100751a481757bf89340ee5723e282a6cd32d17744c8113ed",
       "model": "Qwen3 VL 235B A22B Thinking",
       "organization": "Qwen",
       "provenance_sources": [
@@ -9707,7 +10315,7 @@
       }
     },
     {
-      "key": "qwen-qwen3-vl-8b-instruct",
+      "key": "qwen-qwen3-vl-8b-instruct-38ed7160f7a1cb16387f4a203aac60ab321fd5e9fa1cf71582775fa2dd4b6428",
       "model": "Qwen3 VL 8B Instruct",
       "organization": "Qwen",
       "provenance_sources": [
@@ -9717,6 +10325,17 @@
       "source_counts": {
         "artificial_analysis": 13,
         "llm_stats": 46
+      }
+    },
+    {
+      "key": "qwen-qwen3-vl-8b-instruct-cb63533119be80bd967c9031c3566eef4605e561d0f4ea1fdcc1e07dc500c712",
+      "model": "qwen3-vl-8b-instruct",
+      "organization": "Qwen",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -10461,6 +11080,17 @@
       }
     },
     {
+      "key": "xai-grok-4-1-fast",
+      "model": "grok-4.1-fast",
+      "organization": "xAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "xai-grok-4-1-fast-non-reasoning",
       "model": "Grok 4.1 Fast (Non-reasoning)",
       "organization": "xAI",
@@ -10702,14 +11332,16 @@
       "model": "Grok-4",
       "organization": "xAI",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 7
+        "llm_stats": 7,
+        "model_reports": 1
       }
     },
     {
-      "key": "xai-grok-4-fast",
+      "key": "xai-grok-4-fast-3d06e93c8705d34674f99ed69ed73bd9134a09a1f9d48d9787114de14393bb73",
       "model": "Grok 4 Fast",
       "organization": "xAI",
       "provenance_sources": [
@@ -10717,6 +11349,17 @@
       ],
       "source_counts": {
         "llm_stats": 7
+      }
+    },
+    {
+      "key": "xai-grok-4-fast-40963397633254d32f91ae1ab43b4552b8140aac785c6749c915a7628f88b92c",
+      "model": "grok-4-fast",
+      "organization": "xAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -10775,7 +11418,18 @@
       }
     },
     {
-      "key": "xai-grok-code-fast-1",
+      "key": "xai-grok-code-fast-1-1984f07318a9109ed1c5d059d135b0479b3aaf8864cfa8c9ab1eebffe7d20645",
+      "model": "grok-code-fast-1",
+      "organization": "xAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
+      "key": "xai-grok-code-fast-1-ba7a678a41d9ca64967ccf4d2ae3dcfb84f299a3f170786e66b4ec70479e4f74",
       "model": "Grok Code Fast 1",
       "organization": "xAI",
       "provenance_sources": [
@@ -10912,10 +11566,12 @@
       "model": "GLM-4.5",
       "organization": "Z.ai",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 14
+        "llm_stats": 14,
+        "model_reports": 1
       }
     },
     {
@@ -10976,6 +11632,17 @@
       }
     },
     {
+      "key": "z-ai-glm-4-6-exacto",
+      "model": "glm-4.6:exacto",
+      "organization": "Z.ai",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "z-ai-glm-4-6-non-reasoning",
       "model": "GLM-4.6 (Non-reasoning)",
       "organization": "Z.ai",
@@ -10995,6 +11662,17 @@
       ],
       "source_counts": {
         "artificial_analysis": 16
+      }
+    },
+    {
+      "key": "z-ai-glm-4-6v",
+      "model": "glm-4.6v",
+      "organization": "Z.ai",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {
@@ -11024,10 +11702,12 @@
       "model": "GLM-4.7",
       "organization": "Z.ai",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 13
+        "llm_stats": 13,
+        "model_reports": 1
       }
     },
     {

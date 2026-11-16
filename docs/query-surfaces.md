@@ -9,7 +9,7 @@ health, across the CLI, the HTTP surface, and the public consumer Skill.
   JSON contract. Do not add interface-specific ranking, filtering, identity
   merging, or silent network fallback.
 - Query responses must state their local data provenance and retrieval mode.
-  `search`, `show`, `recent`, and `related-work` also carry top-level
+  `search`, `show`, `trace`, `recent`, and `related-work` also carry top-level
   `required_citations`. Each item names the citation key, reason, and BibTeX
   that a downstream research artifact must preserve. Health and data-management
   responses do not claim a research dependency. Missing or malformed generated

@@ -176,6 +176,15 @@ source_documents:
     published: 2026-09-14
     retrieved_at: 2026-11-15
 
+  - id: yapbench_v0_1_paper_leaderboard
+    name: YapBench v0.1 full leaderboard (Table 6)
+    publisher: YapBench authors
+    document_type: benchmark_leaderboard
+    url: https://arxiv.org/abs/2601.00624
+    benchmarks: [yapbench]
+    published: 2026-01-02
+    retrieved_at: 2026-11-15
+
   - id: websitebench_leaderboard_2026_10_17
     name: WebsiteBench official leaderboard (2026-10-17 cohort)
     publisher: TIGER-AI-Lab
@@ -2119,6 +2128,25 @@ benchmarks:
       outputs by claude-opus-5-5; the README warns the two judges differ in
       strictness, so only models graded by the same judge compare directly.
       Results grow in rounds, so the model set depends on the release read.
+
+  - id: crosssearch
+    name: CrossSearch
+    aliases: ["CrossSearch", "CrossSearch: 100-task paper set"]
+    domain: professional
+    url: https://huggingface.co/datasets/AfterQuery/CrossSearch
+    caveat: >-
+      Evaluation-only benchmark: 100 professional tasks where an agent must
+      reconcile files in a local workspace with public web sources, graded on
+      atomic rubrics for full credit (reported as pass@1 and pass^3). The
+      dataset preserves rollout traces, attachments, reference answers, rubric
+      judgments and model rewards, and documents native and alternative
+      search-engine conditions separately. A reward may be absent for a limit
+      outcome, and results from different conditions, judge versions or
+      task-set revisions are not interchangeable. The authors' blog reports a
+      leaderboard and dates the release 2026-11-12, but the dataset card
+      states no release date and this registry cites only the benchmark URL,
+      so the entry carries no released field; the blog also reports two
+      metrics, so no score rows are added.
 
 # Model cards, technical reports and release posts.
 #
