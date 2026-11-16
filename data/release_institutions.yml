@@ -1667,13 +1667,10 @@ papers:
     - Sun Yat-sen University Cancer Center
     - Monash University
   '2611.11306':
-    basis: arxiv_html_affiliations
-    source_url: https://arxiv.org/html/2611.11306
-    retrieved_at: '2026-11-13'
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7225716517
+    retrieved_at: '2026-11-16'
     institutions:
-    - Pivotal Research
-    - University of Bath
-    - National University Philippines
     - University of Notre Dame
     - Hebrew University of Jerusalem
   '2611.12167':
@@ -1701,19 +1698,33 @@ papers:
     institutions:
     - The University of Tokyo
   '2611.13028':
-    basis: arxiv_html_affiliations
-    source_url: https://arxiv.org/html/2611.13028
-    retrieved_at: '2026-11-13'
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7225824098
+    retrieved_at: '2026-11-16'
     institutions:
-    - Shanghai Innovation Institute
     - Fudan University
+    - Shanghai Innovation Institute
   '2611.13843':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-13'
+    retrieved_at: '2026-11-16'
     institutions: []
+  '2611.15789':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.15789
+    retrieved_at: '2026-11-16'
+    institutions:
+    - Tianjin University Kling AI Beijing University of Posts and Telecommunications
+    - Zhongguancun Academy The Hong Kong Polytechnic University
   '2611.16409':
     basis: null
     source_url: null
     retrieved_at: '2026-11-14'
     institutions: []
+  '2611.18130':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.18130
+    retrieved_at: '2026-11-16'
+    institutions:
+    - Sakana AI
+    - Institute of Science Tokyo
