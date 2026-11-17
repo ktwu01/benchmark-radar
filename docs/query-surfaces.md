@@ -15,6 +15,15 @@ health, across the CLI, the HTTP surface, and the public consumer Skill.
   responses do not claim a research dependency. Missing or malformed generated
   artifacts fail visibly with machine-readable errors; they must not be replaced
   with guessed metadata.
+- `trace` compares the local artifacts of one record stage by stage: crawl or
+  model-card input, normalized row, identity, detail shard, and outputs. It
+  replays the production loaders where it can, but it is a diagnostic, not a
+  rebuild: `first_change: null` means the local artifacts agree with each other,
+  not that a fresh `normalize-catalog` run would produce the same files after
+  every possible interrupted build. A missing input (`leaderboard_snapshots.yml`,
+  `benchmark_scores.yml`, or an identity donor's own input) is reported as
+  absent or changed, never filled in from a later artifact. When the result
+  matters, rebuild and trace again.
 - Lexical search is a high-recall candidate retriever for agents, not a final
   suitability judge. Any shared query token may produce a candidate, except
   that a multi-word query drops a record matching a single token in

@@ -239,8 +239,13 @@ def _trace_snapshot_row(
     registry cannot be read).
     """
     registry_path = root / "data" / "leaderboard_snapshots.yml"
-    if not registry_path.exists() or not source_benchmark_id:
+    if not source_benchmark_id:
         return None, None, "unavailable"
+    if not registry_path.exists():
+        # Every crawled source reads this registry, so in a checkout its
+        # absence means the crawl input is gone. Reporting "unavailable" made
+        # the normalized row stand in as the source and every stage present.
+        return None, registry_path, "missing"
     try:
         registry = yaml.safe_load(registry_path.read_text(encoding="utf-8")) or {}
     except (OSError, yaml.YAMLError) as error:
@@ -590,8 +595,11 @@ def _trace_model_reports_row(
     # normalize_reports only ever sees these files through their production
     # loaders, so trace validates them the same way before indexing into them.
     _trace_validate(path, "model card registry", _load_model_card_registry)
-    if scores_path.exists():
-        _trace_validate(scores_path, "score archive", _load_benchmark_scores)
+    if not scores_path.exists():
+        # normalize-catalog fails without the score archive, even for an
+        # unscored benchmark, so trace must not replay it as empty.
+        return None, scores_path, "missing"
+    _trace_validate(scores_path, "score archive", _load_benchmark_scores)
     try:
         registry = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     except (OSError, yaml.YAMLError) as error:
@@ -874,7 +882,17 @@ def _trace_donor_changes(
             }
         ]
     donor_catalog = next((row for row in index_records if row.get("key") == donor_key), None)
-    raw, _, state = _trace_raw_row(root, donor_catalog, donor, None)
+    raw, raw_path, state = _trace_raw_row(root, donor_catalog, donor, None)
+    if state == "missing":
+        # The stored donor row outlived its crawl or model-card input, so a
+        # rebuild would drop it and the recipient would lose what it inherits.
+        return [
+            {
+                "field": f"donor.{donor_key}",
+                "before": "identity donor",
+                "after": f"absent from its source input at {raw_path}",
+            }
+        ]
     if state != "found" or raw is None:
         return []
     inheritable = {*INHERITED_IDENTITY_FIELDS, "released_reference"}
@@ -2079,6 +2097,16 @@ class QueryService:
                         rebuilt["shard"]["scores_by_source"],
                         "scores_by_source.",
                     )
+                )
+                # The index is a compact projection, so shard-only fields
+                # (documents, provenance) can be stale while every index
+                # field agrees. Compare the whole record build_shard writes,
+                # skipping fields the index comparison already reported.
+                reported = {change["field"] for change in enrichment_changes}
+                enrichment_changes.extend(
+                    change
+                    for change in _trace_field_changes(shard_record, rebuilt["shard"]["record"])
+                    if change["field"] not in reported
                 )
         add_stage(
             "enrichment",
