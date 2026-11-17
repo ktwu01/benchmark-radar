@@ -163,6 +163,11 @@ def create_query_server(
                 identifier = unquote(path.removeprefix("/api/v1/benchmarks/"))
                 return service.show(identifier)
 
+            if path.startswith("/api/v1/trace/"):
+                _parse_parameters(request.query, allowed=set())
+                identifier = unquote(path.removeprefix("/api/v1/trace/"))
+                return service.trace(identifier)
+
             if path == "/api/v1/recent":
                 parameters = _parse_parameters(
                     request.query,

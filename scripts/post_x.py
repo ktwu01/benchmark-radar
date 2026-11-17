@@ -284,9 +284,9 @@ def record_post(ledger: dict[str, Any], date: str, lang: str, post_id: str) -> N
             "posted_at": dt.datetime.now(dt.UTC).isoformat(),
         }
     )
-    LEDGER_PATH.write_text(
-        json.dumps(ledger, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-    )
+    temporary = LEDGER_PATH.with_suffix(".json.tmp")
+    temporary.write_text(json.dumps(ledger, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    os.replace(temporary, LEDGER_PATH)
 
 
 class XApiError(RuntimeError):
@@ -528,10 +528,17 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     print(f"Authenticated as @{username}.")
     image = fetch_image(date)
+    if image is None:
+        print(
+            "::warning::Card image unavailable; posting text only. "
+            "The post will need the image attached by hand.",
+            file=sys.stderr,
+        )
     media_id = upload_media(image, credentials) if image else None
     post_id = create_post(text, media_id, credentials)
     record_post(ledger, date, args.lang, post_id)
-    print(f"Posted {date} ({args.lang}): https://x.com/ktwu01/status/{post_id}")
+    account = username or "ktwu01"
+    print(f"Posted {date} ({args.lang}): https://x.com/{account}/status/{post_id}")
     _emit_output(posted="true", snapshot_date=date, post_id=post_id)
     return 0
 

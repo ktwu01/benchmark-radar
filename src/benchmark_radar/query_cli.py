@@ -28,7 +28,7 @@ from .query_http import serve_query_api
 from .related_work import ManuscriptContext, append_missing_bibtex
 
 QUERY_COMMANDS = frozenset(
-    {"init", "sync", "search", "show", "recent", "status", "serve", "related-work"}
+    {"init", "sync", "search", "show", "trace", "recent", "status", "serve", "related-work"}
 )
 RELATED_WORK_FORMATS = ("latex", "bibtex", "markdown")
 
@@ -82,6 +82,14 @@ def _parser() -> argparse.ArgumentParser:
     )
     show.add_argument("identifier")
     show.add_argument("--json", action="store_true")
+
+    trace = subparsers.add_parser(
+        "trace",
+        parents=[data_parent],
+        help="Trace one record through the locally available pipeline artifacts.",
+    )
+    trace.add_argument("identifier", metavar="KEY_OR_SLUG")
+    trace.add_argument("--json", action="store_true")
 
     recent = subparsers.add_parser(
         "recent", parents=[data_parent], help="List evidence from the latest Radar snapshot."
@@ -224,6 +232,22 @@ def _print_show(payload: dict[str, Any]) -> None:
         print("artifacts:")
         for artifact in artifacts:
             print(f"  {artifact.get('kind')}: {artifact.get('url')}")
+
+
+def _print_trace(payload: dict[str, Any]) -> None:
+    print(f"Trace: {payload['identifier']} ({payload['status']})")
+    if payload.get("first_change"):
+        print(f"first change or missing stage: {payload['first_change']}")
+    for stage in payload["stages"]:
+        print(f"{stage['stage']}: {stage['status']}")
+        if stage.get("path"):
+            print(f"  path: {stage['path']}")
+        if stage["status"] == "absent":
+            print(f"  error: {stage['error']}")
+        if stage.get("note"):
+            print(f"  note: {stage['note']}")
+        for change in stage.get("changes", []):
+            print(f"  changed {change['field']}: {change['before']!r} -> {change['after']!r}")
 
 
 def _stage_related_work_file(path: Path, content: bytes, mode: int | None) -> Path:
@@ -446,6 +470,9 @@ def run_query_cli(argv: Sequence[str] | None = None) -> int:
             elif args.command == "show":
                 payload = service.show(args.identifier)
                 printer = _print_json if args.json else _print_show
+            elif args.command == "trace":
+                payload = service.trace(args.identifier)
+                printer = _print_json if args.json else _print_trace
             elif args.command == "recent":
                 payload = service.recent(
                     limit=args.limit,

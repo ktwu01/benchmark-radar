@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import csv
 import json
 import logging
 import math
@@ -11,6 +12,8 @@ from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+
+import yaml
 
 from .citation import citation_block, required_citations
 from .corpus import exact_artifact_key
@@ -115,6 +118,902 @@ def _read_object(path: Path, *, label: str) -> dict[str, Any]:
             status=500,
         )
     return value
+
+
+def _canon(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, default=str)
+
+
+def _trace_normalization_diff(
+    before: dict[str, Any], after: dict[str, Any]
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """Diff only the vocabulary both representations share.
+
+    Raw inputs and normalized rows use different schemas, so keys present on
+    only one side are mapping, not drift.  Fields whose type changed
+    (scalar to object, object to list) are representation changes and are
+    reported separately from value changes.
+    """
+    changes: list[dict[str, Any]] = []
+    restructured: list[str] = []
+
+    def walk(raw: Any, norm: Any, prefix: str) -> None:
+        if isinstance(raw, dict) and isinstance(norm, dict):
+            for key in sorted(set(raw) & set(norm)):
+                walk(raw[key], norm[key], f"{prefix}.{key}" if prefix else str(key))
+            return
+        if isinstance(raw, dict) or isinstance(norm, dict):
+            if isinstance(raw, dict) != isinstance(norm, dict):
+                restructured.append(prefix)
+            return
+        if _canon(raw) != _canon(norm):
+            changes.append({"field": prefix, "before": raw, "after": norm})
+
+    walk(before, after, "")
+    return changes, restructured
+
+
+def _trace_repo_root(index_path: Path) -> Path | None:
+    """Return the checkout root when the index sits at ``<root>/site/data``.
+
+    Installed clients keep the index under ``~/.benchmark-radar/versions/``;
+    the pipeline inputs (``data/catalog``, ``data/leaderboard_snapshots``,
+    ``data/model_cards.yml``) exist only in a repository checkout, so those
+    stages must report absent there instead of probing the wrong directory.
+    """
+    if index_path.parent.name == "data" and index_path.parent.parent.name == "site":
+        return index_path.parent.parent.parent
+    return None
+
+
+def _trace_csv_rows(path: Path) -> list[dict[str, str]]:
+    try:
+        with path.open(encoding="utf-8-sig", newline="") as handle:
+            return list(csv.DictReader(handle))
+    except (OSError, csv.Error, UnicodeDecodeError) as error:
+        raise QueryError(f"cannot read snapshot at {path}: {error}", code="invalid_data") from error
+
+
+def _trace_jsonl_rows(path: Path) -> list[dict[str, Any]]:
+    try:
+        rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
+    except (OSError, json.JSONDecodeError, UnicodeDecodeError) as error:
+        raise QueryError(
+            f"cannot read normalized evidence at {path}: {error}", code="invalid_data"
+        ) from error
+    if any(not isinstance(row, dict) for row in rows):
+        raise QueryError(f"{path}: expected JSON objects", code="invalid_data")
+    return rows
+
+
+def _load_leaderboard_snapshots(path: Path) -> Any:
+    from .leaderboard_snapshots import load_snapshots as load_leaderboard_snapshots
+
+    return load_leaderboard_snapshots(path)
+
+
+def _load_model_card_registry(path: Path) -> Any:
+    from .model_cards import load_registry
+
+    return load_registry(path)
+
+
+def _load_benchmark_scores(path: Path) -> Any:
+    from .benchmark_scores import load_scores
+
+    return load_scores(path)
+
+
+def _trace_validate(path: Path, label: str, loader: Any) -> None:
+    """Run a pipeline loader and report its rejection as ``invalid_data``.
+
+    The loaders raise ``ValueError`` subclasses for invalid content; a
+    malformed entry can also surface as ``KeyError``/``TypeError``/
+    ``AttributeError`` before their checks run. All of them mean the pipeline
+    cannot read this input, which trace must report in its error envelope
+    rather than as a traceback.
+    """
+    try:
+        loader(path)
+    except (
+        OSError,
+        UnicodeDecodeError,
+        yaml.YAMLError,
+        ValueError,
+        KeyError,
+        TypeError,
+        AttributeError,
+    ) as error:
+        raise QueryError(
+            f"invalid {label} at {path}: {type(error).__name__}: {error}", code="invalid_data"
+        ) from error
+
+
+def _trace_snapshot_row(
+    root: Path, source: str, source_benchmark_id: str
+) -> tuple[dict[str, Any] | None, Path | None, str]:
+    """Return ``(row, path, state)`` for the newest committed crawl row.
+
+    ``state`` is ``found``, ``missing`` (the snapshot artifact exists but has
+    no row for this record), or ``unavailable`` (no snapshot applies or the
+    registry cannot be read).
+    """
+    registry_path = root / "data" / "leaderboard_snapshots.yml"
+    if not registry_path.exists() or not source_benchmark_id:
+        return None, None, "unavailable"
+    try:
+        registry = yaml.safe_load(registry_path.read_text(encoding="utf-8")) or {}
+    except (OSError, yaml.YAMLError) as error:
+        raise QueryError(
+            f"cannot read snapshot registry at {registry_path}: {type(error).__name__}: {error}",
+            code="invalid_data",
+        ) from error
+    # The registry must pass the same validation normalize-catalog applies:
+    # schema_version, required fields, declared row counts and checksums. A
+    # shape-only check would let trace mark source and normalization present
+    # for a registry the pipeline itself refuses to read.
+    _trace_validate(registry_path, "snapshot registry", _load_leaderboard_snapshots)
+    snapshots = [
+        entry
+        for entry in registry["snapshots"]
+        if str(entry.get("id") or "").startswith(f"{source}_")
+    ]
+    if not snapshots:
+        return None, None, "unavailable"
+    entry = max(snapshots, key=lambda row: str(row.get("crawled_at") or ""))
+    columns = entry.get("benchmark_columns") or {}
+    id_column = columns.get("benchmark_id")
+    benchmark_file = entry.get("benchmark_file")
+    if not id_column or not benchmark_file:
+        return None, None, "unavailable"
+    path = root / "data" / str(benchmark_file)
+    if not path.exists():
+        return None, path, "missing"
+    row = next(
+        (row for row in _trace_csv_rows(path) if row.get(id_column) == source_benchmark_id), None
+    )
+    if row is None:
+        return None, path, "missing"
+    value: dict[str, Any] = dict(row)
+    value["snapshot"] = entry
+    value["input_paths"] = {"benchmark_file": str(path), "registry": str(registry_path)}
+    if entry.get("scores_file"):
+        scores_path = root / "data" / entry["scores_file"]
+        score_id = (entry.get("columns") or {}).get("benchmark_id", id_column)
+        value["score_rows"] = [
+            row for row in _trace_csv_rows(scores_path) if row.get(score_id) == source_benchmark_id
+        ]
+        value["input_paths"]["scores_file"] = str(scores_path)
+    if source == "opencompass_hub":
+        from .catalog_opencompass import DEFAULT_ROUND2_PATH
+
+        round2_path = root / DEFAULT_ROUND2_PATH
+        value["round2_evidence"] = next(
+            (
+                row
+                for row in _trace_jsonl_rows(round2_path)
+                if row.get("benchmark_id") == source_benchmark_id
+            ),
+            None,
+        )
+        value["input_paths"]["round2_evidence"] = str(round2_path)
+        if value["round2_evidence"] is None:
+            raise QueryError(
+                f"no round-2 evidence for {source_benchmark_id} at {round2_path}",
+                code="invalid_data",
+            )
+    return json.loads(_canon(value)), path, "found"
+
+
+def _trace_reviewed_record(record: dict[str, Any], normalized_path: Path) -> dict[str, Any]:
+    """Replay reviewed enrichment before comparing with the stored source record."""
+    from .catalog import CatalogError
+    from .catalog_authors import apply_benchmark_authors, load_benchmark_authors
+    from .catalog_dates import apply_benchmark_dates, load_benchmark_dates
+    from .catalog_institutions import apply_benchmark_institutions, load_benchmark_institutions
+    from .catalog_overrides import (
+        apply_llm_stats_identity_overrides,
+        load_llm_stats_identity_overrides,
+    )
+
+    directory = normalized_path.parent
+    root = directory.parent.parent
+    population = [
+        row
+        for path in sorted(directory.glob("*_source_records.jsonl"))
+        for row in _trace_jsonl_rows(path)
+        if row.get("key") != record["key"]
+    ] + [record]
+    records = [record]
+    try:
+        overrides_path = directory / "llm_stats_identity_overrides.yml"
+        if record.get("source") == "llm_stats" and overrides_path.exists():
+            overrides = load_llm_stats_identity_overrides(population, overrides_path)
+            # Apply all registered rows, as the production adapter requires.
+            enriched = apply_llm_stats_identity_overrides(population, overrides)
+            records = [row for row in enriched if row["key"] == record["key"]]
+        steps = [("benchmark_dates.yml", load_benchmark_dates, apply_benchmark_dates)]
+        if record.get("source") != "opencompass_hub":
+            steps += [
+                ("benchmark_authors.yml", load_benchmark_authors, apply_benchmark_authors),
+                (
+                    "benchmark_institutions.yml",
+                    load_benchmark_institutions,
+                    apply_benchmark_institutions,
+                ),
+            ]
+        for filename, load, apply in steps:
+            path = directory / filename
+            if path.exists():
+                records = apply(records, load(population, path))
+    except (CatalogError, OSError, yaml.YAMLError, KeyError, TypeError, ValueError) as error:
+        raise QueryError(f"cannot replay reviewed inputs: {error}", code="invalid_data") from error
+    # Production stores checkout-relative lineage paths. Relativize the
+    # decoded values rather than the JSON text: serialization escapes Windows
+    # backslashes, so a text replace of ``str(root) + "/"`` never matches there.
+    return _trace_relativize(json.loads(_canon(records[0])), str(root))
+
+
+def _trace_relativize(value: Any, root: str) -> Any:
+    """Strip the checkout root from every path inside ``value``.
+
+    Paths may carry a ``#locator`` suffix and may sit inside longer text, so
+    each occurrence of the root (with either separator) is removed, and the
+    path that follows it is rewritten with ``/`` to match the stored rows.
+    """
+    if isinstance(value, dict):
+        return {key: _trace_relativize(item, root) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_trace_relativize(item, root) for item in value]
+    if not isinstance(value, str):
+        return value
+    base = root.rstrip("/\\")
+    for prefix in (base + "/", base + "\\"):
+        while prefix in value:
+            head, tail = value.split(prefix, 1)
+            path, separator, rest = tail.partition("#")
+            path, space, after = path.partition(" ")
+            value = head + path.replace("\\", "/") + space + after + separator + rest
+    return value
+
+
+def _trace_record_changes(
+    record: dict[str, Any], normalized: dict[str, Any], normalized_path: Path
+) -> list[dict[str, Any]]:
+    record = _trace_reviewed_record(record, normalized_path)
+    fields = (record.keys() & normalized.keys()) | {
+        "released_reference",
+        "first_score_source_reference",
+        "first_score_reported_at",
+        "authors",
+        "authors_reference",
+        "institutions",
+        "institutions_reference",
+        "identity_override",
+    }
+    if record.get("identity_override") or normalized.get("identity_override"):
+        fields |= {
+            "repository",
+            "artifacts",
+            "publisher",
+            "released",
+            "released_basis",
+            "sizes",
+            "openness",
+        }
+    # Include removed facts and newly supplied fields, which an intersection-only
+    # raw-schema comparison cannot detect.
+    return [
+        {"field": key, "before": record.get(key), "after": normalized.get(key)}
+        for key in sorted(fields)
+        if key not in {"provenance", "slug", "evidence"}
+        and _canon(record.get(key)) != _canon(normalized.get(key))
+    ]
+
+
+def _trace_snapshot_changes(
+    raw: dict[str, Any],
+    normalized: dict[str, Any],
+    normalized_path: Path,
+) -> list[dict[str, Any]]:
+    """Use the production adapters to compare supplementary inputs with their outputs."""
+    snapshot = raw.get("snapshot")
+    if not isinstance(snapshot, dict):
+        if (raw.get("sources") or {}).get("registry"):
+            return _trace_model_reports_changes(raw, normalized, normalized_path)
+        return []
+    from .catalog import CatalogError, normalize_snapshot
+    from .catalog_evidence import attach_evidence
+    from .catalog_opencompass import normalize_opencompass
+
+    paths = raw["input_paths"]
+    snapshot = {
+        **snapshot,
+        "benchmark_rows": _trace_csv_rows(Path(paths["benchmark_file"])),
+        "score_rows": raw.get("score_rows", []),
+    }
+    try:
+        if "round2_evidence" in raw:
+            expected = normalize_opencompass(
+                Path(paths["round2_evidence"]), catalog_snapshot=snapshot
+            )
+            record = next(
+                row
+                for row in attach_evidence(expected["source_records"], [], [])
+                if row["source_benchmark_id"] == raw["benchmark_id"]
+            )
+            return _trace_record_changes(record, normalized, normalized_path)
+        expected = normalize_snapshot(snapshot)
+    except (CatalogError, KeyError, TypeError, ValueError) as error:
+        raise QueryError(f"cannot normalize source inputs: {error}", code="invalid_data") from error
+    record = next(
+        row
+        for row in attach_evidence(
+            expected["source_records"], expected["score_series"], expected["score_observations"]
+        )
+        if row["key"] == normalized["key"]
+    )
+    changes = _trace_record_changes(record, normalized, normalized_path)
+    if "score_rows" not in raw:
+        return changes
+    source = expected["validation"]["source"]
+    return changes + _trace_row_set_changes(
+        "score_observations",
+        [row for row in expected["score_observations"] if row["key"] == normalized["key"]],
+        normalized_path.parent / f"{source}_score_observations.jsonl",
+        normalized["key"],
+        "obs_id",
+    )
+
+
+def _trace_row_set_changes(
+    field: str,
+    expected_rows: list[dict[str, Any]],
+    stored_path: Path,
+    key: str,
+    id_field: str,
+) -> list[dict[str, Any]]:
+    """Compare replayed rows for one record with the rows stored on disk."""
+    if not stored_path.exists():
+        return [
+            {
+                "field": field,
+                "before": "source inputs available",
+                "after": f"missing artifact at {stored_path}",
+            }
+        ]
+    stored_rows = [row for row in _trace_jsonl_rows(stored_path) if row.get("key") == key]
+    if any(not isinstance(row.get(id_field), str) or not row[id_field] for row in stored_rows):
+        raise QueryError(f"{stored_path}: missing {id_field} row identity", code="invalid_data")
+    stored = {row[id_field]: row for row in stored_rows}
+    current = {row[id_field]: row for row in expected_rows}
+    changes: list[dict[str, Any]] = []
+    for row_id in sorted(current.keys() | stored.keys()):
+        if row_id not in current or row_id not in stored:
+            changes.append(
+                {
+                    "field": f"{field}.{row_id}",
+                    "before": current.get(row_id),
+                    "after": stored.get(row_id),
+                }
+            )
+        else:
+            delta, _ = _trace_normalization_diff(current[row_id], stored[row_id])
+            changes.extend({**item, "field": f"{field}.{row_id}.{item['field']}"} for item in delta)
+    return changes
+
+
+def _trace_model_reports_changes(
+    raw: dict[str, Any], normalized: dict[str, Any], normalized_path: Path
+) -> list[dict[str, Any]]:
+    """Replay normalize_reports and compare its record, series and observations.
+
+    A model_reports raw value has no ``snapshot``, and its ``score_rows``,
+    ``metric_identity`` and ``adopting_documents`` never appear on the
+    normalized record, so a field diff alone cannot see a changed or deleted
+    score or card mention. Rebuild the source exactly as normalize-catalog does.
+    """
+    from .benchmark_scores import load_scores
+    from .catalog import CatalogError
+    from .catalog_evidence import attach_evidence
+    from .catalog_reports import normalize_reports
+    from .model_cards import load_registry
+
+    sources = raw.get("sources") or {}
+    score_archive = sources.get("score_archive")
+    try:
+        expected = normalize_reports(
+            load_registry(Path(sources["registry"])),
+            load_scores(Path(score_archive))
+            if score_archive
+            else {"schema_version": 1, "benchmarks": [], "results": []},
+        )
+    except (CatalogError, OSError, KeyError, TypeError, ValueError) as error:
+        raise QueryError(
+            f"cannot normalize model report inputs: {type(error).__name__}: {error}",
+            code="invalid_data",
+        ) from error
+    key = normalized["key"]
+    series = [row for row in expected["score_series"] if row["key"] == key]
+    observations = [row for row in expected["score_observations"] if row["key"] == key]
+    record = next(
+        (
+            row
+            for row in attach_evidence(expected["source_records"], series, observations)
+            if row["key"] == key
+        ),
+        None,
+    )
+    if record is None:
+        return [
+            {
+                "field": "record",
+                "before": "not produced by current model report inputs",
+                "after": "stored normalized record",
+            }
+        ]
+    return (
+        _trace_record_changes(record, normalized, normalized_path)
+        + _trace_row_set_changes(
+            "score_series",
+            series,
+            normalized_path.parent / "model_reports_score_series.jsonl",
+            key,
+            "key",
+        )
+        + _trace_row_set_changes(
+            "score_observations",
+            observations,
+            normalized_path.parent / "model_reports_score_observations.jsonl",
+            key,
+            "obs_id",
+        )
+    )
+
+
+def _trace_model_reports_row(
+    root: Path, source_benchmark_id: str
+) -> tuple[dict[str, Any] | None, Path | None, str]:
+    """Assemble every model_cards/benchmark_scores input for one benchmark.
+
+    ``normalize_reports`` consumes the ``benchmarks:`` entry, the metric
+    identity and score rows in ``benchmark_scores.yml``, and every model card
+    or source document that cites the benchmark, so the source stage shows
+    all of them rather than only the registry row.
+    """
+    path = root / "data" / "model_cards.yml"
+    scores_path = root / "data" / "benchmark_scores.yml"
+    if not source_benchmark_id:
+        return None, None, "unavailable"
+    if not path.exists():
+        return None, path, "missing"
+    # normalize_reports only ever sees these files through their production
+    # loaders, so trace validates them the same way before indexing into them.
+    _trace_validate(path, "model card registry", _load_model_card_registry)
+    if scores_path.exists():
+        _trace_validate(scores_path, "score archive", _load_benchmark_scores)
+    try:
+        registry = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except (OSError, yaml.YAMLError) as error:
+        raise QueryError(
+            f"cannot read model card registry at {path}: {type(error).__name__}: {error}",
+            code="invalid_data",
+        ) from error
+    entry = next(
+        (
+            benchmark
+            for benchmark in registry.get("benchmarks") or []
+            if isinstance(benchmark, dict) and benchmark.get("id") == source_benchmark_id
+        ),
+        None,
+    )
+    if entry is None:
+        return None, path, "missing"
+    value = dict(entry)
+    value["sources"] = {
+        "registry": str(path),
+        "score_archive": str(scores_path) if scores_path.exists() else None,
+    }
+    if scores_path.exists():
+        try:
+            scores = yaml.safe_load(scores_path.read_text(encoding="utf-8")) or {}
+        except (OSError, yaml.YAMLError) as error:
+            raise QueryError(
+                f"cannot read score archive at {scores_path}: {type(error).__name__}: {error}",
+                code="invalid_data",
+            ) from error
+        value["metric_identity"] = next(
+            (
+                metric
+                for metric in scores.get("benchmarks") or []
+                if isinstance(metric, dict) and metric.get("benchmark_id") == source_benchmark_id
+            ),
+            None,
+        )
+        value["score_rows"] = [
+            row
+            for row in scores.get("results") or []
+            if isinstance(row, dict) and row.get("benchmark_id") == source_benchmark_id
+        ]
+    documents = []
+    for card in registry.get("model_cards") or []:
+        if not isinstance(card, dict):
+            continue
+        cited = {str(ref) for ref in card.get("benchmarks") or []}
+        if source_benchmark_id in cited:
+            documents.append(
+                {
+                    "id": card.get("id"),
+                    "model": card.get("model"),
+                    "document_type": card.get("document_type"),
+                    "url": card.get("url"),
+                }
+            )
+    for source_doc in registry.get("source_documents") or []:
+        if not isinstance(source_doc, dict):
+            continue
+        cited = {str(ref) for ref in source_doc.get("benchmarks") or []}
+        if source_benchmark_id in cited:
+            documents.append(
+                {
+                    "id": source_doc.get("id"),
+                    "name": source_doc.get("name"),
+                    "document_type": source_doc.get("document_type"),
+                    "url": source_doc.get("url"),
+                }
+            )
+    if documents:
+        value["adopting_documents"] = documents
+    # yaml parses dates into date objects; the trace payload must stay JSON-safe.
+    return json.loads(_canon(value)), path, "found"
+
+
+def _trace_raw_row(
+    root: Path | None,
+    catalog: dict[str, Any] | None,
+    normalized: dict[str, Any] | None,
+    shard_record: dict[str, Any] | None,
+) -> tuple[dict[str, Any] | None, Path | None, str]:
+    """Inspect the per-record input the catalog pipeline normalized.
+
+    Works from the normalized row alone so a record dropped before the
+    catalog still resolves its raw artifact.  ``state`` is ``found``,
+    ``missing`` (the artifact exists but has no row for this record), or
+    ``unavailable`` (checkout inputs cannot be inspected).
+    """
+    if root is None:
+        return None, None, "unavailable"
+    source_benchmark_id = str(
+        (normalized or {}).get("source_benchmark_id")
+        or (shard_record or {}).get("source_benchmark_id")
+        or str((catalog or {}).get("key") or "").partition(":")[2]
+        or (catalog or {}).get("slug")
+        or ""
+    )
+    source = str((catalog or {}).get("source") or (normalized or {}).get("source") or "")
+    if not source_benchmark_id or not source:
+        return None, None, "unavailable"
+    if source == "model_reports":
+        return _trace_model_reports_row(root, source_benchmark_id)
+    return _trace_snapshot_row(root, source, source_benchmark_id)
+
+
+def _trace_identity_population(
+    root: Path, index_records: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Return the records normalize-catalog validates identity.yml against.
+
+    The pipeline calls ``load_identity`` on the current normalized source
+    records, not on the published index. When the sources have advanced past
+    a stale index, validating against the index would accept a rule whose
+    member no longer exists, and trace would report identity present for a
+    record the pipeline refuses to build. The index is used only when the
+    checkout has no normalized source records at all.
+    """
+    paths = sorted((root / "data" / "catalog").glob("*_source_records.jsonl"))
+    if not paths:
+        return index_records
+    return [row for path in paths for row in _trace_jsonl_rows(path)]
+
+
+def _trace_rebuild(root: Path, population: list[dict[str, Any]], key: str) -> dict[str, Any] | None:
+    """Rebuild one record's index row and detail shard from normalized artifacts.
+
+    normalize-catalog writes the source records, series and observations
+    before it builds the index and the shards, and both carry fields that
+    exist nowhere else: index score projections (``score_count``,
+    ``scored_models``, ``score_summary``...), Library enrichment, sibling
+    descriptors and ``scores_by_source``. Replay identity inheritance,
+    evidence, ``build_benchmark_index`` and ``build_shard`` with the
+    production inputs so trace compares whole artifacts, not shared keys.
+    Returns None when the current source records no longer contain ``key``.
+    """
+    from .catalog import build_benchmark_index
+    from .catalog_evidence import attach_evidence
+    from .catalog_identity import apply_inherited_identity, load_identity
+    from .catalog_shards import build_shard
+    from .library_directions import (
+        assign_library_directions,
+        load_direction_reviews,
+        load_library_directions,
+    )
+    from .library_signals import assign_library_signals, load_library_signals
+
+    catalog_dir = root / "data" / "catalog"
+    try:
+        identity = load_identity(population, catalog_dir / "identity.yml")
+        record = next(
+            (
+                row
+                for row in apply_inherited_identity(population, identity)
+                if row.get("key") == key
+            ),
+            None,
+        )
+        if record is None:
+            return None
+        series = [
+            row
+            for path in sorted(catalog_dir.glob("*_score_series.jsonl"))
+            for row in _trace_jsonl_rows(path)
+            if row.get("key") == key
+        ]
+        observations = [
+            row
+            for path in sorted(catalog_dir.glob("*_score_observations.jsonl"))
+            for row in _trace_jsonl_rows(path)
+            if row.get("key") == key
+        ]
+        [record] = attach_evidence([record], series, observations)
+        series_by_key = {row["key"]: row for row in series}
+        directions = assign_library_directions(
+            population,
+            load_library_directions(catalog_dir / "claire_library_categories.json"),
+            identity.equivalent_groups,
+            load_direction_reviews(catalog_dir / "library_direction_reviews.yml"),
+        )
+        signals = assign_library_signals(
+            population, load_library_signals(catalog_dir / "claire_library_signals.json")
+        )
+        [index_row] = build_benchmark_index(
+            [record],
+            series_by_key,
+            observations,
+            directions_by_key=directions,
+            signals_by_key=signals,
+        )
+        shard = build_shard(
+            record,
+            identity=identity,
+            series_by_key=series_by_key,
+            observations_by_key={key: observations} if observations else {},
+        )
+    except QueryError:
+        raise
+    except (
+        OSError,
+        UnicodeDecodeError,
+        json.JSONDecodeError,
+        yaml.YAMLError,
+        ValueError,
+        KeyError,
+        TypeError,
+        AttributeError,
+    ) as error:
+        raise QueryError(
+            f"cannot rebuild catalog artifacts from {catalog_dir}: {type(error).__name__}: {error}",
+            code="invalid_data",
+        ) from error
+    return {
+        "index_row": index_row,
+        "shard": json.loads(_canon(shard)),
+        "inheritance": identity.inheritance_for(key),
+    }
+
+
+def _trace_field_changes(
+    before: dict[str, Any], after: dict[str, Any], prefix: str = ""
+) -> list[dict[str, Any]]:
+    """Every top-level field whose value differs between two objects."""
+    return [
+        {"field": prefix + field, "before": before.get(field), "after": after.get(field)}
+        for field in sorted(before.keys() | after.keys())
+        if _canon(before.get(field)) != _canon(after.get(field))
+    ]
+
+
+def _trace_sibling_descriptor_changes(
+    siblings: list[dict[str, Any]], expected: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Compare each shard sibling with the descriptor siblings_for would write.
+
+    Key and relation only say the join is declared; ``slug``, ``name`` and
+    ``source`` drive the detail link, so a stale one is a change too.
+    """
+    expected_by_pair = {(str(row.get("key")), str(row.get("relation"))): row for row in expected}
+    changes: list[dict[str, Any]] = []
+    for sibling in siblings:
+        pair = (str(sibling.get("key")), str(sibling.get("relation")))
+        current = expected_by_pair.get(pair)
+        if current is not None:
+            changes.extend(_trace_field_changes(sibling, current, f"siblings.{pair[0]}."))
+    return changes
+
+
+def _trace_source_record(root: Path, key: str) -> tuple[dict[str, Any] | None, Path | None]:
+    for path in sorted((root / "data" / "catalog").glob("*_source_records.jsonl")):
+        for row in _trace_jsonl_rows(path):
+            if row.get("key") == key:
+                return row, path
+    return None, None
+
+
+def _trace_donor_changes(
+    root: Path, inheritance: dict[str, Any] | None, index_records: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Replay the identity donor's own source inputs.
+
+    A recipient in an ``inherit_from`` group shows its donor's publisher,
+    artifacts, release, sizes and openness. Rebuilding the recipient from
+    the donor's stored normalized row would reapply stale values, so run the
+    donor through the same source replay trace uses for its own target and
+    report drift in the fields the recipient can inherit.
+    """
+    from .catalog_identity import INHERITED_IDENTITY_FIELDS
+
+    if not inheritance:
+        return []
+    donor_key = str(inheritance.get("donor_key") or "")
+    donor, donor_path = _trace_source_record(root, donor_key)
+    if donor is None or donor_path is None:
+        return [
+            {
+                "field": f"donor.{donor_key}",
+                "before": "identity donor",
+                "after": "absent from current normalized source records",
+            }
+        ]
+    donor_catalog = next((row for row in index_records if row.get("key") == donor_key), None)
+    raw, _, state = _trace_raw_row(root, donor_catalog, donor, None)
+    if state != "found" or raw is None:
+        return []
+    inheritable = {*INHERITED_IDENTITY_FIELDS, "released_reference"}
+    return [
+        {**change, "field": f"donor.{donor_key}.{change['field']}"}
+        for change in _trace_snapshot_changes(raw, donor, donor_path)
+        if change["field"].split(".")[0] in inheritable
+    ]
+
+
+def _trace_declared_pairs(
+    root: Path,
+    records: list[dict[str, Any]],
+) -> tuple[set[frozenset[str]], set[tuple[str, str, str]], dict[str, set[str]]] | None:
+    """Return identity rules as ``(equivalent pairs, directed variants, peers)``.
+
+    ``peers`` maps each declared key to the keys the current rules join it
+    with, in either direction, so trace can find joins a stale shard is
+    missing as well as siblings the rules no longer declare.
+    """
+    path = root / "data" / "catalog" / "identity.yml"
+    if not path.exists():
+        return None
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError) as error:
+        raise QueryError(
+            f"cannot read identity rules at {path}: {type(error).__name__}: {error}",
+            code="invalid_data",
+        ) from error
+    if not isinstance(data, dict):
+        raise QueryError(f"identity rules at {path} must be a mapping", code="invalid_data")
+    for section in ("equivalent", "variants"):
+        entries = data.get(section, [])
+        if not isinstance(entries, list) or any(not isinstance(row, dict) for row in entries):
+            raise QueryError(f"{path}: {section} must be a list of objects", code="invalid_data")
+        for row in entries:
+            values = (
+                row.get("members", [])
+                if section == "equivalent"
+                else [row.get("of"), row.get("key")]
+            )
+            if not isinstance(values, list) or any(
+                not isinstance(value, str) or not value for value in values
+            ):
+                raise QueryError(f"{path}: invalid {section} record keys", code="invalid_data")
+            if section == "variants" and not isinstance(row.get("relation", "related"), str):
+                raise QueryError(f"{path}: invalid variant relation", code="invalid_data")
+    from .catalog_identity import IdentityError, load_identity
+
+    try:
+        load_identity(records, path)
+    except (
+        IdentityError,
+        OSError,
+        yaml.YAMLError,
+        AttributeError,
+        KeyError,
+        TypeError,
+        ValueError,
+    ) as error:
+        raise QueryError(
+            f"cannot validate identity rules at {path}: {error}", code="invalid_data"
+        ) from error
+    record_keys = {row["key"] for row in records}
+    equivalent: set[frozenset[str]] = set()
+    peers: dict[str, set[str]] = {}
+    for group in data.get("equivalent") or []:
+        members = [str(member) for member in group.get("members") or []]
+        for position, first in enumerate(members):
+            for second in members[position + 1 :]:
+                equivalent.add(frozenset((first, second)))
+        for member in members:
+            peers.setdefault(member, set()).update(other for other in members if other != member)
+    variants: set[tuple[str, str, str]] = set()
+    for entry in data.get("variants") or []:
+        pair = {str(entry.get("of") or ""), str(entry.get("key") or "")}
+        pair.discard("")
+        if len(pair) == 2 and pair <= record_keys:
+            parent = str(entry["of"])
+            child = str(entry["key"])
+            variants.add((parent, child, f"variant:{entry.get('relation', 'related')}"))
+            variants.add((child, parent, "variant:of"))
+            first, second = tuple(pair)
+            peers.setdefault(first, set()).add(second)
+            peers.setdefault(second, set()).add(first)
+    return equivalent, variants, peers
+
+
+def _trace_export_contains(root: Path, benchmark_id: str) -> dict[str, dict[str, Any]]:
+    """Leaderboard exports and whether they verifiably contain one record.
+
+    Unreadable artifacts are reported with ``error`` rather than omitted, so
+    a corrupt output cannot hide behind a healthy index or shard.
+    """
+    found: dict[str, dict[str, Any]] = {}
+    data_dir = root / "site" / "data"
+    csv_path = data_dir / "leaderboard.csv"
+    if csv_path.exists():
+        try:
+            with csv_path.open(encoding="utf-8-sig", newline="") as handle:
+                contains = any(
+                    row.get("benchmark_id") == benchmark_id for row in csv.DictReader(handle)
+                )
+            found["leaderboard.csv"] = {"path": str(csv_path), "contains": contains}
+        except (OSError, csv.Error, UnicodeDecodeError) as error:
+            found["leaderboard.csv"] = {
+                "path": str(csv_path),
+                "contains": None,
+                "error": f"{type(error).__name__}: {error}",
+            }
+    json_path = data_dir / "leaderboard.json"
+    if json_path.exists():
+        try:
+            payload = _read_object(json_path, label="leaderboard export")
+            entries = payload.get("entries") or []
+            contains = any(
+                isinstance(entry, dict) and entry.get("benchmark_id") == benchmark_id
+                for entry in entries
+            )
+            found["leaderboard.json"] = {"path": str(json_path), "contains": contains}
+        except QueryError as error:
+            found["leaderboard.json"] = {
+                "path": str(json_path),
+                "contains": None,
+                "error": str(error),
+            }
+    md_path = data_dir / "leaderboard.md"
+    if md_path.exists():
+        try:
+            contains = benchmark_id in md_path.read_text(encoding="utf-8")
+            found["leaderboard.md"] = {"path": str(md_path), "contains": contains}
+        except (OSError, UnicodeDecodeError) as error:
+            found["leaderboard.md"] = {
+                "path": str(md_path),
+                "contains": None,
+                "error": f"{type(error).__name__}: {error}",
+            }
+    return found
 
 
 def _validate_index_record(record: dict[str, Any], *, position: int) -> None:
@@ -873,6 +1772,376 @@ class QueryService:
             },
             "required_citations": required_citations(),
             "benchmark": shard,
+        }
+
+    def trace(self, identifier: str) -> dict[str, Any]:
+        """Trace one record through the locally available pipeline artifacts.
+
+        This intentionally reports absent stages instead of manufacturing a
+        record from a later artifact.  That makes an incomplete local checkout
+        useful for diagnosis while keeping the command read-only and offline.
+        """
+        identifier = str(identifier).strip()
+        if not identifier:
+            raise QueryError(
+                "benchmark identifier is required",
+                code="invalid_identifier",
+                status=400,
+            )
+
+        index = self._load_index()
+        catalog = next(
+            (
+                row
+                for row in index["benchmarks"]
+                if identifier in {str(row.get("key")), str(row.get("slug"))}
+            ),
+            None,
+        )
+        root = _trace_repo_root(self.paths.index)
+        normalized_row: dict[str, Any] | None = None
+        normalized_path: Path | None = None
+        if root is not None:
+            catalog_dir = root / "data" / "catalog"
+            targets = {identifier}
+            if catalog is not None:
+                targets.update({str(catalog.get("key")), str(catalog.get("slug"))})
+            matches: list[tuple[dict[str, Any], Path]] = []
+            if catalog_dir.is_dir():
+                for path in sorted(catalog_dir.glob("*_source_records.jsonl")):
+                    try:
+                        rows = [
+                            json.loads(line)
+                            for line in path.read_text(encoding="utf-8").splitlines()
+                        ]
+                    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+                        raise QueryError(
+                            f"cannot read source records at {path}: "
+                            f"{type(error).__name__}: {error}",
+                            code="invalid_data",
+                        ) from error
+                    for row in rows:
+                        if not isinstance(row, dict):
+                            continue
+                        if catalog is not None:
+                            if row.get("key") == catalog["key"]:
+                                matches.append((row, path))
+                        elif targets & {
+                            str(row.get("key")),
+                            str(row.get("slug")),
+                            str(row.get("source_benchmark_id")),
+                        }:
+                            matches.append((row, path))
+            # An exact key is unambiguous. Otherwise every source that shares
+            # an unqualified ID (llm-stats and Artificial Analysis both carry
+            # aime-2025) is a candidate, and choosing by filename order would
+            # trace a different benchmark than the caller meant.
+            exact = [match for match in matches if match[0].get("key") == identifier]
+            if exact:
+                matches = exact
+            keys = sorted({str(row.get("key")) for row, _ in matches})
+            if len(keys) > 1:
+                raise QueryError(
+                    "ambiguous normalized source identifier; use a full key: " + ", ".join(keys),
+                    code="ambiguous_identifier",
+                    status=400,
+                )
+            if matches:
+                normalized_row, normalized_path = matches[0]
+
+        # Consult Radar only when nothing in the catalog resolves the
+        # identifier. A record that exists only in the normalized source rows
+        # must still trace in a checkout without data/snapshots, where loading
+        # Radar would raise data_unavailable before any stage is reported.
+        radar_matches = (
+            []
+            if catalog is not None or normalized_row is not None
+            else [
+                row
+                for row in self._radar_candidates()
+                if identifier in {str(row.get("key")), str(row.get("source_id"))}
+            ]
+        )
+        if len(radar_matches) > 1:
+            raise QueryError(
+                "ambiguous Radar source identifier; use a full Radar key: "
+                + ", ".join(str(row["key"]) for row in radar_matches),
+                code="ambiguous_identifier",
+                status=400,
+            )
+        radar = radar_matches[0] if len(radar_matches) == 1 else None
+
+        shard: dict[str, Any] | None = None
+        shard_path: Path | None = None
+        if catalog is not None:
+            shard_path = self.paths.shards / f"{catalog['slug']}.json"
+            if shard_path.exists():
+                shard = _read_object(shard_path, label="benchmark detail shard")
+
+        siblings = shard.get("siblings", []) if shard is not None else []
+        if not isinstance(siblings, list) or any(not isinstance(row, dict) for row in siblings):
+            raise QueryError(
+                f"benchmark detail shard at {shard_path} must have a list of sibling objects",
+                code="invalid_data",
+            )
+
+        raw_shard_record = shard.get("record") if isinstance(shard, dict) else None
+        shard_record_valid = isinstance(raw_shard_record, dict)
+        shard_record = raw_shard_record if shard_record_valid else {}
+        raw_row, raw_path, raw_state = _trace_raw_row(root, catalog, normalized_row, shard_record)
+        shard_key = shard_record.get("key")
+        shard_key_mismatch = (
+            catalog is not None and shard is not None and shard_key != catalog.get("key")
+        )
+
+        stages: list[dict[str, Any]] = []
+
+        def add_stage(
+            name: str,
+            value: Any,
+            *,
+            path: Path | None = None,
+            input_value: Any = None,
+            changes: list[dict[str, Any]] | None = None,
+        ) -> None:
+            present = value is not None
+            stage: dict[str, Any] = {
+                "stage": name,
+                "status": "absent" if not present else ("changed" if changes else "present"),
+                "path": str(path) if path else None,
+                "input": input_value,
+                "output": value,
+                "changes": changes or [],
+            }
+            if not present:
+                stage["error"] = "artifact is missing locally"
+            stages.append(stage)
+
+        if raw_state == "found":
+            source_value = raw_row
+            source_stage_path = raw_path
+        elif raw_state == "missing":
+            source_value = None
+            source_stage_path = raw_path
+        else:
+            source_value = normalized_row or radar
+            source_stage_path = normalized_path if normalized_row is not None else None
+        add_stage("source", source_value, path=source_stage_path)
+        if raw_state == "missing":
+            if raw_path is not None and raw_path.exists():
+                stages[-1]["error"] = f"no raw input row for this record in {raw_path}"
+            else:
+                stages[-1]["error"] = f"raw input artifact missing at {raw_path}"
+        if normalized_row is not None:
+            norm_changes: list[dict[str, Any]] = []
+            restructured: list[str] = []
+            if raw_row is not None:
+                norm_changes, restructured = _trace_normalization_diff(raw_row, normalized_row)
+                norm_changes.extend(
+                    _trace_snapshot_changes(raw_row, normalized_row, normalized_path)
+                )
+            add_stage(
+                "normalization",
+                normalized_row,
+                path=normalized_path,
+                input_value=raw_row,
+                changes=norm_changes,
+            )
+            notes = []
+            if raw_state == "missing":
+                notes.append("raw input row absent; normalized row is the earliest artifact")
+            elif raw_row is None:
+                notes.append("no raw input artifact found for this source")
+            if restructured:
+                notes.append(
+                    "fields restructured by normalization: " + ", ".join(restructured[:10])
+                )
+            if notes:
+                stages[-1]["note"] = "; ".join(notes)
+        else:
+            add_stage(
+                "normalization",
+                None,
+                input_value=raw_row,
+            )
+
+        identity_path = (
+            root / "data" / "catalog" / "identity.yml"
+            if root is not None and (root / "data" / "catalog" / "identity.yml").exists()
+            else None
+        )
+        population = (
+            _trace_identity_population(root, index["benchmarks"]) if root is not None else None
+        )
+        declared = (
+            _trace_declared_pairs(root, population)
+            if root is not None and population is not None
+            else None
+        )
+        identity_value = None
+        identity_changes: list[dict[str, Any]] = []
+        rebuilt: dict[str, Any] | None = None
+        if catalog is not None and declared is not None:
+            equivalent, variants, peers = declared
+            if normalized_row is not None and root is not None and population is not None:
+                rebuilt = _trace_rebuild(root, population, str(catalog.get("key")))
+                if rebuilt is None:
+                    identity_changes.append(
+                        {
+                            "field": "record",
+                            "before": "in benchmark-index.json",
+                            "after": "absent from current normalized source records",
+                        }
+                    )
+                else:
+                    identity_changes.extend(_trace_field_changes(catalog, rebuilt["index_row"]))
+                    identity_changes.extend(
+                        _trace_sibling_descriptor_changes(siblings, rebuilt["shard"]["siblings"])
+                    )
+                    identity_changes.extend(
+                        _trace_donor_changes(root, rebuilt["inheritance"], index["benchmarks"])
+                    )
+            if shard is not None:
+                for sibling in siblings:
+                    sibling_key = str(sibling.get("key") or "")
+                    pair = frozenset({str(catalog.get("key")), sibling_key})
+                    relation = str(sibling.get("relation") or "")
+                    declared_relation = (
+                        pair in equivalent
+                        if relation == "equivalent"
+                        else (str(catalog["key"]), sibling_key, relation) in variants
+                    )
+                    if not declared_relation:
+                        identity_changes.append(
+                            {
+                                "field": f"siblings.{sibling_key}",
+                                "before": relation or "sibling",
+                                "after": "not declared by current identity.yml",
+                            }
+                        )
+                sibling_keys = {str(sibling.get("key")) for sibling in siblings}
+                for peer in sorted(peers.get(str(catalog.get("key")), set()) - sibling_keys):
+                    identity_changes.append(
+                        {
+                            "field": f"identity.{peer}",
+                            "before": "declared in identity.yml",
+                            "after": "absent from shard siblings",
+                        }
+                    )
+            identity_value = {"record": catalog, "siblings": siblings}
+        add_stage(
+            "identity",
+            identity_value,
+            path=identity_path,
+            input_value=normalized_row if normalized_row is not None else raw_row,
+            changes=identity_changes,
+        )
+        if identity_value is not None and shard is None:
+            stages[-1]["note"] = (
+                "detail shard missing; sibling joins cannot be verified against the rules"
+            )
+
+        enrichment = None
+        enrichment_changes: list[dict[str, Any]] = []
+        enrichment_restructured: list[str] = []
+        if shard is not None:
+            enrichment = {
+                "record": shard_record.copy(),
+                "scores_by_source": shard.get("scores_by_source", {}),
+            }
+            if not shard_record_valid:
+                enrichment_changes.append(
+                    {
+                        "field": "record",
+                        "before": "object",
+                        "after": type(raw_shard_record).__name__,
+                    }
+                )
+            elif shard_key_mismatch:
+                enrichment_changes.append(
+                    {
+                        "field": "record.key",
+                        "before": catalog.get("key") if catalog else None,
+                        "after": shard_key,
+                    }
+                )
+            elif catalog is not None:
+                content_changes, enrichment_restructured = _trace_normalization_diff(
+                    catalog, shard_record
+                )
+                enrichment_changes.extend(content_changes)
+            # The record can agree while an interrupted shard swap leaves old
+            # scores behind, so compare the score payload build_shard writes.
+            if rebuilt is not None and not shard_key_mismatch:
+                enrichment_changes.extend(
+                    _trace_field_changes(
+                        shard.get("scores_by_source") or {},
+                        rebuilt["shard"]["scores_by_source"],
+                        "scores_by_source.",
+                    )
+                )
+        add_stage(
+            "enrichment",
+            enrichment,
+            path=shard_path,
+            input_value=identity_value,
+            changes=enrichment_changes,
+        )
+        if enrichment_restructured:
+            stages[-1]["note"] = "fields restructured between index and shard record: " + ", ".join(
+                enrichment_restructured[:10]
+            )
+
+        outputs: dict[str, Any] = {}
+        if catalog is not None:
+            outputs["benchmark-index.json"] = {
+                "path": str(self.paths.index),
+                "contains": True,
+            }
+        if shard is not None:
+            outputs["shard"] = {
+                "path": str(shard_path),
+                "record_key": shard_key,
+                "matches_target": not shard_key_mismatch,
+            }
+        output_changes: list[dict[str, Any]] = []
+        if catalog is not None and root is not None:
+            page = root / "site" / "benchmarks" / str(catalog["slug"]) / "index.html"
+            if page.exists():
+                outputs["benchmark-page"] = {"path": str(page), "contains": True}
+            # write_exports refuses a CSV/JSON export unless every index slug
+            # is an entry, so membership is checked for every source by the
+            # catalog slug. Markdown is intentionally top-N and only reported.
+            for name, entry in _trace_export_contains(root, str(catalog["slug"])).items():
+                outputs[f"export:{name}"] = entry
+                if entry.get("error"):
+                    output_changes.append(
+                        {"field": f"export:{name}", "before": "readable", "after": entry["error"]}
+                    )
+                elif name != "leaderboard.md" and entry.get("contains") is False:
+                    output_changes.append(
+                        {
+                            "field": f"export:{name}",
+                            "before": "contains this record",
+                            "after": "record missing from full export",
+                        }
+                    )
+        add_stage("outputs", outputs or None, input_value=enrichment, changes=output_changes)
+        first_change = next(
+            (stage["stage"] for stage in stages if stage["status"] in {"changed", "absent"}), None
+        )
+        return {
+            "schema_version": QUERY_SCHEMA_VERSION,
+            "identifier": identifier,
+            "retrieval_mode": "direct_trace",
+            "data": {
+                **self._data_summary(scope="catalog"),
+                "catalog_path": str(self.paths.index),
+            },
+            "required_citations": required_citations(),
+            "status": "present" if catalog or radar else "missing",
+            "first_change": first_change,
+            "stages": stages,
         }
 
     def recent(
