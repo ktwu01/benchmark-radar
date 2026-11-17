@@ -62,7 +62,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 5. Who is viewing and using it
+## 5. Who is viewing or using it
 
 *Reach*
 
