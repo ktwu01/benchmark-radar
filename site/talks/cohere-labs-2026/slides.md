@@ -90,7 +90,9 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 7. Benchmark Frontier
+<!-- Hidden until the Benchmark Frontier has findings to present; remove this comment wrapper to bring the slide back.
+
+## Benchmark Frontier
 
 *Live demo*
 
@@ -100,9 +102,9 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 > **Speaker notes:** Switch to the browser, Saturation page, the Benchmark Frontier. If the network fails, this screenshot is the fallback. Each stick is one benchmark: left to right is release date, depth is the best reported score, height is how many models have a reported score. The gold rings are the Pareto frontier: Humanity's Last Exam, APEX-Agents, CritPt, HorizonMath. No other benchmark has both a lower best score and more models tested.
 
----
+-->
 
-## 8. Attention
+## 7. Attention
 
 *Finding 1 of 5*
 
@@ -117,7 +119,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 9. Papers
+## 8. Papers
 
 *Finding 2 of 5*
 
@@ -132,7 +134,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 10. Abandoned repos
+## 9. Abandoned repos
 
 *Finding 3 of 5*
 
@@ -146,7 +148,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 11. Saturation
+## 10. Saturation
 
 *Finding 4 of 5*
 
@@ -161,7 +163,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 12. Audits
+## 11. Audits
 
 *Finding 5 of 5*
 
@@ -175,7 +177,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 13. A five-step check
+## 12. A five-step check
 
 *Take home*
 
@@ -189,7 +191,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 14. What is next
+## 13. What is next
 
 *Roadmap*
 
@@ -202,7 +204,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 15. Let your agent draft Related Work
+## 14. Let your agent draft Related Work
 
 *For your paper*
 
@@ -215,7 +217,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 16. Search for it. If it is missing, add it.
+## 15. Search for it. If it is missing, add it.
 
 *For your benchmark*
 
@@ -228,7 +230,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 17. Get new benchmarks by email
+## 16. Get new benchmarks by email
 
 *For your inbox*
 
@@ -242,7 +244,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 18. Get involved
+## 17. Get involved
 
 *Join in*
 
@@ -257,18 +259,18 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 19. Acknowledgments
+## 18. Acknowledgments
 
 *Thank you*
 
 - June Kim: independent audits of SWE-bench Pro, Terminal-Bench 2.1, DeepSWE, and five more benchmarks: the evidence behind Finding 5.
 - Prahitha Movva and Cohere Labs: for hosting this talk in the Open Science Community.
 
-> **Speaker notes:** Read both names. June Kim's audits are the work behind Finding 5; Radar only links them. Thank Prahitha and Cohere Labs again for hosting. The sixteen authors are on the title slide.
+> **Speaker notes:** Read both names. June Kim's audits are the work behind Finding 5; Radar only links them. Thank Prahitha and Cohere Labs again for hosting. The sixteen authors are on the title slide. Then say out loud: Martin Ma at Thinking Machines Lab says hi to Brydon Eastman at Cohere.
 
 ---
 
-## 20. Questions
+## 19. Questions
 
 *Q&A*
 
