@@ -100615,5 +100615,154 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [],
+        "authors": [
+          "Srinath Srinivasan",
+          "Tim Menzies",
+          "Tim Menzies Srinath Srinivasan"
+        ],
+        "blurb": "The new study “Beyond Leaderboard Ranks” reframes software-agent selection as an accuracy, cost, and uncertainty decision.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-17T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Beyond Leaderboard Ranks: Selecting Software Engineering Agents Under Budget Constraints",
+        "url": "https://arxiv.org/abs/2611.21515"
+      },
+      {
+        "affiliations": [
+          "Korea Advanced Institute of Science & Technology"
+        ],
+        "authors": [
+          "Yerin Nam",
+          "Minkyung Cho",
+          "MinKyu Kim",
+          "SeungWoo Song",
+          "Hangyeol Yoo",
+          "Jihyo Kim",
+          "KyungTae Lim",
+          "Yerin Nam, Minkyung Cho, MinKyu Kim, SeungWoo Song, Hangyeol Yoo, Jihyo Kim, KyungTae Lim"
+        ],
+        "blurb": "EVIDENT is a new benchmark that tests whether a web-browsing agent’s answer is supported by evidence it actually observed, rather than merely checking task completion.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-17T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "EVIDENT: Evaluating Evidence Grounding in GUI Agents",
+        "url": "https://arxiv.org/abs/2611.20488"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Shervin Shahidi",
+          "James Poon",
+          "Hang Xie",
+          "Kenneth O. Xu",
+          "Robin Håkanson",
+          "Vikram Nair",
+          "Jens Pillgram-Larsen",
+          "Nachiappan Nagappan"
+        ],
+        "blurb": "Benchmark Factory is a new system for constructing coding-agent benchmarks from an organization’s own completed code changes.",
+        "categories": [
+          "benchmark",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-17T08:34:25+00:00",
+        "source": "DataCite",
+        "title": "Benchmark Factory: Agentic Benchmark Creation via Dataset Curation and Label-Free Quality Anchors",
+        "url": "https://doi.org/10.48550/arxiv.2611.18890"
+      },
+      {
+        "affiliations": [
+          "Datagrids.ai",
+          "Northwest Polytechnical University Xi’an",
+          "Nanyang Technological University",
+          "East China Normal University",
+          "Tongji University",
+          "Peking University"
+        ],
+        "authors": [
+          "Hanlin Tian, Sihan Zhu, Zhao Yang, Yuxiang Wang, Zhiquan Hu, Yu Mi, Hongquan Zhu, Qiufei Hu"
+        ],
+        "blurb": "DetourBench, newly discovered in today’s feed, evaluates not only whether an interactive agent succeeds but how many actions it takes relative to an exactly computed minimum.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-17T05:00:00+00:00",
+        "source": "XBsleepy",
+        "title": "DetourBench: Trajectory-Level Evaluation of Interactive Agents with Exact Minimum-Action Bounds",
+        "url": "https://arxiv.org/abs/2611.20844"
+      },
+      {
+        "affiliations": [
+          "The Chinese University of Hong Kong, Shenzhen",
+          "Shenzhen Loop Area Institute"
+        ],
+        "authors": [
+          "Yuzhu Ling",
+          "Jiale Han",
+          "Benyou Wang",
+          "Yuzhu Ling, Jiale Han, Benyou Wang"
+        ],
+        "blurb": "EconSafeBench is a new safety benchmark with 828 cases across five executable economic scenarios.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-17T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "When Helpful Agents Cause Financial Harm: Evaluating LLM Agent Safety in Executable Economic Worlds",
+        "url": "https://arxiv.org/abs/2611.18612"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Bowen Liu",
+          "Yuhan Li",
+          "Nuo Chen",
+          "Weile Luo",
+          "Miao Peng",
+          "Qintong Zhang",
+          "Qifan Zhang",
+          "Jia Li",
+          "Ziqi Gao",
+          "Lydell Huang",
+          "Bowen Liu, Yuhan Li, Nuo Chen, Weile Luo, Miao Peng, Qintong Zhang, Qifan Zhang, Jia Li, Ziqi Gao, Lydell Huang"
+        ],
+        "blurb": "Accelerate Bench is a new application-level optimization benchmark containing 32 central processing unit tasks adapted from scientific software and computing competitions.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-17T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Accelerate Bench: Evaluating Agents for Application-Level Program Optimization",
+        "url": "https://arxiv.org/abs/2611.20882"
+      }
+    ],
+    "date": "2026-11-17",
+    "schema_version": 1,
+    "top": [
+      "https://arxiv.org/abs/2611.21515",
+      "https://arxiv.org/abs/2611.20488",
+      "https://doi.org/10.48550/arxiv.2611.18890"
+    ]
+  },
   "since": "2026-11-15T13:57:07.056056+00:00"
 }
