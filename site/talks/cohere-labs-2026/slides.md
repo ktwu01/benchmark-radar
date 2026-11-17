@@ -13,41 +13,56 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 - \*Equal contribution to the paper and the code.
 - benchmark-radar.org · ktwu@utexas.edu
 
-> **Speaker notes:** Thank the host and Cohere Labs. One sentence on who I am. Benchmark Radar is the work of the sixteen people on this slide. Today: what a living record of AI benchmarks shows, and a method your team can use on Monday.
+> **Speaker notes:** In the first 15 seconds, thank Prahitha Movva and Cohere Labs for hosting. One sentence on who I am. Benchmark Radar is the work of the sixteen people on this slide. Today: what a living record of AI benchmarks shows, and a method your team can use on Monday.
 
 ---
 
-## 2. The problem
+## 2. Before you build an eval: has anyone measured this already?
 
-*Why this talk*
+*Where it started*
 
-- 2,940 new benchmark releases in 90 days. No single place tracked what exists, who reported it, or how scores moved.
-- Teams pick evals by habit. The familiar names win, not the ones that fit the product.
-- Headline scores travel alone. The source, the reporter, and the date get dropped along the way.
-- A wrong eval costs more than no eval. It gives a team confidence in the wrong direction.
+- The answers are scattered. arXiv, GitHub, dataset pages, model cards, technical reports, leaderboards.
+- A name is only the start. What does it measure? Is the code still up? Who reported scores, and under which prompt, tools, and attempts?
+- And the pile keeps growing: 2,940 new benchmark releases in 90 days.
+- Lin Shi, a core contributor to harbor-framework and Terminal-Bench, advised us and helped bring this work about.
 - 2,940 = releases in Benchmark Radar's 90-day window, retrieved Nov 13, 2026 (scripts/release_repo_findings.py).
 
-> **Speaker notes:** Open with the scale: Radar picked up 2,940 new benchmark releases in the last 90 days. Nobody reads that many. So teams fall back to habit, and a number reaches a slide without its source or date. The last bullet is the stake: a bad eval is worse than none, because it points the team the wrong way with confidence.
+> **Speaker notes:** Start with the moment every benchmark researcher knows. You have an idea for an eval, and the first job is to check whether someone already measured it. The answers sit in six different places, and a benchmark name only opens more questions. Then the scale: 2,940 new releases in 90 days. We had not thought much about this until Lin Shi pushed us; credit Lin by name. Benchmark Radar began as a tool for our own research, because we wanted to follow benchmarks every day and the collecting was too repetitive.
 
 ---
 
-## 3. What Benchmark Radar is
+## 3. Credit assignment: 225 leads, 2 papers
+
+*A real case*
+
+- Ask. Jiayu Wang planned an eval and asked: does it duplicate August 2026 work on credit assignment in agentic training, with small Qwen baselines?
+- Search. A coding agent installed the Radar Skill and ran several topic variants.
+- Judge. Opening each paper left SRPO and HindSearch: August, credit assignment, small Qwen backbone, released code.
+- Matches: 225 · matched every query word: 47 · dated August 2026: 38 · met all four conditions: 2.
+- Radar finds the candidates and the evidence. The researcher judges what is relevant.
+- Worked use case contributed by Jiayu Wang, Benchmark Radar technical report.
+
+> **Speaker notes:** One real search, from our co-author Jiayu Wang. The question: is this new eval already done? The agent searched the catalog and the discovery layer: 225 matches, 47 matched every word, 38 from August. Then the human part: open each paper and check the four conditions. Two survived, SRPO and HindSearch. That split is the point of the whole project: the tool narrows the pile, the researcher makes the call. Now, what Radar is.
+
+---
+
+## 4. What Benchmark Radar is
 
 *The project*
 
-- 49,679 · benchmark records collected
+- 52,120 · benchmark records collected
 - 41 · public sources, crawled daily
-- 396 · GitHub stars
+- 400+ · GitHub stars
 - 300+ · users
 - Every record keeps its original source and its score history.
 - Open: code on GitHub (pipeline MIT, web UI AGPL-3.0), dataset on Hugging Face (MIT; third-party data keeps its own terms).
-- Records: benchmark-radar.org records badge, Nov 13, 2026. Stars: GitHub, Nov 13, 2026.
+- Records: benchmark-radar.org records badge, Nov 17, 2026. Stars: GitHub, 409 on Nov 17, 2026. Sources: Nov 13, 2026.
 
-> **Speaker notes:** One line: a living database and search engine for AI benchmarks. The numbers are from today. 49,679 is records collected, not distinct benchmarks; many records point at the same benchmark from different sources. Everything is open: the code and the dataset.
+> **Speaker notes:** One line: a living database and search engine for AI benchmarks. 52,120 is records collected, not distinct benchmarks; many records point at the same benchmark from different sources. Everything is open: the code and the dataset.
 
 ---
 
-## 4. Who is viewing and using it
+## 5. Who is viewing and using it
 
 *Reach*
 
@@ -60,7 +75,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 5. How it works
+## 6. How it works
 
 *The pipeline*
 
@@ -75,7 +90,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 6. Demo: Saturation
+## 7. Demo: Saturation
 
 *Live demo*
 
@@ -88,7 +103,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 7. Benchmark Frontier
+## 8. Benchmark Frontier
 
 *Live demo*
 
@@ -100,7 +115,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 8. Attention
+## 9. Attention
 
 *Finding 1 of 5*
 
@@ -115,7 +130,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 9. Papers
+## 10. Papers
 
 *Finding 2 of 5*
 
@@ -130,7 +145,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 10. Abandoned repos
+## 11. Abandoned repos
 
 *Finding 3 of 5*
 
@@ -144,7 +159,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 11. Saturation
+## 12. Saturation
 
 *Finding 4 of 5*
 
@@ -159,7 +174,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 12. Audits
+## 13. Audits
 
 *Finding 5 of 5*
 
@@ -173,7 +188,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 13. A five-step check
+## 14. A five-step check
 
 *Take home*
 
@@ -187,7 +202,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 14. What is next
+## 15. What is next
 
 *Roadmap*
 
@@ -200,7 +215,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 15. Let your agent draft Related Work
+## 16. Let your agent draft Related Work
 
 *For your paper*
 
@@ -213,11 +228,11 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 16. Search for it. If it is missing, add it.
+## 17. Search for it. If it is missing, add it.
 
 *For your benchmark*
 
-- Search. 49,679 benchmark records from 41 public sources, one search box.
+- Search. 52,120 benchmark records from 41 public sources, one search box.
 - Not there? Open the "Submit a benchmark" form on GitHub. English or Chinese is fine.
 - Help the next team. Every benchmark you add is one more that others can find.
 - benchmark-radar.org (screenshot: search for "agent")
@@ -226,7 +241,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 17. Get new benchmarks by email
+## 18. Get new benchmarks by email
 
 *For your inbox*
 
@@ -240,7 +255,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 18. Get involved
+## 19. Get involved
 
 *Join in*
 
@@ -255,13 +270,23 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 19. Questions
+## 20. Acknowledgments
+
+*Thank you*
+
+- June Kim: independent audits of SWE-bench Pro, Terminal-Bench 2.1, DeepSWE, and five more benchmarks: the evidence behind Finding 5.
+- Prahitha Movva and Cohere Labs: for hosting this talk in the Open Science Community.
+
+> **Speaker notes:** Read both names. June Kim's audits are the work behind Finding 5; Radar only links them. Thank Prahitha and Cohere Labs again for hosting. The sixteen authors are on the title slide.
+
+---
+
+## 21. Questions
 
 *Q&A*
 
 - Which eval does your team trust most, and when did you last check it?
 - I am looking for my next role in AI evaluation, starting Feb '27. If your team is hiring, or you can refer me, please email me: ktwu@utexas.edu
 - QR codes: Discord and WeChat.
-- Thanks to my co-authors and contributors: Wenjun Zhang, Junjie Zhou, Pengqian Han, Qiming Bao, Ergan Shang, Jiayu Wang, Junkai Wang, Wanghan Xu, Songyuanyi Lu, Yixuan Li, Rudy Mizrahi Celekli, Lazizbek Ravshanov, Yaoliang Bian, Xudong Han, and Lin Shi.
 
-> **Speaker notes:** Say the job callout out loud, then leave this slide up for the whole Q&A. Read the acknowledgment. Thank Prahitha and Cohere Labs.
+> **Speaker notes:** Say the job callout out loud, then leave this slide up for the whole Q&A.
