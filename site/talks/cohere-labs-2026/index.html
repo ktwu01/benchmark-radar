@@ -382,24 +382,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">Three steps. Discover: 41 sources every day. Extract: the score never travels without its source, reporter, and date. Track: the history stays. The screenshot is the front door; the demo starts here.</aside>
 </section>
 
-<!-- === 7. DEMO === -->
-<section class="slide" data-title="Demo">
-  <div class="frame">
-    <div class="kicker reveal">Live demo</div>
-    <h2 class="reveal">Demo: Saturation</h2>
-    <div class="split" style="grid-template-columns:560px 1fr">
-      <ul class="points reveal" style="margin-top:0;gap:40px;align-content:start">
-        <li><b>Saturation.</b> The best reported score over time. When it flattens near the top, the benchmark stops telling models apart.</li>
-        <li><b>Pareto frontier.</b> Benchmarks that many models have tried and none has topped: still hard, and widely used.</li>
-      </ul>
-      <div class="shot reveal"><img src="assets/demo-swe-search.jpg" alt="Saturation page with a search for SWE-bench Verified and its LLM Stats score history"></div>
-    </div>
-  </div>
-  <div class="footer"><span>benchmark-radar.org/saturation</span><span class="pg"></span></div>
-  <aside class="notes">Switch to the browser, Saturation page. Type SWE-bench Verified and open its score history: show where the best score flattens. If the network fails, this screenshot is the fallback.</aside>
-</section>
-
-<!-- === 8. BENCHMARK FRONTIER === -->
+<!-- === 7. BENCHMARK FRONTIER === -->
 <section class="slide" data-title="Benchmark Frontier">
   <div class="frame">
     <div class="kicker reveal">Live demo</div>
@@ -408,10 +391,10 @@ body.export .all-talks { display: none; }
     <div class="shot reveal" style="margin-top:28px;align-self:center;width:fit-content"><img src="assets/benchmark-frontier.png" style="height:560px;width:auto" alt="Benchmark Frontier chart: each benchmark plotted by release date, reported score, and number of models with reported scores; Humanity's Last Exam, APEX-Agents, CritPt, and HorizonMath are marked on the Pareto frontier"></div>
   </div>
   <div class="footer"><span>benchmark-radar.org/saturation</span><span class="pg"></span></div>
-  <aside class="notes">Same page, the Benchmark Frontier. Each stick is one benchmark: left to right is release date, depth is the best reported score, height is how many models have a reported score. The gold rings are the Pareto frontier: Humanity's Last Exam, APEX-Agents, CritPt, HorizonMath. No other benchmark has both a lower best score and more models tested.</aside>
+  <aside class="notes">Switch to the browser, Saturation page, the Benchmark Frontier. If the network fails, this screenshot is the fallback. Each stick is one benchmark: left to right is release date, depth is the best reported score, height is how many models have a reported score. The gold rings are the Pareto frontier: Humanity's Last Exam, APEX-Agents, CritPt, HorizonMath. No other benchmark has both a lower best score and more models tested.</aside>
 </section>
 
-<!-- === 9. FINDING 1: ATTENTION === -->
+<!-- === 8. FINDING 1: ATTENTION === -->
 <section class="slide" data-title="Finding 1">
   <div class="frame">
     <div class="kicker reveal">Finding 1 of 5</div>
@@ -433,7 +416,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">This is where the record starts to say something. Of the 1,024 repos we have facts for, 70% have zero stars. The top 1%, about ten repos, hold 78% of all stars. If your team discovers benchmarks through what is trending, you are sampling the top 1%. Careful: stars are attention, not quality.</aside>
 </section>
 
-<!-- === 10. FINDING 2: PAPER SIGNAL === -->
+<!-- === 9. FINDING 2: PAPER SIGNAL === -->
 <section class="slide" data-title="Finding 2">
   <div class="frame">
     <div class="kicker reveal">Finding 2 of 5</div>
@@ -453,7 +436,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">Paper repos are one in seven of the cohort but 21 of the 29 that reached 100 stars. Say releases versus repos clearly: 2,940 releases come from 1,081 repos. Median 8.5 versus 0. Say the caveat out loud: association. The practical reading for industry: a paper makes the setup easier to check.</aside>
 </section>
 
-<!-- === 11. FINDING 3: DECAY === -->
+<!-- === 10. FINDING 3: DECAY === -->
 <section class="slide" data-title="Finding 3">
   <div class="frame">
     <div class="kicker reveal">Finding 3 of 5</div>
@@ -472,7 +455,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">One in three new benchmark repos never gets a second day of commits. And 57 of 1,081 repos are gone: a 404 on the endpoint that follows renames, so these are not renames. They were deleted or made private. If a decision rests on a benchmark, check that its repo still exists.</aside>
 </section>
 
-<!-- === 12. FINDING 4: SATURATION === -->
+<!-- === 11. FINDING 4: SATURATION === -->
 <section class="slide" data-title="Finding 4">
   <div class="frame">
     <div class="kicker reveal">Finding 4 of 5</div>
@@ -490,10 +473,10 @@ body.export .all-talks { display: none; }
     </div>
   </div>
   <div class="footer"><span>benchmark-radar.org/saturation</span><span class="pg"></span></div>
-  <aside class="notes">One leaderboard, LLM Stats, 111 reported scores. The best reported score went from 16.8 in May 2024 to 95.0 in June 2026, as dated by LLM Stats. 65 of the 111 are 70 or higher, so the top is crowded. Saturated does not mean solved; it can mean the test stopped measuring the hard part. These are reported scores from one source, not a cross-source saturation metric.</aside>
+  <aside class="notes">Live demo: on the Saturation page, type SWE-bench Verified and open its score history to show where the best score flattens; this screenshot is the fallback. One leaderboard, LLM Stats, 111 reported scores. The best reported score went from 16.8 in May 2024 to 95.0 in June 2026, as dated by LLM Stats. 65 of the 111 are 70 or higher, so the top is crowded. Saturated does not mean solved; it can mean the test stopped measuring the hard part. These are reported scores from one source, not a cross-source saturation metric.</aside>
 </section>
 
-<!-- === 13. FINDING 5: AUDITS === -->
+<!-- === 12. FINDING 5: AUDITS === -->
 <section class="slide" data-title="Finding 5">
   <div class="frame">
     <div class="kicker reveal">Finding 5 of 5</div>
@@ -512,7 +495,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">How a score was produced matters as much as the number. Independent audits re-run the setup. These are the audit's findings, not Radar's. SWE-bench Pro: at least 15% of public tasks underdetermined. June published this on June 21, 2026, 17 days before OpenAI's own audit on July 8 estimated about 30% of tasks broken. The two measure different defect types, so do not add or compare the percentages. Terminal-Bench 2.1: a careless deletion goes unnoticed on 40 of 83 tasks. DeepSWE: four reference solutions failed their own verifiers, and the v1.1 re-grade fixed three. Radar shows the audit next to the scores it examines. Credit June Kim.</aside>
 </section>
 
-<!-- === 14. TAKE HOME === -->
+<!-- === 13. TAKE HOME === -->
 <section class="slide" data-title="Take home">
   <div class="frame">
     <div class="kicker reveal">Take home</div>
@@ -529,7 +512,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">Each step maps to a finding. Discover wide, because attention is a power law. Check provenance, because many repos go quiet or disappear. Check saturation. Check audits. Then schedule retirement: the step teams skip. Radar helps with the first four; the fifth is a team decision.</aside>
 </section>
 
-<!-- === 15. ROADMAP === -->
+<!-- === 14. ROADMAP === -->
 <section class="slide" data-title="Roadmap">
   <div class="frame">
     <div class="kicker reveal">Roadmap</div>
@@ -545,7 +528,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">Four directions. The audit layer is the one with the most leverage, and it depends on people like June Kim publishing audits. Interop: we would rather feed shared efforts than build a silo.</aside>
 </section>
 
-<!-- === 16. ASK 1: RELATED WORK FROM THE CLI === -->
+<!-- === 15. ASK 1: RELATED WORK FROM THE CLI === -->
 <section class="slide" data-title="Ask 1: Related Work">
   <div class="frame">
     <div class="kicker reveal">For your paper</div>
@@ -563,7 +546,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">First ask, for anyone writing a paper. One command gives your agent the Skill to write a cited Related Work draft and the BibTeX to go with it. It searches the Radar catalog plus arXiv, Hugging Face Papers, Semantic Scholar, OpenAlex, and Crossref. Read every entry before you keep it.</aside>
 </section>
 
-<!-- === 17. ASK 2: SEARCH AND ADD A BENCHMARK === -->
+<!-- === 16. ASK 2: SEARCH AND ADD A BENCHMARK === -->
 <section class="slide" data-title="Ask 2: Add your benchmark">
   <div class="frame">
     <div class="kicker reveal">For your benchmark</div>
@@ -584,7 +567,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">Second ask. Search for the benchmark you built or the one you rely on. If Radar missed it, the form takes two minutes, and the next team will find it.</aside>
 </section>
 
-<!-- === 18. ASK 3: EMAIL === -->
+<!-- === 17. ASK 3: EMAIL === -->
 <section class="slide" data-title="Ask 3: Email">
   <div class="frame">
     <div class="kicker reveal">For your inbox</div>
@@ -609,7 +592,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">Third ask. If you want to keep up without checking the site, the email brings new benchmarks to you, daily or weekly.</aside>
 </section>
 
-<!-- === 19. GET INVOLVED === -->
+<!-- === 18. GET INVOLVED === -->
 <section class="slide" data-title="Get involved">
   <div class="frame">
     <div class="kicker reveal">Join in</div>
@@ -632,7 +615,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">Concrete asks. The audit ask is new: if your team rechecks a benchmark, publish it and Radar will link it.</aside>
 </section>
 
-<!-- === 20. ACKNOWLEDGMENTS === -->
+<!-- === 19. ACKNOWLEDGMENTS === -->
 <section class="slide" data-title="Acknowledgments">
   <div class="frame">
     <div class="kicker reveal">Thank you</div>
@@ -646,7 +629,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">Read both names. June Kim's audits are the work behind Finding 5; Radar only links them. Thank Prahitha and Cohere Labs again for hosting. The sixteen authors are on the title slide.</aside>
 </section>
 
-<!-- === 21. Q&A === -->
+<!-- === 20. Q&A === -->
 <section class="slide dark" data-title="Questions">
   <div class="frame">
     <div class="kicker reveal">Q&amp;A</div>

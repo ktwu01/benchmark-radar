@@ -90,20 +90,7 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 ---
 
-## 7. Demo: Saturation
-
-*Live demo*
-
-- Saturation. The best reported score over time. When it flattens near the top, the benchmark stops telling models apart.
-- Pareto frontier. Benchmarks that many models have tried and none has topped: still hard, and widely used.
-
-![Saturation page with a search for SWE-bench Verified and its LLM Stats score history](assets/demo-swe-search.jpg)
-
-> **Speaker notes:** Switch to the browser, Saturation page. Type SWE-bench Verified and open its score history: show where the best score flattens. If the network fails, this screenshot is the fallback.
-
----
-
-## 8. Benchmark Frontier
+## 7. Benchmark Frontier
 
 *Live demo*
 
@@ -111,11 +98,11 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ![Benchmark Frontier chart: each benchmark plotted by release date, reported score, and number of models with reported scores; Humanity's Last Exam, APEX-Agents, CritPt, and HorizonMath are marked on the Pareto frontier](assets/benchmark-frontier.png)
 
-> **Speaker notes:** Same page, the Benchmark Frontier. Each stick is one benchmark: left to right is release date, depth is the best reported score, height is how many models have a reported score. The gold rings are the Pareto frontier: Humanity's Last Exam, APEX-Agents, CritPt, HorizonMath. No other benchmark has both a lower best score and more models tested.
+> **Speaker notes:** Switch to the browser, Saturation page, the Benchmark Frontier. If the network fails, this screenshot is the fallback. Each stick is one benchmark: left to right is release date, depth is the best reported score, height is how many models have a reported score. The gold rings are the Pareto frontier: Humanity's Last Exam, APEX-Agents, CritPt, HorizonMath. No other benchmark has both a lower best score and more models tested.
 
 ---
 
-## 9. Attention
+## 8. Attention
 
 *Finding 1 of 5*
 
@@ -130,7 +117,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 10. Papers
+## 9. Papers
 
 *Finding 2 of 5*
 
@@ -145,7 +132,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 11. Abandoned repos
+## 10. Abandoned repos
 
 *Finding 3 of 5*
 
@@ -159,7 +146,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 12. Saturation
+## 11. Saturation
 
 *Finding 4 of 5*
 
@@ -170,11 +157,11 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ![SWE-Bench Verified score history on LLM Stats, 111 reported scores, best 95](assets/swe-verified-saturation.jpg)
 
-> **Speaker notes:** One leaderboard, LLM Stats, 111 reported scores. The best reported score went from 16.8 in May 2024 to 95.0 in June 2026, as dated by LLM Stats. 65 of the 111 are 70 or higher, so the top is crowded. Saturated does not mean solved; it can mean the test stopped measuring the hard part. These are reported scores from one source, not a cross-source saturation metric.
+> **Speaker notes:** Live demo: on the Saturation page, type SWE-bench Verified and open its score history to show where the best score flattens; this screenshot is the fallback. One leaderboard, LLM Stats, 111 reported scores. The best reported score went from 16.8 in May 2024 to 95.0 in June 2026, as dated by LLM Stats. 65 of the 111 are 70 or higher, so the top is crowded. Saturated does not mean solved; it can mean the test stopped measuring the hard part. These are reported scores from one source, not a cross-source saturation metric.
 
 ---
 
-## 13. Audits
+## 12. Audits
 
 *Finding 5 of 5*
 
@@ -188,7 +175,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 14. A five-step check
+## 13. A five-step check
 
 *Take home*
 
@@ -202,7 +189,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 15. What is next
+## 14. What is next
 
 *Roadmap*
 
@@ -215,7 +202,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 16. Let your agent draft Related Work
+## 15. Let your agent draft Related Work
 
 *For your paper*
 
@@ -228,7 +215,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 17. Search for it. If it is missing, add it.
+## 16. Search for it. If it is missing, add it.
 
 *For your benchmark*
 
@@ -241,7 +228,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 18. Get new benchmarks by email
+## 17. Get new benchmarks by email
 
 *For your inbox*
 
@@ -255,7 +242,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 19. Get involved
+## 18. Get involved
 
 *Join in*
 
@@ -270,7 +257,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 20. Acknowledgments
+## 19. Acknowledgments
 
 *Thank you*
 
@@ -281,7 +268,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 21. Questions
+## 20. Questions
 
 *Q&A*
 
