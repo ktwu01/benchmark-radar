@@ -40,6 +40,25 @@ SWE-bench Verified 的 saturation 过程。**
   <img src="assets/swe-bench-verified.gif" alt="搜索 SWE-bench Verified 并查看模型成绩随时间变化的动画演示" width="720" />
 </a>
 
+## 为什么做 Benchmark Radar
+
+在做一个新的 eval 之前，第一件事是确认有没有人已经测过同样的东西。答案散落在
+arXiv、GitHub、数据集页面、model card、技术报告和 leaderboard 里；而一个
+benchmark 名字只会带出更多问题：它到底测什么？代码还在不在？谁报告了分数，
+用的是什么 prompt、工具和尝试次数？新的 benchmark 还在不断出现：90 天内有
+2,940 个新的 benchmark 发布（2026 年 11 月 13 日统计）。
+
+Benchmark Radar 最初是我们自己做研究用的工具。我们想每天跟踪 benchmark，而手动
+收集实在太重复了。Lin Shi（harbor-framework 和 Terminal-Bench 的核心贡献者）
+给了我们建议，也促成了这项工作。我们的想法是做一张持续更新的 AI benchmark
+地图：每个报告出来的分数都能追溯到它的来源文档，并保留分数的历史变化。
+
+现在它每天从这些公开来源采集（来源数量见开头介绍，实时记录数见上方徽章），OpenAI、Anthropic、
+Google、Meta、Microsoft、NVIDIA、Amazon、IBM、ByteDance 和 Unitree 的研究者
+都看过或在用它。接下来的方向：更广的覆盖，接入更多来源、更快收录新发布；更深
+的审计层，把更多独立审计和它们检查的分数关联起来；与 Every Eval Ever 等社区
+项目互通；以及更好的分数历史视图。
+
 ## 看看这个 dashboard
 
 **Today：过去 24 小时新出现的东西，全部打分排序，再配一段每日简报，说明发生了
