@@ -108485,5 +108485,156 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "Carnegie Mellon University, Pittsburgh, Pennsylvania, USA",
+          "Jilin University, Changchun, China"
+        ],
+        "authors": [
+          "Yicheng Tao",
+          "Yuante Li",
+          "Zipei Fan"
+        ],
+        "blurb": "ForecastGym is a new benchmark that records how evidence from four commercial web-search Application Programming Interfaces changes before forecast resolution, enabling live but replayable tests of forecasting agents with fixed evidence histories.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-18T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "ForecastGym: A Live, Controlled, and Replayable Benchmark for Forecasting Agents",
+        "url": "https://arxiv.org/abs/2611.23045"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Conor McCauley",
+          "Zeliang Kan",
+          "Jason Martin"
+        ],
+        "blurb": "IH-Benchmark is a new test suite for conflicting instructions across both system-versus-user and user-versus-tool priority levels, organized into seven categories of higher-priority constraints.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-18T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "IH-Benchmark: A Conflict-Centered Benchmark for Instruction-Hierarchy Robustness in Large Language Models",
+        "url": "https://arxiv.org/abs/2607.25987"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Markus Dücker",
+          "Vaibhav Kumar",
+          "Yi Liu",
+          "Ronak Chaudhary",
+          "Andreas Plesner",
+          "Francisco Guzmán",
+          "Anish Athalye"
+        ],
+        "blurb": "BankerVerifierBench is a new meta-evaluation dataset for the systems that grade agents, containing 2,464 human-judged rubric criteria from 24 investment-banking tasks and a nine-capability framework for diagnosing verifier behavior.",
+        "categories": [
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-18T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Verifying Agents in Rubric-Graded Environments",
+        "url": "https://arxiv.org/abs/2611.22841"
+      },
+      {
+        "affiliations": [
+          "University of Basel"
+        ],
+        "authors": [
+          "Maximilian Hindermann",
+          "Sorin Marti",
+          "Anthea Alberto",
+          "Alexandra Binnenkade",
+          "Arno Bosse",
+          "Sven Burkhardt",
+          "Eric Decker",
+          "Pema Frick",
+          "Lea Kasper",
+          "Ana-Maria Leonte",
+          "Sven Lienhard",
+          "José Luis Losada Palenzuela",
+          "Gabriel Müller",
+          "Ina Serif",
+          "Elena Spadini",
+          "Tabea Wullschleger",
+          "Franziska Zúñiga"
+        ],
+        "blurb": "The RISE Humanities Data Benchmark released its complete stored results as joinable tables: 3,861 runs, 168,916 requests, nearly four million metric observations, and per-request cost and runtime for historical-document tasks.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-18T13:26:39+00:00",
+        "source": "DataCite",
+        "title": "RISE Humanities Data Benchmark Dataset: Complete Stored Results",
+        "url": "https://doi.org/10.5281/zenodo.24342744"
+      },
+      {
+        "affiliations": [
+          "Department of Electrical and",
+          "The University of Hong Kong",
+          "Department of Restorative",
+          "Faculty of Dentistry",
+          "Department of Infectious",
+          "Diseases and Public Health",
+          "City University of Hong Kong"
+        ],
+        "authors": [
+          "Meilu Zhu",
+          "Xiaohan Li",
+          "Axiu Mao"
+        ],
+        "blurb": "Benchmark leakage is a recurring design pressure in this feed.",
+        "categories": [
+          "benchmark",
+          "agentic"
+        ],
+        "published_at": "2026-11-18T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Where Does Hindsight Enter Clinical Agent Benchmarks? An Audit of Simulators and Case Construction",
+        "url": "https://arxiv.org/abs/2611.22241"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Sikun Xu",
+          "Raphael Thomadsen",
+          "Dennis J. Zhang",
+          "Heng Zhang"
+        ],
+        "blurb": "The new study “SOTA or Luck?” formalizes rank-induced bias in leaderboards, where selecting the highest noisy score rewards sampling luck, and proposes a bootstrap correction under stated assumptions about the model pool and benchmark tasks.",
+        "categories": [
+          "benchmark",
+          "evaluation"
+        ],
+        "published_at": "2026-11-18T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "SOTA or Luck? The Winner's Curse in LLM Leaderboards",
+        "url": "https://arxiv.org/abs/2611.22227"
+      }
+    ],
+    "date": "2026-11-18",
+    "schema_version": 1,
+    "top": [
+      "https://arxiv.org/abs/2611.23045",
+      "https://arxiv.org/abs/2607.25987",
+      "https://arxiv.org/abs/2611.22841"
+    ]
+  },
   "since": "2026-11-16T13:33:26.890406+00:00"
 }
