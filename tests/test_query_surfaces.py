@@ -3241,3 +3241,35 @@ def test_trace_reports_a_crawled_source_removed_from_the_registry(tmp_path: Path
     assert source["status"] == "absent"
     assert "leaderboard_snapshots.yml" in source["error"]
     assert payload["first_change"] == "source"
+
+
+def test_trace_cli_rejects_a_non_object_provenance(tmp_path: Path, capsys) -> None:
+    # A corrupted source row with "provenance": "unknown" used to raise
+    # AttributeError on .get(), which run_query_cli does not catch, so
+    # trace --json printed a traceback instead of the invalid_data envelope.
+    paths = _catalog(tmp_path)
+    _identity_rules(tmp_path)
+    index = json.loads(paths.index.read_text(encoding="utf-8"))
+    _source_records(tmp_path, [index["benchmarks"][0]], rebuild_index=False)
+    records_path = tmp_path / "data" / "catalog" / "opencompass_source_records.jsonl"
+    row = json.loads(records_path.read_text(encoding="utf-8"))
+    row["provenance"] = "unknown"
+    records_path.write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    result = run_query_cli(
+        [
+            "trace",
+            "opencompass-agent-workbench",
+            "--json",
+            "--index",
+            str(paths.index),
+            "--shards",
+            str(paths.shards),
+            "--snapshots",
+            str(paths.snapshots),
+        ]
+    )
+    captured = capsys.readouterr()
+    assert result != 0
+    assert "invalid_data" in captured.out + captured.err
+    assert "Traceback" not in captured.out + captured.err

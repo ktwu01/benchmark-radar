@@ -709,6 +709,13 @@ def _trace_raw_row(
         return None, None, "unavailable"
     if source == "model_reports":
         return _trace_model_reports_row(root, source_benchmark_id)
+    provenance = (normalized or {}).get("provenance")
+    if provenance is not None and not isinstance(provenance, dict):
+        raise QueryError(
+            f"normalized record {(normalized or {}).get('key')!r} has a non-object"
+            f"provenance: {type(provenance).__name__}",
+            code="invalid_data",
+        )
     crawled = bool(((normalized or {}).get("provenance") or {}).get("crawl_bundle"))
     return _trace_snapshot_row(root, source, source_benchmark_id, crawled=crawled)
 
