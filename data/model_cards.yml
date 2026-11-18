@@ -195,6 +195,27 @@ source_documents:
     published: 2026-10-17
     retrieved_at: 2026-11-12
 
+  # LatchBio publishes each benchmark's current results as a CSV in its own
+  # repository; the URL pins the commit read, and `published` is that commit's
+  # date. The arXiv papers report earlier task sets and are not cited here.
+  - id: latchbio_spatialbench_results_baa9841
+    name: SpatialBench results table (latchbio/spatialbench, commit baa9841)
+    publisher: LatchBio
+    document_type: benchmark_leaderboard
+    url: https://github.com/latchbio/spatialbench/blob/baa9841efc99fa03b2f9ec25684c8ec52a2245df/results/model_results.csv
+    benchmarks: [latchbio_spatialbench]
+    published: 2026-11-01
+    retrieved_at: 2026-11-18
+
+  - id: latchbio_scbench_results_106726f
+    name: scBench results table (latchbio/scbench, commit 106726f)
+    publisher: LatchBio
+    document_type: benchmark_leaderboard
+    url: https://github.com/latchbio/scbench/blob/106726f432e0221a3fdbf9ef8e39b21f638f9b60/results/model_results.csv
+    benchmarks: [latchbio_scbench]
+    published: 2026-11-16
+    retrieved_at: 2026-11-18
+
 benchmarks:
   - id: gobench
     name: GoBench
@@ -2154,6 +2175,37 @@ benchmarks:
 # canonical ids that document reports a result for. It is a set, not a ranking:
 # a card that reports AIME once and a card that reports it in four
 # configurations both contribute exactly one adoption.
+  # Prefixed with the vendor: Ropedia publishes an unrelated SpatialBench
+  # (arXiv 2605.27367), and scbench.ai is SlopCodeBench. Similar names are not
+  # merged.
+  - id: latchbio_spatialbench
+    name: LatchBio SpatialBench
+    aliases: ["LatchBio SpatialBench", "SpatialBench (LatchBio)"]
+    domain: biology
+    url: https://github.com/latchbio/spatialbench
+    caveat: >-
+      159 spatial transcriptomics analysis evaluations, each run 3 times and
+      averaged; the published 95% intervals span about ±6 to 7 points, so
+      neighbouring models usually overlap. The score depends on the agent
+      harness as well as the model (Claude Opus 4.8 scores 55.35 in Claude
+      Code and 52.62 in mini-swe-agent), and the evaluation container has
+      network access. The arXiv paper (2512.21907) reports an earlier task
+      set, so its numbers are not comparable with these.
+
+  - id: latchbio_scbench
+    name: LatchBio scBench
+    aliases: ["LatchBio scBench", "scBench (LatchBio)"]
+    domain: biology
+    url: https://github.com/latchbio/scbench
+    caveat: >-
+      195 single-cell RNA-seq analysis evaluations, but the full set is
+      withheld to prevent training contamination and only six canonical
+      examples are public, so scores cannot be independently reproduced. The
+      published 95% intervals span about ±5 to 6.5 points, and the harness
+      matters (GPT-5.5 scores 57.95 in mini-swe-agent and 57.78 in OpenAI
+      Codex). The arXiv paper (2602.09063) reports an earlier task set, so
+      its numbers are not comparable with these.
+
 model_cards:
   - id: openai_gpt_5_system_card
     organization: OpenAI

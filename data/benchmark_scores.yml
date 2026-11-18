@@ -597,6 +597,16 @@ benchmarks:
     direction: lower_is_better
     unit: characters
 
+  - benchmark_id: latchbio_spatialbench
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+
+  - benchmark_id: latchbio_scbench
+    metric: accuracy
+    direction: higher_is_better
+    unit: percent
+
 results:
   # Brain-to-Text '24's official challenge summary names the top three final
   # submissions and the PyTorch baseline. The challenge used 1,200 held-out
@@ -8542,4 +8552,401 @@ results:
     reported_at: 2026-01-02
     value: 1427
     read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+
+  # latchbio_spatialbench: LatchBio's own results table, read from the pinned
+  # results/model_results.csv. Model names map the CSV's API ids onto the
+  # registry's display names (claude-opus-4-8 -> Claude Opus 4.8).
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; mini-swe-agent harness; container with network access
+    model: GPT-5.5
+    organization: OpenAI
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 57.65
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; mini-swe-agent harness; container with network access
+    model: GPT-5.4
+    organization: OpenAI
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 57.44
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; pi harness; container with network access
+    model: Gemini 3.5 Flash
+    organization: Google
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 55.56
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; Claude Code harness; container with network access
+    model: Claude Opus 4.8
+    organization: Anthropic
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 55.35
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; OpenAI Codex harness; container with network access
+    model: GPT-5.5
+    organization: OpenAI
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 53.67
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; mini-swe-agent harness; container with network access
+    model: Claude Opus 4.6
+    organization: Anthropic
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 52.83
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; mini-swe-agent harness; container with network access
+    model: Claude Opus 4.8
+    organization: Anthropic
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 52.62
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; mini-swe-agent harness; container with network access
+    model: Claude Opus 4.7
+    organization: Anthropic
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 52.41
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; mini-swe-agent harness; container with network access
+    model: Gemini 3.1 Pro Preview
+    organization: Google
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 51.57
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; Claude Code harness; container with network access
+    model: Claude Opus 4.7
+    organization: Anthropic
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 51.36
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; mini-swe-agent harness; container with network access
+    model: GPT-5.2
+    organization: OpenAI
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 50.1
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; mini-swe-agent harness; container with network access
+    model: Gemini 3.5 Flash
+    organization: Google
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 48.85
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; mini-swe-agent harness; container with network access
+    model: Grok 4.20 Beta 0309 (reasoning)
+    organization: xAI
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 45.91
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; mini-swe-agent harness; container with network access
+    model: Claude Sonnet 4.6
+    organization: Anthropic
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 44.23
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; mini-swe-agent harness; container with network access
+    model: Claude Opus 4.5
+    organization: Anthropic
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 42.77
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; mini-swe-agent harness; container with network access
+    model: Claude Sonnet 4.5
+    organization: Anthropic
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 41.51
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; mini-swe-agent harness; container with network access
+    model: GPT-5.1
+    organization: OpenAI
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 39.83
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; mini-swe-agent harness; container with network access
+    model: Grok 4.1 Fast (reasoning)
+    organization: xAI
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 33.96
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; mini-swe-agent harness; container with network access
+    model: Grok 4
+    organization: xAI
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 31.87
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_spatialbench
+    instrument: latchbio_spatialbench_159_evals
+    protocol: 159 evaluations, 3 runs each averaged; mini-swe-agent harness; container with network access
+    model: Gemini 2.5 Pro
+    organization: Google
+    source_id: latchbio_spatialbench_results_baa9841
+    reported_at: 2026-11-01
+    value: 28.93
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # latchbio_scbench: LatchBio's own results table, read from the pinned
+  # results/model_results.csv. Model names map the CSV's API ids onto the
+  # registry's display names (claude-opus-4-8 -> Claude Opus 4.8).
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; Claude Code harness
+    model: Claude Opus 4.8
+    organization: Anthropic
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 57.95
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; mini-swe-agent harness
+    model: GPT-5.5
+    organization: OpenAI
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 57.95
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; OpenAI Codex harness
+    model: GPT-5.5
+    organization: OpenAI
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 57.78
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; mini-swe-agent harness
+    model: Claude Opus 4.8
+    organization: Anthropic
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 57.44
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; mini-swe-agent harness
+    model: GPT-5.4
+    organization: OpenAI
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 57.44
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; pi harness
+    model: Gemini 3.5 Flash
+    organization: Google
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 56.92
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; mini-swe-agent harness
+    model: Claude Opus 4.7
+    organization: Anthropic
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 55.21
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; Claude Code harness
+    model: Claude Opus 4.7
+    organization: Anthropic
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 54.02
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; mini-swe-agent harness
+    model: Gemini 3.1 Pro Preview
+    organization: Google
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 53.85
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; mini-swe-agent harness
+    model: Claude Opus 4.6
+    organization: Anthropic
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 52.65
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; mini-swe-agent harness
+    model: GPT-5.2
+    organization: OpenAI
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 52.31
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; mini-swe-agent harness
+    model: Claude Sonnet 4.6
+    organization: Anthropic
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 50.26
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; mini-swe-agent harness
+    model: Claude Opus 4.5
+    organization: Anthropic
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 47.18
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; mini-swe-agent harness
+    model: Grok 4.20 Beta 0309 (reasoning)
+    organization: xAI
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 44.44
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; mini-swe-agent harness
+    model: Grok 4.3
+    organization: xAI
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 44.27
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; mini-swe-agent harness
+    model: GPT-5.1
+    organization: OpenAI
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 38.80
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; mini-swe-agent harness
+    model: Claude Sonnet 4.5
+    organization: Anthropic
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 33.16
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; mini-swe-agent harness
+    model: Grok 4.1 Fast (reasoning)
+    organization: xAI
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 30.26
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: latchbio_scbench
+    instrument: latchbio_scbench_195_evals
+    protocol: 195 evaluations; mini-swe-agent harness
+    model: Gemini 2.5 Pro
+    organization: Google
+    source_id: latchbio_scbench_results_106726f
+    reported_at: 2026-11-16
+    value: 23.59
+    read_from: html_text
     measurement_kind: benchmark_publisher_run
