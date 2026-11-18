@@ -230,7 +230,7 @@ def _trace_validate(path: Path, label: str, loader: Any) -> None:
 
 
 def _trace_snapshot_row(
-    root: Path, source: str, source_benchmark_id: str
+    root: Path, source: str, source_benchmark_id: str, *, crawled: bool = False
 ) -> tuple[dict[str, Any] | None, Path | None, str]:
     """Return ``(row, path, state)`` for the newest committed crawl row.
 
@@ -264,6 +264,12 @@ def _trace_snapshot_row(
         if str(entry.get("id") or "").startswith(f"{source}_")
     ]
     if not snapshots:
+        # A record whose normalized row names a crawl bundle built from a
+        # registered crawl. If the registry is no longer has that source, the
+        # crawl input is gone; reconstructing it from deprived row would
+        # let every stage read present.
+        if crawled:
+            return None, registry_path, "missing"
         return None, None, "unavailable"
     entry = max(snapshots, key=lambda row: str(row.get("crawled_at") or ""))
     columns = entry.get("benchmark_columns") or {}
@@ -703,7 +709,8 @@ def _trace_raw_row(
         return None, None, "unavailable"
     if source == "model_reports":
         return _trace_model_reports_row(root, source_benchmark_id)
-    return _trace_snapshot_row(root, source, source_benchmark_id)
+    crawled = bool(((normalized or {}).get("provenance") or {}).get("crawl_bundle"))
+    return _trace_snapshot_row(root, source, source_benchmark_id, crawled=crawled)
 
 
 def _trace_identity_population(

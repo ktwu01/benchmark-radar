@@ -3217,3 +3217,27 @@ def test_trace_compares_the_full_shard_record(tmp_path: Path) -> None:
     change = next(row for row in stage["changes"] if row["field"] == "documents")
     assert change["before"] == []
     assert change["after"]
+
+
+def test_trace_reports_a_crawled_source_removed_from_the_registry(tmp_path: Path) -> None:
+    # The registry is valid but no longer has an entry for this record's
+    # source. The normalized row names a crawl bundle, so it was built from a
+    # registered crawl: the input is missing, not unavailable.
+    paths = _catalog(tmp_path)
+    _identity_rules(tmp_path)
+    index = json.loads(paths.index.read_text(encoding="utf-8"))
+    _source_records(
+        tmp_path,
+        [
+            {
+                **index["benchmarks"][0],
+                "provenance": {"crawl_bundle": "leaderboard_snapshots/opencompass_hub.csv"},
+            }
+        ],
+    )
+
+    payload = QueryService(paths).trace("opencompass-agent-workbench")
+    source = _trace_stages(payload)["source"]
+    assert source["status"] == "absent"
+    assert "leaderboard_snapshots.yml" in source["error"]
+    assert payload["first_change"] == "source"
