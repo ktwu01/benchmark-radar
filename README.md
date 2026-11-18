@@ -63,9 +63,10 @@ a core contributor to harbor-framework and Terminal-Bench, advised us and helped
 bring this work about. The idea is a living map of AI benchmarks that ties every
 reported score to its source document and keeps its score history.
 
-Today it collects from 41 public sources every day (the badge above shows the
-live record count), and researchers at OpenAI, Anthropic, Google, Meta,
-Microsoft, NVIDIA, Amazon, IBM, ByteDance and Unitree have viewed or used it.
+Today it collects from its public sources every day (the intro above gives the
+source count, and the badge the live record count), and researchers at OpenAI,
+Anthropic, Google, Meta, Microsoft, NVIDIA, Amazon, IBM, ByteDance and Unitree
+have viewed or used it.
 Where it is going: wider coverage, with more sources and faster pickup of new
 releases; a deeper audit layer, linking more independent audits to the scores
 they examine; interop with community efforts such as Every Eval Ever; and

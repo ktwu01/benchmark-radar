@@ -53,7 +53,7 @@ Benchmark Radar 最初是我们自己做研究用的工具。我们想每天跟�
 给了我们建议，也促成了这项工作。我们的想法是做一张持续更新的 AI benchmark
 地图：每个报告出来的分数都能追溯到它的来源文档，并保留分数的历史变化。
 
-现在它每天从 41 个公开来源采集（实时记录数见上方徽章），OpenAI、Anthropic、
+现在它每天从这些公开来源采集（来源数量见开头介绍，实时记录数见上方徽章），OpenAI、Anthropic、
 Google、Meta、Microsoft、NVIDIA、Amazon、IBM、ByteDance 和 Unitree 的研究者
 都看过或在用它。接下来的方向：更广的覆盖，接入更多来源、更快收录新发布；更深
 的审计层，把更多独立审计和它们检查的分数关联起来；与 Every Eval Ever 等社区
