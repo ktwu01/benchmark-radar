@@ -1025,6 +1025,14 @@ papers:
     retrieved_at: '2026-11-05'
     institutions:
     - Sun Yat-sen University
+  '2610.18352':
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7221806115
+    retrieved_at: '2026-11-18'
+    institutions:
+    - Chinese University of Hong Kong
+    - Xiaomi (China)
+    - National University of Defense Technology
   '2610.18354':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7221770820
@@ -1707,6 +1715,14 @@ papers:
     source_url: null
     retrieved_at: '2026-11-16'
     institutions: []
+  '2611.15348':
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7225994787
+    retrieved_at: '2026-11-18'
+    institutions:
+    - Moscow Regional Scientific Research Clinical Institute. MF Vladimirsky
+    - National Research University Higher School of Economics
+    - Moscow Power Engineering Institute
   '2611.15640':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7225992933
@@ -1740,6 +1756,17 @@ papers:
     retrieved_at: '2026-11-17'
     institutions:
     - Ling Team, Ant Group
+  '2611.17048':
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7226019943
+    retrieved_at: '2026-11-18'
+    institutions:
+    - Hong Kong University of Science and Technology
+  '2611.17621':
+    basis: null
+    source_url: null
+    retrieved_at: '2026-11-18'
+    institutions: []
   '2611.17955':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2611.17955
@@ -1756,6 +1783,11 @@ papers:
     institutions:
     - Sakana AI
     - Institute of Science Tokyo
+  '2611.18981':
+    basis: null
+    source_url: null
+    retrieved_at: '2026-11-18'
+    institutions: []
   '2611.20882':
     basis: null
     source_url: null
