@@ -48,6 +48,29 @@ the GIF below to watch SWE-bench Verified move toward saturation.**
   <img src="assets/swe-bench-verified.gif" alt="Animated demo of searching for SWE-bench Verified and viewing its model scores over time" width="720" />
 </a>
 
+## Why Benchmark Radar exists
+
+Before you build an eval, you need to know whether someone has already measured
+the same thing. The answers are scattered across arXiv, GitHub, dataset pages,
+model cards, technical reports and leaderboards, and a benchmark name only opens
+more questions: what does it measure, is the code still up, and who reported
+each score, under which prompt, tools and attempts? The pile keeps growing:
+2,940 new benchmark releases in 90 days (retrieved Nov 13, 2026).
+
+Benchmark Radar began as a tool for our own research. We wanted to follow
+benchmarks every day, and collecting them by hand was too repetitive. Lin Shi,
+a core contributor to harbor-framework and Terminal-Bench, advised us and helped
+bring this work about. The idea is a living map of AI benchmarks that ties every
+reported score to its source document and keeps its score history.
+
+Today it collects from 41 public sources every day (the badge above shows the
+live record count), and researchers at OpenAI, Anthropic, Google, Meta,
+Microsoft, NVIDIA, Amazon, IBM, ByteDance and Unitree have viewed or used it.
+Where it is going: wider coverage, with more sources and faster pickup of new
+releases; a deeper audit layer, linking more independent audits to the scores
+they examine; interop with community efforts such as Every Eval Ever; and
+better views of score history.
+
 ## See the dashboard
 
 **Today: everything that showed up in the last 24 hours, scored and ranked, plus
