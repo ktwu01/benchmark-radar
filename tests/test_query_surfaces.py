@@ -30,12 +30,51 @@ from benchmark_radar.snapshots import load_snapshots, write_snapshot
 from benchmark_radar.sources import fetch_huggingface
 
 
+def _unrelated_snapshot_registry(tmp_path: Path) -> None:
+    """A valid crawl registry whose only snapshot belongs to no fixture source.
+
+    A real checkout always has data/leaderboard_snapshots.yml, and trace
+    reports its absence as a missing crawl input. Fixture records then take
+    the "no snapshot for this source" path unless a test writes its own.
+    """
+    data_dir = tmp_path / "data"
+    (data_dir / "leaderboard_snapshots").mkdir(parents=True, exist_ok=True)
+    (data_dir / "leaderboard_snapshots" / "unrelated.csv").write_text(
+        "benchmark_id,name\nunrelated,Unrelated\n", encoding="utf-8"
+    )
+    (data_dir / "leaderboard_snapshots.yml").write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": 1,
+                "snapshots": [
+                    {
+                        "id": "unrelated_fixture_2026-08-17",
+                        "source": "Unrelated Fixture",
+                        "source_url": "https://example.com/unrelated",
+                        "crawled_at": "2026-08-17T00:00:00Z",
+                        "benchmark_file": "leaderboard_snapshots/unrelated.csv",
+                        "benchmark_count": 1,
+                        "score_series_policy": "preserve_empty",
+                        "benchmark_columns": {
+                            "benchmark_id": "benchmark_id",
+                            "benchmark_name": "name",
+                        },
+                        "columns": {"benchmark_id": "benchmark_id", "benchmark_name": "name"},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
 def _catalog(tmp_path: Path) -> QueryPaths:
     index_path = tmp_path / "site" / "data" / "benchmark-index.json"
     shard_dir = index_path.parent / "benchmarks"
     snapshot_dir = tmp_path / "data" / "snapshots"
     index_path.parent.mkdir(parents=True)
     shard_dir.mkdir()
+    _unrelated_snapshot_registry(tmp_path)
     records = [
         {
             "slug": "opencompass-agent-workbench",
@@ -589,7 +628,7 @@ def _source_records(tmp_path: Path, rows: list[dict], *, rebuild_index: bool = T
     path = catalog_dir / "opencompass_source_records.jsonl"
     path.write_text("".join(json.dumps(row) + "\n" for row in records), encoding="utf-8")
     if rebuild_index:
-        _sync_index(tmp_path, build_benchmark_index(records))
+        _sync_index(tmp_path, build_benchmark_index(records), records)
 
 
 def _write_model_reports_catalog(tmp_path: Path, *, sync_index: bool = True) -> None:
@@ -625,6 +664,7 @@ def _write_model_reports_catalog(tmp_path: Path, *, sync_index: bool = True) -> 
         build_benchmark_index(
             result["source_records"], series_by_key, result["score_observations"]
         ),
+        result["source_records"],
         append=True,
     )
     # Shards carry the score payload build_shard writes for each record.
@@ -650,13 +690,21 @@ def _write_model_reports_catalog(tmp_path: Path, *, sync_index: bool = True) -> 
         shard_path.write_text(json.dumps(shard), encoding="utf-8")
 
 
-def _sync_index(tmp_path: Path, rows: list[dict], *, append: bool = False) -> None:
-    """Replace fixture index rows (and their shard records) with built rows."""
+def _sync_index(
+    tmp_path: Path,
+    rows: list[dict],
+    records: list[dict],
+    *,
+    append: bool = False,
+) -> None:
+    """Replace fixture index rows with built rows, and shard records with the
+    full normalized records build_shard writes (the index is a projection)."""
     index_path = tmp_path / "site" / "data" / "benchmark-index.json"
     if not index_path.exists():
         return
     index = json.loads(index_path.read_text(encoding="utf-8"))
     rebuilt = {row["key"]: row for row in rows}
+    full = {record["key"]: json.loads(json.dumps(record)) for record in records}
     if append:
         known = {row["key"] for row in index["benchmarks"]}
         for row in rows:
@@ -666,7 +714,12 @@ def _sync_index(tmp_path: Path, rows: list[dict], *, append: bool = False) -> No
             index["count"] = len(index["benchmarks"])
             (index_path.parent / "benchmarks" / f"{row['slug']}.json").write_text(
                 json.dumps(
-                    {"schema_version": 1, "record": row, "siblings": [], "scores_by_source": {}}
+                    {
+                        "schema_version": 1,
+                        "record": full.get(row["key"], row),
+                        "siblings": [],
+                        "scores_by_source": {},
+                    }
                 ),
                 encoding="utf-8",
             )
@@ -680,7 +733,10 @@ def _sync_index(tmp_path: Path, rows: list[dict], *, append: bool = False) -> No
             # A shard that already names another record is a fixture for
             # that mismatch; leave it as written.
             if isinstance(shard.get("record"), dict) and shard["record"].get("key") == row["key"]:
-                shard["record"] = {**shard["record"], **rebuilt[row["key"]]}
+                shard["record"] = full.get(row["key"]) or {
+                    **shard["record"],
+                    **rebuilt[row["key"]],
+                }
                 # Shards are named by slug, so follow a slug the build changed.
                 shard_path.unlink()
                 shard_path = shard_path.with_name(f"{rebuilt[row['key']]['slug']}.json")
@@ -777,6 +833,43 @@ def _model_cards_yaml(benchmark: dict) -> str:
                 }
             ],
         }
+    )
+
+
+def _score_archive(tmp_path: Path, benchmark_id: str) -> None:
+    """A valid benchmark_scores.yml citing the _model_cards_yaml card.
+
+    normalize-catalog refuses to run without the score archive, and trace
+    reports its absence as a missing input.
+    """
+    (tmp_path / "data" / "benchmark_scores.yml").write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": 1,
+                "benchmarks": [
+                    {
+                        "benchmark_id": benchmark_id,
+                        "metric": "accuracy",
+                        "direction": "higher_is_better",
+                        "unit": "percent",
+                    }
+                ],
+                "results": [
+                    {
+                        "benchmark_id": benchmark_id,
+                        "instrument": "fixture_v1",
+                        "protocol": "standard",
+                        "model": "Example-1",
+                        "organization": "Example Lab",
+                        "source_id": "example_card",
+                        "reported_at": "2026-01-01",
+                        "read_from": "html_text",
+                        "value": 50.0,
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
     )
 
 
@@ -1272,6 +1365,7 @@ def test_trace_reports_a_corrupt_leaderboard_export(tmp_path: Path) -> None:
         _model_cards_yaml({"id": "agent-workbench", "name": "Agent Workbench (registry)"}),
         encoding="utf-8",
     )
+    _score_archive(tmp_path, "agent-workbench")
     data_dir = tmp_path / "site" / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
     (data_dir / "leaderboard.json").write_text("{not json", encoding="utf-8")
@@ -2227,6 +2321,7 @@ def test_trace_cli_serializes_unquoted_registry_dates(tmp_path: Path, capsys) ->
             "  name: Dated\n", "  name: Dated\n  released: 2026-01-01\n"
         )
     )
+    _score_archive(tmp_path, "dated")
     result = run_query_cli(
         [
             "trace",
@@ -2272,7 +2367,7 @@ def test_trace_tracks_snapshot_score_inputs(
         "rank": "1",
     }
     directory = tmp_path / "data/leaderboard_snapshots"
-    directory.mkdir()
+    directory.mkdir(exist_ok=True)
     for filename, rows in [("benchmarks.csv", [benchmark]), ("scores.csv", [score])]:
         with (directory / filename).open("w", newline="") as handle:
             writer = csv.DictWriter(handle, fieldnames=rows[0].keys())
@@ -3025,3 +3120,156 @@ def test_trace_checks_full_export_membership_for_every_source(
     fields = {row["field"] for row in outputs["changes"]}
     assert (f"export:{missing_from}" in fields) is flagged
     assert outputs["status"] == ("changed" if flagged else "present")
+
+
+def test_trace_reports_a_missing_crawl_registry(tmp_path: Path) -> None:
+    # Issue #1292: without data/leaderboard_snapshots.yml the crawl input was
+    # classed unavailable and the normalized row stood in as the source, so
+    # every stage read present.
+    paths = _catalog(tmp_path)
+    _identity_rules(tmp_path)
+    index = json.loads(paths.index.read_text(encoding="utf-8"))
+    _source_records(tmp_path, [index["benchmarks"][0]])
+    (tmp_path / "data" / "leaderboard_snapshots.yml").unlink()
+
+    payload = QueryService(paths).trace("opencompass-agent-workbench")
+    source = _trace_stages(payload)["source"]
+    assert source["status"] == "absent"
+    assert "leaderboard_snapshots.yml" in source["error"]
+    assert payload["first_change"] == "source"
+
+
+def test_trace_reports_a_missing_score_archive(tmp_path: Path) -> None:
+    # Issue #1292: normalize-catalog fails without data/benchmark_scores.yml,
+    # but trace replayed an empty archive for an unscored benchmark.
+    paths = _catalog(tmp_path)
+    _identity_rules(tmp_path)
+    _model_reports_inputs(tmp_path, _TWO_SCORES)
+    _write_model_reports_catalog(tmp_path)
+    (tmp_path / "data" / "benchmark_scores.yml").unlink()
+
+    payload = QueryService(paths).trace("model-reports:agent-workbench")
+    source = _trace_stages(payload)["source"]
+    assert source["status"] == "absent"
+    assert "benchmark_scores.yml" in source["error"]
+    assert payload["first_change"] == "source"
+
+
+def test_trace_reports_a_donor_gone_from_its_input(tmp_path: Path) -> None:
+    # Issue #1292: the donor's benchmark left model_cards.yml but its stored
+    # normalized row remained, so inheritance was replayed from stale data.
+    paths = _catalog(tmp_path)
+    _model_reports_inputs(tmp_path, _TWO_SCORES, released="2026-01-01")
+    _write_model_reports_catalog(tmp_path)
+    _add_claire_record(paths, tmp_path, siblings=[])
+    donor = "model-reports:agent-workbench"
+    recipient = "claire-radar:agent-workbench"
+    _identity_rules(
+        tmp_path,
+        equivalent=[
+            {
+                "members": [recipient, donor],
+                "inherit_from": donor,
+                "note": "Same benchmark; the report registry carries the release.",
+            }
+        ],
+    )
+    registry_path = tmp_path / "data" / "model_cards.yml"
+    registry = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
+    registry["benchmarks"] = [
+        row for row in registry["benchmarks"] if row["id"] != "agent-workbench"
+    ]
+    for card in registry["model_cards"]:
+        card["benchmarks"] = [
+            bench for bench in card["benchmarks"] if bench != "agent-workbench"
+        ] or ["other-bench"]
+    registry_path.write_text(yaml.safe_dump(registry), encoding="utf-8")
+
+    stage = _trace_stages(QueryService(paths).trace(recipient))["identity"]
+    change = next(row for row in stage["changes"] if row["field"] == f"donor.{donor}")
+    assert change["after"].startswith("absent from its source input")
+    assert stage["status"] == "changed"
+
+
+def test_trace_compares_the_full_shard_record(tmp_path: Path) -> None:
+    # Issue #1292: the shard was compared only with the compact index row, so
+    # a stale shard-only field (here the record's documents) passed while
+    # every index field agreed.
+    paths = _catalog(tmp_path)
+    _identity_rules(tmp_path)
+    _model_reports_inputs(tmp_path, _TWO_SCORES)
+    _write_model_reports_catalog(tmp_path)
+    key = "model-reports:agent-workbench"
+    index_row = next(
+        row
+        for row in json.loads(paths.index.read_text(encoding="utf-8"))["benchmarks"]
+        if row["key"] == key
+    )
+    shard_path = paths.shards / f"{index_row['slug']}.json"
+    shard = json.loads(shard_path.read_text(encoding="utf-8"))
+    assert "documents" in shard["record"] and "documents" not in index_row
+    shard["record"]["documents"] = []
+    shard_path.write_text(json.dumps(shard), encoding="utf-8")
+
+    payload = QueryService(paths).trace(key)
+    stage = _trace_stages(payload)["enrichment"]
+    assert stage["status"] == "changed"
+    change = next(row for row in stage["changes"] if row["field"] == "documents")
+    assert change["before"] == []
+    assert change["after"]
+
+
+def test_trace_reports_a_crawled_source_removed_from_the_registry(tmp_path: Path) -> None:
+    # The registry is valid but no longer has an entry for this record's
+    # source. The normalized row names a crawl bundle, so it was built from a
+    # registered crawl: the input is missing, not unavailable.
+    paths = _catalog(tmp_path)
+    _identity_rules(tmp_path)
+    index = json.loads(paths.index.read_text(encoding="utf-8"))
+    _source_records(
+        tmp_path,
+        [
+            {
+                **index["benchmarks"][0],
+                "provenance": {"crawl_bundle": "leaderboard_snapshots/opencompass_hub.csv"},
+            }
+        ],
+    )
+
+    payload = QueryService(paths).trace("opencompass-agent-workbench")
+    source = _trace_stages(payload)["source"]
+    assert source["status"] == "absent"
+    assert "leaderboard_snapshots.yml" in source["error"]
+    assert payload["first_change"] == "source"
+
+
+def test_trace_cli_rejects_a_non_object_provenance(tmp_path: Path, capsys) -> None:
+    # A corrupted source row with "provenance": "unknown" used to raise
+    # AttributeError on .get(), which run_query_cli does not catch, so
+    # trace --json printed a traceback instead of the invalid_data envelope.
+    paths = _catalog(tmp_path)
+    _identity_rules(tmp_path)
+    index = json.loads(paths.index.read_text(encoding="utf-8"))
+    _source_records(tmp_path, [index["benchmarks"][0]], rebuild_index=False)
+    records_path = tmp_path / "data" / "catalog" / "opencompass_source_records.jsonl"
+    row = json.loads(records_path.read_text(encoding="utf-8"))
+    row["provenance"] = "unknown"
+    records_path.write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    result = run_query_cli(
+        [
+            "trace",
+            "opencompass-agent-workbench",
+            "--json",
+            "--index",
+            str(paths.index),
+            "--shards",
+            str(paths.shards),
+            "--snapshots",
+            str(paths.snapshots),
+        ]
+    )
+    captured = capsys.readouterr()
+    assert result != 0
+    assert "invalid_data" in captured.out + captured.err
+    assert "Traceback" not in captured.out + captured.err
