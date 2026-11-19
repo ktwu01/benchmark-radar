@@ -2136,14 +2136,14 @@ benchmarks:
       outputs by claude-opus-5-5; the README warns the two judges differ in
       strictness, so only models graded by the same judge compare directly.
       Results grow in rounds, so the model set depends on the release read.
-  openness:      
-    status: open
-    basis: reviewed_code_and_licensed_data_public
-    code_license: CC-BY-4.0
-    data_license: CC-BY-4.0
-    data_located: found
-    evidence:
-      - https://github.com/aiprofessions/prompt-benchmark/blob/6d4c6d8b28756d23024b6f4143f1a8938160278a/LICENSE    
+    openness:      
+      status: open
+      basis: reviewed_code_and_licensed_data_public
+      code_license: CC-BY-4.0
+      data_license: CC-BY-4.0
+      data_located: found
+      evidence:
+        - https://github.com/aiprofessions/prompt-benchmark/blob/6d4c6d8b28756d23024b6f4143f1a8938160278a/LICENSE    
       
   - id: crosssearch
     name: CrossSearch
