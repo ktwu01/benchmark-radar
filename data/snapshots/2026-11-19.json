@@ -101396,5 +101396,128 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [],
+        "authors": [
+          "Zhiyuan Hu"
+        ],
+        "blurb": "The new agent-benchmarks-clean release packages coding-agent tasks as immutable Linux containers with pinned configurations and SHA-256-verified layers.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-18T16:45:45+00:00",
+        "source": "Hugging Face",
+        "title": "zhiyuanhucs/agent-benchmarks-clean",
+        "url": "https://huggingface.co/datasets/zhiyuanhucs/agent-benchmarks-clean"
+      },
+      {
+        "affiliations": [
+          "1 University of Waterloo, 2 Zhejiang University, 3 KTH Royal Institute of Technology"
+        ],
+        "authors": [
+          "Lipeng He",
+          "Yihan Wang",
+          "Jiawen Zhang",
+          "N. Asokan"
+        ],
+        "blurb": "The new PIPETTE release evaluates prompt-injection attacks by whether they produce useful defenses, not only by attack success rate.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-19T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "PIPETTE: Prompt Injection Purple-Teaming for Robust LLM Agents",
+        "url": "https://arxiv.org/abs/2611.24362"
+      },
+      {
+        "affiliations": [
+          "HSE University, Moscow, Russia",
+          "Independent researcher",
+          "N. P. Bechtereva Institute of the Human Brain RAS, St. Petersburg, Russia",
+          "Constructor Labs",
+          "Constructor University, Bremen, Germany"
+        ],
+        "authors": [
+          "Alina Avanesyan",
+          "Alexey Boldyrev",
+          "Liqun Deng",
+          "Denis Derkach",
+          "Mary Godunova",
+          "Mikhail Hushchyn",
+          "Dmitry Ilvovsky",
+          "Irina Knyazeva",
+          "Irina Piontkovskaya",
+          "Dmitry Polubotko",
+          "Fedor Ratnikov",
+          "Ekaterina Trofimova",
+          "Zhenhe Zhang"
+        ],
+        "blurb": "The new STEMBench release scores 12 postdoctoral-level problems in high-energy physics, astrophysics, and neuroscience using each field’s own measure of solution quality.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-19T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Benchmarking LLM abilities on postdoc-level natural science problems",
+        "url": "https://arxiv.org/abs/2611.24321"
+      },
+      {
+        "affiliations": [
+          "KlingAI Research"
+        ],
+        "authors": [
+          "Luoyuan Zhang",
+          "Xuanyu Zheng",
+          "Yancheng Long",
+          "Haoyang Xu",
+          "Bin Wen",
+          "Tingting Gao"
+        ],
+        "blurb": "The new VideoACE benchmark tests whether a video agent uses interaction opportunities to improve understanding.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-19T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "VideoACE: Benchmarking Agentic Video Understanding through High-Frame-Rate Actions",
+        "url": "https://arxiv.org/abs/2611.24184"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Afaque Alam",
+          "Mukesh Kumar"
+        ],
+        "blurb": "Two new releases in the captured feed independently audit train-test leakage in scientific image and sequence benchmarks.",
+        "categories": [
+          "benchmark",
+          "evaluation"
+        ],
+        "published_at": "2026-11-19T00:00:00+00:00",
+        "source": "Crossref",
+        "title": "Homology Leakage Inflates Performance on a Protein Functional-Class Benchmark",
+        "url": "https://doi.org/10.1142/s0219720026500174"
+      }
+    ],
+    "date": "2026-11-19",
+    "schema_version": 1,
+    "top": [
+      "https://huggingface.co/datasets/zhiyuanhucs/agent-benchmarks-clean",
+      "https://arxiv.org/abs/2611.24362",
+      "https://arxiv.org/abs/2611.24321"
+    ]
+  },
   "since": "2026-11-17T14:00:03.497042+00:00"
 }
