@@ -596,14 +596,14 @@ benchmarks:
     metric: YapIndex
     direction: lower_is_better
     unit: characters
-- benchmark_id: ai_professions_prompt_benchmark
-metric: criteria_passed_avg
-direction: higher_is_better
-unit: criteria
-  
+  - benchmark_id: ai_professions_prompt_benchmark
+    metric: criteria_passed_avg
+    direction: higher_is_better
+    unit: criteria
+
     results:
-      # Brain-to-Text '24's official challenge summary names the top three final
-      # submissions and the PyTorch baseline. The challenge used 1,200 held-out
+  # Brain-to-Text '24's official challenge summary names the top three final
+  # submissions and the PyTorch baseline. The challenge used 1,200 held-out
   # sentences from participant T12 and prints word error rate as a percentage.
   - benchmark_id: brain_to_text_24
     instrument: brain_to_text_24_t12_1200_holdout_sentences
