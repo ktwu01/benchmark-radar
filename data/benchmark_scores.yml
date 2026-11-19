@@ -7633,6 +7633,72 @@ results:
     value: 3.3
     read_from: html_text
     measurement_kind: benchmark_publisher_run
+  # V1 under the Hermes harness, from the publisher's results archive. The
+  # table names API model ids; each maps to the existing registry label:
+  # claude-opus-4-6 -> Claude Opus 4.6, claude-sonnet-4-6 -> Claude Sonnet 4.6,
+  # claude-haiku-4-5-20251001 -> Claude Haiku 4.5, gpt-5.4-2026-03-05 -> GPT-5.4,
+  # gpt-5.4-mini-2026-03-17 -> GPT-5.4 mini, kimi-k2.5 -> Kimi K2.5.
+  # Run dates are unstated; reported_at is the date the table was published.
+  - benchmark_id: clawbench
+    instrument: clawbench_paper_153_tasks
+    protocol: "Hermes harness; 153 live-web tasks (V1 corpus); original paper rubric: Claude Code evaluator subagent compares each run against human reference trajectories (eval/agentic_eval.md); pass rate"
+    model: Claude Opus 4.6
+    organization: Anthropic
+    source_id: clawbench_v1_hermes_results_c840962
+    reported_at: 2026-05-23
+    value: 61.4
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: clawbench
+    instrument: clawbench_paper_153_tasks
+    protocol: "Hermes harness; 153 live-web tasks (V1 corpus); original paper rubric: Claude Code evaluator subagent compares each run against human reference trajectories (eval/agentic_eval.md); pass rate"
+    model: Claude Sonnet 4.6
+    organization: Anthropic
+    source_id: clawbench_v1_hermes_results_c840962
+    reported_at: 2026-05-23
+    value: 56.9
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: clawbench
+    instrument: clawbench_paper_153_tasks
+    protocol: "Hermes harness; 153 live-web tasks (V1 corpus); original paper rubric: Claude Code evaluator subagent compares each run against human reference trajectories (eval/agentic_eval.md); pass rate"
+    model: Claude Haiku 4.5
+    organization: Anthropic
+    source_id: clawbench_v1_hermes_results_c840962
+    reported_at: 2026-05-23
+    value: 30.1
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: clawbench
+    instrument: clawbench_paper_153_tasks
+    protocol: "Hermes harness; 153 live-web tasks (V1 corpus); original paper rubric: Claude Code evaluator subagent compares each run against human reference trajectories (eval/agentic_eval.md); pass rate"
+    model: GPT-5.4
+    organization: OpenAI
+    source_id: clawbench_v1_hermes_results_c840962
+    reported_at: 2026-05-23
+    value: 25.5
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: clawbench
+    instrument: clawbench_paper_153_tasks
+    protocol: "Hermes harness; 153 live-web tasks (V1 corpus); original paper rubric: Claude Code evaluator subagent compares each run against human reference trajectories (eval/agentic_eval.md); pass rate"
+    model: GPT-5.4 mini
+    organization: OpenAI
+    source_id: clawbench_v1_hermes_results_c840962
+    reported_at: 2026-05-23
+    value: 24.8
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: clawbench
+    instrument: clawbench_paper_153_tasks
+    protocol: "Hermes harness; 153 live-web tasks (V1 corpus); original paper rubric: Claude Code evaluator subagent compares each run against human reference trajectories (eval/agentic_eval.md); pass rate"
+    model: Kimi K2.5
+    organization: Moonshot AI
+    source_id: clawbench_v1_hermes_results_c840962
+    reported_at: 2026-05-23
+    value: 17.6
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
   # The publisher dates the embedded waffle-data cohort update 2026-10-17.
   # reported_at records that source date, not an inferred model run date.
   - benchmark_id: websitebench

@@ -166,6 +166,17 @@ source_documents:
     published: 2026-07-20
     retrieved_at: 2026-11-12
 
+  # The V1 Hermes table first appeared in the README at 44b4ea2 (2026-05-23)
+  # and moved unchanged to docs/results.md at 62a228e (2026-11-05).
+  - id: clawbench_v1_hermes_results_c840962
+    name: ClawBench results archive, V1 Hermes harness (revision c840962)
+    publisher: TIGER-AI-Lab
+    document_type: benchmark_leaderboard
+    url: https://github.com/TIGER-AI-Lab/ClawBench/blob/c8409629f4f2f9768731350d764aeb3035946c5d/docs/results.md#v1--hermes-harness
+    benchmarks: [clawbench]
+    published: 2026-05-23
+    retrieved_at: 2026-11-19
+
   - id: nafbench_leaderboard_83ede91
     name: NAF-Bench leaderboard (hidden hard test, revision 83ede91)
     publisher: NAF-Bench authors
