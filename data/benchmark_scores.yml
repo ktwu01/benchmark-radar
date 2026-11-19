@@ -601,7 +601,7 @@ benchmarks:
     direction: higher_is_better
     unit: criteria
 
-    results:
+results:
   # Brain-to-Text '24's official challenge summary names the top three final
   # submissions and the PyTorch baseline. The challenge used 1,200 held-out
   # sentences from participant T12 and prints word error rate as a percentage.
