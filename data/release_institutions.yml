@@ -26,13 +26,6 @@ papers:
     institutions:
     - King Abdullah University of Science and Technology
     - Miami University
-  '2608.19799':
-    basis: openalex_linked_institutions
-    source_url: https://openalex.org/W7203880176
-    retrieved_at: '2026-11-05'
-    institutions:
-    - Fudan University
-    - Shanghai Innovation Institute
   '2608.26623':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7204561462
@@ -1713,7 +1706,7 @@ papers:
   '2611.13843':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-16'
+    retrieved_at: '2026-11-19'
     institutions: []
   '2611.15348':
     basis: openalex_linked_institutions
@@ -1731,12 +1724,13 @@ papers:
     - Chinese University of Hong Kong
     - City University of Seattle
   '2611.15789':
-    basis: arxiv_html_affiliations
-    source_url: https://arxiv.org/html/2611.15789
-    retrieved_at: '2026-11-16'
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7226010179
+    retrieved_at: '2026-11-19'
     institutions:
-    - Tianjin University Kling AI Beijing University of Posts and Telecommunications
-    - Zhongguancun Academy The Hong Kong Polytechnic University
+    - Beijing University of Posts and Telecommunications
+    - Hong Kong Polytechnic University
+    - Tianjin University
   '2611.16409':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7226000843
@@ -1779,10 +1773,16 @@ papers:
   '2611.18130':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2611.18130
-    retrieved_at: '2026-11-16'
+    retrieved_at: '2026-11-19'
     institutions:
     - Sakana AI
     - Institute of Science Tokyo
+  '2611.18553':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.18553
+    retrieved_at: '2026-11-19'
+    institutions:
+    - The University of Southern Mississippi, Hattiesburg, MS 39401, USA
   '2611.18981':
     basis: null
     source_url: null
@@ -1793,3 +1793,35 @@ papers:
     source_url: null
     retrieved_at: '2026-11-17'
     institutions: []
+  '2611.21644':
+    basis: null
+    source_url: null
+    retrieved_at: '2026-11-19'
+    institutions: []
+  '2611.24098':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.24098
+    retrieved_at: '2026-11-19'
+    institutions:
+    - ReLER, CCAI, Zhejiang University, ByteDance, Hangzhou, Zhejiang, China
+    - ByteDance, Beijing, China
+    - Peking University, ByteDance, Beijing, China
+    - School of Artificial Intelligence, Zhejiang University, Hangzhou, Zhejiang, China
+    - ReLER, CCAI, Zhejiang University, Hangzhou, Zhejiang, China
+  '2611.24408':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.24408
+    retrieved_at: '2026-11-19'
+    institutions:
+    - Shanghai Jiao Tong University
+    - Shanghai Artificial Intelligence Laboratory
+    - Beihang University
+    - Tianjin University
+    - Shenzhen International Graduate School, Tsinghua University
+  '2611.24669':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.24669
+    retrieved_at: '2026-11-19'
+    institutions:
+    - Independent Shanghai Jiao Tong University
+    - Shanghai Innovation Institute Ant Group
