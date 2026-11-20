@@ -97,10 +97,15 @@ Run these from the repository root, in this order:
    `radar.json` and its split files come from `snapshots.rebuild_dashboard`,
    which also reads the release signals above. `benchmark-radar rebuild` runs
    that same step on its own when only `radar.json` needs refreshing.
-   The same step writes `site/data/radar-search.json`, a compact latest-sighting
-   index used by archive-wide homepage search. It keeps the newest sighting for
-   each source record and only the fields needed to filter and render Today
-   results; the full history remains in `radar.json`.
+   The same step writes archive-wide homepage search (`search_index.py`,
+   issue #1183). It keeps the newest sighting of each source record, as
+   `dashboard_search_index` selects them, in three parts: `site/data/radar-search.json`
+   holds only the fields Today filters and sorts on; `site/data/search/<build>/g/`
+   holds a positional trigram index over the searched text; and
+   `site/data/search/<build>/r/` holds the complete rows, 32 per file. A query
+   downloads only its trigram shards and the rows on screen, and still matches
+   text anywhere. Shards are gzip files the page inflates itself, which keeps the
+   Pages site under its 1 GB cap. The full history remains in `radar.json`.
 3. `benchmark-radar build-data-release` validates the local corpus through
    `QueryService` and writes `site/data/cli/manifest.json` plus a checksummed,
    content-versioned archive under `site/data/cli/`. The manifest is published

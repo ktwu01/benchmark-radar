@@ -381,7 +381,7 @@ def test_dashboard_bounds_work_before_and_during_filtering():
     # The sorted rows stay cached between keystrokes; the cache is reused only
     # while it was built from the same days (a window file or the archive).
     assert "state.observations && state.observationsSource === days" in script
-    assert "const visibleObservations = observations.slice(pageStart, pageEnd)" in script
+    assert "let visibleObservations = observations.slice(pageStart, pageEnd)" in script
     assert "renderToday({ resultsOnly: true })" in script
     assert 'if (state.view === "today") renderToday()' in script
     assert 'if (state.view === "leaderboard") renderLeaderboard()' in script
@@ -850,7 +850,7 @@ def test_initial_page_uses_small_bootstrap_and_lazy_loads_history():
     # An index that arrives after the full archive is not kept either.
     loader = script.split("async function ensureSearchData(", 1)[1].split("\n}\n", 1)[0]
     assert loader.index("if (state.fullDataLoaded) return null;") < loader.index(
-        "state.searchData = data;"
+        "state.searchData = decodeSearchIndex(data);"
     )
     assert "const previousSearchData = state.searchData;" in refresh
     assert "state.searchData = previousSearchData;" in refresh
@@ -2839,7 +2839,7 @@ def test_issue_311_the_today_list_loads_one_page_at_a_time():
         "\nfunction ", 1
     )[0]
     assert "Math.ceil(observations.length / TODAY_PAGE_SIZE)" in renderer
-    assert "const visibleObservations = observations.slice(pageStart, pageEnd);" in renderer
+    assert "let visibleObservations = observations.slice(pageStart, pageEnd);" in renderer
     assert 'byId("today-page-prev").disabled' in renderer
     assert 'byId("today-page-next").disabled' in renderer
     assert 'id="today-page-prev"' in html

@@ -51,6 +51,7 @@ from .rubric import (
     v5_rubric_reference,
 )
 from .science_domains import science_domains_for_record
+from .search_index import write_search_index
 from .site_about import write_about
 from .site_pages import DEFAULT_SHARD_DIR, benchmark_sitemap_entries
 from .site_seo import site_lastmod, talk_page_entries, write_sitemap
@@ -1919,7 +1920,7 @@ def rebuild_dashboard(
         window_path = output.with_name(f"{output.stem}-window-{window_days}d{output.suffix}")
         _write_json(window_path, dashboard_window(value, window_days), indent=None)
     search_path = output.with_name(f"{output.stem}-search{output.suffix}")
-    _write_json(search_path, dashboard_search_index(value), indent=None)
+    write_search_index(search_path, value, dashboard_search_index(value)["observations"])
     # The record-count badge lives beside radar.json so it deploys with the same
     # dashboard build and can never report a corpus newer than the page it sits
     # on. It is the single self-describing "how much have we collected" signal
