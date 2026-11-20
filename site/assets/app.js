@@ -1521,6 +1521,8 @@ const state = {
   // can only be checked against the index once the index has actually
   // arrived, so "not yet loaded" and "failed to load" must not look alike.
   benchmarkIndexLoaded: false,
+  benchmarkSearchRecords: null,
+  benchmarkSearchLoaded: false,
   benchmarkQuery: "",
   benchmarkModel: "",
   // Library (#420): the merged benchmark-radar.com catalog browser.
@@ -3462,20 +3464,29 @@ function renderTodayBenchmarks() {
   // Only fetched when someone actually searches, so the dashboard's first
   // paint never waits on a catalog most visits do not open.
   //
-  // Attached once, not once per keystroke. loadBenchmarkIndex() caches its
+  // Attached once, not once per keystroke. loadBenchmarkSearch() caches its
   // promise, so on a slow connection every debounced keystroke would hang
   // another handler on the same fetch and they would all fire together when it
   // landed, each one re-filtering the observations and rebuilding the list.
-  if (!state.benchmarkIndexLoaded && !benchmarkIndexRerenderQueued) {
+  //
+  // It reads benchmark-search.json, every catalog record cut to the fields the
+  // ranking and these rows read, instead of the 1.9 MB catalog (#1305). Once
+  // another view has loaded the full catalog, the same records come from it.
+  const fullCatalog = state.benchmarkIndexLoaded && state.benchmarkIndex;
+  if (!fullCatalog && !state.benchmarkSearchLoaded && !benchmarkIndexRerenderQueued) {
     benchmarkIndexRerenderQueued = true;
-    loadBenchmarkIndex().then((records) => {
-      state.benchmarkIndex = records;
-      state.benchmarkIndexLoaded = true;
+    loadBenchmarkSearch().then((records) => {
+      // Released once settled, so a load Refresh resets is requested again.
+      benchmarkIndexRerenderQueued = false;
+      state.benchmarkSearchRecords = records;
+      state.benchmarkSearchLoaded = true;
       if (state.q.trim()) renderToday({ resultsOnly: true });
     });
   }
-  const matches = searchBenchmarkIndex(state.benchmarkIndex || [], query);
-  const indexFailed = state.benchmarkIndexLoaded && state.benchmarkIndex === null;
+  const records = fullCatalog || state.benchmarkSearchRecords;
+  const recordsLoaded = Boolean(fullCatalog) || Boolean(state.benchmarkSearchLoaded);
+  const matches = searchBenchmarkIndex(records || [], query);
+  const indexFailed = recordsLoaded && records === null;
   const rows = matches.slice(0, BENCHMARK_SEARCH_LIMIT).map((record) =>
     benchmarkResultRow(record, { navigate: true }),
   );
@@ -3484,7 +3495,7 @@ function renderTodayBenchmarks() {
   // cold search for a crawled-only benchmark the catalog has not arrived, and
   // a slow request would leave "clear one or more filters" on screen for as
   // long as it takes. Reported as pending until it settles.
-  const indexPending = !state.benchmarkIndexLoaded;
+  const indexPending = !recordsLoaded;
   if (!rows.length && !indexFailed && !indexPending) {
     section.hidden = true;
     replaceChildren(byId("today-benchmarks-results"), []);
@@ -3514,7 +3525,7 @@ function renderTodayBenchmarks() {
       ? t("Still checking the benchmark registry\u2026")
       : "";
   byId("today-benchmarks-note").textContent = [
-    note, partialMatchNote(matches, query, (record) => record.slug), warning,
+    note, partialMatchNote(matches, query, (record) => record.slug, records || []), warning,
   ].filter(Boolean).join(" ");
   replaceChildren(byId("today-benchmarks-results"), rows);
   return !total && indexPending ? "pending" : total;
@@ -5576,6 +5587,38 @@ function loadBenchmarkIndex() {
   return benchmarkIndexPromise;
 }
 
+let benchmarkSearchPromise = null;
+
+// The homepage's registry search reads this instead of the full catalog
+// (#1305). A failed load stays explicit, as loadBenchmarkIndex's does.
+function loadBenchmarkSearch() {
+  if (!benchmarkSearchPromise) {
+    benchmarkSearchPromise = trackLoad("Loading the benchmark catalog…", ["today"], () => fetch("/data/benchmark-search.json", { cache: "no-cache" })
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      }))
+      .then(decodeBenchmarkSearch)
+      .catch(() => null);
+  }
+  return benchmarkSearchPromise;
+}
+
+// Records come as arrays under one field list; a null is an absent field,
+// which the ranking already treats the same way.
+function decodeBenchmarkSearch(payload) {
+  if (!Array.isArray(payload?.fields) || !Array.isArray(payload.records)) {
+    throw new Error("Invalid benchmark search index");
+  }
+  return payload.records.map((values) => {
+    const record = {};
+    payload.fields.forEach((field, position) => {
+      if (values[position] !== null && values[position] !== undefined) record[field] = values[position];
+    });
+    return record;
+  });
+}
+
 function foldName(value) {
   return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
@@ -5601,9 +5644,9 @@ function fullMatchSlugs(records, query) {
 
 // "12 match every word · 30 share only some", or nothing when every candidate
 // is a full match.
-function partialMatchNote(rows, query, idOf) {
+function partialMatchNote(rows, query, idOf, records = state.benchmarkIndex || []) {
   if (!query || !rows.length) return "";
-  const full = fullMatchSlugs(state.benchmarkIndex || [], query);
+  const full = fullMatchSlugs(records, query);
   const fullCount = rows.filter((row) => full.has(idOf(row))).length;
   if (fullCount === rows.length) return "";
   return fullCount
@@ -13609,6 +13652,11 @@ async function refreshData() {
       && (!state.benchmarkIndex || !state.libraryTaxonomy || !discoveryAnchor(state.benchmarkIndex))) {
       benchmarkIndexPromise = null;
       state.benchmarkIndexLoaded = false;
+    }
+    // The homepage's compact registry index recovers the same way (#1305).
+    if (state.benchmarkSearchLoaded && !state.benchmarkSearchRecords) {
+      benchmarkSearchPromise = null;
+      state.benchmarkSearchLoaded = false;
     }
     closeFiltersDrawer();
     syncLeaderboardNav();

@@ -15,7 +15,15 @@ const byId = (id) => {
   if (!nodes.has(id)) nodes.set(id, { hidden: false, textContent: "", children: [] });
   return nodes.get(id);
 };
-const state = { q: "protein structure prediction", benchmarkIndex: [], benchmarkIndexLoaded: true };
+// The homepage reads the compact search index (#1305); the full catalog is
+// used only once another view has loaded it.
+const state = {
+  q: "protein structure prediction",
+  benchmarkIndex: null,
+  benchmarkIndexLoaded: false,
+  benchmarkSearchRecords: [],
+  benchmarkSearchLoaded: true,
+};
 const names = ["searchBenchmarkIndex", "fullMatchSlugs", "partialMatchNote", "renderTodayBenchmarks"];
 const render = new Function("state", "byId", "replaceChildren", "searchCatalog", "searchCatalogMatches", "benchmarkResultRow", "t", `
   ${source.match(/const BENCHMARK_SEARCH_LIMIT = .*;/)[0]}
@@ -33,39 +41,71 @@ const full = record("full", "Protein structure prediction");
 const partial = [record("protein", "Protein folding"), record("structure", "Structure analysis")];
 const note = () => byId("today-benchmarks-note").textContent;
 
-state.benchmarkIndex = partial;
+state.benchmarkSearchRecords = partial;
 assert.equal(render(), 2);
 assert.equal(byId("today-benchmarks").hidden, false);
 assert.match(note(), /No benchmark matches every word; these share only some/);
 
-state.benchmarkIndex = [full, ...partial];
+state.benchmarkSearchRecords = [full, ...partial];
 assert.equal(render(), 3);
 assert.match(note(), /1 match every word · 2 share only some/);
 
-state.benchmarkIndex = [full];
+state.benchmarkSearchRecords = [full];
 assert.equal(render(), 1);
 assert.doesNotMatch(note(), /share only some/);
 
 // Counts describe all candidates, not only the first 50 rendered rows.
-state.benchmarkIndex = [full, ...Array.from({ length: 50 }, (_, i) => record(`p${i}`, `Protein ${i}`))];
+state.benchmarkSearchRecords = [full, ...Array.from({ length: 50 }, (_, i) => record(`p${i}`, `Protein ${i}`))];
 assert.equal(render(), 51);
 assert.equal(byId("today-benchmarks-results").children.length, 50);
 assert.match(note(), /Showing 50 of 51 registry records/);
 assert.match(note(), /1 match every word · 50 share only some/);
 
 // A failed/pending catalog must not inherit the previous query's match note.
-state.benchmarkIndex = null;
+state.benchmarkSearchRecords = null;
 assert.equal(render(), 0);
 assert.equal(note(), "The benchmark catalog could not be loaded.");
-state.benchmarkIndex = [];
-state.benchmarkIndexLoaded = false;
+state.benchmarkSearchRecords = [];
+state.benchmarkSearchLoaded = false;
 assert.equal(render(), "pending");
 assert.equal(note(), "Still checking the benchmark registry…");
-state.benchmarkIndexLoaded = true;
+state.benchmarkSearchLoaded = true;
 assert.equal(render(), 0);
 assert.equal(byId("today-benchmarks").hidden, true);
 state.q = "";
 assert.equal(render(), 0);
 assert.equal(byId("today-benchmarks").hidden, true);
 assert.deepEqual(byId("today-benchmarks-results").children, []);
+// A failed load that Refresh reset is requested again: the latch that stops
+// one request per keystroke is released once the load settles.
+{
+  let requests = 0;
+  const retryState = { q: "protein", benchmarkIndex: null, benchmarkIndexLoaded: false,
+    benchmarkSearchRecords: null, benchmarkSearchLoaded: false };
+  const retry = new Function("state", "byId", "replaceChildren", "searchCatalog", "searchCatalogMatches",
+    "benchmarkResultRow", "t", "loadBenchmarkSearch", "renderToday", `
+    ${source.match(/const BENCHMARK_SEARCH_LIMIT = .*;/)[0]}
+    let benchmarkIndexRerenderQueued = false;
+    let fullMatchCache = { records: null, query: "", slugs: new Set() };
+    ${names.map(fn).join("\n")}
+    return renderTodayBenchmarks;
+  `)(retryState, byId, (node, children) => { node.children = children; }, searchCatalog, searchCatalogMatches,
+    (record) => record, (text) => text, () => { requests += 1; return Promise.resolve(null); }, () => {});
+  retry();
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(retryState.benchmarkSearchLoaded, true);
+  // What refreshData does to a failed compact load.
+  retryState.benchmarkSearchLoaded = false;
+  retry();
+  assert.equal(requests, 2);
+}
+
+// A full catalog another view loaded answers with the same records.
+state.q = "protein structure prediction";
+state.benchmarkSearchRecords = [];
+state.benchmarkIndex = [full, ...partial];
+state.benchmarkIndexLoaded = true;
+assert.equal(render(), 3);
+assert.match(note(), /1 match every word · 2 share only some/);
 console.log("Today search distinguishes full and partial candidates without changing ranking.");

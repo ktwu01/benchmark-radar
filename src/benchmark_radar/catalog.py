@@ -819,6 +819,44 @@ def build_benchmark_index(
     return index
 
 
+# Read by site/assets/catalog-search.js (the QueryService ranking port) and by
+# the homepage's benchmark result rows, and nothing else (issue #1305).
+BENCHMARK_SEARCH_FIELDS = (
+    "slug",
+    "key",
+    "name",
+    "aliases",
+    "description",
+    "categories",
+    "publisher",
+    "modality",
+    "languages",
+    "source",
+    "released",
+    "has_paper",
+    "has_repo",
+    "has_dataset",
+    "score_count",
+)
+
+
+def benchmark_search_payload(index: list[dict[str, Any]]) -> dict[str, Any]:
+    """Every catalog record, reduced to the fields homepage search reads.
+
+    A homepage query matched registry records by downloading the whole
+    benchmark-index.json, 1.9 MB of gzip, most of it document registry and
+    score summaries the result rows never show. This keeps every record, in
+    the same order, as arrays under one field list, so the same ranking runs
+    on the same inputs.
+    """
+    return {
+        "schema_version": CATALOG_SCHEMA_VERSION,
+        "count": len(index),
+        "fields": list(BENCHMARK_SEARCH_FIELDS),
+        "records": [[record.get(field) for field in BENCHMARK_SEARCH_FIELDS] for record in index],
+    }
+
+
 def write_benchmark_index(
     index: list[dict[str, Any]],
     output: Path,
@@ -827,6 +865,11 @@ def write_benchmark_index(
     library_taxonomy: dict[str, Any] | None = None,
 ) -> Path:
     output.parent.mkdir(parents=True, exist_ok=True)
+    output.with_name("benchmark-search.json").write_text(
+        json.dumps(benchmark_search_payload(index), ensure_ascii=False, separators=(",", ":"))
+        + "\n",
+        encoding="utf-8",
+    )
     output.write_text(
         json.dumps(
             {

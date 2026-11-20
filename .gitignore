@@ -88,6 +88,7 @@ graphify-out/
 # if it were source. The build is deterministic, so nothing is lost by dropping
 # them; `normalize-catalog` reproduces the complete catalog deterministically.
 /site/data/benchmark-index.json
+/site/data/benchmark-search.json
 /site/data/benchmarks/
 # The Models matrix's scores, written by `classify` from those shards.
 /site/data/model-scores.json
