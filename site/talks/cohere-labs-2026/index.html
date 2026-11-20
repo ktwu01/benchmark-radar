@@ -497,7 +497,26 @@ body.export .all-talks { display: none; }
   <aside class="notes">How a score was produced matters as much as the number. Independent audits re-run the setup. These are the audit's findings, not Radar's. SWE-bench Pro: at least 15% of public tasks underdetermined. June published this on June 21, 2026, 17 days before OpenAI's own audit on July 8 estimated about 30% of tasks broken. The two measure different defect types, so do not add or compare the percentages. Terminal-Bench 2.1: a careless deletion goes unnoticed on 40 of 83 tasks. DeepSWE: four reference solutions failed their own verifiers, and the v1.1 re-grade fixed three. Radar shows the audit next to the scores it examines. Credit June Kim.</aside>
 </section>
 
-<!-- === 12. TAKE HOME === -->
+<!-- === 12. AUDITS, CONTINUED === -->
+<section class="slide" data-title="Finding 5, continued">
+  <div class="frame">
+    <div class="kicker reveal">Finding 5 of 5, continued</div>
+    <h2 class="reveal">Audits, continued</h2>
+    <div class="cards">
+      <div class="card reveal"><h3>Terminal-Bench 4.0</h3><div class="big">50 of 66</div><p>tasks refused: a confirmed material defect in the task or its grading (75.8%).</p></div>
+      <div class="card reveal"><h3>Harvey Legal Agent Benchmark</h3><div class="big">71 of 100</div><p>tasks refused. AutomationBench 1.0.6: also 71 of 100.</p></div>
+      <div class="card reveal"><h3>HLE-Diamond</h3><div class="big">5 of 100</div><p>tasks refused; AA-Omniscience v1.1: 1 of 100. Refusal rates differ widely across benchmarks.</p></div>
+    </div>
+    <ul class="points" style="margin-top:40px">
+      <li class="reveal"><b>Across 8 benchmarks: 336 of 749 reviewed tasks refused and 67 doubtful,</b> in five failure classes from wrong reference answers to scoring bypasses and answer leakage.</li>
+    </ul>
+    <div class="source reveal">Quality reviews as reported in the Benchmarks' Last Exam README, <a style="color:inherit" href="https://github.com/ZekkiCat/Benchmarks-Last-Exam/blob/5962002fee37c2c31127d3f26ebc283e4bc029f8/README.md">revision 5962002</a> (Nov 12, 2026; retrieved Nov 18, 2026), and <a style="color:inherit" href="https://benchmarks-last-exam.com/">benchmarks-last-exam.com</a>. James Zhu: the README's contact, <a style="color:inherit" href="https://x.com/JamesZhu367336">x.com/JamesZhu367336</a> ("Bench Police James"). Not yet linked from Radar records.</div>
+  </div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="pg"></span></div>
+  <aside class="notes">A second independent auditor. James Zhu's Benchmarks' Last Exam reviews each task's statement, environment, reference answer and grader, and marks it accepted, doubtful, or refused. Refused means a confirmed material defect. Terminal-Bench 4.0: 50 of 66 refused. Harvey's legal agent benchmark and AutomationBench: 71 of 100 each. But HLE-Diamond had 5 of 100 refused and AA-Omniscience 1 of 100, so refusal rates differ widely from one benchmark to the next. These are the reviews' findings, not Radar's. DeepSWE appears in both audits, but June's count covers reference solutions in v1.0 and this review covers task-level defects in v1.1, so do not compare the numbers. Credit James Zhu, who runs the project's account, Bench Police James.</aside>
+</section>
+
+<!-- === 13. TAKE HOME === -->
 <section class="slide" data-title="Take home">
   <div class="frame">
     <div class="kicker reveal">Take home</div>
@@ -514,7 +533,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">Each step maps to a finding. Discover wide, because attention is a power law. Check provenance, because many repos go quiet or disappear. Check saturation. Check audits. Then schedule retirement: the step teams skip. Radar helps with the first four; the fifth is a team decision.</aside>
 </section>
 
-<!-- === 13. ROADMAP === -->
+<!-- === 14. ROADMAP === -->
 <section class="slide" data-title="Roadmap">
   <div class="frame">
     <div class="kicker reveal">Roadmap</div>
@@ -530,7 +549,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">Four directions. The audit layer is the one with the most leverage, and it depends on people like June Kim publishing audits. Interop: we would rather feed shared efforts than build a silo.</aside>
 </section>
 
-<!-- === 14. ASK 1: RELATED WORK FROM THE CLI === -->
+<!-- === 15. ASK 1: RELATED WORK FROM THE CLI === -->
 <section class="slide" data-title="Ask 1: Related Work">
   <div class="frame">
     <div class="kicker reveal">For your paper</div>
@@ -548,7 +567,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">First ask, for anyone writing a paper. One command gives your agent the Skill to write a cited Related Work draft and the BibTeX to go with it. It searches the Radar catalog plus arXiv, Hugging Face Papers, Semantic Scholar, OpenAlex, and Crossref. Read every entry before you keep it.</aside>
 </section>
 
-<!-- === 15. ASK 2: SEARCH AND ADD A BENCHMARK === -->
+<!-- === 16. ASK 2: SEARCH AND ADD A BENCHMARK === -->
 <section class="slide" data-title="Ask 2: Add your benchmark">
   <div class="frame">
     <div class="kicker reveal">For your benchmark</div>
@@ -569,7 +588,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">Second ask. Search for the benchmark you built or the one you rely on. If Radar missed it, the form takes two minutes, and the next team will find it.</aside>
 </section>
 
-<!-- === 16. ASK 3: EMAIL === -->
+<!-- === 17. ASK 3: EMAIL === -->
 <section class="slide" data-title="Ask 3: Email">
   <div class="frame">
     <div class="kicker reveal">For your inbox</div>
@@ -594,7 +613,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">Third ask. If you want to keep up without checking the site, the email brings new benchmarks to you, daily or weekly.</aside>
 </section>
 
-<!-- === 17. GET INVOLVED === -->
+<!-- === 18. GET INVOLVED === -->
 <section class="slide" data-title="Get involved">
   <div class="frame">
     <div class="kicker reveal">Join in</div>
@@ -617,7 +636,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">Concrete asks. The audit ask is new: if your team rechecks a benchmark, publish it and Radar will link it.</aside>
 </section>
 
-<!-- === 18. ACKNOWLEDGMENTS === -->
+<!-- === 19. ACKNOWLEDGMENTS === -->
 <section class="slide" data-title="Acknowledgments">
   <div class="frame">
     <div class="kicker reveal">Thank you</div>
@@ -631,7 +650,7 @@ body.export .all-talks { display: none; }
   <aside class="notes">Read both names. June Kim's audits are the work behind Finding 5; Radar only links them. Thank Prahitha and Cohere Labs again for hosting. The sixteen authors are on the title slide. Then say out loud: Martin Ma at Thinking Machines Lab says hi to Brydon Eastman at Cohere.</aside>
 </section>
 
-<!-- === 19. Q&A === -->
+<!-- === 20. Q&A === -->
 <section class="slide dark" data-title="Questions">
   <div class="frame">
     <div class="kicker reveal">Q&amp;A</div>

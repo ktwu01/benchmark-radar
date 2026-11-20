@@ -177,7 +177,21 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 12. A five-step check
+## 12. Audits, continued
+
+*Finding 5 of 5*
+
+- Terminal-Bench 4.0 · 50 of 66 · tasks refused: a confirmed material defect in the task or its grading (75.8%).
+- Harvey Legal Agent Benchmark · 71 of 100 · tasks refused. AutomationBench 1.0.6: also 71 of 100.
+- HLE-Diamond · 5 of 100 · tasks refused; AA-Omniscience v1.1: 1 of 100. Refusal rates differ widely across benchmarks.
+- Across 8 benchmarks: 336 of 749 reviewed tasks refused and 67 doubtful, in five failure classes from wrong reference answers to scoring bypasses and answer leakage.
+- Quality reviews as reported in the Benchmarks' Last Exam README, [revision 5962002](https://github.com/ZekkiCat/Benchmarks-Last-Exam/blob/5962002fee37c2c31127d3f26ebc283e4bc029f8/README.md) (Nov 12, 2026; retrieved Nov 18, 2026), and [benchmarks-last-exam.com](https://benchmarks-last-exam.com/). James Zhu: the README's contact, [x.com/JamesZhu367336](https://x.com/JamesZhu367336) ("Bench Police James"). Not yet linked from Radar records.
+
+> **Speaker notes:** A second independent auditor. James Zhu's Benchmarks' Last Exam reviews each task's statement, environment, reference answer and grader, and marks it accepted, doubtful, or refused. Refused means a confirmed material defect. Terminal-Bench 4.0: 50 of 66 refused. Harvey's legal agent benchmark and AutomationBench: 71 of 100 each. But HLE-Diamond had 5 of 100 refused and AA-Omniscience 1 of 100, so refusal rates differ widely from one benchmark to the next. These are the reviews' findings, not Radar's. DeepSWE appears in both audits, but June's count covers reference solutions in v1.0 and this review covers task-level defects in v1.1, so do not compare the numbers. Credit James Zhu, who runs the project's account, Bench Police James.
+
+---
+
+## 13. A five-step check
 
 *Take home*
 
@@ -191,7 +205,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 13. What is next
+## 14. What is next
 
 *Roadmap*
 
@@ -204,7 +218,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 14. Let your agent draft Related Work
+## 15. Let your agent draft Related Work
 
 *For your paper*
 
@@ -217,7 +231,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 15. Search for it. If it is missing, add it.
+## 16. Search for it. If it is missing, add it.
 
 *For your benchmark*
 
@@ -230,7 +244,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 16. Get new benchmarks by email
+## 17. Get new benchmarks by email
 
 *For your inbox*
 
@@ -244,7 +258,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 17. Get involved
+## 18. Get involved
 
 *Join in*
 
@@ -259,7 +273,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 18. Acknowledgments
+## 19. Acknowledgments
 
 *Thank you*
 
@@ -270,7 +284,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 19. Questions
+## 20. Questions
 
 *Q&A*
 
