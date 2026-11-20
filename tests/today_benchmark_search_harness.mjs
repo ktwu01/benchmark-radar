@@ -76,6 +76,31 @@ state.q = "";
 assert.equal(render(), 0);
 assert.equal(byId("today-benchmarks").hidden, true);
 assert.deepEqual(byId("today-benchmarks-results").children, []);
+// A failed load that Refresh reset is requested again: the latch that stops
+// one request per keystroke is released once the load settles.
+{
+  let requests = 0;
+  const retryState = { q: "protein", benchmarkIndex: null, benchmarkIndexLoaded: false,
+    benchmarkSearchRecords: null, benchmarkSearchLoaded: false };
+  const retry = new Function("state", "byId", "replaceChildren", "searchCatalog", "searchCatalogMatches",
+    "benchmarkResultRow", "t", "loadBenchmarkSearch", "renderToday", `
+    ${source.match(/const BENCHMARK_SEARCH_LIMIT = .*;/)[0]}
+    let benchmarkIndexRerenderQueued = false;
+    let fullMatchCache = { records: null, query: "", slugs: new Set() };
+    ${names.map(fn).join("\n")}
+    return renderTodayBenchmarks;
+  `)(retryState, byId, (node, children) => { node.children = children; }, searchCatalog, searchCatalogMatches,
+    (record) => record, (text) => text, () => { requests += 1; return Promise.resolve(null); }, () => {});
+  retry();
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(retryState.benchmarkSearchLoaded, true);
+  // What refreshData does to a failed compact load.
+  retryState.benchmarkSearchLoaded = false;
+  retry();
+  assert.equal(requests, 2);
+}
+
 // A full catalog another view loaded answers with the same records.
 state.q = "protein structure prediction";
 state.benchmarkSearchRecords = [];

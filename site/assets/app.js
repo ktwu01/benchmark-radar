@@ -3476,6 +3476,8 @@ function renderTodayBenchmarks() {
   if (!fullCatalog && !state.benchmarkSearchLoaded && !benchmarkIndexRerenderQueued) {
     benchmarkIndexRerenderQueued = true;
     loadBenchmarkSearch().then((records) => {
+      // Released once settled, so a load Refresh resets is requested again.
+      benchmarkIndexRerenderQueued = false;
       state.benchmarkSearchRecords = records;
       state.benchmarkSearchLoaded = true;
       if (state.q.trim()) renderToday({ resultsOnly: true });
@@ -13650,6 +13652,11 @@ async function refreshData() {
       && (!state.benchmarkIndex || !state.libraryTaxonomy || !discoveryAnchor(state.benchmarkIndex))) {
       benchmarkIndexPromise = null;
       state.benchmarkIndexLoaded = false;
+    }
+    // The homepage's compact registry index recovers the same way (#1305).
+    if (state.benchmarkSearchLoaded && !state.benchmarkSearchRecords) {
+      benchmarkSearchPromise = null;
+      state.benchmarkSearchLoaded = false;
     }
     closeFiltersDrawer();
     syncLeaderboardNav();
