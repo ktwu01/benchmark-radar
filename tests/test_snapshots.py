@@ -1,3 +1,4 @@
+import gzip
 import json
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -325,16 +326,29 @@ def test_rebuild_writes_a_small_latest_day_bootstrap(tmp_path):
 
     search_path = output.with_name("radar-search.json")
     search = json.loads(search_path.read_text(encoding="utf-8"))
-    assert search["schema_version"] == 1
+    assert search["schema_version"] == 2
     assert search["generated_at"] == dashboard["generated_at"]
-    assert len(search["observations"]) == sum(
+    assert search["row_count"] == sum(
         len(day["evidence_items"]) + len(day["attention"]["observations"])
         for day in dashboard["days"]
     )
+    # The table a search starts from carries no text; summaries live in row
+    # shards fetched a page at a time (#1183).
+    assert "summary" not in search["columns"]
+    shard_dir = output.parent / search["base"]
+    rows = [
+        row
+        for path in sorted(
+            (shard_dir / "r").glob("*.json.gz"), key=lambda path: int(path.name.split(".")[0])
+        )
+        for row in json.loads(gzip.decompress(path.read_bytes()))["rows"]
+    ]
+    assert len(rows) == search["row_count"]
+    assert len(list((shard_dir / "g").glob("*.json.gz"))) == search["gram_shards"]
     # Only an expanded attention row lists its supporting submissions (#1170).
     assert all(
         "supporting_observations" not in item
-        for item in search["observations"]
+        for item in rows
         if item["observation_kind"] != "attention"
     )
     assert search_path.stat().st_size < output.stat().st_size

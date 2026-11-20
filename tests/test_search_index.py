@@ -9,7 +9,7 @@ ROOT = Path(__file__).parent.parent
 def test_search_index_matches_archive_filtering():
     with TemporaryDirectory() as directory:
         dashboard = Path(directory) / "dashboard.json"
-        index = Path(directory) / "search-index.json"
+        index = Path(directory) / "index"
         run(
             ["node", "tests/search_index_parity_harness.mjs", "--write-dashboard", str(dashboard)],
             check=True,

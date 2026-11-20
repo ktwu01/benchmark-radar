@@ -117,7 +117,16 @@ globalThis.fetch = (path) => {
     return Promise.resolve({
       ok: true,
       status: 200,
-      json: async () => ({ schema_version: 1, generated_at: state.data?.generated_at, observations: [] }),
+      json: async () => ({
+        schema_version: 2,
+        generated_at: state.data?.generated_at,
+        row_count: 0,
+        base: "search/test",
+        row_shard_size: 32,
+        gram_shards: 4096,
+        columns: {},
+        shared_records: [],
+      }),
     });
   }
   if (path !== "/data/radar.json") throw new Error(`Unexpected fetch path: ${path}`);

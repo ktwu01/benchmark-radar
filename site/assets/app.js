@@ -3654,6 +3654,13 @@ function renderToday({ resultsOnly = false } = {}) {
   // The badge tracks the secondary filters live, including during the
   // resultsOnly re-renders that follow each drawer interaction.
   updateFiltersCount();
+  const pendingMatches = pendingSearchMatches();
+  if (pendingMatches) {
+    // The previous results stay on screen, dimmed, while the query's index
+    // shards download.
+    waitForSearchIndex(pendingMatches, { resultsOnly });
+    return;
+  }
   const observations = filteredObservations();
   const benchmarkMatches = renderTodayBenchmarks();
   renderSearchScopeBanner(observations.length, benchmarkMatches);
@@ -3678,7 +3685,16 @@ function renderToday({ resultsOnly = false } = {}) {
   state.todayPage = Math.min(Math.max(1, state.todayPage), pageCount);
   const pageStart = (state.todayPage - 1) * TODAY_PAGE_SIZE;
   const pageEnd = Math.min(pageStart + TODAY_PAGE_SIZE, observations.length);
-  const visibleObservations = observations.slice(pageStart, pageEnd);
+  let visibleObservations = observations.slice(pageStart, pageEnd);
+  if (searchIndexActive()) {
+    const index = state.searchData;
+    const missing = visibleObservations.filter((item) => !index.fullRows.has(item.search_row));
+    if (missing.length) {
+      waitForSearchIndex(ensureSearchRows(missing.map((item) => item.search_row)), { resultsOnly });
+      return;
+    }
+    visibleObservations = visibleObservations.map((item) => index.fullRows.get(item.search_row));
+  }
   // The legend is two readings, not three (issue #311): the class breakdown
   // and the order. The raw total repeated what the breakdown already adds up
   // to, and the attention noun lost its verb now that it stands beside
@@ -4533,10 +4549,20 @@ function sortObservations(observations) {
     // order, which differs between radar.json and radar-search.json, so the
     // two paths paged the same results differently (#1143). Break the tie on
     // the record's identity so both produce one order.
-    const keyOrder = observationRecordKey(a).localeCompare(observationRecordKey(b));
+    // The search index stores each day's rows in this same final order
+    // (search_index.py), so its rows need neither identifiers nor titles to
+    // sort (#1183). Only rows of one day reach this point.
+    if (a.search_row !== undefined && b.search_row !== undefined) return a.search_row - b.search_row;
+    const keyOrder = compareCodeUnits(observationRecordKey(a), observationRecordKey(b));
     if (keyOrder) return keyOrder;
-    return `${a.url || ""}\u0000${a.title || ""}`.localeCompare(`${b.url || ""}\u0000${b.title || ""}`);
+    return compareCodeUnits(`${a.url || ""}\u0000${a.title || ""}`, `${b.url || ""}\u0000${b.title || ""}`);
   });
+}
+
+// Plain UTF-16 order: unlike localeCompare it is the same in every browser and
+// in Python, so the generator can store rows in exactly this order.
+function compareCodeUnits(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
 }
 
 // All dates is a record finder, not a replay of every overlapping crawl
@@ -4554,14 +4580,17 @@ function observationRecordKey(item) {
 
 function latestObservationsByRecord(observations) {
   const latest = new Map();
+  // Index rows carry record_group in place of the identifiers the key is
+  // built from (#1183).
+  const recordKey = (item) => item.record_group ?? observationRecordKey(item);
   observations.forEach((item) => {
-    const key = observationRecordKey(item);
+    const key = recordKey(item);
     const current = latest.get(key);
     if (!current || String(item.snapshot_date) > String(current.snapshot_date)) {
       latest.set(key, item);
     }
   });
-  return observations.filter((item) => latest.get(observationRecordKey(item)) === item);
+  return observations.filter((item) => latest.get(recordKey(item)) === item);
 }
 
 function populateSelect(target, values, label, selected) {
@@ -4656,8 +4685,14 @@ function filteredObservations() {
   const query = state.q.trim().toLowerCase();
   const sourceLower = state.source.trim().toLowerCase();
   const range = todayDateRange();
+  // Index rows carry no text; the sharded trigram index answered the query
+  // with the same substring test over the same text (#1183).
+  const indexed = searchIndexActive();
+  const indexMatches = indexed && query ? state.searchData.matches.get(query) : null;
+  const matchesQuery = (item) => (indexed
+    ? Boolean(indexMatches?.has(item.search_row))
+    : `${item.title} ${item.summary} ${item.source}`.toLowerCase().includes(query));
   const matches = allObservations().filter((item) => {
-    const haystack = `${item.title} ${item.summary} ${item.source}`.toLowerCase();
     return (
       (state.todayDate === "all" || (range
         ? item.snapshot_date >= range.start && item.snapshot_date <= range.end
@@ -4667,7 +4702,7 @@ function filteredObservations() {
       (!state.source || item.source.toLowerCase() === sourceLower) &&
       (!state.organization || (item.organizations || []).includes(state.organization)) &&
       (!state.event || item.event_kind === state.event) &&
-      (!query || haystack.includes(query))
+      (!query || matchesQuery(item))
     );
   });
   const records = todayIsMultiDate() ? latestObservationsByRecord(matches) : matches;
@@ -13253,9 +13288,9 @@ async function ensureSearchData(cache = "default") {
   state.searchDataPromise = (async () => {
     const data = await fetchDashboardJson("/data/radar-search.json", cache);
     if (
-      data?.schema_version !== 1
+      data?.schema_version !== 2
       || data.generated_at !== state.data?.generated_at
-      || !Array.isArray(data.observations)
+      || !Number.isInteger(data.row_count)
     ) {
       throw new Error("No compatible search index");
     }
@@ -13263,15 +13298,253 @@ async function ensureSearchData(cache = "default") {
     // The full archive may have landed while this request was in flight; it
     // already answers All dates, so keeping the index too would hold both.
     if (state.fullDataLoaded) return null;
-    state.searchData = data;
+    state.searchData = decodeSearchIndex(data);
     state.observations = null;
-    return data;
+    return state.searchData;
   })();
   try {
     return await state.searchDataPromise;
   } finally {
     state.searchDataPromise = null;
   }
+}
+
+// Archive-wide search reads a sharded index instead of one file holding every
+// summary, which had reached 18.4 MB of gzip and grew about 6 MB a month
+// (#1183). radar-search.json holds only the fields Today filters and sorts on;
+// a query downloads the trigram shards it needs, and a page of results the row
+// shards it shows. search_index.py writes the files; positions count UTF-16
+// code units, as String.prototype.slice does.
+const SEARCH_VERIFY_LIMIT = 24;
+const SEARCH_TYPING_PAUSE_MS = 150;
+
+function searchIndexActive() {
+  return Boolean(state.searchData && state.todayDate === "all" && !state.fullDataLoaded);
+}
+
+function decodeSearchIndex(data) {
+  const observations = Array.from({ length: data.row_count }, (_, row) => ({
+    search_row: row,
+    record_group: row,
+  }));
+  // Sightings of one record share the group of their first row.
+  (data.shared_records || []).forEach((rows) => {
+    rows.forEach((row) => {
+      observations[row].record_group = rows[0];
+    });
+  });
+  Object.entries(data.columns || {}).forEach(([field, column]) => {
+    const { dictionary, values, lists } = column;
+    observations.forEach((item, row) => {
+      const value = lists
+        ? lists[row]?.map((id) => dictionary[id])
+        : dictionary && values[row] !== null ? dictionary[values[row]] : values[row];
+      if (value !== null && value !== undefined) item[field] = value;
+    });
+  });
+  return {
+    generated_at: data.generated_at,
+    latest_date: data.latest_date,
+    base: data.base,
+    rowShardSize: data.row_shard_size,
+    gramShards: data.gram_shards,
+    observations,
+    fullRows: new Map(),
+    shards: new Map(),
+    matches: new Map(),
+    matchPromises: new Map(),
+  };
+}
+
+function searchShard(index, path) {
+  if (!index.shards.has(path)) {
+    const promise = trackLoad("Loading search results…", ["today"], async () => {
+      const response = await fetch(`/data/${index.base}/${path}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return readSearchShard(response);
+    });
+    promise.catch(() => index.shards.delete(path));
+    index.shards.set(path, promise);
+  }
+  return index.shards.get(path);
+}
+
+// Shards are stored gzip-compressed to keep the Pages site under its 1 GB cap
+// (search_index.py). Pages serves them as plain bytes; if a host has already
+// inflated one in transit, the gzip magic number is gone and the text is used
+// as is. Each shard is a few hundred KB at most, unlike the archive whose
+// download must stay in the browser's own JSON reader (#1142).
+async function readSearchShard(response) {
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  if (bytes[0] !== 0x1f || bytes[1] !== 0x8b) return JSON.parse(new TextDecoder().decode(bytes));
+  const inflated = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return new Response(inflated).json();
+}
+
+// Twin of gram_shard in search_index.py.
+function gramShard(gram, shards) {
+  let value = 0;
+  for (let offset = 0; offset < gram.length; offset += 1) {
+    value = (Math.imul(value, 31) + gram.charCodeAt(offset)) >>> 0;
+  }
+  return value % shards;
+}
+
+async function searchGram(index, gram) {
+  const shard = await searchShard(index, `g/${gramShard(gram, index.gramShards)}.json.gz`);
+  return Object.hasOwn(shard, gram) ? shard[gram] : null;
+}
+
+// One- and two-unit grams list rows; trigrams list each row's positions.
+function gramRows(stream) {
+  const rows = [];
+  let row = -1;
+  stream.forEach((delta) => {
+    row += delta + 1;
+    rows.push(row);
+  });
+  return rows;
+}
+
+function gramPositions(stream) {
+  const rows = new Map();
+  let row = -1;
+  for (let cursor = 0; cursor < stream.length;) {
+    row += stream[cursor] + 1;
+    const count = stream[cursor + 1];
+    const positions = new Int32Array(count);
+    let position = 0;
+    for (let offset = 0; offset < count; offset += 1) {
+      position += stream[cursor + 2 + offset];
+      positions[offset] = position;
+    }
+    rows.set(row, positions);
+    cursor += 2 + count;
+  }
+  return rows;
+}
+
+function hasPosition(positions, value) {
+  let low = 0;
+  let high = positions.length - 1;
+  while (low <= high) {
+    const middle = (low + high) >> 1;
+    if (positions[middle] === value) return true;
+    if (positions[middle] < value) low = middle + 1;
+    else high = middle - 1;
+  }
+  return false;
+}
+
+// Trigram offsets that cover every unit of a query of the given length.
+function searchTiles(length) {
+  const tiles = [];
+  for (let offset = 0; offset + 3 <= length; offset += 3) tiles.push(offset);
+  if (tiles[tiles.length - 1] !== length - 3) tiles.push(length - 3);
+  return tiles;
+}
+
+// Rows where every loaded trigram sits at its offset from one common start.
+// With all tiles loaded this is exactly the rows whose text contains the query.
+function alignedRows(loaded) {
+  const tiles = [...loaded.entries()].sort((a, b) => a[1].size - b[1].size);
+  const [firstOffset, firstRows] = tiles[0];
+  const rows = new Set();
+  firstRows.forEach((positions, row) => {
+    const others = tiles.slice(1).map(([offset, map]) => [offset, map.get(row)]);
+    if (others.some(([, list]) => !list)) return;
+    for (const position of positions) {
+      const start = position - firstOffset;
+      if (start >= 0 && others.every(([offset, list]) => hasPosition(list, start + offset))) {
+        rows.add(row);
+        return;
+      }
+    }
+  });
+  return rows;
+}
+
+async function ensureSearchRows(rows, index = state.searchData) {
+  const shards = [...new Set(rows.map((row) => Math.floor(row / index.rowShardSize)))];
+  await Promise.all(shards.map(async (shard) => {
+    const data = await searchShard(index, `r/${shard}.json.gz`);
+    data.rows.forEach((item, offset) => index.fullRows.set(shard * index.rowShardSize + offset, item));
+  }));
+  // A missing row would otherwise re-request the same shard forever.
+  if (rows.some((row) => !index.fullRows.has(row))) throw new Error("Search row missing from its shard");
+}
+
+async function findSearchMatches(index, query) {
+  if (query.length < 3) {
+    const stream = await searchGram(index, query);
+    return new Set(stream ? gramRows(stream) : []);
+  }
+  const tiles = searchTiles(query.length);
+  // The first and last trigrams come first: two trigrams that far apart rarely
+  // line up by chance, so a long query usually narrows to a few rows, and
+  // checking those rows' text costs less than its remaining trigrams.
+  const order = [...new Set([tiles[0], tiles[tiles.length - 1], ...tiles])];
+  const loaded = new Map();
+  for (let start = 0; start < order.length; start += 2) {
+    const batch = order.slice(start, start + 2);
+    const streams = await Promise.all(batch.map((offset) => searchGram(index, query.slice(offset, offset + 3))));
+    if (streams.some((stream) => !stream)) return new Set();
+    batch.forEach((offset, position) => loaded.set(offset, gramPositions(streams[position])));
+    const candidates = alignedRows(loaded);
+    if (loaded.size === order.length) return candidates;
+    if (candidates.size <= SEARCH_VERIFY_LIMIT) {
+      await ensureSearchRows([...candidates], index);
+      return new Set([...candidates].filter((row) => {
+        const item = index.fullRows.get(row);
+        return `${item.title} ${item.summary} ${item.source}`.toLowerCase().includes(query);
+      }));
+    }
+  }
+  return new Set();
+}
+
+// A promise for the current query's matches, or null when nothing is pending.
+function pendingSearchMatches() {
+  if (!searchIndexActive()) return null;
+  const index = state.searchData;
+  const query = state.q.trim().toLowerCase();
+  if (!query || index.matches.has(query)) return null;
+  if (!index.matchPromises.has(query)) {
+    // The search box re-renders on every keystroke. Waiting for a pause keeps
+    // "s", "sw", "swe" from each downloading shards on the way to "swe-bench".
+    const promise = new Promise((resolve) => setTimeout(resolve, SEARCH_TYPING_PAUSE_MS))
+      .then(() => (state.searchData === index && state.q.trim().toLowerCase() === query
+        ? findSearchMatches(index, query)
+        : null))
+      .then((rows) => {
+        if (rows) index.matches.set(query, rows);
+      })
+      .finally(() => {
+        index.matchPromises.delete(query);
+        // Matches are cached per query; the parsed trigram shards are not
+        // needed again and would otherwise pile up over a session.
+        [...index.shards.keys()].filter((path) => path.startsWith("g/")).forEach((path) => index.shards.delete(path));
+      });
+    index.matchPromises.set(query, promise);
+  }
+  return index.matchPromises.get(query);
+}
+
+function waitForSearchIndex(promise, options) {
+  const index = state.searchData;
+  promise.then(
+    () => {
+      if (state.searchData === index && state.view === "today") renderToday(options);
+    },
+    (error) => {
+      console.error(error);
+      if (state.searchData !== index) return;
+      clearTodayResultsForLoadError();
+      const notice = byId("today-load-error");
+      notice.hidden = false;
+      notice.textContent = t("Search data could not be loaded. Refresh to retry.");
+    },
+  );
 }
 
 async function ensureDataForState() {

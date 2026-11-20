@@ -32,7 +32,10 @@ def test_loads_keep_the_browsers_own_json_reader():
     # copy of the 344 MB archive: Chromium's peak renderer memory rose from
     # 1.40 GB to 1.76-1.93 GB, enough to kill a phone tab (#1142 review).
     assert "getReader()" not in APP
-    assert "pipeThrough(" not in APP
+    # The one exception inflates a gzip search shard of a few hundred KB, not
+    # a dashboard payload (#1183).
+    shard_reader = APP.split("async function readSearchShard(", 1)[1].split("\n}\n", 1)[0]
+    assert "pipeThrough(" not in APP.replace(shard_reader, "")
     assert "JSON.parse(parts" not in APP
 
 
