@@ -142,6 +142,10 @@ outputs under `data/catalog/`, is still not an independent source of truth.
 - `site/data/benchmark-index.json`: the complete benchmark catalog and common document
   registry, one row per source record across all sources; reviewed identities do not silently collapse the
   underlying evidence.
+- `site/data/benchmark-search.json`: every catalog record, cut to the fields the
+  homepage's registry search ranks and shows (`BENCHMARK_SEARCH_FIELDS` in
+  `catalog.py`, issue #1305). Written beside the catalog by the same step, so a
+  homepage query does not download the full catalog.
 - `site/data/benchmarks/<slug>.json`: benchmark detail, provenance, identity,
   score series, observations and cited documents through one shared contract.
 - `site/data/models.json`: one model registry assembled from the catalog, with

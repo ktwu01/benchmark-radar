@@ -2690,7 +2690,7 @@ def test_a_benchmark_name_search_reaches_the_registry_not_only_the_daily_feed():
         "function renderToday(", 1
     )[0]
     assert "searchCuratedEntries" not in section
-    assert "searchBenchmarkIndex(state.benchmarkIndex || [], query)" in section
+    assert "searchBenchmarkIndex(records || [], query)" in section
 
     # Curated rows rank above crawled ones: same order the leaderboard picker
     # uses, and the layer with a protocol and a time axis.
@@ -2704,7 +2704,10 @@ def test_a_benchmark_name_search_reaches_the_registry_not_only_the_daily_feed():
     # still does not pay for it.
     # Attached once. The promise is cached, so one handler per keystroke would
     # all fire together on a slow fetch, each re-filtering and rebuilding.
-    assert "!state.benchmarkIndexLoaded && !benchmarkIndexRerenderQueued" in section
+    assert "!state.benchmarkSearchLoaded && !benchmarkIndexRerenderQueued" in section
+    # It fetches the compact search index, not the full catalog (#1305).
+    assert "loadBenchmarkSearch()" in section
+    assert "loadBenchmarkIndex()" not in section
     assert "benchmarkIndexRerenderQueued = true;" in section
 
     # Capped before the rows are built. "bench" matches 355 of the 1,148
@@ -2722,7 +2725,7 @@ def test_a_benchmark_name_search_reaches_the_registry_not_only_the_daily_feed():
     # And an unsettled catalog is a third state. Zero matches is not a fact
     # while the request is in flight, so a cold search for a crawled-only
     # benchmark must not print "clear one or more filters" in the meantime.
-    assert "const indexPending = !state.benchmarkIndexLoaded;" in section
+    assert "const indexPending = !recordsLoaded;" in section
     assert 'return !total && indexPending ? "pending" : total;' in section
     assert 'benchmarkMatches === "pending"' in script
 
