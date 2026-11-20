@@ -103605,5 +103605,138 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "Servicenow"
+        ],
+        "authors": [
+          "Association for Computational Linguistics 2026",
+          "Sai Harshitha Aluru",
+          "Amit Kumar Saha",
+          "Seganrasan Subramanian",
+          "Abhigya Verma"
+        ],
+        "blurb": "The new AgentJudgeBench release tests whether large language models used as automated judges can grade tool-calling workflows represented as dependency graphs.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-20T13:39:41+00:00",
+        "source": "DataCite",
+        "title": "AgentJudgeBench: A Multi-Difficulty Benchmark for Evaluating LLM Judges on Agentic Tool-Calling",
+        "url": "https://doi.org/10.48448/f4ss-tj07"
+      },
+      {
+        "affiliations": [
+          "Sichuan University",
+          "Institute of North Electronic Equipment"
+        ],
+        "authors": [
+          "Association for Computational Linguistics 2026",
+          "Yuxiang He",
+          "Xuelong Li",
+          "Yufei Liu",
+          "Yuchen Yuan",
+          "Jian Zhao"
+        ],
+        "blurb": "The new TraceProbe benchmark runs agents in executable sandboxes, records normalized action traces, and replays tool actions to locate where safety risks entered and propagated.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-20T12:15:30+00:00",
+        "source": "DataCite",
+        "title": "TraceProbe: An Execution-Based Benchmark for Diagnosing Safety Failures in LLM Agents",
+        "url": "https://doi.org/10.48448/aptp-ry58"
+      },
+      {
+        "affiliations": [
+          "EPFL",
+          "Andromede AI"
+        ],
+        "authors": [
+          "Association for Computational Linguistics 2026",
+          "Guillaume Allegre",
+          "Stefan Krsteski",
+          "Charlotte Meyer",
+          "Tony O'Halloran",
+          "Alexandre Sallinen"
+        ],
+        "blurb": "The new MESSIER corpus standardizes 957,611 evaluation records from 30 benchmarks, covering 745 agents, 11,891 tasks, and 74,263 verifiers, while adding runs on six underrepresented professional and scientific benchmarks.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-20T09:48:19+00:00",
+        "source": "DataCite",
+        "title": "Messier: A High-Resolution Corpus for Cross-Benchmark Agent Evaluation",
+        "url": "https://doi.org/10.48448/6a1w-6v53"
+      },
+      {
+        "affiliations": [
+          "Lenovo",
+          "Xi'An Jiaotong University"
+        ],
+        "authors": [
+          "Association for Computational Linguistics 2026",
+          "Jianyi Chen",
+          "Oguz H Elibol",
+          "Tao Li",
+          "Jie Ma",
+          "Pradyumna S. Singh",
+          "Yaqiang Wu",
+          "Shangda Yang"
+        ],
+        "blurb": "The new MACRO benchmark evaluates how multi-agent systems handle underspecified travel requests.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-20T09:40:40+00:00",
+        "source": "DataCite",
+        "title": "MACRO: A Benchmark for Clarification-Aware Multi-Agent Orchestration",
+        "url": "https://doi.org/10.48448/2pwm-j526"
+      },
+      {
+        "affiliations": [
+          "Hong Kong University of Science and Technology",
+          "Electronics and Telecommunications Research Institute"
+        ],
+        "authors": [
+          "Association for Computational Linguistics 2026",
+          "Juyong Jiang",
+          "Sunghun Kim",
+          "Chansung Park",
+          "Jiasi Shen"
+        ],
+        "blurb": "The new ConformWeb benchmark derives hidden interaction sequences from public behavioral contracts and executes them against generated web applications.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-20T13:04:51+00:00",
+        "source": "DataCite",
+        "title": "Do LLM-Generated Web Apps Behave Correctly? A Contract-Grounded Benchmark for Behavioral Conformance",
+        "url": "https://doi.org/10.48448/g3jm-yc97"
+      }
+    ],
+    "date": "2026-11-20",
+    "schema_version": 1,
+    "top": [
+      "https://doi.org/10.48448/f4ss-tj07",
+      "https://doi.org/10.48448/aptp-ry58",
+      "https://doi.org/10.48448/6a1w-6v53"
+    ]
+  },
   "since": "2026-11-18T13:42:43.253800+00:00"
 }
