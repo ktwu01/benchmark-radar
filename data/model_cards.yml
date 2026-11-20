@@ -205,7 +205,15 @@ source_documents:
     # The embedded waffle-data dates this cohort update; model run dates are unstated.
     published: 2026-10-17
     retrieved_at: 2026-11-12
-
+  - id: ai_professions_prompt_benchmark_results_2026_10_22
+    name: AI Professions prompt benchmark results (pinned commit 6d4c6d8b, runs 2026-10-19 to 2026-10-21)
+    publisher: AI Professions
+    document_type: benchmark_leaderboard
+    url: https://github.com/aiprofessions/prompt-benchmark/blob/6d4c6d8b28756d23024b6f4143f1a8938160278a/data/results.csv
+    benchmarks: [ai_professions_prompt_benchmark]
+    published: 2026-10-22
+    retrieved_at: 2026-11-19    
+    
 benchmarks:
   - id: gobench
     name: GoBench
@@ -2139,10 +2147,18 @@ benchmarks:
       outputs by claude-opus-5-5; the README warns the two judges differ in
       strictness, so only models graded by the same judge compare directly.
       Results grow in rounds, so the model set depends on the release read.
-
+    openness:      
+      status: open
+      basis: reviewed_code_and_licensed_data_public
+      code_license: CC-BY-4.0
+      data_license: CC-BY-4.0
+      data_located: found
+      evidence:
+        - https://github.com/aiprofessions/prompt-benchmark/blob/6d4c6d8b28756d23024b6f4143f1a8938160278a/LICENSE    
+      
   - id: crosssearch
     name: CrossSearch
-    aliases: ["CrossSearch", "CrossSearch: 100-task paper set"]
+    aliases: ["CrossSearch", "CrossSearch: 100-task paper set"]  
     domain: professional
     url: https://huggingface.co/datasets/AfterQuery/CrossSearch
     caveat: >-

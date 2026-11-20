@@ -596,6 +596,10 @@ benchmarks:
     metric: YapIndex
     direction: lower_is_better
     unit: characters
+  - benchmark_id: ai_professions_prompt_benchmark
+    metric: criteria_passed_avg
+    direction: higher_is_better
+    unit: criteria
 
 results:
   # Brain-to-Text '24's official challenge summary names the top three final
@@ -8608,4 +8612,54 @@ results:
     reported_at: 2026-01-02
     value: 1427
     read_from: pdf_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: ai_professions_prompt_benchmark
+    instrument: ai_professions_prompt_benchmark_6d4c6d8b
+    protocol: 100 prompts, 3 plain-chat runs each, 5 pass/fail criteria per run, no tools; judged by gpt-6-astra
+    model: Claude Opus 5.5
+    organization: Anthropic
+    source_id: ai_professions_prompt_benchmark_results_2026_10_22
+    reported_at: 2026-10-22
+    value: 4.2969
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: ai_professions_prompt_benchmark
+    instrument: ai_professions_prompt_benchmark_6d4c6d8b
+    protocol: 100 prompts, 3 plain-chat runs each, 5 pass/fail criteria per run, no tools; judged by gpt-6-astra
+    model: Claude Sonnet 5
+    organization: Anthropic
+    source_id: ai_professions_prompt_benchmark_results_2026_10_22
+    reported_at: 2026-10-22
+    value: 3.9798
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: ai_professions_prompt_benchmark
+    instrument: ai_professions_prompt_benchmark_6d4c6d8b
+    protocol: 100 prompts, 3 plain-chat runs each, 5 pass/fail criteria per run, no tools; judged by gpt-6-astra
+    model: Claude Fable 5.1
+    organization: Anthropic
+    source_id: ai_professions_prompt_benchmark_results_2026_10_22
+    reported_at: 2026-10-22
+    value: 4.1432
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: ai_professions_prompt_benchmark
+    instrument: ai_professions_prompt_benchmark_6d4c6d8b
+    protocol: 100 prompts, 3 plain-chat runs each, 5 pass/fail criteria per run, no tools; judged by gpt-6-astra
+    model: Gemini 4 Argon Medium
+    organization: Google
+    source_id: ai_professions_prompt_benchmark_results_2026_10_22
+    reported_at: 2026-10-22
+    value: 4.2435
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: ai_professions_prompt_benchmark
+    instrument: ai_professions_prompt_benchmark_6d4c6d8b
+    protocol: 100 prompts, 3 plain-chat runs each, 5 pass/fail criteria per run, no tools; judged by claude-opus-5-5
+    model: GPT-6 Astra
+    organization: OpenAI
+    source_id: ai_professions_prompt_benchmark_results_2026_10_22
+    reported_at: 2026-10-22
+    value: 4.8766
+    read_from: html_text
     measurement_kind: benchmark_publisher_run
