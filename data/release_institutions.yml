@@ -1760,7 +1760,7 @@ papers:
   '2611.17621':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-18'
+    retrieved_at: '2026-11-21'
     institutions: []
   '2611.17955':
     basis: openalex_linked_institutions
@@ -1789,10 +1789,12 @@ papers:
     institutions:
     - The University of Southern Mississippi, Hattiesburg, MS 39401, USA
   '2611.18981':
-    basis: null
-    source_url: null
-    retrieved_at: '2026-11-18'
-    institutions: []
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7235071092
+    retrieved_at: '2026-11-21'
+    institutions:
+    - Deggendorf Institute of Technology
+    - University of Passau
   '2611.20882':
     basis: null
     source_url: null
