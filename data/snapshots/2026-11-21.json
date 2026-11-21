@@ -99388,5 +99388,182 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "AI Institute, ITMO University",
+          "ITMO University"
+        ],
+        "authors": [
+          "Association for Computational Linguistics 2026",
+          "Sergey Chuprin",
+          "Ilya Galyukshev",
+          "Anna Kalyuzhnaya",
+          "Jerzy Kamiński",
+          "Redko Kirill"
+        ],
+        "blurb": "DynamicMCPBench is a new framework for evaluating agents against live, stateful Model Context Protocol servers, which expose external tools to a model.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-20T19:56:47+00:00",
+        "source": "DataCite",
+        "title": "DynamicMCPBench: A Trace-Grounded, Effect-Scored Benchmark for LLM Agents over Live MCP Servers",
+        "url": "https://doi.org/10.48448/pbxt-by23"
+      },
+      {
+        "affiliations": [
+          "Microsoft Research",
+          "Microsoft",
+          "Alibaba"
+        ],
+        "authors": [
+          "Association for Computational Linguistics 2026",
+          "Yu Kang",
+          "Liqun Li",
+          "Qingwei Lin",
+          "Xiaojun Ma",
+          "Minghua Ma",
+          "Kartik Mathur",
+          "Jian Mu",
+          "Chiming Ni",
+          "Bo Qiao",
+          "Si Qin",
+          "Saravan Rajmohan",
+          "Lu Wang",
+          "Qianhui Wu",
+          "Yuhang Xie",
+          "Chaoyun Zhang",
+          "Dongmei Zhang",
+          "Mengyu Zhou"
+        ],
+        "blurb": "GUI-360° is a new Windows desktop-agent dataset containing 17,000 trajectories and 131,000 validated successful action steps, plus 1.09 million failed steps.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-20T18:37:46+00:00",
+        "source": "DataCite",
+        "title": "GUI-360° : A Comprehensive Dataset and Benchmark for Desktop Productivity Computer-Using Agents",
+        "url": "https://doi.org/10.48448/hsxn-b350"
+      },
+      {
+        "affiliations": [
+          "Institute of Automation, Chinese Academy of Sciences"
+        ],
+        "authors": [
+          "Association for Computational Linguistics 2026",
+          "Kang Liu",
+          "Shun Wu",
+          "Di Wu",
+          "XueYou Zhang"
+        ],
+        "blurb": "COLLABMEM is a new diagnostic benchmark for memory in systems where multiple language-model agents collaborate.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-20T14:40:36+00:00",
+        "source": "DataCite",
+        "title": "COLLABMEM: A Diagnostic Benchmark for Collaborative Memory Operations in Multi-Agent LLM Systems",
+        "url": "https://doi.org/10.48448/8amd-2591"
+      },
+      {
+        "affiliations": [
+          "Seoul National University"
+        ],
+        "authors": [
+          "Association for Computational Linguistics 2026",
+          "Taesup Moon",
+          "Juhyeon Park",
+          "Sumin Yu"
+        ],
+        "blurb": "PopResume is a new resume-screening fairness benchmark that preserves population-based relationships among attributes and measures causal pathways.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-20T18:45:56+00:00",
+        "source": "DataCite",
+        "title": "PopResume: Causal Fairness Evaluation of LLM/VLM Resume Screeners with Population-Representative Dataset",
+        "url": "https://doi.org/10.48448/yezm-0206"
+      },
+      {
+        "affiliations": [
+          "Fudan University",
+          "Nankai University, Inspur Electronic Information Industry Co.,Ltd.",
+          "School of Computer Science, Fudan University"
+        ],
+        "authors": [
+          "Association for Computational Linguistics 2026",
+          "Yifei Cao",
+          "Xinmeng Che",
+          "Shihan Dou",
+          "Xiaoran Fan",
+          "Baoyu Fan",
+          "Tao Gui",
+          "Xuanjing Huang",
+          "Tao Ji",
+          "Changhao Jiang",
+          "Hui Li",
+          "Jiajun Sun",
+          "Jingqi Tong",
+          "Yilong Wu",
+          "Zhiheng Xi",
+          "Junjie Ye",
+          "Ming Zhang",
+          "Qi Zhang",
+          "Jiabao Zhuang"
+        ],
+        "blurb": "SpeechRole is a new speech-to-speech role-playing resource with 98 roles and 111,000 conversations.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-20T17:04:04+00:00",
+        "source": "DataCite",
+        "title": "SpeechRole: A Large-Scale Dataset and Benchmark for Evaluating Speech Role-Playing Agents",
+        "url": "https://doi.org/10.48448/98vr-zh80"
+      },
+      {
+        "affiliations": [
+          "University of Texas at Dallas"
+        ],
+        "authors": [
+          "Association for Computational Linguistics 2026",
+          "Afraa Alshammari"
+        ],
+        "blurb": "QUANTA is a new English-to-Arabic machine-translation error dataset organized into a four-level taxonomy with 23 detailed error classes and severity-oriented analysis, rather than collapsing heterogeneous translation failures into one score.",
+        "categories": [
+          "benchmark",
+          "dataset",
+          "data_quality"
+        ],
+        "published_at": "2026-11-20T20:22:07+00:00",
+        "source": "DataCite",
+        "title": "Quanta: A Fine-Grained Dataset and Benchmark for Arabic Machine-Translation Error Analysis",
+        "url": "https://doi.org/10.48448/qf98-vf11"
+      }
+    ],
+    "date": "2026-11-21",
+    "schema_version": 1,
+    "top": [
+      "https://doi.org/10.48448/pbxt-by23",
+      "https://doi.org/10.48448/hsxn-b350",
+      "https://doi.org/10.48448/8amd-2591"
+    ]
+  },
   "since": "2026-11-19T13:07:58.127026+00:00"
 }
