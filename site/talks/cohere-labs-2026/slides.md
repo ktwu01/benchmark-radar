@@ -104,7 +104,37 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 -->
 
-## 7. Attention
+## 7. Six levels of benchmarks
+
+*The map has floors*
+
+- Level 1 · Atomic skills · One isolated, automatically graded item: MMLU, GSM8K, HumanEval. Frontier scores are 88–99%. This floor is saturated.
+- Level 2 · Frontier knowledge · Questions built to stump experts: GPQA, Humanity's Last Exam, FrontierMath. Launched under 10%; within about 18 months they climbed to 35–55%.
+- Level 3 · Applied tasks · Produce a real artefact: SWE-bench, Aider, LiveCodeBench. The same models score 25–35 points lower here than on isolated skill tests.
+- Level 4 · Agentic work · Multi-step, tool-using, hours long: GAIA, OSWorld, Terminal-Bench. Success decays as tasks get longer. METR puts the frontier 50% time horizon at about 1–2 hours of human work.
+- Level 5 · Occupations · How much of paid work is tested at all: GDPval, Mercor's Benchmark Map, HeyMilo's Atlas of Work. About 90% of US working hours have little or no benchmark coverage.
+- Level 6 · Meta · Auditing the measurement itself: HELM, LMArena, validity studies. One 2026 result: a benchmark's format predicts agreement between benchmarks better than the concept it claims to measure.
+- Six levels, from a literature review of the evaluation field, Nov 2026.
+
+> **Speaker notes:** The catalog is not flat. The word benchmark covers a 30-second quiz item and a two-hour professional workflow. Which floor a benchmark sits on decides what its score can claim. Radar tracks benchmarks on every floor, and the five findings that follow look different depending on the floor you are standing on.
+
+---
+
+## 8. What changes as you climb
+
+*One floor does not predict the next*
+
+- Scores fall. About 95–99% at Level 1; under 10% at launch on Levels 2 and 4; about half of expert parity on one-shot professional deliverables at Level 5.
+- The unit changes. The model alone, then model plus compute, then model plus scaffold, tools, and budget, then the occupation.
+- The failure mode changes. Saturation, then label error and confident wrong answers, then flawed tests and memorised answers, then compounding error and gamed graders, then sampling the wrong work.
+- Levels do not predict each other. SWE-bench Verified 80.9% vs SWE-bench Pro 45.9% for the same model. ARC-AGI-1 53% vs ARC-AGI-2 3% for the same model.
+- Read every score with its floor. A Level 1 number cannot settle a Level 4 question.
+
+> **Speaker notes:** This is the one-slide version of the whole review. Progress is real at every level; the METR horizon trend and GDPval's year-on-year doubling are not artefacts. But each level's headline number overstates the next level's quantity, because each level holds constant exactly what the next level varies: how well the task is specified, how long it runs, which tools are allowed, and whether the task represents real work.
+
+---
+
+## 9. Attention
 
 *Finding 1 of 5*
 
@@ -119,7 +149,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 8. Papers
+## 10. Papers
 
 *Finding 2 of 5*
 
@@ -134,7 +164,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 9. Abandoned repos
+## 11. Abandoned repos
 
 *Finding 3 of 5*
 
@@ -148,7 +178,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 10. Saturation
+## 12. Saturation
 
 *Finding 4 of 5*
 
@@ -163,7 +193,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 11. Audits
+## 13. Audits
 
 *Finding 5 of 5*
 
@@ -177,7 +207,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 12. Benchmarks’ Last Exam
+## 14. Benchmarks’ Last Exam
 
 *Finding 5 of 5, continued · Audits by James Zhu*
 
@@ -191,7 +221,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 13. A five-step check
+## 15. A five-step check
 
 *Take home*
 
@@ -205,7 +235,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 14. What is next
+## 16. What is next
 
 *Roadmap*
 
@@ -218,7 +248,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 15. Let your agent draft Related Work
+## 17. Let your agent draft Related Work
 
 *For your paper*
 
@@ -231,7 +261,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 16. Search for it. If it is missing, add it.
+## 18. Search for it. If it is missing, add it.
 
 *For your benchmark*
 
@@ -244,7 +274,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 17. Get new benchmarks by email
+## 19. Get new benchmarks by email
 
 *For your inbox*
 
@@ -258,7 +288,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 18. Get involved
+## 20. Get involved
 
 *Join in*
 
@@ -273,7 +303,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 19. Acknowledgments
+## 21. Acknowledgments
 
 *Thank you*
 
@@ -284,7 +314,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 20. Questions
+## 22. Questions
 
 *Q&A*
 
