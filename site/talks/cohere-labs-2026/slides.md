@@ -307,13 +307,14 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 *Career path*
 
-- Started in space physics. Undergraduate at USTC, then Ph.D.-track research at UT Austin on Noah-MP, the land surface model inside weather and climate models.
-- Built Noah-MP-bench, a benchmark for whether AI-generated changes to Noah-MP stay physically consistent. That work is my M.A. report, UT Austin, Dec 2026.
-- I lead Benchmark Radar, the living map in this talk: 52,120 records, 41 sources, viewed or used by researchers at major labs.
-- Papers: first author of "What Git Does Not Record" (NeurIPS 2026 AI-Native Academia Workshop); co-author of ResearchClawBench, MatrAIx, and ScienceIDE.
-- In 2026 I moved from the Ph.D. track to the M.A. track. I graduate in Dec 2026 and start my next role in AI evaluation in Feb 2027.
+1. **USTC, Space Science and Technology (2020-2024).** Space physics research and a first-author paper in *JGR: Space Physics*.
+2. **UT Austin, Ph.D. track.** Research on Noah-MP, the land surface model inside weather and climate models.
+3. **Noah-MP-bench, M.A. report (Dec 2026).** A benchmark for whether AI-generated changes to Noah-MP stay physically consistent.
+4. **Benchmark Radar.** I lead the living map in this talk: 52,120 records, 41 sources, viewed or used by researchers at major labs.
 
-> **Speaker notes:** Keep this to one minute. The short version: physics training, a benchmark for AI changes to a physics model, then a map of everyone else's benchmarks. The move from the Ph.D. track to the M.A. track is the next slide.
+- Next: a role in AI evaluation, from Feb 2027.
+
+> **Speaker notes:** Keep this to one minute. The short version: physics training, a benchmark for AI changes to a physics model, then a map of everyone else's benchmarks. If asked about papers: first author of "What Git Does Not Record" (NeurIPS 2026 AI-Native Academia Workshop); co-author of ResearchClawBench, MatrAIx, and ScienceIDE. The move from the Ph.D. track to the M.A. track is the next slide.
 
 ---
 
