@@ -303,7 +303,31 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 21. Acknowledgments
+## 21. What I have done
+
+*Career path*
+
+- Started in space physics. Undergraduate at USTC, then Ph.D.-track research at UT Austin on Noah-MP, the land surface model inside weather and climate models.
+- Built Noah-MP-bench, a benchmark for whether AI-generated changes to Noah-MP stay physically consistent. That work is my M.A. report, UT Austin, Dec 2026.
+- I lead Benchmark Radar, the living map in this talk: 52,120 records, 41 sources, viewed or used by researchers at major labs.
+- Papers: first author of "What Git Does Not Record" (NeurIPS 2026 AI-Native Academia Workshop); co-author of ResearchClawBench, MatrAIx, and ScienceIDE.
+- In 2026 I moved from the Ph.D. track to the M.A. track. I graduate in Dec 2026 and start my next role in AI evaluation in Feb 2027.
+
+> **Speaker notes:** Keep this to one minute. The short version: physics training, a benchmark for AI changes to a physics model, then a map of everyone else's benchmarks. The move from the Ph.D. track to the M.A. track is the next slide.
+
+---
+
+## 22. Questions I asked myself
+
+*Moving from the Ph.D. track to the M.A. track*
+
+<!-- Koutian: your questions go here. Questions only, no advice, in your own words. This slide was promised in the Luma event description and the LinkedIn post. -->
+
+> **Speaker notes:** Read the questions out loud, and stop there. Do not answer them for the audience; the point is that these are the questions, not a verdict on either track.
+
+---
+
+## 23. Acknowledgments
 
 *Thank you*
 
@@ -314,7 +338,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 ---
 
-## 22. Questions
+## 24. Questions
 
 *Q&A*
 
