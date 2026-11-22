@@ -95487,5 +95487,104 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [],
+        "authors": [
+          "Jun Weng"
+        ],
+        "blurb": "A new pilot release for “Generative Retail-Tariff Design and Dual-Verification Compliance” combines 127 regulatory provisions, eight enforcement cases, 13 ground-truth citations, and runnable code for retrieval, rule checking, economic simulation, and review.",
+        "categories": [
+          "benchmark",
+          "dataset",
+          "data_quality",
+          "agentic"
+        ],
+        "published_at": "2026-11-21T23:18:54+00:00",
+        "source": "DataCite",
+        "title": "Pilot corpus, enforcement case library, and pipeline code for \"Generative Retail-Tariff Design and Dual-Verification Compliance: An LLM-Agent Framework and Retrospective Benchmark\" (IEEE TSG submission)",
+        "url": "https://doi.org/10.5281/zenodo.24429969"
+      },
+      {
+        "affiliations": [
+          "The University of Osaka",
+          "University of the Aegean"
+        ],
+        "authors": [
+          "Evangelos Angelidis",
+          "Maria Lambrou"
+        ],
+        "blurb": "The newly released vessel-navigation benchmark audits whether its tasks are physically solvable before scoring multi-agent policies.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-21T17:44:24+00:00",
+        "source": "DataCite",
+        "title": "An Auditable Benchmark for Multi-Agent Vessel Navigation in a Real Port",
+        "url": "https://doi.org/10.5281/zenodo.24331453"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Tengfei Duan"
+        ],
+        "blurb": "A new generic-drug benchmark provides 359 reference-versus-test dissolution-curve pairs across 36 drug substances, a computer-vision digitization pipeline, and evaluation code.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-22T08:26:28+00:00",
+        "source": "DataCite",
+        "title": "A Public Benchmark of Digitized Dissolution Curve Pairs for Similarity Assessment of Generic Drugs: Dataset and Code",
+        "url": "https://doi.org/10.5281/zenodo.24435950"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "mon-dark"
+        ],
+        "blurb": "The new Harness-Readiness Benchmark evaluates models inside simulated agent operating conditions, including tool calls, tool results, system rules, and required structured output.",
+        "categories": [
+          "benchmark",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-22T04:37:11+00:00",
+        "source": "Hugging Face",
+        "title": "mondk/Harness-Readiness-Benchmark",
+        "url": "https://huggingface.co/datasets/mondk/Harness-Readiness-Benchmark"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Zihao Zheng",
+          "Junyi Yao",
+          "Baichuan Li",
+          "Jiayu Long"
+        ],
+        "blurb": "The newly released healthcare-escalation benchmark tests whether a language-model agent should answer, request clarification, abstain, or escalate a case, using controlled perturbations that vary the scenario.",
+        "categories": [
+          "benchmark",
+          "agentic"
+        ],
+        "published_at": "2026-11-21T23:16:51+00:00",
+        "source": "DataCite",
+        "title": "healthcare-escalation-bench: Perturbation-controlled benchmark of when healthcare LLM agents should answer, ask, abstain, or escalate",
+        "url": "https://doi.org/10.5281/zenodo.24430271"
+      }
+    ],
+    "date": "2026-11-22",
+    "schema_version": 1,
+    "top": [
+      "https://doi.org/10.5281/zenodo.24429969",
+      "https://doi.org/10.5281/zenodo.24331453",
+      "https://doi.org/10.5281/zenodo.24435950"
+    ]
+  },
   "since": "2026-11-20T12:55:50.676227+00:00"
 }
