@@ -322,7 +322,9 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 *Moving from the Ph.D. track to the M.A. track*
 
-<!-- Koutian: your questions go here. Questions only, no advice, in your own words. This slide was promised in the Luma event description and the LinkedIn post. -->
+- What's the thing I love?
+- What's the thing people care about?
+- What's the most important topic?
 
 > **Speaker notes:** Read the questions out loud, and stop there. Do not answer them for the audience; the point is that these are the questions, not a verdict on either track.
 
