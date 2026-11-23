@@ -129,7 +129,32 @@ Sources:
 
 ---
 
-## 8. What changes as you climb
+## 8. The ladder keeps going
+
+*Still a long way to measure*
+
+| Level | Capability | Closest benchmark today |
+| --- | --- | --- |
+| 7 · Discovery | Nobel-level research in physics, biology, math | ResearchClawBench, PaperBench |
+| 8 · Self-improvement | Design the next chip and its own successor | RE-Bench, MLE-bench |
+| 9 · Open problems | A Millennium Prize problem; fusion; aging | none: no answer key |
+| 10 · Hidden facts | Infer what is not public from what is | ForecastBench |
+| 11 · Chaotic systems | Predict weather, turbulence, markets | WeatherBench 2, weather only |
+| 12 · Laplace's demon | Predict everything | cannot be benchmarked |
+
+- **Above Level 6, the closest tests check replication or forecasting, not discovery.**
+
+Sources:
+- ResearchClawBench https://github.com/InternScience/ResearchClawBench ; PaperBench (OpenAI, 2025) https://arxiv.org/abs/2504.01848
+- RE-Bench (METR, 2024) https://arxiv.org/abs/2411.15114 ; MLE-bench (OpenAI, 2024) https://arxiv.org/abs/2410.07095
+- ForecastBench (Karger et al., 2024) https://arxiv.org/abs/2409.19839
+- WeatherBench 2 (Rasp et al., 2023) https://arxiv.org/abs/2308.15560
+
+> **Speaker notes:** Benchmarks today cover Levels 1 to 6. The capabilities people talk about next keep going: new science, a model designing its successor, open problems, inferring hidden facts, predicting chaotic systems. The right column is the closest benchmark that exists. Each one measures something narrower: replicating a paper instead of a discovery, a Kaggle task instead of a successor model, weather instead of every chaotic system. For open problems there is no answer key, so there is no benchmark. Disclosure: I am a co-author of ResearchClawBench. The point: if your team builds evals, the open space is above Level 6.
+
+---
+
+## 9. What changes as you climb
 
 *One floor does not predict the next*
 
@@ -146,7 +171,7 @@ Sources:
 
 ---
 
-## 9. Attention
+## 10. Attention
 
 *Finding 1 of 5*
 
@@ -161,7 +186,7 @@ Sources:
 
 ---
 
-## 10. Papers
+## 11. Papers
 
 *Finding 2 of 5*
 
@@ -176,7 +201,7 @@ Sources:
 
 ---
 
-## 11. Abandoned repos
+## 12. Abandoned repos
 
 *Finding 3 of 5*
 
@@ -190,7 +215,7 @@ Sources:
 
 ---
 
-## 12. Saturation
+## 13. Saturation
 
 *Finding 4 of 5*
 
@@ -205,7 +230,7 @@ Sources:
 
 ---
 
-## 13. Audits
+## 14. Audits
 
 *Finding 5 of 5*
 
@@ -219,7 +244,7 @@ Sources:
 
 ---
 
-## 14. Benchmarks’ Last Exam
+## 15. Benchmarks’ Last Exam
 
 *Finding 5 of 5, continued · Audits by James Zhu*
 
@@ -233,7 +258,7 @@ Sources:
 
 ---
 
-## 15. A five-step check
+## 16. A five-step check
 
 *Take home*
 
@@ -247,7 +272,7 @@ Sources:
 
 ---
 
-## 16. What is next
+## 17. What is next
 
 *Roadmap*
 
@@ -260,7 +285,7 @@ Sources:
 
 ---
 
-## 17. Let your agent draft Related Work
+## 18. Let your agent draft Related Work
 
 *For your paper*
 
@@ -273,7 +298,7 @@ Sources:
 
 ---
 
-## 18. Search for it. If it is missing, add it.
+## 19. Search for it. If it is missing, add it.
 
 *For your benchmark*
 
@@ -286,7 +311,7 @@ Sources:
 
 ---
 
-## 19. Get new benchmarks by email
+## 20. Get new benchmarks by email
 
 *For your inbox*
 
@@ -300,7 +325,7 @@ Sources:
 
 ---
 
-## 20. Get involved
+## 21. Get involved
 
 *Join in*
 
@@ -315,7 +340,7 @@ Sources:
 
 ---
 
-## 21. My career journey
+## 22. My career journey
 
 *Career path*
 
@@ -330,7 +355,7 @@ Sources:
 
 ---
 
-## 22. Questions I asked myself
+## 23. Questions I asked myself
 
 *Moving from the Ph.D. track to the M.A. track*
 
@@ -342,7 +367,7 @@ Sources:
 
 ---
 
-## 23. Acknowledgments
+## 24. Acknowledgments
 
 *Thank you*
 
@@ -353,7 +378,7 @@ Sources:
 
 ---
 
-## 24. Questions
+## 25. Questions
 
 *Q&A*
 

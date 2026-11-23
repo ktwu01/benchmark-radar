@@ -287,6 +287,9 @@ body.export .info, body.export .src-pop { display: none !important; }
 .ladder li:last-child { border-bottom: 1px solid var(--line); }
 .ladder .lv { font-family: var(--font-display); font-weight: 700; font-size: 44px; color: var(--amber); line-height: 1; }
 .ladder .nm { font-weight: 600; color: var(--ink); font-size: 30px; }
+.ladder li.hd { font-family: var(--font-mono); font-size: 18px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); padding: 0 0 10px; border-top: none; }
+.ladder li.hd .num { font-size: 18px; color: var(--ink-soft); font-weight: 400; }
+.ladder .num.none { color: var(--ink-soft); font-style: italic; }
 .ladder .num { font-weight: 600; color: var(--teal); font-size: 29px; text-align: right; white-space: nowrap; }
 </style>
 </head>
@@ -446,7 +449,27 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">The catalog is not flat. The word benchmark covers a 30-second quiz item and a 40-hour agent task. Level 1 is saturated. Level 2 tests built to stump experts launched under 10% and reached about 50% within 18 to 20 months. On real code, the same models that score high on synthetic tasks fall to a quarter or a third. METR now puts the frontier at about 40-hour tasks at 50% success, with a very wide interval. Mercor estimates about 90% of US working hours have little or no benchmark coverage. Which level a benchmark sits on decides what its score can claim. Click the i on any number for its source.</aside>
 </section>
 
-<!-- === 8. WHAT CHANGES AS YOU CLIMB === -->
+<!-- === 8. THE LADDER KEEPS GOING === -->
+<section class="slide" data-title="The ladder keeps going">
+  <div class="frame">
+    <div class="kicker reveal">Still a long way to measure</div>
+    <h2 class="reveal">The ladder keeps going</h2>
+    <ol class="ladder">
+      <li class="hd" aria-hidden="true"><span>Level</span><span>Capability</span><span></span><span class="num">Closest benchmark today</span></li>
+      <li class="reveal"><span class="lv">7</span><span class="nm">Discovery</span><span>Nobel-level research in physics, biology, math</span><span class="num">ResearchClawBench, PaperBench<span class="cite"><button class="info" type="button" aria-label="Show source" aria-expanded="false">i</button><span class="src-pop" role="note"><b>Closest today:</b> ResearchClawBench, end-to-end autonomous research <a href="https://github.com/InternScience/ResearchClawBench" target="_blank" rel="noopener">GitHub</a>; PaperBench, replicating published AI research (OpenAI, 2025) <a href="https://arxiv.org/abs/2504.01848" target="_blank" rel="noopener">arXiv 2504.01848</a>. Both score work with a known target; neither scores a new discovery.</span></span></span></li>
+      <li class="reveal"><span class="lv">8</span><span class="nm">Self-improvement</span><span>Design the next chip and its own successor</span><span class="num">RE-Bench, MLE-bench<span class="cite"><button class="info" type="button" aria-label="Show source" aria-expanded="false">i</button><span class="src-pop" role="note"><b>Closest today:</b> RE-Bench, AI R&amp;D tasks against human experts (METR, 2024) <a href="https://arxiv.org/abs/2411.15114" target="_blank" rel="noopener">arXiv 2411.15114</a>; MLE-bench, Kaggle-style ML engineering (OpenAI, 2024) <a href="https://arxiv.org/abs/2410.07095" target="_blank" rel="noopener">arXiv 2410.07095</a>.</span></span></span></li>
+      <li class="reveal"><span class="lv">9</span><span class="nm">Open problems</span><span>A Millennium Prize problem; fusion; aging</span><span class="num none">none: no answer key</span></li>
+      <li class="reveal"><span class="lv">10</span><span class="nm">Hidden facts</span><span>Infer what is not public from what is</span><span class="num">ForecastBench<span class="cite up"><button class="info" type="button" aria-label="Show source" aria-expanded="false">i</button><span class="src-pop" role="note"><b>Closest today:</b> ForecastBench, questions about future events with no known answer at submission time (Karger et al., 2024) <a href="https://arxiv.org/abs/2409.19839" target="_blank" rel="noopener">arXiv 2409.19839</a>.</span></span></span></li>
+      <li class="reveal"><span class="lv">11</span><span class="nm">Chaotic systems</span><span>Predict weather, turbulence, markets</span><span class="num">WeatherBench 2, weather only<span class="cite up"><button class="info" type="button" aria-label="Show source" aria-expanded="false">i</button><span class="src-pop" role="note"><b>Closest today:</b> WeatherBench 2, global medium-range weather forecasts (Rasp et al., 2023) <a href="https://arxiv.org/abs/2308.15560" target="_blank" rel="noopener">arXiv 2308.15560</a>. No shared benchmark covers turbulence or markets the same way.</span></span></span></li>
+      <li class="reveal"><span class="lv">12</span><span class="nm">Laplace’s demon</span><span>Predict everything</span><span class="num none">cannot be benchmarked</span></li>
+    </ol>
+    <p class="reveal" style="margin-top:28px;font-size:28px;color:var(--ink-soft)"><b style="color:var(--ink)">Above Level 6, the closest tests check replication or forecasting, not discovery.</b></p>
+  </div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="pg"></span></div>
+  <aside class="notes">Benchmarks today cover Levels 1 to 6. The capabilities people talk about next keep going: new science, a model designing its successor, open problems, inferring hidden facts, predicting chaotic systems. The right column is the closest benchmark that exists. Each one measures something narrower: replicating a paper instead of a discovery, a Kaggle task instead of a successor model, weather instead of every chaotic system. For open problems there is no answer key, so there is no benchmark. Disclosure: I am a co-author of ResearchClawBench. The point: if your team builds evals, the open space is above Level 6.</aside>
+</section>
+
+<!-- === 9. WHAT CHANGES AS YOU CLIMB === -->
 <section class="slide" data-title="What changes as you climb">
   <div class="frame">
     <div class="kicker reveal">One floor does not predict the next</div>
@@ -461,7 +484,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">This is the one-slide version of the whole review. As you climb, the unit changes: the model alone, then the model with tools and budget, then the occupation. The failure mode changes too: saturation, then label errors, then flawed tests and gamed graders, then sampling the wrong work. The SWE-bench pair comes from two sources with different harnesses; Anthropic's own Pro number is 52.0%, still about 29 points lower. Progress is real: GDPval went from 47.6% to 70.9% in three months. But each level's headline number overstates the next level. The five findings that follow look different depending on the level you stand on.</aside>
 </section>
 
-<!-- === 9. FINDING 1: ATTENTION === -->
+<!-- === 10. FINDING 1: ATTENTION === -->
 <section class="slide" data-title="Finding 1">
   <div class="frame">
     <div class="kicker reveal">Finding 1 of 5</div>
@@ -483,7 +506,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">This is where the record starts to say something. Of the 1,024 repos we have facts for, 70% have zero stars. The top 1%, about ten repos, hold 78% of all stars. If your team discovers benchmarks through what is trending, you are sampling the top 1%. Careful: stars are attention, not quality.</aside>
 </section>
 
-<!-- === 10. FINDING 2: PAPER SIGNAL === -->
+<!-- === 11. FINDING 2: PAPER SIGNAL === -->
 <section class="slide" data-title="Finding 2">
   <div class="frame">
     <div class="kicker reveal">Finding 2 of 5</div>
@@ -503,7 +526,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Paper repos are one in seven of the cohort but 21 of the 29 that reached 100 stars. Say releases versus repos clearly: 2,940 releases come from 1,081 repos. Median 8.5 versus 0. Say the caveat out loud: association. The practical reading for industry: a paper makes the setup easier to check.</aside>
 </section>
 
-<!-- === 11. FINDING 3: DECAY === -->
+<!-- === 12. FINDING 3: DECAY === -->
 <section class="slide" data-title="Finding 3">
   <div class="frame">
     <div class="kicker reveal">Finding 3 of 5</div>
@@ -522,7 +545,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">One in three new benchmark repos never gets a second day of commits. And 57 of 1,081 repos are gone: a 404 on the endpoint that follows renames, so these are not renames. They were deleted or made private. If a decision rests on a benchmark, check that its repo still exists.</aside>
 </section>
 
-<!-- === 12. FINDING 4: SATURATION === -->
+<!-- === 13. FINDING 4: SATURATION === -->
 <section class="slide" data-title="Finding 4">
   <div class="frame">
     <div class="kicker reveal">Finding 4 of 5</div>
@@ -543,7 +566,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Live demo: on the Saturation page, type SWE-bench Verified and open its score history to show where the best score flattens; this screenshot is the fallback. One leaderboard, LLM Stats, 111 reported scores. The best reported score went from 16.8 in May 2024 to 95.0 in June 2026, as dated by LLM Stats. 65 of the 111 are 70 or higher, so the top is crowded. Saturated does not mean solved; it can mean the test stopped measuring the hard part. These are reported scores from one source, not a cross-source saturation metric.</aside>
 </section>
 
-<!-- === 13. FINDING 5: AUDITS === -->
+<!-- === 14. FINDING 5: AUDITS === -->
 <section class="slide" data-title="Finding 5">
   <div class="frame">
     <div class="kicker reveal">Finding 5 of 5</div>
@@ -562,7 +585,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">How a score was produced matters as much as the number. Independent audits re-run the setup. These are the audit's findings, not Radar's. SWE-bench Pro: at least 15% of public tasks underdetermined. June published this on June 21, 2026, 17 days before OpenAI's own audit on July 8 estimated about 30% of tasks broken. The two measure different defect types, so do not add or compare the percentages. Terminal-Bench 2.1: a careless deletion goes unnoticed on 40 of 83 tasks. DeepSWE: four reference solutions failed their own verifiers, and the v1.1 re-grade fixed three. Radar shows the audit next to the scores it examines. Credit June Kim.</aside>
 </section>
 
-<!-- === 14. AUDITS, CONTINUED === -->
+<!-- === 15. AUDITS, CONTINUED === -->
 <section class="slide" data-title="Finding 5, continued">
   <div class="frame">
     <div class="kicker reveal">Finding 5 of 5, continued · Audits by James Zhu</div>
@@ -581,7 +604,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">A second independent auditor. James Zhu's Benchmarks' Last Exam reviews each task's statement, environment, reference answer and grader, and marks it accepted, doubtful, or refused. Refused means a confirmed material defect. Terminal-Bench 4.0: 50 of 66 refused. Harvey's legal agent benchmark and AutomationBench: 71 of 100 each. But HLE-Diamond had 5 of 100 refused and AA-Omniscience 1 of 100, so refusal rates differ widely from one benchmark to the next. These are the reviews' findings, not Radar's. DeepSWE appears in both audits, but June's count covers reference solutions in v1.0 and this review covers task-level defects in v1.1, so do not compare the numbers. Credit James Zhu.</aside>
 </section>
 
-<!-- === 15. TAKE HOME === -->
+<!-- === 16. TAKE HOME === -->
 <section class="slide" data-title="Take home">
   <div class="frame">
     <div class="kicker reveal">Take home</div>
@@ -598,7 +621,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Each step maps to a finding. Discover wide, because attention is a power law. Check provenance, because many repos go quiet or disappear. Check saturation. Check audits. Then schedule retirement: the step teams skip. Radar helps with the first four; the fifth is a team decision.</aside>
 </section>
 
-<!-- === 16. ROADMAP === -->
+<!-- === 17. ROADMAP === -->
 <section class="slide" data-title="Roadmap">
   <div class="frame">
     <div class="kicker reveal">Roadmap</div>
@@ -614,7 +637,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Four directions. The audit layer is the one with the most leverage, and it depends on people like June Kim publishing audits. Interop: we would rather feed shared efforts than build a silo.</aside>
 </section>
 
-<!-- === 17. ASK 1: RELATED WORK FROM THE CLI === -->
+<!-- === 18. ASK 1: RELATED WORK FROM THE CLI === -->
 <section class="slide" data-title="Ask 1: Related Work">
   <div class="frame">
     <div class="kicker reveal">For your paper</div>
@@ -632,7 +655,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">First ask, for anyone writing a paper. One command gives your agent the Skill to write a cited Related Work draft and the BibTeX to go with it. It searches the Radar catalog plus arXiv, Hugging Face Papers, Semantic Scholar, OpenAlex, and Crossref. Read every entry before you keep it.</aside>
 </section>
 
-<!-- === 18. ASK 2: SEARCH AND ADD A BENCHMARK === -->
+<!-- === 19. ASK 2: SEARCH AND ADD A BENCHMARK === -->
 <section class="slide" data-title="Ask 2: Add your benchmark">
   <div class="frame">
     <div class="kicker reveal">For your benchmark</div>
@@ -653,7 +676,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Second ask. Search for the benchmark you built or the one you rely on. If Radar missed it, the form takes two minutes, and the next team will find it.</aside>
 </section>
 
-<!-- === 19. ASK 3: EMAIL === -->
+<!-- === 20. ASK 3: EMAIL === -->
 <section class="slide" data-title="Ask 3: Email">
   <div class="frame">
     <div class="kicker reveal">For your inbox</div>
@@ -678,7 +701,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Third ask. If you want to keep up without checking the site, the email brings new benchmarks to you, daily or weekly.</aside>
 </section>
 
-<!-- === 20. GET INVOLVED === -->
+<!-- === 21. GET INVOLVED === -->
 <section class="slide" data-title="Get involved">
   <div class="frame">
     <div class="kicker reveal">Join in</div>
@@ -701,7 +724,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Concrete asks. The audit ask is new: if your team rechecks a benchmark, publish it and Radar will link it.</aside>
 </section>
 
-<!-- === 21. MY CAREER JOURNEY === -->
+<!-- === 22. MY CAREER JOURNEY === -->
 <section class="slide" data-title="My career journey">
   <div class="frame">
     <div class="kicker reveal">Career path</div>
@@ -718,7 +741,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Keep this to one minute. The short version: physics training, a benchmark for AI changes to a physics model, then a map of everyone else's benchmarks. If asked about papers: first author of "What Git Does Not Record" (NeurIPS 2026 AI-Native Academia Workshop); co-author of ResearchClawBench, MatrAIx, and ScienceIDE. The move from the Ph.D. track to the M.A. track is the next slide.</aside>
 </section>
 
-<!-- === 22. QUESTIONS I ASKED MYSELF === -->
+<!-- === 23. QUESTIONS I ASKED MYSELF === -->
 <section class="slide" data-title="Questions I asked myself">
   <div class="frame">
     <div class="kicker reveal">Moving from the Ph.D. track to the M.A. track</div>
@@ -733,7 +756,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Read the questions out loud, and stop there. Do not answer them for the audience; the point is that these are the questions, not a verdict on either track.</aside>
 </section>
 
-<!-- === 23. ACKNOWLEDGMENTS === -->
+<!-- === 24. ACKNOWLEDGMENTS === -->
 <section class="slide" data-title="Acknowledgments">
   <div class="frame">
     <div class="kicker reveal">Thank you</div>
@@ -747,7 +770,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Read both names. June Kim's audits are the work behind Finding 5; Radar only links them. Thank Prahitha and Cohere Labs again for hosting. The sixteen authors are on the title slide. Then say out loud: Martin Ma at Thinking Machines Lab says hi to Brydon Eastman at Cohere.</aside>
 </section>
 
-<!-- === 24. Q&A === -->
+<!-- === 25. Q&A === -->
 <section class="slide dark" data-title="Questions">
   <div class="frame">
     <div class="kicker reveal">Q&amp;A</div>
