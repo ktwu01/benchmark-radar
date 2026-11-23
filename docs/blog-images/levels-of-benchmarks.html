@@ -35,7 +35,6 @@ h1 { font-size: 76px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.
 .task { font-size: 23px; color: var(--ink-soft); }
 .bench { font-size: 24px; font-weight: 600; color: var(--teal); margin-top: 4px; }
 .bench small { display: block; font-size: 21px; font-weight: 400; color: var(--ink-soft); margin-top: 2px; }
-.upper .band { margin-top: 64px; }
 .none { color: var(--ink-soft); font-style: italic; font-weight: 400; }
 .stat { margin-top: 36px; padding: 28px 30px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); }
 .stat .n { font-size: 64px; font-weight: 700; color: var(--teal); line-height: 1; }
@@ -52,7 +51,7 @@ h1 { font-size: 76px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.
   <h1>Levels of benchmarks</h1>
   <p class="lede">From quiz questions to Laplace’s demon: what today’s AI benchmarks measure, where the best AI stands, and how far measurement still has to go.</p>
 
-  <div class="band"><h2>Measured today</h2><span>Levels 1–7</span></div>
+  <div class="band"><h2>Twelve levels</h2><span>Level · capability · benchmarks today</span></div>
 
   <div class="rung"><div class="lv">1</div><div class="nm">Quiz questions</div><div class="task">Answer one fact or one short problem</div><div class="bench">MMLU, GSM8K, HumanEval<small>top scores 87–97%: basically solved</small></div></div>
   <div class="rung"><div class="lv">2</div><div class="nm">Expert-level questions</div><div class="task">Questions written to stump PhDs</div><div class="bench">Humanity’s Last Exam, FrontierMath<small>under 10% at launch → about 50% today</small></div></div>
@@ -60,17 +59,14 @@ h1 { font-size: 76px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.
   <div class="rung"><div class="lv">4</div><div class="nm">Long agent tasks</div><div class="task">Use tools for hours to reach a goal</div><div class="bench">GAIA, OSWorld, Terminal-Bench<small>best AI finishes half of ~40-hour expert tasks (METR)</small></div></div>
   <div class="rung"><div class="lv">5</div><div class="nm">Whole jobs</div><div class="task">Do paid work end to end</div><div class="bench">GDPval, Mercor Benchmark Map<small>about 90% of US work hours barely tested</small></div></div>
   <div class="rung"><div class="lv">6</div><div class="nm">Testing the tests</div><div class="task">Check whether a score means what it claims</div><div class="bench">HELM, LMArena, validity studies<small>same-format tests can agree more than same-skill tests</small></div></div>
-  <div class="rung" style="border-bottom:0"><div class="lv">7</div><div class="nm">Discovery</div><div class="task">Nobel-level research in physics, biology, math</div><div class="bench">ResearchClawBench, PaperBench<small>known answers only: rediscovery and replication</small></div></div>
+  <div class="rung"><div class="lv">7</div><div class="nm">Discovery</div><div class="task">Nobel-level research in physics, biology, math</div><div class="bench">ResearchClawBench, PaperBench<small>known answers only: rediscovery and replication</small></div></div>
 
-  <section class="upper">
-    <div class="band"><h2>Still a long way to measure</h2><span>Levels 8–12</span></div>
     <div class="rung"><div class="lv">8</div><div class="nm">Self-improvement</div><div class="task">Design the next chip and its own successor</div><div class="bench">RE-Bench, MLE-bench<small>set engineering tasks</small></div></div>
     <div class="rung"><div class="lv">9</div><div class="nm">Open problems</div><div class="task">Unsolved math; fusion; aging</div><div class="bench">Formal Conjectures, FrontierMath: Open Problems<small>math only</small></div></div>
     <div class="rung"><div class="lv">10</div><div class="nm">Hidden facts</div><div class="task">Infer what is not public from what is</div><div class="bench">ForecastBench<small>future events only</small></div></div>
     <div class="rung"><div class="lv">11</div><div class="nm">Chaotic systems</div><div class="task">Predict weather, turbulence, markets</div><div class="bench">WeatherBench 2<small>weather only</small></div></div>
     <div class="rung" style="border-bottom:0"><div class="lv">12</div><div class="nm">Laplace’s demon</div><div class="task">Predict everything</div><div class="bench none">none<small>cannot be benchmarked</small></div></div>
     <div class="stat"><div class="n">32 of 361</div><p>AI-for-science benchmark listings ask a question nobody could answer when it was built.</p></div>
-  </section>
 
   <div class="foot">
     <p><b>Sources:</b> Llama 3.1 405B model card (Meta, 2024); Phan et al. 2025 (HLE); Glazer et al. 2024 (FrontierMath); Scale/CAIS HLE leaderboard; Epoch AI; Rahman et al. 2025; METR Q4 2026 update; Mercor Benchmark Map; Desai et al. 2026; ResearchClawBench; PaperBench; RE-Bench; MLE-bench; Epoch AI FrontierMath: Open Problems; Google DeepMind Formal Conjectures; ForecastBench; WeatherBench 2; The AI4S Benchmark Index Tree (AItonomy Foundation). Links: benchmark-radar.org/blog/levels-of-benchmarks/</p>
