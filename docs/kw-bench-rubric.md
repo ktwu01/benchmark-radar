@@ -15,6 +15,26 @@
 > in CI, but nothing renders its levels. See issue #153, closed as not planned.
 > Use this rubric as a human reference, applied by hand.
 
+## Credits
+
+- **Stage names and order:** Hejia Geng, AItonomy Foundation,
+  [The AI4S Benchmark Index Tree](https://aitonomy.org/projects/benchmark).
+  The six stages, from L0 Retrieval to L5 Frontier advancement, come from that
+  index. It labels 361 AI-for-science listings and pairs each stage with a
+  V1-V7 verifier axis. Issue #111 recorded the index on 2026-08-04, two days
+  before the first KW-Bench draft.
+- **Rediscovery versus discovery:** Brian Keating,
+  [The Artificial Einstein Test](https://keating.ai/einstein-test/). It
+  separates the rediscovery of known theory from the discovery of new theory.
+- **Inspiration for the wider levels framing:** Jakub Pachocki, OpenAI.
+
+KW-Bench adds these parts:
+
+- the rule that the level follows what the evaluator knew before the run
+- the run-start cutoff and the novelty check for L5
+- the boundary tests and the evidence fields
+- the complexity tags and the task card
+
 | | |
 |---|---|
 | **Status** | Proposed v0.1 |
