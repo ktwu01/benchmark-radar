@@ -146,7 +146,7 @@ Sources:
 
 - **Only 32 of 361 AI-for-science benchmark listings ask a question nobody could answer when it was built.**
 
-Inspired by Hejia Geng @ AItonomy Foundation and Jakub Pachocki @ OpenAI.
+Inspired by Hejia Geng @ AItonomy Foundation, Jakub Pachocki @ OpenAI, and Brian Keating's Artificial Einstein Test (https://keating.ai/einstein-test/).
 
 Sources:
 - The 32 of 361 count: The AI4S Benchmark Index Tree, Hejia Geng, AItonomy Foundation. https://aitonomy.org/projects/benchmark
