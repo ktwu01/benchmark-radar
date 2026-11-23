@@ -235,6 +235,24 @@
   min-width: 0;
 }
 
+/* Written posts can carry a tall share image; keep it inside the column. */
+.blog-page .blog-prose figure {
+  margin: 1.5rem 0;
+}
+
+.blog-page .blog-prose img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--edge);
+}
+
+.blog-page .blog-prose figcaption {
+  margin-top: 0.5rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
 .blog-page .blog-directory {
   columns: 3;
   gap: 0.5rem 2rem;

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<!--
+  Source for data/blog_posts/levels-of-benchmarks/levels-of-benchmarks.png.
+  The image is a screenshot of this page, so edit here and re-render instead of
+  editing the PNG:
+
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new \
+      --hide-scrollbars --force-device-scale-factor=2 --window-size=1080,<page height> \
+      --screenshot=data/blog_posts/levels-of-benchmarks/levels-of-benchmarks.png \
+      file://$PWD/docs/blog-images/levels-of-benchmarks.html
+
+  Every number matches the sourced slides 7 and 8 of site/talks/cohere-labs-2026/;
+  the post body lists the same sources with links.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Levels of benchmarks</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root { --paper: #f3efe6; --card: #fffdf8; --ink: #142120; --ink-soft: #4a5856; --teal: #1d6b66; --amber: #d9892b; --panel: #0f1716; --line: rgba(20,33,32,0.14); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { width: 1080px; background: var(--paper); color: var(--ink); font-family: 'IBM Plex Sans', sans-serif; }
+.page { padding: 72px 64px 56px; }
+.kicker { font-family: 'JetBrains Mono', monospace; font-size: 18px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--teal); display: flex; align-items: center; gap: 14px; }
+.kicker::before { content: ''; width: 36px; height: 3px; background: var(--amber); }
+h1 { font-size: 76px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.02; margin: 18px 0 18px; }
+.lede { font-size: 26px; line-height: 1.4; color: var(--ink-soft); max-width: 900px; }
+.band { margin-top: 52px; display: flex; align-items: baseline; justify-content: space-between; border-bottom: 2px solid var(--ink); padding-bottom: 10px; }
+.band h2 { font-size: 34px; font-weight: 700; letter-spacing: -0.015em; }
+.band span { font-family: 'JetBrains Mono', monospace; font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+.rung { display: grid; grid-template-columns: 92px 1fr; gap: 8px 20px; padding: 24px 0; border-bottom: 1px solid var(--line); }
+.lv { font-weight: 700; font-size: 60px; line-height: 0.95; color: var(--amber); grid-row: span 3; }
+.nm { font-size: 31px; font-weight: 700; letter-spacing: -0.01em; }
+.task { font-size: 23px; color: var(--ink-soft); }
+.bench { font-size: 24px; font-weight: 600; color: var(--teal); margin-top: 4px; }
+.bench small { display: block; font-size: 21px; font-weight: 400; color: var(--ink-soft); margin-top: 2px; }
+.upper .band { margin-top: 64px; }
+.none { color: var(--ink-soft); font-style: italic; font-weight: 400; }
+.stat { margin-top: 36px; padding: 28px 30px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); }
+.stat .n { font-size: 64px; font-weight: 700; color: var(--teal); line-height: 1; }
+.stat p { font-size: 25px; line-height: 1.4; margin-top: 10px; }
+.foot { padding-top: 34px; font-size: 17px; line-height: 1.55; color: var(--ink-soft); }
+.foot b { color: var(--ink); font-weight: 600; }
+.foot .credit { font-family: 'JetBrains Mono', monospace; font-size: 16px; margin-top: 14px; }
+.brand { margin-top: 26px; display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 20px; color: var(--teal); border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="kicker">Benchmark Radar</div>
+  <h1>Levels of benchmarks</h1>
+  <p class="lede">From quiz questions to Laplace’s demon: what today’s AI benchmarks measure, where the best AI stands, and how far measurement still has to go.</p>
+
+  <div class="band"><h2>Measured today</h2><span>Levels 1–7</span></div>
+
+  <div class="rung"><div class="lv">1</div><div class="nm">Quiz questions</div><div class="task">Answer one fact or one short problem</div><div class="bench">MMLU, GSM8K, HumanEval<small>top scores 87–97%: basically solved</small></div></div>
+  <div class="rung"><div class="lv">2</div><div class="nm">Expert-level questions</div><div class="task">Questions written to stump PhDs</div><div class="bench">Humanity’s Last Exam, FrontierMath<small>under 10% at launch → about 50% today</small></div></div>
+  <div class="rung"><div class="lv">3</div><div class="nm">Real coding work</div><div class="task">Fix and build code in real projects</div><div class="bench">SWE-bench, LiveCodeBench<small>same models: 84–89% on toy code, 25–34% on real code</small></div></div>
+  <div class="rung"><div class="lv">4</div><div class="nm">Long agent tasks</div><div class="task">Use tools for hours to reach a goal</div><div class="bench">GAIA, OSWorld, Terminal-Bench<small>best AI finishes half of ~40-hour expert tasks (METR)</small></div></div>
+  <div class="rung"><div class="lv">5</div><div class="nm">Whole jobs</div><div class="task">Do paid work end to end</div><div class="bench">GDPval, Mercor Benchmark Map<small>about 90% of US work hours barely tested</small></div></div>
+  <div class="rung"><div class="lv">6</div><div class="nm">Testing the tests</div><div class="task">Check whether a score means what it claims</div><div class="bench">HELM, LMArena, validity studies<small>same-format tests can agree more than same-skill tests</small></div></div>
+  <div class="rung" style="border-bottom:0"><div class="lv">7</div><div class="nm">Discovery</div><div class="task">Nobel-level research in physics, biology, math</div><div class="bench">ResearchClawBench, PaperBench<small>known answers only: rediscovery and replication</small></div></div>
+
+  <section class="upper">
+    <div class="band"><h2>Still a long way to measure</h2><span>Levels 8–12</span></div>
+    <div class="rung"><div class="lv">8</div><div class="nm">Self-improvement</div><div class="task">Design the next chip and its own successor</div><div class="bench">RE-Bench, MLE-bench<small>set engineering tasks</small></div></div>
+    <div class="rung"><div class="lv">9</div><div class="nm">Open problems</div><div class="task">Unsolved math; fusion; aging</div><div class="bench">Formal Conjectures, FrontierMath: Open Problems<small>math only</small></div></div>
+    <div class="rung"><div class="lv">10</div><div class="nm">Hidden facts</div><div class="task">Infer what is not public from what is</div><div class="bench">ForecastBench<small>future events only</small></div></div>
+    <div class="rung"><div class="lv">11</div><div class="nm">Chaotic systems</div><div class="task">Predict weather, turbulence, markets</div><div class="bench">WeatherBench 2<small>weather only</small></div></div>
+    <div class="rung" style="border-bottom:0"><div class="lv">12</div><div class="nm">Laplace’s demon</div><div class="task">Predict everything</div><div class="bench none">none<small>cannot be benchmarked</small></div></div>
+    <div class="stat"><div class="n">32 of 361</div><p>AI-for-science benchmark listings ask a question nobody could answer when it was built.</p></div>
+  </section>
+
+  <div class="foot">
+    <p><b>Sources:</b> Llama 3.1 405B model card (Meta, 2024); Phan et al. 2025 (HLE); Glazer et al. 2024 (FrontierMath); Scale/CAIS HLE leaderboard; Epoch AI; Rahman et al. 2025; METR Q4 2026 update; Mercor Benchmark Map; Desai et al. 2026; ResearchClawBench; PaperBench; RE-Bench; MLE-bench; Epoch AI FrontierMath: Open Problems; Google DeepMind Formal Conjectures; ForecastBench; WeatherBench 2; The AI4S Benchmark Index Tree (AItonomy Foundation). Links: benchmark-radar.org/blog/levels-of-benchmarks/</p>
+    <p class="credit">Inspired by Hejia Geng @ AItonomy Foundation, Jakub Pachocki @ OpenAI, and Brian Keating’s Artificial Einstein Test</p>
+  </div>
+  <div class="brand"><span>benchmark-radar.org</span><span>Koutian Wu · November 2026</span></div>
+</div>
+</body>
+</html>
