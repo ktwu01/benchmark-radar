@@ -104,18 +104,19 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 -->
 
-## 7. Six levels of benchmarks
+## 7. Levels of benchmarks
 
 *The map has floors*
 
-| Level | Examples | Headline number |
-| --- | --- | --- |
-| 1 · Atomic skills | MMLU, GSM8K, HumanEval | 87–97% |
-| 2 · Frontier knowledge | Humanity's Last Exam, FrontierMath | under 10% → about 50% |
-| 3 · Applied tasks | SWE-bench, LiveCodeBench | 84–89% → 25–34% |
-| 4 · Agentic work | GAIA, OSWorld, Terminal-Bench | about 40-hour tasks |
-| 5 · Occupations | GDPval, Mercor Benchmark Map | about 90% of work hours untested |
-| 6 · Meta | HELM, LMArena, validity studies | format can beat concept |
+| Level | Capability | Example task | Example benchmarks |
+| --- | --- | --- | --- |
+| 1 | Quiz questions | Answer one fact or one short problem | MMLU, GSM8K, HumanEval: top scores 87–97%, basically solved |
+| 2 | Expert-level questions | Questions written to stump PhDs | Humanity's Last Exam, FrontierMath: under 10% at launch → about 50% today |
+| 3 | Real coding work | Fix and build code in real projects | SWE-bench, LiveCodeBench: same models, 84–89% on toy code, 25–34% on real code |
+| 4 | Long agent tasks | Use tools for hours to reach a goal | GAIA, OSWorld, Terminal-Bench: best AI finishes half of ~40-hour expert tasks |
+| 5 | Whole jobs | Do paid work end to end | GDPval, Mercor Benchmark Map: about 90% of US work hours barely tested |
+| 6 | Testing the tests | Check whether a score means what it claims | HELM, LMArena, validity studies: same-format tests can agree more than same-skill tests |
+| 7 | Discovery | Nobel-level research in physics, biology, math | ResearchClawBench, PaperBench: known answers only, rediscovery and replication |
 
 Sources:
 1. Meta, Llama 3.1 405B Instruct model card (2024): MMLU 87.3, HumanEval 89.0, GSM8K 96.8. https://github.com/meta-llama/llama-models/blob/main/models/llama3_1/MODEL_CARD.md
@@ -125,7 +126,9 @@ Sources:
 5. Mercor, Benchmark Map: "90% of American working hours are spent on tasks with little or no coverage from existing benchmarks." https://www.mercor.com/research/labor-index/benchmark-map
 6. Desai et al. (Sep 2026), 56 benchmarks: "In some cases, benchmarks that share design elements (e.g., score format) correlate more strongly than benchmarks with the same assigned concept." https://arxiv.org/abs/2609.08812
 
-> **Speaker notes:** The catalog is not flat. The word benchmark covers a 30-second quiz item and a 40-hour agent task. Level 1 is saturated. Level 2 tests built to stump experts launched under 10% and reached about 50% within 18 to 20 months. On real code, the same models that score high on synthetic tasks fall to a quarter or a third. METR now puts the frontier at about 40-hour tasks at 50% success, with a very wide interval. Mercor estimates about 90% of US working hours have little or no benchmark coverage. Which level a benchmark sits on decides what its score can claim. Click the i on any number for its source.
+7. ResearchClawBench https://github.com/InternScience/ResearchClawBench (rediscovery) ; PaperBench (OpenAI, 2025) https://arxiv.org/abs/2504.01848 (replication). Stage labels: The AI4S Benchmark Index Tree, Hejia Geng, AItonomy Foundation. https://aitonomy.org/projects/benchmark
+
+> **Speaker notes:** The catalog is not flat. The word benchmark covers a 30-second quiz item and a 40-hour agent task. Level 1 is saturated: top scores sit at 87 to 97 percent. Level 2 tests built to stump experts launched under 10 percent and reached about 50 percent within 18 to 20 months. On real code, the same models that score high on toy tasks fall to a quarter or a third. METR now estimates the best models finish half of tasks that take an expert about 40 hours, with a very wide interval. Mercor estimates about 90 percent of US working hours have little or no benchmark coverage. At Level 6, a 2026 study found that tests sharing a score format can agree more than tests claiming the same skill. Level 7 discovery benchmarks still know the answer: ResearchClawBench is rediscovery, PaperBench is replication. Which level a benchmark sits on decides what its score can claim. Click the i on any number for its source.
 
 ---
 
@@ -133,26 +136,26 @@ Sources:
 
 *Still a long way to measure*
 
-| Level | Capability | Closest benchmark today |
-| --- | --- | --- |
-| 7 · Discovery | Nobel-level research in physics, biology, math | ResearchClawBench, PaperBench: answer already known |
-| 8 · Self-improvement | Design the next chip and its own successor | RE-Bench, MLE-bench: set engineering tasks |
-| 9 · Open problems | Unsolved mathematics; fusion; aging | Formal Conjectures, FrontierMath: Open Problems: math only |
-| 10 · Hidden facts | Infer what is not public from what is | ForecastBench: future events only |
-| 11 · Chaotic systems | Predict weather, turbulence, markets | WeatherBench 2: weather only |
-| 12 · Laplace's demon | Predict everything | none: cannot be benchmarked |
+| Level | Capability | Example task | Closest benchmark today |
+| --- | --- | --- | --- |
+| 8 | Self-improvement | Design the next chip and its own successor | RE-Bench, MLE-bench: set engineering tasks |
+| 9 | Open problems | Unsolved math; fusion; aging | Formal Conjectures, FrontierMath: Open Problems: math only |
+| 10 | Hidden facts | Infer what is not public from what is | ForecastBench: future events only |
+| 11 | Chaotic systems | Predict weather, turbulence, markets | WeatherBench 2: weather only |
+| 12 | Laplace's demon | Predict everything | none: cannot be benchmarked |
 
 - **Only 32 of 361 AI-for-science benchmark listings ask a question nobody could answer when it was built.**
 
+Inspired by Hejia Geng @ AItonomy Foundation, Jakub Pachocki @ OpenAI, and Brian Keating's Artificial Einstein Test (https://keating.ai/einstein-test/).
+
 Sources:
-- Stage labels (rediscovery, replication, execution) and the 32 of 361 count: The AI4S Benchmark Index Tree, Hejia Geng, AItonomy Foundation. https://aitonomy.org/projects/benchmark
-- ResearchClawBench https://github.com/InternScience/ResearchClawBench ; PaperBench (OpenAI, 2025) https://arxiv.org/abs/2504.01848
+- The 32 of 361 count: The AI4S Benchmark Index Tree, Hejia Geng, AItonomy Foundation. https://aitonomy.org/projects/benchmark
 - RE-Bench (METR, 2024) https://arxiv.org/abs/2411.15114 ; MLE-bench (OpenAI, 2024) https://arxiv.org/abs/2410.07095
 - FrontierMath: Open Problems (Epoch AI) https://epoch.ai/frontiermath/open-problems ; Formal Conjectures (Google DeepMind) https://github.com/google-deepmind/formal-conjectures
 - ForecastBench (Karger et al., 2024) https://arxiv.org/abs/2409.19839
 - WeatherBench 2 (Rasp et al., 2023) https://arxiv.org/abs/2308.15560
 
-> **Speaker notes:** Benchmarks today cover Levels 1 to 6. The capabilities people talk about next keep going. The right column is the closest benchmark that exists, and what limits it. Discovery benchmarks still know the answer: ResearchClawBench is rediscovery, PaperBench is replication. Self-improvement benchmarks are set engineering tasks. Open problems have a real foothold, but only in math, where a proof checker can verify an answer nobody knew. Forecasting covers future events; weather covers one chaotic system. Credit for the stage labels and the 32 of 361 count: Hejia Geng and the AItonomy Foundation's AI4S Benchmark Index Tree. Disclosure: I am a co-author of ResearchClawBench. The point: if your team builds evals, the open space is above Level 6.
+> **Speaker notes:** Above Level 7, the capabilities people talk about next keep going. The right column is the closest benchmark that exists, and what limits it. Self-improvement benchmarks are set engineering tasks. Open problems have a real foothold, but only in math, where a verifier can check an answer nobody knew. Forecasting covers future events; weather covers one chaotic system. Credit for the stage labels and the 32 of 361 count: Hejia Geng and the AItonomy Foundation's AI4S Benchmark Index Tree. Disclosure: I am a co-author of ResearchClawBench, on the previous slide. The point: if your team builds evals, the open space is at the top of this ladder.
 
 ---
 
