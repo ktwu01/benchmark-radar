@@ -135,22 +135,24 @@ Sources:
 
 | Level | Capability | Closest benchmark today |
 | --- | --- | --- |
-| 7 · Discovery | Nobel-level research in physics, biology, math | ResearchClawBench, PaperBench |
-| 8 · Self-improvement | Design the next chip and its own successor | RE-Bench, MLE-bench |
-| 9 · Open problems | A Millennium Prize problem; fusion; aging | none: no answer key |
-| 10 · Hidden facts | Infer what is not public from what is | ForecastBench |
-| 11 · Chaotic systems | Predict weather, turbulence, markets | WeatherBench 2, weather only |
-| 12 · Laplace's demon | Predict everything | cannot be benchmarked |
+| 7 · Discovery | Nobel-level research in physics, biology, math | ResearchClawBench, PaperBench: answer already known |
+| 8 · Self-improvement | Design the next chip and its own successor | RE-Bench, MLE-bench: set engineering tasks |
+| 9 · Open problems | Unsolved mathematics; fusion; aging | Formal Conjectures, FrontierMath: Open Problems: math only |
+| 10 · Hidden facts | Infer what is not public from what is | ForecastBench: future events only |
+| 11 · Chaotic systems | Predict weather, turbulence, markets | WeatherBench 2: weather only |
+| 12 · Laplace's demon | Predict everything | none: cannot be benchmarked |
 
-- **Above Level 6, the closest tests check replication or forecasting, not discovery.**
+- **Only 32 of 361 AI-for-science benchmark listings ask a question nobody could answer when it was built.**
 
 Sources:
+- Stage labels (rediscovery, replication, execution) and the 32 of 361 count: The AI4S Benchmark Index Tree, Hejia Geng, AItonomy Foundation. https://aitonomy.org/projects/benchmark
 - ResearchClawBench https://github.com/InternScience/ResearchClawBench ; PaperBench (OpenAI, 2025) https://arxiv.org/abs/2504.01848
 - RE-Bench (METR, 2024) https://arxiv.org/abs/2411.15114 ; MLE-bench (OpenAI, 2024) https://arxiv.org/abs/2410.07095
+- FrontierMath: Open Problems (Epoch AI) https://epoch.ai/frontiermath/open-problems ; Formal Conjectures (Google DeepMind) https://github.com/google-deepmind/formal-conjectures
 - ForecastBench (Karger et al., 2024) https://arxiv.org/abs/2409.19839
 - WeatherBench 2 (Rasp et al., 2023) https://arxiv.org/abs/2308.15560
 
-> **Speaker notes:** Benchmarks today cover Levels 1 to 6. The capabilities people talk about next keep going: new science, a model designing its successor, open problems, inferring hidden facts, predicting chaotic systems. The right column is the closest benchmark that exists. Each one measures something narrower: replicating a paper instead of a discovery, a Kaggle task instead of a successor model, weather instead of every chaotic system. For open problems there is no answer key, so there is no benchmark. Disclosure: I am a co-author of ResearchClawBench. The point: if your team builds evals, the open space is above Level 6.
+> **Speaker notes:** Benchmarks today cover Levels 1 to 6. The capabilities people talk about next keep going. The right column is the closest benchmark that exists, and what limits it. Discovery benchmarks still know the answer: ResearchClawBench is rediscovery, PaperBench is replication. Self-improvement benchmarks are set engineering tasks. Open problems have a real foothold, but only in math, where a proof checker can verify an answer nobody knew. Forecasting covers future events; weather covers one chaotic system. Credit for the stage labels and the 32 of 361 count: Hejia Geng and the AItonomy Foundation's AI4S Benchmark Index Tree. Disclosure: I am a co-author of ResearchClawBench. The point: if your team builds evals, the open space is above Level 6.
 
 ---
 
