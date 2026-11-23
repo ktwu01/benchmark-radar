@@ -144,6 +144,8 @@ Sources:
 
 - **Only 32 of 361 AI-for-science benchmark listings ask a question nobody could answer when it was built.**
 
+Inspired by Hejia Geng @ AItonomy Foundation and Jakub Pachocki @ OpenAI.
+
 Sources:
 - Stage labels (rediscovery, replication, execution) and the 32 of 361 count: The AI4S Benchmark Index Tree, Hejia Geng, AItonomy Foundation. https://aitonomy.org/projects/benchmark
 - ResearchClawBench https://github.com/InternScience/ResearchClawBench ; PaperBench (OpenAI, 2025) https://arxiv.org/abs/2504.01848
