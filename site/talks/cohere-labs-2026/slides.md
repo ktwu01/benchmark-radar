@@ -108,15 +108,24 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 *The map has floors*
 
-- Level 1 · Atomic skills · One isolated, automatically graded item: MMLU, GSM8K, HumanEval. Frontier scores are 88–99%. This floor is saturated.
-- Level 2 · Frontier knowledge · Questions built to stump experts: GPQA, Humanity's Last Exam, FrontierMath. Launched under 10%; within about 18 months they climbed to 35–55%.
-- Level 3 · Applied tasks · Produce a real artefact: SWE-bench, Aider, LiveCodeBench. The same models score 25–35 points lower here than on isolated skill tests.
-- Level 4 · Agentic work · Multi-step, tool-using, hours long: GAIA, OSWorld, Terminal-Bench. Success decays as tasks get longer. METR puts the frontier 50% time horizon at about 1–2 hours of human work.
-- Level 5 · Occupations · How much of paid work is tested at all: GDPval, Mercor's Benchmark Map, HeyMilo's Atlas of Work. About 90% of US working hours have little or no benchmark coverage.
-- Level 6 · Meta · Auditing the measurement itself: HELM, LMArena, validity studies. One 2026 result: a benchmark's format predicts agreement between benchmarks better than the concept it claims to measure.
-- Six levels, from a literature review of the evaluation field, Nov 2026.
+| Level | Examples | Headline number |
+| --- | --- | --- |
+| 1 · Atomic skills | MMLU, GSM8K, HumanEval | 87–97% |
+| 2 · Frontier knowledge | Humanity's Last Exam, FrontierMath | under 10% → about 50% |
+| 3 · Applied tasks | SWE-bench, LiveCodeBench | 84–89% → 25–34% |
+| 4 · Agentic work | GAIA, OSWorld, Terminal-Bench | about 40-hour tasks |
+| 5 · Occupations | GDPval, Mercor Benchmark Map | about 90% of work hours untested |
+| 6 · Meta | HELM, LMArena, validity studies | format can beat concept |
 
-> **Speaker notes:** The catalog is not flat. The word benchmark covers a 30-second quiz item and a two-hour professional workflow. Which floor a benchmark sits on decides what its score can claim. Radar tracks benchmarks on every floor, and the five findings that follow look different depending on the floor you are standing on.
+Sources:
+1. Meta, Llama 3.1 405B Instruct model card (2024): MMLU 87.3, HumanEval 89.0, GSM8K 96.8. https://github.com/meta-llama/llama-models/blob/main/models/llama3_1/MODEL_CARD.md
+2. Launch: HLE best 9.4% (Phan et al., Jan 2025, Table 1) https://arxiv.org/html/2501.14249v1 ; FrontierMath under 2% (Glazer et al., Nov 2024) https://arxiv.org/abs/2411.04872 . Now: HLE 54.8% (GPT-6 Astra, Scale/CAIS leaderboard) https://labs.scale.com/leaderboard/humanitys_last_exam ; FrontierMath Tiers 1–3 52.4% (Apr 2026, original version, Epoch AI) https://epoch.ai/data/benchmark_data.zip
+3. Rahman, Khatoonabadi, Shihab (2025): 84–89% on synthetic code tasks, 25–34% on real-world classes. https://arxiv.org/abs/2510.26130
+4. METR, Q4 2026 capability update (Nov 20, 2026): GPT-6 Astra 40 h (95% CI 13–2,645 h); Opus 5.5 39 h (12–1,253 h). https://metr.org/blog/2026-11-20-q4-2026-capability-update/
+5. Mercor, Benchmark Map: "90% of American working hours are spent on tasks with little or no coverage from existing benchmarks." https://www.mercor.com/research/labor-index/benchmark-map
+6. Desai et al. (Sep 2026), 56 benchmarks: "In some cases, benchmarks that share design elements (e.g., score format) correlate more strongly than benchmarks with the same assigned concept." https://arxiv.org/abs/2609.08812
+
+> **Speaker notes:** The catalog is not flat. The word benchmark covers a 30-second quiz item and a 40-hour agent task. Level 1 is saturated. Level 2 tests built to stump experts launched under 10% and reached about 50% within 18 to 20 months. On real code, the same models that score high on synthetic tasks fall to a quarter or a third. METR now puts the frontier at about 40-hour tasks at 50% success, with a very wide interval. Mercor estimates about 90% of US working hours have little or no benchmark coverage. Which level a benchmark sits on decides what its score can claim. Click the i on any number for its source.
 
 ---
 
@@ -124,13 +133,16 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 
 *One floor does not predict the next*
 
-- Scores fall. About 95–99% at Level 1; under 10% at launch on Levels 2 and 4; about half of expert parity on one-shot professional deliverables at Level 5.
-- The unit changes. The model alone, then model plus compute, then model plus scaffold, tools, and budget, then the occupation.
-- The failure mode changes. Saturation, then label error and confident wrong answers, then flawed tests and memorised answers, then compounding error and gamed graders, then sampling the wrong work.
-- Levels do not predict each other. SWE-bench Verified 80.9% vs SWE-bench Pro 45.9% for the same model. ARC-AGI-1 53% vs ARC-AGI-2 3% for the same model.
-- Read every score with its floor. A Level 1 number cannot settle a Level 4 question.
+- **Levels do not predict each other.** Claude Opus 4.5: 80.9% on SWE-bench Verified, 45.9% on SWE-bench Pro. OpenAI o3: 53% on ARC-AGI-1, 2.9% on ARC-AGI-2.
+- **Progress is real at every level.** GDPval, expert-graded work: 47.6% wins or ties at launch (Sep 2025), 70.9% three months later.
+- **Read every score with its level.** A Level 1 number cannot settle a Level 4 question.
 
-> **Speaker notes:** This is the one-slide version of the whole review. Progress is real at every level; the METR horizon trend and GDPval's year-on-year doubling are not artefacts. But each level's headline number overstates the next level's quantity, because each level holds constant exactly what the next level varies: how well the task is specified, how long it runs, which tools are allowed, and whether the task represents real work.
+Sources:
+- SWE-bench: Anthropic, Claude Opus 4.5 System Card, Table 2.4.A (Verified 80.9%) https://assets.claude.com/bf10f64990cfda0ba858290be7b8cc6317685f47.pdf ; Scale SWE-Bench Pro public leaderboard, standardized harness (45.89%) https://labs.scale.com/leaderboard/swe_bench_pro_public
+- ARC-AGI: ARC Prize, o3 (medium), semi-private set, Apr 22, 2025. https://arcprize.org/blog/analyzing-o3-with-arc-agi
+- GDPval: Claude Opus 4.1, 47.6% (Patwardhan et al.) https://arxiv.org/html/2510.04374 ; GPT-5.2 Thinking, 70.9%, Dec 2025 (OpenAI) https://openai.com/index/introducing-gpt-5-2/
+
+> **Speaker notes:** This is the one-slide version of the whole review. As you climb, the unit changes: the model alone, then the model with tools and budget, then the occupation. The failure mode changes too: saturation, then label errors, then flawed tests and gamed graders, then sampling the wrong work. The SWE-bench pair comes from two sources with different harnesses; Anthropic's own Pro number is 52.0%, still about 29 points lower. Progress is real: GDPval went from 47.6% to 70.9% in three months. But each level's headline number overstates the next level. The five findings that follow look different depending on the level you stand on.
 
 ---
 
