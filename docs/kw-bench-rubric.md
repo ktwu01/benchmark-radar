@@ -26,7 +26,14 @@
 - **Rediscovery versus discovery:** Brian Keating,
   [The Artificial Einstein Test](https://keating.ai/einstein-test/). It
   separates the rediscovery of known theory from the discovery of new theory.
-- **Inspiration for the wider levels framing:** Jakub Pachocki, OpenAI.
+- **Prediction as the top of the levels framing:** Jakub Pachocki, Chief
+  Scientist at OpenAI,
+  [Perplexity and Intelligence](https://openai.com/index/perplexity-and-intelligence/)
+  (2026-11-22). The essay treats capability as the prediction of unseen data,
+  measured by perplexity on held-out data. It also notes that benchmarks were
+  "largely saturated around GPT-4". This idea motivates the upper levels of
+  the Levels of benchmarks post, from hidden facts to Laplace's demon. It came
+  after the L0-L5 stages, so it does not affect them.
 
 KW-Bench adds these parts:
 
