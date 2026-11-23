@@ -1966,6 +1966,7 @@ def rebuild_dashboard(
             snapshots,
             sitemap_output.parent,
             catalog_pages=catalog_pages_by_url(benchmark_shard_dir.parent / "benchmark-index.json"),
+            articles_dir=sitemap_output.parent.parent / "data" / "blog_posts",
         )
         blog_entries = blog["sitemap_entries"]
     write_sitemap(

@@ -1,0 +1,27 @@
+{
+  "title": "Levels of benchmarks: from quiz questions to Laplace's demon",
+  "description": "Twelve levels of AI benchmarks, what the best AI scores on each, and the levels no benchmark measures yet. Every number is sourced.",
+  "published": "2026-11-23",
+  "tags": ["AI benchmarks", "evaluation", "levels of benchmarks"],
+  "sources": [
+    {"title": "Meta, Llama 3.1 405B Instruct model card", "url": "https://github.com/meta-llama/llama-models/blob/main/models/llama3_1/MODEL_CARD.md"},
+    {"title": "Phan et al. (2025), Humanity's Last Exam, v1", "url": "https://arxiv.org/html/2501.14249v1"},
+    {"title": "Glazer et al. (2024), FrontierMath", "url": "https://arxiv.org/abs/2411.04872"},
+    {"title": "Scale/CAIS, Humanity's Last Exam leaderboard", "url": "https://labs.scale.com/leaderboard/humanitys_last_exam"},
+    {"title": "Epoch AI, benchmark data", "url": "https://epoch.ai/data/benchmark_data.zip"},
+    {"title": "Rahman, Khatoonabadi, Shihab (2025)", "url": "https://arxiv.org/abs/2510.26130"},
+    {"title": "METR, Q4 2026 capability update", "url": "https://metr.org/blog/2026-11-20-q4-2026-capability-update/"},
+    {"title": "Mercor, Benchmark Map", "url": "https://www.mercor.com/research/labor-index/benchmark-map"},
+    {"title": "Desai et al. (2026), What AI Benchmarks Actually Measure", "url": "https://arxiv.org/abs/2609.08812"},
+    {"title": "ResearchClawBench", "url": "https://github.com/InternScience/ResearchClawBench"},
+    {"title": "PaperBench (OpenAI, 2025)", "url": "https://arxiv.org/abs/2504.01848"},
+    {"title": "RE-Bench (METR, 2024)", "url": "https://arxiv.org/abs/2411.15114"},
+    {"title": "MLE-bench (OpenAI, 2024)", "url": "https://arxiv.org/abs/2410.07095"},
+    {"title": "Epoch AI, FrontierMath: Open Problems", "url": "https://epoch.ai/frontiermath/open-problems"},
+    {"title": "Google DeepMind, Formal Conjectures", "url": "https://github.com/google-deepmind/formal-conjectures"},
+    {"title": "ForecastBench (Karger et al., 2024)", "url": "https://arxiv.org/abs/2409.19839"},
+    {"title": "WeatherBench 2 (Rasp et al., 2023)", "url": "https://arxiv.org/abs/2308.15560"},
+    {"title": "The AI4S Benchmark Index Tree, Hejia Geng, AItonomy Foundation", "url": "https://aitonomy.org/projects/benchmark"},
+    {"title": "Brian Keating, The Artificial Einstein Test", "url": "https://keating.ai/einstein-test/"}
+  ]
+}

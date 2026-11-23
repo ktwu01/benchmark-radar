@@ -31,6 +31,7 @@ from pathlib import Path
 from typing import Any
 from xml.etree import ElementTree as ET
 
+from .blog_articles import load_articles
 from .blog_content import build_post
 from .blog_shell import (
     BLOG_ARCHIVE_PATH,
@@ -262,6 +263,7 @@ def write_blog(
     dashboard_html: str | None = None,
     app_js: str | None = None,
     catalog_pages: dict[str, str] | None = None,
+    articles_dir: Path | None = None,
 ) -> dict[str, Any]:
     """Write the whole blog tree atomically and report what it published.
 
@@ -291,6 +293,19 @@ def write_blog(
     chrome = extract_site_chrome(dashboard_html)
     chrome_i18n = chrome_i18n_table(chrome, app_js)
     posts = build_posts(snapshots, catalog_pages)
+    # Written posts sit in the same list as the daily briefs, ordered by the day
+    # each was published, so the index and the feed read as one blog.
+    articles = load_articles(articles_dir)
+    taken = {post.slug for post in posts}
+    clashes = sorted(article.post.slug for article in articles if article.post.slug in taken)
+    if clashes:
+        raise ValueError(f"a written post cannot reuse a brief's URL: {clashes}")
+    posts = sorted(
+        [*posts, *(article.post for article in articles)],
+        key=lambda post: (post.published, post.slug),
+        reverse=True,
+    )
+    assets = {article.post.slug: article.assets for article in articles}
     output_dir = site_dir / "blog"
     staging = site_dir / "blog.staging"
     if staging.exists():
@@ -312,6 +327,8 @@ def write_blog(
         (page_dir / "index.html").write_text(
             _post_page(post, chrome, chrome_i18n), encoding="utf-8"
         )
+        for asset in assets.get(post.slug, ()):
+            shutil.copyfile(asset, page_dir / asset.name)
     tree = blog_feed_tree(posts)
     ET.indent(tree, space="  ")
     tree.write(staging / "feed.xml", encoding="utf-8", xml_declaration=True)
