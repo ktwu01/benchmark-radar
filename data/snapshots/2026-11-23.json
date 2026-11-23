@@ -100653,5 +100653,200 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "Benchmarks’ Last Exam Lab"
+        ],
+        "authors": [
+          "James Zhu",
+          "Zekki Cat"
+        ],
+        "blurb": "“Benchmarks’ Last Exam” is a new task-level audit of 749 tasks across eight benchmarks and 767 model evaluations, checking whether each prompt, environment, and grader agrees on success.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-23T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Benchmarks' Last Exam",
+        "url": "https://arxiv.org/abs/2611.27622"
+      },
+      {
+        "affiliations": [
+          "University of Padua"
+        ],
+        "authors": [
+          "Nathan Nour Houlamy",
+          "Mattia Favretto",
+          "Earlence Fernandes",
+          "Mauro Conti"
+        ],
+        "blurb": "“Who Grades the Agent?” is a new analysis of coding-agent benchmarks where submitted code can run inside and potentially manipulate the grading process.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-23T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Who Grades the Agent? Privilege Separation for Coding-Agent Benchmarks",
+        "url": "https://arxiv.org/abs/2611.27860"
+      },
+      {
+        "affiliations": [
+          "1 School of Intelligence Science and Technology, Nanjing University, China. 2 School of Computer Science, Nanjing University, China"
+        ],
+        "authors": [
+          "Zhikang Shi",
+          "Yuk Tung Samuel Fang",
+          "Hongyu Ding",
+          "Zixuan Chen",
+          "Yujin Wang",
+          "Junhui Guo",
+          "You Wu",
+          "Jieqi Shi",
+          "Jing Huo",
+          "Yang Gao"
+        ],
+        "blurb": "Mem-X is a new benchmark designed to make vision-and-language navigation depend on memory from earlier episodes rather than fresh exploration.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-23T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Mem-X: A Memory-Dependent Cross-Episode Benchmark for Vision-and-Language Navigation",
+        "url": "https://arxiv.org/abs/2611.27166"
+      },
+      {
+        "affiliations": [
+          "Martian",
+          "Greptile",
+          "Augment"
+        ],
+        "authors": [
+          "Ashley Zhang",
+          "Narmeen Fatimah Oozeer",
+          "Aleksandr Zverianskii",
+          "Daniel Ng",
+          "Tasana Pejovic",
+          "Antía García",
+          "Jacob Clyne",
+          "Ravpreet Setia",
+          "Akshay Utture",
+          "Etan Jacob Ginsberg",
+          "Shriyash Kaustubh Upadhyay",
+          "Fazl Barez"
+        ],
+        "blurb": "CodeReviewBench is a new code-review benchmark that uses developers’ actions on automated review comments as the target signal: whether the code author actually accepted and fixed an identified issue.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-23T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "CodeReviewBench: An Automated Benchmark for Evaluating the Software Factory",
+        "url": "https://arxiv.org/abs/2611.26942"
+      },
+      {
+        "affiliations": [
+          "Dhillon School of Business, University of Lethbridge, Canada",
+          "Al Hussein Technical University, Jordan",
+          "Universidad de Guanajuato, Mexico",
+          "Universidad de Guadalajara, Mexico"
+        ],
+        "authors": [
+          "Sidney Shapiro",
+          "Sanad Al-Khatib",
+          "Aurora Pinzón Arzola",
+          "Emiliano Sebastian Gonzalez Venegas",
+          "Daniel Pearson"
+        ],
+        "blurb": "“Schema-Validated Large Language Model Workflows” is a new executable protocol covering five business tasks and six Python implementations.",
+        "categories": [
+          "benchmark",
+          "evaluation"
+        ],
+        "published_at": "2026-11-23T04:41:37+00:00",
+        "source": "DataCite",
+        "title": "Schema-Validated LLM Workflows: A Benchmark Protocol and Comparative Evaluation Across Six Python Implementations",
+        "url": "https://doi.org/10.48550/arxiv.2611.27106"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Sergio Burdisso",
+          "Jordi Luque",
+          "Esaú Villatoro-Tello",
+          "Dairazalia Sánchez-Cortés",
+          "Petr Motlicek"
+        ],
+        "blurb": "DialFork-Audio Challenge 2026 is an updated benchmark with 4,185 spoken conversations totaling 80.7 hours.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-23T00:00:00+00:00",
+        "source": "Zenodo",
+        "title": "DialFork-Audio Challenge 2026",
+        "url": "https://zenodo.org/records/24468613"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Zhiyuan Li",
+          "Charles Eret",
+          "Dingsheng Liu",
+          "Xuan Zhao",
+          "Joshua Choi",
+          "Yangzheng Wu",
+          "Tongtong Cao",
+          "Yingxue Zhang",
+          "Amir Rasouli"
+        ],
+        "blurb": "RoboPRO is a new robotic-manipulation benchmark with 80 two-handed tasks in furnished indoor environments.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-23T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "RoboPRO: A Perturbation-Resilient and Obstacle-Aware Benchmark for Robotic Manipulation",
+        "url": "https://arxiv.org/abs/2611.26971"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "YINGzhitao"
+        ],
+        "blurb": "The NeuroTwin-Agent release publishes the underlying blinded clinician evaluation table: 576 ratings from six board-certified specialists across 24 glioblastoma cases and four systems, including correctness, harmfulness, item-level scores, and ablation summaries.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-23T14:14:56+00:00",
+        "source": "DataCite",
+        "title": "Anonymized Clinician Evaluation Table and Derived Benchmark Data for: NeuroTwin-Agent",
+        "url": "https://doi.org/10.5281/zenodo.24467995"
+      }
+    ],
+    "date": "2026-11-23",
+    "schema_version": 1,
+    "top": [
+      "https://arxiv.org/abs/2611.27622",
+      "https://arxiv.org/abs/2611.27860",
+      "https://arxiv.org/abs/2611.27166"
+    ]
+  },
   "since": "2026-11-21T15:30:04.040892+00:00"
 }
