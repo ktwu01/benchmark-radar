@@ -1,6 +1,6 @@
 # Benchmark Radar principles
 
-## The product covers 1,259+ benchmark records across 4+ sources
+## The product covers 3,000+ catalog benchmark records and 29,000+ discovery artifact records
 
 This is the operating scale of Benchmark Radar. It is not a small collection
 of benchmarks from model cards. Every benchmark-facing chart, search, table,
@@ -8,7 +8,16 @@ count, and export must start from the full population across all sources.
 
 The benchmark catalog in `benchmark-index.json` contains the whole population,
 including model reports, OpenCompass Hub, Artificial Analysis and LLM Stats.
-The baseline was 1,259 records across four sources when this rule was introduced.
+The discovery corpus in `radar.json` holds the artifact records (papers,
+repositories, datasets) found since 2026-07-23. These are two populations with
+different units; never add them into one count.
+
+| Population | Baseline | Measured in |
+| --- | --- | --- |
+| Catalog benchmark records | 3,000+ across 6 sources | v0.16.0: 3,844 records |
+| Discovery artifact records | 29,000+ across 16 sources | v0.16.0: 29,891 records |
+
+The first baseline was 1,259 catalog records across four sources.
 Include registry entries that have citations but no scores, and entries with
 neither measurement. Rebuild the data and calculate the current total and source
 count. Never hard-code these numbers into the interface or add report records
@@ -24,8 +33,8 @@ release's input hashes. This file does not pin any paper to a release.
 
 Within one paper, do not mix in current `main`, the live website, or another
 release.
-The 1,259+ baseline is a coverage alarm, not a replacement for the record count
-computed from the paper's release.
+The 3,000+ and 29,000+ baselines are coverage alarms, not replacements for the
+record counts computed from the paper's release.
 
 This requirement applies separately to every main results table and analysis,
 including documentation, reported scores, headroom, and dates. Reading the full
