@@ -115,7 +115,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 | 3 | Real coding work | Fix and build code in real projects | SWE-bench, LiveCodeBench: same models, 84–89% on toy code, 25–34% on real code |
 | 4 | Long agent tasks | Use tools for hours to reach a goal | GAIA, OSWorld, Terminal-Bench: best AI finishes half of ~40-hour expert tasks |
 | 5 | Whole jobs | Do paid work end to end | GDPval, Mercor Benchmark Map: about 90% of US work hours barely tested |
-| 6 | Testing the tests | Check whether a score means what it claims | HELM, LMArena, validity studies: same-format tests can agree more than same-skill tests |
+| 6 | Testing the tests | Check whether a score means what it claims | HELM, LMArena, FAITH-Manip: same-format tests can agree more than same-skill tests |
 | 7 | Discovery | Nobel-level research in physics, biology, math | ResearchClawBench, PaperBench: known answers only, rediscovery and replication |
 
 Sources:
@@ -124,11 +124,12 @@ Sources:
 3. Rahman, Khatoonabadi, Shihab (2025): 84–89% on synthetic code tasks, 25–34% on real-world classes. https://arxiv.org/abs/2510.26130
 4. METR, Q4 2026 capability update (Nov 20, 2026): GPT-6 Astra 40 h (95% CI 13–2,645 h); Opus 5.5 39 h (12–1,253 h). https://metr.org/blog/2026-11-20-q4-2026-capability-update/
 5. Mercor, Benchmark Map: "90% of American working hours are spent on tasks with little or no coverage from existing benchmarks." https://www.mercor.com/research/labor-index/benchmark-map
-6. Desai et al. (Sep 2026), 56 benchmarks: "In some cases, benchmarks that share design elements (e.g., score format) correlate more strongly than benchmarks with the same assigned concept." https://arxiv.org/abs/2609.08812
+6. Validity study, Desai et al. (Sep 2026), 56 benchmarks: "In some cases, benchmarks that share design elements (e.g., score format) correlate more strongly than benchmarks with the same assigned concept." https://arxiv.org/abs/2609.08812
+   FAITH-Manip (Bao et al., CISR 2026): for imitation-learning robot policies, the action-horizon setting with the best offline score is not the one with the best closed-loop success. https://ieeexplore.ieee.org/abstract/document/11680207/
 
 7. ResearchClawBench https://github.com/InternScience/ResearchClawBench (rediscovery) ; PaperBench (OpenAI, 2025) https://arxiv.org/abs/2504.01848 (replication). Stage labels: The AI4S Benchmark Index Tree, Hejia Geng, AItonomy Foundation. https://aitonomy.org/projects/benchmark
 
-> **Speaker notes:** The catalog is not flat. The word benchmark covers a 30-second quiz item and a 40-hour agent task. Level 1 is saturated: top scores sit at 87 to 97 percent. Level 2 tests built to stump experts launched under 10 percent and reached about 50 percent within 18 to 20 months. On real code, the same models that score high on toy tasks fall to a quarter or a third. METR now estimates the best models finish half of tasks that take an expert about 40 hours, with a very wide interval. Mercor estimates about 90 percent of US working hours have little or no benchmark coverage. At Level 6, a 2026 study found that tests sharing a score format can agree more than tests claiming the same skill. Level 7 discovery benchmarks still know the answer: ResearchClawBench is rediscovery, PaperBench is replication. Which level a benchmark sits on decides what its score can claim. Click the i on any number for its source.
+> **Speaker notes:** The catalog is not flat. The word benchmark covers a 30-second quiz item and a 40-hour agent task. Level 1 is saturated: top scores sit at 87 to 97 percent. Level 2 tests built to stump experts launched under 10 percent and reached about 50 percent within 18 to 20 months. On real code, the same models that score high on toy tasks fall to a quarter or a third. METR now estimates the best models finish half of tasks that take an expert about 40 hours, with a very wide interval. Mercor estimates about 90 percent of US working hours have little or no benchmark coverage. At Level 6, a 2026 study found that tests sharing a score format can agree more than tests claiming the same skill. The same gap appears in robotics: FAITH-Manip, by our co-author Qiming Bao, finds that the setting that scores best offline is not the one that succeeds best on the robot. Level 7 discovery benchmarks still know the answer: ResearchClawBench is rediscovery, PaperBench is replication. Which level a benchmark sits on decides what its score can claim. Click the i on any number for its source.
 
 ---
 
