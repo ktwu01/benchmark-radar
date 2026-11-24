@@ -112,11 +112,11 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 | --- | --- | --- | --- |
 | 1 | Quiz questions | Answer one fact or one short problem | MMLU, GSM8K, HumanEval: top scores 87–97%, basically solved |
 | 2 | Expert-level questions | Questions written to stump PhDs | Humanity's Last Exam, FrontierMath: under 10% at launch → about 50% today |
-| 3 | Real coding work | Fix and build code in real projects | SWE-bench, LiveCodeBench: same models, 84–89% on toy code, 25–34% on real code |
-| 4 | Long agent tasks | Use tools for hours to reach a goal | GAIA, OSWorld, Terminal-Bench: best AI finishes half of ~40-hour expert tasks |
+| 3 | Real coding work | Fix and build code in real projects | SWE-bench: same models, 84–89% on toy code, 25–34% on real code |
+| 4 | Long agent tasks | Use tools for hours to reach a goal | OSWorld, Terminal-Bench: best AI finishes half of ~40-hour expert tasks |
 | 5 | Whole jobs | Do paid work end to end | GDPval, Mercor Benchmark Map: about 90% of US work hours barely tested |
 | 6 | Testing the tests | Check whether a score means what it claims | HELM, LMArena, FAITH-Manip: same-format tests can agree more than same-skill tests |
-| 7 | Discovery | Nobel-level research in physics, biology, math | ResearchClawBench, PaperBench: known answers only, rediscovery and replication |
+| 7 | Reproducing research | Reproduce published research in physics, biology, math | ResearchClawBench, PaperBench: known answers only, rediscovery and replication |
 
 Sources:
 1. Meta, Llama 3.1 405B Instruct model card (2024): MMLU 87.3, HumanEval 89.0, GSM8K 96.8. https://github.com/meta-llama/llama-models/blob/main/models/llama3_1/MODEL_CARD.md
@@ -129,7 +129,7 @@ Sources:
 
 7. ResearchClawBench https://github.com/InternScience/ResearchClawBench (rediscovery) ; PaperBench (OpenAI, 2025) https://arxiv.org/abs/2504.01848 (replication). Stage labels: The AI4S Benchmark Index Tree, Hejia Geng, AItonomy Foundation. https://aitonomy.org/projects/benchmark
 
-> **Speaker notes:** The catalog is not flat. The word benchmark covers a 30-second quiz item and a 40-hour agent task. Level 1 is saturated: top scores sit at 87 to 97 percent. Level 2 tests built to stump experts launched under 10 percent and reached about 50 percent within 18 to 20 months. On real code, the same models that score high on toy tasks fall to a quarter or a third. METR now estimates the best models finish half of tasks that take an expert about 40 hours, with a very wide interval. Mercor estimates about 90 percent of US working hours have little or no benchmark coverage. At Level 6, a 2026 study found that tests sharing a score format can agree more than tests claiming the same skill. The same gap appears in robotics: FAITH-Manip, by our co-author Qiming Bao, finds that the setting that scores best offline is not the one that succeeds best on the robot. Level 7 discovery benchmarks still know the answer: ResearchClawBench is rediscovery, PaperBench is replication. Which level a benchmark sits on decides what its score can claim. Click the i on any number for its source.
+> **Speaker notes:** The catalog is not flat. The word benchmark covers a 30-second quiz item and a 40-hour agent task. Level 1 is saturated: top scores sit at 87 to 97 percent. Level 2 tests built to stump experts launched under 10 percent and reached about 50 percent within 18 to 20 months. On real code, the same models that score high on toy tasks fall to a quarter or a third. METR now estimates the best models finish half of tasks that take an expert about 40 hours, with a very wide interval. Mercor estimates about 90 percent of US working hours have little or no benchmark coverage. At Level 6, a 2026 study found that tests sharing a score format can agree more than tests claiming the same skill. The same gap appears in robotics: FAITH-Manip, by our co-author Qiming Bao, finds that the setting that scores best offline is not the one that succeeds best on the robot. Level 7 benchmarks reproduce research whose answer is already known: ResearchClawBench is rediscovery, PaperBench is replication. Creating something new starts at Level 9. Which level a benchmark sits on decides what its score can claim. Click the i on any number for its source.
 
 ---
 
@@ -142,7 +142,7 @@ Sources:
 | 8 | Self-improvement | Design the next chip and its own successor | RE-Bench, MLE-bench: set engineering tasks |
 | 9 | Open problems | Unsolved math; fusion; aging | Formal Conjectures, FrontierMath: Open Problems: math only |
 | 10 | Hidden facts | Infer what is not public from what is | ForecastBench: future events only |
-| 11 | Chaotic systems | Predict weather, turbulence, markets | WeatherBench 2: weather only |
+| 11 | Chaotic systems | Predict weather, turbulence, markets | WeatherBench 2: weather only, scored on past data |
 | 12 | Laplace's demon | Predict everything | none: cannot be benchmarked |
 
 - **Only 32 of 361 AI-for-science benchmark listings ask a question nobody could answer when it was built.**
@@ -156,7 +156,7 @@ Sources:
 - ForecastBench (Karger et al., 2024) https://arxiv.org/abs/2409.19839
 - WeatherBench 2 (Rasp et al., 2023) https://arxiv.org/abs/2308.15560
 
-> **Speaker notes:** Above Level 7, the capabilities people talk about next keep going. The right column is the closest benchmark that exists, and what limits it. Self-improvement benchmarks are set engineering tasks. Open problems have a real foothold, but only in math, where a verifier can check an answer nobody knew. Forecasting covers future events; weather covers one chaotic system. Credit for the stage labels and the 32 of 361 count: Hejia Geng and the AItonomy Foundation's AI4S Benchmark Index Tree. Disclosure: I am a co-author of ResearchClawBench, on the previous slide. The point: if your team builds evals, the open space is at the top of this ladder.
+> **Speaker notes:** Above Level 7, the capabilities people talk about next keep going. The right column is the closest benchmark that exists, and what limits it. Self-improvement benchmarks are set engineering tasks. Open problems have a real foothold, but only in math, where a verifier can check an answer nobody knew. Forecasting covers future events; weather covers one chaotic system, and WeatherBench 2 scores forecasts of 2020 against data that already exists. Credit for the stage labels and the 32 of 361 count: Hejia Geng and the AItonomy Foundation's AI4S Benchmark Index Tree. Disclosure: I am a co-author of ResearchClawBench, on the previous slide. The point: if your team builds evals, the open space is at the top of this ladder.
 
 ---
 
@@ -164,16 +164,18 @@ Sources:
 
 *One floor does not predict the next*
 
-- **Levels do not predict each other.** Claude Opus 4.5: 80.9% on SWE-bench Verified, 45.9% on SWE-bench Pro. OpenAI o3: 53% on ARC-AGI-1, 2.9% on ARC-AGI-2.
+- **Levels do not predict each other.** Claude Opus 4.5: 80.9% on SWE-bench Verified, 45.9% on SWE-bench Pro. OpenAI o3: 53% on ARC-AGI-1, 2.9% on ARC-AGI-2. In a 2024 study, LLMs strong on other language tasks were weak on abstract reasoning.
 - **Progress is real at every level.** GDPval, expert-graded work: 47.6% wins or ties at launch (Sep 2025), 70.9% three months later.
 - **Read every score with its level.** A Level 1 number cannot settle a Level 4 question.
 
 Sources:
 - SWE-bench: Anthropic, Claude Opus 4.5 System Card, Table 2.4.A (Verified 80.9%) https://assets.claude.com/bf10f64990cfda0ba858290be7b8cc6317685f47.pdf ; Scale SWE-Bench Pro public leaderboard, standardized harness (45.89%) https://labs.scale.com/leaderboard/swe_bench_pro_public
 - ARC-AGI: ARC Prize, o3 (medium), semi-private set, Apr 22, 2025. https://arcprize.org/blog/analyzing-o3-with-arc-agi
+- Abstract reasoning: Gendron, Bao, Witbrock, Dobbie, "Large Language Models Are Not Strong Abstract Reasoners" (IJCAI 2024): state-of-the-art LLMs "achieve very limited performance in contrast with other natural language tasks." https://www.ijcai.org/proceedings/2024/693
+- PARARULE-Plus in OpenAI Evals: https://github.com/openai/evals/pull/651
 - GDPval: Claude Opus 4.1, 47.6% (Patwardhan et al.) https://arxiv.org/html/2510.04374 ; GPT-5.2 Thinking, 70.9%, Dec 2025 (OpenAI) https://openai.com/index/introducing-gpt-5-2/
 
-> **Speaker notes:** This is the one-slide version of the whole review. As you climb, the unit changes: the model alone, then the model with tools and budget, then the occupation. The failure mode changes too: saturation, then label errors, then flawed tests and gamed graders, then sampling the wrong work. The SWE-bench pair comes from two sources with different harnesses; Anthropic's own Pro number is 52.0%, still about 29 points lower. Progress is real: GDPval went from 47.6% to 70.9% in three months. But each level's headline number overstates the next level. The five findings that follow look different depending on the level you stand on.
+> **Speaker notes:** This is the one-slide version of the whole review. As you climb, the unit changes: the model alone, then the model with tools and budget, then the occupation. The failure mode changes too: saturation, then label errors, then flawed tests and gamed graders, then sampling the wrong work. The SWE-bench pair comes from two sources with different harnesses; Anthropic's own Pro number is 52.0%, still about 29 points lower. Abstract reasoning shows the same gap: in the IJCAI 2024 study by our co-author Qiming Bao and colleagues, the LLMs it tested did well on other language tasks but achieved very limited performance on abstract reasoning. Qiming's multi-step deduction dataset, PARARULE-Plus, is part of OpenAI Evals. Progress is real: GDPval went from 47.6% to 70.9% in three months. But each level's headline number overstates the next level. The five findings that follow look different depending on the level you stand on.
 
 ---
 
