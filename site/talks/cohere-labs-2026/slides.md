@@ -163,16 +163,18 @@ Sources:
 
 *One floor does not predict the next*
 
-- **Levels do not predict each other.** Claude Opus 4.5: 80.9% on SWE-bench Verified, 45.9% on SWE-bench Pro. OpenAI o3: 53% on ARC-AGI-1, 2.9% on ARC-AGI-2.
+- **Levels do not predict each other.** Claude Opus 4.5: 80.9% on SWE-bench Verified, 45.9% on SWE-bench Pro. OpenAI o3: 53% on ARC-AGI-1, 2.9% on ARC-AGI-2. In a 2024 study, LLMs strong on other language tasks were weak on abstract reasoning.
 - **Progress is real at every level.** GDPval, expert-graded work: 47.6% wins or ties at launch (Sep 2025), 70.9% three months later.
 - **Read every score with its level.** A Level 1 number cannot settle a Level 4 question.
 
 Sources:
 - SWE-bench: Anthropic, Claude Opus 4.5 System Card, Table 2.4.A (Verified 80.9%) https://assets.claude.com/bf10f64990cfda0ba858290be7b8cc6317685f47.pdf ; Scale SWE-Bench Pro public leaderboard, standardized harness (45.89%) https://labs.scale.com/leaderboard/swe_bench_pro_public
 - ARC-AGI: ARC Prize, o3 (medium), semi-private set, Apr 22, 2025. https://arcprize.org/blog/analyzing-o3-with-arc-agi
+- Abstract reasoning: Gendron, Bao, Witbrock, Dobbie, "Large Language Models Are Not Strong Abstract Reasoners" (IJCAI 2024): state-of-the-art LLMs "achieve very limited performance in contrast with other natural language tasks." https://www.ijcai.org/proceedings/2024/693
+- PARARULE-Plus in OpenAI Evals: https://github.com/openai/evals/pull/651
 - GDPval: Claude Opus 4.1, 47.6% (Patwardhan et al.) https://arxiv.org/html/2510.04374 ; GPT-5.2 Thinking, 70.9%, Dec 2025 (OpenAI) https://openai.com/index/introducing-gpt-5-2/
 
-> **Speaker notes:** This is the one-slide version of the whole review. As you climb, the unit changes: the model alone, then the model with tools and budget, then the occupation. The failure mode changes too: saturation, then label errors, then flawed tests and gamed graders, then sampling the wrong work. The SWE-bench pair comes from two sources with different harnesses; Anthropic's own Pro number is 52.0%, still about 29 points lower. Progress is real: GDPval went from 47.6% to 70.9% in three months. But each level's headline number overstates the next level. The five findings that follow look different depending on the level you stand on.
+> **Speaker notes:** This is the one-slide version of the whole review. As you climb, the unit changes: the model alone, then the model with tools and budget, then the occupation. The failure mode changes too: saturation, then label errors, then flawed tests and gamed graders, then sampling the wrong work. The SWE-bench pair comes from two sources with different harnesses; Anthropic's own Pro number is 52.0%, still about 29 points lower. Abstract reasoning shows the same gap: in the IJCAI 2024 study by our co-author Qiming Bao and colleagues, the LLMs it tested did well on other language tasks but achieved very limited performance on abstract reasoning. Qiming's multi-step deduction dataset, PARARULE-Plus, is part of OpenAI Evals. Progress is real: GDPval went from 47.6% to 70.9% in three months. But each level's headline number overstates the next level. The five findings that follow look different depending on the level you stand on.
 
 ---
 
