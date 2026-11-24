@@ -75,7 +75,7 @@ place.
 | **L4** | Long agent tasks | Many tool or environment actions toward one stated goal, over a long human-time horizon. | OSWorld |
 | **L5** | Whole jobs | A complete professional deliverable from real paid work, judged at professional quality. | GDPval |
 | **L6** | Testing the tests | Judging whether a test, a grader, or a claimed result is valid. | — |
-| **L7** | Discovery | A research result the evaluator already knows: reproducing it, or finding it when the task does not name it. | PaperBench, ResearchClawBench |
+| **L7** | Reproducing research | A research result the evaluator already knows: replicating it when the task names it, or rediscovering it when the task does not. | PaperBench, ResearchClawBench |
 | **L8** | Self-improvement | An output that measurably improves an AI system over a stated baseline. | RE-Bench, MLE-bench |
 | **L9** | Open problems | A result that nobody had when the benchmark was built, checked by a verifier. | FrontierMath: Open Problems, Formal Conjectures |
 | **L10** | Hidden facts | A prediction of a fact that nobody knows yet, scored when the world reveals it. | ForecastBench |
