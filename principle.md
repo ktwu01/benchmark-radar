@@ -12,10 +12,13 @@ The discovery corpus in `radar.json` holds the artifact records (papers,
 repositories, datasets) found since 2026-07-23. These are two populations with
 different units; never add them into one count.
 
-| Population | Baseline | Measured in |
-| --- | --- | --- |
-| Catalog benchmark records | 3,000+ across 6 sources | v0.16.0: 3,844 records |
-| Discovery artifact records | 29,000+ from 41 discovery sources (17 connectors and 24 first-party feeds) | v0.16.0: 29,891 records |
+| Population | Baseline | Sources defined in | Measured in |
+| --- | --- | --- | --- |
+| Catalog benchmark records | 3,000+ across 6 sources | the `source` field of [`site/data/benchmark-index.json`](site/data/benchmark-index.json) | v0.16.0: 3,844 records |
+| Discovery artifact records | 29,000+ from 41 discovery sources (17 connectors and 24 first-party feeds) | [`config.yml`](config.yml), `sources:` (the 41 sources in the [README](README.md) match it) | v0.16.0: 29,891 records |
+
+In the discovery data, the 24 first-party feeds share one source label, so a
+count of source labels shows 16, not 41.
 
 The first baseline was 1,259 catalog records across four sources.
 Include registry entries that have citations but no scores, and entries with
