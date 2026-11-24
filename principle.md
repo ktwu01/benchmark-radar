@@ -15,7 +15,7 @@ different units; never add them into one count.
 | Population | Baseline | Measured in |
 | --- | --- | --- |
 | Catalog benchmark records | 3,000+ across 6 sources | v0.16.0: 3,844 records |
-| Discovery artifact records | 29,000+ across 16 sources | v0.16.0: 29,891 records |
+| Discovery artifact records | 29,000+ from 41 discovery sources (17 connectors and 24 first-party feeds) | v0.16.0: 29,891 records |
 
 The first baseline was 1,259 catalog records across four sources.
 Include registry entries that have citations but no scores, and entries with
