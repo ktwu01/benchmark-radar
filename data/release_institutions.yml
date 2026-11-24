@@ -1760,7 +1760,7 @@ papers:
   '2611.17621':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-21'
+    retrieved_at: '2026-11-24'
     institutions: []
   '2611.17955':
     basis: openalex_linked_institutions
@@ -1787,6 +1787,14 @@ papers:
     retrieved_at: '2026-11-22'
     institutions:
     - The University of Southern Mississippi, Hattiesburg, MS 39401, USA
+  '2611.18639':
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7235660158
+    retrieved_at: '2026-11-24'
+    institutions:
+    - Nanyang Technological University
+    - Shanghai Jiao Tong University
+    - University of Wisconsin–Madison
   '2611.18981':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7235071092
@@ -1871,3 +1879,21 @@ papers:
     - Velabot AI
     - Simple AI
     - Baidu AI Cloud
+  '2611.27494':
+    basis: null
+    source_url: null
+    retrieved_at: '2026-11-24'
+    institutions: []
+  '2611.30157':
+    basis: null
+    source_url: null
+    retrieved_at: '2026-11-24'
+    institutions: []
+  '2611.30771':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.30771
+    retrieved_at: '2026-11-24'
+    institutions:
+    - University of Macau
+    - National University of Singapore
+    - University of Hong Kong
