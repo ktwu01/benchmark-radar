@@ -162,7 +162,7 @@ freshly generated `benchmark-index.json`. Model-report records are already in
 that index, including benchmarks with no scores or citations. Never add
 `radar.json` score tracks to that total or fall back to a smaller report registry
 when the catalog fails to load. Compute records and sources from rebuilt outputs;
-1,259+ records across 4+ sources is the minimum scale to investigate against.
+3,000+ catalog records across 6 sources is the minimum scale to investigate against.
 
 `normalize-catalog` is the current command. `normalize-external` remains an
 alias for existing maintainer scripts. Implementation modules use `catalog_*`

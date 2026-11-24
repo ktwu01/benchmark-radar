@@ -2,7 +2,7 @@
 
 Read `principle.md` before changing a benchmark-facing surface. Its full-corpus
 coverage rule applies to charts, search, tables, counts, and exports: start from
-1,259+ benchmark records across 4+ sources, and investigate any unexplained
+3,000+ catalog benchmark records and 29,000+ discovery artifact records, and investigate any unexplained
 reduction to a few dozen. Missing measurements must not remove corpus records.
 Benchmark Frontier and its linked score ranking explicitly exclude records
 without numeric reported scores, as specified in `principle.md`.
