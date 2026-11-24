@@ -137,8 +137,10 @@ result to be valid or invalid.
 
 L7 scores a research result that the evaluator already holds. Replication names
 the target result. Rediscovery hides it: the system must choose what to
-investigate and find it. A task that states the question and withholds only the
-answer stays at L1, L2, or L3, according to its scored outcome.
+investigate and find it. A research task may state its question and still be
+L7 when the system must produce the result from data or papers. A closed
+question with one fixed answer, rather than a research result, stays at L1 or
+L2.
 
 ### L7 to L8: an AI system gets better
 
