@@ -109816,5 +109816,149 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "University of Utah"
+        ],
+        "authors": [
+          "Haichuan Zhang",
+          "Zhiyuan Zhong",
+          "Shih-Chieh Dai",
+          "Xinyu Sun",
+          "Guanhong Tao",
+          "Haichuan Zhang, Zhiyuan Zhong, Shih-Chieh Dai, Xinyu Sun, Guanhong Tao"
+        ],
+        "blurb": "AdaptiveVPI is a new benchmark for testing web agents against visual prompt injection—malicious instructions embedded in webpage imagery.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-24T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Benchmarking Web Agent Defenses Against Adaptive Visual Prompt Injection",
+        "url": "https://arxiv.org/abs/2611.29268"
+      },
+      {
+        "affiliations": [
+          "Department of Electrical and Computer Engineering",
+          "Department of Computer ScienceDuke UniversityDurham, NC 27708, USA"
+        ],
+        "authors": [
+          "Haoyuan Zheng",
+          "Dongting Li",
+          "Hancheng Ye",
+          "Qinsi Wang",
+          "Mingyuan Ma",
+          "Yuncheng Yao",
+          "Yifei Wang",
+          "Baijun Zhou",
+          "Zishan Shao",
+          "Tingjun Chen",
+          "Hai Helen Li",
+          "Danyang Zhuo",
+          "Yiran Chen",
+          "Haoyuan Zheng, Dongting Li, Hancheng Ye, Qinsi Wang, Mingyuan Ma, Yuncheng Yao, Yifei Wang, Baijun Zhou, Zishan Shao, Tingjun Chen, Hai Helen Li, Danyang Zhuo, Yiran Chen"
+        ],
+        "blurb": "MASSys is a new benchmark that reruns identical multi-agent workflows across different serving systems and load levels.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-24T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "The Evaluation Substrate Matters: Benchmarking Multi-Agent Serving Substrates",
+        "url": "https://arxiv.org/abs/2611.28671"
+      },
+      {
+        "affiliations": [
+          "The University of Texas at Austin"
+        ],
+        "authors": [
+          "Koutian Wu",
+          "Yuxuan Cao",
+          "Gengchen Mai",
+          "Zeping Liu",
+          "Koutian Wu, Yuxuan Cao, Gengchen Mai, Zeping Liu"
+        ],
+        "blurb": "ESM-Bench is a new benchmark of 60 coding-agent tasks drawn from six Earth system model repositories.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-24T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "ESM-Bench: A Benchmark for Evaluating Whether AI Agents Understand Earth System Model Physics and Code",
+        "url": "https://arxiv.org/abs/2611.28477"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Chao Ding",
+          "Yidong Jiang",
+          "Junzhi Ning",
+          "Juncheng Wu",
+          "Yuhan Wang",
+          "Renjie Lu",
+          "Minjia Yuan",
+          "Gaopeng Wang",
+          "Liyang Wang",
+          "Pengcheng Chen",
+          "Dong Yin",
+          "Meiping Wang",
+          "Jinru Ding",
+          "Yuyin Zhou",
+          "Chao Ding, Yidong Jiang, Junzhi Ning, Juncheng Wu, Yuhan Wang, Renjie Lu, Minjia Yuan, Gaopeng Wang, Liyang Wang, Pengcheng Chen, Dong Yin, Meiping Wang, Jinru Ding, Yuyin Zhou"
+        ],
+        "blurb": "WARD is the clearest new example in this feed of a recurring move away from final-answer scoring.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-24T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Seeing Is Not Acting: WARD Diagnoses the Evidence-to-State-to-Action Gap in Longitudinal Clinical Agents",
+        "url": "https://arxiv.org/abs/2611.29243"
+      },
+      {
+        "affiliations": [
+          "University of Oxford"
+        ],
+        "authors": [
+          "Bradley Segal",
+          "William Bolton",
+          "Philip Torr",
+          "David Clifton",
+          "Lei Clifton",
+          "Bradley Segal, William Bolton, Philip Torr, David Clifton, Lei Clifton"
+        ],
+        "blurb": "TrialAgentBench is a new benchmark with nearly 3,500 tasks for clinical-trial analysis and sequential drug-development decisions.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-24T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "TrialAgentBench: Evaluating AI Agents for Clinical-Trial Analysis and Long-Horizon Drug-Development Decisions",
+        "url": "https://arxiv.org/abs/2611.30916"
+      }
+    ],
+    "date": "2026-11-24",
+    "schema_version": 1,
+    "top": [
+      "https://arxiv.org/abs/2611.29268",
+      "https://arxiv.org/abs/2611.28671",
+      "https://arxiv.org/abs/2611.28477"
+    ]
+  },
   "since": "2026-11-22T15:24:28.804124+00:00"
 }
