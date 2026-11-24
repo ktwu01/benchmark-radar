@@ -19,11 +19,17 @@ missing and investigate. Do not present that subset as Benchmark Radar.**
 
 ### Paper analyses must use the frozen full catalog
 
-For the paper, use the **frozen v0.11.0 release**, software commit
-`8f46bbfa91f5d9900c8b08a5d552c3df5c9597b0`, and verify the released input hashes.
-Do not substitute current `main`, the live website, or a newer collection.
+Each paper uses the one release named in its own README, and verifies that
+release's input hashes:
+
+- The technical report (`ktwu01/benchmark-radar-paper`) uses the **frozen
+  v0.11.0 release**, software commit `8f46bbfa91f5d9900c8b08a5d552c3df5c9597b0`.
+- The Levels of benchmarks paper (`ktwu01/levels-of-benchmarks-paper`) uses the
+  **v0.16.0 release**, software commit `1a813b1c56eaeacdcc63286c85551f414b5f3caa`.
+
+Do not substitute current `main`, the live website, or another release.
 The 1,259+ baseline is a coverage alarm, not a replacement for the record count
-computed from that frozen catalog.
+computed from the paper's release.
 
 This requirement applies separately to every main results table and analysis,
 including documentation, reported scores, headroom, and dates. Reading the full
