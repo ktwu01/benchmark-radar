@@ -2,50 +2,55 @@
 
 > **This file is the source of truth for the KW-Bench rubric in benchmark-radar.**
 > The rubric was first drafted in `ktwu01/vendor-data-qc`. This repository no
-> longer defers to that copy: the levels, boundaries, and evidence fields
-> implemented in `src/benchmark_radar/kw_bench.py` are defined here, and
-> `KW_BENCH_VERSION` tracks the `KW-BENCH VERSION` field on the task card below.
+> longer defers to that copy.
+>
+> **Version 0.2 merges two scales into one.** Version 0.1 had six levels, L0 to
+> L5. The Levels of benchmarks post and the Cohere Labs talk had twelve. Version
+> 0.2 is one scale, L0 to L12, ordered by how hard the tested ability is
+> (issue #1345). Labels made under v0.1 keep their version; see the last section.
 >
 > **Status in this repository: dormant.** No classifier output is published.
-> Assigning L0-L5 means reading a task and its verifier and judging what the
-> evaluator knew before the run. That is a semantic judgment, and the
+> Assigning a level means reading a task and its verifier and judging which
+> ability a passing score requires. That is a semantic judgment, and the
 > deterministic pattern-matching classifier in `kw_bench.py` cannot make it: two
 > rounds of adversarial review found 11 and then 7 misclassifications, each fix
-> trading one error class for another. The classifier stays in the tree and runs
-> in CI, but nothing renders its levels. See issue #153, closed as not planned.
-> Use this rubric as a human reference, applied by hand.
+> trading one error class for another. The classifier still implements v0.1
+> (`KW_BENCH_VERSION = "0.1"`) and runs in CI, but nothing renders its levels.
+> See issue #153, closed as not planned. Use this rubric as a human reference,
+> applied by hand.
 
 ## Credits
 
-- **Stage names and order:** Hejia Geng, AItonomy Foundation,
+- **Retrieval, replication, rediscovery, and frontier stages:** Hejia Geng,
+  AItonomy Foundation,
   [The AI4S Benchmark Index Tree](https://aitonomy.org/projects/benchmark).
-  The six stages, from L0 Retrieval to L5 Frontier advancement, come from that
-  index. It labels 361 AI-for-science listings and pairs each stage with a
-  V1-V7 verifier axis. Issue #111 recorded the index on 2026-08-04, two days
-  before the first KW-Bench draft.
+  KW-Bench v0.1 took its six stage names and their order from that index:
+  L0 Retrieval, L1 Closed-form reasoning, L2 Execution, L3 Replication,
+  L4 Rediscovery, and L5 Frontier advancement. In v0.2 they survive as L0,
+  L1-L2, L3-L5, L7, and L9. The index labels 361 AI-for-science listings and
+  pairs each stage with a V1-V7 verifier axis. Issue #111 recorded it on
+  2026-08-04, two days before the first KW-Bench draft.
 - **Rediscovery versus discovery:** Brian Keating,
   [The Artificial Einstein Test](https://keating.ai/einstein-test/). It
   separates the rediscovery of known theory from the discovery of new theory.
-- **Prediction as the top of the levels framing:** Jakub Pachocki, Chief
-  Scientist at OpenAI,
+- **Prediction as the top of the scale:** Jakub Pachocki, Chief Scientist at
+  OpenAI,
   [Perplexity and Intelligence](https://openai.com/index/perplexity-and-intelligence/)
   (2026-11-22). The essay treats capability as the prediction of unseen data,
   measured by perplexity on held-out data. It also notes that benchmarks were
-  "largely saturated around GPT-4". This idea motivates the upper levels of
-  the Levels of benchmarks post, from hidden facts to Laplace's demon. It came
-  after the L0-L5 stages, so it does not affect them.
+  "largely saturated around GPT-4". This idea motivates L10 to L12.
 
 KW-Bench adds these parts:
 
-- the rule that the level follows what the evaluator knew before the run
-- the run-start cutoff and the novelty check for L5
-- the boundary tests and the evidence fields
-- the complexity tags and the task card
+- the single scale from L0 to L12 and its ordering rule
+- the pass test for each level
+- the run-start cutoff, novelty check, and resolution event for unknown answers
+- the evidence fields, the complexity tags, and the task card
 
 | | |
 |---|---|
-| **Status** | Proposed v0.1 |
-| **Purpose** | Classify the highest capability an agent must demonstrate to pass a benchmark |
+| **Status** | Proposed v0.2 |
+| **Purpose** | Classify the hardest ability a benchmark requires for a passing score |
 | **Applies to** | Agent, model, and system benchmarks in any domain |
 | **Companion** | SLIM Rubrics, which audits task quality (drafted in `ktwu01/vendor-data-qc`; not vendored here) |
 
@@ -53,84 +58,119 @@ KW-Bench records capability level. SLIM records whether the task and its
 measurement process are Real, Diverse, Difficult, Valuable, and Solid. Publish
 both assessments when both are available.
 
-## Six levels locate the scored capability frontier
+## Thirteen levels, ordered by the difficulty of the tested ability
 
-| Level | Name | Passing requirement |
-|---|---|---|
-| **L0** | Retrieval | Locate and return existing information from supplied or accessible sources. |
-| **L1** | Closed-form reasoning | Derive a checkable answer from supplied or read-only retrieved information without changing external state. |
-| **L2** | Execution | Take actions in an environment to reach a specified, verifiable end state. |
-| **L3** | Replication | Reproduce a known artifact, workflow, experiment, or result under controlled conditions. |
-| **L4** | Rediscovery | Identify and validate an undisclosed problem, phenomenon, relationship, or mechanism in an open-ended environment; the evaluator already knows the finding. |
-| **L5** | Frontier advancement | Produce a result absent from the declared prior-art scope at the start of the evaluation run and validate it through new external evidence. |
+A higher level tests a harder ability. L9, L10, and L11 are the exception:
+they test three different kinds of unknown answer, and none of them is
+necessarily harder than another. L12 is the hardest ability. That no finite
+benchmark can test it follows from its difficulty; it is not the reason for its
+place.
+
+| Level | Name | A passing score requires | Example |
+|---|---|---|---|
+| **L0** | Retrieval | Finding and returning information that already exists in a source. | Lookup question answering |
+| **L1** | Quiz questions | A short, fixed answer that a non-specialist could derive in minutes. | MMLU, GSM8K, LiveCodeBench |
+| **L2** | Expert-level questions | A fixed answer that needs domain expertise. Experts wrote or checked the items to be hard. | Humanity's Last Exam, FrontierMath |
+| **L3** | Real coding work | Changing code inside a real project, where running tests on that code decides the score. | SWE-bench |
+| **L4** | Long agent tasks | Many tool or environment actions toward one stated goal, over a long human-time horizon. | OSWorld |
+| **L5** | Whole jobs | A complete professional deliverable from real paid work, judged at professional quality. | GDPval |
+| **L6** | Testing the tests | Judging whether a test, a grader, or a claimed result is valid. | — |
+| **L7** | Discovery | A research result the evaluator already knows: reproducing it, or finding it when the task does not name it. | PaperBench, ResearchClawBench |
+| **L8** | Self-improvement | An output that measurably improves an AI system over a stated baseline. | RE-Bench, MLE-bench |
+| **L9** | Open problems | A result that nobody had when the benchmark was built, checked by a verifier. | FrontierMath: Open Problems, Formal Conjectures |
+| **L10** | Hidden facts | A prediction of a fact that nobody knows yet, scored when the world reveals it. | ForecastBench |
+| **L11** | Chaotic systems | A prediction of a system sensitive to initial conditions, scored against observations made after the prediction. | Live weather forecasting |
+| **L12** | Laplace's demon | A prediction of any state of the world. | None |
 
 ## The scored task determines the level
 
-Assign the highest fully evidenced level required for a passing score. Test from
-L5 down to L0. Discovery status takes precedence over output form: an open-ended,
-read-only bug hunt receives L4 when it satisfies the rediscovery requirements. A
-task that retrieves documentation, reasons about it, and edits a repository
-receives L2 when the verifier scores the repository end state.
+Assign the highest fully evidenced level that a passing score requires. Test
+from L12 down to L0. When a task fits more than one of L9, L10, and L11, record
+each as a separate track.
 
 Separate tracks receive separate levels. A suite containing retrieval questions
-and executable tasks reports L0 and L2 track labels instead of one suite-wide
+and executable tasks reports L0 and L3 track labels instead of one suite-wide
 average.
 
-## Five boundaries separate retrieval, reasoning, execution, and discovery
+A benchmark that measures other benchmarks, such as a harness, a ranking
+platform, or a validity study, tests no ability of the system under test.
+Record it with the type `meta-evaluation` and no level. L6 applies only when
+the system under test must judge validity itself.
+
+## Boundary tests
 
 ### L0 to L1: the answer is derived
 
 L0 returns information already present in a source. L1 transforms, combines, or
-infers from supplied or retrieved information to produce a derived answer. Using
-a search tool to access a source preserves L0 when the scored answer is copied
-from that source. Synthesizing across retrieved sources receives L1.
+infers from that information. Using a search tool preserves L0 when the scored
+answer is copied from the source.
 
-### L1 to L2: external state determines success
+### L1 to L2: the answer needs expertise
 
-After L4 and L5 have been excluded, L1 scores an answer produced from information
-available during the run. L2 scores an action outcome or an environment state
-changed by the agent. Read-only use of a shell, browser, or database preserves L1
-when the verifier checks only the returned answer.
+L1 items can be answered by a non-specialist in minutes. L2 items need domain
+expertise, and experts wrote or checked them to be hard. Both score only a
+returned answer.
 
-### L2 to L3: the task reproduces a known target
+### L2 to L3: running code decides the score
 
-L2 supplies a goal and checks successful execution. L3 additionally identifies a
-known artifact, protocol, experiment, or result that the agent must reproduce.
-The benchmark records the target provenance and the equivalence criteria used by
-the verifier.
+L3 scores code that the system changed inside a real or realistic project, by
+running tests on it. A standalone contest problem stays at L1 or L2.
 
-### L3 to L4: the target finding is hidden
+### L3 to L4: the task takes many actions over a long horizon
 
-L3 gives the agent the replication target. L4 presents an open-ended environment
-without naming the target problem, phenomenon, relationship, or mechanism. The
-agent must choose what to investigate, identify the undisclosed finding, and
-validate it. The evaluator already knows the finding and can verify rediscovery
-against recorded evidence. A task that states the question and withholds only
-the answer remains L1, L2, or L3 according to its scored outcome.
+L4 needs many tool or environment actions toward one goal, over a long
+human-time horizon. The horizon threshold is calibrated in the first labelling
+pilot and recorded here with its version. Read-only browsing scored only by its
+final answer stays at L1 or L2.
 
-Examples include discovering an undocumented known bug, recovering a hidden
-scientific relationship, or identifying a known failure mechanism from raw
-observations.
+### L4 to L5: the output is a whole job
 
-### L4 to L5: the result is created prospectively
+L5 tasks come from real paid work, and the scored output is the complete
+deliverable, judged at professional quality.
 
-L4 uses evaluator-held knowledge that predates the evaluation run. L5 starts
-with an open frontier and judges a result created during that run. L5 evidence
-requires prospective validation such as a new experiment, independent
-reproduction, deployment outcome, or qualified expert adjudication.
+### L5 to L6: the system judges validity
 
-A prior-art or provenance check that finds the result before the evaluation run
-establishes a ceiling of L4. L5 evaluation records the run-start cutoff, declared
-search scope, sources and dates checked, domain-expert attestation, and the
-validation event that occurred after the agent produced the candidate result.
-Later runs begin from their own cutoff. A prior result in evaluator knowledge
-establishes an L4 ceiling. A prior result accessible to the agent may reduce the
-task to L0, L1, L2, or L3. Apply all five boundary tests to every later run.
+L6 scores whether the system correctly judges a test, a grader, or a claimed
+result to be valid or invalid.
+
+### L6 to L7: the target is a research result
+
+L7 scores a research result that the evaluator already holds. Replication names
+the target result. Rediscovery hides it: the system must choose what to
+investigate and find it. A task that states the question and withholds only the
+answer stays at L1, L2, or L3, according to its scored outcome.
+
+### L7 to L8: an AI system gets better
+
+L8 scores a measured improvement to an AI system over a stated baseline, such
+as a faster kernel or a lower training loss. Reproducing an ML paper without
+such an improvement stays at L7.
+
+### L8 to L9, L10, and L11: nobody knows the answer
+
+Below L9, the evaluator holds the answer or a checker for it before the run.
+From L9 up, nobody holds the answer at the run-start cutoff.
+
+- **L9** scores a result that the system creates. It needs a novelty check.
+- **L10** scores a prediction. It needs a resolution event: the world reveals
+  the fact after the prediction.
+- **L11** scores a prediction of a chaotic system. It needs observations made
+  after the prediction. Scoring forecasts against data that already existed at
+  the cutoff, as WeatherBench 2 does for 2020, stays below L9.
+
+A prior result found before the run caps the task at L7 or below. Later runs
+begin from their own cutoff.
+
+### L11 to L12: any state of the world
+
+L12 would score a prediction of any state of the world. No finite benchmark
+passes this test.
 
 ## Complexity is reported on separate axes
 
-Time horizon, tool count, token count, pass rate, environment realism, autonomy,
-safety, and cost do not set the L0-L5 level. Record them as tags or measurements:
+Tool count, token count, pass rate, environment realism, autonomy, safety, and
+cost do not set the level. Horizon sets the level only at the L3 to L4
+boundary. Record these as tags or measurements:
 
 - **horizon:** single-turn, multi-turn, cross-session, streaming, lifelong
 - **state:** stateless, workspace, memory, persistent learning state
@@ -139,7 +179,7 @@ safety, and cost do not set the L0-L5 level. Record them as tags or measurements
 - **risk:** privacy, security, policy compliance, destructive action
 - **resources:** latency, cost, compute, memory, network
 
-## Every assignment ships with six evidence fields; L5 ships with eight
+## Every assignment ships with six evidence fields; L9 to L11 ship with eight
 
 1. **Scored outcome:** the state or result that determines pass or fail.
 2. **Agent-visible target:** the goal, finding, or protocol disclosed to the agent.
@@ -147,35 +187,35 @@ safety, and cost do not set the L0-L5 level. Record them as tags or measurements
 4. **Verifier modality:** exact, executable, simulation, model judge, human expert, or hybrid.
 5. **Verifier procedure:** the checks, equivalence criteria, and evidence link used to determine the outcome.
 6. **Level rationale:** one sentence naming the requirement that sets the level.
-7. **Evaluation cutoff, required for L5:** the run-start timestamp used to establish that the result was unknown.
-8. **Novelty check, required for L5:** the prior-art scope, sources, search dates, provenance checks, and domain-expert attestation.
+7. **Evaluation cutoff, required for L9 to L11:** the run-start timestamp used to establish that the answer was unknown.
+8. **Novelty check or resolution event, required for L9 to L11:** for L9, the prior-art scope, sources, search dates, provenance checks, and domain-expert attestation; for L10 and L11, the event that revealed the answer and its date.
 
 Missing evidence produces `LEVEL: unclassified`. The reviewer records every
-missing field on the task card. An L5 assignment without an evaluation cutoff or
-novelty check is unclassified.
+missing field on the task card. An L9, L10, or L11 assignment without fields 7
+and 8 is unclassified. An unclassified record stays in the corpus.
 
 ## Classification follows four steps
 
 1. Read the task instruction and verifier.
 2. Identify the requirement that determines a passing score.
-3. Test levels from L5 down to L0 and select the first fully evidenced level.
+3. Test levels from L12 down to L0 and select the first fully evidenced level.
 4. Record the level, evidence fields, and orthogonal tags.
 
-Difficulty and benchmark quality receive separate reports. Apply SLIM after the
-capability classification to assess task acceptance and measurement confidence.
+Benchmark quality receives a separate report. Apply SLIM after the capability
+classification to assess task acceptance and measurement confidence.
 
 ## The task card keeps the decision auditable
 
 ```text
 TASK: <id>
-KW-BENCH VERSION: 0.1
-LEVEL: L0 / L1 / L2 / L3 / L4 / L5 / unclassified
+KW-BENCH VERSION: 0.2
+LEVEL: L0 / L1 / ... / L12 / meta-evaluation / unclassified
 
 SCORED OUTCOME: <what determines pass or fail>
 AGENT-VISIBLE TARGET: <what the agent receives>
 EVALUATOR KNOWLEDGE: <what was known before the run>
-EVALUATION CUTOFF: <run start timestamp; required for L5>
-NOVELTY CHECK: <prior-art scope, sources, dates, provenance, expert attestation; required for L5>
+EVALUATION CUTOFF: <run start timestamp; required for L9 to L11>
+NOVELTY CHECK OR RESOLUTION EVENT: <required for L9 to L11>
 VERIFIER MODALITY: <exact, executable, simulation, model judge, expert, hybrid>
 VERIFIER PROCEDURE: <checks, equivalence criteria, and evidence link>
 LEVEL RATIONALE: <one sentence>
@@ -198,3 +238,16 @@ DATE: <date>
 Changes to a level boundary require a minor version bump. Wording edits that
 preserve every decision boundary require a patch version bump. Every task card
 stores the rubric version used for classification.
+
+A v0.1 label does not convert to one v0.2 level, because v0.2 splits the old
+levels by task scope. Reclassify a v0.1 task under v0.2 with the tests above.
+This table shows where each v0.1 level can land:
+
+| v0.1 level | Possible v0.2 levels |
+|---|---|
+| L0 Retrieval | L0 |
+| L1 Closed-form reasoning | L1, L2 |
+| L2 Execution | L3, L4, L5, L8 |
+| L3 Replication | L7 |
+| L4 Rediscovery | L7 |
+| L5 Frontier advancement | L9, L10, L11 |
