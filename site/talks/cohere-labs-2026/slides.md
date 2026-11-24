@@ -112,8 +112,8 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 | --- | --- | --- | --- |
 | 1 | Quiz questions | Answer one fact or one short problem | MMLU, GSM8K, HumanEval: top scores 87–97%, basically solved |
 | 2 | Expert-level questions | Questions written to stump PhDs | Humanity's Last Exam, FrontierMath: under 10% at launch → about 50% today |
-| 3 | Real coding work | Fix and build code in real projects | SWE-bench, LiveCodeBench: same models, 84–89% on toy code, 25–34% on real code |
-| 4 | Long agent tasks | Use tools for hours to reach a goal | GAIA, OSWorld, Terminal-Bench: best AI finishes half of ~40-hour expert tasks |
+| 3 | Real coding work | Fix and build code in real projects | SWE-bench: same models, 84–89% on toy code, 25–34% on real code |
+| 4 | Long agent tasks | Use tools for hours to reach a goal | OSWorld, Terminal-Bench: best AI finishes half of ~40-hour expert tasks |
 | 5 | Whole jobs | Do paid work end to end | GDPval, Mercor Benchmark Map: about 90% of US work hours barely tested |
 | 6 | Testing the tests | Check whether a score means what it claims | HELM, LMArena, validity studies: same-format tests can agree more than same-skill tests |
 | 7 | Reproducing research | Reproduce published research in physics, biology, math | ResearchClawBench, PaperBench: known answers only, rediscovery and replication |
@@ -141,7 +141,7 @@ Sources:
 | 8 | Self-improvement | Design the next chip and its own successor | RE-Bench, MLE-bench: set engineering tasks |
 | 9 | Open problems | Unsolved math; fusion; aging | Formal Conjectures, FrontierMath: Open Problems: math only |
 | 10 | Hidden facts | Infer what is not public from what is | ForecastBench: future events only |
-| 11 | Chaotic systems | Predict weather, turbulence, markets | WeatherBench 2: weather only |
+| 11 | Chaotic systems | Predict weather, turbulence, markets | WeatherBench 2: weather only, scored on past data |
 | 12 | Laplace's demon | Predict everything | none: cannot be benchmarked |
 
 - **Only 32 of 361 AI-for-science benchmark listings ask a question nobody could answer when it was built.**
@@ -155,7 +155,7 @@ Sources:
 - ForecastBench (Karger et al., 2024) https://arxiv.org/abs/2409.19839
 - WeatherBench 2 (Rasp et al., 2023) https://arxiv.org/abs/2308.15560
 
-> **Speaker notes:** Above Level 7, the capabilities people talk about next keep going. The right column is the closest benchmark that exists, and what limits it. Self-improvement benchmarks are set engineering tasks. Open problems have a real foothold, but only in math, where a verifier can check an answer nobody knew. Forecasting covers future events; weather covers one chaotic system. Credit for the stage labels and the 32 of 361 count: Hejia Geng and the AItonomy Foundation's AI4S Benchmark Index Tree. Disclosure: I am a co-author of ResearchClawBench, on the previous slide. The point: if your team builds evals, the open space is at the top of this ladder.
+> **Speaker notes:** Above Level 7, the capabilities people talk about next keep going. The right column is the closest benchmark that exists, and what limits it. Self-improvement benchmarks are set engineering tasks. Open problems have a real foothold, but only in math, where a verifier can check an answer nobody knew. Forecasting covers future events; weather covers one chaotic system, and WeatherBench 2 scores forecasts of 2020 against data that already exists. Credit for the stage labels and the 32 of 361 count: Hejia Geng and the AItonomy Foundation's AI4S Benchmark Index Tree. Disclosure: I am a co-author of ResearchClawBench, on the previous slide. The point: if your team builds evals, the open space is at the top of this ladder.
 
 ---
 
