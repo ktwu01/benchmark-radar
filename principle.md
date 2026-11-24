@@ -17,17 +17,13 @@ again after reading the unified index.
 **If a main surface contains only a few dozen benchmarks, assume records are
 missing and investigate. Do not present that subset as Benchmark Radar.**
 
-### Paper analyses must use the frozen full catalog
+### Paper analyses must use one release and the full catalog
 
 Each paper uses the one release named in its own README, and verifies that
-release's input hashes:
+release's input hashes. This file does not pin any paper to a release.
 
-- The technical report (`ktwu01/benchmark-radar-paper`) uses the **frozen
-  v0.11.0 release**, software commit `8f46bbfa91f5d9900c8b08a5d552c3df5c9597b0`.
-- The Levels of benchmarks paper (`ktwu01/levels-of-benchmarks-paper`) uses the
-  **v0.16.0 release**, software commit `1a813b1c56eaeacdcc63286c85551f414b5f3caa`.
-
-Do not substitute current `main`, the live website, or another release.
+Within one paper, do not mix in current `main`, the live website, or another
+release.
 The 1,259+ baseline is a coverage alarm, not a replacement for the record count
 computed from the paper's release.
 
