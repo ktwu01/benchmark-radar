@@ -68,10 +68,11 @@ Cohere Labs Open Science Community · Koutian Wu, UT Austin · benchmark-radar.o
 
 - Researchers at OpenAI, Anthropic, Google, Meta, Microsoft, NVIDIA, Amazon, IBM, ByteDance, and Unitree viewed/using it.
 - 300+ users across labs, companies, and universities.
+- In product: **Archimedes**, a local-first research app (archimedes-research.com) — last logo in the strip.
 
-![Logos of 37 institutions whose researchers viewed/using Benchmark Radar](assets/researchers.svg)
+![Logos of 37 institutions whose researchers viewed/using Benchmark Radar, followed by the Archimedes product wordmark](assets/researchers.svg)
 
-> **Speaker notes:** Keep this short. The point is not the logos; it is that the people who build and report on benchmarks already look things up here. 37 institutions on the strip. Wording is deliberate: viewed or using.
+> **Speaker notes:** Keep this short. The point is not the logos; it is that the people who build and report on benchmarks already look things up here. 37 institutions on the strip, and Archimedes at the end of the last row: the product on the slide after next. Wording is deliberate: viewed or using.
 
 ---
 
@@ -263,7 +264,23 @@ Sources:
 
 ---
 
-## 16. A five-step check
+## 16. Already in Product
+
+*Already in product · Audits by Jiayu Wang*
+
+- Archimedes, a local-first research app, ships Benchmark Radar as a Research App — archimedes-research.com
+- Research Apps can be hidden, reordered, or extended.
+- A local checkout can replace the public index.
+
+![Archimedes workspace: research chat, files, and a proactive agent](assets/archimedes-hero.webp)
+
+![Rising benchmarks from Radar's public index, inside the Research App](assets/archimedes-radar.webp)
+
+> **Speaker notes:** One product already uses Radar. Archimedes is a local-first research app: you bring your own model and the data stays on your machine. Research Apps are its customizable layer — hide them, reorder them, or extend them. Benchmark Radar is one of them, and its default data source is Radar's public index. This screenshot reads a bundled snapshot of 3,824 records, so the count is smaller than the 52,120 on the earlier slide: that is the shipped snapshot, not the live feed. Point the app at a local checkout and it reads the full index. The point for the room: an open benchmark record can be consumed by a product without any extra work from its authors. Case contributed by Jiayu Wang; the site is archimedes-research.com.
+
+---
+
+## 17. A five-step check
 
 *Take home*
 
@@ -277,7 +294,7 @@ Sources:
 
 ---
 
-## 17. What is next
+## 18. What is next
 
 *Roadmap*
 
@@ -290,7 +307,7 @@ Sources:
 
 ---
 
-## 18. Let your agent draft Related Work
+## 19. Let your agent draft Related Work
 
 *For your paper*
 
@@ -303,7 +320,7 @@ Sources:
 
 ---
 
-## 19. Search for it. If it is missing, add it.
+## 20. Search for it. If it is missing, add it.
 
 *For your benchmark*
 
@@ -316,7 +333,7 @@ Sources:
 
 ---
 
-## 20. Get new benchmarks by email
+## 21. Get new benchmarks by email
 
 *For your inbox*
 
@@ -330,7 +347,7 @@ Sources:
 
 ---
 
-## 21. Get involved
+## 22. Get involved
 
 *Join in*
 
@@ -345,7 +362,7 @@ Sources:
 
 ---
 
-## 22. My career journey
+## 23. My career journey
 
 *Career path*
 
@@ -360,7 +377,7 @@ Sources:
 
 ---
 
-## 23. Questions I asked myself
+## 24. Questions I asked myself
 
 *Moving from the Ph.D. track to the M.A. track*
 
@@ -372,7 +389,7 @@ Sources:
 
 ---
 
-## 24. Acknowledgments
+## 25. Acknowledgments
 
 *Thank you*
 
@@ -383,7 +400,7 @@ Sources:
 
 ---
 
-## 25. Questions
+## 26. Questions
 
 *Q&A*
 

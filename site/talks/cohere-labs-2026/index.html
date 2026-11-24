@@ -200,7 +200,24 @@ body.export .progress { display: none; }
    REACH: logo strip
    =========================================== */
 .logos { margin-top: 30px; background: #fff; border-radius: 18px; border: 1px solid var(--line); padding: 26px 40px; display: flex; justify-content: center; }
-.logos img { width: 860px; height: auto; max-height: none; }
+.logos img { width: 940px; height: auto; max-height: none; }
+/* The Archimedes wordmark (Inter 600, -0.04em tracking) is baked into assets/researchers.svg
+   as the last logo of the strip, so it scales with the other marks. */
+
+/* ===========================================
+   ALREADY IN PRODUCT: two-up product screenshots
+   =========================================== */
+.product-lead { margin-top: 14px; font-size: 27px; line-height: 1.4; color: var(--ink-soft); max-width: 1600px; }
+.product-lead a { color: var(--teal); font-family: var(--font-mono); font-size: 0.82em; text-decoration: none; border-bottom: 2px solid rgba(29,107,102,0.28); padding-bottom: 2px; }
+.product-body { display: grid; grid-template-columns: 1.1fr 1fr; gap: 32px; margin: 34px -56px 0; flex: 1; min-height: 0; }
+.product-body figure { margin: 0; display: flex; flex-direction: column; min-height: 0; }
+.product-body .shot { flex: 1; min-height: 0; display: flex; align-items: flex-end; border: 0; border-radius: 0; background: none; box-shadow: none; overflow: visible; }
+.product-body .shot img {
+  display: block; width: 100%; height: auto; max-height: 100%; object-fit: contain; object-position: left bottom;
+  border-radius: 16px; border: 1px solid var(--line); background: #fff;
+  box-shadow: 0 30px 60px -30px rgba(20,33,32,0.45);
+}
+.product-body .caption { margin-top: 16px; font-size: 19px; line-height: 1.4; }
 
 /* ===========================================
    METHOD: numbered columns
@@ -393,10 +410,10 @@ body.export .info, body.export .src-pop { display: none !important; }
       <li class="reveal"><b>Researchers at OpenAI, Anthropic, Google, Meta, Microsoft, NVIDIA, Amazon, IBM, ByteDance, and Unitree</b> viewed/using it.</li>
       <li class="reveal"><b>300+ users</b> across labs, companies, and universities.</li>
     </ul>
-    <div class="logos reveal"><img src="assets/researchers.svg" alt="Logos of 37 institutions whose researchers viewed/using Benchmark Radar"></div>
+    <div class="logos reveal"><img src="assets/researchers.svg" alt="Logos of 37 institutions whose researchers viewed/using Benchmark Radar, followed by the Archimedes product wordmark"></div>
   </div>
   <div class="footer"><span>benchmark-radar.org</span><span class="pg"></span></div>
-  <aside class="notes">Keep this short. The point is not the logos; it is that the people who build and report on benchmarks already look things up here. 37 institutions on the strip. Wording is deliberate: viewed or using.</aside>
+  <aside class="notes">Keep this short. The point is not the logos; it is that the people who build and report on benchmarks already look things up here. 37 institutions on the strip, and Archimedes at the end of the last row: the product on the slide after next. Wording is deliberate: viewed or using.</aside>
 </section>
 
 <!-- === 6. HOW IT WORKS === -->
@@ -609,7 +626,28 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">A second independent auditor. James Zhu's Benchmarks' Last Exam reviews each task's statement, environment, reference answer and grader, and marks it accepted, doubtful, or refused. Refused means a confirmed material defect. Terminal-Bench 4.0: 50 of 66 refused. Harvey's legal agent benchmark and AutomationBench: 71 of 100 each. But HLE-Diamond had 5 of 100 refused and AA-Omniscience 1 of 100, so refusal rates differ widely from one benchmark to the next. These are the reviews' findings, not Radar's. DeepSWE appears in both audits, but June's count covers reference solutions in v1.0 and this review covers task-level defects in v1.1, so do not compare the numbers. Credit James Zhu.</aside>
 </section>
 
-<!-- === 16. TAKE HOME === -->
+<!-- === 16. ALREADY IN PRODUCT === -->
+<section class="slide" data-title="Already in Product">
+  <div class="frame">
+    <div class="kicker reveal">Already in product · Audits by Jiayu Wang</div>
+    <h2 class="reveal">Already in Product</h2>
+    <div class="product-lead reveal">Archimedes, a local-first research app, ships Benchmark Radar as a Research App — <a href="https://archimedes-research.com/" target="_blank" rel="noopener">archimedes-research.com</a></div>
+    <div class="product-body">
+      <figure class="reveal">
+        <div class="shot"><img src="assets/archimedes-hero.webp" alt="Archimedes workspace: research chat with a drafted prompt, agent activity, the files workbench and a proactive citation warning"></div>
+        <div class="caption">Archimedes: research chat, files, and a proactive agent in one workspace.</div>
+      </figure>
+      <figure class="reveal">
+        <div class="shot"><img src="assets/archimedes-radar.webp" alt="The Benchmark Radar Research App open inside Archimedes: rising benchmarks with release dates, taxonomy labels, evidence signals, and paper and code links"></div>
+        <div class="caption">Rising benchmarks from Radar's public index, inside the Research App.</div>
+      </figure>
+    </div>
+  </div>
+  <div class="footer"><span>benchmark-radar.org</span><span class="pg"></span></div>
+  <aside class="notes">One product already uses Radar. Archimedes is a local-first research app: you bring your own model and the data stays on your machine. Research Apps are its customizable layer — hide them, reorder them, or extend them. Benchmark Radar is one of them, and its default data source is Radar's public index. This screenshot reads a bundled snapshot of 3,824 records, so the count is smaller than the 52,120 on the earlier slide: that is the shipped snapshot, not the live feed. Point the app at a local checkout and it reads the full index. The point for the room: an open benchmark record can be consumed by a product without any extra work from its authors. Case contributed by Jiayu Wang; the site is archimedes-research.com.</aside>
+</section>
+
+<!-- === 17. TAKE HOME === -->
 <section class="slide" data-title="Take home">
   <div class="frame">
     <div class="kicker reveal">Take home</div>
@@ -626,7 +664,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Each step maps to a finding. Discover wide, because attention is a power law. Check provenance, because many repos go quiet or disappear. Check saturation. Check audits. Then schedule retirement: the step teams skip. Radar helps with the first four; the fifth is a team decision.</aside>
 </section>
 
-<!-- === 17. ROADMAP === -->
+<!-- === 18. ROADMAP === -->
 <section class="slide" data-title="Roadmap">
   <div class="frame">
     <div class="kicker reveal">Roadmap</div>
@@ -642,7 +680,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Four directions. The audit layer is the one with the most leverage, and it depends on people like June Kim publishing audits. Interop: we would rather feed shared efforts than build a silo.</aside>
 </section>
 
-<!-- === 18. ASK 1: RELATED WORK FROM THE CLI === -->
+<!-- === 19. ASK 1: RELATED WORK FROM THE CLI === -->
 <section class="slide" data-title="Ask 1: Related Work">
   <div class="frame">
     <div class="kicker reveal">For your paper</div>
@@ -660,7 +698,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">First ask, for anyone writing a paper. One command gives your agent the Skill to write a cited Related Work draft and the BibTeX to go with it. It searches the Radar catalog plus arXiv, Hugging Face Papers, Semantic Scholar, OpenAlex, and Crossref. Read every entry before you keep it.</aside>
 </section>
 
-<!-- === 19. ASK 2: SEARCH AND ADD A BENCHMARK === -->
+<!-- === 20. ASK 2: SEARCH AND ADD A BENCHMARK === -->
 <section class="slide" data-title="Ask 2: Add your benchmark">
   <div class="frame">
     <div class="kicker reveal">For your benchmark</div>
@@ -681,7 +719,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Second ask. Search for the benchmark you built or the one you rely on. If Radar missed it, the form takes two minutes, and the next team will find it.</aside>
 </section>
 
-<!-- === 20. ASK 3: EMAIL === -->
+<!-- === 21. ASK 3: EMAIL === -->
 <section class="slide" data-title="Ask 3: Email">
   <div class="frame">
     <div class="kicker reveal">For your inbox</div>
@@ -706,7 +744,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Third ask. If you want to keep up without checking the site, the email brings new benchmarks to you, daily or weekly.</aside>
 </section>
 
-<!-- === 21. GET INVOLVED === -->
+<!-- === 22. GET INVOLVED === -->
 <section class="slide" data-title="Get involved">
   <div class="frame">
     <div class="kicker reveal">Join in</div>
@@ -729,7 +767,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Concrete asks. The audit ask is new: if your team rechecks a benchmark, publish it and Radar will link it.</aside>
 </section>
 
-<!-- === 22. MY CAREER JOURNEY === -->
+<!-- === 23. MY CAREER JOURNEY === -->
 <section class="slide" data-title="My career journey">
   <div class="frame">
     <div class="kicker reveal">Career path</div>
@@ -746,7 +784,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Keep this to one minute. The short version: physics training, a benchmark for AI changes to a physics model, then a map of everyone else's benchmarks. If asked about papers: first author of "What Git Does Not Record" (NeurIPS 2026 AI-Native Academia Workshop); co-author of ResearchClawBench, MatrAIx, and ScienceIDE. The move from the Ph.D. track to the M.A. track is the next slide.</aside>
 </section>
 
-<!-- === 23. QUESTIONS I ASKED MYSELF === -->
+<!-- === 24. QUESTIONS I ASKED MYSELF === -->
 <section class="slide" data-title="Questions I asked myself">
   <div class="frame">
     <div class="kicker reveal">Moving from the Ph.D. track to the M.A. track</div>
@@ -761,7 +799,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Read the questions out loud, and stop there. Do not answer them for the audience; the point is that these are the questions, not a verdict on either track.</aside>
 </section>
 
-<!-- === 24. ACKNOWLEDGMENTS === -->
+<!-- === 25. ACKNOWLEDGMENTS === -->
 <section class="slide" data-title="Acknowledgments">
   <div class="frame">
     <div class="kicker reveal">Thank you</div>
@@ -775,7 +813,7 @@ body.export .info, body.export .src-pop { display: none !important; }
   <aside class="notes">Read both names. June Kim's audits are the work behind Finding 5; Radar only links them. Thank Prahitha and Cohere Labs again for hosting. The sixteen authors are on the title slide. Then say out loud: Martin Ma at Thinking Machines Lab says hi to Brydon Eastman at Cohere.</aside>
 </section>
 
-<!-- === 25. Q&A === -->
+<!-- === 26. Q&A === -->
 <section class="slide dark" data-title="Questions">
   <div class="frame">
     <div class="kicker reveal">Q&amp;A</div>
