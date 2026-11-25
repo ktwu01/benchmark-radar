@@ -112130,5 +112130,199 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "Purdue University"
+        ],
+        "authors": [
+          "Avi Aggarwal",
+          "Yiran Hu"
+        ],
+        "blurb": "The newly released Spec-Test Coverage Gap study audits whether coding-agent tests enforce requirements absent from the task description.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-25T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Spec-Test Coverage Gap: Detecting Overspecified Tests in SWE-Bench-Style Benchmarks",
+        "url": "https://arxiv.org/abs/2611.31839"
+      },
+      {
+        "affiliations": [
+          "Tsinghua University",
+          "Dataset: huggingface.co/datasets/Aoraku/ICLWorld"
+        ],
+        "authors": [
+          "Qingle Liu",
+          "Jieming Li",
+          "Pei-lin Li",
+          "Shenghan Zheng",
+          "Ruize Yang",
+          "Sunqi Fan",
+          "Deyao Hong",
+          "Huan-ang Gao",
+          "Meng-Hao Guo",
+          "Shuojin Yang"
+        ],
+        "blurb": "ICLWorld is a newly released online benchmark for in-context learning, meaning an agent must infer new rules from demonstrations supplied during use rather than from additional training.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "data_quality",
+          "agentic"
+        ],
+        "published_at": "2026-11-25T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "ICLWorld: Benchmarking In-Context Learning of Agents from Digital to Physical Worlds",
+        "url": "https://arxiv.org/abs/2611.32649"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Wenxi Xu",
+          "Chuan Qin",
+          "Zihan Wang",
+          "Zixing Chen",
+          "Le Zhang",
+          "Jingbo Zhou",
+          "Hao Wang",
+          "Yuanchun Zhou",
+          "Hengshu Zhu"
+        ],
+        "blurb": "RecurSciBench is a newly released benchmark for recursive self-improvement, where a scientific agent uses experience from earlier work to improve later work.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-25T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "RecurSciBench: Benchmarking Recursive Self-Improvement in Data-Driven Scientific Research",
+        "url": "https://arxiv.org/abs/2611.32508"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Zhuoying Yang",
+          "Jiachen Ni",
+          "Yichen Guo",
+          "Xiaoshan Wu",
+          "Mengyu Wang"
+        ],
+        "blurb": "RoboProbe is a newly released benchmark for checking whether robot world models generate physically plausible videos.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-25T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "RoboProbe: Benchmarking Physical Plausibility of Robot World Models",
+        "url": "https://arxiv.org/abs/2611.32152"
+      },
+      {
+        "affiliations": [
+          "EPFL",
+          "University of Oxford",
+          "Technical University of Munich"
+        ],
+        "authors": [
+          "Angelika Romanou",
+          "Maria Grandury",
+          "Clara Meister",
+          "Negar Foroutan",
+          "Jabez Magomere",
+          "Anna Sotnikova",
+          "Hitesh Laxmichand Patel",
+          "Akshay Kumar Dubey",
+          "Alfonso Amayuelas",
+          "Amit Agarwal",
+          "Arion Das",
+          "Carlos Arriaga",
+          "Cheng Yu",
+          "Dalia Ali",
+          "David Quispe-Castillo",
+          "Fenal Ashokbhai Ilasariya",
+          "Francisco-Javier Rodrigo-Gines",
+          "Gonzalo Martinez",
+          "Gouthami Vadithya",
+          "Guido Ivetta",
+          "Javier Conde",
+          "Jorge Vallego",
+          "Juan J. Calderon G.",
+          "Karan Gupta",
+          "Marcos J Gomez",
+          "Marvin M. Agüero-Torales",
+          "Mithil Bangera",
+          "Naira Paola Arnez Jordan",
+          "Oscar M. Cumbicus-Pineda",
+          "Priyaranjan Pattnayak",
+          "Reewos Erwin Talla Chumpitaz",
+          "Sahil Aggarwal",
+          "Sahil Raj",
+          "Shruti Jalan",
+          "Srikant Panda",
+          "Susana Zhou",
+          "Yeshil Bangera",
+          "Orestis Papakyriakopoulos",
+          "Scott A. Hale",
+          "Shamsuddeen Hassan Muhammad",
+          "Antoine Bosselut"
+        ],
+        "blurb": "INCLUDE-2.0 is a newly released multilingual factual benchmark that separates language proficiency from regional knowledge.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-25T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "INCLUDE-2.0: Disentangling Knowledge Gaps in Multilingual LLM Evaluation",
+        "url": "https://arxiv.org/abs/2611.31255"
+      },
+      {
+        "affiliations": [
+          "SenseTime Sun Yat-sen University",
+          "Southern University of Science and Technology Tsinghua University",
+          "East China University of Science and Technology University of Edinburgh"
+        ],
+        "authors": [
+          "Xinyue Huang",
+          "Yongyong Gao",
+          "Zhengyuan Pan",
+          "Zheng Wei",
+          "Xinya Liu",
+          "Duanyi Yan",
+          "Zhiyu Hang",
+          "Zheng Ma",
+          "Lewei Lu"
+        ],
+        "blurb": "FigmaEval is a newly released benchmark for agents operating professional user-interface design software.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-25T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "FigmaEval: A Benchmark for Evaluating AI Agents in Professional UI Design",
+        "url": "https://arxiv.org/abs/2611.32321"
+      }
+    ],
+    "date": "2026-11-25",
+    "schema_version": 1,
+    "top": [
+      "https://arxiv.org/abs/2611.31839",
+      "https://arxiv.org/abs/2611.32649",
+      "https://arxiv.org/abs/2611.32508"
+    ]
+  },
   "since": "2026-11-23T15:06:49.813500+00:00"
 }
