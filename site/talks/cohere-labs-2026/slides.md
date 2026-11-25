@@ -115,7 +115,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 | 3 | Real coding work | Fix and build code in real projects | SWE-bench: same models, 84–89% on toy code, 25–34% on real code |
 | 4 | Long agent tasks | Use tools for hours to reach a goal | OSWorld, Terminal-Bench: best AI finishes half of ~40-hour expert tasks |
 | 5 | Whole jobs | Do paid work end to end | GDPval, Mercor Benchmark Map: about 90% of US work hours barely tested |
-| 6 | Testing the tests | Check whether a score means what it claims | HELM, LMArena, FAITH-Manip: same-format tests can agree more than same-skill tests |
+| 6 | Testing the tests | Check whether a score means what it claims | HELM, LMArena, FAITH-Manip: scores can track format or offline tests, not real skill |
 | 7 | Reproducing research | Reproduce published research in physics, biology, math | ResearchClawBench, PaperBench: known answers only, rediscovery and replication |
 
 Sources:
