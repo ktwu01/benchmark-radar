@@ -6,6 +6,14 @@
 # basis is counted in the institution ranking.
 schema_version: 1
 papers:
+  '2510.22622':
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7101725447
+    retrieved_at: '2026-11-25'
+    institutions:
+    - Chinese University of Hong Kong, Shenzhen
+    - University at Buffalo, State University of New York
+    - Nanjing University of Posts and Telecommunications
   '2603.27343':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7147400221
@@ -26,18 +34,6 @@ papers:
     institutions:
     - King Abdullah University of Science and Technology
     - Miami University
-  '2608.26623':
-    basis: openalex_linked_institutions
-    source_url: https://openalex.org/W7204561462
-    retrieved_at: '2026-11-05'
-    institutions:
-    - ServiceNow (United States)
-  '2608.26730':
-    basis: openalex_linked_institutions
-    source_url: https://openalex.org/W7204604140
-    retrieved_at: '2026-11-05'
-    institutions:
-    - Alibaba Group (China)
   '2608.26737':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7204558206
@@ -1707,7 +1703,7 @@ papers:
   '2611.13843':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-22'
+    retrieved_at: '2026-11-25'
     institutions: []
   '2611.15348':
     basis: openalex_linked_institutions
@@ -1784,7 +1780,7 @@ papers:
   '2611.18553':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2611.18553
-    retrieved_at: '2026-11-22'
+    retrieved_at: '2026-11-25'
     institutions:
     - The University of Southern Mississippi, Hattiesburg, MS 39401, USA
   '2611.18639':
@@ -1813,10 +1809,13 @@ papers:
     - Hong Kong University of Science and Technology
     - Tsinghua University
   '2611.21644':
-    basis: null
-    source_url: null
-    retrieved_at: '2026-11-22'
-    institutions: []
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7236045775
+    retrieved_at: '2026-11-25'
+    institutions:
+    - Georgia Institute of Technology
+    - The University of Tokyo
+    - University of Illinois Urbana-Champaign
   '2611.22343':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7236008216
@@ -1824,37 +1823,43 @@ papers:
     institutions:
     - Alibaba Group (China)
   '2611.24098':
-    basis: arxiv_html_affiliations
-    source_url: https://arxiv.org/html/2611.24098
-    retrieved_at: '2026-11-22'
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7236831546
+    retrieved_at: '2026-11-25'
     institutions:
-    - ReLER, CCAI, Zhejiang University, ByteDance, Hangzhou, Zhejiang, China
-    - ByteDance, Beijing, China
-    - Peking University, ByteDance, Beijing, China
-    - School of Artificial Intelligence, Zhejiang University, Hangzhou, Zhejiang, China
-    - ReLER, CCAI, Zhejiang University, Hangzhou, Zhejiang, China
+    - Zhejiang University
+    - ByteDance (China)
+    - Peking University
   '2611.24408':
-    basis: arxiv_html_affiliations
-    source_url: https://arxiv.org/html/2611.24408
-    retrieved_at: '2026-11-22'
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7236795446
+    retrieved_at: '2026-11-25'
     institutions:
     - Shanghai Jiao Tong University
     - Shanghai Artificial Intelligence Laboratory
     - Beihang University
     - Tianjin University
-    - Shenzhen International Graduate School, Tsinghua University
+    - Tsinghua Shenzhen International Graduate School
+    - Tsinghua University
   '2611.24669':
-    basis: arxiv_html_affiliations
-    source_url: https://arxiv.org/html/2611.24669
-    retrieved_at: '2026-11-22'
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7236585209
+    retrieved_at: '2026-11-25'
     institutions:
-    - Independent Shanghai Jiao Tong University
-    - Shanghai Innovation Institute Ant Group
+    - Shanghai Jiao Tong University
+    - Ant Group (China)
+    - Shanghai Innovation Institute
   '2611.25252':
     basis: null
     source_url: null
     retrieved_at: '2026-11-23'
     institutions: []
+  '2611.26358':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.26358
+    retrieved_at: '2026-11-25'
+    institutions:
+    - Reflection Team
   '2611.26408':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2611.26408
@@ -1897,3 +1902,15 @@ papers:
     - University of Macau
     - National University of Singapore
     - University of Hong Kong
+  '2611.31974':
+    basis: null
+    source_url: null
+    retrieved_at: '2026-11-25'
+    institutions: []
+  '2611.32649':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.32649
+    retrieved_at: '2026-11-25'
+    institutions:
+    - Tsinghua University
+    - 'Dataset: huggingface.co/datasets/Aoraku/ICLWorld'
