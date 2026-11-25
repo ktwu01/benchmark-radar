@@ -115,7 +115,7 @@ Which difficult benchmarks have been tested most? Compare reported scores, relea
 | 3 | Real coding work | Fix and build code in real projects | SWE-bench: same models, 84–89% on toy code, 25–34% on real code |
 | 4 | Long agent tasks | Use tools for hours to reach a goal | OSWorld, Terminal-Bench: best AI finishes half of ~40-hour expert tasks |
 | 5 | Whole jobs | Do paid work end to end | GDPval, Mercor Benchmark Map: about 90% of US work hours barely tested |
-| 6 | Testing the tests | Check whether a score means what it claims | HELM, LMArena, FAITH-Manip: scores can track format or offline tests, not real skill |
+| 6 | Testing the tests | Check whether a score means what it claims | HELM, LMArena, validity studies: same-format tests can agree more than same-skill tests |
 | 7 | Reproducing research | Reproduce published research in physics, biology, math | ResearchClawBench, PaperBench: known answers only, rediscovery and replication |
 
 Sources:
@@ -125,7 +125,7 @@ Sources:
 4. METR, Q4 2026 capability update (Nov 20, 2026): GPT-6 Astra 40 h (95% CI 13–2,645 h); Opus 5.5 39 h (12–1,253 h). https://metr.org/blog/2026-11-20-q4-2026-capability-update/
 5. Mercor, Benchmark Map: "90% of American working hours are spent on tasks with little or no coverage from existing benchmarks." https://www.mercor.com/research/labor-index/benchmark-map
 6. Validity study, Desai et al. (Sep 2026), 56 benchmarks: "In some cases, benchmarks that share design elements (e.g., score format) correlate more strongly than benchmarks with the same assigned concept." https://arxiv.org/abs/2609.08812
-   FAITH-Manip (Bao et al., CISR 2026): for imitation-learning robot policies, the action-horizon setting with the best offline score is not the one with the best closed-loop success. https://ieeexplore.ieee.org/abstract/document/11680207/
+   Validity study, FAITH-Manip (Bao et al., CISR 2026): for imitation-learning robot policies, the action-horizon setting with the best offline score is not the one with the best closed-loop success. https://ieeexplore.ieee.org/abstract/document/11680207/
 
 7. ResearchClawBench https://github.com/InternScience/ResearchClawBench (rediscovery) ; PaperBench (OpenAI, 2025) https://arxiv.org/abs/2504.01848 (replication). Stage labels: The AI4S Benchmark Index Tree, Hejia Geng, AItonomy Foundation. https://aitonomy.org/projects/benchmark
 
