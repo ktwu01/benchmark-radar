@@ -1131,7 +1131,8 @@ const I18N = {
     "Reviewed: the code and the data are public, and the data has a license.":
       "已核对：代码和数据均已公开，且数据有许可证。",
     "Reviewed: the data is behind an access request.": "已核对：数据需申请才能访问。",
-    "Reviewed: the data is public but has no license.": "已核对：数据已公开，但没有许可证。",
+    "Reviewed: the data is public, but no data license was found.":
+      "已核对：数据已公开，但未找到数据许可证。",
     "Reviewed: the data's license restricts reuse.": "已核对：数据的许可证限制再使用。",
     "Reviewed: whether the data is available is not yet established.":
       "已核对：数据是否可获取尚未确定。",
@@ -8414,7 +8415,7 @@ const OPENNESS_BASIS_TEXT = {
     "Reviewed: the code and the data are public, and the data has a license.",
   reviewed_data_gated: "Reviewed: the data is behind an access request.",
   reviewed_data_found_without_license:
-    "Reviewed: the data is public but has no license.",
+    "Reviewed: the data is public, but no data license was found.",
   reviewed_data_license_restricts_reuse:
     "Reviewed: the data's license restricts reuse.",
   reviewed_data_availability_not_established:
