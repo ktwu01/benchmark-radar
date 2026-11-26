@@ -374,7 +374,9 @@ def _read_manuscript(args: argparse.Namespace) -> ManuscriptContext | None:
         ) from error
 
 
-def _related_work_printer(args: argparse.Namespace) -> Callable[[dict[str, Any]], None]:
+def _related_work_printer(
+    args: argparse.Namespace, sources_warning: str | None = None
+) -> Callable[[dict[str, Any]], None]:
     """Write requested files first, then print one format for the terminal."""
 
     def printer(payload: dict[str, Any]) -> None:
@@ -415,14 +417,39 @@ def _related_work_printer(args: argparse.Namespace) -> Callable[[dict[str, Any]]
                 if args.bib in changed
                 else f"Benchmark Radar and these references are already in {args.bib}. "
             )
+        # The files are written by now, so a failed write never leaves this
+        # warning ahead of the error JSON; the prompt still prints last.
+        _warn_missing_sources(sources_warning)
         print(prefix + "Pick where to cite it: 1 / 2 / 3", file=stream)
 
     return printer
 
 
+def _missing_sources_warning(missing: Sequence[str]) -> str | None:
+    """The one-line warning for a catalog without some required sources."""
+    if not missing:
+        return None
+    return (
+        f"warning: the local catalog has no records from {', '.join(missing)}, so results "
+        "come from part of the corpus; run `benchmark-radar sync` to update it"
+    )
+
+
+def _warn_missing_sources(warning: str | None) -> None:
+    """Issue #1336: say so on stderr when answers come from a partial catalog.
+
+    stderr keeps stdout byte-identical to the HTTP payload for `--json`, as
+    the error contract and the citation reminder already do.
+    """
+    if warning:
+        print(warning, file=sys.stderr)
+
+
 def _print_status(payload: dict[str, Any]) -> None:
     print(f"status: {payload['status']}")
     print(f"catalog: {payload['catalog']['count']} records at {payload['catalog']['path']}")
+    sources = payload["catalog"]["sources"]
+    print("sources: " + ", ".join(f"{source} {count}" for source, count in sources.items()))
     print(
         f"radar: {payload['radar']['snapshot_count']} snapshots; "
         f"latest={payload['radar']['latest_date']}"
@@ -454,6 +481,7 @@ def run_query_cli(argv: Sequence[str] | None = None) -> int:
         else:
             query = _search_query(args) if args.command == "search" else None
             service = _service(args)
+            sources_warning = _missing_sources_warning(service.catalog_sources()["missing_sources"])
             if args.command == "search":
                 payload = service.search(
                     query,
@@ -489,7 +517,7 @@ def run_query_cli(argv: Sequence[str] | None = None) -> int:
                     include_radar=args.include_radar,
                     manuscript=_read_manuscript(args),
                 )
-                printer = _related_work_printer(args)
+                printer = _related_work_printer(args, sources_warning)
             elif args.command == "status":
                 payload = service.status()
                 printer = _print_json if args.json else _print_status
@@ -502,11 +530,18 @@ def run_query_cli(argv: Sequence[str] | None = None) -> int:
                         code="data_unavailable",
                         status=503,
                     )
+                _warn_missing_sources(sources_warning)
                 print(f"Serving Benchmark Radar at http://{args.host}:{args.port}", file=sys.stderr)
                 print(cite_reminder(), file=sys.stderr)
                 serve_query_api(service, host=args.host, port=args.port)
                 return 0
         assert printer is not None  # every non-serve command above sets it
+        # Only once the answer exists, so a failed command's stderr stays the
+        # bare error JSON agents parse; and before it prints, so the citation
+        # prompt is still the last line an agent sees. related-work prints its
+        # own, after its file writes can no longer fail.
+        if args.command not in {"init", "sync", "related-work"}:
+            _warn_missing_sources(sources_warning)
         printer(payload)
         if args.command != "related-work":
             _print_cite_reminder(args)

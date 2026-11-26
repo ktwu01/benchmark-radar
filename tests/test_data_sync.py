@@ -603,3 +603,77 @@ def test_unsafe_archive_member_is_rejected(tmp_path: Path) -> None:
     with pytest.raises(DataSyncError, match="unsafe archive path"):
         store.initialize()
     assert not (tmp_path / "escaped.json").exists()
+
+
+def _cli_paths(paths: QueryPaths) -> list[str]:
+    return [
+        "--index",
+        str(paths.index),
+        "--shards",
+        str(paths.shards),
+        "--snapshots",
+        str(paths.snapshots),
+    ]
+
+
+def test_status_reports_catalog_sources_and_required_gaps(monkeypatch, tmp_path: Path) -> None:
+    # Issue #1336: a cached catalog from before Model reports existed answered
+    # every search from three of four sources and `status` said only "ok".
+    monkeypatch.setattr(
+        "benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture", "model_reports"})
+    )
+    status = QueryService(_source_tree(tmp_path)).status()
+
+    assert status["catalog"]["sources"] == {"fixture": 1}
+    assert status["catalog"]["missing_sources"] == ["model_reports"]
+    # Reported, not degraded: `sync` refuses a degraded dataset, and sync is
+    # how a reader repairs a stale catalog.
+    assert status["status"] == "ok"
+
+
+def test_cli_warns_on_stderr_when_the_catalog_lacks_a_required_source(
+    monkeypatch, capsys, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(
+        "benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture", "model_reports"})
+    )
+    paths = _source_tree(tmp_path)
+
+    assert run_query_cli(["search", "agent workbench", "--json", *_cli_paths(paths)]) == 0
+    captured = capsys.readouterr()
+    # stdout stays the bare JSON payload; the warning rides stderr.
+    assert json.loads(captured.out)["results"][0]["name"] == "Agent Workbench"
+    assert "no records from model_reports" in captured.err
+    assert "benchmark-radar sync" in captured.err
+    # The citation reminder is still the last thing an agent sees.
+    from benchmark_radar.query_cli import cite_reminder
+
+    assert captured.err.rstrip().endswith(cite_reminder().rstrip())
+    assert captured.err.index("no records from") < captured.err.index(cite_reminder().strip())
+
+    assert run_query_cli(["status", *_cli_paths(paths)]) == 0
+    captured = capsys.readouterr()
+    assert "sources: fixture 1" in captured.out
+    assert "no records from model_reports" in captured.err
+
+
+def test_cli_is_silent_when_every_required_source_is_present(
+    monkeypatch, capsys, tmp_path: Path
+) -> None:
+    monkeypatch.setattr("benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture"}))
+    paths = _source_tree(tmp_path)
+
+    assert run_query_cli(["search", "agent workbench", "--json", *_cli_paths(paths)]) == 0
+    assert "no records from" not in capsys.readouterr().err
+
+
+def test_a_failed_query_keeps_stderr_as_the_bare_error(monkeypatch, capsys, tmp_path) -> None:
+    # Agents parse a failed command's stderr as one JSON error, so the
+    # partial-catalog warning must not print ahead of it.
+    monkeypatch.setattr(
+        "benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture", "model_reports"})
+    )
+    paths = _source_tree(tmp_path)
+
+    assert run_query_cli(["show", "no-such-benchmark", "--json", *_cli_paths(paths)]) != 0
+    assert "error" in json.loads(capsys.readouterr().err)

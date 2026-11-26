@@ -27,6 +27,12 @@ QUERY_SCHEMA_VERSION = 8
 DEFAULT_INDEX_PATH = Path("site/data/benchmark-index.json")
 DEFAULT_SHARD_DIR = Path("site/data/benchmarks")
 DEFAULT_SNAPSHOT_DIR = Path("data/snapshots")
+# Catalog source families every published index carries. An index missing one
+# answers searches from part of the corpus without saying so (issue #1336), so
+# `status` reports the gap and the CLI warns on every query.
+REQUIRED_CATALOG_SOURCES = frozenset(
+    {"artificial_analysis", "llm_stats", "model_reports", "opencompass_hub"}
+)
 SEARCH_SCOPES = ("catalog", "radar", "all")
 
 _FIELD_ORDER = (
@@ -2236,6 +2242,14 @@ class QueryService:
             "results": results,
         }
 
+    def catalog_sources(self) -> dict[str, Any]:
+        """Records per catalog source, and required sources the index lacks."""
+        counts = Counter(str(record.get("source")) for record in self._load_index()["benchmarks"])
+        return {
+            "sources": dict(sorted(counts.items())),
+            "missing_sources": sorted(REQUIRED_CATALOG_SOURCES - set(counts)),
+        }
+
     def status(self) -> dict[str, Any]:
         index = self._load_index()
         snapshots = self._load_snapshots()
@@ -2269,6 +2283,10 @@ class QueryService:
                 "complete": not missing_shards,
                 "missing_shard_count": len(missing_shards),
                 "missing_shards": missing_shards[:20],
+                # Reported, not folded into `status`: a stale catalog still
+                # answers, and `sync` (which refuses a degraded dataset) is
+                # exactly how a reader repairs it.
+                **self.catalog_sources(),
             },
             "radar": {
                 "path": str(self.paths.snapshots),
