@@ -1180,3 +1180,28 @@ def test_shipped_registry_changes_openness_for_reviewed_benchmarks_only():
         if record["openness"]["status"] != "unknown"
     }
     assert changed == reviewed == {"ai_professions_prompt_benchmark"}
+
+
+@pytest.mark.parametrize("placeholder", ["unknown", "none", "none_found", "other", "NOASSERTION"])
+def test_license_placeholders_read_as_no_established_license(tmp_path, placeholder):
+    # Codex review on #1358: the OpenCompass records treat these values as
+    # no licence, so a model-report record must too, or one catalog field
+    # would mean different things depending on the source.
+    openness = {**REVIEWED_OPENNESS, "code_license": placeholder, "data_license": placeholder}
+    board = adoption_rank(load_registry(_registry_with_openness(tmp_path, openness)))
+    alpha = next(entry for entry in board["entries"] if entry["benchmark_id"] == "alpha")
+    assert alpha["openness"]["code_license"] is None
+    assert alpha["openness"]["data_license"] is None
+    expected_note = "file_present_unparsed" if placeholder == "NOASSERTION" else None
+    assert alpha["openness"]["code_license_note"] == expected_note
+    assert alpha["openness"]["data_license_note"] == expected_note
+
+
+def test_reviewed_licenses_take_spdx_casing(tmp_path):
+    openness = {**REVIEWED_OPENNESS, "code_license": "mit", "data_license": "cc-by-4.0"}
+    board = adoption_rank(load_registry(_registry_with_openness(tmp_path, openness)))
+    alpha = next(entry for entry in board["entries"] if entry["benchmark_id"] == "alpha")
+    assert (alpha["openness"]["code_license"], alpha["openness"]["data_license"]) == (
+        "MIT",
+        "CC-BY-4.0",
+    )

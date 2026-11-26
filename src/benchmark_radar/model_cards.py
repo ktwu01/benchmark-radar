@@ -29,6 +29,8 @@ from urllib.parse import urlsplit
 
 import yaml
 
+from .catalog_opencompass import _clean_license
+
 # The single date format JavaScript's Date constructor parses reliably. See
 # `_require_date` for why the ISO 8601 standard is too wide a target here.
 _ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
@@ -111,13 +113,20 @@ def _benchmark_openness(benchmark: dict[str, Any]) -> dict[str, Any] | None:
     openness = benchmark.get("openness")
     if openness is None:
         return None
+    # Licences go through the cleaner the OpenCompass records use, so one
+    # catalog field means one thing whatever the source: a placeholder such
+    # as `unknown`, `none_found`, `other` or `NOASSERTION` reads as no
+    # established licence, never as a licence of that name, and SPDX casing
+    # matches across sources.
+    code_license, code_license_note = _clean_license(openness.get("code_license"))
+    data_license, data_license_note = _clean_license(openness.get("data_license"))
     return {
         "status": str(openness["status"]),
         "basis": str(openness["basis"]) if openness.get("basis") else None,
-        "code_license": str(openness["code_license"]) if openness.get("code_license") else None,
-        "code_license_note": None,
-        "data_license": str(openness["data_license"]) if openness.get("data_license") else None,
-        "data_license_note": None,
+        "code_license": code_license,
+        "code_license_note": code_license_note,
+        "data_license": data_license,
+        "data_license_note": data_license_note,
         "data_located": str(openness["data_located"]) if openness.get("data_located") else None,
         "access_gate": None,
         "link_status": None,
