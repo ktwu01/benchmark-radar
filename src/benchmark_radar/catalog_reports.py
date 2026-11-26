@@ -92,7 +92,10 @@ def normalize_reports(registry: dict[str, Any], scores: dict[str, Any]) -> dict[
                 "description": {"en": entry["caveat"]} if entry["caveat"] else {},
                 "publisher": None,
                 "artifacts": [{"kind": artifact_kind, "url": url}] if url else [],
-                "openness": {
+                # A reviewed openness block in the registry is the answer;
+                # without one the status stays unknown rather than guessed.
+                "openness": entry.get("openness")
+                or {
                     "status": "unknown",
                     "code_license": None,
                     "data_license": None,
