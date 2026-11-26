@@ -34,23 +34,6 @@ papers:
     institutions:
     - King Abdullah University of Science and Technology
     - Miami University
-  '2608.26737':
-    basis: openalex_linked_institutions
-    source_url: https://openalex.org/W7204558206
-    retrieved_at: '2026-11-05'
-    institutions:
-    - Fudan University
-    - Carnegie Mellon University
-  '2608.27345':
-    basis: openalex_linked_institutions
-    source_url: https://openalex.org/W7204569255
-    retrieved_at: '2026-11-05'
-    institutions:
-    - Shanghai Jiao Tong University
-    - Shanghai Artificial Intelligence Laboratory
-    - Hugging Face
-    - Shanghai Innovation Institute
-    - University of Hong Kong
   '2608.28281':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7204813304
@@ -101,7 +84,7 @@ papers:
   '2608.31100':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2608.31111':
     basis: openalex_linked_institutions
@@ -121,7 +104,7 @@ papers:
   '2609.01437':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2609.01515':
     basis: openalex_linked_institutions
@@ -258,7 +241,7 @@ papers:
   '2609.13498':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2609.14302':
     basis: openalex_linked_institutions
@@ -331,7 +314,7 @@ papers:
   '2609.18605':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2609.18708':
     basis: openalex_linked_institutions
@@ -383,7 +366,7 @@ papers:
   '2609.29028':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2609.29142':
     basis: openalex_linked_institutions
@@ -401,7 +384,7 @@ papers:
   '2609.29892':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2609.30192':
     basis: openalex_linked_institutions
@@ -483,7 +466,7 @@ papers:
   '2609.35504':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2609.35504
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions:
     - ZODA
     - HKUST
@@ -540,7 +523,7 @@ papers:
   '2609.39420':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2609.39903':
     basis: openalex_linked_institutions
@@ -652,7 +635,7 @@ papers:
   '2610.02298':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2610.02858':
     basis: openalex_linked_institutions
@@ -663,7 +646,7 @@ papers:
   '2610.03825':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2610.03825
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions:
     - Centific
   '2610.04184':
@@ -695,7 +678,7 @@ papers:
   '2610.05949':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2610.06100':
     basis: openalex_linked_institutions
@@ -723,7 +706,7 @@ papers:
   '2610.06496':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2610.06496
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions:
     - 1 HKUST, 2 Tencent Hy
   '2610.07557':
@@ -761,7 +744,7 @@ papers:
   '2610.09633':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2610.09633
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions:
     - JetBrains Research
   '2610.09823':
@@ -1142,7 +1125,7 @@ papers:
   '2610.20939':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2610.21073':
     basis: openalex_linked_institutions
@@ -1197,7 +1180,7 @@ papers:
   '2610.22306':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2610.22306
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions:
     - Athlitix Inc
   '2610.22350':
@@ -1224,12 +1207,12 @@ papers:
   '2610.22602':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2610.22708':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2610.23230':
     basis: openalex_linked_institutions
@@ -1249,7 +1232,7 @@ papers:
   '2610.25459':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2610.25459
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions:
     - Zhejiang University Ant Group
   '2610.25950':
@@ -1265,7 +1248,7 @@ papers:
   '2610.26185':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2610.26185
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions:
     - Keep, Beijing, China
     - Capital University of Physical Education and Sports, Beijing, China
@@ -1293,7 +1276,7 @@ papers:
   '2610.27597':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2610.27782':
     basis: openalex_linked_institutions
@@ -1328,7 +1311,7 @@ papers:
   '2610.28402':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2610.28416':
     basis: openalex_linked_institutions
@@ -1356,7 +1339,7 @@ papers:
   '2610.28522':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2610.28522
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions:
     - Peixian Ma
     - StartLux
@@ -1373,7 +1356,7 @@ papers:
   '2610.28763':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2610.28763
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions:
     - Anthropic Fellows Program Anthropic
   '2610.29139':
@@ -1401,13 +1384,13 @@ papers:
   '2610.30113':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2610.30113
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions:
     - Navers Lab, Einsia.AI
   '2610.30970':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2610.31494':
     basis: openalex_linked_institutions
@@ -1419,7 +1402,7 @@ papers:
   '2610.31566':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2610.31566
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions:
     - Biohub
     - San Francisco, CA
@@ -1470,12 +1453,12 @@ papers:
   '2610.35671':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2610.35864':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2610.35864
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions:
     - Beijing University of Posts and Telecommunications Zhongguancun Academy
     - Peking University Jilin University Kling Team
@@ -1488,7 +1471,7 @@ papers:
   '2610.36420':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2610.36420
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions:
     - Independent
   '2610.37739':
@@ -1515,7 +1498,7 @@ papers:
   '2610.38568':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2611.00359':
     basis: openalex_linked_institutions
@@ -1592,12 +1575,12 @@ papers:
   '2611.03998':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2611.05280':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions: []
   '2611.05862':
     basis: openalex_linked_institutions
@@ -1744,7 +1727,7 @@ papers:
   '2611.16661':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2611.16661
-    retrieved_at: '2026-11-23'
+    retrieved_at: '2026-11-26'
     institutions:
     - Ling Team, Ant Group
   '2611.17048':
@@ -1850,10 +1833,13 @@ papers:
     - Ant Group (China)
     - Shanghai Innovation Institute
   '2611.25252':
-    basis: null
-    source_url: null
-    retrieved_at: '2026-11-23'
-    institutions: []
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7237213872
+    retrieved_at: '2026-11-26'
+    institutions:
+    - Université Paris-Saclay
+    - CentraleSupélec
+    - Laboratoire Génie Industriel
   '2611.26358':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2611.26358
@@ -1861,39 +1847,43 @@ papers:
     institutions:
     - Reflection Team
   '2611.26408':
-    basis: arxiv_html_affiliations
-    source_url: https://arxiv.org/html/2611.26408
-    retrieved_at: '2026-11-23'
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7237080729
+    retrieved_at: '2026-11-26'
     institutions:
-    - Ulm University
+    - Universität Ulm
   '2611.26444':
-    basis: arxiv_html_affiliations
-    source_url: https://arxiv.org/html/2611.26444
-    retrieved_at: '2026-11-23'
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7237070410
+    retrieved_at: '2026-11-26'
     institutions:
-    - THU
-    - CMU
-    - HKU
-    - HKUST
-    - CUHK
-    - PKU
-    - SJTU
-    - FDU
-    - RUC
-    - SZU
-    - Velabot AI
-    - Simple AI
-    - Baidu AI Cloud
+    - Chinese University of Hong Kong
+    - University of Hong Kong
+    - Hong Kong University of Science and Technology
+    - Carnegie Mellon University
+    - Stanford University
   '2611.27494':
     basis: null
     source_url: null
     retrieved_at: '2026-11-24'
+    institutions: []
+  '2611.30017':
+    basis: null
+    source_url: null
+    retrieved_at: '2026-11-26'
     institutions: []
   '2611.30157':
     basis: null
     source_url: null
     retrieved_at: '2026-11-24'
     institutions: []
+  '2611.30564':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.30564
+    retrieved_at: '2026-11-26'
+    institutions:
+    - University of New South Wales, Sydney, NSW, Australia
+    - Hong Kong University of Science and Technology (Guangzhou), Guangzhou, China
   '2611.30771':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2611.30771
@@ -1914,3 +1904,37 @@ papers:
     institutions:
     - Tsinghua University
     - 'Dataset: huggingface.co/datasets/Aoraku/ICLWorld'
+  '2611.32816':
+    basis: null
+    source_url: null
+    retrieved_at: '2026-11-26'
+    institutions: []
+  '2611.33307':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.33307
+    retrieved_at: '2026-11-26'
+    institutions:
+    - Nanyang Technological University
+    - National University of Singapore
+    - VinUniversity
+  '2611.34466':
+    basis: null
+    source_url: null
+    retrieved_at: '2026-11-26'
+    institutions: []
+  '2611.34849':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.34849
+    retrieved_at: '2026-11-26'
+    institutions:
+    - State Key Laboratory of General AI, School of Intelligence Science and Technology, PKU
+    - School of Physics, PKU
+    - The University of Hong Kong ⋆
+  '2611.34907':
+    basis: arxiv_html_affiliations
+    source_url: https://arxiv.org/html/2611.34907
+    retrieved_at: '2026-11-26'
+    institutions:
+    - NVIDIA
+    - MIT
+    - CUHK
