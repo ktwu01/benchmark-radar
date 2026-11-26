@@ -109839,5 +109839,196 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "State Key Laboratory of General AI, School of Intelligence Science and Technology, PKU",
+          "School of Physics, PKU",
+          "The University of Hong Kong ⋆"
+        ],
+        "authors": [
+          "Yongchang Zhang",
+          "Jie Huang",
+          "Yunhe Ni",
+          "Ningyu Zhou",
+          "Guangyu Zhao",
+          "Ruixun Liu",
+          "Rui Huang",
+          "Yidi Wu",
+          "TianZe Zhang",
+          "Zixiang Jiang",
+          "Xiang Li",
+          "Kevin Shen",
+          "Yiwu Zhong"
+        ],
+        "blurb": "Real2SimLab is a new platform that runs simulation programs generated from real-world observations against multiple existing benchmarks while retaining each benchmark’s original scorer.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "data_quality",
+          "agentic"
+        ],
+        "published_at": "2026-11-26T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Real2SimLab: A Unified Platform for Real-to-Simulation Transfer",
+        "url": "https://arxiv.org/abs/2611.34849"
+      },
+      {
+        "affiliations": [
+          "University of Georgia",
+          "Northeastern University",
+          "The Hong Kong Polytechnic University"
+        ],
+        "authors": [
+          "Yun Wang",
+          "Siyue Sun",
+          "Jiaying Du",
+          "Xinyi Wei",
+          "Xiaoming Zhai",
+          "Zhenlin An",
+          "Ninghao Liu"
+        ],
+        "blurb": "GlassGround is a new graphical user interface localization benchmark with 3,250 paired tasks that hold interface states, instructions, and targets fixed while switching between native screenshots and wearable-camera views.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-26T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "GlassGround: GUI Grounding Beyond Native Screenshots with Egocentric Wearable Vision",
+        "url": "https://arxiv.org/abs/2611.33760"
+      },
+      {
+        "affiliations": [
+          "Fig",
+          "Manifold Research Group",
+          "Tufts University",
+          "Georgia Institute of Technology"
+        ],
+        "authors": [
+          "Pranav Guruprasad",
+          "Sean Rivera",
+          "Helen Lu",
+          "Arushi Jain",
+          "Hangliang Ren",
+          "Harshvardhan Sikka"
+        ],
+        "blurb": "MultiNet v2.0-Gridworld is a new preview benchmark designed to attribute agent failures rather than only rank success rates.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-26T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "Attributing Agentic Failure in Reasoning Vision-Language Models with Interactive 2D Environments",
+        "url": "https://arxiv.org/abs/2611.33162"
+      },
+      {
+        "affiliations": [
+          "Nanjing University of Science and Technology"
+        ],
+        "authors": [
+          "Junjie Chen"
+        ],
+        "blurb": "The SimGlot Frozen Evaluation Dataset v1.1.0 is an update that archives inputs and supporting evidence for four agent-evaluation configurations, including a newly added versioned archive with a published SHA-256 file fingerprint.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-26T02:54:46+00:00",
+        "source": "DataCite",
+        "title": "SimGlot Frozen Evaluation Dataset v1.1.0",
+        "url": "https://doi.org/10.5281/zenodo.24547484"
+      },
+      {
+        "affiliations": [
+          "Shanghai Jiao Tong University, Shanghai, China",
+          "Shanghai Artificial Intelligence Laboratory, Shanghai, China",
+          "University of Chinese Academy of Sciences, Beijing, China",
+          "Fudan University, Shanghai, China",
+          "Tsinghua University, Beijing, China"
+        ],
+        "authors": [
+          "Qihao Lin",
+          "Guanxu Chen",
+          "Shuhang Zheng",
+          "Xiaoya Lu",
+          "Jingyi Yang",
+          "Terumi Chiba",
+          "Wenyi Yu",
+          "Chao Zhang",
+          "Zhuan Shi",
+          "Jing Shao"
+        ],
+        "blurb": "μ-Bench is a new benchmark for voice agents serving several people in one shared session.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-26T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "$\\mu$-Bench: Benchmarking Multi-User Task Completion in Shared Interaction Voice Agents",
+        "url": "https://arxiv.org/abs/2611.34920"
+      },
+      {
+        "affiliations": [
+          "Nara Institute of Science and Technology"
+        ],
+        "authors": [
+          "Shohei Hisada",
+          "Keisuke Orimo",
+          "Kenji Igarashi",
+          "Kota Sato",
+          "Masahiro Kazama",
+          "Mitsuhisa Ota",
+          "Shoko Wakamiya",
+          "Eiji Aramaki"
+        ],
+        "blurb": "JHealthBench-L is a new Japanese localization of an open-ended medical benchmark containing 79 consultations and 1,022 clinician-reviewed criteria.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-26T05:00:00+00:00",
+        "source": "arXiv",
+        "title": "JHealthBench-L: Clinician-Reviewed Localization of HealthBench for Rubric-Based Medical LLM Evaluation in Japan",
+        "url": "https://arxiv.org/abs/2611.34024"
+      },
+      {
+        "affiliations": [
+          "Independent researcher, Maputo, Mozambique"
+        ],
+        "authors": [
+          "Akil Hassane"
+        ],
+        "blurb": "Trained Here, Tested There is a new evaluation of seven prompt-injection detectors across five public datasets.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-26T06:09:57+00:00",
+        "source": "DataCite",
+        "title": "Trained Here, Tested There: A Cross-Dataset Evaluation of Prompt-Injection Detectors on Five Public Datasets",
+        "url": "https://doi.org/10.5281/zenodo.24550826"
+      }
+    ],
+    "date": "2026-11-26",
+    "schema_version": 1,
+    "top": [
+      "https://arxiv.org/abs/2611.34849",
+      "https://arxiv.org/abs/2611.33760",
+      "https://arxiv.org/abs/2611.33162"
+    ]
+  },
   "since": "2026-11-24T14:35:29.128678+00:00"
 }
