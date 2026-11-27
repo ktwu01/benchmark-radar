@@ -611,6 +611,11 @@ benchmarks:
     direction: higher_is_better
     unit: percent
 
+  - benchmark_id: accelerate_bench
+    metric: score_at_1
+    direction: higher_is_better
+    unit: percent
+
 results:
   # Brain-to-Text '24's official challenge summary names the top three final
   # submissions and the PyTorch baseline. The challenge used 1,200 held-out
@@ -9068,5 +9073,169 @@ results:
     source_id: latchbio_scbench_results_106726f
     reported_at: 2026-11-16
     value: 23.59
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  # accelerate_bench: the README leaderboard at d53a88a (paper Table 1, v1.1).
+  # Names keep the table's spelling except Hy4-Preview, which the registry
+  # spells "Hy4 preview". Hy4 is a separate release with its own row. GLM
+  # models use Z.ai, the organization the registry files GLM-5.3-Flash under.
+  - benchmark_id: accelerate_bench
+    instrument: accelerate_bench_v1_1_32_tasks
+    protocol: "Claude Code harness; one run per agent and task, all final programs scored on the same machine; Score@1"
+    model: Claude Sonnet 5.5
+    organization: Anthropic
+    source_id: accelerate_bench_readme_d53a88a
+    reported_at: 2026-11-23
+    value: 67.4
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: accelerate_bench
+    instrument: accelerate_bench_v1_1_32_tasks
+    protocol: "Claude Code harness; one run per agent and task, all final programs scored on the same machine; Score@1"
+    model: Claude Opus 5.5
+    organization: Anthropic
+    source_id: accelerate_bench_readme_d53a88a
+    reported_at: 2026-11-23
+    value: 59.4
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: accelerate_bench
+    instrument: accelerate_bench_v1_1_32_tasks
+    protocol: "Codex harness; one run per agent and task, all final programs scored on the same machine; Score@1"
+    model: GPT-6.1 Sol
+    organization: OpenAI
+    source_id: accelerate_bench_readme_d53a88a
+    reported_at: 2026-11-23
+    value: 49.2
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: accelerate_bench
+    instrument: accelerate_bench_v1_1_32_tasks
+    protocol: "Codex harness; one run per agent and task, all final programs scored on the same machine; Score@1"
+    model: GPT-6 Astra
+    organization: OpenAI
+    source_id: accelerate_bench_readme_d53a88a
+    reported_at: 2026-11-23
+    value: 47.2
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: accelerate_bench
+    instrument: accelerate_bench_v1_1_32_tasks
+    protocol: "Claude Code harness; one run per agent and task, all final programs scored on the same machine; Score@1"
+    model: Hy4 preview
+    organization: Tencent
+    source_id: accelerate_bench_readme_d53a88a
+    reported_at: 2026-11-23
+    value: 45.2
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: accelerate_bench
+    instrument: accelerate_bench_v1_1_32_tasks
+    protocol: "Claude Code harness; one run per agent and task, all final programs scored on the same machine; Score@1"
+    model: Hy4
+    organization: Tencent
+    source_id: accelerate_bench_readme_d53a88a
+    reported_at: 2026-11-23
+    value: 45
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: accelerate_bench
+    instrument: accelerate_bench_v1_1_32_tasks
+    protocol: "Claude Code harness; one run per agent and task, all final programs scored on the same machine; Score@1"
+    model: Kimi K3
+    organization: Moonshot AI
+    source_id: accelerate_bench_readme_d53a88a
+    reported_at: 2026-11-23
+    value: 42.5
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: accelerate_bench
+    instrument: accelerate_bench_v1_1_32_tasks
+    protocol: "Claude Code harness; one run per agent and task, all final programs scored on the same machine; Score@1"
+    model: DeepSeek-V4.1-Flash-1017
+    organization: DeepSeek
+    source_id: accelerate_bench_readme_d53a88a
+    reported_at: 2026-11-23
+    value: 40.1
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: accelerate_bench
+    instrument: accelerate_bench_v1_1_32_tasks
+    protocol: "Claude Code harness; one run per agent and task, all final programs scored on the same machine; Score@1"
+    model: GLM-5.3
+    organization: Z.ai
+    source_id: accelerate_bench_readme_d53a88a
+    reported_at: 2026-11-23
+    value: 39.7
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: accelerate_bench
+    instrument: accelerate_bench_v1_1_32_tasks
+    protocol: "Claude Code harness; one run per agent and task, all final programs scored on the same machine; Score@1"
+    model: GLM-5.3-Flash
+    organization: Z.ai
+    source_id: accelerate_bench_readme_d53a88a
+    reported_at: 2026-11-23
+    value: 39.3
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: accelerate_bench
+    instrument: accelerate_bench_v1_1_32_tasks
+    protocol: "Claude Code harness; one run per agent and task, all final programs scored on the same machine; Score@1"
+    model: DeepSeek-V4-Pro
+    organization: DeepSeek
+    source_id: accelerate_bench_readme_d53a88a
+    reported_at: 2026-11-23
+    value: 37.9
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: accelerate_bench
+    instrument: accelerate_bench_v1_1_32_tasks
+    protocol: "Codex harness; one run per agent and task, all final programs scored on the same machine; Score@1"
+    model: GPT-6.1 Terra
+    organization: OpenAI
+    source_id: accelerate_bench_readme_d53a88a
+    reported_at: 2026-11-23
+    value: 37.9
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: accelerate_bench
+    instrument: accelerate_bench_v1_1_32_tasks
+    protocol: "Claude Code harness; one run per agent and task, all final programs scored on the same machine; Score@1"
+    model: DeepSeek-V4-Flash
+    organization: DeepSeek
+    source_id: accelerate_bench_readme_d53a88a
+    reported_at: 2026-11-23
+    value: 34.1
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: accelerate_bench
+    instrument: accelerate_bench_v1_1_32_tasks
+    protocol: "Claude Code harness; one run per agent and task, all final programs scored on the same machine; Score@1"
+    model: GLM-5.2
+    organization: Z.ai
+    source_id: accelerate_bench_readme_d53a88a
+    reported_at: 2026-11-23
+    value: 34
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: accelerate_bench
+    instrument: accelerate_bench_v1_1_32_tasks
+    protocol: "Claude Code harness; one run per agent and task, all final programs scored on the same machine; Score@1"
+    model: Grok 4.6
+    organization: xAI
+    source_id: accelerate_bench_readme_d53a88a
+    reported_at: 2026-11-23
+    value: 33.9
+    read_from: html_text
+    measurement_kind: benchmark_publisher_run
+  - benchmark_id: accelerate_bench
+    instrument: accelerate_bench_v1_1_32_tasks
+    protocol: "Claude Code harness; one run per agent and task, all final programs scored on the same machine; Score@1"
+    model: Hy3
+    organization: Tencent
+    source_id: accelerate_bench_readme_d53a88a
+    reported_at: 2026-11-23
+    value: 25.5
     read_from: html_text
     measurement_kind: benchmark_publisher_run

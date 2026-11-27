@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
-  "model_count": 1060,
+  "model_count": 1061,
   "source_counts": {
     "artificial_analysis": 595,
     "llm_stats": 339,
-    "model_reports": 262
+    "model_reports": 265
   },
-  "multiple_sources": 126,
+  "multiple_sources": 127,
   "organizations": [
     "AI21 Labs",
     "AI9Stars",
@@ -1320,7 +1320,7 @@
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 6
+        "model_reports": 7
       }
     },
     {
@@ -1504,7 +1504,7 @@
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 1
+        "model_reports": 2
       }
     },
     {
@@ -2514,7 +2514,7 @@
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 1
+        "model_reports": 2
       }
     },
     {
@@ -2582,7 +2582,7 @@
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 20
+        "model_reports": 21
       }
     },
     {
@@ -2650,7 +2650,7 @@
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 44
+        "model_reports": 45
       }
     },
     {
@@ -6470,7 +6470,7 @@
       ],
       "source_counts": {
         "llm_stats": 31,
-        "model_reports": 31
+        "model_reports": 32
       }
     },
     {
@@ -8395,7 +8395,7 @@
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 4
+        "model_reports": 5
       }
     },
     {
@@ -8406,7 +8406,7 @@
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 1
+        "model_reports": 2
       }
     },
     {
@@ -8417,7 +8417,7 @@
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 14
+        "model_reports": 15
       }
     },
     {
@@ -10721,11 +10721,13 @@
       "organization": "Tencent",
       "provenance_sources": [
         "artificial_analysis",
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
         "artificial_analysis": 11,
-        "llm_stats": 31
+        "llm_stats": 31,
+        "model_reports": 1
       }
     },
     {
@@ -10751,6 +10753,17 @@
       }
     },
     {
+      "key": "tencent-hy4",
+      "model": "Hy4",
+      "organization": "Tencent",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
+      }
+    },
+    {
       "key": "tencent-hy4-preview",
       "model": "Hy4 preview",
       "organization": "Tencent",
@@ -10758,7 +10771,7 @@
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 38
+        "model_reports": 39
       }
     },
     {
@@ -11307,7 +11320,7 @@
       ],
       "source_counts": {
         "llm_stats": 10,
-        "model_reports": 5
+        "model_reports": 6
       }
     },
     {
@@ -11863,7 +11876,7 @@
       ],
       "source_counts": {
         "llm_stats": 19,
-        "model_reports": 13
+        "model_reports": 14
       }
     },
     {
@@ -11904,10 +11917,12 @@
       "model": "GLM-5.3",
       "organization": "Z.ai",
       "provenance_sources": [
-        "llm_stats"
+        "llm_stats",
+        "model_reports"
       ],
       "source_counts": {
-        "llm_stats": 16
+        "llm_stats": 16,
+        "model_reports": 1
       }
     },
     {
@@ -11918,7 +11933,7 @@
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 16
+        "model_reports": 17
       }
     },
     {
