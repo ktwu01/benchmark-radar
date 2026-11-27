@@ -42,6 +42,7 @@ from .release_leaderboard import (
 from .release_signals import ReleaseSignals, load_release_signals
 from .rubric import (
     SCORING_VERSION,
+    declared_copy,
     legacy_rubric_reference,
     rubric_reference,
     taxonomy_version,
@@ -49,6 +50,7 @@ from .rubric import (
     v3_rubric_reference,
     v4_rubric_reference,
     v5_rubric_reference,
+    v6_rubric_reference,
 )
 from .science_domains import science_domains_for_record
 from .search_index import write_search_index
@@ -1240,6 +1242,21 @@ def dashboard_data(
     organizations: set[str] = set()
     event_kinds: set[str] = set()
     science_domains: set[str] = set()
+    # Records whose own card declares them a copy of another dataset (#1232)
+    # are suppressed from v7 on. Days scored earlier still hold them; the
+    # snapshots stay as recorded and the site leaves them out, counting them
+    # per day as `declared_copies_hidden` so the drop is visible.
+    hidden_copies: dict[str, int] = {}
+    shown: list[dict[str, Any]] = []
+    for snapshot in snapshots:
+        kept = [
+            item
+            for item in snapshot["evidence_items"]
+            if not declared_copy(str(item.get("title") or ""), str(item.get("summary") or ""))
+        ]
+        hidden_copies[snapshot["date"]] = len(snapshot["evidence_items"]) - len(kept)
+        shown.append({**snapshot, "evidence_items": kept})
+    snapshots = shown
     for snapshot in snapshots:
         # Snapshot schema v2 predates scoring-version metadata. Preserve those
         # historical 0-4 values explicitly so a current 0-100 label and formula
@@ -1322,6 +1339,7 @@ def dashboard_data(
                 "since": snapshot["since"],
                 "item_count": len(evidence_items),
                 "evidence_count": len(evidence_items),
+                "declared_copies_hidden": hidden_copies[snapshot["date"]],
                 "category_counts": dict(sorted(category_counts.items())),
                 "category_counts_released": dict(sorted(category_counts_released.items())),
                 "source_counts": dict(sorted(source_counts.items())),
@@ -1443,6 +1461,11 @@ def dashboard_data(
                 ),
             ),
             "5": v5_rubric_reference(
+                lookback_hours=(
+                    (days[-1].get("selection") or {}).get("lookback_hours") or 48 if days else 48
+                ),
+            ),
+            "6": v6_rubric_reference(
                 lookback_hours=(
                     (days[-1].get("selection") or {}).get("lookback_hours") or 48 if days else 48
                 ),

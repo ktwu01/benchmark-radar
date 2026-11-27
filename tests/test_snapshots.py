@@ -1,5 +1,6 @@
 import gzip
 import json
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from xml.etree import ElementTree as ET
@@ -2386,3 +2387,31 @@ def test_today_items_name_their_catalog_record_only_by_exact_unique_url(tmp_path
     searchable = dashboard_search_index(dashboard)["observations"][0]
     assert searchable["catalog_card"] == card
     assert attach_catalog_cards(dashboard, tmp_path / "missing.json") == 0
+
+
+def test_dashboard_leaves_out_declared_copies_and_counts_them(tmp_path):
+    """Issue #1232: days scored before v7 still hold declared copies. The
+    snapshot keeps them as recorded; the site leaves them out and says how many."""
+    snapshot_dir = tmp_path / "snapshots"
+    run = radar_run(27)
+    original = run.items[0]
+    copy = replace(
+        original,
+        source="Hugging Face",
+        source_id="HYUKI5/nvidia__cvdp-benchmark-dataset",
+        title="HYUKI5/nvidia__cvdp-benchmark-dataset",
+        url="https://huggingface.co/datasets/HYUKI5/nvidia__cvdp-benchmark-dataset",
+        summary="nvidia/cvdp-benchmark-dataset（複製） データの内容 CVDP ベンチマーク。",
+    )
+    run.items = [original, copy]
+    write_snapshot(run, snapshot_dir)
+    assert len(load_snapshots(snapshot_dir)[0]["evidence_items"]) == 2
+
+    data = rebuild_dashboard(snapshot_dir, tmp_path / "radar.json")
+
+    day = data["days"][0]
+    assert [item["source_id"] for item in day["evidence_items"]] == [original.source_id]
+    assert day["evidence_count"] == 1
+    assert day["declared_copies_hidden"] == 1
+    # Nor does the corpus behind search and "all dates" hold the copy.
+    assert "HYUKI5" not in json.dumps(data["corpus"], ensure_ascii=False)

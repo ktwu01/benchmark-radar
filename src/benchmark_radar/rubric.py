@@ -10,9 +10,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from typing import Any
 
-SCORING_VERSION = 6
+SCORING_VERSION = 7
 SCORE_MAX = 100.0
 DEFAULT_LOOKBACK_HOURS = 48.0
 
@@ -140,17 +141,49 @@ LOW_VALUE_SIGNALS: tuple[dict[str, Any], ...] = (
         "deduction": 30.0,
         "action": "demote",
     },
+    {
+        # A dataset whose own card opens by naming another dataset and marking
+        # itself a copy: "nvidia/cvdp-benchmark-dataset（複製） データの内容 ..."
+        # (#1232). The benchmark is the original's; the copy adds a second
+        # record of it under someone else's account. The pattern needs the
+        # owner/name form directly before the full-width "（複製）" ("copy"),
+        # so a card that only mentions copying is not caught.
+        "label": "declared copy of another dataset",
+        # The card writes the original's name with spaces where the repository
+        # id has underscores ("snips built in intents"), so spaces are allowed.
+        "pattern": r"[\w.-]+/[\w .-]+（複製）",
+        "deduction": 30.0,
+        "action": "suppress",
+    },
 )
 MAX_LOW_VALUE_DEDUCTION = 60.0
 
 # Rules added in v6. Earlier references must not list them: a v5 score was
 # produced without them, and explaining it with them would relabel history.
 V6_SIGNAL_LABELS = ("paper supplement",)
+# Rules added in v7, kept out of the v6 reference for the same reason.
+V7_SIGNAL_LABELS = ("declared copy of another dataset",)
+
+
+def declared_copy(title: str, summary: str) -> bool:
+    """Whether a record's own text declares it a copy of another dataset (#1232).
+
+    The same rule the pipeline suppresses with, so the site can leave out the
+    copies that snapshots scored before v7 still hold.
+    """
+    (signal,) = (s for s in LOW_VALUE_SIGNALS if s["label"] == V7_SIGNAL_LABELS[0])
+    return bool(re.search(str(signal["pattern"]), f"{title} {summary}".lower()))
+
+
 V6_SUPPRESSION_LIMIT = (
     "Negative signals demote only named artifact patterns. Result indexes, "
     "submission placeholders, and visualization-only companions are suppressed; "
     "the selection funnel reports how many were removed. Paper supplements are "
     "demoted, not removed, because some carry the benchmark itself."
+)
+V7_SUPPRESSION_LIMIT = (
+    V6_SUPPRESSION_LIMIT[: -len(".")]
+    + ". A dataset whose own card declares it a copy of another dataset is suppressed."
 )
 V5_SUPPRESSION_LIMIT = (
     "Negative signals demote only named artifact patterns. Result indexes, "
@@ -398,7 +431,7 @@ def rubric_reference(
             "review, a quality verdict, or an endorsement.",
             "Relevance reads only the title and source-published description. Nothing "
             "this project writes about a record can earn it points.",
-            V6_SUPPRESSION_LIMIT,
+            V7_SUPPRESSION_LIMIT,
             "Adoption measures attention, not correctness. Counters that accumulate "
             "without a human decision (downloads, likes) are capped below the top of "
             "the adoption scale; stars and citations are not.",
@@ -413,13 +446,39 @@ def rubric_reference(
     return value
 
 
+def _without_bands(value: dict[str, Any], labels: tuple[str, ...]) -> None:
+    for component in value["components"]:
+        if component["key"] == "relevance":
+            component["bands"] = [
+                band
+                for band in component["bands"]
+                if not any(f"for {label}" in band for label in labels)
+            ]
+
+
+def v6_rubric_reference(*, lookback_hours: float = DEFAULT_LOOKBACK_HOURS) -> dict[str, Any]:
+    """Describe v6 without retroactively applying v7's declared-copy rule.
+
+    November snapshots scored under v6 published declared copies (#1232);
+    their scores must be explained by the rules that ran.
+    """
+    value = rubric_reference(lookback_hours=lookback_hours)
+    value["scoring_version"] = 6
+    _without_bands(value, V7_SIGNAL_LABELS)
+    value["limits"] = [
+        V6_SUPPRESSION_LIMIT if limit == V7_SUPPRESSION_LIMIT else limit
+        for limit in value["limits"]
+    ]
+    return value
+
+
 def v5_rubric_reference(*, lookback_hours: float = DEFAULT_LOOKBACK_HOURS) -> dict[str, Any]:
     """Describe v5 without retroactively applying v6's paper-supplement rule.
 
     August to October snapshots scored under v5 contain unsuppressed paper
     supplements; their scores must be explained by the rules that ran.
     """
-    value = rubric_reference(lookback_hours=lookback_hours)
+    value = v6_rubric_reference(lookback_hours=lookback_hours)
     value["scoring_version"] = 5
     for component in value["components"]:
         if component["key"] == "relevance":
