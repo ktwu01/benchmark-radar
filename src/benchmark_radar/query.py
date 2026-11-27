@@ -85,18 +85,28 @@ LOGGER = logging.getLogger(__name__)
 class QueryError(RuntimeError):
     """A public, actionable query failure with a stable machine code."""
 
-    def __init__(self, message: str, *, code: str = "query_error", status: int = 500):
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: str = "query_error",
+        status: int = 500,
+        missing_sources: list[str] | None = None,
+    ):
         super().__init__(message)
         self.code = code
         self.status = status
+        # Required catalog sources absent from the index that answered, when
+        # that gap could explain the failure (issue #1336).
+        self.missing_sources = missing_sources or []
 
 
 def error_payload(error: QueryError) -> dict[str, Any]:
     """Stable machine-readable error envelope shared by every interface."""
-    return {
-        "schema_version": QUERY_SCHEMA_VERSION,
-        "error": {"code": error.code, "message": str(error)},
-    }
+    body: dict[str, Any] = {"code": error.code, "message": str(error)}
+    if error.missing_sources:
+        body["missing_sources"] = list(error.missing_sources)
+    return {"schema_version": QUERY_SCHEMA_VERSION, "error": body}
 
 
 @dataclass(frozen=True, slots=True)
@@ -1777,11 +1787,17 @@ class QueryService:
             if identifier in {str(record.get("key")), str(record.get("slug"))}
         ]
         if not matches:
-            raise QueryError(
-                f"benchmark {identifier!r} was not found in the catalog index",
-                code="not_found",
-                status=404,
-            )
+            # A catalog without some required source cannot say the record does
+            # not exist, only that this copy lacks it, so the 404 names the gap
+            # (CLI and HTTP share this envelope) instead of looking final.
+            missing = self.catalog_sources()["missing_sources"]
+            message = f"benchmark {identifier!r} was not found in the catalog index"
+            if missing:
+                message += (
+                    f"; the local catalog has no records from {', '.join(missing)}, so it may "
+                    "be in a missing source; run `benchmark-radar sync` to update it"
+                )
+            raise QueryError(message, code="not_found", status=404, missing_sources=missing)
         if len(matches) != 1:
             raise QueryError(
                 f"benchmark identifier {identifier!r} resolves to multiple catalog records",

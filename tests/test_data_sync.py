@@ -676,7 +676,37 @@ def test_a_failed_query_keeps_stderr_as_the_bare_error(monkeypatch, capsys, tmp_
     paths = _source_tree(tmp_path)
 
     assert run_query_cli(["show", "no-such-benchmark", "--json", *_cli_paths(paths)]) != 0
-    assert "error" in json.loads(capsys.readouterr().err)
+    error = json.loads(capsys.readouterr().err)["error"]
+    # Codex review on #1359: the 404 itself carries the gap, so a record from
+    # a missing source never looks genuinely absent.
+    assert error["code"] == "not_found"
+    assert error["missing_sources"] == ["model_reports"]
+    assert "benchmark-radar sync" in error["message"]
+
+
+def test_not_found_from_a_complete_catalog_keeps_the_plain_envelope(
+    monkeypatch, capsys, tmp_path: Path
+) -> None:
+    monkeypatch.setattr("benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture"}))
+    paths = _source_tree(tmp_path)
+
+    assert run_query_cli(["show", "no-such-benchmark", "--json", *_cli_paths(paths)]) != 0
+    assert json.loads(capsys.readouterr().err)["error"] == {
+        "code": "not_found",
+        "message": "benchmark 'no-such-benchmark' was not found in the catalog index",
+    }
+
+
+def test_http_not_found_carries_the_same_missing_sources(monkeypatch, tmp_path: Path) -> None:
+    from benchmark_radar.query import QueryError, error_payload
+
+    monkeypatch.setattr(
+        "benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture", "model_reports"})
+    )
+    with pytest.raises(QueryError) as caught:
+        QueryService(_source_tree(tmp_path)).show("no-such-benchmark")
+    assert caught.value.status == 404
+    assert error_payload(caught.value)["error"]["missing_sources"] == ["model_reports"]
 
 
 def test_every_published_catalog_source_is_required() -> None:
