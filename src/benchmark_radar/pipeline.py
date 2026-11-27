@@ -361,10 +361,16 @@ def score_item(
         rubric.RELEVANCE_PER_CATEGORY * len(categories)
         + rubric.RELEVANCE_PER_TERM * len(matched_terms),
     )
+    # A signal may name the one field it reads ("summary"); the rest read the
+    # title and summary together.
     text_deductions = [
         signal
         for signal in rubric.LOW_VALUE_SIGNALS
-        if re.search(str(signal["pattern"]), haystack, flags=re.IGNORECASE)
+        if re.search(
+            str(signal["pattern"]),
+            str(getattr(item, signal["field"]) or "").lower() if "field" in signal else haystack,
+            flags=re.IGNORECASE,
+        )
     ]
     structural_deductions = [
         signal for signal in rubric.STRUCTURAL_SIGNALS if _matches_structural_signal(item, signal)

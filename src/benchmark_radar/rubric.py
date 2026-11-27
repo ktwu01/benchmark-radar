@@ -145,13 +145,17 @@ LOW_VALUE_SIGNALS: tuple[dict[str, Any], ...] = (
         # A dataset whose own card opens by naming another dataset and marking
         # itself a copy: "nvidia/cvdp-benchmark-dataset（複製） データの内容 ..."
         # (#1232). The benchmark is the original's; the copy adds a second
-        # record of it under someone else's account. The pattern needs the
-        # owner/name form directly before the full-width "（複製）" ("copy"),
-        # so a card that only mentions copying is not caught.
+        # record of it under someone else's account.
+        #
+        # Matched against the summary alone, from its first character, so it
+        # can never start in the record's own title. The name is ASCII only:
+        # Python's \w also matches Japanese, which let "複製を禁止（複製）不可"
+        # ("copying forbidden") pass for a declaration. Spaces are allowed
+        # because the card writes the original's underscores as spaces
+        # ("snips built in intents").
         "label": "declared copy of another dataset",
-        # The card writes the original's name with spaces where the repository
-        # id has underscores ("snips built in intents"), so spaces are allowed.
-        "pattern": r"[\w.-]+/[\w .-]+（複製）",
+        "field": "summary",
+        "pattern": r"^\s*[a-z0-9_.-]+/[a-z0-9_. -]+（複製）",
         "deduction": 30.0,
         "action": "suppress",
     },
@@ -165,14 +169,14 @@ V6_SIGNAL_LABELS = ("paper supplement",)
 V7_SIGNAL_LABELS = ("declared copy of another dataset",)
 
 
-def declared_copy(title: str, summary: str) -> bool:
+def declared_copy(summary: str) -> bool:
     """Whether a record's own text declares it a copy of another dataset (#1232).
 
     The same rule the pipeline suppresses with, so the site can leave out the
     copies that snapshots scored before v7 still hold.
     """
     (signal,) = (s for s in LOW_VALUE_SIGNALS if s["label"] == V7_SIGNAL_LABELS[0])
-    return bool(re.search(str(signal["pattern"]), f"{title} {summary}".lower()))
+    return bool(re.search(str(signal["pattern"]), summary.lower()))
 
 
 def without_declared_copies(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -181,11 +185,7 @@ def without_declared_copies(items: list[dict[str, Any]]) -> list[dict[str, Any]]
     Every surface that reads snapshots (the site build and QueryService)
     applies this one function, so web search and CLI/HTTP search agree.
     """
-    return [
-        item
-        for item in items
-        if not declared_copy(str(item.get("title") or ""), str(item.get("summary") or ""))
-    ]
+    return [item for item in items if not declared_copy(str(item.get("summary") or ""))]
 
 
 V6_SUPPRESSION_LIMIT = (

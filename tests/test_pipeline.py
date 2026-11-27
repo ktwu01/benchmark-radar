@@ -2233,3 +2233,20 @@ def test_a_dataset_declaring_itself_a_copy_is_suppressed():
     )
     assert copy.suppression_reasons == ["declared copy of another dataset"]
     assert original.suppression_reasons == []
+
+
+def test_the_copy_rule_never_starts_in_the_records_own_title():
+    """Review on #1368: a slash-named title followed by a summary that only
+    mentions copying is the original, not a copy."""
+    taxonomy = {"benchmark": ["benchmark"], "dataset": ["dataset"]}
+    original = score_item(
+        item(
+            source="Hugging Face",
+            source_id="org/bench",
+            title="org/bench",
+            summary="複製を禁止（複製）不可。A benchmark dataset.",
+        ),
+        taxonomy,
+        datetime(2026, 11, 17, 1, tzinfo=UTC),
+    )
+    assert original.suppression_reasons == []

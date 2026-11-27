@@ -275,15 +275,15 @@ def test_a_declared_copy_is_recognised_only_by_its_own_declaration():
     # As HYUKI5's copies open their cards, with the original's id written
     # both with underscores and with spaces.
     assert rubric.declared_copy(
-        "HYUKI5/nvidia__cvdp-benchmark-dataset",
-        "nvidia/cvdp-benchmark-dataset（複製） データの内容 Verilog の設計課題を集めた",
+        "nvidia/cvdp-benchmark-dataset（複製） データの内容 Verilog の設計課題を集めた"
     )
     assert rubric.declared_copy(
-        "HYUKI5/sonos-nlu-benchmark__snips_built_in_intents",
-        "sonos-nlu-benchmark/snips built in intents（複製） データの内容 10 種類の意図",
+        "sonos-nlu-benchmark/snips built in intents（複製） データの内容 10 種類の意図"
     )
     # The original itself, and a card that only talks about copying, are not.
-    assert not rubric.declared_copy(
-        "nvidia/cvdp-benchmark-dataset", "Verilog design problems for the CVDP benchmark."
-    )
-    assert not rubric.declared_copy("org/bench", "複製 を禁止します。（複製）不可")
+    assert not rubric.declared_copy("Verilog design problems for the CVDP benchmark.")
+    assert not rubric.declared_copy("複製 を禁止します。（複製）不可")
+    # Review on #1368: Japanese counts as a word character, so a pattern
+    # read across title and summary could start in the title and run on.
+    assert not rubric.declared_copy("複製を禁止（複製）不可")
+    assert not rubric.declared_copy("See nvidia/cvdp-benchmark-dataset（複製） for the copy.")
