@@ -510,14 +510,80 @@ def _homepage_modules() -> dict[str, str]:
 
 
 def _call_props(source: str, start: int) -> str:
-    """The props object literal of a constructor call, braces balanced."""
+    """The object literal that opens at or after `start`, braces balanced.
+
+    Braces inside string literals do not count, so an alt text such as
+    "Share card for {name}" cannot shift where the object ends.
+    """
     open_at = source.index("{", start)
-    depth = 0
-    for index in range(open_at, len(source)):
-        depth += {"{": 1, "}": -1}.get(source[index], 0)
-        if depth == 0:
-            return source[open_at : index + 1]
+    depth, quote, index = 0, "", open_at
+    while index < len(source):
+        char = source[index]
+        if quote:
+            if char == "\\":
+                index += 1
+            elif char == quote:
+                quote = ""
+        elif char in "\"'`":
+            quote = char
+        elif char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return source[open_at : index + 1]
+        index += 1
     raise AssertionError("unbalanced constructor props")
+
+
+def _direct_members(obj: str) -> dict[str, str]:
+    """The keys an object literal declares itself, each with its value's text.
+
+    Keys inside nested objects, arrays, calls or strings are not this
+    object's members, so a scan depth-tracks brackets and skips string
+    literals: only a `key:` at the object's own level counts.
+    """
+    assert obj.startswith("{") and obj.endswith("}"), obj[:40]
+    members: dict[str, str] = {}
+    depth, index, quote = 0, 0, ""
+    key, value_start = None, None
+    while index < len(obj):
+        char = obj[index]
+        if quote:
+            if char == "\\":
+                index += 1
+            elif char == quote:
+                quote = ""
+        elif char in "\"'`":
+            quote = char
+        elif char in "{[(":
+            depth += 1
+        elif char in "}])":
+            depth -= 1
+            if depth == 0 and key is not None:
+                members[key] = obj[value_start:index].strip().rstrip(",").strip()
+        elif depth == 1 and char == ",":
+            if key is not None:
+                members[key] = obj[value_start:index].strip()
+            key = None
+        elif depth == 1 and key is None:
+            found = re.match(r"\s*([A-Za-z_$][\w$]*|\"[^\"]*\"|'[^']*')\s*:", obj[index:])
+            if found:
+                key = found.group(1).strip("\"'")
+                index += found.end()
+                value_start = index
+                continue
+        index += 1
+    return members
+
+
+def test_direct_members_ignores_nested_and_quoted_keys():
+    members = _direct_members('{ wrapper: { attrs: { alt: "x" } }, text: "attrs: {}" }')
+    assert set(members) == {"wrapper", "text"}
+    assert set(_direct_members('{ attrs: { alt: t("a {b}", { b }) }, className: "c" }')) == {
+        "attrs",
+        "className",
+    }
 
 
 def test_every_image_the_homepage_scripts_build_carries_an_alt():
@@ -543,10 +609,13 @@ def test_every_image_the_homepage_scripts_build_carries_an_alt():
             props = _call_props(source, match.end())
             line = source.count("\n", 0, match.start()) + 1
             builders.append(f"{name}:{line}")
-            attrs_key = re.search(r"\battrs\s*:", props)
-            assert attrs_key, f"{name}:{line}: img built without attrs, so it has no alt"
-            attrs = _call_props(props, attrs_key.end())
-            assert re.search(r"\balt\s*:", attrs), f"{name}:{line}: img built without alt"
+            # Only a direct `attrs` member reaches setAttribute, and only a
+            # direct `alt` inside it becomes the attribute: a key nested any
+            # deeper, or written inside a string, renders no alt.
+            attrs = _direct_members(props).get("attrs")
+            assert attrs, f"{name}:{line}: img built without a direct attrs, so it has no alt"
+            assert attrs.startswith("{"), f"{name}:{line}: attrs is not an object literal"
+            assert "alt" in _direct_members(attrs), f"{name}:{line}: img built without alt"
     assert any(b.startswith("share-card.js:") for b in builders), builders
 
 
