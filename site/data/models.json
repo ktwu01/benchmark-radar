@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "model_count": 1060,
+  "model_count": 1061,
   "source_counts": {
     "artificial_analysis": 595,
     "llm_stats": 339,
-    "model_reports": 262
+    "model_reports": 263
   },
   "multiple_sources": 126,
   "organizations": [
@@ -11202,7 +11202,7 @@
         "model_reports"
       ],
       "source_counts": {
-        "model_reports": 5
+        "model_reports": 4
       }
     },
     {
@@ -11214,6 +11214,17 @@
       ],
       "source_counts": {
         "llm_stats": 1
+      }
+    },
+    {
+      "key": "xai-grok-4-20-reasoning",
+      "model": "Grok 4.20 reasoning",
+      "organization": "xAI",
+      "provenance_sources": [
+        "model_reports"
+      ],
+      "source_counts": {
+        "model_reports": 1
       }
     },
     {

@@ -9267,9 +9267,9 @@ results:
     measurement_kind: benchmark_publisher_run
   # latchbio_epibench: Table "Endpoint pass rates by model-harness pair" in
   # paper/main.tex at 46c69cb. "Claude Opus 4.8 Max / Pi" is Claude Opus 4.8 at
-  # Max effort; "Grok 4.20 reasoning" is the Grok 4.20 Beta 0309 reasoning
-  # model the same lab names in SpatialBench-Long. Every value equals its own
-  # passing/318 count.
+  # Max effort. "Grok 4.20 reasoning" keeps the table's own label: the
+  # registry has several Grok 4.20 builds and the table does not say which.
+  # Every value equals its own passing/318 count.
   - benchmark_id: latchbio_epibench
     instrument: latchbio_epibench_106_evals
     protocol: "Pi harness; 106 evaluations, 3 attempts each (318); endpoint pass rate"
@@ -9413,7 +9413,7 @@ results:
   - benchmark_id: latchbio_epibench
     instrument: latchbio_epibench_106_evals
     protocol: "Pi harness; 106 evaluations, 3 attempts each (318); endpoint pass rate"
-    model: Grok 4.20 Beta 0309 (reasoning)
+    model: Grok 4.20 reasoning
     organization: xAI
     source_id: latchbio_epibench_paper_46c69cb
     reported_at: 2026-06-11
@@ -9434,11 +9434,13 @@ results:
   # mean_pass_rate is the mean of per-evaluation pass rates with refusals
   # excluded; an evaluation refused on every attempt is dropped, so
   # n_evaluations differs by row. It goes in protocol, so only rows scored
-  # over the same number of evaluations share a comparable group. Model ids map to registry labels
+  # over the same number of evaluations share a comparable group. METHODS.md
+  # at the same commit says each model-harness pair ran three times per
+  # evaluation. Model ids map to registry labels
   # (anthropic/claude-opus-5 -> Claude Opus 5).
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "Claude Code harness; refusals excluded, mean of per-evaluation pass rates over the 99 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Claude Code harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 99 evaluations with a gradeable run; endpoint pass rate"
     model: Claude Opus 5
     organization: Anthropic
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9448,7 +9450,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "mini-swe-agent harness; refusals excluded, mean of per-evaluation pass rates over the 102 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "mini-swe-agent harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 102 evaluations with a gradeable run; endpoint pass rate"
     model: Claude Opus 5
     organization: Anthropic
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9458,7 +9460,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 80 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 80 evaluations with a gradeable run; endpoint pass rate"
     model: Claude Opus 4.8
     organization: Anthropic
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9468,7 +9470,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "Grok Build harness; refusals excluded, mean of per-evaluation pass rates over the 111 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Grok Build harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 111 evaluations with a gradeable run; endpoint pass rate"
     model: Grok 4.6
     organization: xAI
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9478,7 +9480,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 98 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 98 evaluations with a gradeable run; endpoint pass rate"
     model: Claude Opus 5
     organization: Anthropic
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9488,7 +9490,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 109 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 109 evaluations with a gradeable run; endpoint pass rate"
     model: Gemini 3.5 Flash
     organization: Google
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9498,7 +9500,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 111 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 111 evaluations with a gradeable run; endpoint pass rate"
     model: Grok 4.6
     organization: xAI
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9508,7 +9510,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "mini-swe-agent harness; refusals excluded, mean of per-evaluation pass rates over the 111 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "mini-swe-agent harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 111 evaluations with a gradeable run; endpoint pass rate"
     model: Grok 4.6
     organization: xAI
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9518,7 +9520,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 108 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 108 evaluations with a gradeable run; endpoint pass rate"
     model: Gemini 3.7 Flash
     organization: Google
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9528,7 +9530,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "mini-swe-agent harness; refusals excluded, mean of per-evaluation pass rates over the 104 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "mini-swe-agent harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 104 evaluations with a gradeable run; endpoint pass rate"
     model: Gemini 3.7 Flash
     organization: Google
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9538,7 +9540,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 77 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 77 evaluations with a gradeable run; endpoint pass rate"
     model: GPT-5.6 Sol
     organization: OpenAI
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9548,7 +9550,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "Claude Code harness; refusals excluded, mean of per-evaluation pass rates over the 87 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Claude Code harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 87 evaluations with a gradeable run; endpoint pass rate"
     model: Claude Sonnet 5
     organization: Anthropic
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9558,7 +9560,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "Claude Code harness; refusals excluded, mean of per-evaluation pass rates over the 82 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Claude Code harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 82 evaluations with a gradeable run; endpoint pass rate"
     model: Claude Opus 4.8
     organization: Anthropic
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9568,7 +9570,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "OpenAI Codex harness; refusals excluded, mean of per-evaluation pass rates over the 84 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "OpenAI Codex harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 84 evaluations with a gradeable run; endpoint pass rate"
     model: GPT-5.5
     organization: OpenAI
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9578,7 +9580,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 111 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 111 evaluations with a gradeable run; endpoint pass rate"
     model: Grok 4.5
     organization: xAI
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9588,7 +9590,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 76 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 76 evaluations with a gradeable run; endpoint pass rate"
     model: Claude Sonnet 5
     organization: Anthropic
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9598,7 +9600,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 82 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 82 evaluations with a gradeable run; endpoint pass rate"
     model: GPT-5.6 Terra
     organization: OpenAI
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9608,7 +9610,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "OpenAI Codex harness; refusals excluded, mean of per-evaluation pass rates over the 78 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "OpenAI Codex harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 78 evaluations with a gradeable run; endpoint pass rate"
     model: GPT-5.6 Sol
     organization: OpenAI
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9618,7 +9620,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 82 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 82 evaluations with a gradeable run; endpoint pass rate"
     model: GPT-5.5
     organization: OpenAI
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9628,7 +9630,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "OpenAI Codex harness; refusals excluded, mean of per-evaluation pass rates over the 83 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "OpenAI Codex harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 83 evaluations with a gradeable run; endpoint pass rate"
     model: GPT-5.6 Terra
     organization: OpenAI
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9638,7 +9640,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "OpenAI Codex harness; refusals excluded, mean of per-evaluation pass rates over the 83 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "OpenAI Codex harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 83 evaluations with a gradeable run; endpoint pass rate"
     model: GPT-5.6 Luna
     organization: OpenAI
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9648,7 +9650,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_function
     instrument: latchbio_biosecbench_function_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 84 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 84 evaluations with a gradeable run; endpoint pass rate"
     model: GPT-5.6 Luna
     organization: OpenAI
     source_id: latchbio_biosecbench_function_results_893cde2
@@ -9660,11 +9662,13 @@ results:
   # mean_pass_rate is the mean of per-evaluation pass rates with refusals
   # excluded; an evaluation refused on every attempt is dropped, so
   # n_evaluations differs by row. It goes in protocol, so only rows scored
-  # over the same number of evaluations share a comparable group. Model ids map to registry labels
+  # over the same number of evaluations share a comparable group. METHODS.md
+  # at the same commit says each model-harness pair ran three times per
+  # evaluation. Model ids map to registry labels
   # (anthropic/claude-opus-5 -> Claude Opus 5).
   - benchmark_id: latchbio_biosecbench_surveillance
     instrument: latchbio_biosecbench_surveillance_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 83 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 83 evaluations with a gradeable run; endpoint pass rate"
     model: Claude Opus 4.8
     organization: Anthropic
     source_id: latchbio_biosecbench_surveillance_results_3112b22
@@ -9674,7 +9678,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_surveillance
     instrument: latchbio_biosecbench_surveillance_evals
-    protocol: "OpenAI Codex harness; refusals excluded, mean of per-evaluation pass rates over the 93 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "OpenAI Codex harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 93 evaluations with a gradeable run; endpoint pass rate"
     model: GPT-5.5
     organization: OpenAI
     source_id: latchbio_biosecbench_surveillance_results_3112b22
@@ -9684,7 +9688,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_surveillance
     instrument: latchbio_biosecbench_surveillance_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 78 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 78 evaluations with a gradeable run; endpoint pass rate"
     model: Claude Opus 4.7
     organization: Anthropic
     source_id: latchbio_biosecbench_surveillance_results_3112b22
@@ -9694,7 +9698,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_surveillance
     instrument: latchbio_biosecbench_surveillance_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 83 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 83 evaluations with a gradeable run; endpoint pass rate"
     model: Claude Sonnet 4.6
     organization: Anthropic
     source_id: latchbio_biosecbench_surveillance_results_3112b22
@@ -9704,7 +9708,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_surveillance
     instrument: latchbio_biosecbench_surveillance_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 92 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 92 evaluations with a gradeable run; endpoint pass rate"
     model: Gemini 3.5 Flash
     organization: Google
     source_id: latchbio_biosecbench_surveillance_results_3112b22
@@ -9714,7 +9718,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_surveillance
     instrument: latchbio_biosecbench_surveillance_evals
-    protocol: "Claude Code harness; refusals excluded, mean of per-evaluation pass rates over the 80 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Claude Code harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 80 evaluations with a gradeable run; endpoint pass rate"
     model: Claude Opus 4.6
     organization: Anthropic
     source_id: latchbio_biosecbench_surveillance_results_3112b22
@@ -9724,7 +9728,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_surveillance
     instrument: latchbio_biosecbench_surveillance_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 81 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 81 evaluations with a gradeable run; endpoint pass rate"
     model: Claude Opus 4.6
     organization: Anthropic
     source_id: latchbio_biosecbench_surveillance_results_3112b22
@@ -9734,7 +9738,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_surveillance
     instrument: latchbio_biosecbench_surveillance_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 95 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 95 evaluations with a gradeable run; endpoint pass rate"
     model: Gemini 3.1 Pro Preview
     organization: Google
     source_id: latchbio_biosecbench_surveillance_results_3112b22
@@ -9744,7 +9748,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_surveillance
     instrument: latchbio_biosecbench_surveillance_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 77 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 77 evaluations with a gradeable run; endpoint pass rate"
     model: GPT-5.5
     organization: OpenAI
     source_id: latchbio_biosecbench_surveillance_results_3112b22
@@ -9754,7 +9758,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_surveillance
     instrument: latchbio_biosecbench_surveillance_evals
-    protocol: "Claude Code harness; refusals excluded, mean of per-evaluation pass rates over the 77 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Claude Code harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 77 evaluations with a gradeable run; endpoint pass rate"
     model: Claude Opus 4.7
     organization: Anthropic
     source_id: latchbio_biosecbench_surveillance_results_3112b22
@@ -9764,7 +9768,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_surveillance
     instrument: latchbio_biosecbench_surveillance_evals
-    protocol: "Claude Code harness; refusals excluded, mean of per-evaluation pass rates over the 83 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Claude Code harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 83 evaluations with a gradeable run; endpoint pass rate"
     model: Claude Sonnet 4.6
     organization: Anthropic
     source_id: latchbio_biosecbench_surveillance_results_3112b22
@@ -9774,7 +9778,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_surveillance
     instrument: latchbio_biosecbench_surveillance_evals
-    protocol: "OpenAI Codex harness; refusals excluded, mean of per-evaluation pass rates over the 92 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "OpenAI Codex harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 92 evaluations with a gradeable run; endpoint pass rate"
     model: GPT-5.4
     organization: OpenAI
     source_id: latchbio_biosecbench_surveillance_results_3112b22
@@ -9784,7 +9788,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_surveillance
     instrument: latchbio_biosecbench_surveillance_evals
-    protocol: "Claude Code harness; refusals excluded, mean of per-evaluation pass rates over the 76 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Claude Code harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 76 evaluations with a gradeable run; endpoint pass rate"
     model: Claude Opus 4.8
     organization: Anthropic
     source_id: latchbio_biosecbench_surveillance_results_3112b22
@@ -9794,7 +9798,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_surveillance
     instrument: latchbio_biosecbench_surveillance_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 81 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 81 evaluations with a gradeable run; endpoint pass rate"
     model: GPT-5.4
     organization: OpenAI
     source_id: latchbio_biosecbench_surveillance_results_3112b22
@@ -9804,7 +9808,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_surveillance
     instrument: latchbio_biosecbench_surveillance_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 100 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 100 evaluations with a gradeable run; endpoint pass rate"
     model: Grok 4.3
     organization: xAI
     source_id: latchbio_biosecbench_surveillance_results_3112b22
@@ -9814,7 +9818,7 @@ results:
     measurement_kind: benchmark_publisher_run
   - benchmark_id: latchbio_biosecbench_surveillance
     instrument: latchbio_biosecbench_surveillance_evals
-    protocol: "Pi harness; refusals excluded, mean of per-evaluation pass rates over the 100 evaluations with a gradeable run; endpoint pass rate"
+    protocol: "Pi harness; 3 runs per evaluation, refusals excluded, mean of per-evaluation pass rates over the 100 evaluations with a gradeable run; endpoint pass rate"
     model: Grok 4.20 Beta 0309 (reasoning)
     organization: xAI
     source_id: latchbio_biosecbench_surveillance_results_3112b22
