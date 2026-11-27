@@ -8212,6 +8212,14 @@ const CATALOG_SOURCE_META = {
       "The top-performing models the Benchmark Saturation study (arXiv:2602.16763) reports for this benchmark, up to five, with scores as the study states them. No evaluation protocol or date is recorded.",
     emptyKey: "The Benchmark Saturation study recorded no scores for this benchmark.",
   },
+  aider: {
+    name: "Aider",
+    noteKey:
+      // Like Artificial Analysis, Aider ran every model itself; unlike it,
+      // each run carries its own date, so the date here is the test date.
+      "Scores measured by Aider running its own leaderboard benchmark, not numbers reported by the model makers. Each row is one run, so a model tried with two edit formats appears twice. Higher values are better. The date shown is the day the run was made.",
+    emptyKey: "Aider recorded no scores for this benchmark.",
+  },
 };
 
 function catalogSourceMeta(source) {
@@ -12410,6 +12418,7 @@ const SCORE_SOURCE_LINKS = [
   ["Artificial Analysis", "https://artificialanalysis.ai"],
   ["OpenCompass Hub", "https://hub.opencompass.org.cn"],
   ["Benchmark Saturation", "https://github.com/evaleval/benchmark-saturation"],
+  ["Aider", "https://aider.chat/docs/leaderboards/"],
 ];
 
 // Deliberately quiet: it closes the card as a footnote under the formats the

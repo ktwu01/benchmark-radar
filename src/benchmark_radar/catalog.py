@@ -48,6 +48,7 @@ SOURCES = {
     ARTIFICIAL_ANALYSIS_SNAPSHOT_ID: (ARTIFICIAL_ANALYSIS_SOURCE, ARTIFICIAL_ANALYSIS_KEY_PREFIX),
     "claire_radar_2026-10-14": ("claire_radar", "claire-radar"),
     "benchmark_saturation_2026-11-04": ("benchmark_saturation", "benchmark-saturation"),
+    "aider_2026-11-27": ("aider", "aider"),
 }
 
 _SLUG_STRIP = re.compile(r"[^a-z0-9]+")
@@ -396,7 +397,10 @@ def _observation(
             if self_reported == "false"
             else "unknown"
         ),
-        "measured_by": "Artificial Analysis" if source == ARTIFICIAL_ANALYSIS_SOURCE else None,
+        # A source that ran every test itself names itself per row (#1317);
+        # Artificial Analysis predates that column and is named here.
+        "measured_by": (row.get("measured_by") or "").strip()
+        or ("Artificial Analysis" if source == ARTIFICIAL_ANALYSIS_SOURCE else None),
         "comparable_group": None,
         "rank_in_source_response": int(rank) if rank.isdigit() else None,
         "crawled_at": crawled_at,
@@ -407,8 +411,15 @@ def _observation(
         # kept and labelled for what it is rather than discarded because it
         # is not a full evaluation date. `date_precision` says which claim the
         # value supports.
-        "reported_date": (row.get("announcement_date") or "").strip() or None,
-        "date_precision": "model_announcement",
+        # A row that carries its own run date (score_date, #1317) is dated by
+        # the day the score was measured, the stronger claim; every other row
+        # keeps the model announcement date described above.
+        "reported_date": (
+            (row.get("score_date") or "").strip()
+            or (row.get("announcement_date") or "").strip()
+            or None
+        ),
+        "date_precision": "day" if (row.get("score_date") or "").strip() else "model_announcement",
         "source_url": (row.get("source_url") or "").strip() or None,
     }
 
