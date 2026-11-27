@@ -2299,7 +2299,7 @@ benchmarks:
       published 95% intervals are 11 to 18 points wide, so most adjacent
       pairs overlap, and the harness changes the result (GPT-5.5 passes 45.0%
       in Pi and 39.9% in OpenAI Codex). Runtime and cost are not part of the
-      score.
+      score. Not the epitope-reasoning EpiBench of arXiv 2608.06022.
 
   - id: latchbio_variantbench
     name: VariantBench
