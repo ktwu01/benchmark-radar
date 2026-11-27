@@ -509,6 +509,15 @@ def _homepage_modules() -> dict[str, str]:
     return found
 
 
+def _comment_end(text: str, index: int) -> int:
+    """Where the // or /* */ comment starting at `index` ends."""
+    if text.startswith("//", index):
+        end = text.find("\n", index)
+        return len(text) if end == -1 else end
+    end = text.find("*/", index + 2)
+    return len(text) if end == -1 else end + 2
+
+
 def _call_props(source: str, start: int) -> str:
     """The object literal that opens at or after `start`, braces balanced.
 
@@ -526,6 +535,9 @@ def _call_props(source: str, start: int) -> str:
                 quote = ""
         elif char in "\"'`":
             quote = char
+        elif source.startswith(("//", "/*"), index):
+            index = _comment_end(source, index)
+            continue
         elif char == "{":
             depth += 1
         elif char == "}":
@@ -556,6 +568,9 @@ def _direct_members(obj: str) -> dict[str, str]:
                 quote = ""
         elif char in "\"'`":
             quote = char
+        elif obj.startswith(("//", "/*"), index):
+            index = _comment_end(obj, index)
+            continue
         elif char in "{[(":
             depth += 1
         elif char in "}])":
@@ -567,7 +582,11 @@ def _direct_members(obj: str) -> dict[str, str]:
                 members[key] = obj[value_start:index].strip()
             key = None
         elif depth == 1 and key is None:
-            found = re.match(r"\s*([A-Za-z_$][\w$]*|\"[^\"]*\"|'[^']*')\s*:", obj[index:])
+            found = re.match(
+                r"(?:\s|//[^\n]*|/\*.*?\*/)*([A-Za-z_$][\w$]*|\"[^\"]*\"|'[^']*')\s*:",
+                obj[index:],
+                re.S,
+            )
             if found:
                 key = found.group(1).strip("\"'")
                 index += found.end()
@@ -577,7 +596,9 @@ def _direct_members(obj: str) -> dict[str, str]:
     return members
 
 
-def test_direct_members_ignores_nested_and_quoted_keys():
+def test_direct_members_ignores_nested_quoted_and_commented_keys():
+    assert set(_direct_members('{ /* alt: "", */ src: "x" }')) == {"src"}
+    assert set(_direct_members('{\n  // alt: "",\n  src: "x",\n}')) == {"src"}
     members = _direct_members('{ wrapper: { attrs: { alt: "x" } }, text: "attrs: {}" }')
     assert set(members) == {"wrapper", "text"}
     assert set(_direct_members('{ attrs: { alt: t("a {b}", { b }) }, className: "c" }')) == {
@@ -605,9 +626,11 @@ def test_every_image_the_homepage_scripts_build_carries_an_alt():
         assert not re.search(r"createElement\(\s*[\"']img", source), name
         assert not re.search(r"\bnew\s+Image\s*\(", source), name
         assert "<img" not in source, name
-        for match in re.finditer(r"""\b\w+\(\s*["']img["']\s*,""", source):
-            props = _call_props(source, match.end())
+        for match in re.finditer(r"""\b\w+\(\s*["']img["']\s*([,)])""", source):
             line = source.count("\n", 0, match.start()) + 1
+            # node("img") is a valid call with no props, so it renders no alt.
+            assert match.group(1) == ",", f"{name}:{line}: img built with no props, so no alt"
+            props = _call_props(source, match.end())
             builders.append(f"{name}:{line}")
             # Only a direct `attrs` member reaches setAttribute, and only a
             # direct `alt` inside it becomes the attribute: a key nested any
