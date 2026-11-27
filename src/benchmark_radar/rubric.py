@@ -175,6 +175,19 @@ def declared_copy(title: str, summary: str) -> bool:
     return bool(re.search(str(signal["pattern"]), f"{title} {summary}".lower()))
 
 
+def without_declared_copies(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """A stored day's evidence without its declared copies (#1232).
+
+    Every surface that reads snapshots (the site build and QueryService)
+    applies this one function, so web search and CLI/HTTP search agree.
+    """
+    return [
+        item
+        for item in items
+        if not declared_copy(str(item.get("title") or ""), str(item.get("summary") or ""))
+    ]
+
+
 V6_SUPPRESSION_LIMIT = (
     "Negative signals demote only named artifact patterns. Result indexes, "
     "submission placeholders, and visualization-only companions are suppressed; "

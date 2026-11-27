@@ -42,7 +42,6 @@ from .release_leaderboard import (
 from .release_signals import ReleaseSignals, load_release_signals
 from .rubric import (
     SCORING_VERSION,
-    declared_copy,
     legacy_rubric_reference,
     rubric_reference,
     taxonomy_version,
@@ -51,6 +50,7 @@ from .rubric import (
     v4_rubric_reference,
     v5_rubric_reference,
     v6_rubric_reference,
+    without_declared_copies,
 )
 from .science_domains import science_domains_for_record
 from .search_index import write_search_index
@@ -1249,11 +1249,7 @@ def dashboard_data(
     hidden_copies: dict[str, int] = {}
     shown: list[dict[str, Any]] = []
     for snapshot in snapshots:
-        kept = [
-            item
-            for item in snapshot["evidence_items"]
-            if not declared_copy(str(item.get("title") or ""), str(item.get("summary") or ""))
-        ]
+        kept = without_declared_copies(snapshot["evidence_items"])
         hidden_copies[snapshot["date"]] = len(snapshot["evidence_items"]) - len(kept)
         shown.append({**snapshot, "evidence_items": kept})
     snapshots = shown
