@@ -478,8 +478,11 @@ def test_every_homepage_image_carries_an_alt_attribute():
     assert parser.images, "the homepage declares no image to check"
     for image in parser.images:
         assert "alt" in image, f"image without alt: {image.get('src')}"
-    badge = parser.images[0]
-    assert badge["src"] == "/assets/hf-paper-of-the-day.svg"
+    # Found by its source, not its position (#1169): a correctly labelled
+    # image added ahead of the badge must not fail this test.
+    badges = [i for i in parser.images if i.get("src") == "/assets/hf-paper-of-the-day.svg"]
+    assert len(badges) == 1, "the homepage should carry the award badge exactly once"
+    badge = badges[0]
     assert badge["alt"] == ""
     # The badge sits in a link that already names the award, so the empty
     # alt is deliberate: a repeated alt would read the award twice.
@@ -488,6 +491,57 @@ def test_every_homepage_image_carries_an_alt_attribute():
     # Generated pages are checked by parsing their rendered output instead
     # (tests/test_site_pages.py): a blanket ban on "<img" in the generator
     # source would also block a future accessible image.
+
+
+def _homepage_modules() -> dict[str, str]:
+    """app.js and every module it imports, directly or through another module."""
+    root = Path("site/assets")
+    found: dict[str, str] = {}
+    pending = ["app.js"]
+    while pending:
+        name = pending.pop()
+        if name in found:
+            continue
+        found[name] = (root / name).read_text(encoding="utf-8")
+        pending.extend(
+            re.findall(r"""(?:from|import)\s*\(?\s*["']\./([\w.-]+\.js)["']""", found[name])
+        )
+    return found
+
+
+def _call_props(source: str, start: int) -> str:
+    """The props object literal of a constructor call, braces balanced."""
+    open_at = source.index("{", start)
+    depth = 0
+    for index in range(open_at, len(source)):
+        depth += {"{": 1, "}": -1}.get(source[index], 0)
+        if depth == 0:
+            return source[open_at : index + 1]
+    raise AssertionError("unbalanced constructor props")
+
+
+def test_every_image_the_homepage_scripts_build_carries_an_alt():
+    """Issue #1169: index.html is parsed above, but images built in script are not.
+
+    share-card.js's openShareDialog() and share-queue.js's thumbnails build an
+    img through a node() helper, so dropping its alt still passed. Walk every
+    module app.js loads and require an alt key in each img constructor's
+    props; an empty alt is allowed, because decorative images need one.
+    """
+    modules = _homepage_modules()
+    assert "share-card.js" in modules, "app.js no longer reaches share-card.js; update this test"
+    builders = []
+    for name, source in modules.items():
+        # Only the props-object constructors are checked, so any other way of
+        # making an img fails here until this test learns to read it.
+        assert not re.search(r"createElement\(\s*[\"']img", source), name
+        assert "<img" not in source, name
+        for match in re.finditer(r"""\b\w+\(\s*["']img["']\s*,""", source):
+            props = _call_props(source, match.end())
+            line = source.count("\n", 0, match.start()) + 1
+            builders.append(f"{name}:{line}")
+            assert re.search(r"\balt\s*:", props), f"{name}:{line}: img built without alt"
+    assert any(b.startswith("share-card.js:") for b in builders), builders
 
 
 def test_language_toggle_click_handler_is_wired():
