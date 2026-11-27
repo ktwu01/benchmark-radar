@@ -2238,12 +2238,16 @@ benchmarks:
       Codex). The arXiv paper (2602.09063) reports an earlier task set, so
       its numbers are not comparable with these.
 
-  # Submitted by one of its authors in #1327 (arXiv 2611.20882).
+  # Submitted by one of its authors in #1327. Released is the arXiv
+  # publication date of 2611.20882, "Accelerate Bench: Evaluating Agents for
+  # Application-Level Program Optimization", as data/snapshots/2026-11-17.json
+  # records it; the leaderboard date (2026-11-23) is when the scores were read.
   - id: accelerate_bench
     name: Accelerate Bench
     aliases: ["Accelerate Bench", "AccelerateBench", "Accelerate-Bench"]
     domain: coding_agent
     url: https://github.com/AdAstraAbyssoque/accelerate-bench/blob/d53a88a3afef5b90e5b64053b186783f9924627d/README.md
+    released: 2026-11-17
     caveat: >-
       Long-horizon agents speed up 32 scientific computing programs. Score@1
       is the mean over the tasks of a correctness-gated runtime saving, so a
