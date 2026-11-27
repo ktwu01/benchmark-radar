@@ -1739,7 +1739,7 @@ papers:
   '2611.17621':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-24'
+    retrieved_at: '2026-11-27'
     institutions: []
   '2611.17955':
     basis: openalex_linked_institutions
@@ -1781,6 +1781,16 @@ papers:
     institutions:
     - Deggendorf Institute of Technology
     - University of Passau
+  '2611.20844':
+    basis: openalex_linked_institutions
+    source_url: https://openalex.org/W7235249047
+    retrieved_at: '2026-11-27'
+    institutions:
+    - Northwestern Polytechnical University
+    - Nanyang Technological University
+    - East China Normal University
+    - Tongji University
+    - Peking University
   '2611.20882':
     basis: openalex_linked_institutions
     source_url: https://openalex.org/W7234995337
@@ -1865,7 +1875,7 @@ papers:
   '2611.27494':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-24'
+    retrieved_at: '2026-11-27'
     institutions: []
   '2611.30017':
     basis: null
@@ -1875,7 +1885,7 @@ papers:
   '2611.30157':
     basis: null
     source_url: null
-    retrieved_at: '2026-11-24'
+    retrieved_at: '2026-11-27'
     institutions: []
   '2611.30564':
     basis: arxiv_html_affiliations
@@ -1887,7 +1897,7 @@ papers:
   '2611.30771':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2611.30771
-    retrieved_at: '2026-11-24'
+    retrieved_at: '2026-11-27'
     institutions:
     - University of Macau
     - National University of Singapore
@@ -1930,6 +1940,11 @@ papers:
     - State Key Laboratory of General AI, School of Intelligence Science and Technology, PKU
     - School of Physics, PKU
     - The University of Hong Kong ⋆
+  '2611.34852':
+    basis: null
+    source_url: null
+    retrieved_at: '2026-11-27'
+    institutions: []
   '2611.34907':
     basis: arxiv_html_affiliations
     source_url: https://arxiv.org/html/2611.34907
