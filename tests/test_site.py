@@ -526,7 +526,9 @@ def test_every_image_the_homepage_scripts_build_carries_an_alt():
     share-card.js's openShareDialog() and share-queue.js's thumbnails build an
     img through a node() helper, so dropping its alt still passed. Walk every
     module app.js loads and require an alt key in each img constructor's
-    props; an empty alt is allowed, because decorative images need one.
+    `attrs` object, the only props the node() helpers turn into attributes;
+    a top-level `alt` would render no alt at all. An empty alt is allowed,
+    because decorative images need one.
     """
     modules = _homepage_modules()
     assert "share-card.js" in modules, "app.js no longer reaches share-card.js; update this test"
@@ -535,12 +537,16 @@ def test_every_image_the_homepage_scripts_build_carries_an_alt():
         # Only the props-object constructors are checked, so any other way of
         # making an img fails here until this test learns to read it.
         assert not re.search(r"createElement\(\s*[\"']img", source), name
+        assert not re.search(r"\bnew\s+Image\s*\(", source), name
         assert "<img" not in source, name
         for match in re.finditer(r"""\b\w+\(\s*["']img["']\s*,""", source):
             props = _call_props(source, match.end())
             line = source.count("\n", 0, match.start()) + 1
             builders.append(f"{name}:{line}")
-            assert re.search(r"\balt\s*:", props), f"{name}:{line}: img built without alt"
+            attrs_key = re.search(r"\battrs\s*:", props)
+            assert attrs_key, f"{name}:{line}: img built without attrs, so it has no alt"
+            attrs = _call_props(props, attrs_key.end())
+            assert re.search(r"\balt\s*:", attrs), f"{name}:{line}: img built without alt"
     assert any(b.startswith("share-card.js:") for b in builders), builders
 
 
