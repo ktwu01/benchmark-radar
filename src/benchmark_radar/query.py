@@ -27,11 +27,19 @@ QUERY_SCHEMA_VERSION = 8
 DEFAULT_INDEX_PATH = Path("site/data/benchmark-index.json")
 DEFAULT_SHARD_DIR = Path("site/data/benchmarks")
 DEFAULT_SNAPSHOT_DIR = Path("data/snapshots")
-# Catalog source families every published index carries. An index missing one
+# Every catalog source family a published index carries. An index missing one
 # answers searches from part of the corpus without saying so (issue #1336), so
-# `status` reports the gap and the CLI warns on every query.
+# `status` reports the gap and the CLI warns on every catalog query. A new
+# source family joins this set when the pipeline starts publishing it.
 REQUIRED_CATALOG_SOURCES = frozenset(
-    {"artificial_analysis", "llm_stats", "model_reports", "opencompass_hub"}
+    {
+        "artificial_analysis",
+        "benchmark_saturation",
+        "claire_radar",
+        "llm_stats",
+        "model_reports",
+        "opencompass_hub",
+    }
 )
 SEARCH_SCOPES = ("catalog", "radar", "all")
 

@@ -677,3 +677,37 @@ def test_a_failed_query_keeps_stderr_as_the_bare_error(monkeypatch, capsys, tmp_
 
     assert run_query_cli(["show", "no-such-benchmark", "--json", *_cli_paths(paths)]) != 0
     assert "error" in json.loads(capsys.readouterr().err)
+
+
+def test_every_published_catalog_source_is_required() -> None:
+    # Codex review on #1359: a stale index missing only claire_radar or
+    # benchmark_saturation must warn too; claire_radar alone is most rows.
+    from benchmark_radar.query import REQUIRED_CATALOG_SOURCES
+
+    assert REQUIRED_CATALOG_SOURCES == {
+        "artificial_analysis",
+        "benchmark_saturation",
+        "claire_radar",
+        "llm_stats",
+        "model_reports",
+        "opencompass_hub",
+    }
+
+
+@pytest.mark.parametrize(
+    "command",
+    [["recent"], ["search", "agent workbench", "--scope", "radar"]],
+)
+def test_radar_only_commands_neither_load_nor_judge_the_catalog(
+    monkeypatch, capsys, tmp_path: Path, command: list[str]
+) -> None:
+    # Codex review on #1359: `recent` and a radar-scoped search answer from
+    # snapshots alone, so a missing catalog must not fail them and a stale one
+    # must not claim their results come from a partial corpus.
+    paths = _source_tree(tmp_path)
+    paths.index.unlink()
+
+    assert run_query_cli([*command, "--json", *_cli_paths(paths)]) == 0
+    captured = capsys.readouterr()
+    json.loads(captured.out)
+    assert "no records from" not in captured.err

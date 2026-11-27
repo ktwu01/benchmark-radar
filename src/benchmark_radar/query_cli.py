@@ -435,6 +435,15 @@ def _missing_sources_warning(missing: Sequence[str]) -> str | None:
     )
 
 
+def _reads_catalog(args: argparse.Namespace) -> bool:
+    """Whether a query command answers from the catalog index."""
+    if args.command == "recent":
+        return False
+    if args.command == "search":
+        return args.scope != "radar"
+    return True
+
+
 def _warn_missing_sources(warning: str | None) -> None:
     """Issue #1336: say so on stderr when answers come from a partial catalog.
 
@@ -481,7 +490,14 @@ def run_query_cli(argv: Sequence[str] | None = None) -> int:
         else:
             query = _search_query(args) if args.command == "search" else None
             service = _service(args)
-            sources_warning = _missing_sources_warning(service.catalog_sources()["missing_sources"])
+            # Only commands that read the catalog check it: `recent` and a
+            # radar-scoped search answer from snapshots alone, so they must
+            # neither load the index nor warn about a corpus they never used.
+            sources_warning = (
+                _missing_sources_warning(service.catalog_sources()["missing_sources"])
+                if _reads_catalog(args)
+                else None
+            )
             if args.command == "search":
                 payload = service.search(
                     query,
