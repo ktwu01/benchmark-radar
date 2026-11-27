@@ -494,10 +494,17 @@ def test_every_homepage_image_carries_an_alt_attribute():
 
 
 def _homepage_modules() -> dict[str, str]:
-    """app.js and every module it imports, directly or through another module."""
+    """Every local script index.html loads, and every module those import.
+
+    The scan starts from each /assets/ script the homepage declares, not
+    from app.js alone (#1169 review): clarity.js loads beside app.js, and an
+    image it built would otherwise go unchecked.
+    """
     root = Path("site/assets")
+    html = Path("site/index.html").read_text(encoding="utf-8")
+    pending = re.findall(r"""<script\b[^>]*\bsrc=["']/assets/([\w.-]+\.js)["']""", html)
+    assert "app.js" in pending, "index.html no longer loads app.js; update this test"
     found: dict[str, str] = {}
-    pending = ["app.js"]
     while pending:
         name = pending.pop()
         if name in found:
@@ -630,6 +637,12 @@ def test_every_image_the_homepage_scripts_build_carries_an_alt():
             line = source.count("\n", 0, match.start()) + 1
             # node("img") is a valid call with no props, so it renders no alt.
             assert match.group(1) == ",", f"{name}:{line}: img built with no props, so no alt"
+            # The props must be written right here as an object literal: a
+            # variable cannot be read, and scanning ahead to the next "{" would
+            # credit this image with another call's attributes.
+            assert re.match(r"\s*\{", source[match.end() :]), (
+                f"{name}:{line}: img props are not an object literal, so the test cannot read them"
+            )
             props = _call_props(source, match.end())
             builders.append(f"{name}:{line}")
             # Only a direct `attrs` member reaches setAttribute, and only a
