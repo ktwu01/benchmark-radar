@@ -106066,5 +106066,148 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "DaVita Inc., Denver, Colorado, USA"
+        ],
+        "authors": [
+          "Lipsa Senapati"
+        ],
+        "blurb": "The newly released revision of Risk-Calibrated Autonomy for Healthcare AI Agents packages a live-agent test of an action-authorization gateway, including synthetic episodes, an in-memory tool environment, autonomy controls, condition-blinded adjudication, invariant tests, and episode-level outputs from preregistered runs.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-27T09:23:22+00:00",
+        "source": "DataCite",
+        "title": "Risk-Calibrated Autonomy for Healthcare AI Agents: live-agent benchmark harness",
+        "url": "https://doi.org/10.5281/zenodo.24583148"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Lei Yang",
+          "Shipei Du",
+          "Yungui Chen",
+          "Yanwen Chen",
+          "Lingjie Ji"
+        ],
+        "blurb": "The new controlled study Does Debate Help Factuality?",
+        "categories": [
+          "benchmark",
+          "agentic"
+        ],
+        "published_at": "2026-11-27T00:00:00+00:00",
+        "source": "Crossref",
+        "title": "Does Debate Help Factuality? A Controlled Re-Aggregation Study on a 1,200-Item Chinese Benchmark",
+        "url": "https://doi.org/10.20944/preprints202611.2897.v1"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Faisal Abdulaziz Almisned",
+          "Ibrahim Ibrahim Shuaibu"
+        ],
+        "blurb": "The newly released African disease-forecasting protocol pre-specifies comparisons between pretrained time-series models and simple statistical methods across 274 surveillance series, with the main test restricted to observations dated after model release.",
+        "categories": [
+          "benchmark",
+          "evaluation"
+        ],
+        "published_at": "2026-11-27T00:00:00+00:00",
+        "source": "Crossref",
+        "title": "Do pretrained time-series models forecast African disease surveillance data better than simple methods? Protocol for a pre-specified benchmark with a post-release hold-out v1",
+        "url": "https://doi.org/10.17504/protocols.io.r3l25mjy3l1y/v1"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "Binbin Liu"
+        ],
+        "blurb": "The new gpu-kernel-benchmark is an executable evaluation for agents that implement and optimize graphics processing unit kernels.",
+        "categories": [
+          "benchmark",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-27T07:54:06+00:00",
+        "source": "Hugging Face",
+        "title": "code-roamer/gpu-kernel-benchmark",
+        "url": "https://huggingface.co/datasets/code-roamer/gpu-kernel-benchmark"
+      },
+      {
+        "affiliations": [
+          "Károli Gáspár University of the Reformed Church in Hungary"
+        ],
+        "authors": [
+          "Gergely Tóth",
+          "Gábor Péli",
+          "Miklós Gyorgyovich",
+          "Bálint Duráczky"
+        ],
+        "blurb": "A new audit of the VU Amsterdam Metaphor Corpus reports that one fragment was only partly annotated, but its encoding could not distinguish missing annotation from a negative label.",
+        "categories": [
+          "benchmark",
+          "dataset"
+        ],
+        "published_at": "2026-11-26T00:00:00+00:00",
+        "source": "Crossref",
+        "title": "Silent negatives: when partial annotation becomes supervision. A label integrity audit of the VU Amsterdam Metaphor Corpus benchmark",
+        "url": "https://doi.org/10.21203/rs.3.rs-10930300/v1"
+      },
+      {
+        "affiliations": [
+          "FPT University"
+        ],
+        "authors": [
+          "Hoang Hai Nguyen Pham",
+          "Tran Quang Huy",
+          "Hoang Hieu Do",
+          "Tấn Lực Lê",
+          "Le Tien Dung",
+          "Tran Van Ninh",
+          "Quang Huy Tran",
+          "Tien Dung Le",
+          "Van Ninh Tran"
+        ],
+        "blurb": "The new pinned benchmark for indirect prompt injection in email agents contains 1,800 cases spanning malicious emails, poisoned retrieved documents, and benign messages, selected with seeded sampling and fixed by a cryptographic digest.",
+        "categories": [
+          "benchmark",
+          "agentic"
+        ],
+        "published_at": "2026-11-27T00:00:00+00:00",
+        "source": "OpenAlex",
+        "title": "How Exposed Are LLM Email Agents to Indirect Prompt Injection? A Pinned Benchmark over Email and Retrieved Documents",
+        "url": "https://doi.org/10.5281/zenodo.24567398"
+      },
+      {
+        "affiliations": [
+          "Independent researcher"
+        ],
+        "authors": [
+          "Pablo Loschi"
+        ],
+        "blurb": "The new paper When the Benchmark Moves with the Policy shows that an allocation ratio can improve while allocated value falls when a policy changes which agents enter the denominator; it also reports policy rank reversals between open-arrival and fixed-cohort accounting.",
+        "categories": [
+          "benchmark",
+          "agentic"
+        ],
+        "published_at": "2026-11-27T11:45:48+00:00",
+        "source": "DataCite",
+        "title": "When the Benchmark Moves with the Policy: Efficiency and Access in Agent-Based Allocation Models",
+        "url": "https://doi.org/10.5281/zenodo.24586983"
+      }
+    ],
+    "date": "2026-11-27",
+    "schema_version": 1,
+    "top": [
+      "https://doi.org/10.5281/zenodo.24583148",
+      "https://doi.org/10.20944/preprints202611.2897.v1",
+      "https://doi.org/10.17504/protocols.io.r3l25mjy3l1y/v1"
+    ]
+  },
   "since": "2026-11-25T14:29:50.984663+00:00"
 }
