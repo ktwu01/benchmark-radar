@@ -231,7 +231,11 @@ def build_model_scores(
 
 # What a column's date is: aggregators date a score by the model's
 # announcement, model reports by the document's publication.
-DATE_LABELS = {"model_announcement": "announced {date}", "document_publication": "reported {date}"}
+DATE_LABELS = {
+    "model_announcement": "announced {date}",
+    "document_publication": "reported {date}",
+    "measurement": "measured {date}",
+}
 
 
 def latest_date(dates: dict[str, list[str]], source: str | None = None) -> tuple[str, str]:

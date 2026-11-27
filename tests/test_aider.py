@@ -7,6 +7,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import reshape_aider as reshape  # noqa: E402
 
@@ -33,7 +35,7 @@ def test_each_leaderboard_keeps_its_own_score_field_and_scale():
     assert fields["polyglot"]["score_field"] == "pass_rate_2"
     assert fields["edit"]["score_field"] == "pass_rate_2"
     assert fields["refactor"]["score_field"] == "pass_rate_1"
-    assert all(row["max_score"] == "100" for row in benchmarks)
+    assert all(row["max_score"] == "100" and row["unit"] == "percent" for row in benchmarks)
     assert all(0 <= float(row["benchmark_score"]) <= 100 for row in scores)
     # Aider names models, not who made them, so no organization is guessed.
     assert all(row["organization_name"] == "" for row in scores)
@@ -70,7 +72,8 @@ def test_a_run_over_a_partial_exercise_set_is_dropped_not_kept(tmp_path, monkeyp
         reshape, "LEADERBOARDS", {"refactor": ("refactor.yml", "R", "metric", "pass_rate_1", 89)}
     )
     _, scores, dropped = reshape.reshape()
-    assert [row["model_id"] for row in scores] == ["full"]
+    assert [row["run_id"] for row in scores] == ["full"]
+    assert [row["model_id"] for row in scores] == [""]
     assert dropped == [
         "refactor: part: 88 exercises, not 89",
         "refactor: blank: no numeric pass_rate_1",
@@ -98,7 +101,7 @@ def test_a_run_date_dates_the_observation_by_the_day_it_was_measured():
         source="aider",
     )
     assert obs["reported_date"] == "2024-06-01"
-    assert obs["date_precision"] == "day"
+    assert obs["date_precision"] == "measurement"
     assert obs["measured_by"] == "Aider"
     assert obs["reported_by"] == "third_party"
 
@@ -123,4 +126,32 @@ def test_the_site_shards_carry_the_three_leaderboards():
     shard = json.loads(Path("site/data/benchmarks/aider-refactor.json").read_text(encoding="utf-8"))
     rows = shard["scores_by_source"]["aider"]["rows"]
     assert len(rows) == 11
-    assert all(row["measured_by"] == "Aider" and row["date_precision"] == "day" for row in rows)
+    assert all(
+        row["measured_by"] == "Aider" and row["date_precision"] == "measurement" for row in rows
+    )
+
+
+def test_an_upstream_file_with_changed_bytes_is_refused(tmp_path, monkeypatch):
+    # edit_leaderboard.yml mixes CRLF and LF lines; a copy that normalized
+    # them parses identically but is no longer upstream's file.
+    original = (reshape.IN_DIR / "edit_leaderboard.yml").read_bytes()
+    assert b"\r\n" in original
+    for name in reshape.UPSTREAM_SHA256:
+        (tmp_path / name).write_bytes((reshape.IN_DIR / name).read_bytes())
+    (tmp_path / "edit_leaderboard.yml").write_bytes(original.replace(b"\r\n", b"\n"))
+    monkeypatch.setattr(reshape, "IN_DIR", tmp_path)
+    with pytest.raises(SystemExit, match="edit_leaderboard.yml is not upstream"):
+        reshape.reshape()
+
+
+def test_runs_are_observations_not_models():
+    series = {
+        json.loads(line)["series_id"]: json.loads(line)
+        for line in Path("data/catalog/aider_score_series.jsonl").read_text().splitlines()
+    }
+    polyglot = series["aider:polyglot:default"]
+    assert polyglot["unit"] == "percent"
+    # 63 runs, but a run directory is not a model and Aider names no
+    # organization, so no model count is claimed.
+    assert polyglot["observation_count"] == 63
+    assert polyglot["score_summary"]["model_count"] is None

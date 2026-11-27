@@ -381,30 +381,33 @@ snapshots:
       4c437c9e22c7fff8b0d61cb8fd4bf9bdf44370783ac9b00a840a80c81319d36e,
       refactor_leaderboard.yml sha256
       e01b88adf869b88501d48f9b041dbbb37e77e464e1bed886bb62f6b335c60561,
-      committed verbatim with the licence under aider/). Each leaderboard is
+      committed byte for byte with the licence under aider/; the reshape
+      checks these digests before reading). Each leaderboard is
       its own benchmark: Polyglot (225 exercises, pass_rate_2), Code Editing
       (133 Python exercises, pass_rate_2) and Refactoring (89 exercises,
       pass_rate_1). Aider ran every model itself, so each score is third
-      party, measured by Aider, and dated by its run. One row is one run,
-      keyed by Aider's run directory, so a model tried with two edit formats
-      stays two rows. Of 181 published runs, 14 that covered fewer exercises
+      party, measured by Aider, on a percent scale, and dated by its run. One
+      row is one run, keyed by Aider's run directory as run_id, so a model
+      tried with two edit formats stays two rows; model_id stays empty
+      because a run directory is not a model. Of 181 published runs, 14 that covered fewer exercises
       than their leaderboard's full set are left out and listed by the
       reshape: 167 score rows. Reshaped by scripts/reshape_aider.py (#1317).
     benchmark_file: leaderboard_snapshots/aider_benchmarks_2026-11-27.csv
-    benchmark_sha256: 3c980a255184624696a00e5394d25ed1aa111cb8ee8cd7b9020969c13b4567c3
+    benchmark_sha256: 050c614fb245c3cc1015996679f34a384817f237de14501022c3cdcf12ca8c93
     benchmark_count: 3
     score_series_policy: preserve_empty
     benchmark_columns:
       benchmark_id: benchmark_id
       benchmark_name: name
     scores_file: leaderboard_snapshots/aider_benchmark_scores_2026-11-27.csv
-    scores_sha256: 211ee546a050446c104d4cb7546f5393764edefaaa5801cfd41556ae95fb94bf
+    scores_sha256: c1606b77813a6f62ca347260795b9bc082197497923f2645c41f628f09c50715
     score_row_count: 167
     columns:
       benchmark_id: benchmark_id
       benchmark_name: benchmark_name
       model: model_name
       model_id: model_id
+      row_id: run_id
       organization: organization_name
       rank: rank
       score: benchmark_score

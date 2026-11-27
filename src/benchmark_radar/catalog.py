@@ -370,8 +370,13 @@ def _observation(
     # Identity is (benchmark, model_id): distinct dated checkpoints can share a
     # display name, so the name is vocabulary and the id is what a row is.
     model_id = (row.get("model_id") or "").strip() or None
+    # A source that publishes one row per run (Aider, #1317) names the run in
+    # run_id and leaves model_id empty, so a model run twice is two
+    # observations but still not two models.
+    run_id = (row.get("run_id") or "").strip() or None
     observation_identity = (
         model_id
+        or run_id
         or "unidentified-"
         + hashlib.sha256(
             json.dumps(row, sort_keys=True, ensure_ascii=False).encode("utf-8")
@@ -419,7 +424,9 @@ def _observation(
             or (row.get("announcement_date") or "").strip()
             or None
         ),
-        "date_precision": "day" if (row.get("score_date") or "").strip() else "model_announcement",
+        "date_precision": (
+            "measurement" if (row.get("score_date") or "").strip() else "model_announcement"
+        ),
         "source_url": (row.get("source_url") or "").strip() or None,
     }
 
@@ -428,7 +435,7 @@ def first_score_record(
     observations: list[dict[str, Any]], *, allow_model_dates: bool = True
 ) -> dict[str, Any] | None:
     """Earliest dated numeric score, preserving the source's date precision."""
-    precisions = {"day", "document_publication", "score_publication"}
+    precisions = {"day", "measurement", "document_publication", "score_publication"}
     if allow_model_dates:
         precisions.add("model_announcement")
     reports = []
@@ -483,6 +490,9 @@ def _series(
         # source-ranked in descending numeric order, pinned by the snapshot
         # invariant tests.
         "metric": str(row.get("metric") or "").strip() or None,
+        # Only a source that states its unit names it (Aider: percent); the
+        # aggregator APIs do not, so theirs stays null rather than guessed.
+        "unit": str(row.get("unit") or "").strip() or None,
         "direction": "higher_is_better",
         "direction_basis": "source_rank_descending",
         "bounds": {"min": None, "max": declared_max, "basis": "aggregator_declared"},
@@ -497,6 +507,7 @@ def _series(
         "score_summary": score_summary(
             observations,
             fractional_display=True,
+            unit=str(row.get("unit") or "").strip() or None,
             declared_max=declared_max,
             max_score_contradicted=contradicted,
         ),

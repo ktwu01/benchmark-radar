@@ -541,6 +541,7 @@ def _benchmark_date(
     first_record = record.get("first_score_record") or {}
     if first_record.get("date_precision") in {
         "day",
+        "measurement",
         "document_publication",
         "score_publication",
         "model_announcement",

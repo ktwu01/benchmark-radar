@@ -25,9 +25,16 @@ repaired.
 
 Aider ran every model itself, so each score is third_party and measured_by
 Aider. Each run keeps its own date as score_date, the day the run was made.
-The run's directory name is unique per run and becomes model_id, so one model
-tried with two edit formats stays two observations. Aider names models but not
-their organizations, so organization_name stays empty rather than guessed.
+The run's directory name is unique per run and becomes run_id, so one model
+tried with two edit formats stays two observations. It is not a model id, so
+model_id stays empty and two runs never count as two models. Aider names
+models but not their organizations, so organization_name stays empty rather
+than guessed.
+
+The upstream files are pinned by SHA-256 and checked before anything is read.
+edit_leaderboard.yml has CRLF line endings on some lines, and a patch or an
+editor that normalizes them changes the bytes; the reshape then stops instead
+of reading a file that is no longer upstream's.
 
 Usage, from the repository root:
 
@@ -37,6 +44,7 @@ Usage, from the repository root:
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 from datetime import date
 from pathlib import Path
@@ -49,6 +57,12 @@ IN_DIR = Path("data/leaderboard_snapshots/aider")
 OUT_DIR = Path("data/leaderboard_snapshots")
 BENCHMARKS = OUT_DIR / "aider_benchmarks_2026-11-27.csv"
 SCORES = OUT_DIR / "aider_benchmark_scores_2026-11-27.csv"
+
+UPSTREAM_SHA256 = {
+    "polyglot_leaderboard.yml": "85a50b25953512d18ba4bb0c23c0b8e626fcf9a5b52d287644b8a0b44b9535de",
+    "edit_leaderboard.yml": "4c437c9e22c7fff8b0d61cb8fd4bf9bdf44370783ac9b00a840a80c81319d36e",
+    "refactor_leaderboard.yml": "e01b88adf869b88501d48f9b041dbbb37e77e464e1bed886bb62f6b335c60561",
+}
 
 # id: (file, display name, metric, score field, full exercise set)
 LEADERBOARDS = {
@@ -85,7 +99,14 @@ def reshape() -> tuple[list[dict[str, str]], list[dict[str, str]], list[str]]:
     scores: list[dict[str, str]] = []
     dropped: list[str] = []
     for benchmark_id, (filename, name, metric, field, full) in LEADERBOARDS.items():
-        runs = yaml.safe_load((IN_DIR / filename).read_text(encoding="utf-8"))
+        raw = (IN_DIR / filename).read_bytes()
+        expected = UPSTREAM_SHA256.get(filename)
+        if expected and hashlib.sha256(raw).hexdigest() != expected:
+            raise SystemExit(
+                f"{IN_DIR / filename} is not upstream's file at {COMMIT}: its SHA-256 "
+                f"differs from {expected}. Restore it byte for byte from {upstream_url(filename)}."
+            )
+        runs = yaml.safe_load(raw.decode("utf-8"))
         url = upstream_url(filename)
         kept = 0
         for run in runs:
@@ -107,7 +128,10 @@ def reshape() -> tuple[list[dict[str, str]], list[dict[str, str]], list[str]]:
                     "benchmark_id": benchmark_id,
                     "benchmark_name": name,
                     "rank": "",
-                    "model_id": run_id,
+                    # The directory names a run, not a model: a model tried
+                    # with two edit formats is two runs of one model.
+                    "model_id": "",
+                    "run_id": run_id,
                     "model_name": str(run["model"]),
                     "organization_name": "",
                     "benchmark_score": str(score),
@@ -125,6 +149,7 @@ def reshape() -> tuple[list[dict[str, str]], list[dict[str, str]], list[str]]:
                 "metric": metric,
                 # Every score is a percentage of the exercises solved.
                 "max_score": "100",
+                "unit": "percent",
                 "detail_source_url": url,
                 "extra_json": json.dumps(
                     {

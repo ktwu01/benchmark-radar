@@ -1086,6 +1086,12 @@ const I18N = {
     "{count} scores reported to {source}, placed at each model's release date, which is the only date recorded and is not when the score was measured. Highest {best} by {model}, lowest {low}.":
       "向 {source} 报告的 {count} 个分数,按各模型的发布日期排布;这是唯一记录在案的日期,并非分数的测量时间。最高 {best},来自 {model};最低 {low}。",
     "Date (model release)": "日期（模型发布）",
+    "Date measured": "测量日期",
+    "date measured": "测量日期",
+    Measured: "测量于",
+    "measured {date}": "测量于 {date}",
+    "{count} scores measured by {source}, placed by the day each run was made. Best measured {best} by {model}, lowest observed {low}.":
+      "{source} 测量的 {count} 个分数,按每次运行的日期排布。最高 {best},来自 {model};最低 {low}。",
     "Benchmark home ↗": "benchmark主页 ↗",
     "Top cards": "头部模型卡",
     "Disclosure": "披露",
@@ -5808,7 +5814,7 @@ function scoreBrowseResultRow(row) {
     element("span", { className: "benchmark-result-facts", text: [scoreSourceLabel(row.source),
       row.date ? `${t(benchmarkDateLabel(row))} ${formatDate(row.date, { dateStyle: "medium" })}` : t("Date unknown"),
       matchesScoreCutoff(row.summary, 100) ? "" : t("No score reported"),
-      matchedModel ? `${matchedModel.name}${matchedModel.date ? ` · ${t(matchedModel.date_precision === "model_announcement" ? "Model release" : "Document published")} ${formatDate(matchedModel.date, { dateStyle: "medium" })}` : ""}` : "",
+      matchedModel ? `${matchedModel.name}${matchedModel.date ? ` · ${t(matchedModel.date_precision === "model_announcement" ? "Model release" : matchedModel.date_precision === "measurement" ? "Measured" : "Document published")} ${formatDate(matchedModel.date, { dateStyle: "medium" })}` : ""}` : "",
     ].filter(Boolean).join(" · ") }),
   ]);
   button.addEventListener("click", () => {
@@ -6920,7 +6926,7 @@ function modelSeriesScale(series) {
 // What a column's date is: aggregators date a score by the model's
 // announcement, model reports by the document's publication. Ties keep the
 // first source in name order. Mirrors model_scores.latest_date.
-const MODEL_DATE_LABELS = { model_announcement: "announced {date}", document_publication: "reported {date}" };
+const MODEL_DATE_LABELS = { model_announcement: "announced {date}", document_publication: "reported {date}", measurement: "measured {date}" };
 
 function modelLatestDate(dates, source = "") {
   const entries = source ? (dates[source] ? [dates[source]] : []) : Object.keys(dates).sort().map((key) => dates[key]);
@@ -8615,7 +8621,9 @@ function catalogScoreChart(source, payload) {
     "aria-label": t(
       plotted.every((row) => row.date_precision === "model_announcement")
         ? "{count} scores reported to {source}, placed at each model's release date, which is the only date recorded and is not when the score was measured. Best reported {best} by {model}, lowest observed {low}."
-        : "{count} scores from {source}, placed by document publication date. Best reported {best} by {model}, lowest observed {low}.",
+        : plotted.every((row) => row.date_precision === "measurement")
+          ? "{count} scores measured by {source}, placed by the day each run was made. Best measured {best} by {model}, lowest observed {low}."
+          : "{count} scores from {source}, placed by document publication date. Best reported {best} by {model}, lowest observed {low}.",
       {
         count: plotted.length.toLocaleString(),
         source: meta.name,
@@ -8775,7 +8783,7 @@ function catalogScoreChart(source, payload) {
         ...(row.reported_date
           ? [
               {
-                label: t(row.date_precision === "model_announcement" ? "Date (model release)" : "Document publication date"),
+                label: t(row.date_precision === "model_announcement" ? "Date (model release)" : row.date_precision === "measurement" ? "Date measured" : "Document publication date"),
                 value: formatDate(row.reported_date, { dateStyle: "medium" }),
               },
             ]
@@ -8886,7 +8894,7 @@ function catalogScoreChart(source, payload) {
       // reader has to open. Nothing here records when any of these scores was
       // actually measured; that qualification lives in the (i) note and the
       // chart's aria-label, so the axis names the date and stops.
-      t(plotted.every((row) => row.date_precision === "model_announcement") ? "model release date" : "document publication date"),
+      t(plotted.every((row) => row.date_precision === "model_announcement") ? "model release date" : plotted.every((row) => row.date_precision === "measurement") ? "date measured" : "document publication date"),
     ),
   );
   return svg;
@@ -8973,7 +8981,7 @@ function catalogScoreResults(source, rows) {
         ]),
         element("p", { className: "catalog-result-meta", text: [
           row.organization,
-          row.reported_date ? `${t(row.date_precision === "model_announcement" ? "model release date" : "Document publication date")} ${formatDate(row.reported_date, { dateStyle: "medium" })}` : t("Date unknown"),
+          row.reported_date ? `${t(row.date_precision === "model_announcement" ? "model release date" : row.date_precision === "measurement" ? "Date measured" : "Document publication date")} ${formatDate(row.reported_date, { dateStyle: "medium" })}` : t("Date unknown"),
         ].filter(Boolean).join(" · ") }),
         row.instrument || row.protocol ? element("p", { className: "catalog-result-meta", text: [row.instrument, row.protocol].filter(Boolean).join(" · ") }) : null,
         safeHttpUrl(row.source_url) ? element("a", { className: "catalog-result-source", text: t("Open source record ↗"), attrs: {
