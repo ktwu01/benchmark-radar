@@ -117,7 +117,8 @@ combines two complementary systems:
    model score observations from catalog source providers including
    LLM Stats, OpenCompass Hub, Artificial Analysis, Claire Radar, the Benchmark
    Saturation study (github.com/evaleval/benchmark-saturation; MIT, notice in
-   LICENSE-CONTENT.md), and model technical reports.
+   LICENSE-CONTENT.md), Aider's leaderboards (github.com/Aider-AI/aider;
+   Apache-2.0, license in LICENSE-CONTENT.md), and model technical reports.
 2. **Radar Discoveries**: A 24/7 automated intelligence pipeline tracking emerging
    papers, code repositories, datasets, and community attention across 37+ sources,
    capturing **{artifacts_count:,}** research artifacts and **{observations_count:,}**

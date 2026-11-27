@@ -400,7 +400,7 @@ snapshots:
       benchmark_id: benchmark_id
       benchmark_name: name
     scores_file: leaderboard_snapshots/aider_benchmark_scores_2026-11-27.csv
-    scores_sha256: c1606b77813a6f62ca347260795b9bc082197497923f2645c41f628f09c50715
+    scores_sha256: 117fcb3ac040f3a7d04aabeb31782bdc34374376cdb69bf7f3fcb210da9036fc
     score_row_count: 167
     columns:
       benchmark_id: benchmark_id

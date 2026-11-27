@@ -27,7 +27,9 @@ Aider ran every model itself, so each score is third_party and measured_by
 Aider. Each run keeps its own date as score_date, the day the run was made.
 The run's directory name is unique per run and becomes run_id, so one model
 tried with two edit formats stays two observations. It is not a model id, so
-model_id stays empty and two runs never count as two models. Aider names
+model_id stays empty and two runs never count as two models. Each row's
+protocol names the run's edit format and, where the run recorded it, the
+aider version, so two runs of one model say which setting made each score. Aider names
 models but not their organizations, so organization_name stays empty rather
 than guessed.
 
@@ -94,6 +96,13 @@ def upstream_url(filename: str) -> str:
     return f"https://github.com/Aider-AI/aider/blob/{COMMIT}/{UPSTREAM_DIR}/{filename}"
 
 
+def protocol(run: dict) -> str:
+    parts = [f"edit format {run['edit_format']}"] if run.get("edit_format") else []
+    if run.get("versions"):
+        parts.append(f"aider {run['versions']}")
+    return " · ".join(parts)
+
+
 def reshape() -> tuple[list[dict[str, str]], list[dict[str, str]], list[str]]:
     benchmarks: list[dict[str, str]] = []
     scores: list[dict[str, str]] = []
@@ -138,6 +147,9 @@ def reshape() -> tuple[list[dict[str, str]], list[dict[str, str]], list[str]]:
                     "self_reported": "false",
                     "measured_by": "Aider",
                     "score_date": str(run_date),
+                    # The conditions a run was made under, so two runs of one
+                    # model (say diff and whole) stay distinguishable.
+                    "protocol": protocol(run),
                     "source_url": url,
                 }
             )

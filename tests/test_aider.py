@@ -155,3 +155,24 @@ def test_runs_are_observations_not_models():
     # organization, so no model count is claimed.
     assert polyglot["observation_count"] == 63
     assert polyglot["score_summary"]["model_count"] is None
+
+
+def test_two_runs_of_one_model_say_which_setting_made_each_score():
+    _, scores, _ = reshape.reshape()
+    qwen = sorted(
+        (row["benchmark_score"], row["protocol"])
+        for row in scores
+        if row["benchmark_id"] == "polyglot" and row["model_name"] == "Qwen2.5-Coder-32B-Instruct"
+    )
+    assert qwen == [
+        ("16.4", "edit format whole · aider 0.69.2.dev"),
+        ("8.0", "edit format diff · aider 0.69.2.dev"),
+    ]
+    assert all(row["protocol"].startswith("edit format ") for row in scores)
+
+
+def test_aider_licence_ships_with_the_third_party_notices():
+    notices = Path("LICENSE-CONTENT.md").read_text(encoding="utf-8")
+    licence = (reshape.IN_DIR / "LICENSE.txt").read_text(encoding="utf-8").strip("\n")
+    assert reshape.COMMIT in notices
+    assert licence in notices

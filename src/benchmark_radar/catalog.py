@@ -407,6 +407,9 @@ def _observation(
         "measured_by": (row.get("measured_by") or "").strip()
         or ("Artificial Analysis" if source == ARTIFICIAL_ANALYSIS_SOURCE else None),
         "comparable_group": None,
+        # The conditions a source states for one row (Aider: edit format and
+        # aider version). Sources that state none leave it null.
+        "protocol": (row.get("protocol") or "").strip() or None,
         "rank_in_source_response": int(rank) if rank.isdigit() else None,
         "crawled_at": crawled_at,
         # This is the MODEL's own announcement date, not a measurement date: the
