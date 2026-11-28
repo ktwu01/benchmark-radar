@@ -103521,5 +103521,103 @@
     "taxonomy_version": "sha256:5ee3bd8146ce",
     "watchlisted": 0
   },
+  "share": {
+    "basis": "briefing",
+    "cards": [
+      {
+        "affiliations": [
+          "Independent Researcher"
+        ],
+        "authors": [
+          "Aditi Patodiya"
+        ],
+        "blurb": "The new Context Clash benchmark targets conflicts among coding-agent instruction files from different tools.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset",
+          "agentic"
+        ],
+        "published_at": "2026-11-27T18:57:50+00:00",
+        "source": "DataCite",
+        "title": "Context Clash: Benchmark Data and Analysis Code for Cross-Tool Coding-Agent Instruction Conflicts",
+        "url": "https://doi.org/10.5281/zenodo.24599997"
+      },
+      {
+        "affiliations": [],
+        "authors": [
+          "huyang"
+        ],
+        "blurb": "This captured feed shows a recurring move from checking final answers toward testing failures during execution.",
+        "categories": [
+          "evaluation",
+          "agentic"
+        ],
+        "published_at": "2026-11-28T09:32:49+00:00",
+        "source": "GitHub",
+        "title": "114514yangyi/Faultline",
+        "url": "https://github.com/114514yangyi/Faultline"
+      },
+      {
+        "affiliations": [
+          "Friedrich-Alexander-Universität Erlangen-Nürnberg",
+          "Universitätsklinikum Erlangen",
+          "Universitätsklinikum Aachen",
+          "RWTH Aachen University"
+        ],
+        "authors": [
+          "Sebastian Wind",
+          "Tri-Thien Nguyen",
+          "Jeta Sopa",
+          "Mahshad Lotfinia",
+          "Sebastian Bickelhaupt",
+          "Michael Uder",
+          "Harald Köstler",
+          "Gerhard Wellein",
+          "Sven Nebelung",
+          "Daniel Truhn",
+          "Andreas Maier",
+          "Soroosh Tayebi Arasteh",
+          "Sebastian Bickelhaup"
+        ],
+        "blurb": "The new Safety-Focused Evaluation of Scaling study separates clinical answer accuracy from safety under changing evidence conditions.",
+        "categories": [
+          "benchmark",
+          "evaluation"
+        ],
+        "published_at": "2026-11-27T00:00:00+00:00",
+        "source": "Crossref",
+        "title": "Safety and accuracy diverge across deployment conditions in clinical large language models",
+        "url": "https://doi.org/10.1038/s41746-026-03455-y"
+      },
+      {
+        "affiliations": [
+          "Department of Computer Science, Missouri University of Science and Technology, Rolla, MO, USA"
+        ],
+        "authors": [
+          "Nieb Hasan Neom",
+          "Rasman Mubtasim Swargo",
+          "Md Arifuzzaman"
+        ],
+        "blurb": "The new NetBench package compares four ways to add specialist knowledge—continued pre-training, supervised fine-tuning, low-rank adaptation, and retrieval-augmented generation, which supplies external documents at answer time—across eight open-weight models and three commercial model interfaces.",
+        "categories": [
+          "benchmark",
+          "evaluation",
+          "dataset"
+        ],
+        "published_at": "2026-11-27T17:38:14+00:00",
+        "source": "DataCite",
+        "title": "NetBench: benchmark, framework, and analysis code for a controlled study of LLM domain adaptation in high-performance networking",
+        "url": "https://doi.org/10.5281/zenodo.24598418"
+      }
+    ],
+    "date": "2026-11-28",
+    "schema_version": 1,
+    "top": [
+      "https://doi.org/10.5281/zenodo.24599997",
+      "https://github.com/114514yangyi/Faultline",
+      "https://doi.org/10.1038/s41746-026-03455-y"
+    ]
+  },
   "since": "2026-11-26T13:45:48.662621+00:00"
 }
