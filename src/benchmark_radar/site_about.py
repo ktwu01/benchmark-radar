@@ -172,7 +172,7 @@ _STORY = (
     ),
     (
         "Who makes it",
-        "Benchmark Radar is built by Koutian Wu and open to contributions. The web UI is "
+        "Benchmark Radar is built by Koutian Wu et al. and open to contributions. The web UI is "
         "AGPL-3.0, the pipeline and data are MIT-licensed, the data is downloadable in "
         "full, and every page is generated from the same public corpus, so anyone can "
         "check a claim against its source.",
