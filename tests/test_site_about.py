@@ -168,3 +168,15 @@ def test_about_is_byte_deterministic(tmp_path: Path):
     assert (first / "about" / "index.html").read_bytes() == (
         second / "about" / "index.html"
     ).read_bytes()
+
+
+def test_about_shows_the_readme_evidence(about: str):
+    """The README's badge, user list and screenshots reach readers who never open GitHub."""
+    assert 'src="/assets/hf-paper-of-the-day.svg"' in about
+    assert "OpenAI, Anthropic, Google" in about
+    for path, image in (
+        ("/leaderboard/", "/assets/about/benchmark-frontier.jpg"),
+        ("/trends/", "/assets/about/trends-research-directions.jpg"),
+    ):
+        assert f'<a href="{path}"><img src="{image}"' in about
+        assert Path("site" + image).is_file()

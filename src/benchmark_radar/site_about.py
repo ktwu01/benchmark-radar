@@ -128,6 +128,7 @@ _INSIDE: tuple[tuple[str, str, str], ...] = (
     ("/models/", "Models", "Compare AI models' reported benchmark scores side by side, by lab"),
     ("/leaderboard/", "Landscape", "Compare reported scores across the benchmark frontier"),
     ("/saturation/", "Saturation", "Watch scores on a benchmark climb toward saturation"),
+    ("/trends/", "Trends", "See which research directions are producing new benchmarks"),
     ("/blog/", "Blog", "Read the daily brief: what appeared today and what it means"),
     ("/cli/", "CLI", "Query the whole catalog offline from the command line"),
     (CITE_PATH, "Publications", "Cite the technical report, or read the publications behind it"),
@@ -164,6 +165,12 @@ _STORY = (
         "Where a field is missing, the page leaves it out rather than filling it in.",
     ),
     (
+        "Where it is going",
+        "Wider coverage, with more sources and faster pickup of new releases; a deeper "
+        "audit layer, linking more independent audits to the scores they examine; interop "
+        "with community efforts such as Every Eval Ever; and better views of score history.",
+    ),
+    (
         "Who makes it",
         "Benchmark Radar is built by Koutian Wu and open to contributions. The web UI is "
         "AGPL-3.0, the pipeline and data are MIT-licensed, the data is downloadable in "
@@ -171,6 +178,63 @@ _STORY = (
         "check a claim against its source.",
     ),
 )
+
+
+# The README's evidence that the project is used and noticed, repeated here so a
+# reader who arrives from search sees it without opening GitHub. The institution
+# list is the README's own sentence; keep the two in step.
+_USED_BY = (
+    "Researchers at OpenAI, Anthropic, Google, Meta, Microsoft, NVIDIA, Amazon, IBM, "
+    "ByteDance and Unitree have viewed or used it for benchmark discovery and score tracking."
+)
+_HF_BADGE = (
+    "https://huggingface.co/papers/date/2026-09-14",
+    "/assets/hf-paper-of-the-day.svg",
+    "Hugging Face: #1 Paper of the Day, September 14, 2026",
+)
+
+# Screenshots of two views, each linked to the live page it shows. Copies live
+# under site/assets/about/ because Pages publishes only site/, not the README's
+# assets/ folder. The width and height attributes reserve the box before load.
+_SHOWCASE: tuple[tuple[str, str, str, str, int, int], ...] = (
+    (
+        "/leaderboard/",
+        "/assets/about/benchmark-frontier.jpg",
+        "Benchmark Frontier with tested-model counts, scores and release dates",
+        "Benchmark Frontier: which difficult benchmarks have been tested most? Compare "
+        "reported scores, release dates and the number of models tested.",
+        1695,
+        823,
+    ),
+    (
+        "/trends/",
+        "/assets/about/trends-research-directions.jpg",
+        "Trends page: new benchmark records by research direction over the last 30 days, "
+        "compared with the previous period",
+        "Trends: which research directions are producing new benchmarks? Compare the last "
+        "30 days with the 30 days before, per direction, with a 16-week trend.",
+        1600,
+        852,
+    ),
+)
+
+
+def _badge() -> str:
+    href, src, alt = _HF_BADGE
+    return (
+        f'<p class="about-badge"><a href="{esc(href)}" rel="noopener">'
+        f'<img src="{esc(src)}" alt="{esc(alt)}" width="360" height="96"></a></p>'
+    )
+
+
+def _showcase() -> str:
+    figures = "".join(
+        f'<figure><a href="{esc(path)}"><img src="{esc(src)}" alt="{esc(alt)}" '
+        f'width="{width}" height="{height}" loading="lazy"></a>'
+        f"<figcaption>{esc(caption)}</figcaption></figure>"
+        for path, src, alt, caption, width, height in _SHOWCASE
+    )
+    return f"<section><h2>See it</h2>{figures}</section>"
 
 
 def _section(heading: str, body: str) -> str:
@@ -220,8 +284,11 @@ def about_body() -> str:
     return f"""<header class="blog-hero">
   <h1>{esc(ABOUT_HEADING)}</h1>
   <p class="blog-lede">{esc(ABOUT_LEDE)}</p>
+  {_badge()}
 </header>
-<div class="blog-prose">{story}
+<div class="blog-prose">{_section("Who uses it", _USED_BY)}
+{_showcase()}
+{story}
 <section><h2>Where to start</h2>{_inside_list()}</section>
 <section><h2>Benchmark Radar elsewhere</h2>{_link_list(_ELSEWHERE)}</section>
 </div>"""
