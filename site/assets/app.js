@@ -1128,6 +1128,14 @@ const I18N = {
       "以下基本信息来自 {source} 卡片；人工核对确认它指向同一个benchmark，分数不受影响。",
     Openness: "开放性",
     "openness not established": "开放性尚未确定",
+    "Reviewed: the code and the data are public, and the data has a license.":
+      "已核对：代码和数据均已公开，且数据有许可证。",
+    "Reviewed: the data is behind an access request.": "已核对：数据需申请才能访问。",
+    "Reviewed: the data is public, but no data license was found.":
+      "已核对：数据已公开，但未找到数据许可证。",
+    "Reviewed: the data's license restricts reuse.": "已核对：数据的许可证限制再使用。",
+    "Reviewed: whether the data is available is not yet established.":
+      "已核对：数据是否可获取尚未确定。",
     open: "开放",
     restricted: "受限",
     "Code licence": "代码许可证",
@@ -8398,6 +8406,31 @@ function catalogIdentityBlock(detail) {
   ]);
 }
 
+// A reviewed basis is stored as a code such as
+// `reviewed_code_and_licensed_data_public`. The reader gets a sentence; the
+// code stays on the element's title as provenance. A basis that is already
+// prose (an OpenCompass row note, say) prints as written.
+const OPENNESS_BASIS_TEXT = {
+  reviewed_code_and_licensed_data_public:
+    "Reviewed: the code and the data are public, and the data has a license.",
+  reviewed_data_gated: "Reviewed: the data is behind an access request.",
+  reviewed_data_found_without_license:
+    "Reviewed: the data is public, but no data license was found.",
+  reviewed_data_license_restricts_reuse:
+    "Reviewed: the data's license restricts reuse.",
+  reviewed_data_availability_not_established:
+    "Reviewed: whether the data is available is not yet established.",
+};
+
+function opennessBasisElement(basis) {
+  const sentence = OPENNESS_BASIS_TEXT[basis];
+  return element("p", {
+    className: "catalog-basis",
+    text: sentence ? t(sentence) : basis,
+    attrs: sentence ? { title: basis } : {},
+  });
+}
+
 function catalogOpennessBlock(detail) {
   const openness = detail.openness || {};
   const evidence = (openness.evidence || []).filter((item) =>
@@ -8410,9 +8443,7 @@ function catalogOpennessBlock(detail) {
     ]),
     // The basis is the reviewer's own note on how the status was decided, so
     // it prints as evidence rather than being paraphrased away.
-    openness.basis
-      ? element("p", { className: "catalog-basis", text: openness.basis })
-      : null,
+    openness.basis ? opennessBasisElement(openness.basis) : null,
     catalogFactList([
       [t("Code licence"), openness.code_license || t("not established")],
       [t("Data licence"), openness.data_license || t("not established")],

@@ -1115,3 +1115,33 @@ def test_issue_341_terminal_bench_2_qualifies_and_an_elo_board_does_not():
     assert factor("llm-stats-terminal-bench-2") == 100
     # An Elo board declares 3000 and carries four-figure values. Untouched.
     assert factor("llm-stats-aa-briefcase") == 1
+
+
+def test_reviewed_openness_basis_codes_render_as_sentences():
+    # Codex review on #1358: a reviewed basis is stored as a code such as
+    # `reviewed_code_and_licensed_data_public`. The detail panel must show
+    # the reader a sentence, in both languages, and keep the code only as
+    # provenance on the title attribute.
+    import re
+
+    script = source("site/assets/app.js")
+    # Every basis `_openness` can assign: `status, basis = "<status>", "<code>"`.
+    codes = set(
+        re.findall(
+            r'status, basis = "[a-z]+", "(reviewed_[a-z_]+)"',
+            source("src/benchmark_radar/catalog_overrides.py"),
+        )
+    )
+    assert "reviewed_code_and_licensed_data_public" in codes
+
+    table = script.split("const OPENNESS_BASIS_TEXT = {", 1)[1].split("};", 1)[0]
+    sentences = dict(re.findall(r'(reviewed_[a-z_]+):\s*"([^"]+)"', table))
+    assert set(sentences) == codes
+    for sentence in sentences.values():
+        assert f'"{sentence}":' in script, f"no Chinese translation for {sentence!r}"
+
+    block = script.split("function catalogOpennessBlock(detail)", 1)[1].split("\nfunction ", 1)[0]
+    assert "opennessBasisElement(openness.basis)" in block
+    assert "text: openness.basis" not in block
+    helper = script.split("function opennessBasisElement(basis)", 1)[1].split("\n}\n", 1)[0]
+    assert "title: basis" in helper

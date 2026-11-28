@@ -29,6 +29,8 @@ from urllib.parse import urlsplit
 
 import yaml
 
+from .catalog_opencompass import _clean_license
+
 # The single date format JavaScript's Date constructor parses reliably. See
 # `_require_date` for why the ISO 8601 standard is too wide a target here.
 _ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
@@ -90,6 +92,72 @@ def _benchmark_audits(benchmark: dict[str, Any]) -> list[dict[str, Any]]:
             published[str(field)] = value
         audits.append(published)
     return audits
+
+
+_OPENNESS_STATUSES = ("open", "restricted", "unknown")
+_OPENNESS_FIELDS = frozenset(
+    {"status", "basis", "code_license", "data_license", "data_located", "evidence"}
+)
+
+
+def _benchmark_openness(benchmark: dict[str, Any]) -> dict[str, Any] | None:
+    """The benchmark's reviewed openness, in the catalog's openness shape.
+
+    ``None`` when the registry records no review, so the catalog keeps its
+    ``unknown`` default rather than inventing one. When a review exists it is
+    copied through, never recomputed: the status is the reviewer's answer,
+    and the licences and evidence are what it rests on. Evidence URLs take the
+    ``{evidence_url, locator}`` form the other catalog sources publish, which
+    is the form the record page renders.
+    """
+    openness = benchmark.get("openness")
+    if openness is None:
+        return None
+    # Licences go through the cleaner the OpenCompass records use, so one
+    # catalog field means one thing whatever the source: a placeholder such
+    # as `unknown`, `none_found`, `other` or `NOASSERTION` reads as no
+    # established licence, never as a licence of that name, and SPDX casing
+    # matches across sources.
+    code_license, code_license_note = _clean_license(openness.get("code_license"))
+    data_license, data_license_note = _clean_license(openness.get("data_license"))
+    return {
+        "status": str(openness["status"]),
+        "basis": str(openness["basis"]) if openness.get("basis") else None,
+        "code_license": code_license,
+        "code_license_note": code_license_note,
+        "data_license": data_license,
+        "data_license_note": data_license_note,
+        "data_located": str(openness["data_located"]) if openness.get("data_located") else None,
+        "access_gate": None,
+        "link_status": None,
+        "evidence": [
+            {"evidence_url": str(url), "locator": None} for url in openness.get("evidence") or []
+        ],
+    }
+
+
+def _validate_openness(openness: Any, *, label: str) -> None:
+    """Reject an openness block the catalog could not publish as recorded."""
+    if not isinstance(openness, dict):
+        raise ModelCardRegistryError(f"{label} must be a mapping")
+    unexpected = sorted(set(openness) - _OPENNESS_FIELDS)
+    if unexpected:
+        raise ModelCardRegistryError(f"{label} has unexpected fields {unexpected}")
+    if openness.get("status") not in _OPENNESS_STATUSES:
+        raise ModelCardRegistryError(
+            f"{label} status must be one of {list(_OPENNESS_STATUSES)}, "
+            f"not {openness.get('status')!r}"
+        )
+    for field in ("basis", "code_license", "data_license", "data_located"):
+        value = openness.get(field)
+        if value is not None and not (isinstance(value, str) and value.strip()):
+            raise ModelCardRegistryError(f"{label} {field} must be a non-empty string")
+    evidence = openness.get("evidence")
+    if evidence is not None:
+        if not isinstance(evidence, list):
+            raise ModelCardRegistryError(f"{label} evidence must be a list")
+        for url in evidence:
+            _require_http_url(url, label=f"{label} evidence")
 
 
 class _descending:
@@ -258,6 +326,12 @@ def load_registry(path: Path = DEFAULT_REGISTRY_PATH) -> dict[str, Any]:
                         raise ModelCardRegistryError(f"{audit_label} receipts must be a list")
                     for receipt in receipts:
                         _require_http_url(receipt, label=f"{audit_label} receipt")
+        # A reviewed openness block reaches the record page through the
+        # catalog, so it is checked here on the terms the page renders it on.
+        if benchmark.get("openness") is not None:
+            _validate_openness(
+                benchmark["openness"], label=f"{path}: benchmark {benchmark_id!r} openness"
+            )
         by_id[benchmark_id] = benchmark
 
     seen_cards: set[str] = set()
@@ -448,6 +522,8 @@ def adoption_rank(registry: dict[str, Any]) -> dict[str, Any]:
                 # a benchmark an auditor has already questioned should not be
                 # publishable here with the question left behind in the YAML.
                 "audits": _benchmark_audits(benchmark),
+                # The reviewed openness, or None when nobody has reviewed it.
+                "openness": _benchmark_openness(benchmark),
                 "card_count": count,
                 "organization_count": len(organizations.get(benchmark_id, set())),
                 "organizations": sorted(organizations.get(benchmark_id, set())),

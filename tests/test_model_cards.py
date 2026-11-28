@@ -1089,3 +1089,119 @@ def test_shipped_registry_publishes_every_recorded_audit():
             assert audit["finding"]
             assert audit["receipts"]
     json.dumps(board)
+
+
+def _registry_with_openness(tmp_path, openness):
+    document = minimal_registry()
+    document["benchmarks"][0]["openness"] = openness
+    return write_registry(tmp_path, document)
+
+
+REVIEWED_OPENNESS = {
+    "status": "open",
+    "basis": "reviewed_code_and_licensed_data_public",
+    "code_license": "CC-BY-4.0",
+    "data_license": "CC-BY-4.0",
+    "data_located": "found",
+    "evidence": ["https://example.com/alpha/LICENSE"],
+}
+
+
+def test_reviewed_openness_travels_with_the_entry(tmp_path):
+    # Issue #1310: a reviewed openness block in the YAML must reach the
+    # catalog, in the evidence shape the record page renders, while an
+    # unreviewed benchmark carries None so the catalog keeps `unknown`.
+    import json
+
+    board = adoption_rank(load_registry(_registry_with_openness(tmp_path, REVIEWED_OPENNESS)))
+    entries = {entry["benchmark_id"]: entry for entry in board["entries"]}
+    assert entries["alpha"]["openness"] == {
+        "status": "open",
+        "basis": "reviewed_code_and_licensed_data_public",
+        "code_license": "CC-BY-4.0",
+        "code_license_note": None,
+        "data_license": "CC-BY-4.0",
+        "data_license_note": None,
+        "data_located": "found",
+        "access_gate": None,
+        "link_status": None,
+        "evidence": [{"evidence_url": "https://example.com/alpha/LICENSE", "locator": None}],
+    }
+    assert entries["beta"]["openness"] is None
+    json.dumps(board)
+
+
+def test_catalog_record_uses_reviewed_openness_and_keeps_unknown_otherwise(tmp_path):
+    from benchmark_radar.catalog_reports import normalize_reports
+
+    registry = load_registry(_registry_with_openness(tmp_path, REVIEWED_OPENNESS))
+    records = {
+        record["source_benchmark_id"]: record
+        for record in normalize_reports(registry, {"results": []})["source_records"]
+    }
+    assert records["alpha"]["openness"]["status"] == "open"
+    assert records["alpha"]["openness"]["data_license"] == "CC-BY-4.0"
+    assert records["beta"]["openness"] == {
+        "status": "unknown",
+        "code_license": None,
+        "data_license": None,
+        "evidence": [],
+    }
+
+
+@pytest.mark.parametrize(
+    ("openness", "message"),
+    [
+        ("open", "must be a mapping"),
+        ({**REVIEWED_OPENNESS, "status": "public"}, "status must be one of"),
+        ({**REVIEWED_OPENNESS, "licence": "MIT"}, "unexpected fields"),
+        ({**REVIEWED_OPENNESS, "code_license": ""}, "code_license must be"),
+        ({**REVIEWED_OPENNESS, "evidence": "https://example.com/x"}, "evidence must be a list"),
+        ({**REVIEWED_OPENNESS, "evidence": ["ftp://example.com/x"]}, "evidence"),
+    ],
+)
+def test_a_malformed_openness_block_is_rejected(tmp_path, openness, message):
+    with pytest.raises(ModelCardRegistryError, match=message):
+        load_registry(_registry_with_openness(tmp_path, openness))
+
+
+def test_shipped_registry_changes_openness_for_reviewed_benchmarks_only():
+    # The issue's count: on the shipped corpus, exactly the benchmarks with a
+    # reviewed block leave `unknown`, and today that is AI Professions alone.
+    from benchmark_radar.benchmark_scores import load_scores
+    from benchmark_radar.catalog_reports import normalize_reports
+
+    registry = load_registry(DEFAULT_REGISTRY_PATH)
+    reviewed = {str(b["id"]) for b in registry["benchmarks"] if b.get("openness")}
+    records = normalize_reports(registry, load_scores(DEFAULT_SCORES_PATH))["source_records"]
+    changed = {
+        record["source_benchmark_id"]
+        for record in records
+        if record["openness"]["status"] != "unknown"
+    }
+    assert changed == reviewed == {"ai_professions_prompt_benchmark"}
+
+
+@pytest.mark.parametrize("placeholder", ["unknown", "none", "none_found", "other", "NOASSERTION"])
+def test_license_placeholders_read_as_no_established_license(tmp_path, placeholder):
+    # Codex review on #1358: the OpenCompass records treat these values as
+    # no licence, so a model-report record must too, or one catalog field
+    # would mean different things depending on the source.
+    openness = {**REVIEWED_OPENNESS, "code_license": placeholder, "data_license": placeholder}
+    board = adoption_rank(load_registry(_registry_with_openness(tmp_path, openness)))
+    alpha = next(entry for entry in board["entries"] if entry["benchmark_id"] == "alpha")
+    assert alpha["openness"]["code_license"] is None
+    assert alpha["openness"]["data_license"] is None
+    expected_note = "file_present_unparsed" if placeholder == "NOASSERTION" else None
+    assert alpha["openness"]["code_license_note"] == expected_note
+    assert alpha["openness"]["data_license_note"] == expected_note
+
+
+def test_reviewed_licenses_take_spdx_casing(tmp_path):
+    openness = {**REVIEWED_OPENNESS, "code_license": "mit", "data_license": "cc-by-4.0"}
+    board = adoption_rank(load_registry(_registry_with_openness(tmp_path, openness)))
+    alpha = next(entry for entry in board["entries"] if entry["benchmark_id"] == "alpha")
+    assert (alpha["openness"]["code_license"], alpha["openness"]["data_license"]) == (
+        "MIT",
+        "CC-BY-4.0",
+    )
