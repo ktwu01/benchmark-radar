@@ -195,7 +195,7 @@ histories. It retains source identities and citations so readers can inspect
 candidate benchmarks and their evaluation evidence.
 
 Daily discovery draws on 41 sources: 17 direct connectors and 24 first-party
-research and engineering feeds. The catalog collects source records from five
+research and engineering feeds. The catalog collects source records from six
 benchmark catalogs, with numeric score observations on the records that carry
 them. The project publishes the web dashboard with a benchmark leaderboard, a
 Pareto frontier view of score against measured use, saturation and trend views,
@@ -250,7 +250,9 @@ wider benchmark catalog adds [OpenCompass Hub](https://hub.opencompass.org.cn)
 as a fourth source. The [Benchmark Saturation](https://github.com/evaleval/benchmark-saturation)
 study (Akhtar et al., [arXiv:2602.16763](https://arxiv.org/abs/2602.16763), MIT)
 adds its hand-annotated top five model scores for 60 benchmarks. Thank you for
-releasing that table.
+releasing that table. [Aider](https://aider.chat/docs/leaderboards/) (Apache-2.0)
+adds 167 runs it measured itself on its Polyglot, Code Editing and Refactoring
+leaderboards, each dated by the day it ran. Thank you for keeping every run public.
 
 A special thank you to [Xiaopai Liu](https://github.com/liuxiaopai-ai)
 ([@bourneliu66](https://x.com/bourneliu66)) for the shout-out on X, and to his

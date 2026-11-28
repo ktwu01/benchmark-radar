@@ -2346,6 +2346,7 @@ def test_trace_cli_serializes_unquoted_registry_dates(tmp_path: Path, capsys) ->
         ("llm_stats", "llm_stats_2026-08-17", "llm-stats"),
         ("artificial_analysis", "artificial_analysis_2026-08-25", "artificial-analysis"),
         ("benchmark_saturation", "benchmark_saturation_2026-11-04", "benchmark-saturation"),
+        ("aider", "aider_2026-11-27", "aider"),
     ],
 )
 @pytest.mark.parametrize("mutation", ["unchanged", "changed", "deleted", "missing_file"])

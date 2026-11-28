@@ -541,6 +541,7 @@ def _benchmark_date(
     first_record = record.get("first_score_record") or {}
     if first_record.get("date_precision") in {
         "day",
+        "measurement",
         "document_publication",
         "score_publication",
         "model_announcement",
@@ -1535,6 +1536,7 @@ SCORE_SOURCE_LINKS: tuple[tuple[str, str], ...] = (
     ("Artificial Analysis", "https://artificialanalysis.ai"),
     ("OpenCompass Hub", "https://hub.opencompass.org.cn"),
     ("Benchmark Saturation", "https://github.com/evaleval/benchmark-saturation"),
+    ("Aider", "https://aider.chat/docs/leaderboards/"),
 )
 CITE_CREDIT_LEAD = "Benchmark score data comes from lab model reports and from"
 

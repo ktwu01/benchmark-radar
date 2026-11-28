@@ -48,6 +48,7 @@ SOURCES = {
     ARTIFICIAL_ANALYSIS_SNAPSHOT_ID: (ARTIFICIAL_ANALYSIS_SOURCE, ARTIFICIAL_ANALYSIS_KEY_PREFIX),
     "claire_radar_2026-10-14": ("claire_radar", "claire-radar"),
     "benchmark_saturation_2026-11-04": ("benchmark_saturation", "benchmark-saturation"),
+    "aider_2026-11-27": ("aider", "aider"),
 }
 
 _SLUG_STRIP = re.compile(r"[^a-z0-9]+")
@@ -369,8 +370,13 @@ def _observation(
     # Identity is (benchmark, model_id): distinct dated checkpoints can share a
     # display name, so the name is vocabulary and the id is what a row is.
     model_id = (row.get("model_id") or "").strip() or None
+    # A source that publishes one row per run (Aider, #1317) names the run in
+    # run_id and leaves model_id empty, so a model run twice is two
+    # observations but still not two models.
+    run_id = (row.get("run_id") or "").strip() or None
     observation_identity = (
         model_id
+        or run_id
         or "unidentified-"
         + hashlib.sha256(
             json.dumps(row, sort_keys=True, ensure_ascii=False).encode("utf-8")
@@ -396,8 +402,14 @@ def _observation(
             if self_reported == "false"
             else "unknown"
         ),
-        "measured_by": "Artificial Analysis" if source == ARTIFICIAL_ANALYSIS_SOURCE else None,
+        # A source that ran every test itself names itself per row (#1317);
+        # Artificial Analysis predates that column and is named here.
+        "measured_by": (row.get("measured_by") or "").strip()
+        or ("Artificial Analysis" if source == ARTIFICIAL_ANALYSIS_SOURCE else None),
         "comparable_group": None,
+        # The conditions a source states for one row (Aider: edit format and
+        # aider version). Sources that state none leave it null.
+        "protocol": (row.get("protocol") or "").strip() or None,
         "rank_in_source_response": int(rank) if rank.isdigit() else None,
         "crawled_at": crawled_at,
         # This is the MODEL's own announcement date, not a measurement date: the
@@ -407,8 +419,17 @@ def _observation(
         # kept and labelled for what it is rather than discarded because it
         # is not a full evaluation date. `date_precision` says which claim the
         # value supports.
-        "reported_date": (row.get("announcement_date") or "").strip() or None,
-        "date_precision": "model_announcement",
+        # A row that carries its own run date (score_date, #1317) is dated by
+        # the day the score was measured, the stronger claim; every other row
+        # keeps the model announcement date described above.
+        "reported_date": (
+            (row.get("score_date") or "").strip()
+            or (row.get("announcement_date") or "").strip()
+            or None
+        ),
+        "date_precision": (
+            "measurement" if (row.get("score_date") or "").strip() else "model_announcement"
+        ),
         "source_url": (row.get("source_url") or "").strip() or None,
     }
 
@@ -417,7 +438,7 @@ def first_score_record(
     observations: list[dict[str, Any]], *, allow_model_dates: bool = True
 ) -> dict[str, Any] | None:
     """Earliest dated numeric score, preserving the source's date precision."""
-    precisions = {"day", "document_publication", "score_publication"}
+    precisions = {"day", "measurement", "document_publication", "score_publication"}
     if allow_model_dates:
         precisions.add("model_announcement")
     reports = []
@@ -472,6 +493,9 @@ def _series(
         # source-ranked in descending numeric order, pinned by the snapshot
         # invariant tests.
         "metric": str(row.get("metric") or "").strip() or None,
+        # Only a source that states its unit names it (Aider: percent); the
+        # aggregator APIs do not, so theirs stays null rather than guessed.
+        "unit": str(row.get("unit") or "").strip() or None,
         "direction": "higher_is_better",
         "direction_basis": "source_rank_descending",
         "bounds": {"min": None, "max": declared_max, "basis": "aggregator_declared"},
@@ -486,6 +510,7 @@ def _series(
         "score_summary": score_summary(
             observations,
             fractional_display=True,
+            unit=str(row.get("unit") or "").strip() or None,
             declared_max=declared_max,
             max_score_contradicted=contradicted,
         ),

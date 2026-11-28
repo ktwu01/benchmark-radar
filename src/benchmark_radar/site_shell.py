@@ -20,6 +20,7 @@ SOURCE_LABELS = {
     "opencompass_hub": "OpenCompass Hub",
     "claire_radar": "Claire Radar",
     "benchmark_saturation": "Benchmark Saturation",
+    "aider": "Aider",
 }
 
 
