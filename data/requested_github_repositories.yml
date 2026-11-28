@@ -79,3 +79,6 @@ repositories:
   - full_name: aiprofessions/prompt-benchmark
     issue: https://github.com/ktwu01/benchmark-radar/issues/1267
     requested_at: 2026-11-15
+  - full_name: 14H034160212/faith-manip
+    issue: https://github.com/ktwu01/benchmark-radar/issues/1340
+    requested_at: 2026-11-24
