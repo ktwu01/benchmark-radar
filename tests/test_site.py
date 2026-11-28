@@ -478,8 +478,11 @@ def test_every_homepage_image_carries_an_alt_attribute():
     assert parser.images, "the homepage declares no image to check"
     for image in parser.images:
         assert "alt" in image, f"image without alt: {image.get('src')}"
-    badge = parser.images[0]
-    assert badge["src"] == "/assets/hf-paper-of-the-day.svg"
+    # Found by its source, not its position (#1169): a correctly labelled
+    # image added ahead of the badge must not fail this test.
+    badges = [i for i in parser.images if i.get("src") == "/assets/hf-paper-of-the-day.svg"]
+    assert len(badges) == 1, "the homepage should carry the award badge exactly once"
+    badge = badges[0]
     assert badge["alt"] == ""
     # The badge sits in a link that already names the award, so the empty
     # alt is deliberate: a repeated alt would read the award twice.
@@ -488,6 +491,168 @@ def test_every_homepage_image_carries_an_alt_attribute():
     # Generated pages are checked by parsing their rendered output instead
     # (tests/test_site_pages.py): a blanket ban on "<img" in the generator
     # source would also block a future accessible image.
+
+
+def _homepage_modules() -> dict[str, str]:
+    """Every local script index.html loads, and every module those import.
+
+    The scan starts from each /assets/ script the homepage declares, not
+    from app.js alone (#1169 review): clarity.js loads beside app.js, and an
+    image it built would otherwise go unchecked.
+    """
+    root = Path("site/assets")
+    html = Path("site/index.html").read_text(encoding="utf-8")
+    pending = re.findall(r"""<script\b[^>]*\bsrc=["']/assets/([\w.-]+\.js)["']""", html)
+    assert "app.js" in pending, "index.html no longer loads app.js; update this test"
+    found: dict[str, str] = {}
+    while pending:
+        name = pending.pop()
+        if name in found:
+            continue
+        found[name] = (root / name).read_text(encoding="utf-8")
+        pending.extend(
+            re.findall(r"""(?:from|import)\s*\(?\s*["']\./([\w.-]+\.js)["']""", found[name])
+        )
+    return found
+
+
+def _comment_end(text: str, index: int) -> int:
+    """Where the // or /* */ comment starting at `index` ends."""
+    if text.startswith("//", index):
+        end = text.find("\n", index)
+        return len(text) if end == -1 else end
+    end = text.find("*/", index + 2)
+    return len(text) if end == -1 else end + 2
+
+
+def _call_props(source: str, start: int) -> str:
+    """The object literal that opens at or after `start`, braces balanced.
+
+    Braces inside string literals do not count, so an alt text such as
+    "Share card for {name}" cannot shift where the object ends.
+    """
+    open_at = source.index("{", start)
+    depth, quote, index = 0, "", open_at
+    while index < len(source):
+        char = source[index]
+        if quote:
+            if char == "\\":
+                index += 1
+            elif char == quote:
+                quote = ""
+        elif char in "\"'`":
+            quote = char
+        elif source.startswith(("//", "/*"), index):
+            index = _comment_end(source, index)
+            continue
+        elif char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return source[open_at : index + 1]
+        index += 1
+    raise AssertionError("unbalanced constructor props")
+
+
+def _direct_members(obj: str) -> dict[str, str]:
+    """The keys an object literal declares itself, each with its value's text.
+
+    Keys inside nested objects, arrays, calls or strings are not this
+    object's members, so a scan depth-tracks brackets and skips string
+    literals: only a `key:` at the object's own level counts.
+    """
+    assert obj.startswith("{") and obj.endswith("}"), obj[:40]
+    members: dict[str, str] = {}
+    depth, index, quote = 0, 0, ""
+    key, value_start = None, None
+    while index < len(obj):
+        char = obj[index]
+        if quote:
+            if char == "\\":
+                index += 1
+            elif char == quote:
+                quote = ""
+        elif char in "\"'`":
+            quote = char
+        elif obj.startswith(("//", "/*"), index):
+            index = _comment_end(obj, index)
+            continue
+        elif char in "{[(":
+            depth += 1
+        elif char in "}])":
+            depth -= 1
+            if depth == 0 and key is not None:
+                members[key] = obj[value_start:index].strip().rstrip(",").strip()
+        elif depth == 1 and char == ",":
+            if key is not None:
+                members[key] = obj[value_start:index].strip()
+            key = None
+        elif depth == 1 and key is None:
+            found = re.match(
+                r"(?:\s|//[^\n]*|/\*.*?\*/)*([A-Za-z_$][\w$]*|\"[^\"]*\"|'[^']*')\s*:",
+                obj[index:],
+                re.S,
+            )
+            if found:
+                key = found.group(1).strip("\"'")
+                index += found.end()
+                value_start = index
+                continue
+        index += 1
+    return members
+
+
+def test_direct_members_ignores_nested_quoted_and_commented_keys():
+    assert set(_direct_members('{ /* alt: "", */ src: "x" }')) == {"src"}
+    assert set(_direct_members('{\n  // alt: "",\n  src: "x",\n}')) == {"src"}
+    members = _direct_members('{ wrapper: { attrs: { alt: "x" } }, text: "attrs: {}" }')
+    assert set(members) == {"wrapper", "text"}
+    assert set(_direct_members('{ attrs: { alt: t("a {b}", { b }) }, className: "c" }')) == {
+        "attrs",
+        "className",
+    }
+
+
+def test_every_image_the_homepage_scripts_build_carries_an_alt():
+    """Issue #1169: index.html is parsed above, but images built in script are not.
+
+    share-card.js's openShareDialog() and share-queue.js's thumbnails build an
+    img through a node() helper, so dropping its alt still passed. Walk every
+    module app.js loads and require an alt key in each img constructor's
+    `attrs` object, the only props the node() helpers turn into attributes;
+    a top-level `alt` would render no alt at all. An empty alt is allowed,
+    because decorative images need one.
+    """
+    modules = _homepage_modules()
+    assert "share-card.js" in modules, "app.js no longer reaches share-card.js; update this test"
+    builders = []
+    for name, source in modules.items():
+        # Only the props-object constructors are checked, so any other way of
+        # making an img fails here until this test learns to read it.
+        assert not re.search(r"createElement\(\s*[\"']img", source), name
+        assert not re.search(r"\bnew\s+Image\s*\(", source), name
+        assert "<img" not in source, name
+        for match in re.finditer(r"""\b\w+\(\s*["']img["']\s*([,)])""", source):
+            line = source.count("\n", 0, match.start()) + 1
+            # node("img") is a valid call with no props, so it renders no alt.
+            assert match.group(1) == ",", f"{name}:{line}: img built with no props, so no alt"
+            # The props must be written right here as an object literal: a
+            # variable cannot be read, and scanning ahead to the next "{" would
+            # credit this image with another call's attributes.
+            assert re.match(r"\s*\{", source[match.end() :]), (
+                f"{name}:{line}: img props are not an object literal, so the test cannot read them"
+            )
+            props = _call_props(source, match.end())
+            builders.append(f"{name}:{line}")
+            # Only a direct `attrs` member reaches setAttribute, and only a
+            # direct `alt` inside it becomes the attribute: a key nested any
+            # deeper, or written inside a string, renders no alt.
+            attrs = _direct_members(props).get("attrs")
+            assert attrs, f"{name}:{line}: img built without a direct attrs, so it has no alt"
+            assert attrs.startswith("{"), f"{name}:{line}: attrs is not an object literal"
+            assert "alt" in _direct_members(attrs), f"{name}:{line}: img built without alt"
+    assert any(b.startswith("share-card.js:") for b in builders), builders
 
 
 def test_language_toggle_click_handler_is_wired():
