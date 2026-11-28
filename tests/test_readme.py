@@ -117,7 +117,7 @@ def test_chinese_readme_mirrors_the_english_one():
 def test_readmes_link_the_current_technical_report():
     # The badge and resource links point at the published arXiv paper rather
     # than the source repository. The Daily Papers badge provides a second
-    # discovery path while the LaTeX source remains linked separately.
+    # discovery path.
     for readme in (README, README_ZH):
         text = readme.read_text(encoding="utf-8")
         assert f'<a href="{TECHNICAL_REPORT}">' in text

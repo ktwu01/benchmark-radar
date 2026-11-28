@@ -121,7 +121,7 @@ written in the
 - [Public corpus schema](docs/cumulative-corpus.schema.json)
 - [Citation information](https://benchmark-radar.org/cite/)
 - [Talks: slides and speaker notes](https://benchmark-radar.org/talks/)
-- [Technical report](https://arxiv.org/abs/2609.11115) (LaTeX source: [`main.tex`](https://github.com/ktwu01/benchmark-radar-paper/blob/main/main.tex))
+- [Technical report](https://arxiv.org/abs/2609.11115)
 - [Configuration](config.yml)
 - **Developer setup:** `python -m pip install -e '.[dev]' && benchmark-radar normalize-catalog`
 - **Support / bugs:** [open an issue](https://github.com/ktwu01/benchmark-radar/issues)

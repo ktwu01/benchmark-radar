@@ -3,9 +3,9 @@
 <a href="https://arxiv.org/abs/2609.11115"><img src="https://img.shields.io/badge/arXiv-Paper-red?style=for-the-badge&logo=arxiv" alt="arXiv"></a>
 <a href="https://huggingface.co/papers/2609.11115"><img src="https://img.shields.io/badge/Hugging%20Face-%232%20Paper%20of%20the%20Day%20%E2%80%A2%20Upvote%20us-FFD21E?style=for-the-badge&amp;logo=huggingface&amp;logoColor=000" alt="Hugging Face: #2 Paper of the Day — upvote us"></a>
 
-The manuscript, PDF, figures, and Overleaf instructions live in
-**[benchmark-radar-paper](https://github.com/ktwu01/benchmark-radar-paper)**,
-mounted here as the `latex/` Git submodule.
+The manuscript, PDF, figures, and Overleaf instructions live in the private
+repository `ktwu01/benchmark-radar-paper`. It is not part of this repository.
+The published paper is on [arXiv](https://arxiv.org/abs/2609.11115).
 
 ## Frozen paper data: v0.11.0
 
@@ -13,7 +13,7 @@ All paper data is cut off at the
 [v0.11.0 release](https://github.com/ktwu01/benchmark-radar/releases/tag/v0.11.0),
 software commit `8f46bbfa91f5d9900c8b08a5d552c3df5c9597b0`, with discovery
 through **2026-09-07**. The release includes the frozen input archive, checksums,
-and paper PDF. Follow the [paper's cutoff rule](latex/README.md#data-cutoff-rule-v0110).
+and paper PDF. Follow the cutoff rule in the paper repository's README.
 Routine paper edits must not incorporate newer inputs or advance the cutoff.
 The existing audit remains valid for unchanged inputs.
 
@@ -21,14 +21,15 @@ The existing audit remains valid for unchanged inputs.
 
 The exporter stays in this software repository. It reads
 `site/data/benchmark-index.json` and `site/data/radar.json`, then writes directly
-to `docs/technical-report/latex/figure-data.tex` inside the paper submodule.
+to `figure-data.tex` in a local clone of the paper repository (default path
+`docs/technical-report/latex/`, ignored by Git; override with `--output`).
 
 Use a clean checkout at the release commit above, then rebuild the inputs using the
 [clean-checkout CI steps](../../.github/workflows/ci.yml).
 From that Benchmark Radar checkout's root:
 
 ```bash
-git submodule update --init --recursive
+git clone https://github.com/ktwu01/benchmark-radar-paper docs/technical-report/latex
 git -C docs/technical-report/latex switch -c paper/reproduce-v0.11.0
 python scripts/export_report_figure_data.py
 python scripts/export_report_figure_data.py --check
@@ -49,8 +50,6 @@ CSV and JSON provide all records and their available measurements.
 
 Verify the exported hashes against the paper README and preserve the release
 cutoff. For manuscript edits, rebuild and inspect the figures and manuscript using the
-[paper's build instructions](https://github.com/ktwu01/benchmark-radar-paper#build-locally).
-Commit and push the reviewed changes in the paper repository. Keep paper-only
-work there by default. Update Benchmark Radar's `docs/technical-report/latex`
-submodule pointer only when the user explicitly requests it, after pushing the
-reviewed paper commit.
+build instructions in the paper repository's README.
+Commit and push the reviewed changes in the paper repository. This repository
+keeps no pointer to it, so nothing here changes.
