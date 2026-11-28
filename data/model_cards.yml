@@ -2227,6 +2227,24 @@ benchmarks:
       Codex). The arXiv paper (2602.09063) reports an earlier task set, so
       its numbers are not comparable with these.
 
+  # Submitted in #1340. The description comes from the authors' code release
+  # (README at 46374325, 2026-11-23); the IEEE page could not be read, so no
+  # release date is recorded.
+  - id: faith_manip
+    name: FAITH-Manip
+    aliases: ["FAITH-Manip", "FAITH Manip"]
+    domain: robotics
+    url: https://github.com/14H034160212/faith-manip/blob/46374325c48cdd774859e160bd1e83596420d4e8/README.md
+    caveat: >-
+      Measures how well offline proxy metrics predict closed-loop success for
+      imitation-learning robotic manipulation policies, not how well a policy
+      performs, so it has no per-model score. It reports Spearman rank
+      correlation, MMRV and selection regret with bootstrap confidence
+      intervals, over robomimic BC-RNN, Diffusion Policy on Push-T, ALOHA/ACT
+      and SmolVLA. The code release omits trained checkpoints, raw datasets
+      and pinned environments, and the authors note that four of the seven
+      main-text figures lack the scripts that drew them.
+
 # Model cards, technical reports and release posts.
 #
 # `organization` is the publisher of the document. `benchmarks` is the set of
