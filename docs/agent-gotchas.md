@@ -4,6 +4,11 @@ Known traps in this repo. Each entry states the trap and what to do.
 
 ## Local verification
 
+- **Prefer GitHub Actions CI on public PRs.** GitHub Actions runs
+  [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) on a clean checkout
+  for free on public repos. Run targeted checks locally; reserve full
+  clean-worktree CI runs for fork PRs without CI runs or for reproducing a
+  CI-only failure.
 - **Stale artifacts lie both ways.** Gitignored files such as `site/data/radar.json`
   can make a working copy pass a test that CI fails. Stale files can also invent
   failures. Trust only a clean-worktree run of the steps in

@@ -86,8 +86,9 @@ history.
   asks you to list what the issue requires and which items the PR does. A PR
   that does a small part of an issue says `Related to`, not `Closes`.
 - **Starts from the full corpus.** Every benchmark-facing chart, search, table,
-  count and export covers all records across all sources (1,259+ records across
-  4+ sources at minimum). Missing measurements never remove a record. If your
+  count and export covers all records across all sources (3,000+ catalog
+  benchmark records across 6 sources and 29,000+ discovery artifact records
+  across 41 sources). Missing measurements never remove a record. If your
   surface shows a few dozen benchmarks, records are missing. One exception:
   Benchmark Frontier and its linked score ranking exclude records without a
   numeric reported score, and account for them in their counts. See
@@ -95,10 +96,12 @@ history.
 - **Makes one change.** One logical change per PR. A connector, a page and a
   restyle are three PRs. Stacked PRs say so and land in order.
 - **Is conflict-free and green.** Merges into `main` with no conflict (it need
-  not be rebased on the latest `main`), with the full CI
-  sequence passing from a clean checkout (`git worktree add`, then
-  `git submodule update --init --recursive`). Give that checkout its own
-  environment first; a global install can run code from the wrong checkout:
+  not be rebased on the latest `main`), with CI passing. GitHub Actions runs
+  [`.github/workflows/ci.yml`](.github/workflows/ci.yml) on PRs from this
+  repository; when running the sequence locally (such as on a fork PR awaiting
+  workflow approval), run it from a clean checkout (`git worktree add`) with its
+  own environment first, since a global install can run code from the wrong
+  checkout:
 
   ```bash
   python3 -m venv .venv
@@ -155,9 +158,8 @@ Stated up front so nobody writes work that has to be turned down.
   `main`, or that brings back old commits, snapshots or files. Replay your own
   commits onto a fresh branch from `main`.
 - **Paper material.** Report drafts, figures and analysis folders for the
-  technical report go to
-  [`benchmark-radar-paper`](https://github.com/ktwu01/benchmark-radar-paper),
-  not this code repository.
+  technical report go to `ktwu01/benchmark-radar-paper`, not this code
+  repository.
 - **Useless bug fixes.** Changes without a reproducible failure a user could
   hit: cosmetic churn, defensive code for impossible inputs, rewording, or
   tests that pin source text or today's data counts instead of behavior.
@@ -227,10 +229,10 @@ Points, scored issues, collaborator seats and the public ledger are described in
 ## 4. Other problems
 
 - **CI has not run on your PR.** Workflows from forks wait for a maintainer to
-  approve them. Say in the PR that you ran the six steps from a clean checkout,
-  and with what result. "Relying on CI" is not a verification. CI does not run
-  at all for most Markdown-only changes; for a docs-only PR, say that the
-  docs-only check above printed nothing.
+  approve them. On a fork PR awaiting approval, say in the PR that you ran the
+  six steps from a clean checkout, and with what result. CI does not run at all
+  for most Markdown-only changes; for a docs-only PR, say that the docs-only
+  check above printed nothing.
 - **Your branch conflicts.** Rebase on `main`. When both sides append to a YAML
   file or a test file, keep both blocks. When a generated file conflicts, take
   `main`'s copy and regenerate it.
