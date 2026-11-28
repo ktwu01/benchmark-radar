@@ -232,6 +232,83 @@ def test_main_retries_doi_misses_by_arxiv_location(tmp_path, monkeypatch):
     assert not checkpoint.exists()
 
 
+def test_resume_skips_location_lookups_that_already_missed(tmp_path, monkeypatch):
+    # Issue #1168: an interrupted run checkpointed a completed location miss
+    # as null, the same value as a DOI miss, so every resume queried it again
+    # and spent OpenAlex's small daily budget without progress.
+    records_dir = tmp_path / "catalog"
+    records_dir.mkdir()
+    (records_dir / "model_reports_source_records.jsonl").write_text("", encoding="utf-8")
+    papers = ("2501.00001", "2501.00002", "2501.00003")
+    with (records_dir / "claire_radar_source_records.jsonl").open("w", encoding="utf-8") as h:
+        for paper in papers:
+            h.write(json.dumps(_record(f"claire-radar:{paper}", papers=(paper,))) + "\n")
+
+    doi_calls: list[list[str]] = []
+    location_calls: list[str] = []
+
+    def _doi_request(batch, **kwargs):
+        doi_calls.append(list(batch))
+        return {"results": []}  # the DOI pass misses all three
+
+    def _location_request(paper, **kwargs):
+        location_calls.append(paper)
+        if paper == "2501.00002" and location_calls.count(paper) == 1:
+            raise RuntimeError("interrupted")  # the first run stops here
+        if paper == "2501.00003":
+            return {
+                "results": [
+                    {
+                        "id": "https://openalex.org/W3",
+                        "doi": "https://doi.org/10.1/x",
+                        "authorships": [_authorship("MIT")],
+                    }
+                ]
+            }
+        return {"results": []}  # 2501.00001 and, on resume, 2501.00002 miss
+
+    monkeypatch.setattr(fetch, "request", _doi_request)
+    monkeypatch.setattr(fetch, "request_by_arxiv_location", _location_request)
+    output = tmp_path / "institutions.yml"
+    checkpoint = tmp_path / "checkpoint.json"
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "fetch_openalex_institutions.py",
+            "--records-dir",
+            str(records_dir),
+            "--output",
+            str(output),
+            "--checkpoint",
+            str(checkpoint),
+            "--delay",
+            "0",
+        ],
+    )
+
+    with pytest.raises(RuntimeError, match="interrupted"):
+        fetch.main()
+    fetched, attempted = fetch.load_checkpoint(checkpoint)
+    assert fetched["2501.00001"] is None
+    assert attempted == {"2501.00001"}
+
+    fetch.main()
+
+    # The completed miss is never asked again; the interrupted paper and the
+    # untouched one each get exactly one more lookup, and the DOI pass ran once.
+    assert location_calls == ["2501.00001", "2501.00002", "2501.00002", "2501.00003"]
+    assert doi_calls == [list(papers)]
+    payload = yaml.safe_load(output.read_text(encoding="utf-8"))
+    assert set(payload["benchmarks"]) == {"claire-radar:2501.00003"}
+    assert not checkpoint.exists()
+
+
+def test_a_checkpoint_from_before_the_attempted_list_still_loads(tmp_path):
+    checkpoint = tmp_path / "old.json"
+    checkpoint.write_text(json.dumps({"2501.00001": None}), encoding="utf-8")
+    assert fetch.load_checkpoint(checkpoint) == ({"2501.00001": None}, set())
+
+
 def test_committed_file_names_only_introducing_papers():
     payload = yaml.safe_load(DEFAULT_INSTITUTIONS_PATH.read_text(encoding="utf-8"))
     assert payload["schema_version"] == 1

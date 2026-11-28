@@ -171,6 +171,33 @@ def parse_location(payload: dict[str, Any], paper: str) -> dict[str, Any] | None
     return {"work": works[0]["id"], "institutions": names} if names else None
 
 
+def load_checkpoint(path: Path) -> tuple[dict[str, dict[str, Any] | None], set[str]]:
+    """Results so far, and the papers whose location lookup already ran.
+
+    A location lookup that finds nothing records None, the same value a DOI
+    miss records, so the result alone cannot say whether the fallback ran
+    (#1168). The checkpoint keeps the attempted papers as their own list. A
+    checkpoint from before that list is a plain paper-to-result mapping; it
+    still loads, with no lookup counted as attempted.
+    """
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if set(payload) == {"fetched", "location_attempted"}:
+        return payload["fetched"], set(payload["location_attempted"])
+    return payload, set()
+
+
+def write_checkpoint(
+    path: Path, fetched: dict[str, dict[str, Any] | None], location_attempted: set[str]
+) -> None:
+    path.write_text(
+        json.dumps(
+            {"fetched": fetched, "location_attempted": sorted(location_attempted)},
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--records-dir", type=Path, default=Path("data/catalog"))
@@ -190,8 +217,9 @@ def main() -> None:
     # The checkpoint only resumes an interrupted run: a refresh re-reads every
     # paper, and a finished run deletes it below.
     fetched: dict[str, dict[str, Any] | None] = {}
+    location_attempted: set[str] = set()
     if args.checkpoint.exists() and not args.refresh:
-        fetched = json.loads(args.checkpoint.read_text(encoding="utf-8"))
+        fetched, location_attempted = load_checkpoint(args.checkpoint)
     missing = sorted(
         {paper for key, paper in wanted.items() if key not in existing} - fetched.keys()
     )
@@ -199,23 +227,26 @@ def main() -> None:
     for start in range(0, len(missing), args.batch):
         batch = missing[start : start + args.batch]
         fetched.update(parse(request(batch), batch))
-        args.checkpoint.write_text(json.dumps(fetched, ensure_ascii=False), encoding="utf-8")
+        write_checkpoint(args.checkpoint, fetched, location_attempted)
         print(f"fetched {min(start + args.batch, len(missing))}/{len(missing)}")
         time.sleep(args.delay)
 
     # Papers the DOI misses — OpenAlex often merges an older arXiv preprint
     # into the published version's work (#1081). Retry those by the arXiv
     # location, one paper per request; a paper the DOI already resolved is
-    # never re-fetched, and a paper recorded as unresolved in an older
-    # checkpoint is retried here. Every paper is checkpointed as it resolves
-    # so an interrupted run resumes where it stopped.
+    # never re-fetched, and neither is a paper whose location lookup already
+    # ran, even when it found nothing (#1168): each lookup spends one request
+    # from OpenAlex's small daily budget. Every paper is checkpointed as its
+    # lookup finishes so an interrupted run resumes where it stopped.
     unresolved = sorted(
         {paper for key, paper in wanted.items() if key not in existing}
         - {paper for paper, result in fetched.items() if result}
+        - location_attempted
     )
     for count, paper in enumerate(unresolved, start=1):
         fetched[paper] = parse_location(request_by_arxiv_location(paper), paper)
-        args.checkpoint.write_text(json.dumps(fetched, ensure_ascii=False), encoding="utf-8")
+        location_attempted.add(paper)
+        write_checkpoint(args.checkpoint, fetched, location_attempted)
         print(f"location fallback {count}/{len(unresolved)}")
         time.sleep(args.delay)
 
