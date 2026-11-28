@@ -235,6 +235,17 @@ source_documents:
     published: 2026-11-16
     retrieved_at: 2026-11-18
 
+  # Accelerate Bench's README quotes the paper's Table 1 (v1.1). The table has
+  # not changed since a110efa (2026-11-23); the URL pins the commit read (#1327).
+  - id: accelerate_bench_readme_d53a88a
+    name: Accelerate Bench leaderboard, v1.1 (README at commit d53a88a)
+    publisher: Accelerate Bench authors
+    document_type: benchmark_leaderboard
+    url: https://github.com/AdAstraAbyssoque/accelerate-bench/blob/d53a88a3afef5b90e5b64053b186783f9924627d/README.md#leaderboard
+    benchmarks: [accelerate_bench]
+    published: 2026-11-23
+    retrieved_at: 2026-11-27
+
 benchmarks:
   - id: gobench
     name: GoBench
@@ -2226,6 +2237,26 @@ benchmarks:
       matters (GPT-5.5 scores 57.95 in mini-swe-agent and 57.78 in OpenAI
       Codex). The arXiv paper (2602.09063) reports an earlier task set, so
       its numbers are not comparable with these.
+
+  # Submitted by one of its authors in #1327. Released is the arXiv
+  # publication date of 2611.20882, "Accelerate Bench: Evaluating Agents for
+  # Application-Level Program Optimization", as data/snapshots/2026-11-17.json
+  # records it; the leaderboard date (2026-11-23) is when the scores were read.
+  - id: accelerate_bench
+    name: Accelerate Bench
+    aliases: ["Accelerate Bench", "AccelerateBench", "Accelerate-Bench"]
+    domain: coding_agent
+    url: https://github.com/AdAstraAbyssoque/accelerate-bench/blob/d53a88a3afef5b90e5b64053b186783f9924627d/README.md
+    released: 2026-11-17
+    caveat: >-
+      Long-horizon agents speed up 32 scientific computing programs. Score@1
+      is the mean over the tasks of a correctness-gated runtime saving, so a
+      correct 2x speedup earns 50 and a correct program with no speedup earns
+      0; correctness alone hardly separates agents. Each agent ran once per
+      task, so one task can move a score by up to about 3 points, and the
+      harness differs by row (Claude Code or Codex). The provider's safety
+      system stopped three Claude Opus 5.5 runs, which count as zero; on its
+      other 29 tasks it scores 65.6.
 
 # Model cards, technical reports and release posts.
 #
