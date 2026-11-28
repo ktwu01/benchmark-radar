@@ -27,6 +27,7 @@ from benchmark_radar.data_store import (
     default_data_home,
 )
 from benchmark_radar.models import RadarItem, RadarRun, SourceHealth
+from benchmark_radar.query import REQUIRED_CATALOG_SOURCES as PUBLISHED_REQUIRED_SOURCES
 from benchmark_radar.query import QueryPaths, QueryService
 from benchmark_radar.query_cli import run_query_cli
 from benchmark_radar.snapshots import write_snapshot
@@ -73,6 +74,15 @@ class _Remote:
             self.bundle_requests += 1
             return _Response(self.bundle, url=url)
         raise AssertionError(f"unexpected URL: {url}")
+
+
+@pytest.fixture(autouse=True)
+def _fixture_catalog_is_complete(monkeypatch):
+    # The fixture catalog is one "fixture" source standing in for the six
+    # published ones; releases and syncs refuse a catalog that lacks a
+    # required source, so here that one source is the complete set. Tests of
+    # missing sources set their own requirement.
+    monkeypatch.setattr("benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture"}))
 
 
 def _source_tree(tmp_path: Path, *, name: str = "Agent Workbench", day: int = 29) -> QueryPaths:
@@ -712,9 +722,7 @@ def test_http_not_found_carries_the_same_missing_sources(monkeypatch, tmp_path: 
 def test_every_published_catalog_source_is_required() -> None:
     # Codex review on #1359: a stale index missing only claire_radar or
     # benchmark_saturation must warn too; claire_radar alone is most rows.
-    from benchmark_radar.query import REQUIRED_CATALOG_SOURCES
-
-    assert REQUIRED_CATALOG_SOURCES == {
+    assert PUBLISHED_REQUIRED_SOURCES == {
         "artificial_analysis",
         "benchmark_saturation",
         "claire_radar",
@@ -782,3 +790,46 @@ def test_an_invalid_argument_is_reported_before_the_catalog_is_judged(
     assert exit_code == 2
     assert captured.value.code == 400
     assert cli_error["error"]["code"] == http_error["error"]["code"] == "invalid_limit"
+
+
+def test_a_release_is_refused_while_a_required_source_is_missing(
+    monkeypatch, tmp_path: Path
+) -> None:
+    # Codex review on #1359: status stays "ok" for a partial catalog so an
+    # installed stale dataset keeps answering, but publishing one must fail.
+    monkeypatch.setattr(
+        "benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture", "model_reports"})
+    )
+    paths = _source_tree(tmp_path)
+    with pytest.raises(ValueError, match="missing required sources: model_reports"):
+        build_data_release(paths=paths, output_dir=tmp_path / "published")
+
+
+def test_sync_rejects_a_partial_catalog_and_keeps_the_active_dataset(
+    monkeypatch, tmp_path: Path
+) -> None:
+    # Codex review on #1359: the staged-install check refuses a downloaded
+    # catalog that lacks a required source, before activation, and the
+    # already-active dataset stays in place and keeps answering.
+    first_manifest, first_bundle, manifest_url = _release(tmp_path / "first", day=29)
+    store = DataStore(
+        root=tmp_path / "home",
+        manifest_url=manifest_url,
+        urlopen=_Remote(manifest_url, first_manifest, first_bundle).urlopen,
+    )
+    store.initialize()
+    second_manifest, second_bundle, _ = _release(tmp_path / "second", day=30)
+    store.urlopen = _Remote(manifest_url, second_manifest, second_bundle).urlopen
+    # The published requirement grew after the second release was built.
+    monkeypatch.setattr(
+        "benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture", "model_reports"})
+    )
+
+    with pytest.raises(DataSyncError, match="missing required sources: model_reports") as caught:
+        store.sync()
+
+    assert caught.value.code == "invalid_artifact"
+    assert store.state()["data_version"] == first_manifest["data_version"]
+    assert [path.name for path in (store.root / "versions").iterdir()] == [
+        first_manifest["data_version"]
+    ]
