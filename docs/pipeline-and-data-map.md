@@ -171,23 +171,21 @@ inputs retain their source spelling.
 
 ## Technical report and deposit files
 
-The paper lives in `ktwu01/benchmark-radar-paper`, mounted as a Git submodule at
-`docs/technical-report/latex`. Initialize it with
-`git submodule update --init --recursive`, including in clean worktrees. Keep
-paper-only edits and PRs in the paper repository by default. Update the parent
-Benchmark Radar repository, including its submodule pointer, only when the user
-explicitly requests it. For a requested pointer update, push the reviewed paper
-commit first, then commit the pointer here. Overleaf sync changes the paper
-repository, not this pinned pointer.
+The paper lives in the private repository `ktwu01/benchmark-radar-paper`. This
+repository does not include it; CI and the site deploy never read it. To work
+on the report, clone it to `docs/technical-report/latex` (Git ignores that
+path) or anywhere else:
+`git clone https://github.com/ktwu01/benchmark-radar-paper docs/technical-report/latex`.
+Keep paper edits and PRs in the paper repository. Overleaf sync changes the
+paper repository only.
 
-- Report source: `docs/technical-report/latex/main.tex`. This is the single
+- Report source: `main.tex` in the paper repository. This is the single
   source of truth for the report. Edit it directly. Nothing generates it from
   Python, Markdown, or the running site.
-- Built PDF: `docs/technical-report/latex/main.pdf`, tracked so the report reads
-  on GitHub in the paper repository. Rebuild and commit it with any change to
+- Built PDF: `main.pdf` in the paper repository, tracked there. Rebuild and commit it with any change to
   `main.tex`.
-- The four PDF figures have native TikZ sources under `latex/figures/`.
-  `make` builds them from the dated `latex/figure-data.tex` export. Refresh that
+- The four PDF figures have native TikZ sources under `figures/` in the paper repository.
+  `make` builds them from the dated `figure-data.tex` export. Refresh that
   export only after auditing a clean corpus rebuild; review and commit the
   figure PDFs and manuscript PDF together. The exporter writes no report prose.
 - Build instructions and audited inputs: `docs/technical-report/README.md`
@@ -196,5 +194,5 @@ repository, not this pinned pointer.
 
 Before changing report claims, run the clean-checkout steps in
 `.github/workflows/ci.yml` and recompute claims from its outputs. Rebuild the PDF
-with `make` in `docs/technical-report/latex/`, inspect the rendered PDF, and
+with `make` in the paper repository, inspect the rendered PDF, and
 commit that exact file. The PDF is a dated interpretation, not a data source.

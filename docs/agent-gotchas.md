@@ -22,8 +22,6 @@ Known traps in this repo. Each entry states the trap and what to do.
 - **Local pipeline runs need a token.** Export `GITHUB_TOKEN="$(gh auth token)"`.
   Without it, GitHub search returns HTTP 429 and the run aborts before the
   boilerplate guard executes.
-- **Worktree removal fails because of the submodule.** Confirm
-  `git status --short` is empty, then run `trash <path>` and `git worktree prune`.
 
 ## GitHub and hosting
 

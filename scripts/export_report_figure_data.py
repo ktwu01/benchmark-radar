@@ -116,9 +116,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--check", action="store_true", help="Fail if the dated inputs differ")
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=OUTPUT,
+        help="figure-data.tex in a local clone of ktwu01/benchmark-radar-paper",
+    )
     args = parser.parse_args()
     result = render_data(args.root)
-    output = args.root / OUTPUT
+    output = args.output if args.output.is_absolute() else args.root / args.output
     if args.check:
         if output.read_text(encoding="utf-8") != result:
             raise SystemExit("Figure data differs; audit the rebuilt inputs before refreshing")
