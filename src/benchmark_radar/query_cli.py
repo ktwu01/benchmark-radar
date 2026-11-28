@@ -490,14 +490,18 @@ def run_query_cli(argv: Sequence[str] | None = None) -> int:
         else:
             query = _search_query(args) if args.command == "search" else None
             service = _service(args)
-            # Only commands that read the catalog check it: `recent` and a
-            # radar-scoped search answer from snapshots alone, so they must
-            # neither load the index nor warn about a corpus they never used.
-            sources_warning = (
-                _missing_sources_warning(service.catalog_sources()["missing_sources"])
-                if _reads_catalog(args)
-                else None
-            )
+
+            def coverage_warning() -> str | None:
+                # Only commands that read the catalog check it: `recent` and a
+                # radar-scoped search answer from snapshots alone, so they must
+                # neither load the index nor warn about a corpus they never used.
+                # Called only after the command itself has answered, so a bad
+                # argument (say --limit 0) is reported as such, exactly as over
+                # HTTP, and never masked by a missing or malformed index.
+                if not _reads_catalog(args):
+                    return None
+                return _missing_sources_warning(service.catalog_sources()["missing_sources"])
+
             if args.command == "search":
                 payload = service.search(
                     query,
@@ -533,7 +537,7 @@ def run_query_cli(argv: Sequence[str] | None = None) -> int:
                     include_radar=args.include_radar,
                     manuscript=_read_manuscript(args),
                 )
-                printer = _related_work_printer(args, sources_warning)
+                printer = _related_work_printer(args, coverage_warning())
             elif args.command == "status":
                 payload = service.status()
                 printer = _print_json if args.json else _print_status
@@ -546,7 +550,7 @@ def run_query_cli(argv: Sequence[str] | None = None) -> int:
                         code="data_unavailable",
                         status=503,
                     )
-                _warn_missing_sources(sources_warning)
+                _warn_missing_sources(coverage_warning())
                 print(f"Serving Benchmark Radar at http://{args.host}:{args.port}", file=sys.stderr)
                 print(cite_reminder(), file=sys.stderr)
                 serve_query_api(service, host=args.host, port=args.port)
@@ -557,7 +561,7 @@ def run_query_cli(argv: Sequence[str] | None = None) -> int:
         # prompt is still the last line an agent sees. related-work prints its
         # own, after its file writes can no longer fail.
         if args.command not in {"init", "sync", "related-work"}:
-            _warn_missing_sources(sources_warning)
+            _warn_missing_sources(coverage_warning())
         printer(payload)
         if args.command != "related-work":
             _print_cite_reminder(args)

@@ -741,3 +741,44 @@ def test_radar_only_commands_neither_load_nor_judge_the_catalog(
     captured = capsys.readouterr()
     json.loads(captured.out)
     assert "no records from" not in captured.err
+
+
+@pytest.mark.parametrize("index_state", ["missing", "malformed"])
+def test_an_invalid_argument_is_reported_before_the_catalog_is_judged(
+    capsys, tmp_path: Path, index_state: str
+) -> None:
+    # Review on #1359 (toby-bridges): the coverage check read the index before
+    # search validated --limit, so a missing or malformed index turned
+    # invalid_limit (exit 2) into a data error (exit 1), unlike HTTP.
+    import threading
+    import urllib.request
+
+    from benchmark_radar.query_http import create_query_server
+
+    paths = _source_tree(tmp_path)
+    if index_state == "missing":
+        paths.index.unlink()
+    else:
+        paths.index.write_text("{not json", encoding="utf-8")
+
+    exit_code = run_query_cli(["search", "agent", "--limit", "0", "--json", *_cli_paths(paths)])
+    cli_error = json.loads(capsys.readouterr().err.strip().splitlines()[-1])
+
+    server = create_query_server(QueryService(paths), host="127.0.0.1", port=0)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        with pytest.raises(urllib.error.HTTPError) as captured:
+            urllib.request.urlopen(
+                f"http://127.0.0.1:{server.server_port}/api/v1/search?q=agent&limit=0",
+                timeout=5,
+            )
+        http_error = json.loads(captured.value.read())
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+    assert exit_code == 2
+    assert captured.value.code == 400
+    assert cli_error["error"]["code"] == http_error["error"]["code"] == "invalid_limit"
