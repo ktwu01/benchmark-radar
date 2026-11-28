@@ -19,7 +19,7 @@ the constraint that holds whether or not you open it.
 | [`docs/sop-add-model-cards.md`](docs/sop-add-model-cards.md) | Adding a model card, a benchmark, or a score | `data/model_cards.yml` and `data/benchmark_scores.yml` move together. Every value is read out of the cited document, never from memory. |
 | [`docs/query-surfaces.md`](docs/query-surfaces.md) | Changing search, detail lookup, the CLI or HTTP query surface, or the consumer Skill | `QueryService` is the single source of truth. No interface-specific ranking, and no silent network fallback. |
 | [`principle.md`](principle.md) | Changing any benchmark-facing surface | Start from the full corpus across all sources. |
-| [`docs/agent-gotchas.md`](docs/agent-gotchas.md) | Verifying locally, merging, or answering a literature question | A local result counts only from a clean worktree with its own venv. |
+| [`docs/agent-gotchas.md`](docs/agent-gotchas.md) | Verifying locally, merging, or answering a literature question | Prefer GitHub Actions CI over full local test runs on public PRs; when verifying locally, only a clean worktree with its own venv counts. |
 | [`maintainer-review.md`](maintainer-review.md) | Reviewing or merging a contributor PR | The human contributor answers the four questions, and the change takes the least resource-intensive route. |
 
 ## Glob rule: showcase and UI communication
@@ -68,7 +68,12 @@ Applies to `README*`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `site/**`,
 
 - When the contributor is not `ktwu01`, ask the four questions in
   [`CONTRIBUTING.md`](CONTRIBUTING.md#before-you-start-a-pr) before
-  substantive work.
+  substantive work. For `ktwu01`, skip them and proceed directly.
+- Do not add arbitrary request caps, silent filters, or literal
+  CSS/copy-pinning tests. Every cap or holdback must state what happens to
+  records past it and keep them inspectable; an unrequested cap silently drops
+  due records (e.g., `99307e23`), and frozen style/copy assertions break CI on
+  intended edits (e.g., #1245, #1247).
 - Finish the task without nudges. Stop only for a merge, a credential, or a
   destructive action.
 - If a request has two opposite readings, state your reading in one line, then

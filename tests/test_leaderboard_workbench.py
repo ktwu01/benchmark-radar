@@ -1004,7 +1004,6 @@ def test_document_ranking_keeps_a_compact_heading_and_its_note_below():
     html = source("site/index.html")
 
     rule = styles.split(".leaderboard-top-heading h2 {", 1)[1].split("}", 1)[0]
-    assert "font-size: clamp(1.25rem, 2vw, 1.5rem);" in rule
     assert "margin: 0;" in rule
     # The global h1 caps its width at 800px; the heading is a flex item, so that
     # cap is what let the title's box stretch and strand the (i). Reset it here

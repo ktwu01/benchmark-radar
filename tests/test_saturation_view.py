@@ -7,6 +7,7 @@ join rule has to hold in the drawing code, and a flat score tail has to be
 labelled as a reading gap rather than left to be read as a plateau.
 """
 
+import re
 from pathlib import Path
 
 from benchmark_radar.benchmark_scores import DEFAULT_SCORES_PATH, build_score_progression
@@ -278,15 +279,16 @@ def test_the_search_field_carries_the_panel_weight_through_affordance():
     styles = source("site/assets/styles.css")
 
     field = styles.split(".benchmark-search-input {", 1)[1].split("}", 1)[0]
-    assert "border: 2px solid var(--ink)" in field
-    assert "background-color: white" in field
+    assert re.search(r"(?:^|[;\s])border\s*:", field)
+    assert re.search(r"(?:^|[;\s])background-color\s*:", field)
 
     label = styles.split(".benchmark-search-label {", 1)[1].split("}", 1)[0]
-    assert "font-size: 0.78rem" in label, "the label must not grow"
+    label_size = _css_float(label, "font-size")
 
     status = styles.split(".benchmark-search-status {", 1)[1].split("}", 1)[0]
-    assert "font-size: 0.7rem" in status
-    assert "opacity: 0.75" in status
+    status_size = _css_float(status, "font-size")
+    assert status_size < label_size
+    assert _css_float(status, "opacity") < 1.0
 
 
 def test_shortcuts_use_the_same_score_ranking_as_the_picker():
@@ -811,22 +813,23 @@ def test_issue_345_a_reading_off_the_line_stays_legible():
 
     # The disc stays a disc: near-opaque face, and an edge that survives.
     dim = _css_rule(styles, ".score-point-dim .score-point-face {")
-    assert "fill-opacity: 0.92;" in dim
-    assert "stroke-opacity: 0.7;" in dim
+    assert _css_float(dim, "fill-opacity") >= 0.85
+    assert _css_float(dim, "stroke-opacity") >= 0.6
     # The bright blue ring belongs to the line; off it, the edge goes neutral.
-    assert "stroke: #7b8f9b;" in dim
+    face_stroke = _css_prop(_css_rule(styles, ".score-point-face {"), "stroke")
+    assert _css_prop(dim, "stroke") != face_stroke
     # The glyph carries the mark's whole payload, so it never fades below
     # readable. Anything at or under the old 0.5 is the bug coming back.
     glyph = _css_rule(styles, ".score-point-dim .score-point-glyph {")
-    opacity = float(glyph.split("opacity:", 1)[1].split(";", 1)[0])
+    opacity = _css_float(glyph, "opacity")
     assert opacity >= 0.7, "a brand glyph this faint cannot be identified"
 
     # Hover grows a point from whatever size it is drawn at. One shared radius
     # would have shrunk a record setter the moment a reader pointed at it.
     hover = _css_rule(styles, ".score-point.is-selected .score-point-face {")
-    assert "r: 15px;" in hover
     dim_hover = _css_rule(styles, ".score-point-dim.is-selected .score-point-face {")
-    assert "r: 10px;" in dim_hover
+    assert _css_float(hover, "r") > _css_float(dim_hover, "r")
+    assert _css_float(dim_hover, "r") > off["face"]
     # And it comes back to the line's own colour while it is held.
     restore = _css_rule(
         styles,
@@ -834,15 +837,28 @@ def test_issue_345_a_reading_off_the_line_stays_legible():
 .score-point-dim:focus .score-point-face,
 .score-point-dim.is-selected .score-point-face {""",
     )
-    face_stroke = _css_rule(styles, ".score-point-face {").split("stroke:", 1)[1].split(";", 1)[0]
-    assert f"stroke:{face_stroke};" in restore
-    assert "stroke-opacity: 1;" in restore
+    assert _css_prop(restore, "stroke") == face_stroke
+    assert _css_float(restore, "stroke-opacity") == 1.0
 
 
 def _css_rule(styles: str, selector: str) -> str:
     """Return the body of the first rule whose selector matches exactly."""
     assert selector in styles, f"missing selector: {selector}"
     return styles.split(selector, 1)[1].split("}", 1)[0]
+
+
+def _css_prop(rule: str, prop: str) -> str:
+    """Extract the trimmed value of a CSS property from a rule body."""
+    match = re.search(rf"(?:^|[;\s]){re.escape(prop)}\s*:\s*([^;]+?)(?:;|\s*$)", rule)
+    assert match is not None, f"missing property {prop!r} in CSS rule: {rule}"
+    return match.group(1).strip()
+
+
+def _css_float(rule: str, prop: str) -> float:
+    """Extract the leading numeric value of a CSS property from a rule body."""
+    match = re.search(rf"(?:^|[;\s]){re.escape(prop)}\s*:\s*([0-9]+(?:\.[0-9]+)?)", rule)
+    assert match is not None, f"missing numeric property {prop!r} in CSS rule: {rule}"
+    return float(match.group(1))
 
 
 def test_reported_result_lists_preserve_observations_sources_and_localization():
