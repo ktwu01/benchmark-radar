@@ -235,6 +235,49 @@ source_documents:
     published: 2026-11-16
     retrieved_at: 2026-11-18
 
+  # SpatialBench-Long's results table is in its README and has not changed
+  # since 0759a59 (2026-06-09); EpiBench's is Table "Endpoint pass rates by
+  # model-harness pair" in the repository's paper/main.tex, unchanged since
+  # a8fa2e3 (2026-06-11). Both URLs pin the commit read (#1296).
+  - id: latchbio_spatialbench_long_results_b693be2
+    name: SpatialBench-Long results table (latchbio/spatialbench-long, commit b693be2)
+    publisher: LatchBio
+    document_type: benchmark_leaderboard
+    url: https://github.com/latchbio/spatialbench-long/blob/b693be22d32755c2c0c3c376a8b3b71d226e2685/README.md#results
+    benchmarks: [latchbio_spatialbench_long]
+    published: 2026-06-09
+    retrieved_at: 2026-11-26
+
+  - id: latchbio_epibench_paper_46c69cb
+    name: EpiBench manuscript source, endpoint pass rates table (latchbio/epibench, commit 46c69cb)
+    publisher: LatchBio
+    document_type: benchmark_leaderboard
+    url: https://github.com/latchbio/epibench/blob/46c69cba20b41c6da337766f9b24df3ab4bf7687/paper/main.tex
+    benchmarks: [latchbio_epibench]
+    published: 2026-06-11
+    retrieved_at: 2026-11-26
+
+  # BioSecBench-Function and -Surveillance publish per-configuration results
+  # as results/config_results.csv; the URLs pin the commit read, and
+  # `published` is the date that file last changed.
+  - id: latchbio_biosecbench_function_results_893cde2
+    name: BioSecBench-Function configuration results (latchbio/biosecbench-function, commit 893cde2)
+    publisher: LatchBio
+    document_type: benchmark_leaderboard
+    url: https://github.com/latchbio/biosecbench-function/blob/893cde2b9e0ad80a3cb51004b708180092e7f29a/results/config_results.csv
+    benchmarks: [latchbio_biosecbench_function]
+    published: 2026-08-27
+    retrieved_at: 2026-11-26
+
+  - id: latchbio_biosecbench_surveillance_results_3112b22
+    name: BioSecBench-Surveillance configuration results (latchbio/biosecbench-surveillance, commit 3112b22)
+    publisher: LatchBio
+    document_type: benchmark_leaderboard
+    url: https://github.com/latchbio/biosecbench-surveillance/blob/3112b221410cebb673b76a58b5b06b861bc46903/results/config_results.csv
+    benchmarks: [latchbio_biosecbench_surveillance]
+    published: 2026-07-08
+    retrieved_at: 2026-11-26
+
 benchmarks:
   - id: gobench
     name: GoBench
@@ -2226,6 +2269,144 @@ benchmarks:
       matters (GPT-5.5 scores 57.95 in mini-swe-agent and 57.78 in OpenAI
       Codex). The arXiv paper (2602.09063) reports an earlier task set, so
       its numbers are not comparable with these.
+
+  # More LatchBio benchmarks for #1296. SpatialBench-Long and EpiBench carry
+  # scores from pinned tables; VariantBench, TxBench-PP and OncologyBench
+  # publish results only on benchmarks.bio, which updates in place, so they
+  # are recorded without scores. Descriptions come from each repository's
+  # README at the commit in its URL.
+  - id: latchbio_spatialbench_long
+    name: SpatialBench-Long
+    aliases: ["SpatialBench-Long", "SpatialBench Long"]
+    domain: biology
+    url: https://github.com/latchbio/spatialbench-long/blob/b693be22d32755c2c0c3c376a8b3b71d226e2685/README.md
+    caveat: >-
+      Long-horizon spatial biology: agents must recover biological claims from
+      raw or near-raw data without a prescribed method. Each model-harness pair
+      has 72 runs, so one run moves the pass rate by about 1.4 points and many
+      pairs tie. The harness changes the result (Claude Opus 4.8 passes 11.11%
+      in Claude Code and 8.33% in Pi). Only four evaluations are public.
+      LatchBio's SpatialBench is a separate benchmark with its own scores.
+
+  - id: latchbio_epibench
+    name: EpiBench
+    aliases: ["EpiBench", "LatchBio EpiBench"]
+    domain: biology
+    url: https://github.com/latchbio/epibench/blob/46c69cba20b41c6da337766f9b24df3ab4bf7687/README.md
+    caveat: >-
+      Short-horizon epigenomics analysis over 106 evaluations, three attempts
+      each (318 per model-harness pair), scored on the endpoint answer. The
+      published 95% intervals are 11 to 18 points wide, so most adjacent
+      pairs overlap, and the harness changes the result (GPT-5.5 passes 45.0%
+      in Pi and 39.9% in OpenAI Codex). Runtime and cost are not part of the
+      score. Not the epitope-reasoning EpiBench of arXiv 2608.06022.
+
+  - id: latchbio_variantbench
+    name: VariantBench
+    aliases: ["VariantBench", "LatchBio VariantBench"]
+    domain: biology
+    url: https://github.com/latchbio/variantbench/blob/96a26565d7ff08961a2bbdd1061cd5957a9b3692/README.md
+    caveat: >-
+      Agentic variant discovery, statistical genetics and personal genomics,
+      in a main benchmark of 118 evaluations. The public repository holds only
+      eight evaluations and 28 example trajectories, and two of those eight
+      (the neoantigen evaluations) are not part of the main benchmark. Results
+      are published only on LatchBio's benchmarks.bio leaderboard, which
+      updates in place. Not the 2025 VariantBench of Basharat et al., a
+      separate benchmark of ACMG/AMP variant-classification justifications.
+
+  - id: latchbio_txbench_pp
+    name: TxBench-PP
+    aliases: ["TxBench-PP", "TherapeuticsBench Preclinical Pharmacology", "TxBench Preclinical Pharmacology"]
+    domain: biology
+    url: https://github.com/latchbio/txbench/blob/920bff72157cb2a6106ff4f534f160eccca8ad85/README.md
+    caveat: >-
+      Small-molecule preclinical pharmacology, the first focused slice of a
+      broader TherapeuticsBench effort across drug-discovery stages and
+      therapeutic modalities; other slices are separate benchmarks. The public
+      repository holds seven example evaluations, and results are published
+      only on LatchBio's benchmarks.bio leaderboard, which updates in place.
+
+  - id: latchbio_oncologybench
+    name: OncologyBench
+    aliases: ["OncologyBench", "LatchBio OncologyBench"]
+    domain: health
+    url: https://github.com/latchbio/oncologybench/blob/96eb31b7e5611dd8f5c178d9b962d6e0cc1a4c76/README.md
+    caveat: >-
+      Oncology data analysis and interpretation, including molecular tumour
+      board decisions, biomarker-driven treatment selection, pharmacogenomic
+      safety and translational programme review. The public release holds two
+      evaluations that are not in the benchmark itself, only built the same
+      way, and results are published only on LatchBio's benchmarks.bio
+      leaderboard, which updates in place.
+
+  - id: latchbio_biosecbench_function
+    name: BioSecBench-Function
+    aliases: ["BioSecBench-Function", "BioSecBench Function"]
+    domain: biology
+    url: https://github.com/latchbio/biosecbench-function/blob/893cde2b9e0ad80a3cb51004b708180092e7f29a/README.md
+    caveat: >-
+      Whether agents recover biological function, or a biosecurity-relevant
+      conclusion, from assay readouts, structures or sequences, graded
+      deterministically. Refusals are excluded, and an evaluation refused on
+      every attempt is dropped, so each row covers a different subset (76 to
+      111 evaluations). For three of four providers most refusals are
+      provider-side blocks rather than the model's own decision. Published 95%
+      intervals are 17 to 20 points wide.
+
+  - id: latchbio_biosecbench_surveillance
+    name: BioSecBench-Surveillance
+    aliases: ["BioSecBench-Surveillance", "BioSecBench Surveillance"]
+    domain: biology
+    url: https://github.com/latchbio/biosecbench-surveillance/blob/3112b221410cebb673b76a58b5b06b861bc46903/README.md
+    caveat: >-
+      Whether agents turn raw pathogen sequencing data into a surveillance
+      result, graded deterministically. Timeouts count as failures, but
+      refusals are excluded and an evaluation refused on every attempt is
+      dropped, so each row covers a different subset (76 to 100 evaluations).
+      The publisher reports that the Anthropic, OpenAI and Google
+      configurations overlap with no clear ordering; published 95% intervals
+      are 11 to 21 points wide.
+
+  - id: latchbio_neurosciencebench
+    name: NeuroscienceBench
+    aliases: ["NeuroscienceBench", "Neuroscience Bench"]
+    domain: biology
+    url: https://github.com/latchbio/neurobench/blob/804b78c5e8aca83cee3ccfb1338280d5891800e4/README.md
+    caveat: >-
+      Whether agents reach correct scientific conclusions from neuroscience
+      research data, from sequencing and electrophysiology to imaging and
+      clinical biomarkers, graded deterministically. The repository holds three
+      public example tasks. Its manuscript reports the full leaderboard only as
+      a figure, so no scores are filed here.
+
+  # Handshake's ATLAS suite (#1296's data-vendor half). Both repositories run
+  # the benchmark but publish results only on Handshake's leaderboard pages,
+  # which update in place, so they are recorded without scores.
+  - id: handshake_atlas_vials
+    name: ATLAS - Visual Life Sciences (VIALS)
+    aliases: ["VIALS", "ATLAS-VIALS", "ATLAS Visual Life Sciences"]
+    domain: multimodal
+    url: https://github.com/Handshake-AI-Research/vials/blob/6f130acccb8c02e12b943a437af9b713b537db12/README.md
+    caveat: >-
+      Visual question answering over the artifacts of biotech and
+      pharmaceutical R&D: each task gives one or more images and a question.
+      An LLM judge decides whether the answer matches the held-out ground
+      truth, so scores depend on that judge. Part of Handshake's ATLAS suite
+      (arXiv 2608.21357).
+
+  - id: handshake_atlas_finance
+    name: ATLAS-Finance
+    aliases: ["ATLAS-Finance", "ATLAS Finance"]
+    domain: professional
+    url: https://github.com/Handshake-AI-Research/atlas-finance/blob/2f6ece06eed81002e6d4712b20d172cc39a3a93b/README.md
+    caveat: >-
+      100 expert-level tasks inside 13 simulated financial-firm environments,
+      where the agent must find requirements scattered across email, chat,
+      drive and notes and deliver an Excel model. Graded by an agent-as-judge
+      against weighted, section-gated rubrics, so scores depend on that judge
+      and on the agent harness. Part of Handshake's ATLAS suite (arXiv
+      2611.22085).
 
 # Model cards, technical reports and release posts.
 #

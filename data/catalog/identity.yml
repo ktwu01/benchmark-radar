@@ -291,6 +291,54 @@ equivalent:
     reviewed_at: 2026-09-12
     note: Both are VBench (Huang et al., 2023).
 
+  # LatchBio benchmarks from #1296 that Claire Radar already lists from
+  # arXiv. Each pair was checked by author list and description, not by name:
+  # claire-radar:2608.06022 is also called EpiBench but is a different,
+  # epitope-reasoning benchmark (Zhejiang University) and is not linked.
+  # Siblings only: neither record inherits fields or scores from the other.
+  - group_id: latchbio-spatialbench-long-2605-28065
+    basis: reviewer_asserted
+    members: [claire-radar:2605.28065, model-reports:latchbio_spatialbench_long]
+    anchors: [arxiv:2605.28065, gh:latchbio/spatialbench-long]
+    reviewed_by: jellyfishing2346
+    reviewed_at: 2026-11-26
+    note: >-
+      Both are LatchBio's SpatialBench-Long (Diks, Muralidharan, Proctor and
+      Workman); the arXiv paper and the repository describe the same
+      long-horizon spatial biology benchmark.
+
+  - group_id: latchbio-epibench-2606-13602
+    basis: reviewer_asserted
+    members: [claire-radar:2606.13602, model-reports:latchbio_epibench]
+    anchors: [arxiv:2606.13602, gh:latchbio/epibench]
+    reviewed_by: jellyfishing2346
+    reviewed_at: 2026-11-26
+    note: >-
+      Both are LatchBio's epigenomics EpiBench: the arXiv record's authors
+      match the author list in the repository's paper/main.tex (Muralidharan,
+      Baskar, Lee, Proctor and Workman).
+
+  - group_id: latchbio-txbench-pp-2606-19245
+    basis: reviewer_asserted
+    members: [claire-radar:2606.19245, model-reports:latchbio_txbench_pp]
+    anchors: [arxiv:2606.19245, gh:latchbio/txbench]
+    reviewed_by: jellyfishing2346
+    reviewed_at: 2026-11-26
+    note: >-
+      The arXiv record is titled TherapeuticsBench but describes TxBench-PP,
+      with the same authors (Le, Ramasamy, Urrutia and Yazdani) as the
+      repository's TherapeuticsBench Preclinical Pharmacology.
+
+  - group_id: latchbio-biosecbench-surveillance-2607-19262
+    basis: reviewer_asserted
+    members: [claire-radar:2607.19262, model-reports:latchbio_biosecbench_surveillance]
+    anchors: [arxiv:2607.19262, gh:latchbio/biosecbench-surveillance]
+    reviewed_by: jellyfishing2346
+    reviewed_at: 2026-11-26
+    note: >-
+      Both are LatchBio's BioSecBench-Surveillance, the pathogen genomic
+      surveillance benchmark.
+
 # Related, cross-linked, never merged. Two kinds share this block:
 #
 # The first three are the OpenCompass-internal anchor-sharing pairs from
