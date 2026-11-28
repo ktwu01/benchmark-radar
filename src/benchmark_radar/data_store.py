@@ -461,6 +461,14 @@ class DataStore:
                 staged_status = QueryService(staged_paths).status()
                 if staged_status["status"] != "ok":
                     raise DataSyncError("downloaded dataset is degraded", code="invalid_artifact")
+                # A partial catalog is refused here, before activation, while
+                # the already-active dataset (stale or not) stays in place and
+                # keeps answering until a complete release arrives.
+                if missing := staged_status["catalog"]["missing_sources"]:
+                    raise DataSyncError(
+                        "downloaded catalog is missing required sources: " + ", ".join(missing),
+                        code="invalid_artifact",
+                    )
                 if staged_status["catalog"]["count"] != manifest["benchmark_count"]:
                     raise DataSyncError(
                         "downloaded benchmark count does not match manifest",

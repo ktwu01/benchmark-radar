@@ -44,6 +44,13 @@ def build_data_release(
     status = QueryService(paths).status()
     if status["status"] != "ok":
         raise ValueError("refusing to publish a degraded Benchmark Radar dataset")
+    # `status` stays "ok" for a catalog that lacks a required source, so an
+    # already-installed stale dataset keeps answering. A new release must not
+    # be one: it would publish the partial catalog this check exists to catch.
+    if missing := status["catalog"]["missing_sources"]:
+        raise ValueError(
+            "refusing to publish a catalog missing required sources: " + ", ".join(missing)
+        )
     snapshots = load_snapshots(paths.snapshots)
     generated_at = snapshots[-1]["generated_at"]
     # The timestamp gives humans a useful release ordering, while the digest

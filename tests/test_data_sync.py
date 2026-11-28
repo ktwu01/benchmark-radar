@@ -27,6 +27,7 @@ from benchmark_radar.data_store import (
     default_data_home,
 )
 from benchmark_radar.models import RadarItem, RadarRun, SourceHealth
+from benchmark_radar.query import REQUIRED_CATALOG_SOURCES as PUBLISHED_REQUIRED_SOURCES
 from benchmark_radar.query import QueryPaths, QueryService
 from benchmark_radar.query_cli import run_query_cli
 from benchmark_radar.snapshots import write_snapshot
@@ -73,6 +74,15 @@ class _Remote:
             self.bundle_requests += 1
             return _Response(self.bundle, url=url)
         raise AssertionError(f"unexpected URL: {url}")
+
+
+@pytest.fixture(autouse=True)
+def _fixture_catalog_is_complete(monkeypatch):
+    # The fixture catalog is one "fixture" source standing in for the six
+    # published ones; releases and syncs refuse a catalog that lacks a
+    # required source, so here that one source is the complete set. Tests of
+    # missing sources set their own requirement.
+    monkeypatch.setattr("benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture"}))
 
 
 def _source_tree(tmp_path: Path, *, name: str = "Agent Workbench", day: int = 29) -> QueryPaths:
@@ -603,3 +613,223 @@ def test_unsafe_archive_member_is_rejected(tmp_path: Path) -> None:
     with pytest.raises(DataSyncError, match="unsafe archive path"):
         store.initialize()
     assert not (tmp_path / "escaped.json").exists()
+
+
+def _cli_paths(paths: QueryPaths) -> list[str]:
+    return [
+        "--index",
+        str(paths.index),
+        "--shards",
+        str(paths.shards),
+        "--snapshots",
+        str(paths.snapshots),
+    ]
+
+
+def test_status_reports_catalog_sources_and_required_gaps(monkeypatch, tmp_path: Path) -> None:
+    # Issue #1336: a cached catalog from before Model reports existed answered
+    # every search from three of four sources and `status` said only "ok".
+    monkeypatch.setattr(
+        "benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture", "model_reports"})
+    )
+    status = QueryService(_source_tree(tmp_path)).status()
+
+    assert status["catalog"]["sources"] == {"fixture": 1}
+    assert status["catalog"]["missing_sources"] == ["model_reports"]
+    # Reported, not degraded: `sync` refuses a degraded dataset, and sync is
+    # how a reader repairs a stale catalog.
+    assert status["status"] == "ok"
+
+
+def test_cli_warns_on_stderr_when_the_catalog_lacks_a_required_source(
+    monkeypatch, capsys, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(
+        "benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture", "model_reports"})
+    )
+    paths = _source_tree(tmp_path)
+
+    assert run_query_cli(["search", "agent workbench", "--json", *_cli_paths(paths)]) == 0
+    captured = capsys.readouterr()
+    # stdout stays the bare JSON payload; the warning rides stderr.
+    assert json.loads(captured.out)["results"][0]["name"] == "Agent Workbench"
+    assert "no records from model_reports" in captured.err
+    assert "benchmark-radar sync" in captured.err
+    # The citation reminder is still the last thing an agent sees.
+    from benchmark_radar.query_cli import cite_reminder
+
+    assert captured.err.rstrip().endswith(cite_reminder().rstrip())
+    assert captured.err.index("no records from") < captured.err.index(cite_reminder().strip())
+
+    assert run_query_cli(["status", *_cli_paths(paths)]) == 0
+    captured = capsys.readouterr()
+    assert "sources: fixture 1" in captured.out
+    assert "no records from model_reports" in captured.err
+
+
+def test_cli_is_silent_when_every_required_source_is_present(
+    monkeypatch, capsys, tmp_path: Path
+) -> None:
+    monkeypatch.setattr("benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture"}))
+    paths = _source_tree(tmp_path)
+
+    assert run_query_cli(["search", "agent workbench", "--json", *_cli_paths(paths)]) == 0
+    assert "no records from" not in capsys.readouterr().err
+
+
+def test_a_failed_query_keeps_stderr_as_the_bare_error(monkeypatch, capsys, tmp_path) -> None:
+    # Agents parse a failed command's stderr as one JSON error, so the
+    # partial-catalog warning must not print ahead of it.
+    monkeypatch.setattr(
+        "benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture", "model_reports"})
+    )
+    paths = _source_tree(tmp_path)
+
+    assert run_query_cli(["show", "no-such-benchmark", "--json", *_cli_paths(paths)]) != 0
+    error = json.loads(capsys.readouterr().err)["error"]
+    # Codex review on #1359: the 404 itself carries the gap, so a record from
+    # a missing source never looks genuinely absent.
+    assert error["code"] == "not_found"
+    assert error["missing_sources"] == ["model_reports"]
+    assert "benchmark-radar sync" in error["message"]
+
+
+def test_not_found_from_a_complete_catalog_keeps_the_plain_envelope(
+    monkeypatch, capsys, tmp_path: Path
+) -> None:
+    monkeypatch.setattr("benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture"}))
+    paths = _source_tree(tmp_path)
+
+    assert run_query_cli(["show", "no-such-benchmark", "--json", *_cli_paths(paths)]) != 0
+    assert json.loads(capsys.readouterr().err)["error"] == {
+        "code": "not_found",
+        "message": "benchmark 'no-such-benchmark' was not found in the catalog index",
+    }
+
+
+def test_http_not_found_carries_the_same_missing_sources(monkeypatch, tmp_path: Path) -> None:
+    from benchmark_radar.query import QueryError, error_payload
+
+    monkeypatch.setattr(
+        "benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture", "model_reports"})
+    )
+    with pytest.raises(QueryError) as caught:
+        QueryService(_source_tree(tmp_path)).show("no-such-benchmark")
+    assert caught.value.status == 404
+    assert error_payload(caught.value)["error"]["missing_sources"] == ["model_reports"]
+
+
+def test_every_published_catalog_source_is_required() -> None:
+    # Codex review on #1359: a stale index missing only claire_radar or
+    # benchmark_saturation must warn too; claire_radar alone is most rows.
+    assert PUBLISHED_REQUIRED_SOURCES == {
+        "artificial_analysis",
+        "benchmark_saturation",
+        "claire_radar",
+        "llm_stats",
+        "model_reports",
+        "opencompass_hub",
+    }
+
+
+@pytest.mark.parametrize(
+    "command",
+    [["recent"], ["search", "agent workbench", "--scope", "radar"]],
+)
+def test_radar_only_commands_neither_load_nor_judge_the_catalog(
+    monkeypatch, capsys, tmp_path: Path, command: list[str]
+) -> None:
+    # Codex review on #1359: `recent` and a radar-scoped search answer from
+    # snapshots alone, so a missing catalog must not fail them and a stale one
+    # must not claim their results come from a partial corpus.
+    paths = _source_tree(tmp_path)
+    paths.index.unlink()
+
+    assert run_query_cli([*command, "--json", *_cli_paths(paths)]) == 0
+    captured = capsys.readouterr()
+    json.loads(captured.out)
+    assert "no records from" not in captured.err
+
+
+@pytest.mark.parametrize("index_state", ["missing", "malformed"])
+def test_an_invalid_argument_is_reported_before_the_catalog_is_judged(
+    capsys, tmp_path: Path, index_state: str
+) -> None:
+    # Review on #1359 (toby-bridges): the coverage check read the index before
+    # search validated --limit, so a missing or malformed index turned
+    # invalid_limit (exit 2) into a data error (exit 1), unlike HTTP.
+    import threading
+    import urllib.request
+
+    from benchmark_radar.query_http import create_query_server
+
+    paths = _source_tree(tmp_path)
+    if index_state == "missing":
+        paths.index.unlink()
+    else:
+        paths.index.write_text("{not json", encoding="utf-8")
+
+    exit_code = run_query_cli(["search", "agent", "--limit", "0", "--json", *_cli_paths(paths)])
+    cli_error = json.loads(capsys.readouterr().err.strip().splitlines()[-1])
+
+    server = create_query_server(QueryService(paths), host="127.0.0.1", port=0)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        with pytest.raises(urllib.error.HTTPError) as captured:
+            urllib.request.urlopen(
+                f"http://127.0.0.1:{server.server_port}/api/v1/search?q=agent&limit=0",
+                timeout=5,
+            )
+        http_error = json.loads(captured.value.read())
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+    assert exit_code == 2
+    assert captured.value.code == 400
+    assert cli_error["error"]["code"] == http_error["error"]["code"] == "invalid_limit"
+
+
+def test_a_release_is_refused_while_a_required_source_is_missing(
+    monkeypatch, tmp_path: Path
+) -> None:
+    # Codex review on #1359: status stays "ok" for a partial catalog so an
+    # installed stale dataset keeps answering, but publishing one must fail.
+    monkeypatch.setattr(
+        "benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture", "model_reports"})
+    )
+    paths = _source_tree(tmp_path)
+    with pytest.raises(ValueError, match="missing required sources: model_reports"):
+        build_data_release(paths=paths, output_dir=tmp_path / "published")
+
+
+def test_sync_rejects_a_partial_catalog_and_keeps_the_active_dataset(
+    monkeypatch, tmp_path: Path
+) -> None:
+    # Codex review on #1359: the staged-install check refuses a downloaded
+    # catalog that lacks a required source, before activation, and the
+    # already-active dataset stays in place and keeps answering.
+    first_manifest, first_bundle, manifest_url = _release(tmp_path / "first", day=29)
+    store = DataStore(
+        root=tmp_path / "home",
+        manifest_url=manifest_url,
+        urlopen=_Remote(manifest_url, first_manifest, first_bundle).urlopen,
+    )
+    store.initialize()
+    second_manifest, second_bundle, _ = _release(tmp_path / "second", day=30)
+    store.urlopen = _Remote(manifest_url, second_manifest, second_bundle).urlopen
+    # The published requirement grew after the second release was built.
+    monkeypatch.setattr(
+        "benchmark_radar.query.REQUIRED_CATALOG_SOURCES", frozenset({"fixture", "model_reports"})
+    )
+
+    with pytest.raises(DataSyncError, match="missing required sources: model_reports") as caught:
+        store.sync()
+
+    assert caught.value.code == "invalid_artifact"
+    assert store.state()["data_version"] == first_manifest["data_version"]
+    assert [path.name for path in (store.root / "versions").iterdir()] == [
+        first_manifest["data_version"]
+    ]

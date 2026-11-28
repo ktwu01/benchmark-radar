@@ -16,13 +16,10 @@ from pathlib import Path
 from typing import Any
 
 from .corpus import CorpusError, validate_corpus
-from .query import QueryPaths, QueryService
+from .query import REQUIRED_CATALOG_SOURCES, QueryPaths, QueryService
 
 DEFAULT_EXPORT_DIR = Path("site/data/hf_dataset")
 MIN_CATALOG_RECORDS = 1259
-REQUIRED_CATALOG_SOURCES = frozenset(
-    {"artificial_analysis", "llm_stats", "model_reports", "opencompass_hub"}
-)
 
 
 @dataclass

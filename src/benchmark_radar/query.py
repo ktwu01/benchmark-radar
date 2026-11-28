@@ -27,6 +27,20 @@ QUERY_SCHEMA_VERSION = 8
 DEFAULT_INDEX_PATH = Path("site/data/benchmark-index.json")
 DEFAULT_SHARD_DIR = Path("site/data/benchmarks")
 DEFAULT_SNAPSHOT_DIR = Path("data/snapshots")
+# Every catalog source family a published index carries. An index missing one
+# answers searches from part of the corpus without saying so (issue #1336), so
+# `status` reports the gap and the CLI warns on every catalog query. A new
+# source family joins this set when the pipeline starts publishing it.
+REQUIRED_CATALOG_SOURCES = frozenset(
+    {
+        "artificial_analysis",
+        "benchmark_saturation",
+        "claire_radar",
+        "llm_stats",
+        "model_reports",
+        "opencompass_hub",
+    }
+)
 SEARCH_SCOPES = ("catalog", "radar", "all")
 
 _FIELD_ORDER = (
@@ -71,18 +85,28 @@ LOGGER = logging.getLogger(__name__)
 class QueryError(RuntimeError):
     """A public, actionable query failure with a stable machine code."""
 
-    def __init__(self, message: str, *, code: str = "query_error", status: int = 500):
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: str = "query_error",
+        status: int = 500,
+        missing_sources: list[str] | None = None,
+    ):
         super().__init__(message)
         self.code = code
         self.status = status
+        # Required catalog sources absent from the index that answered, when
+        # that gap could explain the failure (issue #1336).
+        self.missing_sources = missing_sources or []
 
 
 def error_payload(error: QueryError) -> dict[str, Any]:
     """Stable machine-readable error envelope shared by every interface."""
-    return {
-        "schema_version": QUERY_SCHEMA_VERSION,
-        "error": {"code": error.code, "message": str(error)},
-    }
+    body: dict[str, Any] = {"code": error.code, "message": str(error)}
+    if error.missing_sources:
+        body["missing_sources"] = list(error.missing_sources)
+    return {"schema_version": QUERY_SCHEMA_VERSION, "error": body}
 
 
 @dataclass(frozen=True, slots=True)
@@ -1763,11 +1787,17 @@ class QueryService:
             if identifier in {str(record.get("key")), str(record.get("slug"))}
         ]
         if not matches:
-            raise QueryError(
-                f"benchmark {identifier!r} was not found in the catalog index",
-                code="not_found",
-                status=404,
-            )
+            # A catalog without some required source cannot say the record does
+            # not exist, only that this copy lacks it, so the 404 names the gap
+            # (CLI and HTTP share this envelope) instead of looking final.
+            missing = self.catalog_sources()["missing_sources"]
+            message = f"benchmark {identifier!r} was not found in the catalog index"
+            if missing:
+                message += (
+                    f"; the local catalog has no records from {', '.join(missing)}, so it may "
+                    "be in a missing source; run `benchmark-radar sync` to update it"
+                )
+            raise QueryError(message, code="not_found", status=404, missing_sources=missing)
         if len(matches) != 1:
             raise QueryError(
                 f"benchmark identifier {identifier!r} resolves to multiple catalog records",
@@ -2236,6 +2266,14 @@ class QueryService:
             "results": results,
         }
 
+    def catalog_sources(self) -> dict[str, Any]:
+        """Records per catalog source, and required sources the index lacks."""
+        counts = Counter(str(record.get("source")) for record in self._load_index()["benchmarks"])
+        return {
+            "sources": dict(sorted(counts.items())),
+            "missing_sources": sorted(REQUIRED_CATALOG_SOURCES - set(counts)),
+        }
+
     def status(self) -> dict[str, Any]:
         index = self._load_index()
         snapshots = self._load_snapshots()
@@ -2269,6 +2307,10 @@ class QueryService:
                 "complete": not missing_shards,
                 "missing_shard_count": len(missing_shards),
                 "missing_shards": missing_shards[:20],
+                # Reported, not folded into `status`: a stale catalog still
+                # answers, and `sync` (which refuses a degraded dataset) is
+                # exactly how a reader repairs it.
+                **self.catalog_sources(),
             },
             "radar": {
                 "path": str(self.paths.snapshots),
