@@ -88,6 +88,14 @@ Compare reported scores, release dates and the number of models tested.**
   <img src="assets/benchmark-frontier.jpg" alt="Benchmark Frontier with tested-model counts, scores and dates; legends below the chart and explanations inside one information note" width="720" />
 </a>
 
+**Trends: which research directions are producing new benchmarks? Compare
+the last 30 days with the 30 days before, per direction, with a 16-week trend
+and the newest releases.**
+
+<a href="https://benchmark-radar.org/trends/">
+  <img src="assets/trends-research-directions.png" alt="Trends page: new benchmark records by research direction over the last 30 days, compared with the previous period, with a weekly chart and newest releases for Deep Research and Search" width="720" />
+</a>
+
 Model reports, OpenCompass Hub, Artificial Analysis and LLM Stats feed one
 catalog. Each record keeps its scores, test conditions and citations.
 
