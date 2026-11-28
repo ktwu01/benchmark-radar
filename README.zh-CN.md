@@ -75,6 +75,13 @@ Google、Meta、Microsoft、NVIDIA、Amazon、IBM、ByteDance 和 Unitree 的研
   <img src="assets/benchmark-frontier.jpg" alt="Benchmark Frontier 展示模型数量、分数和日期；图例在图下方，说明收进一个信息按钮" width="720" />
 </a>
 
+**Trends：哪些研究方向在冒出新 benchmark？按方向对比最近 30 天和前 30 天，
+再看 16 周走势和最新发布。**
+
+<a href="https://benchmark-radar.org/trends/">
+  <img src="assets/trends-research-directions.png" alt="Trends 页面：按研究方向统计最近 30 天的新 benchmark 记录，对比上一周期，并展示 Deep Research & Search 方向的每周柱状图和最新发布" width="720" />
+</a>
+
 模型报告、OpenCompass Hub、Artificial Analysis 和 LLM Stats 的数据进入同一个
 benchmark 目录。每条记录保留自己的分数、评测条件和引用来源。
 
