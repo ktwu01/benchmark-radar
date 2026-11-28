@@ -17,6 +17,7 @@ import yaml
 
 from .citation import citation_block, required_citations
 from .corpus import exact_artifact_key
+from .rubric import without_declared_copies
 from .science_domains import science_domains_for_record
 from .snapshots import REQUIRED_SOURCES, load_snapshots
 
@@ -1484,7 +1485,9 @@ class QueryService:
     def _radar_candidates(self) -> list[dict[str, Any]]:
         latest_by_identity: dict[tuple[str, str], dict[str, Any]] = {}
         for snapshot in self._load_snapshots():
-            for item in snapshot["evidence_items"]:
+            # Same filter as the site build (#1232), so a declared copy the web
+            # search leaves out is not returned by CLI or HTTP search either.
+            for item in without_declared_copies(snapshot["evidence_items"]):
                 source = str(item.get("source") or "")
                 source_id = str(item.get("source_id") or "")
                 identity = source_id
@@ -2202,7 +2205,7 @@ class QueryService:
             )
         latest = self._load_snapshots()[-1]
         results = []
-        for item in latest["evidence_items"]:
+        for item in without_declared_copies(latest["evidence_items"]):
             if category and _filter_value(category) not in {
                 _filter_value(value) for value in item.get("categories") or []
             }:

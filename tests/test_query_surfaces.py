@@ -3273,3 +3273,48 @@ def test_trace_cli_rejects_a_non_object_provenance(tmp_path: Path, capsys) -> No
     assert result != 0
     assert "invalid_data" in captured.out + captured.err
     assert "Traceback" not in captured.out + captured.err
+
+
+def test_declared_copies_are_left_out_of_cli_and_http_search(tmp_path: Path) -> None:
+    """Issue #1232: QueryService applies the site build's copy filter, so web
+    search, CLI and HTTP search all agree."""
+    paths = _catalog(tmp_path)
+    generated_at = datetime(2026, 8, 30, 8, 0, tzinfo=UTC)
+
+    def hub(source_id: str, summary: str) -> RadarItem:
+        return RadarItem(
+            source="Hugging Face",
+            source_id=source_id,
+            title=source_id,
+            url=f"https://huggingface.co/datasets/{source_id}",
+            published_at=generated_at - timedelta(hours=2),
+            summary=summary,
+            categories=["benchmark", "dataset"],
+        )
+
+    write_snapshot(
+        RadarRun(
+            generated_at=generated_at,
+            since=generated_at - timedelta(hours=48),
+            items=[
+                hub("nvidia/cvdp-benchmark-dataset", "Verilog design problems: CVDP benchmark."),
+                hub(
+                    "HYUKI5/nvidia__cvdp-benchmark-dataset",
+                    "nvidia/cvdp-benchmark-dataset（複製） データの内容 CVDP ベンチマーク。",
+                ),
+            ],
+            health=[
+                SourceHealth(source=source, ok=True, item_count=1, method="API")
+                for source in ("arxiv", "github", "huggingface")
+            ],
+        ),
+        paths.snapshots,
+    )
+    service = QueryService(paths)
+
+    searched = service.search("cvdp", scope="radar", limit=10)
+    recent = service.recent(limit=10)
+
+    radar_ids = [r["source_id"] for r in searched["results"] if r["kind"] == "radar"]
+    assert radar_ids == ["nvidia/cvdp-benchmark-dataset"]
+    assert [r["source_id"] for r in recent["results"]] == ["nvidia/cvdp-benchmark-dataset"]

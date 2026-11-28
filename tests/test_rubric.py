@@ -231,14 +231,14 @@ def test_v4_reference_is_not_relabelled_with_v5_bands_or_limits():
 
 def test_v5_reference_is_not_relabelled_with_the_v6_supplement_rule():
     """Issue #936: August to October snapshots scored under v5 keep v5's rules."""
-    current = rubric.rubric_reference()
+    current = rubric.v6_rubric_reference()
     v5 = rubric.v5_rubric_reference()
     v4 = rubric.v4_rubric_reference()
 
     def relevance(reference):
         return next(c for c in reference["components"] if c["key"] == "relevance")["bands"]
 
-    assert current["scoring_version"] == rubric.SCORING_VERSION == 6
+    assert current["scoring_version"] == 6
     assert v5["scoring_version"] == 5
     assert any("paper supplement" in band for band in relevance(current))
     for frozen in (v5, v4, rubric.v3_rubric_reference(), rubric.v2_rubric_reference()):
@@ -249,3 +249,41 @@ def test_v5_reference_is_not_relabelled_with_the_v6_supplement_rule():
     # v5 keeps every v5 rule; only the v6 addition is removed.
     assert all(limit in v5["limits"] for limit in rubric.V5_LIMITS)
     assert len(relevance(v5)) == len(relevance(current)) - len(rubric.V6_SIGNAL_LABELS)
+
+
+def test_v6_reference_is_not_relabelled_with_the_v7_copy_rule():
+    """Issue #1232: November snapshots scored under v6 keep v6's rules."""
+    current = rubric.rubric_reference()
+    v6 = rubric.v6_rubric_reference()
+
+    def relevance(reference):
+        return next(c for c in reference["components"] if c["key"] == "relevance")["bands"]
+
+    assert current["scoring_version"] == rubric.SCORING_VERSION == 7
+    assert any(
+        "declared copy of another dataset; suppressed" in band for band in relevance(current)
+    )
+    for frozen in (v6, rubric.v5_rubric_reference(), rubric.v4_rubric_reference()):
+        assert not any("declared copy" in band for band in relevance(frozen))
+        assert rubric.V7_SUPPRESSION_LIMIT not in frozen["limits"]
+    assert rubric.V7_SUPPRESSION_LIMIT in current["limits"]
+    assert rubric.V6_SUPPRESSION_LIMIT in v6["limits"]
+    assert len(relevance(v6)) == len(relevance(current)) - len(rubric.V7_SIGNAL_LABELS)
+
+
+def test_a_declared_copy_is_recognised_only_by_its_own_declaration():
+    # As HYUKI5's copies open their cards, with the original's id written
+    # both with underscores and with spaces.
+    assert rubric.declared_copy(
+        "nvidia/cvdp-benchmark-dataset（複製） データの内容 Verilog の設計課題を集めた"
+    )
+    assert rubric.declared_copy(
+        "sonos-nlu-benchmark/snips built in intents（複製） データの内容 10 種類の意図"
+    )
+    # The original itself, and a card that only talks about copying, are not.
+    assert not rubric.declared_copy("Verilog design problems for the CVDP benchmark.")
+    assert not rubric.declared_copy("複製 を禁止します。（複製）不可")
+    # Review on #1368: Japanese counts as a word character, so a pattern
+    # read across title and summary could start in the title and run on.
+    assert not rubric.declared_copy("複製を禁止（複製）不可")
+    assert not rubric.declared_copy("See nvidia/cvdp-benchmark-dataset（複製） for the copy.")

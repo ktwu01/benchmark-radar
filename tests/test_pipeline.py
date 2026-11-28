@@ -2204,3 +2204,49 @@ def test_digest_cursor_survives_failure_and_ignores_older_activity(monkeypatch):
     )
     assert stale.items == []
     assert stale.discovery_state["xbsleepy"] == first.discovery_state["xbsleepy"]
+
+
+def test_a_dataset_declaring_itself_a_copy_is_suppressed():
+    """Issue #1232: a Hugging Face copy whose own card names the original and
+    marks itself "（複製）" (copy) is not a second record of that benchmark."""
+    taxonomy = {"benchmark": ["benchmark"], "dataset": ["dataset"]}
+    now = datetime(2026, 11, 17, 1, tzinfo=UTC)
+    copy = score_item(
+        item(
+            source="Hugging Face",
+            source_id="HYUKI5/nvidia__cvdp-benchmark-dataset",
+            title="HYUKI5/nvidia__cvdp-benchmark-dataset",
+            summary="nvidia/cvdp-benchmark-dataset（複製） データの内容 CVDP ベンチマーク。",
+        ),
+        taxonomy,
+        now,
+    )
+    original = score_item(
+        item(
+            source="Hugging Face",
+            source_id="nvidia/cvdp-benchmark-dataset",
+            title="nvidia/cvdp-benchmark-dataset",
+            summary="Verilog design problems: the CVDP benchmark dataset.",
+        ),
+        taxonomy,
+        now,
+    )
+    assert copy.suppression_reasons == ["declared copy of another dataset"]
+    assert original.suppression_reasons == []
+
+
+def test_the_copy_rule_never_starts_in_the_records_own_title():
+    """Review on #1368: a slash-named title followed by a summary that only
+    mentions copying is the original, not a copy."""
+    taxonomy = {"benchmark": ["benchmark"], "dataset": ["dataset"]}
+    original = score_item(
+        item(
+            source="Hugging Face",
+            source_id="org/bench",
+            title="org/bench",
+            summary="複製を禁止（複製）不可。A benchmark dataset.",
+        ),
+        taxonomy,
+        datetime(2026, 11, 17, 1, tzinfo=UTC),
+    )
+    assert original.suppression_reasons == []
